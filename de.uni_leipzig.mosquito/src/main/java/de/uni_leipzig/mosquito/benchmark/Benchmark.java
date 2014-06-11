@@ -453,15 +453,15 @@ public class Benchmark {
 		HashMap<String, List<String>> map = new HashMap<String, List<String>>();
 
 		map = queriesPerSecond(con, queries, graphURI, fromGraph, map);
-		map = queryMixesPerHour(con, queries, map);
+		map = queryMixesPerHour(con, queries, graphURI, fromGraph, map);
 
 		return map;
 
 	}
 
 	private static HashMap<String, List<String>> queryMixesPerHour(Connection con,
-			HashMap<String, List<String>> queries,
-			HashMap<String, List<String>> map) {
+			HashMap<String, List<String>> queries, String graphURI,
+			String fromGraph, HashMap<String, List<String>> map) {
 		// QueryMixes in einer Stunde
 		List<String> row2 = new ArrayList<String>();
 		log.info("second test starts");
@@ -485,7 +485,8 @@ public class Benchmark {
 				setNumber = it.next();
 			}
 			List<String> querySet = queries.get(setNumber);
-			query = querySet.get((int) (gen2.nextDouble() * (querySet.size())));
+			query = querySet.get((int) (gen2.nextDouble() * (querySet.size()))).replace(
+						"FROM <" + graphURI + ">", "FROM <" + fromGraph + ">");;
 			Date start = new Date();
 			try {
 				con.select(query);
