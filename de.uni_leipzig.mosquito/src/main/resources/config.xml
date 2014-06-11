@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mosquito xmlns="http://github.com/TortugaAttack/mosquito"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<data-description>
+		<namespace name="http://localhost/" />
+		<anchor name="#" />
+		<resource-uri name="http://localhost/resource/" />
+		<property-prefix-name name="bgprop" />
+		<resource-prefix-name name="bgres" />
+	</data-description>
+	<databases main="curl">
+		<database id="curl" type="curl">
+			<endpoint uri="localhost/sparql-auth" />
+			<user value="dba" />
+			<pwd value="dba" />
+			<curl-url url="http://localhost/sparql-graph-crud-auth" />
+			<curl-command command="curl --digest --user $USER:$PWD --url '$CURL-URL?graph-uri=$GRAPH-URI' $UPLOAD-TYPE -T $FILE"/>
+			<curl-drop command="curl -X DELETE $GRAPH-URI --url '$CURL-URL'"/>
+			<curl-update command="curl -i -d '$UPDATE' -u '$USER:$PWD' -H 'Content-Type: application/sparql-query' --url 'http://$ENDPOINT'"/>
+		</database>
+		<database id="impl" type="impl">
+			<endpoint uri="localhost/sparql-auth" />
+			<user value="dba" />
+			<pwd value="dba" />
+		</database>
+	</databases>
+
+	<benchmark log="Benchmark">
+
+		<output-format name="RDF/XML" />
+		<graph-uri name="http://localhost/benchtest/" />
+		<pgn-input-path name="PGNS" />
+		<output-path name="res" />
+		<drop-db value="false" />
+		<random-function type="seed" generate="true">
+			<generated-path name="" percent="0.5"/>
+			<generated-path name="" percent="0.2"/>
+			<generated-path name="" percent="0.1"/>
+			<class-enabled value="false" />
+		</random-function>
+		<pgn-processing value="false" />
+		<query-diversity value="2000" />
+		<queries-file name="queries.txt" />
+		<queries-output-path name="queries" />
+		<!-- For every triplestore tested in the Benchmark you need - a startup_$id.sh 
+			script to start the Triplestore with the given Configuration - a shutdown_$id.sh 
+			script due to performance and fairness of the benchmark booth must be executable 
+			and in the directory with the jar -file! -->
+		<test-db type="choose">
+			<db id="4store" />
+
+		</test-db>
+
+		<variables path="res">
+			<variable name="name" />
+			<variable name="blackPlayer" />
+			<variable name="moves" />
+			<variable name="whitePlayer" />
+			<variable name="site" />
+			<variable name="result" />
+			<variable name="white" />
+			<variable name="round" />
+			<variable name="event" />
+			<variable name="eco" />
+			<variable name="date" />
+			<variable name="black" />
+			<variable name="blackelo" />
+			<variable name="whiteelo" />
+			<variable name="eventdate" />
+			<variable name="blacktitle" />
+			<variable name="whitetitle" />
+			<variable name="opening" />
+			<variable name="variation" />
+			<variable name="blackfideid" />
+			<variable name="whitefideid" />
+			<variable name="move" />
+			<variable name="fen" />
+			<variable name="moveNr" />
+		</variables>
+	</benchmark>
+
+
+</mosquito>
