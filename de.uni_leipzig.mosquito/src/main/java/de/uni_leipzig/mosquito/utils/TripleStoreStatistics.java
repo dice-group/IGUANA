@@ -1,12 +1,7 @@
 package de.uni_leipzig.mosquito.utils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -101,41 +96,5 @@ public class TripleStoreStatistics {
 			return query(con, query);
 		}
 		
-		public static Boolean hashmapToCSV(File file, HashMap<String, List<String>> hashmap){
-			Logger log = Logger.getLogger("TripleStoreStatistics");
-			PrintWriter out;
-			try {
-				out = new PrintWriter(file);
-			} catch (FileNotFoundException e) {
-				LogHandler.writeStackTrace(log, e, Level.SEVERE);
-				return false;
-			}
-					
-			String header="";
-			for(String column : hashmap.keySet()){
-				header += column+";";
-			}
-			out.println(header.substring(0, header.length()-1));
-			
-			String currentLine = "";
-			Integer i=0, t=0;
-			while(t<hashmap.keySet().size()){
-				t=0;
-				for(String column : hashmap.keySet()){
-					try{
-						currentLine += hashmap.get(column).get(i)+";";			
-					}
-					catch(Exception e){
-						currentLine += ";";
-						t++;
-					}
-				}
-				out.println(currentLine);
-				currentLine="";
-				i++;
-			}
-			
-			out.close();
-			return true;
-		}
+	
 }
