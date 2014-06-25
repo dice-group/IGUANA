@@ -5,20 +5,21 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-public class ResultSet implements Iterator<Object>{
+public class ResultSet implements Iterator<List<Object>>{
 	
 	private String fileName = UUID.randomUUID().toString();
 
-	private List<String> header;
+	private List<String> header = new LinkedList<String>();
 	
-	private List<List<Object>> table;
+	private List<List<Object>> table = new LinkedList<List<Object>>();
 	
-	private int row=0;
+	private int row=-1;
 	
-	private Boolean removed;
+	private Boolean removed=false;
 	
 	public List<String> getHeader(){
 		return header;
@@ -68,7 +69,7 @@ public class ResultSet implements Iterator<Object>{
 	}
 	
 	@Override
-	public Object next() {
+	public List<Object> next() {
 		return table.get(++row);
 	}
 

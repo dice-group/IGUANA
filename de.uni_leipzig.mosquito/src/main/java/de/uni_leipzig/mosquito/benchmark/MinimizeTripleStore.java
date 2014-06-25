@@ -155,7 +155,7 @@ tr:		for(Long i=0L; i<deletionCount; i++){
 	}
 	
 	
-	private static Node implToNode(Object impl){
+	public static Node implToNode(Object impl){
 		Node s;
 		try{
 			s = (Node) ((ResourceImpl)impl).asNode();

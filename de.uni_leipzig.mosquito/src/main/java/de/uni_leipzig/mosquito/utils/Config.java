@@ -25,26 +25,29 @@ public class Config {
 			throws ParserConfigurationException, SAXException, IOException {
 		List<String> ids = new ArrayList<String>();
 		ConfigParser cp = ConfigParser.getParser(rootNode);
+		NodeList databases;
 		switch (type) {
 		case all:
 			cp.setNode((Element) rootNode);
 			cp.getElementAt("databases", 0);
+			databases = cp.getNodeList("database");
 			break;
 		case choose:
 			cp.resetNode();
 			cp.setNode((Element) rootNode);
 			cp.getElementAt("benchmark", 0);
 			cp.getElementAt("test-db", 0);
+			databases = cp.getNodeList("db");
 			break;
 		default:
 			log.warning("test-db type not or not correctly set {all|choose}\nuse default: all");
 			cp.resetNode();
 			cp.setNode((Element) rootNode);
 			cp.getElementAt("databases", 0);
-
+			databases = cp.getNodeList("database");
 		}
 
-		NodeList databases = cp.getNodeList("db");
+		
 		for (Integer i = 0; i < databases.getLength(); i++) {
 			ids.add(((Element) databases.item(i)).getAttribute("id"));
 		}
@@ -87,26 +90,44 @@ public class Config {
 
 		map.put("drop-db", cp.getElementAt("drop-db", 0).getAttribute("value"));
 		cp.setNode(benchmark);
-		map.put("pgn-processing", cp.getElementAt("pgn-processing", 0)
-				.getAttribute("value"));
+		String pgnprocess = "false";
+		try{
+			pgnprocess = cp.getElementAt("pgn-processing", 0)
+					.getAttribute("value");
+			cp.setNode(benchmark);
+			map.put("pgn-input-path", cp.getElementAt("pgn-input-path", 0)
+					.getAttribute("name"));
+			cp.setNode(benchmark);
+			map.put("output-format", cp.getElementAt("output-format", 0)
+					.getAttribute("name"));
+			
+		}
+		catch(Exception e){
+			pgnprocess = "false";
+		}
+		map.put("pgn-processing", pgnprocess);
 		cp.setNode(benchmark);
-		map.put("pgn-input-path", cp.getElementAt("pgn-input-path", 0)
-				.getAttribute("name"));
-		cp.setNode(benchmark);
-		map.put("output-format", cp.getElementAt("output-format", 0)
-				.getAttribute("name"));
-		cp.setNode(benchmark);
-		map.put("graph-uri",
-				cp.getElementAt("graph-uri", 0).getAttribute("name"));
+		String graph;
+		try{
+			graph = cp.getElementAt("graph-uri", 0).getAttribute("name");
+		}
+		catch(Exception e){
+			graph=null;
+		}
+		map.put("graph-uri", graph);
 		cp.setNode(benchmark);
 		map.put("output-path",
 				cp.getElementAt("output-path", 0).getAttribute("name"));
 		cp.setNode(benchmark);
-		map.put("query-diversity", cp.getElementAt("query-diversity", 0)
-				.getAttribute("value"));
-		cp.setNode(benchmark);
-		map.put("queries-file", cp.getElementAt("queries-file", 0)
-				.getAttribute("name"));
+		String limit= "5000";
+		try{
+			limit= cp.getElementAt("query-diversity", 0)
+			.getAttribute("value");
+		}
+		catch(Exception e){
+			limit = "5000";
+		}
+		map.put("query-diversity", limit);
 		cp.setNode(benchmark);
 		map.put("dbs", cp.getElementAt("test-db", 0).getAttribute("type"));
 		cp.setNode(benchmark);
@@ -137,7 +158,7 @@ public class Config {
 		ConfigParser cp = ConfigParser.getParser(rootNode);
 		cp.getElementAt("benchmark", 0);
 		cp.getElementAt("random-function", 0);
-		NodeList percents = cp.getNodeList("percent");
+		NodeList percents = cp.getNodeList("data-path");
 		
 		String[] ret = new String[percents.getLength()];
 		for(int i=0;i<percents.getLength();i++){
@@ -158,6 +179,34 @@ public class Config {
 			ret.add(Double.valueOf(((Element)percents.item(i)).getAttribute("value")));
 		}
 		
+		return ret;
+	}
+	
+	public static HashMap<String,Object> getEmail(Node rootNode){
+		HashMap<String,Object>ret =  new HashMap<String,Object>();
+		try{
+			ConfigParser cp = ConfigParser.getParser(rootNode);
+			Element email = cp.getElementAt("email-notification", 0);
+			ret.put("hostname", cp.getElementAt("hostname", 0).getAttribute("value"));
+			cp.setNode(email);
+			ret.put("port",cp.getElementAt("port", 0).getAttribute("value"));
+			cp.setNode(email);
+			ret.put("user",cp.getElementAt("username", 0).getAttribute("value"));
+			cp.setNode(email);
+			ret.put("pwd",cp.getElementAt("password", 0).getAttribute("value"));
+			cp.setNode(email);
+			ret.put("email-name",cp.getElementAt("email-name", 0).getAttribute("address"));
+			cp.setNode(email);
+			NodeList emailTo = cp.getNodeList("email-to");
+			List<String> emTo = new LinkedList<String>();
+			for(int i=0; i<emailTo.getLength();i++){
+				emTo.add(((Element)emailTo.item(i)).getAttribute("address"));
+			}
+			ret.put("email-to", emTo);
+		}
+		catch(Exception e){
+			return null;
+		}
 		return ret;
 	}
 }

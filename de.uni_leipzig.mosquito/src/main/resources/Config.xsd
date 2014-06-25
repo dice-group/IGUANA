@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <?xml version="1.0" encoding="UTF-8"?> -->
+<!-- <!DOCTYPE mosquito [ -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://github.com/TortugaAttack/mosquito" xmlns:mosquito="http://github.com/TortugaAttack/mosquito">
+  <xs:element name="mosquito">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mosquito:data-description"/>
+        <xs:element ref="mosquito:databases"/>
+        <xs:element ref="mosquito:benchmark"/>
+        <xs:element minOccurs="0" ref="mosquito:email-notification"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="data-description" abstract="true"/>
+  <xs:element name="namespace">
+    <xs:complexType>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="anchor">
+    <xs:complexType>
+      <xs:attribute name="name" default="#"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="resource-uri">
+    <xs:complexType>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="property-preifx-name">
+    <xs:complexType>
+      <xs:attribute name="name" default="mprop"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="resource-prefix-name">
+    <xs:complexType>
+      <xs:attribute name="name" default="mres"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="databases">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mosquito:database"/>
+      </xs:sequence>
+      <xs:attribute name="main" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="database">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mosquito:endpoint"/>
+        <xs:element ref="mosquito:user"/>
+        <xs:element ref="mosquito:pwd"/>
+        <xs:sequence minOccurs="0">
+          <xs:element ref="mosquito:curl-url"/>
+          <xs:element ref="mosquito:curl-command"/>
+          <xs:element ref="mosquito:curl-drop"/>
+          <xs:element ref="mosquito:curl-update"/>
+        </xs:sequence>
+      </xs:sequence>
+      <xs:attribute name="id" use="required"/>
+      <xs:attribute name="type" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="endpoint">
+    <xs:complexType>
+      <xs:attribute name="uri" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="user">
+    <xs:complexType>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="pwd">
+    <xs:complexType>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="curl-url">
+    <xs:complexType>
+      <xs:attribute name="url" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="curl-command">
+    <xs:complexType>
+      <xs:attribute name="command" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="curl-drop">
+    <xs:complexType>
+      <xs:attribute name="command" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="curl-update">
+    <xs:complexType>
+      <xs:attribute name="command" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="benchmark">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mosquito:drop-db"/>
+        <xs:sequence minOccurs="0">
+          <xs:element ref="mosquito:pgn-processing"/>
+          <xs:element ref="mosquito:pgn-input-path"/>
+          <xs:element ref="mosquito:output-format"/>
+          <xs:element ref="mosquito:output-path"/>
+        </xs:sequence>
+        <xs:element minOccurs="0" ref="mosquito:graph-uri"/>
+        <xs:element minOccurs="0" ref="mosquito:query-diversity"/>
+        <xs:element ref="mosquito:random-function"/>
+        <xs:element ref="mosquito:test-db"/>
+        <xs:element ref="mosquito:testcases"/>
+      </xs:sequence>
+      <xs:attribute name="log" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="drop-db">
+    <xs:complexType>
+      <xs:attribute name="value" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="pgn-processing">
+    <xs:complexType>
+      <xs:attribute name="value" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="pgn-input-path">
+    <xs:complexType>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="output-format">
+    <xs:complexType>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="output-path">
+    <xs:complexType>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="graph-uri">
+    <xs:complexType>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="query-diversity">
+    <xs:complexType>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="random-function">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="mosquito:class-enabled"/>
+        <xs:choice>
+          <xs:element maxOccurs="unbounded" ref="mosquito:data-path"/>
+          <xs:element maxOccurs="unbounded" ref="mosquito:percent"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="type" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="seed"/>
+            <xs:enumeration value="rand"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="generate" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="class-enabled">
+    <xs:complexType>
+      <xs:attribute name="value" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="data-path">
+    <xs:complexType>
+      <xs:attribute name="path" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="percent">
+    <xs:complexType>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="test-db">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mosquito:db"/>
+      </xs:sequence>
+      <xs:attribute name="type" default="all">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="choose"/>
+            <xs:enumeration value="all"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="db">
+    <xs:complexType>
+      <xs:attribute name="id" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="testcases">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mosquito:testcase"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="testcase">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mosquito:property"/>
+      </xs:sequence>
+      <xs:attribute name="class" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="property">
+    <xs:complexType>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="email-notification">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mosquito:hostname"/>
+        <xs:element ref="mosquito:port"/>
+        <xs:element ref="mosquito:user"/>
+        <xs:element ref="mosquito:pwd"/>
+        <xs:element ref="mosquito:email-name"/>
+        <xs:element maxOccurs="unbounded" ref="mosquito:email-to"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="hostname">
+    <xs:complexType>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="port">
+    <xs:complexType>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="username">
+    <xs:complexType>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="password">
+    <xs:complexType>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="email-name">
+    <xs:complexType>
+      <xs:attribute name="address" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="email-to">
+    <xs:complexType/>
+  </xs:element>
+</xs:schema>
+<!-- ]> -->

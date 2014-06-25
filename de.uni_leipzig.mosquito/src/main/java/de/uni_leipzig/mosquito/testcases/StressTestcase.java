@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.bio_gene.wookie.connection.Connection;
+
 import de.uni_leipzig.mosquito.utils.ResultSet;
 
 public class StressTestcase implements Testcase {
@@ -38,7 +40,13 @@ public class StressTestcase implements Testcase {
 	}
 
 	@Override
-	public void setCurrentResults(Collection<ResultSet> currentResults) {
+	public void addCurrentResults(Collection<ResultSet> currentResults) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setConnection(Connection con) {
 		// TODO Auto-generated method stub
 		
 	}

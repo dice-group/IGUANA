@@ -8,7 +8,7 @@
 		<property-prefix-name name="bgprop" />
 		<resource-prefix-name name="bgres" />
 	</data-description>
-	<databases main="curl">
+<databases main="curl">
 		<database id="curl" type="curl">
 			<endpoint uri="localhost/sparql-auth" />
 			<user value="dba" />
@@ -26,58 +26,24 @@
 	</databases>
 
 	<benchmark log="Benchmark">
-
-		<output-format name="RDF/XML" />
-		<graph-uri name="http://localhost/benchtest/" />
-		<pgn-input-path name="PGNS" />
-		<output-path name="res" />
 		<drop-db value="false" />
-		<random-function type="seed" generate="true">
-			<generated-path name="" percent="0.5"/>
-			<generated-path name="" percent="0.2"/>
-			<generated-path name="" percent="0.1"/>
-			<class-enabled value="false" />
-		</random-function>
 		<pgn-processing value="false" />
+		<pgn-input-path name="PGNS" />
+		<output-format name="RDF/XML" />
+		<output-path name="res" />
+		<graph-uri name="http://localhost/benchtest/" />
 		<query-diversity value="2000" />
-		<queries-file name="queries.txt" />
-		<queries-output-path name="queries" />
-		<!-- For every triplestore tested in the Benchmark you need - a startup_$id.sh 
-			script to start the Triplestore with the given Configuration - a shutdown_$id.sh 
-			script due to performance and fairness of the benchmark booth must be executable 
-			and in the directory with the jar -file! -->
+		<random-function type="seed" generate="true">
+			<class-enabled value="false" />
+			<data-path path="asd"/>
+		</random-function>
 		<test-db type="choose">
 			<db id="4store" />
-
 		</test-db>
-
-		<variables path="res">
-			<variable name="name" />
-			<variable name="blackPlayer" />
-			<variable name="moves" />
-			<variable name="whitePlayer" />
-			<variable name="site" />
-			<variable name="result" />
-			<variable name="white" />
-			<variable name="round" />
-			<variable name="event" />
-			<variable name="eco" />
-			<variable name="date" />
-			<variable name="black" />
-			<variable name="blackelo" />
-			<variable name="whiteelo" />
-			<variable name="eventdate" />
-			<variable name="blacktitle" />
-			<variable name="whitetitle" />
-			<variable name="opening" />
-			<variable name="variation" />
-			<variable name="blackfideid" />
-			<variable name="whitefideid" />
-			<variable name="move" />
-			<variable name="fen" />
-			<variable name="moveNr" />
-		</variables>
+                <testcases>
+                   <testcase class="asdv">
+                   		<property name="b" value="a"/>
+                   </testcase>
+                </testcases>
 	</benchmark>
-
-
 </mosquito>

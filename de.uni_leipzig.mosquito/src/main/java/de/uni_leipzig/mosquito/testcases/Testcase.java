@@ -3,6 +3,8 @@ package de.uni_leipzig.mosquito.testcases;
 import java.util.Collection;
 import java.util.Properties;
 
+import org.bio_gene.wookie.connection.Connection;
+
 import de.uni_leipzig.mosquito.utils.ResultSet;
 
 /**
@@ -18,8 +20,9 @@ public interface Testcase {
 	
 	public Collection<ResultSet> getResults();
 	
-	public void setCurrentResults(Collection<ResultSet> currentResults);
+	public void addCurrentResults(Collection<ResultSet> currentResults);
 	
 	public void setProperties(Properties p);
-
+	
+	public void setConnection(Connection con);
 }

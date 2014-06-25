@@ -1,0 +1,87 @@
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<!--<!DOCTYPE mosquito [ -->
+<!ELEMENT mosquito (data-description, databases, benchmark, email-notification?)>
+<!ELEMENT data-description (namespace, resource-uri, property-prefix-name, resource-prefix-name)>
+	<!ELEMENT namespace EMPTY>
+		<!ATTLIST namespace name CDATA #REQUIRED>
+	<!ELEMENT anchor EMPTY>
+		<!ATTLIST anchor name CDATA "#">
+	<!ELEMENT resource-uri EMPTY>
+		<!ATTLIST resource-uri name CDATA #REQUIRED>
+	<!ELEMENT property-preifx-name EMPTY>
+		<!ATTLIST property-preifx-name name CDATA "mprop">
+	<!ELEMENT resource-prefix-name EMPTY>
+		<!ATTLIST resource-prefix-name name CDATA "mres">
+
+<!ELEMENT databases (database+)>
+	<!ATTLIST databases main CDATA #REQUIRED>
+	<!ELEMENT database (endpoint, user, pwd, (curl-url, curl-command, curl-drop, curl-update)?)>
+		<!ATTLIST database 
+					id CDATA #REQUIRED
+					type CDATA #REQUIRED>
+		<!ELEMENT endpoint EMPTY>
+			<!ATTLIST endpoint uri CDATA #REQUIRED>
+		<!ELEMENT user EMPTY>	
+			<!ATTLIST user value CDATA #REQUIRED>
+		<!ELEMENT pwd EMPTY>
+			<!ATTLIST pwd value CDATA #REQUIRED>
+		<!ELEMENT curl-url EMPTY>
+			<!ATTLIST curl-url url CDATA #REQUIRED>
+		<!ELEMENT curl-command EMPTY>
+			<!ATTLIST curl-command command CDATA #REQUIRED>
+		<!ELEMENT curl-drop EMPTY>
+			<!ATTLIST curl-drop command CDATA #REQUIRED>
+		<!ELEMENT curl-update EMPTY>
+			<!ATTLIST curl-update command CDATA #REQUIRED>
+
+<!ELEMENT benchmark (drop-db, (pgn-processing, pgn-input-path, output-format, output-path)?, graph-uri?, query-diversity?, random-function, test-db, testcases)>
+	<!ATTLIST benchmark log CDATA #REQUIRED>
+	<!ELEMENT drop-db EMPTY>
+		<!ATTLIST drop-db value (true|false) #REQUIRED>
+	<!ELEMENT pgn-processing EMPTY>
+		<!ATTLIST pgn-processing value (true|false) #REQUIRED>
+	<!ELEMENT pgn-input-path EMPTY>
+		<!ATTLIST pgn-input-path name CDATA #REQUIRED>
+	<!ELEMENT output-format EMPTY>
+		<!ATTLIST output-format name CDATA #REQUIRED>
+	<!ELEMENT output-path EMPTY>
+		<!ATTLIST output-path name CDATA #REQUIRED>
+	<!ELEMENT graph-uri EMPTY>
+		<!ATTLIST graph-uri name CDATA #REQUIRED>
+	<!ELEMENT query-diversity EMPTY>
+		<!ATTLIST query-diversity value CDATA #REQUIRED>
+	<!ELEMENT random-function (class-enabled?, (data-path+|percent+))>
+		<!ATTLIST random-function 
+					type (seed|rand) #REQUIRED
+					generate (true|false) #REQUIRED>
+		<!ELEMENT class-enabled EMPTY>
+			<!ATTLIST class-enabled value (true|false) #REQUIRED>
+		<!ELEMENT data-path EMPTY>
+			<!ATTLIST data-path path CDATA #REQUIRED>
+		<!ELEMENT percent EMPTY>
+			<!ATTLIST percent value CDATA #REQUIRED>
+	<!ELEMENT test-db (db*)>
+		<!ATTLIST test-db type (choose|all) "all">
+		<!ELEMENT db EMPTY>
+			<!ATTLIST db id CDATA #REQUIRED>
+	<!ELEMENT testcases (testcase+)>
+		<!ELEMENT testcase (property*)>
+			<!ATTLIST testcase class CDATA #REQUIRED>
+			<!ELEMENT property EMPTY>
+				<!ATTLIST property name CDATA #REQUIRED
+							value CDATA #REQUIRED> 
+							
+<!ELEMENT email-notification (hostname, port, user, pwd, email-name, email-to+)>
+	<!ELEMENT hostname EMPTY>
+		<!ATTLIST hostname value CDATA #REQUIRED>
+	<!ELEMENT port EMPTY>
+		<!ATTLIST port value CDATA #REQUIRED>
+	<!ELEMENT username EMPTY>
+		<!ATTLIST username value CDATA #REQUIRED>
+	<!ELEMENT password EMPTY>
+		<!ATTLIST password value CDATA #REQUIRED>
+	<!ELEMENT email-name EMPTY>
+		<!ATTLIST email-name address CDATA #REQUIRED>
+	<!ELEMENT email-to EMPTY>
+		<!ATTLIST email-name address CDATA #REQUIRED>
+<!--]>-->
