@@ -98,14 +98,22 @@ public class Config {
 			map.put("pgn-input-path", cp.getElementAt("pgn-input-path", 0)
 					.getAttribute("name"));
 			cp.setNode(benchmark);
-			map.put("output-format", cp.getElementAt("output-format", 0)
-					.getAttribute("name"));
 			
 		}
 		catch(Exception e){
 			pgnprocess = "false";
 		}
 		map.put("pgn-processing", pgnprocess);
+		cp.setNode(benchmark);
+		String outputFormat = "TURTLE";
+		try{
+			outputFormat=  cp.getElementAt("output-format", 0)
+					.getAttribute("name");
+		}
+		catch(Exception e){
+			outputFormat = "TURTLE";
+		}
+		map.put("output-format", outputFormat);
 		cp.setNode(benchmark);
 		String graph;
 		try{

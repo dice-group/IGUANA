@@ -83,6 +83,7 @@ public class Benchmark {
 	 * @throws SQLException
 	 * @throws InterruptedException
 	 */
+	@SuppressWarnings("unchecked")
 	public static void start(String pathToXMLFile) {
 		Calendar start = Calendar.getInstance();
 		start.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -102,7 +103,7 @@ public class Benchmark {
 			LogHandler.initLogFileHandler(log, config.get("log-name"));
 			if(email!=null){
 				EmailHandler.initEmail(
-						String.valueOf(email.get("hostname")), 
+						String.valueOf(email.get("hostname")),
 						Integer.parseInt(String.valueOf(email.get("port"))), 
 						String.valueOf(email.get("user")), 
 						String.valueOf(email.get("pwd")), 
@@ -165,6 +166,7 @@ public class Benchmark {
 			}
 			// May Must Fill the TS before
 			if (dbCount == 0) {
+				//TODO NO JUST NO!!! use a reference Connection before the mainLoop 
 				if (Boolean.valueOf(config.get("random-function-gen"))) {
 					// Generating a smaller dataset
 					randPath = getDatasetPaths(con);

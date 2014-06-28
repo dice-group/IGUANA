@@ -19,11 +19,9 @@ import java.util.regex.Pattern;
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.connection.ConnectionFactory;
 import org.bio_gene.wookie.utils.GraphHandler;
-
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-
 import de.uni_leipzig.mosquito.benchmark.MinimizeTripleStore;
 import de.uni_leipzig.mosquito.utils.RandomStringBuilder;
 
@@ -31,10 +29,21 @@ public class QueryHandler {
 	
 		
 	public static void main(String args[]) throws IOException{
-//		String insert = "INSERT DATA {GRAPH %%r%% {%%r1%% %%r2%% %%d%%} {%%r1%% %%r3%% %%d%%}{%%r1%% %%r2%% %%r4%%} {%%r4%% %%r2%% %%i%%} {%%r4%% %%r5%% %%s%%}}";
+		String insert = "INSERT DATA {GRAPH %%r%% {%%r1%% %%r2%% %%d%%} {%%r1%% %%r3%% %%d%%}{%%r1%% %%r2%% %%r4%%} {%%r4%% %%r2%% %%i%%} {%%r4%% %%r5%% %%s%%}}";
 		String select = "select distinct ?s where {%%v1%% <http://dbpedia.org/property/einwohner> %%v2%%} LIMIT 10";
+		String construct = "CONSTRUCT   { [] ?p ?name } WHERE { %%v1%% ?p ?name }";
+		String ask = "PREFIX foaf:<http://xmlns.com/foaf/0.1/>  ASK  { ?x foaf:name  %%v%% }";
+		String describe = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> DESCRIBE %%v%%";
 		PrintWriter pw = new PrintWriter(new File("queries.txt"));
+		pw.write(ask);
+		pw.println();
+		pw.write(construct);
+		pw.println();
 		pw.write(select);
+		pw.println();
+		pw.write(describe);
+		pw.println();
+		pw.write(insert);
 		pw.close();
 		
 		Connection con = ConnectionFactory.createImplConnection("dbpedia.org/sparql");
@@ -54,8 +63,16 @@ public class QueryHandler {
 		this.fileForQueries = fileForQueries;
 	}
 	
-	public void init() throws IOException{
+	private void init() throws IOException{
 		init(fileForQueries);
+	}
+	
+	public String getPath(){
+		return path;
+	}
+	
+	public String getAbsolutPath(){
+		return new File(path+File.separator).getAbsolutePath();
 	}
 	
 	public void setLimit(int i){
@@ -69,7 +86,10 @@ public class QueryHandler {
 		List<String> queryPatterns = Files.readAllLines(Paths.get(queriesFile), Charset.forName("UTF-8")); 
 		int i=0;
 		for(String p : queryPatterns){
-			if(!(p.toLowerCase().startsWith("insert") || p.toLowerCase().startsWith("delete"))){
+			if(p.isEmpty()){
+				continue;
+			}
+			if((p.toLowerCase().contains("ask") || p.toLowerCase().contains("select") || p.toLowerCase().contains("construct") || p.toLowerCase().contains("describe"))){
 				//SELECT, ASK, DESCRIBE, CONSTRUCT
 //				QueryFactory.create(p);
 				valuesToCSV(p, String.valueOf(i));
@@ -192,16 +212,41 @@ public class QueryHandler {
 			query = query.replaceAll(var, "?"+var.replace("%", ""));
 			vars.add(var.replace("%", ""));
 		}
+		if(vars.isEmpty()){
+			return query;
+		}
 		Query q = QueryFactory.create(query);
 		q.setLimit(Long.valueOf(limit));
 		String select = "SELECT DISTINCT ";
 		for(String v : vars){
 			select+="?"+v+" ";
 		}
-		String clause = q.serialize();
-		int i = clause.indexOf('\n');
-		clause = clause.substring(i);
-		return (select+clause).replace("\n"," ");
+		
+		switch(q.getQueryType()){
+			case Query.QueryTypeSelect: return typeQuery(q, select, "select");
+			case Query.QueryTypeAsk: return typeQuery(q, select, "ask");
+			case Query.QueryTypeDescribe: return typeQuery(q, select, "describe");
+			case Query.QueryTypeConstruct: return typeQuery(q, select, "construct");
+		}
+		return query;
 	}
-
+	
+	private String typeQuery(Query q, String select, String type){
+		String clause = q.serialize();
+		int i = clause.toLowerCase().indexOf(type);
+		String prefix = clause.substring(0, i);
+		clause = clause.substring(i);
+		i = clause.indexOf('\n');
+		clause = clause.substring(i);
+		if(type.equals("construct")){
+			clause = clause.substring(1);
+			i = clause.indexOf('\n');
+			clause = clause.substring(i);
+		}
+		if(type.equals("describe") && !clause.contains("WHERE")){
+			return "SELECT DISTINCT ?g WHERE {GRAPH ?g {?s ?p ?o}}";
+		}
+		return (prefix+select+clause).replace("\n"," ");
+	}
+	
 }
