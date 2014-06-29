@@ -1,5 +1,6 @@
 package de.uni_leipzig.mosquito.testcases;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -16,7 +17,7 @@ import de.uni_leipzig.mosquito.utils.ResultSet;
  */
 public interface Testcase {
 	
-	public void start();
+	public void start() throws IOException;
 	
 	public Collection<ResultSet> getResults();
 	
@@ -25,4 +26,8 @@ public interface Testcase {
 	public void setProperties(Properties p);
 	
 	public void setConnection(Connection con);
+	
+	public void setCurrentDBName(String name);
+
+	public void setCurrentPercent(String percent);
 }

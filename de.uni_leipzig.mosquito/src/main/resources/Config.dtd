@@ -56,12 +56,13 @@
 					generate (true|false) #REQUIRED>
 		<!ELEMENT class-enabled EMPTY>
 			<!ATTLIST class-enabled value (true|false) #REQUIRED>
-		<!ELEMENT data-path EMPTY>
-			<!ATTLIST data-path path CDATA #REQUIRED>
+		<!ELEMENT data-file EMPTY>
+			<!ATTLIST data-file file-name CDATA #REQUIRED>
 		<!ELEMENT percent EMPTY>
 			<!ATTLIST percent value CDATA #REQUIRED>
 	<!ELEMENT test-db (db*)>
-		<!ATTLIST test-db type (choose|all) "all">
+		<!ATTLIST test-db type (choose|all) "all"
+						  reference CDATA #REQUIRED>
 		<!ELEMENT db EMPTY>
 			<!ATTLIST db id CDATA #REQUIRED>
 	<!ELEMENT testcases (testcase+)>

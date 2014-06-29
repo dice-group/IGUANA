@@ -70,7 +70,6 @@ public class FileHandler {
 			String line ="";
 			while((line=br.readLine()) != null){
 				if(!line.isEmpty() && !line.equals("\n")){
-					//TODO
 					int begin = line.indexOf("<");
                     int end = line.indexOf(">");
                     String subject = line.substring(begin+1, end-1);
@@ -93,6 +92,45 @@ public class FileHandler {
 			}
 		}
 		return subjects;
+	}
+
+	public static String getLineAt(String fileName, int index){
+		return getLineAt(new File(fileName), index);
+	}
+	
+	public static String getLineAt(File file, int index){
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		try{
+			fis = new FileInputStream(file);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			int i =0;
+			while((line = br.readLine())!= null && i<index){
+			}
+		}
+		catch(Exception e){
+			return null;
+		}
+		finally{
+			if(br != null){
+				try {
+					br.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(fis != null){
+				try {
+					fis.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return line;
 	}
 	
 }

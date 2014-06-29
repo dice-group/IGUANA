@@ -64,18 +64,10 @@ public class TripleStoreStatistics {
 			String query="";
 			if(literals){
 				
-				//TODO Löschen???
-//				query="SELECT (AVG(?count) AS ?no) "+(graphURI!=null?"FROM <"+graphURI+"> ":"")
-//						+ "WHERE {SELECT (COUNT(?t) AS ?count) ?s WHERE{ {?s ?q ?t}{SELECT ?s "
-//						+ "WHERE {  ?s ?p ?o   }GROUP BY ?s}}}";
 				query="SELECT (AVG(?co) AS ?no)  "+(graphURI!=null?"FROM <"+graphURI+"> ":"")
 						+ " WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) WHERE  { ?s ?p ?t } GROUP BY ?s}";
 			}else{
 				
-				//TODO Löschen???
-//				query="SELECT (AVG(?count) AS ?no) "+(graphURI!=null?"FROM <"+graphURI+"> ":"")
-//						+ "WHERE {SELECT (COUNT(?s) AS ?count) ?s WHERE{ {?s ?q ?t  filter(!isLiteral(?t))}{SELECT ?s "
-//						+ "WHERE {  ?s ?p ?o   }GROUP BY ?s}}}";
 				query="SELECT (AVG(?co) AS ?no)  "+(graphURI!=null?"FROM <"+graphURI+"> ":"")
 						+ " WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) "+
 						"WHERE  { ?s ?p ?t filter(!isLiteral(?t))} GROUP BY ?s}";

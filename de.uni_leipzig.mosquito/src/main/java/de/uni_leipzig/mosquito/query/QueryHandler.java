@@ -63,8 +63,13 @@ public class QueryHandler {
 		this.fileForQueries = fileForQueries;
 	}
 	
-	private void init() throws IOException{
+	public void init() throws IOException{
+		new File(path).mkdir();
 		init(fileForQueries);
+	}
+	
+	public void setPath(String path){
+		this.path = path;
 	}
 	
 	public String getPath(){

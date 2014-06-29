@@ -21,7 +21,7 @@ import de.uni_leipzig.mosquito.benchmark.Benchmark.DBTestType;
 
 public class Config {
 	
-	public static List<String> getDatabaseIds(Node rootNode, DBTestType type, Logger log)
+	public static List<String> getDatabaseIds(Node rootNode, DBTestType type, String refID, Logger log)
 			throws ParserConfigurationException, SAXException, IOException {
 		List<String> ids = new ArrayList<String>();
 		ConfigParser cp = ConfigParser.getParser(rootNode);
@@ -49,7 +49,10 @@ public class Config {
 
 		
 		for (Integer i = 0; i < databases.getLength(); i++) {
-			ids.add(((Element) databases.item(i)).getAttribute("id"));
+			String id = ((Element) databases.item(i)).getAttribute("id");
+			if(!id.equals(refID)){
+				ids.add(id);
+			}
 		}
 		return ids;
 	}
@@ -137,20 +140,13 @@ public class Config {
 		}
 		map.put("query-diversity", limit);
 		cp.setNode(benchmark);
-		map.put("dbs", cp.getElementAt("test-db", 0).getAttribute("type"));
+		Element testDB = cp.getElementAt("test-db", 0);
+		map.put("dbs", testDB.getAttribute("type"));
+		map.put("ref-con", testDB.getAttribute("reference"));
 		cp.setNode(benchmark);
 		Element rand = cp.getElementAt("random-function", 0);
 		map.put("random-function", rand.getAttribute("type"));
 		map.put("random-function-gen", rand.getAttribute("generate"));
-		try{
-			if (map.get("random-function").toLowerCase().equals("seed")) {
-				map.put("class-enabled", cp.getElementAt("class-enabled", 0)
-						.getAttribute("value"));
-			}
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
 		cp.setNode(benchmark);
 		map.put("queries-output-path", cp
 				.getElementAt("queries-output-path", 0).getAttribute("name"));
@@ -161,16 +157,16 @@ public class Config {
 	}
 	
 	
-	public static String[] getRandomPath(Node rootNode) throws SAXException, IOException, ParserConfigurationException{
+	public static String[] getRandomFiles(Node rootNode) throws SAXException, IOException, ParserConfigurationException{
 		
 		ConfigParser cp = ConfigParser.getParser(rootNode);
 		cp.getElementAt("benchmark", 0);
 		cp.getElementAt("random-function", 0);
-		NodeList percents = cp.getNodeList("data-path");
+		NodeList percents = cp.getNodeList("data-file");
 		
 		String[] ret = new String[percents.getLength()];
 		for(int i=0;i<percents.getLength();i++){
-			ret[i]= ((Element)percents.item(i)).getAttribute("path");
+			ret[i]= ((Element)percents.item(i)).getAttribute("file-name");
 		}
 		
 		return ret;

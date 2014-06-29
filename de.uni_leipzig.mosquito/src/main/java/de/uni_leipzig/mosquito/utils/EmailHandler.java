@@ -67,8 +67,13 @@ public class EmailHandler {
 		msg += "Start: " + DateFormat.getInstance().format(start.getTime());
 		msg += "\nEnd: " + DateFormat.getInstance().format(end.getTime());
 		msg += "\n" + "Finished in: ";
+		msg += getWellFormatDateDiff(start, end);
+		EmailHandler.sendGoodNews(msg);
+	}
+
+	public static String getWellFormatDateDiff(Calendar start, Calendar end){
 		int diff = end.get(Calendar.YEAR) - start.get(Calendar.YEAR);
-		msg += diff == 0 ? "" : String.valueOf(diff) + "y ";
+		String msg = diff == 0 ? "" : String.valueOf(diff) + "y ";
 		diff = end.get(Calendar.DAY_OF_YEAR) - start.get(Calendar.DAY_OF_YEAR);
 		msg += diff == 0 ? "" : String.valueOf(diff) + "d ";
 		diff = end.get(Calendar.HOUR_OF_DAY) - start.get(Calendar.HOUR_OF_DAY);
@@ -79,9 +84,9 @@ public class EmailHandler {
 		msg += diff == 0 ? "" : String.valueOf(diff) + "s ";
 		diff = end.get(Calendar.MILLISECOND) - start.get(Calendar.MILLISECOND);
 		msg += diff == 0 ? "" : String.valueOf(diff) + "ms";
-		EmailHandler.sendGoodNews(msg);
+		return msg;
 	}
-
+	
 	public static void sendBadMail(Calendar start, Calendar end, Exception e)
 			throws EmailException {
 		String msg = "Problem at: ";

@@ -1,5 +1,6 @@
 package de.uni_leipzig.mosquito.benchmark;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Calendar;
@@ -23,6 +24,8 @@ import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import de.uni_leipzig.mosquito.data.TripleStoreHandler;
+import de.uni_leipzig.mosquito.generation.DataGenerator;
 import de.uni_leipzig.mosquito.testcases.Testcase;
 import de.uni_leipzig.mosquito.testcases.UploadTestcase;
 import de.uni_leipzig.mosquito.utils.Config;
@@ -49,6 +52,8 @@ public class Benchmark {
 	private static HashMap<String, Collection<ResultSet>> results;
 	private static List<Double> percents;
 	private static Boolean mail=false;
+	private static Connection refCon;
+	private static Boolean end=false;
 
 	public enum DBTestType {
 		all, choose
@@ -61,13 +66,32 @@ public class Benchmark {
 	public static void main(String[] args) throws IOException {
 		if (args.length < 1) {
 			System.out.println("Usage: benchmark.jar configfile");
+			end=true;
 			return;
 		} else {
+			Runtime.getRuntime().addShutdownHook(new Thread(){
+				@Override public void run() {
+					sendIfEnd();
+				}
+			});
 			start(args[0]);
+			end=true;
 		}
 	}
 
-
+	public static void sendIfEnd(){
+		if(!end){
+			try{
+				EmailHandler.sendBadNews("Sys.exit");
+			}
+			catch(Exception e){
+				log.warning("Couldn't send email due to: ");
+				LogHandler.writeStackTrace(log, e, Level.WARNING);
+			}
+		}
+	}
+	
+	
 
 	/**
 	 * Beginnt den Benchmark für die, in der angegebenen Konfigurationsdatei,
@@ -120,7 +144,13 @@ public class Benchmark {
 								config.get("graph-uri"), log);
 			}
 			databaseIds = Config.getDatabaseIds(rootNode,
-					DBTestType.valueOf(config.get("dbs")), log);
+					DBTestType.valueOf(config.get("dbs")), config.get("ref-con"), log);
+			
+			refCon = ConnectionFactory.createConnection(dbNode, config.get("ref-con"));
+			
+			//mkdirs
+			new File("results").mkdir();
+			
 			//<<<<<<<!!!!!!!!!!!!!>>>>>>>
 			
 			mainLoop(databaseIds, pathToXMLFile);
@@ -155,27 +185,20 @@ public class Benchmark {
 			throws ClassNotFoundException, SAXException, IOException,
 			ParserConfigurationException, SQLException, InterruptedException {
 		Integer dbCount = 0;
-		ResultSet upload = new ResultSet();
-		String[] randPath = null;
-		for (String db : ids) {
-			// Connection zur jetzigen DB
-			Connection con = ConnectionFactory.createConnection(dbNode, db);
-			// drop
-			if (Boolean.valueOf(config.get("drop-db"))) {
-				con.dropGraph(config.get("graph-uri"));
-			}
-			// May Must Fill the TS before
-			if (dbCount == 0) {
-				//TODO NO JUST NO!!! use a reference Connection before the mainLoop 
-				if (Boolean.valueOf(config.get("random-function-gen"))) {
-					// Generating a smaller dataset
-					randPath = getDatasetPaths(con);
-				} else {
-					// Dataset is already generated
-					randPath = Config.getRandomPath(rootNode);
-				}
-			}
-			for (int i = 0; i < percents.size(); i++) {
+		
+		String[] randFiles = null;
+		if(Boolean.valueOf(config.get("random-function-gen"))) {
+			randFiles = getDatasetFiles(refCon);
+		}
+		else{
+			randFiles = Config.getRandomFiles(rootNode);
+		}
+		for (int i = 0; i < percents.size(); i++) {
+			ResultSet upload = new ResultSet();
+			for (String db : ids) {
+				// Connection zur jetzigen DB
+				Connection con = ConnectionFactory.createConnection(dbNode, db);
+			
 				// drop
 				if (Boolean.valueOf(config.get("drop-db"))) {
 					con.dropGraph(config.get("graph-uri"));
@@ -184,23 +207,27 @@ public class Benchmark {
 					UploadTestcase ut = new UploadTestcase();
 					Properties up = testcases.get(UploadTestcase.class
 							.getName());
-					up.setProperty("path", randPath[i]);
+					up.setProperty("file", randFiles[i]);
 					ut.setProperties(up);
 					ut.setConnection(con);
-					ut.setName(db);
-					Collection<ResultSet> res = new LinkedList<ResultSet>();
-					res.add(upload);
-					ut.addCurrentResults(res);
+					ut.setCurrentDBName(db);
+					Collection<ResultSet> uploadRes = new LinkedList<ResultSet>();
+					uploadRes.add(upload);
+					ut.addCurrentResults(uploadRes);
+					ut.start();
+					upload = ut.getResults().iterator().next();
 				}
+				//TODO warmup
+				start(con, db, String.valueOf(percents.get(i)));
+				// drop
+				if (Boolean.valueOf(config.get("drop-db"))) {
+					con.dropGraph(config.get("graph-uri"));
+				}
+				dbCount++;
 
-				start(con);
 			}
-			// drop
-			if (Boolean.valueOf(config.get("drop-db"))) {
-				con.dropGraph(config.get("graph-uri"));
-			}
-			dbCount++;
-
+			upload.setFileName("UploadTest_"+percents.get(i));
+			upload.save();
 		}
 		for (String key : results.keySet()) {
 			for (ResultSet res : results.get(key)) {
@@ -222,9 +249,10 @@ public class Benchmark {
 	 * @param fromGraph
 	 *            Named Graph welcher benutzt wird
 	 * @return gibt Liste mit gemessenen Parametern zurück zu jeweiligem Test
+	 * @throws IOException 
 	 */
 	@SuppressWarnings("unchecked")
-	public static void start(Connection con) {
+	public static void start(Connection con, String dbName, String percent) throws IOException {
 
 		for (String testcase : testcases.keySet()) {
 			if (testcase.equals(UploadTestcase.class.getName())) {
@@ -236,13 +264,15 @@ public class Benchmark {
 						.getClass(testcase);
 				Testcase test = t.newInstance();
 				test.setProperties(testProps);
-				if (results.containsKey(testcase)) {
-					test.addCurrentResults(results.get(testcase));
+				if (results.containsKey(testcase+percent)) {
+					test.addCurrentResults(results.get(testcase+percent));
 				}
 				test.setConnection(con);
+				test.setCurrentDBName(dbName);
+				test.setCurrentPercent(percent);
 				test.start();
 				Collection<ResultSet> tcResults = test.getResults();
-				results.put(testcase, tcResults);
+				results.put(testcase+percent, tcResults);
 			} catch (ClassNotFoundException | InstantiationException
 					| IllegalAccessException e) {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
@@ -250,24 +280,24 @@ public class Benchmark {
 		}
 	}
 
-	private static String[] getDatasetPaths(Connection con) {
+	private static String[] getDatasetFiles(Connection con) {
 		String[] ret = new String[percents.size()];
-		switch (config.get("random-function")) {
-		case "seed":
-			for (int i = 0; i < percents.size(); i++) {
-				ret[i] = MinimizeTripleStore.seed(con, percents.get(i),
-						config.get("graph-uri"),
-						Boolean.valueOf(config.get("class-enabled")));
+		new File("datasets"+File.separator).mkdir();
+		String fileName ="datasets"+File.separator+"ds_100.nt";
+		TripleStoreHandler.writeDatasetToFile(con, config.get("graph-uri"), fileName);
+		for (int i = 0; i < percents.size(); i++) {
+			if(percents.get(i)==1.0){
+				ret[i] = fileName;
+				continue;
 			}
-			break;
-		case "rand":
-			for (int i = 0; i < percents.size(); i++) {
-				ret[i] = MinimizeTripleStore.rand(con, percents.get(i),
-						config.get("graph-uri"));
-			}
-			break;
+			String outputFile ="datasets"+File.separator+"ds_"+i*100+".nt";
+			DataGenerator.generateData(con, config.get("graph-uri"), fileName, outputFile, config.get("random-function"), percents.get(i));
 		}
 		return ret;
+
 	}
 
+	public static Connection getReferenceConnection(){
+		return refCon;
+	}
 }
