@@ -19,10 +19,12 @@ import java.util.regex.Pattern;
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.connection.ConnectionFactory;
 import org.bio_gene.wookie.utils.GraphHandler;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import de.uni_leipzig.mosquito.benchmark.MinimizeTripleStore;
+
+import de.uni_leipzig.mosquito.data.TripleStoreHandler;
 import de.uni_leipzig.mosquito.utils.RandomStringBuilder;
 
 public class QueryHandler {
@@ -128,7 +130,7 @@ public class QueryHandler {
 				List<Object> vars = new LinkedList<Object>();
 				for(int i=1 ;i<=columns;i++ ){
 					Object current = res.getObject(i);
-					Node cur = MinimizeTripleStore.implToNode(current);
+					Node cur = TripleStoreHandler.implToNode(current);
 					vars.add(GraphHandler.NodeToSPARQLString(cur));
 				}
 				line = patternToQuery(pattern, vars);
