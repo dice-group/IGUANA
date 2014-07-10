@@ -24,6 +24,7 @@ import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import de.uni_leipzig.mosquito.converter.RDFVocabulary;
 import de.uni_leipzig.mosquito.data.TripleStoreHandler;
 import de.uni_leipzig.mosquito.generation.DataGenerator;
 import de.uni_leipzig.mosquito.testcases.Testcase;
@@ -43,6 +44,7 @@ import de.uni_leipzig.mosquito.utils.ResultSet;
  */
 public class Benchmark {
 
+	private static final String RESULT_FILE_NAME = "results";
 	private static HashMap<String, String> config;
 	private static List<String> databaseIds;
 	private static Logger log;
@@ -54,6 +56,7 @@ public class Benchmark {
 	private static Boolean mail=false;
 	private static Connection refCon;
 	private static Boolean end=false;
+	private static HashMap<String, String> dataDescription;
 
 	public enum DBTestType {
 		all, choose
@@ -119,6 +122,7 @@ public class Benchmark {
 			config = Config.getParameter(rootNode);
 			testcases = Config.getTestCases(rootNode);
 			percents = Config.getPercents(rootNode);
+			dataDescription = Config.getDataDescription(rootNode);
 			HashMap<String, Object> email = Config.getEmail(rootNode);
 			// Logging ermöglichen
 			log = Logger.getLogger(config.get("log-name"));
@@ -136,10 +140,19 @@ public class Benchmark {
 				mail = true;
 			}
 			// Soll vorher noch konvertiert werden?
-			if (Boolean.valueOf((config.get("pgn-processing")))) {
+			if (Boolean.valueOf((config.get("convert-processing")))) {
+				RDFVocabulary rdfV = (RDFVocabulary) ClassUtils.getClass(config.get("rdf-vocabulary-class")).newInstance();
+				rdfV.init(dataDescription.get("namespace"),
+						dataDescription.get("anchor"),
+						dataDescription.get("prefix"),
+						dataDescription.get("resourceURI"),
+						dataDescription.get("propertyPrefixName"),
+						dataDescription.get("resourcePrefixName")		
+						);
+				
 				// Es sollen PGNs konvertiert werden
-				Converter.pgnToFormat(config.get("output-format"),
-								config.get("pgn-input-path"),
+				Converter.rawToFormat(config.get("converter-class"), config.get("output-format"),
+								config.get("convert-input-path"),
 								config.get("output-path"),
 								config.get("graph-uri"), log);
 			}
@@ -149,7 +162,7 @@ public class Benchmark {
 			refCon = ConnectionFactory.createConnection(dbNode, config.get("ref-con"));
 			
 			//mkdirs
-			new File("results").mkdir();
+			new File(RESULT_FILE_NAME).mkdir();
 			
 			//<<<<<<<!!!!!!!!!!!!!>>>>>>>
 			
@@ -163,10 +176,12 @@ public class Benchmark {
 					Calendar end = Calendar.getInstance();
 					end.setTimeZone(TimeZone.getTimeZone("UTC"));
 					EmailHandler.sendBadMail(start, end, e);
+					
 				} catch (EmailException e1) {
 					log.warning("Couldn't send email due to: ");
 					LogHandler.writeStackTrace(log, e1, Level.WARNING);
 				}
+				
 			}
 		}
 		if(mail){
@@ -231,7 +246,9 @@ public class Benchmark {
 		}
 		for (String key : results.keySet()) {
 			for (ResultSet res : results.get(key)) {
+				res.setFileName(RESULT_FILE_NAME+File.separator+res.getFileName());
 				res.save();
+				res.saveAsPNG();
 			}
 		}
 	}

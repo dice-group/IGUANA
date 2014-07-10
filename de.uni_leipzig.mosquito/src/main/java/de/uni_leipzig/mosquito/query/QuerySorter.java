@@ -59,10 +59,10 @@ public class QuerySorter {
 	public static int[] getSelectAndInsertCounts(String queriesPath){
 		int[] ret = {0, 0};
 		for(String file : getSPARQL(queriesPath)){
-			ret[0] += FileHandler.getLineCount(file);
+			ret[0] += 1;
 		}
 		for(String file : getSPARQLUpdate(queriesPath)){
-			ret[1] += FileHandler.getLineCount(file);
+			ret[1] += 1;
 		}
 		return ret;
 	}

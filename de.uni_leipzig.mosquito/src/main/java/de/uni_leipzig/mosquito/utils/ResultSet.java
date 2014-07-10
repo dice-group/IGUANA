@@ -1,15 +1,65 @@
 package de.uni_leipzig.mosquito.utils;
 
-import java.io.BufferedWriter;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
+
+import com.xeiam.xchart.Chart;
+import com.xeiam.xchart.ChartBuilder;
+import com.xeiam.xchart.StyleManager.ChartType;
+
 public class ResultSet implements Iterator<List<Object>>{
+	
+	public static void main(String[] args) throws IOException{
+		ResultSet res = new ResultSet();
+		res.setTitle("Queries per Second");
+		res.setxAxis("Query");
+		res.setyAxis("#Queries");
+		List<Object> row = new LinkedList<Object>();
+		List<String> header = new LinkedList<String>();
+		Random rand = new Random(123);
+		header.add("DB");
+		row.add("1");
+		for(int i =1; i<10;i++){
+			header.add(String.valueOf(i));
+			row.add(rand.nextInt(1000));
+		}
+		res.addRow(row);
+		row.clear();
+		row.add("2");
+		for(int i =1; i<10;i++){
+			row.add(rand.nextInt(1000));
+		}
+		res.addRow(row);
+		row.clear();
+		row.add("3");
+		for(int i =1; i<10;i++){
+			row.add(rand.nextInt(1000));
+		}
+		res.addRow(row);
+		row.clear();
+		row.add("4");
+		for(int i =1; i<10;i++){
+			row.add(rand.nextInt(1000));
+		}
+		res.addRow(row);
+		res.setHeader(header);
+		res.setFileName("testCSV2");
+		res.saveAsPNG();
+		
+	}
+	
 	
 	private String fileName = UUID.randomUUID().toString();
 
@@ -20,21 +70,24 @@ public class ResultSet implements Iterator<List<Object>>{
 	private int row=-1;
 	
 	private Boolean removed=false;
+
+	private String title="";
+	
+	private String xAxis="";
+	
+	private String yAxis="";
 	
 	public List<String> getHeader(){
 		return header;
 	}
 	
 	public void setHeader(List<String> header){
-		this.header = header;
+		this.header = new LinkedList<String>(header);
 	}
 	
 	public Boolean addRow(List<Object> row){
-		if(header.size() == row.size()){
-			table.add(row);
-			return true;
-		}
-		return false;
+		table.add(new LinkedList<Object>(row));
+		return true;
 	}
 	
 	public String getHeadAt(int i){
@@ -89,25 +142,119 @@ public class ResultSet implements Iterator<List<Object>>{
 	public void save() throws IOException{
 		File f = new File(this.fileName+".csv");
 		f.createNewFile();
-		FileWriter fstream = new FileWriter(fileName, true);
-        BufferedWriter out = new BufferedWriter(fstream);
+		PrintWriter pw = new PrintWriter(fileName+".csv");
+		String head="";
+		for(String cell : header){
+			head+=cell+";";
+		}
+		pw.write(head.substring(0, head.length()-1));
+    	pw.println();
         for(List<Object> row : table){
         	String currentRow = "";
         	for(Object cell : row){
         		currentRow += cell+";";
         	}
-        	out.write(currentRow.substring(0, currentRow.length()-1));
-        	out.newLine();
+        	pw.write(currentRow.substring(0, currentRow.length()-1));
+        	pw.println();
         }
-        out.close();
+        pw.close();
 	}
 
+
+	@SuppressWarnings("unused")
+	private List<List<Object>> transform(){
+		List<List<Object>> columns = new LinkedList<List<Object>>();
+		for(List<Object> row : table){
+			if(columns.isEmpty()){
+//				List<Object> header = new LinkedList<Object>(this.header);
+//				columns.add(header);
+				for(int i=0;i<header.size(); i++){
+					List<Object> column = new LinkedList<Object>(); 
+					column.add(header.get(i));
+					columns.add(column);
+				}
+//				for(Object cell : row){
+//					List<Object> column = new LinkedList<Object>(); 
+//					column.add(cell);
+//					columns.add(column);
+//				}
+			}
+			else{
+				for(int i=0;i<columns.size();i++){
+					columns.get(i).add(row.get(i));
+				}
+			}
+		}	
+		return columns.subList(1, columns.size());
+	}
+	
+	private void streamPNG(Chart chart) throws IOException {
+		 
+	    BufferedImage lBufferedImage = new BufferedImage(chart.getWidth(), chart.getHeight(), BufferedImage.TYPE_INT_RGB);
+	    Graphics2D lGraphics2D = lBufferedImage.createGraphics();
+	    chart.paint(lGraphics2D);
+	 
+	    FileOutputStream fos = new FileOutputStream(new File(this.fileName+".png"));
+	    
+	    ImageIO.write(lBufferedImage, "png", fos);
+	    fos.close();
+	  }
+	
+	public void saveAsPNG() throws FileNotFoundException, IOException{
+		save();
+		int width = 30*(header.size()*table.size());
+		int height = width/2;//?
+		Chart chart = new ChartBuilder().chartType(ChartType.Bar).width(width).height(height).title(title).xAxisTitle(xAxis).yAxisTitle(yAxis).build();
+
+		for(List<Object> row :table){
+			List<Number> subRow = new LinkedList<Number>();
+			for(int i=1;i< row.size(); i++){
+				subRow.add((Number) row.get(i));
+			}
+			chart.addSeries(String.valueOf(row.get(0)),
+						header.subList(1, header.size()), subRow);
+		}
+		streamPNG(chart);
+		
+//		CategoryDataset dataset = new CSV(';','\n').readCategoryDataset(new FileReader(this.fileName+".csv"));
+//		JFreeChart ch = ChartFactory.createBarChart(this.fileName,"Query", "Value", dataset, PlotOrientation.VERTICAL, true, false, false);
+//		ch.setAntiAlias(true);
+//		ch.setTextAntiAlias(true);
+//		ch.setBorderVisible(false);
+//		StandardChartTheme ct = new StandardChartTheme(fileName);
+//		ChartUtilities.saveChartAsPNG(new File(this.fileName+".png"), ch, 800, 800);
+	}
+	
 	public String getFileName() {
 		return fileName;
 	}
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getxAxis() {
+		return xAxis;
+	}
+
+	public void setxAxis(String xAxis) {
+		this.xAxis = xAxis;
+	}
+
+	public String getyAxis() {
+		return yAxis;
+	}
+
+	public void setyAxis(String yAxis) {
+		this.yAxis = yAxis;
 	}
 	
 }

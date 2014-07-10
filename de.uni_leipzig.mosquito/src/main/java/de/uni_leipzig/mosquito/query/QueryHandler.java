@@ -32,7 +32,7 @@ public class QueryHandler {
 		
 	public static void main(String args[]) throws IOException{
 		String insert = "INSERT DATA {GRAPH %%r%% {%%r1%% %%r2%% %%d%%} {%%r1%% %%r3%% %%d%%}{%%r1%% %%r2%% %%r4%%} {%%r4%% %%r2%% %%i%%} {%%r4%% %%r5%% %%s%%}}";
-		String select = "select distinct ?s where {%%v1%% <http://dbpedia.org/property/einwohner> %%v2%%} LIMIT 10";
+		String select = "select distinct ?s where {<http://dbpedia.org/asd> <http://dbpedia.org/property/einwohner> 1} LIMIT 10";
 		String construct = "CONSTRUCT   { [] ?p ?name } WHERE { %%v1%% ?p ?name }";
 		String ask = "PREFIX foaf:<http://xmlns.com/foaf/0.1/>  ASK  { ?x foaf:name  %%v%% }";
 		String describe = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> DESCRIBE %%v%%";
@@ -123,7 +123,9 @@ public class QueryHandler {
 			PrintWriter pw = new PrintWriter(f);
 			String q = selectPattern(query);
 			ResultSet res = con.execute(q);
+			Boolean result= false;
 			while(res.next()){
+				result=true;
 				ResultSetMetaData rsmd = res.getMetaData();
 				int columns = rsmd.getColumnCount();
 				String line ="";
@@ -137,6 +139,9 @@ public class QueryHandler {
 				pw.write(line);
 				pw.println();
 				ret++;
+			}
+			if(!result){
+				pw.write(pattern);
 			}
 			pw.close();
 			return ret;
@@ -162,6 +167,7 @@ public class QueryHandler {
 				replaced.add(var);
 			}
 		}
+		
 		return query;
 	}
 	

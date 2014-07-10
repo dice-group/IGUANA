@@ -95,18 +95,22 @@ public class Config {
 		cp.setNode(benchmark);
 		String pgnprocess = "false";
 		try{
-			pgnprocess = cp.getElementAt("pgn-processing", 0)
+			pgnprocess = cp.getElementAt("convert-processing", 0)
 					.getAttribute("value");
 			cp.setNode(benchmark);
-			map.put("pgn-input-path", cp.getElementAt("pgn-input-path", 0)
+			map.put("convert-input-path", cp.getElementAt("convert-input-path", 0)
 					.getAttribute("name"));
+			cp.setNode(benchmark);
+			map.put("converter-class", cp.getElementAt("converter-class", 0).getAttribute("class"));
+			cp.setNode(benchmark);
+			map.put("rdf-vocabulary-class", cp.getElementAt("rdf-vocabulary-class", 0).getAttribute("class"));
 			cp.setNode(benchmark);
 			
 		}
 		catch(Exception e){
 			pgnprocess = "false";
 		}
-		map.put("pgn-processing", pgnprocess);
+		map.put("convert-processing", pgnprocess);
 		cp.setNode(benchmark);
 		String outputFormat = "TURTLE";
 		try{
@@ -151,7 +155,7 @@ public class Config {
 		map.put("queries-output-path", cp
 				.getElementAt("queries-output-path", 0).getAttribute("name"));
 		new File(map.get("queries-output-path")).mkdirs();
-
+		
 		return map;
 
 	}
@@ -212,5 +216,35 @@ public class Config {
 			return null;
 		}
 		return ret;
+	}
+	
+	public static HashMap<String, String> getDataDescription(Node rootNode){
+	          HashMap<String, String> map = new HashMap<String, String>();
+	          try{
+	      	   ConfigParser cp = ConfigParser.getParser(rootNode);
+	      	   Element e = cp.getElementAt("data-description", 0);
+	      	   
+	      	   map.put("namespace", cp.getElementAt("namespace", 0).getAttribute("name"));
+	      	   cp.setNode(e);
+	           map.put("anchor", cp.getElementAt("anchor", 0).getAttribute("name"));
+	      	   cp.setNode(e);
+	      	   map.put("prefix", map.get("namespace")+map.get("anchor"));
+	      	   map.put("resourceURI", cp.getElementAt("resource-uri", 0).getAttribute("name"));
+	      	   cp.setNode(e);
+	      	   map.put("propertyPrefixName", cp.getElementAt("property-prefix-name", 0).getAttribute("name"));
+	      	   cp.setNode(e);
+	      	   map.put("resourcePrefixName", cp.getElementAt("resource-prefix-name", 0).getAttribute("name"));
+	      	   cp.setNode(e);
+	      	   try{
+	      		 map.put("metadata", cp.getElementAt("meta-data", 0).getAttribute("value"));
+	           }
+	           catch(Exception ex){
+	           }
+	          }
+	        catch(Exception e){
+	        	return null;
+	      	}
+	        return map;
+	    
 	}
 }

@@ -39,6 +39,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	private List<Long> qpsTime;
 	private Long timeLimit = 1000L;
 	private int xCount = 0;
+	private String changeSetPath = "";
 	
 	private static int x = -1;
 	private static int[] sig  = {0, 0};
@@ -60,14 +61,19 @@ public class QueryTestcase implements Testcase, Runnable {
 			qh.init();
 			selects = QuerySorter.getSPARQL("QueryTestcase"+File.separator);
 			inserts = QuerySorter.getSPARQLUpdate("QueryTestcase"+File.separator);
-			selectGTinserts = selects.size()>=inserts.size()?true:false;
+			int insertSize = inserts.size();
+			if(!changeSetPath.isEmpty()){
+				//TODO 
+				//FROM CHANGESET TO INSERT 
+			}
+			selectGTinserts = selects.size()>=insertSize?true:false;
 			if(updateStrategy.equals("fixed")){
 				if(x <0)
-					x = QuerySorter.getRoundX(selects.size(), inserts.size());
+					x = QuerySorter.getRoundX(selects.size(), insertSize);
 			}
 			else if(updateStrategy.equals("variation")){
 				if (x < 0){
-					sig = QuerySorter.getIntervall(selects.size(), inserts.size());
+					sig = QuerySorter.getIntervall(selects.size(), insertSize);
 				}
 				else{ 
 					sig[0] = 0;
@@ -80,8 +86,9 @@ public class QueryTestcase implements Testcase, Runnable {
 		qQMpH = new Random(seed2);
 		ResultSet qmph = new ResultSet();
 		ResultSet qps = new ResultSet();
-		qmph.setFileName("results"+File.separator+"QueryQMpH"+percent);
-		qps.setFileName("results"+File.separator+"QueryQpS"+percent);
+		new File("tempResults").mkdir();
+		qmph.setFileName("tempResults"+File.separator+"QueryQMpH"+percent);
+		qps.setFileName("tempResults"+File.separator+"QueryQpS"+percent);
 		//qps
 		qps = querySeconds();
 		//qmph

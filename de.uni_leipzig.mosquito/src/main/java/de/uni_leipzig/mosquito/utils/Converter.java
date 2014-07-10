@@ -7,9 +7,10 @@ import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.xml.sax.SAXException;
 
-import de.uni_leipzig.informatik.swp13_sc.converter.PGNToRDFConverterRanged;
+import de.uni_leipzig.mosquito.converter.ConverterI;
 
 public class Converter {
 
@@ -27,12 +28,18 @@ public class Converter {
 	 * @throws SAXException
 	 * @throws IOException
 	 * @throws ParserConfigurationException
+	 * @throws ClassNotFoundException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public static void pgnToFormat(String outputFormat, String path,
+	public static void rawToFormat(String converter, String outputFormat, String path,
 			String oPath, String graphURI, Logger log) throws SAXException,
-			IOException, ParserConfigurationException {
-		PGNToRDFConverterRanged pg = new PGNToRDFConverterRanged();
+			IOException, ParserConfigurationException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+//		PGNToRDFConverterRanged pg = new PGNToRDFConverterRanged();
+		
+		ConverterI pg = (ConverterI) ClassUtils.getClass(converter).newInstance();
 
+				
 		new File(oPath).mkdirs();
 		pg.setOutputFormat(outputFormat);
 
