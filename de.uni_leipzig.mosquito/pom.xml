@@ -7,7 +7,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.xeiam.xchart</groupId>
@@ -190,5 +190,32 @@
 			<url>http://maven.bio-gene.org/nexus/content/groups/public/</url>
 		</repository>
 	</repositories>
+	<build>
+		<plugins>
+			<plugin>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <configuration>
+                  <archive>
+                      <manifest>
+                          <addClasspath>true</addClasspath>
+                          <mainClass>de.uni_leipzig.mosquito.benchmark.Benchmark</mainClass>
+                      </manifest>
+                  </archive>
+                  <descriptorRefs>
+                      <descriptorRef>jar-with-dependencies</descriptorRef>
+                  </descriptorRefs>
+              </configuration>
+              <executions>
+                  <execution>
+                      <id>make-my-jar-with-dependencies</id>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>single</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>
+		</plugins>
+	</build>
 </project>
   

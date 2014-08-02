@@ -8,15 +8,15 @@ import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
+import org.apache.commons.mail.MultiPartEmail;
 
 public class EmailHandler {
 	
 
 
-	private static Email email;
+	private static MultiPartEmail email;
 	private static String aHostName;
 	private static int port;
 	private static DefaultAuthenticator da;
@@ -32,34 +32,46 @@ public class EmailHandler {
 		
 	}
 	
-	private static void sendNews(String subject, String msg) throws EmailException{
-		email = new SimpleEmail();
+	private static void sendNews(String subject, String msg, String attachmentPath) throws EmailException{
+		email = new MultiPartEmail();
+		
 		email.setHostName(aHostName);
 		email.setSmtpPort(port);
 		email.setAuthenticator(da);
 		email.setSSLOnConnect(true);
+		
 		email.setFrom(emailFrom);
 		for(String em : emailTo){
 			email.addTo(em);
 		}
 		email.setSubject(subject);
 		email.setMsg(msg);
+		
+		if(attachmentPath != null){
+			EmailAttachment attachment = new EmailAttachment();
+			attachment.setPath(attachmentPath);
+			attachment.setDisposition(EmailAttachment.ATTACHMENT);
+			attachment.setDescription("Results of Benchmark");
+			attachment.setName("results.zip");
+		
+			email.attach(attachment);
+		}
 		email.send();
 	}
 	
-	public static void sendGoodNews(String msg) throws EmailException{
+	public static void sendGoodNews(String msg, String attachmentPath) throws EmailException{
 		String news="Benchmark finished!";
 		String msg2 = news+"\nHOOORAYYY\n"+msg;
-		sendNews(news, msg2);
+		sendNews(news, msg2, attachmentPath);
 	}
 	
-	public static void sendBadNews(String msg) throws EmailException{
+	public static void sendBadNews(String msg, String attachmentPath) throws EmailException{
 		String news="Benchmark doesn't feel good!";
 		String msg2 = news+"\nTo find out why the Benchmark ended unexpected see the log Files\n\n"+msg;
-		sendNews(news, msg2);
+		sendNews(news, msg2, attachmentPath);
 	}
 	
-	public static void sendGoodMail(Calendar start, Calendar end)
+	public static void sendGoodMail(Calendar start, Calendar end, String attachmentPath)
 			throws EmailException {
 		List<String> to = new LinkedList<String>();
 		to.add("");
@@ -68,7 +80,7 @@ public class EmailHandler {
 		msg += "\nEnd: " + DateFormat.getInstance().format(end.getTime());
 		msg += "\n" + "Finished in: ";
 		msg += getWellFormatDateDiff(start, end);
-		EmailHandler.sendGoodNews(msg);
+		EmailHandler.sendGoodNews(msg, attachmentPath);
 	}
 
 	public static String getWellFormatDateDiff(Calendar start, Calendar end){
@@ -87,11 +99,11 @@ public class EmailHandler {
 		return msg;
 	}
 	
-	public static void sendBadMail(Calendar start, Calendar end, Exception e)
+	public static void sendBadMail(Calendar start, Calendar end, Exception e, String attachmentPath)
 			throws EmailException {
 		String msg = "Problem at: ";
 		msg += DateFormat.getInstance().format(new Date()) + "\n";
 		msg += ExceptionUtils.getStackTrace(e);
-		EmailHandler.sendBadNews(msg);
+		EmailHandler.sendBadNews(msg, attachmentPath);
 	}
 }

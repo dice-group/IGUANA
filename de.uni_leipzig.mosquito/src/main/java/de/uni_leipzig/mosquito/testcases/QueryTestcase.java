@@ -1,8 +1,10 @@
 package de.uni_leipzig.mosquito.testcases;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -39,7 +41,14 @@ public class QueryTestcase implements Testcase, Runnable {
 	private List<Long> qpsTime;
 	private Long timeLimit = 1000L;
 	private int xCount = 0;
-	private String changeSetPath = "";
+	private String ldLinking;
+	private String ldpath;
+//	private String liveDataFormat = "[0-9]{6}\\.(added|removed)\\.nt";
+	private String ldInsertFormat = "[0-9]{6}\\.added\\.nt";
+	private String ldDeleteFormat = "[0-9]{6}\\.removed\\.nt";
+	private int ldIt=0;
+	private Boolean ldInsert;
+	private String ldQueryNo;
 	
 	private static int x = -1;
 	private static int[] sig  = {0, 0};
@@ -56,29 +65,54 @@ public class QueryTestcase implements Testcase, Runnable {
 		log = Logger.getLogger(QueryTestcase.class.getName());
 		LogHandler.initLogFileHandler(log, QueryTestcase.class.getSimpleName());
 		if(qh==null){
-			QueryHandler qh = new QueryHandler(Benchmark.getReferenceConnection(), queryPatterns);
+			qh = new QueryHandler(Benchmark.getReferenceConnection(), queryPatterns);
 			qh.setPath("QueryTestcase"+File.separator);
 			qh.init();
+			patterns = FileHandler.getFilesInDir(qh.getPath());
 			selects = QuerySorter.getSPARQL("QueryTestcase"+File.separator);
-			inserts = QuerySorter.getSPARQLUpdate("QueryTestcase"+File.separator);
-			int insertSize = inserts.size();
-			if(!changeSetPath.isEmpty()){
-				//TODO 
-				//FROM CHANGESET TO INSERT 
+			int insertSize = 0;
+		
+			if(!ldpath.equals("null")){
+				File ldDir = new File(ldpath);
+				String[] files = ldDir.list(new FilenameFilter(){
+					@Override
+					public boolean accept(File dir, String name) {
+						return name.matches(ldInsertFormat)?true:false;
+					}});
+				inserts = new LinkedList<String>();
+				for(int i=0; i<files.length;i++){
+					inserts.add(files[i]);
+				}
+				Collections.sort(inserts);
+				patterns += inserts.size();
 			}
+			else{
+				inserts = QuerySorter.getSPARQLUpdate("QueryTestcase"+File.separator);
+			}
+			insertSize = inserts.size();
+			
 			selectGTinserts = selects.size()>=insertSize?true:false;
-			if(updateStrategy.equals("fixed")){
-				if(x <0)
-					x = QuerySorter.getRoundX(selects.size(), insertSize);
+			if(selects.size()>0 && insertSize >0){
+				
+				if(updateStrategy.equals("fixed")){
+					if(x <0)
+						x = QuerySorter.getRoundX(selects.size(), insertSize);
+				}
+				else if(updateStrategy.equals("variation")){
+					if (x < 0){
+						sig = QuerySorter.getIntervall(selects.size(), insertSize);
+					}
+					else{ 
+						sig[0] = 1;
+						sig[1] = 2*x;
+					}
+				}	
+				else{
+					updateStrategy ="null";
+				}
 			}
-			else if(updateStrategy.equals("variation")){
-				if (x < 0){
-					sig = QuerySorter.getIntervall(selects.size(), insertSize);
-				}
-				else{ 
-					sig[0] = 0;
-					sig[1] = 2*x;
-				}
+			else{
+				updateStrategy = "null";
 			}
 		}
 		path = qh.getAbsolutPath();
@@ -86,9 +120,8 @@ public class QueryTestcase implements Testcase, Runnable {
 		qQMpH = new Random(seed2);
 		ResultSet qmph = new ResultSet();
 		ResultSet qps = new ResultSet();
-		new File("tempResults").mkdir();
-		qmph.setFileName("tempResults"+File.separator+"QueryQMpH"+percent);
-		qps.setFileName("tempResults"+File.separator+"QueryQpS"+percent);
+		qmph.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryQMpH"+percent);
+		qps.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryQpS"+percent);
 		//qps
 		qps = querySeconds();
 		//qmph
@@ -122,17 +155,24 @@ public class QueryTestcase implements Testcase, Runnable {
 		row.add(currentDB);
 		header.add("Connection");
 		for(int i=0; i<patterns ;i++){
-			row.add(i+1);
-			header.add(String.valueOf(i+1));
+			row.add(0);
+			if(selects.size()<=i){
+				header.add(inserts.get(i-selects.size()));
+			}
+			else{
+				header.add(selects.get(i));
+			}
 		}
 		while(!isQpSFinished()){
-			int pattern = patternQpS;
-			String query = getNextQpSQuery();
+			String[] next = getNextQpSQuery();
+			String query = next[0];
+			String qFile = next[1];
+			
 			Long time = getQueryTime(query);
-			Long newTime = qpsTime.get(pattern)+time;
-			qpsTime.set(pattern, newTime);
+			Long newTime = qpsTime.get(query.hashCode())+time;
+			qpsTime.set(query.hashCode(), newTime);
 			if(newTime<timeLimit){
-				row.set(pattern+1, (int)row.get(pattern)+1);
+				row.set(header.indexOf(qFile), (int)row.get(query.hashCode()));
 			}
 		}
 		res.setHeader(header);
@@ -149,16 +189,159 @@ public class QueryTestcase implements Testcase, Runnable {
 		return true;
 	}
 	
+	private String[] getNextLD(){
+		String query ="";
+		String ret[] = {"", ""};
+		String queryFile="";
+		switch(ldLinking){
+		case "insertsFirst":
+			if(ldInsert==null){
+				ldInsert=true;
+			}
+			if(ldIt==inserts.size()){
+				if(!ldInsert){
+					return null;
+				}
+				ldInsert = false;
+			}
+
+			for(int i=ldIt;i<inserts.size();i++){
+				queryFile = inserts.get(i);
+				if(ldInsert && queryFile.matches(ldInsertFormat)){
+					query = QueryHandler.ntToQuery(queryFile);
+					break;
+				}
+				else if(!ldInsert && queryFile.matches(ldDeleteFormat)){
+					query = QueryHandler.ntToQuery(queryFile);
+					break;
+				}
+				ldIt++;
+			}
+			ldIt++;
+			break;
+		case "deletesFirst": 
+			if(ldInsert==null){
+				ldInsert=false;
+			}
+			if(ldIt==inserts.size()){
+				if(ldInsert){
+					return null;
+				}
+				ldInsert = true;
+			}
+			for(int i=ldIt;i<inserts.size();i++){
+				queryFile = inserts.get(i);
+				if(ldInsert && queryFile.matches(ldInsertFormat)){
+					query = QueryHandler.ntToQuery(queryFile);
+					break;
+				}
+				else if(!ldInsert && queryFile.matches(ldDeleteFormat)){
+					query = QueryHandler.ntToQuery(queryFile);
+					break;
+				}
+				ldIt++;
+			}
+			ldIt++;
+			break;
+		case "ID":
+			if(ldInsert==null){
+				ldInsert=true;
+			}
+			
+			if(ldIt>=inserts.size()){
+				return null;
+			}
+			String next="";
+			if(ldInsert){
+				if((next = getNextI())!=null)
+					queryFile = new File(next).getName();
+				else
+					queryFile = new File(getNextD()).getName();
+			}
+			else if(!ldInsert){
+				queryFile = ldQueryNo+".removed.nt";
+				if(!inserts.contains(queryFile))
+					queryFile = new File(queryFile).getName();
+//				else if((next = getNextD())!= null)
+//					queryFile = new File(next).getName();
+				else
+					queryFile = new File(getNextI()).getName();
+			}
+			query = QueryHandler.ntToQuery(queryFile);
+			ldInsert = !ldInsert;
+			ldIt++;
+			ldQueryNo = queryFile.substring(0, 6);
+			break;
+		case "DI":
+			if(ldInsert==null){
+				ldInsert=false;
+			}
+			if(ldIt>=inserts.size()){
+				return null;
+			}
+			next="";
+			if(!ldInsert){
+				if((next = getNextD())!=null)
+					queryFile = new File(next).getName();
+				else
+					queryFile = new File(getNextI()).getName();
+			}
+			else if(ldInsert){
+				queryFile = ldQueryNo+".added.nt";
+				if(!inserts.contains(queryFile))
+					queryFile = new File(queryFile).getName();
+//				else if((next = getNextD())!= null)
+//					queryFile = new File(next).getName();
+				else
+					queryFile = new File(getNextD()).getName();
+			}
+			query = QueryHandler.ntToQuery(queryFile);
+			ldInsert = !ldInsert;
+			ldIt++;
+			ldQueryNo = queryFile.substring(0, 6);
+			break;
+		}
+		ret[0] = query;
+		ret[1] = queryFile;
+		return ret;
+	}
+	
+	
+	private String getNextI(){
+		return getNextFormat(ldInsertFormat);
+	}
+	
+	private String getNextD(){
+		return getNextFormat(ldDeleteFormat);
+	}
+	
+	private String getNextFormat(String format){
+		for(int i=ldIt; i<inserts.size(); i++){
+			if(inserts.get(i).matches(format)){
+				inserts.get(i);
+			}
+		}
+		return null;
+	}
+	
+
+	
+	
 	private String getNextQMpHQuery(){
 		String currentFile;
 		Boolean not;
 		int s;
 		switch(updateStrategy){
 		case "null": 
-			int pattern = pQMpH.nextInt(patterns.intValue());
-			currentFile = path+File.separator+pattern+".txt";
-			int queryNr = qQMpH.nextInt((int)FileHandler.getLineCount(currentFile));
-			return FileHandler.getLineAt(currentFile, queryNr);
+			if(ldpath.equals("null")){
+				int pattern = pQMpH.nextInt(patterns.intValue());
+				currentFile = path+File.separator+FileHandler.getNameInDirAtPos(path, pattern)+".txt";
+				int queryNr = qQMpH.nextInt((int)FileHandler.getLineCount(currentFile));
+				return FileHandler.getLineAt(currentFile, queryNr);
+			}
+			else{
+				return getNextLD()[0];
+			}
 		case "variation":
 			if(xCount == 0){
 				not = true;
@@ -174,9 +357,15 @@ public class QueryTestcase implements Testcase, Runnable {
 				}
 				else{
 					s = pQMpH.nextInt(inserts.size());
-					currentFile = inserts.get(s);
+					if(!ldpath.equals("null")){
+						xCount--;
+						return getNextLD()[0];
+					}
+					else{
+						currentFile = inserts.get(s);
+					}
 				}
-			queryNr = qQMpH.nextInt((int)FileHandler.getLineCount(currentFile));
+			int queryNr = qQMpH.nextInt((int)FileHandler.getLineCount(currentFile));
 			xCount--;
 			return FileHandler.getLineAt(currentFile, queryNr);
 		case "fixed":
@@ -195,7 +384,13 @@ public class QueryTestcase implements Testcase, Runnable {
 			}
 			else{
 				s = pQMpH.nextInt(inserts.size());
-				currentFile = inserts.get(s);
+				if(!ldpath.equals("null")){
+					xCount++;
+					return getNextLD()[0];
+				}
+				else{
+					currentFile = inserts.get(s);
+				}
 			}
 			
 			queryNr = qQMpH.nextInt((int)FileHandler.getLineCount(currentFile));
@@ -205,19 +400,28 @@ public class QueryTestcase implements Testcase, Runnable {
 		return "";
 	}
 	
-	private String getNextQpSQuery(){
+	private String[] getNextQpSQuery(){
 		int s;
+		String ret[] = {"", ""};
 		String currentFile;
 		Boolean not;
 		switch(updateStrategy){
 		case "null": 
-			if(patternQpS>= patterns){
-				patternQpS =0;
+			if(ldpath.equals("null")){
+				if(patternQpS>= patterns){
+					patternQpS =0;
+				}
+				currentFile = path+File.separator+FileHandler.getNameInDirAtPos(path, patternQpS)+".txt";
+				int queryNr = qQpS.nextInt((int)FileHandler.getLineCount(currentFile));
+				patternQpS++;
+				
+				
+				ret[0] =  FileHandler.getLineAt(currentFile, queryNr);
+				ret[1] = new File(currentFile).getName();
+				return ret;
+			}else{
+				return getNextLD();
 			}
-			currentFile = path+File.separator+patternQpS+".txt";
-			int queryNr = qQpS.nextInt((int)FileHandler.getLineCount(currentFile));
-			patternQpS++;
-			return FileHandler.getLineAt(currentFile, queryNr);
 		case "variation":
 			if(xCount == 0){
 				not = true;
@@ -233,11 +437,19 @@ public class QueryTestcase implements Testcase, Runnable {
 				}
 				else{
 					s = qQpS.nextInt(inserts.size());
-					currentFile = inserts.get(s);
+					if(!ldpath.equals("null")){
+						xCount--;
+						return getNextLD();
+					}
+					else{
+						currentFile = inserts.get(s);
+					}
 				}
-			queryNr = qQpS.nextInt((int)FileHandler.getLineCount(currentFile));
+			int queryNr = qQpS.nextInt((int)FileHandler.getLineCount(currentFile));
 			xCount--;
-			return FileHandler.getLineAt(currentFile, queryNr);
+			ret[0] =  FileHandler.getLineAt(currentFile, queryNr);
+			ret[1] = new File(currentFile).getName();
+			return ret;
 		case "fixed":
 			
 			if(xCount<x){
@@ -254,13 +466,21 @@ public class QueryTestcase implements Testcase, Runnable {
 			}
 			else{
 				s = pQMpH.nextInt(inserts.size());
-				currentFile = inserts.get(s);
+				if(!ldpath.equals("null")){
+					xCount++;
+					return getNextLD();
+				}
+				else{
+					currentFile = inserts.get(s);
+				}
 			}
 			queryNr = qQpS.nextInt((int)FileHandler.getLineCount(currentFile));
 			xCount++;
-			return FileHandler.getLineAt(currentFile, queryNr);
+			ret[0] =  FileHandler.getLineAt(currentFile, queryNr);
+			ret[1] = new File(currentFile).getName();
+			return ret;
 		}
-		return "";
+		return ret;
 	}
 	
 	private ResultSet queryMixes(){
@@ -318,6 +538,16 @@ public class QueryTestcase implements Testcase, Runnable {
 			x = Integer.parseInt(String.valueOf(p.get("x")));
 		}
 		catch(Exception e){
+			//x should be calculated
+		}
+		try{
+			//insertsfirst, deletesfirst, ID, DI 
+			ldLinking = String.valueOf(p.get("ldLinking"));
+			
+			ldpath = String.valueOf(p.get("ldPath"));
+		}
+		catch(Exception e){
+			//NO Live Data
 		}
 	}
 

@@ -2,9 +2,12 @@ package de.uni_leipzig.mosquito.benchmark;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.CodeSource;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +35,9 @@ import de.uni_leipzig.mosquito.testcases.UploadTestcase;
 import de.uni_leipzig.mosquito.utils.Config;
 import de.uni_leipzig.mosquito.utils.Converter;
 import de.uni_leipzig.mosquito.utils.EmailHandler;
+import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.ResultSet;
+import de.uni_leipzig.mosquito.utils.ZipUtils;
 
 /**
  * 
@@ -45,6 +50,7 @@ import de.uni_leipzig.mosquito.utils.ResultSet;
 public class Benchmark {
 
 	private static final String RESULT_FILE_NAME = "results";
+	public static final String TEMP_RESULT_FILE_NAME = "tempResults";
 	private static HashMap<String, String> config;
 	private static List<String> databaseIds;
 	private static Logger log;
@@ -57,6 +63,7 @@ public class Benchmark {
 	private static Connection refCon;
 	private static Boolean end=false;
 	private static HashMap<String, String> dataDescription;
+	private static boolean attach = false;
 
 	public enum DBTestType {
 		all, choose
@@ -66,9 +73,15 @@ public class Benchmark {
 		seed, rand
 	};
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, URISyntaxException {
 		if (args.length < 1) {
-			System.out.println("Usage: benchmark.jar configfile");
+			
+			//If the FileName of the Jar is changed it still shows the correct Name
+			CodeSource codeSource = Benchmark.class.getProtectionDomain().getCodeSource();
+			File jarFile = new File(codeSource.getLocation().toURI().getPath());
+			String jarName = jarFile.getName();
+			
+			System.out.println("Usage: "+jarName+" configfile.xml");
 			end=true;
 			return;
 		} else {
@@ -85,7 +98,10 @@ public class Benchmark {
 	public static void sendIfEnd(){
 		if(!end){
 			try{
-				EmailHandler.sendBadNews("Sys.exit");
+				EmailHandler.sendBadNews("Sys.exit", 
+						ZipUtils.folderToZip(
+								"."+File.separator+Benchmark.RESULT_FILE_NAME, 
+								"."+File.separator+Benchmark.RESULT_FILE_NAME+".zip"));
 			}
 			catch(Exception e){
 				log.warning("Couldn't send email due to: ");
@@ -138,6 +154,7 @@ public class Benchmark {
 						String.valueOf(email.get("email-name")), 
 						(List<String>)email.get("email-to"));
 				mail = true;
+				attach = Boolean.valueOf(String.valueOf(email.get("attach")));
 			}
 			// Soll vorher noch konvertiert werden?
 			if (Boolean.valueOf((config.get("convert-processing")))) {
@@ -163,7 +180,7 @@ public class Benchmark {
 			
 			//mkdirs
 			new File(RESULT_FILE_NAME).mkdir();
-			
+			new File(TEMP_RESULT_FILE_NAME).mkdir();
 			//<<<<<<<!!!!!!!!!!!!!>>>>>>>
 			
 			mainLoop(databaseIds, pathToXMLFile);
@@ -175,8 +192,17 @@ public class Benchmark {
 				try {
 					Calendar end = Calendar.getInstance();
 					end.setTimeZone(TimeZone.getTimeZone("UTC"));
-					EmailHandler.sendBadMail(start, end, e);
-					
+					String attachment = null;
+					if(attach){
+						try {
+							attachment = ZipUtils.folderToZip(
+									"."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME, 
+									"."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+".zip");
+						}
+						catch(IOException e1){
+						}
+					}
+					EmailHandler.sendBadMail(start, end, e, attachment);
 				} catch (EmailException e1) {
 					log.warning("Couldn't send email due to: ");
 					LogHandler.writeStackTrace(log, e1, Level.WARNING);
@@ -188,7 +214,17 @@ public class Benchmark {
 			try {
 				Calendar end = Calendar.getInstance();
 				end.setTimeZone(TimeZone.getTimeZone("UTC"));
-				EmailHandler.sendGoodMail(start, end);
+				String attachment = null;
+				if(attach){
+					try {
+						attachment = ZipUtils.folderToZip(
+								"."+File.separator+Benchmark.RESULT_FILE_NAME, 
+								"."+File.separator+Benchmark.RESULT_FILE_NAME+".zip");
+					}
+					catch(IOException e1){
+					}
+				}
+				EmailHandler.sendGoodMail(start, end,attachment);
 			} catch (EmailException e) {
 				log.warning("Couldn't send email due to: ");
 				LogHandler.writeStackTrace(log, e, Level.WARNING);
@@ -232,7 +268,12 @@ public class Benchmark {
 					ut.start();
 					upload = ut.getResults().iterator().next();
 				}
-				//TODO warmup
+				try{
+					warmup(con, String.valueOf(config.get("warmup-query-file")) ,
+							Long.valueOf(config.get("warmup-time")));
+				}catch(Exception e){
+					log.info("No warmup! ");
+				}
 				start(con, db, String.valueOf(percents.get(i)));
 				// drop
 				if (Boolean.valueOf(config.get("drop-db"))) {
@@ -246,13 +287,42 @@ public class Benchmark {
 		}
 		for (String key : results.keySet()) {
 			for (ResultSet res : results.get(key)) {
-				res.setFileName(RESULT_FILE_NAME+File.separator+res.getFileName());
+				String testCase = key.split("&")[0];
+				testCase.replaceAll("[^A-Za-z0-9]", "");
+				String[] fileName = res.getFileName().split(File.separator);
+				res.setFileName("."+File.separator+
+						RESULT_FILE_NAME+
+						File.separator+testCase+
+						File.separator+fileName[fileName.length-1]);
 				res.save();
 				res.saveAsPNG();
 			}
 		}
 	}
 
+	
+	private static void warmup(Connection con, Collection<String> queries, Long time){
+		Long begin = new Date().getTime();
+		int i=0;
+		List<String> queryList = new LinkedList<String>(queries);
+		if(queryList.size()==0){
+			log.warning("No queries in File: No warmup! Ready to get pumped");
+			return;
+		}
+		while(begin+(new Date().getTime()) < time){
+			if(queryList.size()<=i){
+				i=0;
+			}
+			con.execute(queryList.get(i));
+		}
+		log.info("Warmup finished! Ready to get pumped!");
+	}
+	
+	private static void warmup(Connection con, String queriesFile, Long time){
+		Collection<String> queries = FileHandler.getQueriesInFile(queriesFile);
+		warmup(con, queries, time);
+	}
+	
 	/**
 	 * 
 	 * Starten den Benchmark und testet die angegeben Testcases
@@ -277,8 +347,7 @@ public class Benchmark {
 			}
 			try {
 				Properties testProps = testcases.get(testcase);
-				Class<Testcase> t = (Class<Testcase>) ClassUtils
-						.getClass(testcase);
+				Class<Testcase> t = (Class<Testcase>) Class.forName(testcase);
 				Testcase test = t.newInstance();
 				test.setProperties(testProps);
 				if (results.containsKey(testcase+percent)) {
@@ -289,7 +358,7 @@ public class Benchmark {
 				test.setCurrentPercent(percent);
 				test.start();
 				Collection<ResultSet> tcResults = test.getResults();
-				results.put(testcase+percent, tcResults);
+				results.put(testcase+"&"+percent, tcResults);
 			} catch (ClassNotFoundException | InstantiationException
 					| IllegalAccessException e) {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);

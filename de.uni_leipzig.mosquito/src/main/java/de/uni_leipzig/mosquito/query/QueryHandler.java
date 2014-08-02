@@ -1,7 +1,11 @@
 package de.uni_leipzig.mosquito.query;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -32,9 +36,9 @@ public class QueryHandler {
 		
 	public static void main(String args[]) throws IOException{
 		String insert = "INSERT DATA {GRAPH %%r%% {%%r1%% %%r2%% %%d%%} {%%r1%% %%r3%% %%d%%}{%%r1%% %%r2%% %%r4%%} {%%r4%% %%r2%% %%i%%} {%%r4%% %%r5%% %%s%%}}";
-		String select = "select distinct ?s where {<http://dbpedia.org/asd> <http://dbpedia.org/property/einwohner> 1} LIMIT 10";
+		String select = "select distinct ?s where {?s <http://dbpedia.org/property/einwohner> ?v} LIMIT 10";
 		String construct = "CONSTRUCT   { [] ?p ?name } WHERE { %%v1%% ?p ?name }";
-		String ask = "PREFIX foaf:<http://xmlns.com/foaf/0.1/>  ASK  { ?x foaf:name  %%v%% }";
+		String ask = "PREFIX foaf:<http://xmlns.com/foaf/0.1/ASD>  ASK  { ?x foaf:name  %%v%% }";
 		String describe = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> DESCRIBE %%v%%";
 		PrintWriter pw = new PrintWriter(new File("queries.txt"));
 		pw.write(ask);
@@ -56,6 +60,7 @@ public class QueryHandler {
 	
 	private Connection con;
 	private String path = "queryvalues"+File.separator;
+	private String failedQueries = "queriesWithNoValues";
 	private int limit = 5000;
 	private Random rand;
 	private String fileForQueries;
@@ -63,6 +68,32 @@ public class QueryHandler {
 	public QueryHandler(Connection con, String fileForQueries) throws IOException{
 		this.con = con;
 		this.fileForQueries = fileForQueries;
+	}
+	
+	public static String ntToQuery(String file){
+		return ntToQuery(new File(file));
+	}
+	
+	public static String ntToQuery(File file){
+		try{
+			String query = "INSERT DATA {";
+			FileInputStream fis = new FileInputStream(file);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			String line ="";
+			while((line=br.readLine()) != null){
+				if(!line.isEmpty() && !line.equals("\n")){
+					continue;
+				}
+				query +="{";
+				query +=line;
+				query +="}";
+			}
+			br.close();
+			return query;
+		}
+		catch(IOException e){
+			return null;
+		}
 	}
 	
 	public void init() throws IOException{
@@ -89,6 +120,9 @@ public class QueryHandler {
 	
 	private void init(String queriesFile) throws IOException{
 		rand = new Random(2);
+		File f = new File(failedQueries);
+		if(f.exists())
+			f.delete();
 		//Gets the Values
 		List<String> queryPatterns = Files.readAllLines(Paths.get(queriesFile), Charset.forName("UTF-8")); 
 		int i=0;
@@ -117,9 +151,13 @@ public class QueryHandler {
 		int ret = 0;
 		try{
 			new File(path).mkdirs();
+			File failed = new File(failedQueries+".txt");
+			failed.createNewFile();
 			File f = new File(path+fileName+".txt");
 			
 			f.createNewFile();
+			
+			PrintWriter pwfailed = new PrintWriter(new FileOutputStream(failed, true));
 			PrintWriter pw = new PrintWriter(f);
 			String q = selectPattern(query);
 			ResultSet res = con.execute(q);
@@ -140,10 +178,13 @@ public class QueryHandler {
 				pw.println();
 				ret++;
 			}
-			if(!result){
-				pw.write(pattern);
-			}
 			pw.close();
+			if(!result){
+				pwfailed.write(pattern);
+				pwfailed.println();
+				f.delete();
+			}
+			pwfailed.close();
 			return ret;
 		}
 		catch(Exception e){

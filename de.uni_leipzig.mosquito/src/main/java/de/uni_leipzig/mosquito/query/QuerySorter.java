@@ -34,12 +34,16 @@ public class QuerySorter {
 		return (int) getX(selects, inserts);
 	}
 	
+	private static double getLambda(int selects, int inserts, double mu){
+		return (Math.pow((selects-mu), 2)+Math.pow((inserts-mu), 2))/2;
+	}
+	
 	public static double getSig(int selects, int inserts){
-		return Math.sqrt(getX(selects, inserts));
+		return Math.sqrt( getX(selects, inserts));
 	}
 	
 	public static int getRoundSig(int selects, int inserts){
-		return (int) Math.sqrt(getRoundX(selects, inserts));
+		return (int) getSig(selects, inserts);
 	}
 	
 	public static int[] getIntervall(int selects, int inserts){

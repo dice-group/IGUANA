@@ -152,6 +152,14 @@ public class Config {
 		map.put("random-function", rand.getAttribute("type"));
 		map.put("random-function-gen", rand.getAttribute("generate"));
 		cp.setNode(benchmark);
+		try{
+			Element warmup = cp.getElementAt("warmup", 0);
+			map.put("warmup-query-file", warmup.getAttribute("file-name"));
+			map.put("warmup-time", warmup.getAttribute("time"));
+		}catch(Exception e){
+			
+		}
+		cp.setNode(benchmark);
 		map.put("queries-output-path", cp
 				.getElementAt("queries-output-path", 0).getAttribute("name"));
 		new File(map.get("queries-output-path")).mkdirs();
@@ -195,6 +203,7 @@ public class Config {
 		try{
 			ConfigParser cp = ConfigParser.getParser(rootNode);
 			Element email = cp.getElementAt("email-notification", 0);
+			ret.put("attach", email.getAttribute("attach-results"));
 			ret.put("hostname", cp.getElementAt("hostname", 0).getAttribute("value"));
 			cp.setNode(email);
 			ret.put("port",cp.getElementAt("port", 0).getAttribute("value"));

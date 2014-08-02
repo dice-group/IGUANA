@@ -17,7 +17,7 @@
 	<!ATTLIST databases main CDATA #REQUIRED>
 	<!ELEMENT database (endpoint, user, pwd, (curl-url, curl-command, curl-drop, curl-update)?)>
 		<!ATTLIST database 
-					id CDATA #REQUIRED
+					id ID #REQUIRED
 					type CDATA #REQUIRED>
 		<!ELEMENT endpoint EMPTY>
 			<!ATTLIST endpoint uri CDATA #REQUIRED>
@@ -34,7 +34,7 @@
 		<!ELEMENT curl-update EMPTY>
 			<!ATTLIST curl-update command CDATA #REQUIRED>
 
-<!ELEMENT benchmark (drop-db, (pgn-processing, pgn-input-path, output-format, output-path)?, graph-uri?, query-diversity?, random-function, test-db, testcases)>
+<!ELEMENT benchmark (drop-db, (pgn-processing, pgn-input-path, output-format, output-path)?, graph-uri?, query-diversity?, warmup?, random-function, test-db, testcases)>
 	<!ATTLIST benchmark log CDATA #REQUIRED>
 	<!ELEMENT drop-db EMPTY>
 		<!ATTLIST drop-db value (true|false) #REQUIRED>
@@ -50,6 +50,9 @@
 		<!ATTLIST graph-uri name CDATA #REQUIRED>
 	<!ELEMENT query-diversity EMPTY>
 		<!ATTLIST query-diversity value CDATA #REQUIRED>
+	<!ELEMENT warmup EMPTY>
+		<!ATTLIST warmup time CDATA #REQUIRED
+						 file-name CDATA #REQUIRED>
 	<!ELEMENT random-function (class-enabled?, (data-path+|percent+))>
 		<!ATTLIST random-function 
 					type (seed|rand) #REQUIRED
@@ -62,9 +65,10 @@
 			<!ATTLIST percent value CDATA #REQUIRED>
 	<!ELEMENT test-db (db*)>
 		<!ATTLIST test-db type (choose|all) "all"
-						  reference CDATA #REQUIRED>
+						  reference IDREF #REQUIRED>
 		<!ELEMENT db EMPTY>
-			<!ATTLIST db id CDATA #REQUIRED>
+			<!ATTLIST db database IDREF #REQUIRED>
+			
 	<!ELEMENT testcases (testcase+)>
 		<!ELEMENT testcase (property*)>
 			<!ATTLIST testcase class CDATA #REQUIRED>
@@ -73,6 +77,7 @@
 							value CDATA #REQUIRED> 
 							
 <!ELEMENT email-notification (hostname, port, user, pwd, email-name, email-to+)>
+	<!ATTLIST email-notification attach-results (true|false) #REQUIRED>
 	<!ELEMENT hostname EMPTY>
 		<!ATTLIST hostname value CDATA #REQUIRED>
 	<!ELEMENT port EMPTY>

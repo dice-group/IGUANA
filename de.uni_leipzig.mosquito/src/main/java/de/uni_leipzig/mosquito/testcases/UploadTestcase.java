@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import org.bio_gene.wookie.connection.Connection;
 
+import de.uni_leipzig.mosquito.benchmark.Benchmark;
 import de.uni_leipzig.mosquito.utils.EmailHandler;
 import de.uni_leipzig.mosquito.utils.ResultSet;
 
@@ -66,8 +67,8 @@ public class UploadTestcase implements Testcase {
 		start.setTimeInMillis(time);
 		row.add(EmailHandler.getWellFormatDateDiff(start, end ));
 		res.addRow(row);
-		res.setFileName("UpdateTest"+ DateFormat.getDateInstance().format(new Date()));
-		res.setFileName(name);
+		res.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"UpdateTest"+ DateFormat.getDateInstance().format(new Date()));
+//		res.setFileName(name);
 		
 		try {
 			res.save();
