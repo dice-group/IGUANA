@@ -10,86 +10,35 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.util.Date;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Calendar;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
+import de.uni_leipzig.bf.cluster.BorderFlow;
+import de.uni_leipzig.bf.cluster.harden.Harden;
+import de.uni_leipzig.bf.cluster.harden.HardenSuperset;
 import de.uni_leipzig.mosquito.query.PatternSolution;
-import de.uni_leipzig.mosquito.utils.EmailHandler;
+import de.uni_leipzig.mosquito.query.QueryHandler;
 
 
 public class LogCluster {
 	
 	private static Logger log = LogSolution.getLogger();
 
-	private static String PATH = "cluster" + File.separator;
 
 	public static void main(String[] argc){
-		try {
-			clusterProcess("../../LogFiles", "queriesFile.txt", 100, 100);
-
-		} catch (IOException e) {
+//		try {
+//			clusterProcess("../../LogFiles", "queriesFile.txt", 100, 100);
 			
-			LogHandler.writeStackTrace(log, e, Level.SEVERE);
-		}
-	}
-	
-	public static void clusterProcess(String logsPath, String outputFile,
-			Integer thresholdStructs, Integer thresholdQueries)
-			throws IOException {
-		clusterProcess(logsPath, new File(outputFile), thresholdStructs,
-				thresholdQueries);
-	}
-
-	public static void clusterProcess(String logsPath, File file,
-			Integer thresholdStructs, Integer thresholdQueries)
-			throws IOException {
-		String start = DateFormat.getDateTimeInstance().format(new Date());
-		Calendar calS = Calendar.getInstance();
-		log.info("Starting ClusterProcess "+start);
-		new File(PATH).mkdir();
-		String queriesFile = PATH + "queryset.log";
-		String structFile = PATH + "structs.log";
-		String freqStructFile = PATH + "freqStruct.log";
-		String sortedFreqStructFile = PATH + "sortedFreqStruct.log";
-		String freqFile = PATH + "freq.log";
-		String sortedFreqFile = PATH + "sortedFreq.log";
-
-		log.info("Start logs2Queries: "+DateFormat.getDateTimeInstance().format(new Date()));
-		LogSolution.logsToPatterns(logsPath, queriesFile);
-		log.info("End logs2Queries: "+DateFormat.getDateTimeInstance().format(new Date()));
-
-		// Structure work
-		log.info("Start queries2FrequentStructs: "+DateFormat.getDateTimeInstance().format(new Date()));
-		log.info("Start queries2Structure...");
-		LogSolution.queriesToStructure(queriesFile, structFile);
-		log.info("Start structs2Frequents...");
-		LogSolution.patternsToFrequents(structFile, freqStructFile,
-				thresholdStructs);
-		log.info("Start sorting structs...");
-		LogSolution.sortFrequents(freqStructFile, sortedFreqStructFile);
-		log.info("End queries2FrequentStructs: "+DateFormat.getDateTimeInstance().format(new Date()));
-
-		log.info("Start queries2Frequents: "+DateFormat.getDateTimeInstance().format(new Date()));
-		// Structure work
-		LogSolution.patternsToFrequents(queriesFile, freqFile,
-				thresholdQueries);
-		LogSolution.sortFrequents(freqFile, sortedFreqFile);
-		log.info("End queries2Frequent: "+DateFormat.getDateTimeInstance().format(new Date()));
-
-
-		//Clustering
-		log.info("Start Clustering: "+DateFormat.getDateTimeInstance().format(new Date()));
-		sortedStructure(new File(sortedFreqFile), new File(sortedFreqStructFile), file);
-		String end = DateFormat.getDateTimeInstance().format(new Date());
-		Calendar calE = Calendar.getInstance();
-		log.info("Ended ClusterProcess "+end);
-		log.info("Needed Time: "+EmailHandler.getWellFormatDateDiff(calS, calE));
+//		} catch (IOException e) {
+//			
+//			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+//		}
 	}
 
 	public static void sortedStructure(String inputQueries,
@@ -146,14 +95,12 @@ public class LogCluster {
 				 * have tuples. The first which has tuples will be the tested
 				 * query for this cluster
 				 */
-				// TODO! test if tuples available
 				if(cluster.isEmpty()){
 					
 					log.info("Cluster "+line+" has no frequent queries");
 					continue;
 				}
-				String testQuery = PatternSolution.queryToPattern(cluster.get(0));
-
+				String testQuery = QueryHandler.queryIRIsToVars(PatternSolution.queryToPattern(cluster.get(0)));
 				// write test Query into the final output File
 				pw.println(testQuery);
 
@@ -169,7 +116,139 @@ public class LogCluster {
 				
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			}
+		} 
+	}
+
+	public static void borderFlow(String inputQueries, String input, String clusterOutput, String clQueryOutput,String output) throws IOException{
+		Harden h = new HardenSuperset();
+		BorderFlow bf = new BorderFlow(input, h);
+		//TODO
+		bf.clusterToFile(clusterOutput, 0.8, false, true, true);
+		queryListToFile(bfClusterToQuerySet(input, clusterOutput), inputQueries, clQueryOutput);
+		
+	}
+	
+	private static void queryListToFile(LinkedList<Integer> queryList, String input, String output) throws IOException{
+		queryListToFile(queryList, new File(input), new File(output));
+	}
+	
+	private static void queryListToFile(LinkedList<Integer> queryList, File input , File output) throws IOException{
+		output.createNewFile();
+		PrintWriter pw = new PrintWriter(output);
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		Collections.sort(queryList);
+		Collections.reverse(queryList);
+		try{
+			fis = new FileInputStream(input);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			int i=0, j=0, t=0;
+			j=queryList.get(t);
+			while((line = br.readLine())!= null){
+				if(j==i){
+					line = line.substring(0, line.lastIndexOf("\t"));
+					pw.println(QueryHandler.queryIRIsToVars(PatternSolution.queryToPattern(line)));
+					j =queryList.get(++t);
+				}
+				i++;
+			}
+			pw.close();
 		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+	}
+	
+	private static LinkedList<Integer> bfClusterToQuerySet(String inputSim, String input) throws IOException{
+		return bfClusterToQuerySet(inputSim, new File(input));
+	}
+
+	private static LinkedList<Integer> bfClusterToQuerySet(String inputSim, File input) throws IOException {
+//			output.createNewFile();
+			FileInputStream fis = null;
+			BufferedReader br = null;
+			String line="";
+			LinkedList<Integer> queryList = new LinkedList<Integer>();
+
+			try{
+				fis = new FileInputStream(input);
+				br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+				br.readLine(); //HEADER
+				while((line = br.readLine())!= null){
+					String[] s = line.split("\t");
+					String[] cluster = s[1].replaceAll("(\\[|\\])", "").split(",\\s*");
+					queryList.add(getQueryID(inputSim, cluster));
+					
+				}
+			}
+			catch(IOException e){
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+			finally{
+				try {
+					fis.close();
+					br.close();
+				} catch (IOException e) {
+					
+					LogHandler.writeStackTrace(log, e, Level.SEVERE);
+				}
+			}
+			return queryList;
+	}
+	
+	private static Integer getQueryID(String simFile, String[] cluster){
+		Integer ret=null;
+		
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+		for(String str : cluster){
+			map.put(Integer.parseInt(str.substring(1)), 0);
+		}
+		try{
+			fis = new FileInputStream(simFile);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			br.readLine(); //HEADER
+			while((line = br.readLine())!= null){
+				String[] split = line.split("\t");
+				if(map.containsKey(split[0])){
+					map.put(Integer.parseInt(split[0].substring(1)), map.get(split)+1);
+				}
+				if(map.containsKey(split[2])){
+					map.put(Integer.parseInt(split[1].substring(1)), map.get(split)+1);
+				}
+			}
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		int occurs=0;
+		for(Integer key : map.keySet()){
+			if(map.get(key)>occurs){
+				ret = key;
+			}
+		}
+		return ret;
 	}
 
 }

@@ -125,6 +125,13 @@
 			<systemPath>${project.basedir}/src/main/resources/lib/simmetrics-1.6.2.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>de.uni-leipzig.bf</groupId>
+			<artifactId>BorderFlow</artifactId>
+			<version>0.4.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/BorderFlow-0.4.0.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>org.bio_gene.wookie</groupId>
 			<artifactId>connection</artifactId>
 			<version>0.0.1-SNAPSHOT</version>

@@ -74,6 +74,7 @@ public class QueryHandler {
 		this.fileForQueries = fileForQueries;
 	}
 	
+	
 	public static String ntToQuery(String file){
 		return ntToQuery(new File(file));
 	}
@@ -197,6 +198,18 @@ public class QueryHandler {
 		}
 		
 	}
+	
+	public static String queryIRIsToVars(String query){
+		String ret = query;
+		Pattern p = Pattern.compile("<\\S+>", Pattern.UNICODE_CHARACTER_CLASS);
+		Matcher m = p.matcher(ret);
+		int i=1;
+		while(m.find()){
+			ret.replace(m.group(), "?iri"+i);
+			i++;
+		}
+		return ret;
+	}
 
 	private String patternToQuery(String pattern, List<Object> vars){
 		String query = String.valueOf(pattern);
@@ -224,36 +237,27 @@ public class QueryHandler {
 		f.createNewFile();
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8), true);
 		for(int i=0;i<limit;i++){
-			Pattern regex = Pattern.compile("%%i[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
+			Pattern regex = Pattern.compile("%%v[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 			Matcher matcher = regex.matcher(pattern);
 			while(matcher.find()){
-				query = query.replace(matcher.group(), String.valueOf(rand.nextInt()));
+				String var = matcher.group();
+				if(PatternSolution.mustBeResource(query, var)){
+					query = query.replace(var, "<http://example.com/"+rsb.buildString(15)+">");
+				}
+				else{
+					//i=0;d=1;b=2;s=3
+					int type = rand.nextInt(4);
+					if(type==0)
+						query = query.replace(var, String.valueOf(rand.nextInt()));
+					else if(type==1)
+						query = query.replace(var, String.valueOf(rand.nextDouble()));
+					else if(type==2)
+						query = query.replace(var, String.valueOf(rand.nextBoolean()));
+					else if(type==3)
+						query = query.replace(var, "'"+rsb.buildString(15)+"'");
+				}
 			}
-			regex = Pattern.compile("%%d[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
-			matcher = regex.matcher(pattern);
-			while(matcher.find()){
-				query = query.replace(matcher.group(), String.valueOf(rand.nextDouble()));
-			}
-			regex = Pattern.compile("%%b[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
-			matcher = regex.matcher(pattern);
-			while(matcher.find()){
-				query = query.replace(matcher.group(), String.valueOf(rand.nextBoolean()));
-		
-			}
-			regex = Pattern.compile("%%s[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
-			matcher = regex.matcher(pattern);
-			while(matcher.find()){
-				query = query.replace(matcher.group(), "'"+rsb.buildString(15)+"'");
-		
-			}
-			regex = Pattern.compile("%%r[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
-			matcher = regex.matcher(pattern);
-			while(matcher.find()){
-				query = query.replace(matcher.group(), "<http://example.com/"+rsb.buildString(15)+">");
-		
-			}
-			pw.write(query);
-			pw.println();
+			pw.println(query);
 			query = String.valueOf(pattern);
 		}
 		pw.close();

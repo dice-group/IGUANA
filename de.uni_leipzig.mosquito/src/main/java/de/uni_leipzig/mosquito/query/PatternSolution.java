@@ -124,7 +124,7 @@ public class PatternSolution {
 			ret.add(literal);
 			q = q.replace(literal, "<>");
 		}
-		regex = "[^\"'](true|false|[0-9]+(.[0-9]+|))\\s*(\\}|\\.|;)";
+		regex = "[^\"'](true|false|[+-]?[0-9]+(.[0-9]+|))\\s*(\\}|\\.|;)";
 		p = Pattern.compile(regex, Pattern.UNICODE_CHARACTER_CLASS);
 		m = p.matcher(q);
 		while(m.find()){
@@ -179,7 +179,8 @@ public class PatternSolution {
 	public static Boolean mustBeResource(String query, String var) {
 		String regex = ".*(\\{\\s*" + var + "|\\s*(\\.|;)\\s*" + var
 				+ "|\\{\\s*\\S+\\s*" + var + ").*";
-		if (query.matches(regex)) {
+		Pattern p = Pattern.compile(regex, Pattern.UNICODE_CHARACTER_CLASS);
+		if (p.matcher(query).find()) {
 			return true;
 		}
 		return false;

@@ -37,6 +37,8 @@ public class QueryTestcase implements Testcase, Runnable {
 	private Random pQMpH;
 	private Random qQMpH;
 	private Random qQpS;
+	private Boolean isQMpH;
+	private Boolean isQpS;
 	private int patternQpS=0;
 	private List<Long> qpsTime;
 	private Long timeLimit = 1000L;
@@ -118,18 +120,22 @@ public class QueryTestcase implements Testcase, Runnable {
 		path = qh.getAbsolutPath();
 		pQMpH = new Random(seed1);
 		qQMpH = new Random(seed2);
-		ResultSet qmph = new ResultSet();
-		ResultSet qps = new ResultSet();
-		qmph.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryQMpH"+percent);
-		qps.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryQpS"+percent);
-		//qps
-		qps = querySeconds();
-		//qmph
-		qmph = queryMixes();
-		
 		Collection<ResultSet> r = new LinkedList<ResultSet>();
-		r.add(qps);
-		r.add(qmph);
+
+		//qps
+		if(isQpS){
+			ResultSet qps = new ResultSet();
+			qps.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryQpS"+percent);		
+			qps = querySeconds();
+			r.add(qps);
+		}
+		//qmph
+		if(isQMpH){
+			ResultSet qmph = new ResultSet();
+			qmph.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryQMpH"+percent);
+			qmph = queryMixes();
+			r.add(qmph);
+		}
 		addCurrentResults(r);
 		for(ResultSet result : res){
 			try {
@@ -534,6 +540,12 @@ public class QueryTestcase implements Testcase, Runnable {
 		queryPatterns = String.valueOf(p.get("queryPatternFile"));
 		patterns = FileHandler.getLineCount(queryPatterns);
 		updateStrategy = String.valueOf(p.get("updateStrategy"));
+		isQMpH = Boolean.valueOf(String.valueOf(p.get("testQMpH")));
+		isQpS = Boolean.valueOf(String.valueOf(p.get("testQpS")));
+		if(isQMpH&&isQpS){
+			isQpS=true;
+			isQMpH=true;
+		}
 		try{
 			x = Integer.parseInt(String.valueOf(p.get("x")));
 		}

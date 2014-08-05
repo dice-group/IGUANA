@@ -478,7 +478,7 @@ public class ClusterProcessor {
      * @return  The number of triple patterns
      */
     @SuppressWarnings("unused")
-	private static int countNumberOfTriplePatterns(String query){
+	public static int countNumberOfTriplePatterns(String query){
         String queryToOperate = query.toLowerCase();
         //remove all literals as the literal may contain a dot "."
         int startingQuotePos = queryToOperate.indexOf("\"");

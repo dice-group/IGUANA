@@ -115,6 +115,8 @@ public class StressTestcase implements Testcase {
 		users = Integer.parseInt(String.valueOf(p.get("users")));
 		props = p;
 		props.remove("users");
+		props.put("isQpS", "false");
+		props.put("isQMpH", "true");
 	}
 
 	@Override

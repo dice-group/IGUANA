@@ -3,6 +3,7 @@ package de.uni_leipzig.mosquito.clustering;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 import org.bio_gene.wookie.utils.LogHandler;
 
 import de.uni_leipzig.mosquito.utils.FileHandler;
+import de.uni_leipzig.mosquito.utils.StringHandler;
 import de.uni_leipzig.mosquito.utils.comparator.OccurrencesComparator;
 
 public class LogSolution {
@@ -46,8 +48,9 @@ public class LogSolution {
 //		queriesToStructure("test.log", "structure.log");
 //		patternsToFrequents("structure.log", "frequent.log", 2);
 //		sortFrequents("frequent.log", "sortedFrequent.log");
-		String test = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dbpedia2: <http://dbpedia.org/property/> PREFIX owl: <http://dbpedia.org/ontology/> SELECT ?yearVar WHERE { ?subject dbpedia2:name ?name . ?subject dbpedia2:artist ?artist . ?artist dbpedia2:name \"ÊÈÍÎ\"@en . ?subject rdf:type <http://dbpedia.org/ontology/Album> . ?subject owl:releaseDate ?yearVar.FILTER (regex(str(?name), \"Ëó÷øèå ïåñíè 88-90\"@en, \"i\"))}Limit 10";
-		System.out.println(queryToStructure(test));
+		String test = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dbpedia2: <http://dbpedia.org/property/> PREFIX owl: <http://dbpedia.org/ontology/> SELECT ?yearVar WHERE { {?subject dbpedia2:name ?name } {?subject dbpedia2:artist ?artist . ?artist dbpedia2:name \"ÊÈÍÎ\"@en . ?subject rdf:type <http://dbpedia.org/ontology/Album> . ?subject owl:releaseDate ?yearVar.FILTER (regex(str(?name), \"Ëó÷øèå ïåñíè.. 88-90\"@en, \"i\"))}}Limit 10";
+		log.info(queryToStructure(test));
+		countTriplesInQuery(test);
 	}
 	
 
@@ -74,6 +77,7 @@ public class LogSolution {
 				pw.println(line);
 				pw.flush();
 			}
+			log.info("Finished converting "+i+" queries to structures");
 			pw.close();
 		}
 		catch(IOException e){
@@ -128,7 +132,7 @@ public class LogSolution {
 				.replaceAll("<\\S+>", "<r>")
 				.replace("<>", "blank")
 				.replaceAll("(true|false)", "Bool")
-				.replaceAll("[0-9]+(\\.[0-9])?", "Number")
+				.replaceAll("[+-]?[0-9]+(\\.[0-9])?", "Number")
 				.replaceAll("\\?\\w+", "\\?var")
 				.replaceAll("@\\w+", "@tag")
 				.replaceAll("^^\"\\S+\"", "^^\"type\"")
@@ -180,10 +184,12 @@ public class LogSolution {
 				if((index=line.indexOf("&"))>=0)
 					line = line.substring(0, index);
 				line = URLDecoder.decode(line, "UTF-8");
-
+				line = line.replaceAll("^\\s+", "");
+				line = queryVarRename(line);
 				pw.println(line.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " "));
 
 			}
+			pw.flush();
 		}
 		catch(IOException e){
 			
@@ -198,6 +204,20 @@ public class LogSolution {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			}
 		}
+	}
+	
+	public static String queryVarRename(String query){
+		String ret = query;
+		Pattern p = Pattern.compile("\\?\\w+", Pattern.UNICODE_CHARACTER_CLASS);
+		Matcher m = p.matcher(ret);
+		String var="?var";
+		int i=0;
+		while(m.find()){
+			ret = ret.replace(m.group(), var+i);
+//			m = p.matcher(ret);
+			i++;
+		}
+		return ret;
 	}
 	
 	public static void patternsToFrequents(String input, String output, Integer threshold) throws IOException{
@@ -341,12 +361,151 @@ public class LogSolution {
 	}
 
 	
-	public static int totalFreq(List<String> cluster){
-		int i=0;
-		for(String line : cluster)
-			i += Integer.parseInt(line.substring(line.lastIndexOf('\t'+1)));
-		return i;
+	public static void similarity(String input, String output, int delta) throws FileNotFoundException{
+		similarity(new File(input), new File(output), delta);
+	}
+	
+	public static void similarity(File input, File output, int delta) throws FileNotFoundException{
+		FileInputStream fis = null;
+		BufferedReader br1 = null;
+		BufferedReader br2 = null;
+		PrintWriter pw = new PrintWriter(output);
+		int[] threshold = getThreshold(input, delta);
+		String line1, line2;
+		try{
+			fis = new FileInputStream(input);
+			br1 = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			br2 = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			int n=0, o=0;
+			while((line1 = br1.readLine())!= null){
+				if(line1.isEmpty()){continue;}
+				n++;
+				while((line2 = br2.readLine())!= null){
+					if(line1.isEmpty()){continue;}
+					o++;
+					if(o<=n){continue;}
+					line1 =StringHandler.removeKeywordsFromQuery(line1.substring(0, line1.lastIndexOf("\t")));
+					line2 =StringHandler.removeKeywordsFromQuery(line2.substring(0, line2.lastIndexOf("\t")));
+					Integer sim = getSimilarity(line1, line2, threshold);
+					if(sim ==null){continue;}
+					pw.println("q"+n+"\t"+"q"+o+"\t"+sim);
+				}
+			}
+			pw.close();
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			try {
+				fis.close();
+				br1.close();
+				br2.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+	}
+	
+	public static Integer getSimilarity(String query1, String query2, int[] threshold){
+		int vdist = getFeatureVectorDistance(query1, query2);
+		int ldist = StringHandler.levenshteinDistance(query1, query2);
+		if(vdist>threshold[0]||ldist>threshold[1]){
+			return null;
+		}
+		return 1/(1+Math.min(vdist, ldist));
+	}
+	
+	public static int[] getThreshold(String input, int delta){
+		return getThreshold(new File(input), delta);
+	}
+	
+	public static int[] getThreshold(File input, int delta){
+		int s=0;
+		int[] ret = {0,0}; 
+		int queryCount=0, featureCount=getFeatures().length;
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		try{
+			fis = new FileInputStream(input);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			while((line = br.readLine())!= null){
+				if(line.isEmpty()){continue;}
+				queryCount++;
+				line =	line.substring(0, line.lastIndexOf("\t"));
+				s+= line.length();
+			}
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		
+		ret[0]= Double.valueOf(Math.ceil((featureCount*queryCount)*delta/(100.0*queryCount))).intValue();
+		ret[1]= Double.valueOf(Math.ceil(s*delta/(100.0*queryCount))).intValue();
+		return ret;
+	}	
+	
+	private static String[] getFeatures(){
+		return new String []{"offset", "limit", "union", "optional", "filter", "regex", "sameterm",
+			     "isliteral", "bound", "isiri", "isblank", "lang", "datatype", "distinct", "group", "order", "str"};
+
+	}
+	
+	public static int countTriplesInQuery(String query){
+		int ret=0;
+		String qOp = queryToStructure(query).replaceAll("[^\\{\\}\\.;]", "").replace(" ", "");
+		String[] regexes = {"\\{\\}", ";","\\."};
+		for(int i=0; i<regexes.length;i++){
+			Pattern p = Pattern.compile(regexes[i], Pattern.UNICODE_CHARACTER_CLASS);
+			Matcher m = p.matcher(qOp);
+			while(m.find()){
+				ret++;
+			}
+			qOp = qOp.replaceAll(regexes[i], "");
+
+		}
+		
+//		log.info("Found "+ret+" triples in query");
+		return ret;
+	}
+
+	
+	private static Byte[] getFeatureVector(String query, String[] features){
+		Byte[] vec = new Byte[features.length];
+		for(int i=0;i<features.length;i++){
+			if(query.contains(features[i])){
+				vec[i]=1;
+			}
+			else{
+				vec[i]=0;
+			}
+		}
+		return vec;
+	}
+	
+	private static int getFeatureVectorDistance(String query1, String query2){
+		Byte[] q1= getFeatureVector(query1, getFeatures());
+		Byte[] q2= getFeatureVector(query2, getFeatures());
+		int ret =0;
+		for(int i=0;i<q1.length;i++){
+			ret+=Math.pow(q1[i]-q2[i], 2);
+		}
+		return Math.abs(ret);
 	}
 	
 	
+	
+	
+
 }
