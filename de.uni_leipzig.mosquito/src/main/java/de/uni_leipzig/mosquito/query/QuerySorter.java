@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.update.UpdateFactory;
+
 import de.uni_leipzig.mosquito.utils.FileHandler;
 
 public class QuerySorter {
@@ -34,7 +35,7 @@ public class QuerySorter {
 		return (int) getX(selects, inserts);
 	}
 	
-	private static double getLambda(int selects, int inserts, double mu){
+	public static double getLambda(int selects, int inserts, double mu){
 		return (Math.pow((selects-mu), 2)+Math.pow((inserts-mu), 2))/2;
 	}
 	
@@ -60,6 +61,7 @@ public class QuerySorter {
 		return getIntervall(q[0], q[1]);
 	}
 	
+	@SuppressWarnings("unused")
 	public static int[] getSelectAndInsertCounts(String queriesPath){
 		int[] ret = {0, 0};
 		for(String file : getSPARQL(queriesPath)){

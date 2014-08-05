@@ -30,11 +30,11 @@ public class RandomInstance {
     
     private static String outputFormat;
     
-    public void setGraphURI(String graphURI){
+    public static void setGraphURI(String graphURI){
     	RandomInstance.graphURI = graphURI;
     }
     
-    public void setOutputFormat(String outputFormat){
+    public static void setOutputFormat(String outputFormat){
     	RandomInstance.outputFormat = outputFormat;
     }
     

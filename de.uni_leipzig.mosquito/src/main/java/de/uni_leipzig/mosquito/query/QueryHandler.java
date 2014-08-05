@@ -6,8 +6,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
@@ -50,7 +52,9 @@ public class QueryHandler {
 		pw.write(describe);
 		pw.println();
 		pw.write(insert);
+		pw.println("SELECT ?abstract WHERE { <http://dbpedia.org/resource/Ernesto_J._Cordero> <http://dbpedia.org/ontology/abstract> ?abstract. FILTER langMatches(lang(?abstract), %%v%%)}");
 		pw.close();
+		
 		
 		Connection con = ConnectionFactory.createImplConnection("dbpedia.org/sparql");
 		QueryHandler qh = new QueryHandler(con, "queries.txt");
@@ -158,7 +162,7 @@ public class QueryHandler {
 			f.createNewFile();
 			
 			PrintWriter pwfailed = new PrintWriter(new FileOutputStream(failed, true));
-			PrintWriter pw = new PrintWriter(f);
+			PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8), true);
 			String q = selectPattern(query);
 			ResultSet res = con.execute(q);
 			Boolean result= false;
@@ -196,7 +200,7 @@ public class QueryHandler {
 
 	private String patternToQuery(String pattern, List<Object> vars){
 		String query = String.valueOf(pattern);
-		Pattern regex = Pattern.compile("%%v[0-9]*%%");
+		Pattern regex = Pattern.compile("%%v[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 		Matcher matcher = regex.matcher(pattern);
 		int i=0;
 		List<String> replaced = new LinkedList<String>();
@@ -218,31 +222,31 @@ public class QueryHandler {
 		new File(path).mkdirs();
 		File f = new File(path+fileName+".txt");
 		f.createNewFile();
-		PrintWriter pw = new PrintWriter(f);
+		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8), true);
 		for(int i=0;i<limit;i++){
-			Pattern regex = Pattern.compile("%%i[0-9]*%%");
+			Pattern regex = Pattern.compile("%%i[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 			Matcher matcher = regex.matcher(pattern);
 			while(matcher.find()){
 				query = query.replace(matcher.group(), String.valueOf(rand.nextInt()));
 			}
-			regex = Pattern.compile("%%d[0-9]*%%");
+			regex = Pattern.compile("%%d[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 			matcher = regex.matcher(pattern);
 			while(matcher.find()){
 				query = query.replace(matcher.group(), String.valueOf(rand.nextDouble()));
 			}
-			regex = Pattern.compile("%%b[0-9]*%%");
+			regex = Pattern.compile("%%b[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 			matcher = regex.matcher(pattern);
 			while(matcher.find()){
 				query = query.replace(matcher.group(), String.valueOf(rand.nextBoolean()));
 		
 			}
-			regex = Pattern.compile("%%s[0-9]*%%");
+			regex = Pattern.compile("%%s[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 			matcher = regex.matcher(pattern);
 			while(matcher.find()){
 				query = query.replace(matcher.group(), "'"+rsb.buildString(15)+"'");
 		
 			}
-			regex = Pattern.compile("%%r[0-9]*%%");
+			regex = Pattern.compile("%%r[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 			matcher = regex.matcher(pattern);
 			while(matcher.find()){
 				query = query.replace(matcher.group(), "<http://example.com/"+rsb.buildString(15)+">");
@@ -258,7 +262,7 @@ public class QueryHandler {
 	}
 	
 	private String selectPattern(String query){
-		Pattern regex = Pattern.compile("%%v[0-9]*%%");
+		Pattern regex = Pattern.compile("%%v[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 		Matcher matcher = regex.matcher(query);
 		Set<String> vars = new HashSet<String>();
 		while(matcher.find()){
@@ -269,6 +273,7 @@ public class QueryHandler {
 		if(vars.isEmpty()){
 			return query;
 		}
+
 		Query q = QueryFactory.create(query);
 		q.setLimit(Long.valueOf(limit));
 		String select = "SELECT DISTINCT ";

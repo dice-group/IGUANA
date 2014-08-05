@@ -9,8 +9,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bio_gene.wookie.connection.Connection;
+import org.bio_gene.wookie.utils.LogHandler;
 
 import de.uni_leipzig.mosquito.benchmark.Benchmark;
 import de.uni_leipzig.mosquito.utils.EmailHandler;
@@ -22,9 +25,11 @@ public class UploadTestcase implements Testcase {
 	private Connection con;
 	private ResultSet res = new ResultSet();
 	private String name;
+	private Logger log = Logger.getLogger(UploadTestcase.class.getName()); 
 	
 	@Override
 	public void start() {
+		LogHandler.initLogFileHandler(log, "UploadTestcase");
 		List<Object> row = new LinkedList<Object>();
 		List<String> header = res.getHeader();
 		Boolean newHeader = false;
@@ -73,8 +78,7 @@ public class UploadTestcase implements Testcase {
 		try {
 			res.save();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LogHandler.writeStackTrace(log, e, Level.WARNING);
 		}
 	}
 
@@ -111,7 +115,6 @@ public class UploadTestcase implements Testcase {
 
 	@Override
 	public void setCurrentPercent(String percent) {
-		// TODO Auto-generated method stub
 		//Currently managed in Class Benchmark
 	}
 

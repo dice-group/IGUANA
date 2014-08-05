@@ -3,6 +3,9 @@ package de.uni_leipzig.mosquito.data;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -58,7 +61,7 @@ public class TripleStoreHandler {
 		try {
 			file.createNewFile();
 		
-			pw = new PrintWriter(file);
+			pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), true);
 			long triples = TripleStoreStatistics.tripleCount(con, graphURI);
 			for(int i=0; i<triples; i+=2000){
 				String query = "SELECT ?s ?p ?o "+graphURI==null?"":graphURI+" WHERE {?s ?p ?o} LIMIT 2000 OFFSET "+i;
@@ -93,7 +96,7 @@ public class TripleStoreHandler {
 		try {
 			file.createNewFile();
 		
-			pw = new PrintWriter(file);
+			pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), true);
 			for(String instance : instances){
 				pw.write(instance);
 				pw.println();
@@ -129,7 +132,7 @@ public class TripleStoreHandler {
 		try {
 			file.createNewFile();
 		
-			pw = new PrintWriter(file);
+			pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), true);
 			for(String className : classes){
 				pw.write(className);
 				pw.println();

@@ -3,11 +3,14 @@ package de.uni_leipzig.mosquito.generation;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Collection;
@@ -42,7 +45,7 @@ public class ExtendedDatasetGenerator {
     
     private static Collection<String> getUrisOfLine(String line){
     	Set<String> uris = new HashSet<String>();
-    	Pattern p = Pattern.compile(uriRegex);
+    	Pattern p = Pattern.compile(uriRegex, Pattern.UNICODE_CHARACTER_CLASS);
     	Matcher m = p.matcher(line);
     	while(m.find()){
     		uris.add(m.group());
@@ -67,7 +70,7 @@ public class ExtendedDatasetGenerator {
     	try{
     		File output = new File(outputFileName);
     		output.createNewFile();
-    		pw = new PrintWriter(output);
+    		pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8), true);
     		for(int i=0; i<genHundred; i++){
     			int index = i+2;
     			FileInputStream fis = new FileInputStream(inputFileName);

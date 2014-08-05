@@ -54,6 +54,7 @@ public class FileHandler {
 		return lines;
 	}
 	
+	//TODO 
 	public static Collection<String> getSubjectsInFile(String fileName){
 		return getSubjectsInFile(new File(fileName));
 	}
@@ -108,9 +109,11 @@ public class FileHandler {
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			int i =0;
 			while((line = br.readLine())!= null && i<index){
+				i++;
 			}
 		}
 		catch(Exception e){
+			e.printStackTrace();
 			return null;
 		}
 		finally{
@@ -118,16 +121,14 @@ public class FileHandler {
 				try {
 					br.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LogHandler.writeStackTrace(log, e, Level.SEVERE);
 				}
 			}
 			if(fis != null){
 				try {
 					fis.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LogHandler.writeStackTrace(log, e, Level.SEVERE);
 				}
 			}
 		}
@@ -167,26 +168,56 @@ public class FileHandler {
 		return queries;
 	}
 	
-	public static Long getFilesInDir(String path){
+	public static Long getFileCountInDir(String path){
 		File p = new File(path);
 		if(!p.isDirectory()){
 			return -1L;
 		}
-		return p.list().length*1L;
+		return (p.listFiles().length)*1L;
 	}	
 
 	public static String[] getAllNamesInDir(String path){
 		File p = new File(path);
-		String[] ret = p.list();
+		File[] retF = p.listFiles();
+		String[] ret = new String[retF.length];
 		for(int i=0; i<ret.length;i++){
-			ret[i] = ret[i].replaceAll("(\\.\\w+)$", "").replaceAll("^(.*"+File.separator+")", "");
+			ret[i] = (retF[i].getName()).replaceAll("(\\.\\w+)$", "").replaceAll("^(.*"+File.separator+")", "");
 		}
 		return ret;
 	}
 	
 	public static String getNameInDirAtPos(String path, int pos){
 		File p = new File(path);
-		return p.list()[pos].replaceAll("(\\.\\w+)$", "").replaceAll("^(.*"+File.separator+")", "");
+		return p.listFiles()[pos].getName().replaceAll("(\\.\\w+)$", "").replaceAll("^(.*"+File.separator+")", "");
 	}
 	
+	private static String getRegex(String[] extensions){
+		String regex = "(";
+		for(String ext : extensions){
+			regex+="\\."+ext+"|";
+		}
+		regex = regex.substring(0, regex.length()-1)+")";
+		return regex;
+	}
+	
+	public static Collection<File> getFilesInDir(String path, String[] extensions){
+		File root = new File(path);
+		final String regex = ".*"+getRegex(extensions)+"$";
+		Collection<File> ret = new LinkedList<File>();
+		for(String f : root.list()){
+			File file = new File(root.getPath()+File.separator+f);
+			if(file.isDirectory()){
+				ret.addAll(getFilesInDir(root.getPath()+File.separator+f, extensions));
+			}
+			else{
+				if(f.matches(regex))	
+					ret.add(file);
+			}
+		}
+		return ret;
+	}
+	
+	public static void replaceLine(){
+		
+	}
 }

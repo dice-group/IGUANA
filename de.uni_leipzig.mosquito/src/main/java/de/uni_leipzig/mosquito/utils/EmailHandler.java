@@ -83,7 +83,12 @@ public class EmailHandler {
 		EmailHandler.sendGoodNews(msg, attachmentPath);
 	}
 
-	public static String getWellFormatDateDiff(Calendar start, Calendar end){
+	public static String getWellFormatDateDiff(Calendar start2, Calendar end2){
+		long diff2 = end2.getTimeInMillis()-start2.getTimeInMillis();
+		Calendar start = Calendar.getInstance();
+		Calendar end = Calendar.getInstance();
+		start.setTimeInMillis(0);
+		end.setTimeInMillis(diff2);
 		int diff = end.get(Calendar.YEAR) - start.get(Calendar.YEAR);
 		String msg = diff == 0 ? "" : String.valueOf(diff) + "y ";
 		diff = end.get(Calendar.DAY_OF_YEAR) - start.get(Calendar.DAY_OF_YEAR);

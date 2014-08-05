@@ -68,7 +68,7 @@ public class QueryTestcase implements Testcase, Runnable {
 			qh = new QueryHandler(Benchmark.getReferenceConnection(), queryPatterns);
 			qh.setPath("QueryTestcase"+File.separator);
 			qh.init();
-			patterns = FileHandler.getFilesInDir(qh.getPath());
+			patterns = FileHandler.getFileCountInDir(qh.getPath());
 			selects = QuerySorter.getSPARQL("QueryTestcase"+File.separator);
 			int insertSize = 0;
 		

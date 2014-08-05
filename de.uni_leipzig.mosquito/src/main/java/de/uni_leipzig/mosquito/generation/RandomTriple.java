@@ -40,15 +40,15 @@ public class RandomTriple {
     	numberOfGeneratedTriples = FileHandler.getLineCount(outputFile);
     }
 	
-	public void setGraphURI(String graphURI){
+	public static void setGraphURI(String graphURI){
     	RandomTriple.graphURI = graphURI;
     }
 	
-	public void setOutputFileName(String outputFileName){
+	public static void setOutputFileName(String outputFileName){
 		RandomTriple.outputFileName = outputFileName;
 	}
 	
-	public void setOutputFormat(String outputFormat){
+	public static void setOutputFormat(String outputFormat){
     	RandomTriple.outputFormat = outputFormat;
     }
 	
