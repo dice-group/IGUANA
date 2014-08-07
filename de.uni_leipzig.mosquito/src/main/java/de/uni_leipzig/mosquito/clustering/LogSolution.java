@@ -27,6 +27,9 @@ import java.util.regex.Pattern;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
+import com.hp.hpl.jena.query.QueryException;
+import com.hp.hpl.jena.query.QueryFactory;
+
 import uk.ac.shef.wit.simmetrics.similaritymetrics.Levenshtein;
 import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.StringHandler;
@@ -191,7 +194,13 @@ public class LogSolution {
 				line = URLDecoder.decode(line, "UTF-8");
 				line = line.replaceAll("^\\s+", "");
 				line = queryVarRename(line);
-				pw.println(line.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " "));
+				try{
+					QueryFactory.create(line);
+					pw.println(line.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " "));
+				}
+				catch(QueryException e){
+					log.info("Messed up Query in logfile: "+line+"\nException: "+e);
+				}
 
 			}
 			pw.flush();

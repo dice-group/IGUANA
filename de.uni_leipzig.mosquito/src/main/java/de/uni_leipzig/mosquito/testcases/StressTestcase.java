@@ -1,5 +1,6 @@
 package de.uni_leipzig.mosquito.testcases;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -7,13 +8,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bio_gene.wookie.connection.Connection;
+import org.bio_gene.wookie.utils.LogHandler;
+import org.jfree.util.Log;
 
 import de.uni_leipzig.mosquito.utils.ResultSet;
 
 public class StressTestcase implements Testcase {
 	
+	private Logger log;
 	private int users;
 	private Properties props;
 	private Collection<ResultSet> res = new LinkedList<ResultSet>();
@@ -23,7 +30,10 @@ public class StressTestcase implements Testcase {
 	
 	@Override
 	public void start() {
+		log = Logger.getLogger(StressTestcase.class.getName());
+		LogHandler.initLogFileHandler(log, StressTestcase.class.getSimpleName());
 		Map<Thread, QueryTestcase> threadPool = new HashMap<Thread, QueryTestcase>();
+		log.info("Initialize users as threads");
 		for(Integer i=0; i<users; i++){
 			QueryTestcase qt = new QueryTestcase();
 			qt.setConnection(con);
@@ -31,6 +41,7 @@ public class StressTestcase implements Testcase {
 			qt.setCurrentPercent(percent);
 			qt.setProperties(props);
 			Thread t = new Thread(qt);
+			Log.info("User "+i+" starting");
 			t.start();
 			threadPool.put(t, qt);
 		}
@@ -39,18 +50,32 @@ public class StressTestcase implements Testcase {
 			for(Thread t : threadPool.keySet()){
 				if(t.isAlive()){
 					alive= true;
-					continue;
+					break;
 				}
 				else{
 					alive = false;
 				}
+				
 			}
 		}
+		log.info("finished stresstest");
 		Collection<Collection<ResultSet>> results = new LinkedList<Collection<ResultSet>>();
 		for(Thread t : threadPool.keySet()){
 			results.add(threadPool.get(t).getResults());
 		}
+		log.info("Merging results");
 		mergeResults(results);
+		log.info("Saving Results...");
+		for(ResultSet result : res){
+			result.setFileName(result.getFileName()+"_stresstest_"+UUID.randomUUID().toString());
+			try {
+				result.save();
+			} catch (IOException e) {
+				log.severe("Can't save Results due to: ");
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		log.info("...Done saving results");
 	}
 	
 	private void mergeResults(Collection<Collection<ResultSet>> results){

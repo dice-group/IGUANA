@@ -198,18 +198,7 @@ public class QueryHandler {
 		}
 		
 	}
-	
-	public static String queryIRIsToVars(String query){
-		String ret = query;
-		Pattern p = Pattern.compile("<\\S+>", Pattern.UNICODE_CHARACTER_CLASS);
-		Matcher m = p.matcher(ret);
-		int i=1;
-		while(m.find()){
-			ret.replace(m.group(), "?iri"+i);
-			i++;
-		}
-		return ret;
-	}
+
 
 	private String patternToQuery(String pattern, List<Object> vars){
 		String query = String.valueOf(pattern);

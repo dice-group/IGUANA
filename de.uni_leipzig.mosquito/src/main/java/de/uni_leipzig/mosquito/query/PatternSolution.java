@@ -176,6 +176,7 @@ public class PatternSolution {
 		return false;
 	}
 	
+
 	public static Boolean mustBeResource(String query, String var) {
 		String regex = ".*(\\{\\s*" + var + "|\\s*(\\.|;)\\s*" + var
 				+ "|\\{\\s*\\S+\\s*" + var + ").*";
@@ -184,5 +185,17 @@ public class PatternSolution {
 			return true;
 		}
 		return false;
+	}
+	
+	public static String queryIRIsToVars(String query){
+		String ret = query;
+		Pattern p = Pattern.compile("<\\S+>", Pattern.UNICODE_CHARACTER_CLASS);
+		Matcher m = p.matcher(ret);
+		int i=1;
+		while(m.find()){
+			ret.replace(m.group(), "?iri"+i);
+			i++;
+		}
+		return ret;
 	}
 }

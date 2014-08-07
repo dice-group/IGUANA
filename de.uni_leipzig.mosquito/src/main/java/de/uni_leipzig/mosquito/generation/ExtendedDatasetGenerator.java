@@ -67,6 +67,7 @@ public class ExtendedDatasetGenerator {
     	long generatedLines=0;
     	BufferedReader br = null;
     	PrintWriter pw = null;
+    	log.info("Generating data...");
     	try{
     		File output = new File(outputFileName);
     		output.createNewFile();
@@ -105,5 +106,6 @@ public class ExtendedDatasetGenerator {
                      " to " + exp.getMessage());
              LogHandler.writeStackTrace(log, exp, Level.SEVERE);
     	}
+    	log.info("...generated data");
     }
 }

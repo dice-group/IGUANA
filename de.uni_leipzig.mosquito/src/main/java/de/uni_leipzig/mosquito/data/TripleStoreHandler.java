@@ -63,22 +63,24 @@ public class TripleStoreHandler {
 		
 			pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), true);
 			long triples = TripleStoreStatistics.tripleCount(con, graphURI);
+			int k=0;
 			for(int i=0; i<triples; i+=2000){
 				String query = "SELECT ?s ?p ?o "+graphURI==null?"":graphURI+" WHERE {?s ?p ?o} LIMIT 2000 OFFSET "+i;
 				try {
 					ResultSet res = con.select(query);
-					
 					while(res.next()){
 						String line="";
 						line += GraphHandler.NodeToSPARQLString(implToNode(res.getObject(1)))+" ";
 						line += GraphHandler.NodeToSPARQLString(implToNode(res.getObject(2)))+" ";
 						line += GraphHandler.NodeToSPARQLString(implToNode(res.getObject(3)));
-						pw.write(line);
-						pw.println();
+						pw.println(line);
+						k++;
 					}
+					log.info("Written "+k+" triples to file");
 				} catch (SQLException e) {
 					LogHandler.writeStackTrace(log, e, Level.SEVERE);
 				}
+				pw.flush();
 			}
 		} catch (IOException e) {
 			return;

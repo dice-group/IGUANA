@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.mail.EmailException;
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.connection.ConnectionFactory;
@@ -130,10 +129,17 @@ public class Benchmark {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void start(String pathToXMLFile) {
+		// Logging ermöglichen
+		log = Logger.getLogger("benchmark");
+		log.setLevel(Level.FINE);
+		// Auch in Datei schreiben
+		LogHandler.initLogFileHandler(log, "benchmark");
+		
 		Calendar start = Calendar.getInstance();
 		start.setTimeZone(TimeZone.getTimeZone("UTC"));
-
+		log.info("Starting Benchmark...");
 		try {
+			log.info("Parsing Config Data...");
 			ConfigParser cp = ConfigParser.getParser(pathToXMLFile);
 			rootNode = cp.getElementAt("mosquito", 0);
 			dbNode = cp.getElementAt("databases", 0);
@@ -141,15 +147,14 @@ public class Benchmark {
 			testcases = Config.getTestCases(rootNode);
 			percents = Config.getPercents(rootNode);
 			dataDescription = Config.getDataDescription(rootNode);
-			if(config.containsKey("log-cluster"))
+			if(config.containsKey("log-cluster")){
 				logCluster = Config.getLogClusterProperties(rootNode);
+				log.info("Clustering logFiles Option enabled");
+			}
 			HashMap<String, Object> email = Config.getEmail(rootNode);
-			// Logging ermöglichen
-			log = Logger.getLogger(config.get("log-name"));
-			log.setLevel(Level.FINE);
-			// Auch in Datei schreiben
-			LogHandler.initLogFileHandler(log, config.get("log-name"));
+			
 			if(email!=null){
+				log.info("Initialize Email...");
 				EmailHandler.initEmail(
 						String.valueOf(email.get("hostname")),
 						Integer.parseInt(String.valueOf(email.get("port"))), 
@@ -162,7 +167,8 @@ public class Benchmark {
 			}
 			// Soll vorher noch konvertiert werden?
 			if (Boolean.valueOf((config.get("convert-processing")))) {
-				RDFVocabulary rdfV = (RDFVocabulary) ClassUtils.getClass(config.get("rdf-vocabulary-class")).newInstance();
+				log.info("Converting Data...");
+				RDFVocabulary rdfV = (RDFVocabulary) Class.forName(config.get("rdf-vocabulary-class")).newInstance();
 				rdfV.init(dataDescription.get("namespace"),
 						dataDescription.get("anchor"),
 						dataDescription.get("prefix"),
@@ -176,10 +182,12 @@ public class Benchmark {
 								config.get("convert-input-path"),
 								config.get("output-path"),
 								config.get("graph-uri"), log);
+				log.info("Data Converted");
 			}
 			databaseIds = Config.getDatabaseIds(rootNode,
 					DBTestType.valueOf(config.get("dbs")), config.get("ref-con"), log);
 			
+			log.info("Making Reference Connection");
 			refCon = ConnectionFactory.createConnection(dbNode, config.get("ref-con"));
 			
 			//mkdirs
@@ -187,7 +195,9 @@ public class Benchmark {
 			new File(TEMP_RESULT_FILE_NAME).mkdir();
 			//<<<<<<<!!!!!!!!!!!!!>>>>>>>
 			if(config.containsKey("log-cluster")){
+				log.info("Clustering Log Files...");
 				clustering(config.get("log-cluster"),config.get("log-path"),config.get("log-queries-file"));
+				log.info("Finished Clustering");
 			}
 			
 			
@@ -268,6 +278,7 @@ public class Benchmark {
 		for (int i = 0; i < percents.size(); i++) {
 			ResultSet upload = new ResultSet();
 			for (String db : ids) {
+				log.info("DB:PERCENT: "+db+":"+percents.get(i));
 				// Connection zur jetzigen DB
 				Connection con = ConnectionFactory.createConnection(dbNode, db);
 			
@@ -276,6 +287,7 @@ public class Benchmark {
 					con.dropGraph(config.get("graph-uri"));
 				}
 				if (testcases.containsKey(UploadTestcase.class.getName())) {
+					log.info("Upload Testcase starting for "+db+":"+percents.get(i));
 					UploadTestcase ut = new UploadTestcase();
 					Properties up = testcases.get(UploadTestcase.class
 							.getName());
@@ -288,16 +300,22 @@ public class Benchmark {
 					ut.addCurrentResults(uploadRes);
 					ut.start();
 					upload = ut.getResults().iterator().next();
+					log.info("Upload Testcase finished for "+db+":"+percents.get(i));
 				}
 				try{
-					warmup(con, String.valueOf(config.get("warmup-query-file")) ,
-							Long.valueOf(config.get("warmup-time")));
+					if(config.get("warmup-query-file")!=null &&config.get("warmup-time")!=null){
+						warmup(con, String.valueOf(config.get("warmup-query-file")) ,
+								Long.valueOf(config.get("warmup-time")));
+						log.info("Warmup finished");
+					}
 				}catch(Exception e){
 					log.info("No warmup! ");
 				}
+				log.info("Start other testcases");
 				start(con, db, String.valueOf(percents.get(i)));
 				// drop
 				if (Boolean.valueOf(config.get("drop-db"))) {
+					log.info("Drop Graph "+config.get("graph-uri"));
 					con.dropGraph(config.get("graph-uri"));
 				}
 				dbCount++;
@@ -308,6 +326,7 @@ public class Benchmark {
 		}
 		for (String key : results.keySet()) {
 			for (ResultSet res : results.get(key)) {
+				log.info("Saving Results...");
 				String testCase = key.split("&")[0];
 				testCase.replaceAll("[^A-Za-z0-9]", "");
 				String[] fileName = res.getFileName().split(File.separator);
@@ -317,6 +336,7 @@ public class Benchmark {
 						File.separator+fileName[fileName.length-1]);
 				res.save();
 				res.saveAsPNG();
+				log.info("Finished saving results");
 			}
 		}
 	}
@@ -366,6 +386,7 @@ public class Benchmark {
 			if (testcase.equals(UploadTestcase.class.getName())) {
 				continue;
 			}
+			log.info("Starting "+testcase+" for "+dbName+":"+percent);
 			try {
 				Properties testProps = testcases.get(testcase);
 				Class<Testcase> t = (Class<Testcase>) Class.forName(testcase);
@@ -380,6 +401,7 @@ public class Benchmark {
 				test.start();
 				Collection<ResultSet> tcResults = test.getResults();
 				results.put(testcase+"&"+percent, tcResults);
+				log.info("Finished "+testcase+" for "+dbName+":"+percent);
 			} catch (ClassNotFoundException | InstantiationException
 					| IllegalAccessException e) {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
@@ -389,9 +411,12 @@ public class Benchmark {
 
 	private static String[] getDatasetFiles(Connection con) {
 		String[] ret = new String[percents.size()];
+		//TODO: File from TS or just have the file
 		new File("datasets"+File.separator).mkdir();
 		String fileName ="datasets"+File.separator+"ds_100.nt";
+		log.info("Writing 100% Dataset to File");
 		TripleStoreHandler.writeDatasetToFile(con, config.get("graph-uri"), fileName);
+
 		for (int i = 0; i < percents.size(); i++) {
 			if(percents.get(i)==1.0){
 				ret[i] = fileName;
@@ -399,6 +424,7 @@ public class Benchmark {
 			}
 			String outputFile ="datasets"+File.separator+"ds_"+i*100+".nt";
 			DataGenerator.generateData(con, config.get("graph-uri"), fileName, outputFile, config.get("random-function"), percents.get(i));
+			log.info("Writing "+percents.get(i)*100+"% Dataset to File");
 		}
 		return ret;
 

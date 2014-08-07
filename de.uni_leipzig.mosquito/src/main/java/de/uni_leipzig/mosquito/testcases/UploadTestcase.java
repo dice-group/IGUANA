@@ -43,6 +43,7 @@ public class UploadTestcase implements Testcase {
 		row.add(name);
 		File f = new File(file);
 		long time =0L;
+		//TODO: insteead of File use Paths. 
 //		for(File f : path.listFiles(
 //				new FilenameFilter() {
 //					public boolean accept(File dir, String name) {
@@ -61,6 +62,7 @@ public class UploadTestcase implements Testcase {
 				if(newHeader){
 					header.add(f.getName());
 				}
+				log.info("Uploaded File "+file+" into "+name);
 //		}
 		if(newHeader){
 			header.add("sum");
@@ -74,7 +76,7 @@ public class UploadTestcase implements Testcase {
 		res.addRow(row);
 		res.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"UpdateTest"+ DateFormat.getDateInstance().format(new Date()));
 //		res.setFileName(name);
-		
+		log.info("Finished uploading");
 		try {
 			res.save();
 		} catch (IOException e) {

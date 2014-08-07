@@ -26,7 +26,6 @@ import de.uni_leipzig.bf.cluster.harden.HardenSuperset;
 import de.uni_leipzig.bf.cluster.harden.QualityMeasureRelativeFlow;
 import de.uni_leipzig.bf.cluster.harden.QualityMeasureSilhouette;
 import de.uni_leipzig.mosquito.query.PatternSolution;
-import de.uni_leipzig.mosquito.query.QueryHandler;
 
 
 public class LogCluster {
@@ -103,7 +102,7 @@ public class LogCluster {
 					log.info("Cluster "+line+" has no frequent queries");
 					continue;
 				}
-				String testQuery = QueryHandler.queryIRIsToVars(PatternSolution.queryToPattern(cluster.get(0)));
+				String testQuery = PatternSolution.queryToPattern(cluster.get(0));
 				// write test Query into the final output File
 				pw.println(testQuery);
 
@@ -142,7 +141,6 @@ public class LogCluster {
 			h = new HardenSuperset();
 		}
 		BorderFlow bf = new BorderFlow(input, h);
-		//TODO
 		bf.clusterToFile(clusterOutput, connThreshold, testOne, heuristic, caching);
 //		queryListToFile(bfClusterToQuerySet(input, clusterOutput), inputQueries, clQueryOutput);
 		rankAndChoose(inputQueries, clusterOutput, output, minNodes);
@@ -169,7 +167,7 @@ public class LogCluster {
 			while((line = br.readLine())!= null){
 				if(j==i){
 					line = line.substring(0, line.lastIndexOf("\t"));
-					pw.println(QueryHandler.queryIRIsToVars(PatternSolution.queryToPattern(line)));
+					pw.println(PatternSolution.queryToPattern(line));//TODO
 					j =queryList.get(++t);
 				}
 				i++;
@@ -208,7 +206,7 @@ public class LogCluster {
 			while((line = br.readLine())!= null){
 				if(j==i){
 					line = line.substring(0, line.lastIndexOf("\t"));
-					ret[t] = QueryHandler.queryIRIsToVars(PatternSolution.queryToPattern(line));
+					ret[t] = PatternSolution.queryToPattern(line);//TODO
 					j =queryList.get(++t);
 				}
 				i++;
