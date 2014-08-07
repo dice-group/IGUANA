@@ -27,6 +27,7 @@ import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import de.uni_leipzig.mosquito.clustering.clusterer.Clusterer;
 import de.uni_leipzig.mosquito.converter.RDFVocabulary;
 import de.uni_leipzig.mosquito.data.TripleStoreHandler;
 import de.uni_leipzig.mosquito.generation.DataGenerator;
@@ -64,6 +65,7 @@ public class Benchmark {
 	private static Boolean end=false;
 	private static HashMap<String, String> dataDescription;
 	private static boolean attach = false;
+	private static Properties logCluster;
 
 	public enum DBTestType {
 		all, choose
@@ -139,6 +141,8 @@ public class Benchmark {
 			testcases = Config.getTestCases(rootNode);
 			percents = Config.getPercents(rootNode);
 			dataDescription = Config.getDataDescription(rootNode);
+			if(config.containsKey("log-cluster"))
+				logCluster = Config.getLogClusterProperties(rootNode);
 			HashMap<String, Object> email = Config.getEmail(rootNode);
 			// Logging ermöglichen
 			log = Logger.getLogger(config.get("log-name"));
@@ -182,6 +186,10 @@ public class Benchmark {
 			new File(RESULT_FILE_NAME).mkdir();
 			new File(TEMP_RESULT_FILE_NAME).mkdir();
 			//<<<<<<<!!!!!!!!!!!!!>>>>>>>
+			if(config.containsKey("log-cluster")){
+				clustering(config.get("log-cluster"),config.get("log-path"),config.get("log-queries-file"));
+			}
+			
 			
 			mainLoop(databaseIds, pathToXMLFile);
 			
@@ -230,6 +238,19 @@ public class Benchmark {
 				LogHandler.writeStackTrace(log, e, Level.WARNING);
 			}
 		}
+	}
+	
+	
+	public static void clustering(String name, String logPath, String queriesFile){
+		try {
+			Clusterer cl = (Clusterer) Class.forName(name).newInstance();
+			cl.setProperties(logCluster);
+			cl.cluster(logPath, queriesFile);
+		} catch (InstantiationException | IllegalAccessException
+				| ClassNotFoundException | IOException e) {
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		
 	}
 
 	public static void mainLoop(List<String> ids, String pathToXMLFile)

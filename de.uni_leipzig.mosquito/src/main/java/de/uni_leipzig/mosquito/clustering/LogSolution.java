@@ -14,6 +14,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
+import uk.ac.shef.wit.simmetrics.similaritymetrics.Levenshtein;
 import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.StringHandler;
 import de.uni_leipzig.mosquito.utils.comparator.OccurrencesComparator;
@@ -51,6 +53,9 @@ public class LogSolution {
 		String test = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dbpedia2: <http://dbpedia.org/property/> PREFIX owl: <http://dbpedia.org/ontology/> SELECT ?yearVar WHERE { {?subject dbpedia2:name ?name } {?subject dbpedia2:artist ?artist . ?artist dbpedia2:name \"ÊÈÍÎ\"@en . ?subject rdf:type <http://dbpedia.org/ontology/Album> . ?subject owl:releaseDate ?yearVar.FILTER (regex(str(?name), \"Ëó÷øèå ïåñíè.. 88-90\"@en, \"i\"))}}Limit 10";
 		log.info(queryToStructure(test));
 		countTriplesInQuery(test);
+		
+		Levenshtein lev = new Levenshtein();
+		log.info(String.valueOf(lev.getSimilarity("FELIS", "HELIX")));
 	}
 	
 
@@ -367,29 +372,35 @@ public class LogSolution {
 	
 	public static void similarity(File input, File output, int delta) throws FileNotFoundException{
 		FileInputStream fis = null;
+		FileInputStream fis2 = null;
 		BufferedReader br1 = null;
 		BufferedReader br2 = null;
 		PrintWriter pw = new PrintWriter(output);
 		int[] threshold = getThreshold(input, delta);
-		String line1, line2;
+		log.info("Similarity Threshold vector: "+threshold[0]+"\nSimilarity Threshold levenshtein: "+threshold[1]);
+		String line1, line2, line;
 		try{
 			fis = new FileInputStream(input);
 			br1 = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
-			br2 = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			int n=0, o=0;
 			while((line1 = br1.readLine())!= null){
 				if(line1.isEmpty()){continue;}
 				n++;
+				fis2 = new FileInputStream(input);
+				br2 = new BufferedReader(new InputStreamReader(fis2, Charset.forName("UTF-8")));
+				o=0;
 				while((line2 = br2.readLine())!= null){
-					if(line1.isEmpty()){continue;}
+					if(line2.isEmpty()){continue;}
 					o++;
 					if(o<=n){continue;}
-					line1 =StringHandler.removeKeywordsFromQuery(line1.substring(0, line1.lastIndexOf("\t")));
+					line =StringHandler.removeKeywordsFromQuery(line1.substring(0, line1.lastIndexOf("\t")));
 					line2 =StringHandler.removeKeywordsFromQuery(line2.substring(0, line2.lastIndexOf("\t")));
-					Integer sim = getSimilarity(line1, line2, threshold);
+					Double sim = getSimilarity(line, line2, threshold);
 					if(sim ==null){continue;}
 					pw.println("q"+n+"\t"+"q"+o+"\t"+sim);
 				}
+				fis2.close();
+				log.info("Compared Query "+n+" with each other Query");
 			}
 			pw.close();
 		}
@@ -399,6 +410,7 @@ public class LogSolution {
 		finally{
 			try {
 				fis.close();
+				fis2.close();
 				br1.close();
 				br2.close();
 			} catch (IOException e) {
@@ -408,13 +420,21 @@ public class LogSolution {
 		}
 	}
 	
-	public static Integer getSimilarity(String query1, String query2, int[] threshold){
-		int vdist = getFeatureVectorDistance(query1, query2);
-		int ldist = StringHandler.levenshteinDistance(query1, query2);
-		if(vdist>threshold[0]||ldist>threshold[1]){
+	public static Double getSimilarity(String query1, String query2, int[] threshold){
+		double vdist = getFeatureVectorDistance(query1, query2);
+		if(vdist>threshold[0]){
 			return null;
 		}
-		return 1/(1+Math.min(vdist, ldist));
+		vdist =1.0/(1+vdist);
+		
+		
+ 
+//		ldist = lev.getSimilarity(query1, query2);
+		double ldist = StringHandler.levenshtein(query1, query2, threshold[1]);
+//		if(Math.max(query1.length(), query2.length())*(1-ldist)>threshold[1]){
+//			return null;
+//		}
+		return Math.max(vdist, ldist);
 	}
 	
 	public static int[] getThreshold(String input, int delta){
@@ -434,7 +454,7 @@ public class LogSolution {
 			while((line = br.readLine())!= null){
 				if(line.isEmpty()){continue;}
 				queryCount++;
-				line =	line.substring(0, line.lastIndexOf("\t"));
+				line =	line.substring(0, line.lastIndexOf("\t")).trim();
 				s+= line.length();
 			}
 		}
@@ -452,11 +472,14 @@ public class LogSolution {
 		}
 		
 		ret[0]= Double.valueOf(Math.ceil((featureCount*queryCount)*delta/(100.0*queryCount))).intValue();
+		log.info("Math.ceil(s*delta/(100.0*queryCount)): "+Math.ceil(s*delta/(100.0*queryCount)));
+		log.info("queryCount: "+queryCount);
+		log.info("s: "+s);
 		ret[1]= Double.valueOf(Math.ceil(s*delta/(100.0*queryCount))).intValue();
 		return ret;
 	}	
 	
-	private static String[] getFeatures(){
+	public static String[] getFeatures(){
 		return new String []{"offset", "limit", "union", "optional", "filter", "regex", "sameterm",
 			     "isliteral", "bound", "isiri", "isblank", "lang", "datatype", "distinct", "group", "order", "str"};
 
@@ -479,7 +502,91 @@ public class LogSolution {
 //		log.info("Found "+ret+" triples in query");
 		return ret;
 	}
+	
+	public static Integer getFreqSum(String[] cluster, String freqQueries){
+		return getFreqSum(cluster, new File(freqQueries));
+	}
+	
+	public static Integer getFreqSum(String[] cluster, File freqQueries){
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		int q=0;
+		List<String> cl = Arrays.asList(cluster);
+		Integer ret=0;
+		try{
+			fis = new FileInputStream(freqQueries);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			while((line = br.readLine())!= null && cl.isEmpty()){
+				if(line.isEmpty()){continue;}
+				for(String qID : cl){
+					if(qID.equals("q"+q)){
+						ret+=Integer.parseInt(line.substring(line.lastIndexOf("\t")+1, line.length()));
+						cl.remove(qID);
+						break;
+					}
+				}
+				q++;
+			}
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		return ret;
+	}
+	
+	
+	public static void structsToFreqQueries(String structs, String freq, String output) throws IOException{
+		structsToFreqQueries(new File(structs), new File(freq), new File(output));
+	}
 
+	public static void structsToFreqQueries(File structs, File freq, File output) throws IOException{
+		output.createNewFile();
+		PrintWriter pw = new PrintWriter(output);
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		FileInputStream fis2 = null;
+		BufferedReader br2 = null;
+		String line, line2, struct;
+		try{
+			fis = new FileInputStream(structs);
+			fis2 = new FileInputStream(freq);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			br2 = new BufferedReader(new InputStreamReader(fis2, Charset.forName("UTF-8")));
+			while((line = br.readLine())!= null){
+				line = line.substring(0, line.lastIndexOf("\t"));
+				while((line2=br2.readLine())!=null){
+					struct = queryToStructure(line2.substring(0, line2.lastIndexOf("\t")));
+					if(struct.equals(line)){
+						pw.println(line2);
+					}
+				}
+				pw.flush();
+			}
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+	}
+	
 	
 	private static Byte[] getFeatureVector(String query, String[] features){
 		Byte[] vec = new Byte[features.length];
@@ -494,10 +601,10 @@ public class LogSolution {
 		return vec;
 	}
 	
-	private static int getFeatureVectorDistance(String query1, String query2){
+	private static double getFeatureVectorDistance(String query1, String query2){
 		Byte[] q1= getFeatureVector(query1, getFeatures());
 		Byte[] q2= getFeatureVector(query2, getFeatures());
-		int ret =0;
+		double ret =0;
 		for(int i=0;i<q1.length;i++){
 			ret+=Math.pow(q1[i]-q2[i], 2);
 		}

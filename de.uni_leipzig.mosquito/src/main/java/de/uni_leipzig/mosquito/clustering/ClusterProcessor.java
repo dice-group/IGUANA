@@ -511,7 +511,6 @@ public class ClusterProcessor {
             if(queryToOperate.contains(feature))
                 queryFeatures += feature + ",";
         }
-
         return queryFeatures;
     }
 

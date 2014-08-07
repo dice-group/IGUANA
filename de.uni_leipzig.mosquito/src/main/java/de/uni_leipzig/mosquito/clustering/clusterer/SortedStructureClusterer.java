@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import de.uni_leipzig.mosquito.clustering.LogCluster;
@@ -15,8 +16,8 @@ public class SortedStructureClusterer implements Clusterer {
 
 	private static String PATH = "cluster" + File.separator;
 	private static Logger log = LogSolution.getLogger();
-	private Integer thresholdStructs;
-	private Integer thresholdQueries;
+	private Integer thresholdStructs=10;
+	private Integer thresholdQueries=10;
 
 	@Override
 	public void cluster(String logsPath, String queries) throws IOException {
@@ -74,6 +75,17 @@ public class SortedStructureClusterer implements Clusterer {
 		log.info("Ended ClusterProcess " + end);
 		log.info("Needed Time: "
 				+ EmailHandler.getWellFormatDateDiff(calS, calE));
+	}
+
+
+	@Override
+	public void setProperties(Properties p) {
+		if((thresholdQueries=Integer.parseInt(String.valueOf(p.get("threshold-queries")).trim()))==null){
+			thresholdQueries=10;
+		}
+		if((thresholdStructs=Integer.parseInt(String.valueOf(p.get("threshold-structs")).trim()))==null){
+			thresholdStructs=10;
+		}
 	}
 
 }

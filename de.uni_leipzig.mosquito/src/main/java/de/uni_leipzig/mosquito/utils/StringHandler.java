@@ -9,6 +9,12 @@ public class StringHandler {
 		return str.replaceAll("[^A-Za-z0-9]", "");
 	}
 	
+	public static void main(String argc[]){
+		System.out.println(levenshteinDistance("HAUS","RAUS ASD sad { }."));
+		System.out.println(levenshtein("HAUS","RAUS ASD sad { }.",5));
+		
+	}
+	
 
 	public static String removeKeywordsFromQuery(String query) {
 		for (String keyword : KEYWORD_LIST) {
@@ -64,10 +70,10 @@ public class StringHandler {
 	 * @param s1
 	 * @return
 	 */
-	public static int levenshteinDistance (String s0, String s1) {                          
+	public static float levenshteinDistance (String s0, String s1) {                          
 	    int len0 = s0.length() + 1;                                                     
 	    int len1 = s1.length() + 1;                                                     
-	 
+	    
 	    // the array of distances                                                       
 	    int[] cost = new int[len0];                                                     
 	    int[] newcost = new int[len0];                                                  
@@ -102,5 +108,68 @@ public class StringHandler {
 	 
 	    // the distance is the cost for transforming all letters in both strings        
 	    return cost[len0 - 1];                                                          
+	}
+	
+	public static double levenshtein(String str1, String str2, int threshold){
+		int horizontal=0, vertikal=0;
+		int dist=0, n = str1.length(), m=str2.length();
+		int[][] d = new int[n+1][m+1];
+		d[0][0]=0;
+		for(int i=1,k=1;i<=n||k<=m;){
+			int z = i<=n?0:1, r = k<=m?0:1;
+			for(int t=horizontal;t<k-r;t++){
+				if(t>0){
+					int pl = str1.charAt(i-z-1)==str2.charAt(t-1)?0:1;
+					d[i-z][t]=Math.min(Math.min(d[i-z-1][t]+1, d[i-z][t-1]+1), d[i-z-1][t-1]+pl);
+				}else{
+					d[i-z][t]=d[i-z-1][t]+1;
+				}
+//				if(d[i-z][t]>threshold){
+//					horizontal=t;
+//				}
+			}
+			for(int t=vertikal;t<i-z;t++){
+				if(t>0){
+					int pl = str1.charAt(t-1)==str2.charAt(k-r-1)?0:1;
+//					System.out.println(str1.charAt(t-1)+":"+str2.charAt(k-r-1));
+					d[t][k-r]=Math.min(Math.min(d[t-1][k-r]+1, d[t][k-r-1]+1), d[t-1][k-r-1]+pl);
+//					System.out.println(t+":"+(k-r)+" "+d[t][k-r]);
+				}else{
+					d[t][k-r]=d[t][k-r-1]+1;
+				}
+//				if(d[t][k-r]>threshold){
+//					vertikal=t;
+//				}
+			}
+			
+			int pl = str1.charAt(i-z-1)==str2.charAt(k-r-1)?0:1;
+			d[i-z][k-r]=Math.min(Math.min(d[i-z-1][k-r]+1, d[i-z][k-r-1]+1), d[i-z-1][k-r-1]+pl);
+			if(d[i-z][k-r]>threshold){
+				return 0.0;
+			}
+			i += i<=n?1:0;
+			k += k<=m?1:0;
+			
+		}
+//		System.out.print("\t-\t");
+//		for(int k=0;k<n;k++){
+//			System.out.print(str1.charAt(k)+"\t");
+//		}
+//		System.out.println();
+//		System.out.print("-\t");
+//		int r=0;
+//		for(int i=0;i<m+1;i++){
+////			System.out.print(str2.charAt(i));
+//			
+//			for(int k=0;k<n+1;k++){
+//				System.out.print(d[k][i]+"\t");
+//			}
+//			System.out.println();
+//			if(r<m)
+//				System.out.print(str2.charAt(r++)+"\t");
+//		}
+//		dist = d[n][m];
+//		System.out.println(dist);
+		return 1.0-dist*1.0/Math.max(n, m);
 	}
 }

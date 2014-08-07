@@ -70,25 +70,49 @@ public class Config {
 			Node testcase = tests.item(i);
 			cp.setNode((Element)testcase); 
 			NodeList testcaseProperties = cp.getNodeList("property");
-			Properties prop = new Properties();
-			for(int t=0; t<testcaseProperties.getLength(); t++){
-				Element currentProp = ((Element)testcaseProperties.item(t));
-				prop.put(currentProp.getAttribute("name"), currentProp.getAttribute("value"));
-			}
 			cp.setNode(testcases);
-			ret.put(((Element)testcase).getAttribute("class"), prop);
+			ret.put(((Element)testcase).getAttribute("class"), getProps(testcaseProperties));
 		}
 		return ret;
 		
 	}
 	
+	public static Properties getLogClusterProperties(Node rootNode) throws ParserConfigurationException, SAXException, IOException{
+		ConfigParser cp = ConfigParser.getParser(rootNode);
+		cp.getElementAt("log-clustering", 0);
+		
+		NodeList tests = cp.getNodeList("property");
+		return getProps(tests);
+	}
+	
+	private static Properties getProps(NodeList property) throws ParserConfigurationException, SAXException, IOException{
+		
+		Properties prop = new Properties();
+		for(int t=0; t<property.getLength(); t++){
+			Element currentProp = ((Element)property.item(t));
+			prop.put(currentProp.getAttribute("name"), currentProp.getAttribute("value"));
+		}
+	
+		return prop;
+	}
+	
 	public static HashMap<String, String> getParameter(Node root)
 			throws ParserConfigurationException, SAXException, IOException {
 		ConfigParser cp = ConfigParser.getParser(root);
-		Element benchmark = (Element) cp.getElementAt("benchmark", 0);
-		
 		HashMap<String, String> map = new HashMap<String, String>();
 
+		try{		
+			Element logCluster = cp.getElementAt("log-clustering", 0);
+			map.put("log-cluster", logCluster.getAttribute("class"));
+			map.put("log-path", logCluster.getAttribute("path"));
+			map.put("log-queries-file", logCluster.getAttribute("output-file"));
+		}
+		catch(Exception e){
+			
+		}
+		cp.setNode((Element)root);
+		Element benchmark = (Element) cp.getElementAt("benchmark", 0);
+	
 		map.put("log-name", benchmark.getAttribute("log"));
 
 		map.put("drop-db", cp.getElementAt("drop-db", 0).getAttribute("value"));
