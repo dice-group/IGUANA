@@ -175,6 +175,7 @@ public class Config {
 		Element rand = cp.getElementAt("random-function", 0);
 		map.put("random-function", rand.getAttribute("type"));
 		map.put("random-function-gen", rand.getAttribute("generate"));
+		map.put("random-hundred-file", rand.getAttribute("initFile"));
 		cp.setNode(benchmark);
 		try{
 			Element warmup = cp.getElementAt("warmup", 0);

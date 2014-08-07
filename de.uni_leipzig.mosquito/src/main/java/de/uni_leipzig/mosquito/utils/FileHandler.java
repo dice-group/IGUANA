@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,12 +16,35 @@ import java.util.logging.Logger;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
+
 public class FileHandler {
 
 	private static Logger log = Logger.getLogger(FileHandler.class.getName());
 	
 	static {
 		LogHandler.initLogFileHandler(log, FileHandler.class.getSimpleName());
+	}
+	
+	
+	public static void writeFilesToFile(String dir, String f) throws IOException{
+		writeFilesToFile(new File(dir), new File(f));
+	}
+	
+	public static void writeFilesToFile(File dir, File f) throws IOException{
+		f.createNewFile();
+		String line;
+		PrintWriter pw = new PrintWriter(f);
+		for(File file : dir.listFiles()){
+			FileInputStream fis = new FileInputStream(file);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			while((line=br.readLine())!=null){
+				pw.println(line);
+			}
+			br.close();
+			fis.close();
+			pw.flush();
+		}
+		pw.close();
 	}
 	
 	public static long getLineCount(String fileName){
@@ -54,7 +78,7 @@ public class FileHandler {
 		return lines;
 	}
 	
-	//TODO 
+
 	public static Collection<String> getSubjectsInFile(String fileName){
 		return getSubjectsInFile(new File(fileName));
 	}

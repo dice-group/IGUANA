@@ -417,7 +417,7 @@ public class QueryTestcase implements Testcase, Runnable {
 			else{
 				not = false;
 			}
-				//SELECT OR INSERT TODO
+				//SELECT OR INSERT
 				if(not ^ selectGTinserts){
 					if(sQpS>=selects.size())
 						sQpS=0;

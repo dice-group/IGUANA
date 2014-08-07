@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,6 +38,7 @@ import de.uni_leipzig.mosquito.utils.Converter;
 import de.uni_leipzig.mosquito.utils.EmailHandler;
 import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.ResultSet;
+import de.uni_leipzig.mosquito.utils.StringHandler;
 import de.uni_leipzig.mosquito.utils.ZipUtils;
 
 /**
@@ -152,7 +154,8 @@ public class Benchmark {
 				log.info("Clustering logFiles Option enabled");
 			}
 			HashMap<String, Object> email = Config.getEmail(rootNode);
-			
+			log.info("Making Reference Connection");
+			refCon = ConnectionFactory.createConnection(dbNode, config.get("ref-con"));
 			if(email!=null){
 				log.info("Initialize Email...");
 				EmailHandler.initEmail(
@@ -177,18 +180,24 @@ public class Benchmark {
 						dataDescription.get("resourcePrefixName")		
 						);
 				
-				// Es sollen PGNs konvertiert werden
+				// COnverting the Data 
 				Converter.rawToFormat(config.get("converter-class"), config.get("output-format"),
 								config.get("convert-input-path"),
 								config.get("output-path"),
 								config.get("graph-uri"), log);
+				
+				//To one File & upload to refTS
+				String output=config.get("output-path")+File.separator+StringHandler.stringToAlphanumeric(UUID.randomUUID().toString());
+				FileHandler.writeFilesToFile(config.get("output-path"), output);
+				refCon.uploadFile(output);
+				config.put("random-function-gen", "true");
+				config.put("random-hundred-file", output);
 				log.info("Data Converted");
 			}
 			databaseIds = Config.getDatabaseIds(rootNode,
 					DBTestType.valueOf(config.get("dbs")), config.get("ref-con"), log);
 			
-			log.info("Making Reference Connection");
-			refCon = ConnectionFactory.createConnection(dbNode, config.get("ref-con"));
+		
 			
 			//mkdirs
 			new File(RESULT_FILE_NAME).mkdir();
@@ -270,7 +279,8 @@ public class Benchmark {
 		
 		String[] randFiles = null;
 		if(Boolean.valueOf(config.get("random-function-gen"))) {
-			randFiles = getDatasetFiles(refCon);
+			String file = config.get("random-hundred-file");
+			randFiles = getDatasetFiles(refCon, file);
 		}
 		else{
 			randFiles = Config.getRandomFiles(rootNode);
@@ -409,14 +419,15 @@ public class Benchmark {
 		}
 	}
 
-	private static String[] getDatasetFiles(Connection con) {
+	private static String[] getDatasetFiles(Connection con, String hundredFile) {
 		String[] ret = new String[percents.size()];
-		//TODO: File from TS or just have the file
 		new File("datasets"+File.separator).mkdir();
-		String fileName ="datasets"+File.separator+"ds_100.nt";
-		log.info("Writing 100% Dataset to File");
-		TripleStoreHandler.writeDatasetToFile(con, config.get("graph-uri"), fileName);
-
+		String fileName = hundredFile;
+		if(hundredFile==null||!(new File(hundredFile).exists())){
+			fileName ="datasets"+File.separator+"ds_100.nt";
+			log.info("Writing 100% Dataset to File");
+			TripleStoreHandler.writeDatasetToFile(con, config.get("graph-uri"), fileName);
+		}
 		for (int i = 0; i < percents.size(); i++) {
 			if(percents.get(i)==1.0){
 				ret[i] = fileName;

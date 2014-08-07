@@ -167,7 +167,8 @@ public class LogCluster {
 			while((line = br.readLine())!= null){
 				if(j==i){
 					line = line.substring(0, line.lastIndexOf("\t"));
-					pw.println(PatternSolution.queryToPattern(line));//TODO
+					//TODO patterns only literals or iris too as vars
+					pw.println(PatternSolution.queryToPattern(line));
 					j =queryList.get(++t);
 				}
 				i++;
@@ -206,7 +207,8 @@ public class LogCluster {
 			while((line = br.readLine())!= null){
 				if(j==i){
 					line = line.substring(0, line.lastIndexOf("\t"));
-					ret[t] = PatternSolution.queryToPattern(line);//TODO
+					//TODO patterns only literals or iris too as vars
+					ret[t] = PatternSolution.queryToPattern(line);
 					j =queryList.get(++t);
 				}
 				i++;
