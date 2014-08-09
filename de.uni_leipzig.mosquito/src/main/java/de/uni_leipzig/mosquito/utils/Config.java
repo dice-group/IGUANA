@@ -1,6 +1,5 @@
 package de.uni_leipzig.mosquito.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +32,7 @@ public class Config {
 			databases = cp.getNodeList("database");
 			break;
 		case choose:
-			cp.resetNode();
+//			cp.resetNode();
 			cp.setNode((Element) rootNode);
 			cp.getElementAt("benchmark", 0);
 			cp.getElementAt("test-db", 0);
@@ -129,7 +128,8 @@ public class Config {
 			cp.setNode(benchmark);
 			map.put("rdf-vocabulary-class", cp.getElementAt("rdf-vocabulary-class", 0).getAttribute("class"));
 			cp.setNode(benchmark);
-			
+			map.put("output-path",	cp.getElementAt("output-path", 0).getAttribute("name"));
+			cp.setNode(benchmark);
 		}
 		catch(Exception e){
 			pgnprocess = "false";
@@ -142,7 +142,7 @@ public class Config {
 					.getAttribute("name");
 		}
 		catch(Exception e){
-			outputFormat = "TURTLE";
+			outputFormat = "N3";
 		}
 		map.put("output-format", outputFormat);
 		cp.setNode(benchmark);
@@ -155,19 +155,7 @@ public class Config {
 		}
 		map.put("graph-uri", graph);
 		cp.setNode(benchmark);
-		map.put("output-path",
-				cp.getElementAt("output-path", 0).getAttribute("name"));
-		cp.setNode(benchmark);
-		String limit= "5000";
-		try{
-			limit= cp.getElementAt("query-diversity", 0)
-			.getAttribute("value");
-		}
-		catch(Exception e){
-			limit = "5000";
-		}
-		map.put("query-diversity", limit);
-		cp.setNode(benchmark);
+		
 		Element testDB = cp.getElementAt("test-db", 0);
 		map.put("dbs", testDB.getAttribute("type"));
 		map.put("ref-con", testDB.getAttribute("reference"));
@@ -184,10 +172,6 @@ public class Config {
 		}catch(Exception e){
 			
 		}
-		cp.setNode(benchmark);
-		map.put("queries-output-path", cp
-				.getElementAt("queries-output-path", 0).getAttribute("name"));
-		new File(map.get("queries-output-path")).mkdirs();
 		
 		return map;
 
@@ -199,7 +183,7 @@ public class Config {
 		ConfigParser cp = ConfigParser.getParser(rootNode);
 		cp.getElementAt("benchmark", 0);
 		cp.getElementAt("random-function", 0);
-		NodeList percents = cp.getNodeList("data-file");
+		NodeList percents = cp.getNodeList("percent");
 		
 		String[] ret = new String[percents.getLength()];
 		for(int i=0;i<percents.getLength();i++){
@@ -247,6 +231,7 @@ public class Config {
 			ret.put("email-to", emTo);
 		}
 		catch(Exception e){
+			e.printStackTrace();
 			return null;
 		}
 		return ret;

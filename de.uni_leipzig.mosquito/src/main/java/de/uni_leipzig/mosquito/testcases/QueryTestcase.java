@@ -34,12 +34,11 @@ public class QueryTestcase implements Testcase, Runnable {
 	private String path;
 	private String updateStrategy;
 	private Random qQpS;
-	private Boolean isQMpH;
-	private Boolean isQpS;
 	private int patternQpS=0, iQpS=0,sQpS=0;
 	private List<Long> qpsTime;
 	private List<Long> qCount;
 	private Long timeLimit = 3600000L;
+	private int limit=5000;
 	private int xCount = 0;
 	private String ldLinking;
 	private String ldpath;
@@ -64,10 +63,18 @@ public class QueryTestcase implements Testcase, Runnable {
 	public void start() throws IOException {
 		log = Logger.getLogger(QueryTestcase.class.getName());
 		LogHandler.initLogFileHandler(log, QueryTestcase.class.getSimpleName());
+		qQpS = new Random(2);
 		if(qh==null){
 			log.info("Initialize QueryHandler");
+			File path = new File("QueryTestcase"+File.separator);
+			path.mkdir();
+			for(String f : path.list()){
+				new File(f).delete();
+			}
+			path.delete();
 			qh = new QueryHandler(Benchmark.getReferenceConnection(), queryPatterns);
 			qh.setPath("QueryTestcase"+File.separator);
+			qh.setLimit(limit);
 			qh.init();
 			patterns = FileHandler.getFileCountInDir(qh.getPath());
 			log.info("Gettint Queries and diverse them into SPARQL and SPARQL Update");
@@ -92,6 +99,7 @@ public class QueryTestcase implements Testcase, Runnable {
 				inserts = QuerySorter.getSPARQLUpdate("QueryTestcase"+File.separator);
 			}
 			insertSize = inserts.size();
+			log.info("Query Patterns: "+patterns);
 			log.info("SPARQL Queries: "+selects.size());
 			log.info("SPARQL Updates (incl. Live Data): "+insertSize);
 			selectGTinserts = selects.size()>=insertSize?true:false;
@@ -125,29 +133,37 @@ public class QueryTestcase implements Testcase, Runnable {
 		log.info("Queries Path: "+path);
 //		pQMpH = new Random(seed1);
 //		qQMpH = new Random(seed2);
+		qpsTime = new LinkedList<Long>();
 		qCount = new LinkedList<Long>();
 		Collection<ResultSet> r = new LinkedList<ResultSet>();
 
 		//qps
 		log.info("Starting Hotrun phase");
 		ResultSet qps = new ResultSet();
-		qps.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryTestcase"+percent);		
 		qps = querySeconds();
+		qps.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueriesTotalTime"+percent);		
 		qps.setTitle("Queries total Executiontime");
+		qps.setxAxis("Query");
+		qps.setyAxis("time");
 		r.add(qps);
 		//This isn't the correct results yet, so we need to 
 		ResultSet sumRes = new ResultSet();
 		ResultSet seconds = new ResultSet();
+		sumRes.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryMixesPerHour"+percent);		
+		seconds.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueriesPerSeconds"+percent);		
 		Long sum = 0L;
 		List<Object> row = new LinkedList<Object>();
 		row.add(currentDB);
 		for(int i=0; i<qCount.size();i++){
 			sum+=qCount.get(i);
-			row.add(1000L*qCount.get(i)/(1.0*qpsTime.get(i)));
+			row.add(Math.round(1000L*qCount.get(i)/(1.0*qpsTime.get(i))));
 		}
 
 		seconds.setHeader(qps.getHeader());
 		seconds.setTitle("Queries Per Second (Mean)");
+		seconds.setxAxis("Query");
+		seconds.setyAxis("#Queries");
+		seconds.addRow(row);
 		
 		r.add(seconds);
 		
@@ -156,10 +172,12 @@ public class QueryTestcase implements Testcase, Runnable {
 		row.add(sum);
 		List<String> header = new LinkedList<String>();
 		header.add("Connection");
-		header.add("result");
+		header.add("0");
 		sumRes.setHeader(header);
 		sumRes.addRow(row);
 		sumRes.setTitle("Query Mixes per Hour");
+		sumRes.setxAxis("triplestore");
+		sumRes.setyAxis("#QueryMixes");
 		r.add(sumRes);
 		
 		
@@ -203,7 +221,14 @@ public class QueryTestcase implements Testcase, Runnable {
 		header.add("Connection");
 		for(int i=0; i<patterns ;i++){
 			row.add(0);
-			qCount.set(i, 0L);
+			if(qCount.size()<=i){
+				qCount.add(0L);
+				qpsTime.add(0L);
+			}
+			else{
+				qCount.set(i, 0L);
+				qpsTime.set(i, 0L);
+			}
 			if(selects.size()<=i){
 				header.add(inserts.get(i-selects.size()));
 			}
@@ -216,13 +241,18 @@ public class QueryTestcase implements Testcase, Runnable {
 			String query = next[0];
 			String qFile = next[1];
 			
-			Long time = getQueryTime(query);
-			Long newTime = qpsTime.get(query.hashCode())+time;
-			qpsTime.set(query.hashCode(), newTime);
 			int i=header.indexOf(qFile);
-			qCount.set(i, 1+qCount.get(i));
-			row.set(i, qpsTime.get(query.hashCode())+(int)row.get(query.hashCode()));
-			log.info("Query # "+i+" has taken "+time+" microseconds");
+			Long time = getQueryTime(query);
+			Long newTime = qpsTime.get(i-1)+time;
+			qpsTime.set(i-1, newTime);
+			
+			qCount.set(i-1, 1+qCount.get(i-1));
+			row.set(i, qpsTime.get(i-1)+Integer.parseInt(String.valueOf(row.get(i))));
+			log.info("Query # "+(i-1)+" has taken "+time+" microseconds");
+		}
+		for(int i=1;i<header.size();i++){
+			String cell = header.get(i);
+			header.set(i, cell.substring(0, cell.lastIndexOf(".")));
 		}
 		res.setHeader(header);
 		res.addRow(row);
@@ -230,7 +260,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	}
 	
 	private Boolean isQpSFinished(){
-		int t=0;
+		long t=0;
 		for(long time: qpsTime){
 			t+=time;
 		}
@@ -509,17 +539,22 @@ public class QueryTestcase implements Testcase, Runnable {
 		queryPatterns = String.valueOf(p.get("queryPatternFile"));
 		patterns = FileHandler.getLineCount(queryPatterns);
 		updateStrategy = String.valueOf(p.get("updateStrategy"));
-		isQMpH = Boolean.valueOf(String.valueOf(p.get("testQMpH")));
-		isQpS = Boolean.valueOf(String.valueOf(p.get("testQpS")));
-		if(isQMpH&&isQpS){
-			isQpS=true;
-			isQMpH=true;
-		}
 		try{
 			x = Integer.parseInt(String.valueOf(p.get("x")));
 		}
 		catch(Exception e){
 			//x should be calculated
+		}
+		try{
+			timeLimit = Long.valueOf(String.valueOf(p.get("time-limit")));
+		}
+		catch(Exception e){
+		}
+		try{
+			limit = Integer.parseInt(String.valueOf(p.get("limit")));
+		}
+		catch(Exception e){
+			limit=5000;
 		}
 		try{
 			//insertsfirst, deletesfirst, ID, DI 

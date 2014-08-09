@@ -55,6 +55,7 @@ public class PatternSolution {
 		
 //		String test = "SELECT DISTINCT * WHERE { { { ?place rdfs:label 'London'@en .} UNION { ?place rdfs:label 'London, Greater London'@en .} UNION { ?place dbpedia-prop:officialName 'London'@en .} UNION { ?place dbpedia-prop:name 'London'@en .} UNION { ?place foaf:name 'London'@en .} UNION { ?place owl:sameAs <http://rdf.freebase.com/ns/guid.9202a8c04000641f80000000000242b2> .} } { { ?place rdf:type ?type . FILTER regex(?type, '.+/((Place)|(PopulatedPlace)|(Town)|(City)|(.*CitiesIn.*))$', 'i') } UNION { ?place dbpedia-prop:population ''' asdasd ' ''' .} } { ?place rdfs:label ?label . FILTER ( lang(?label) = 'en' ) } OPTIONAL { { ?place dbpedia-prop:latm ?latm ; dbpedia-prop:longm ?longm . } UNION { ?place dbpedia-prop:latM ?latm ; dbpedia-prop:longM ''' asdasv ' \"v''' . } UNION { ?place geo:lat ?latitude ; geo:long ?longitude . } UNION { ?place owl:sameAs ?sameAsUri .} UNION { ?place foaf:page ?linkUrl .} } }";
 		String test = "PREFIX : <http://dbpedia.org/resource/> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX dbpedia-owl: <http://dbpedia.org/ontology/> PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX dbpedia-prop: <http://dbpedia.org/property/> PREFIX yago: <http://dbpedia.org/class/yago/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX umbel-sc: <http://umbel.org/umbel/sc/> PREFIX dbpedia: <http://dbpedia.org/> PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?place ?label ?longitude ?latitude ?latm ?longm ?sameAsUri ?linkUrl WHERE { { { ?place rdfs:label 'London'@en .} UNION { ?place rdfs:label 'London, Greater London'@en .} UNION { ?place dbpedia-prop:officialName 'London'@en .} UNION { ?place dbpedia-prop:name 'London'@en .} UNION { ?place foaf:name 'London'@en .} UNION { ?place owl:sameAs <http://rdf.freebase.com/ns/guid.9202a8c04000641f80000000000242b2> .} } { { ?place rdf:type ?type . FILTER regex(?type, '.+/((Place)|(PopulatedPlace)|(Town)|(City)|(.*CitiesIn.*))$', 'i') } UNION { ?place dbpedia-prop:population ''' asdasd '''' .} } { ?place rdfs:label ?label . FILTER ( lang(?label) = 'en' ) } OPTIONAL { { ?place dbpedia-prop:latm ?latm ; dbpedia-prop:longm ?longm . } UNION { ?place dbpedia-prop:latM ?latm ; dbpedia-prop:longM ''' asdasv ' \"v''' . } UNION { ?place geo:lat ?latitude ; geo:long ?longitude . } UNION { ?place owl:sameAs ?sameAsUri .} UNION { ?place foaf:page ?linkUrl .} } }";
+		test="select distinct * where { <http://dbpedia.org/resource/> <http://dbpedia.org/property/associatedBands> ?var0 . } order by ?var0";
 		System.out.println(test);
 		System.out.println(queryIRIsToVars(test, 0));
 		System.out.println(queryToPattern(test));
@@ -131,9 +132,9 @@ public class PatternSolution {
 			ret.add(literal);
 			q = q.replace(literal, "<>");
 		}
-		regex = "[^\"'](true|false|[+-]?[0-9]+(.[0-9]+|))\\s*(\\}|\\.|;)";
+		regex = "[^\"'](true|false|[+-]?[^.]*[0-9]+(.[0-9]+|))\\s*(\\}|\\.|;)";
 		p = Pattern.compile(regex, Pattern.UNICODE_CHARACTER_CLASS);
-		m = p.matcher(q);
+		m = p.matcher(q.replaceAll("\\?\\w+", "?var"));
 		while(m.find()){
 			String literal = m.group();
 //			if(literal.startsWith("<")||literal.startsWith("?")||literal.matches("\\w*:\\w+")){

@@ -199,7 +199,7 @@ public class LogSolution {
 					pw.println(line.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " "));
 				}
 				catch(QueryException e){
-					log.info("Messed up Query in logfile: "+line+"\nException: "+e);
+//					log.info("Messed up Query in logfile: "+line+"\nException: "+e);
 				}
 
 			}
@@ -520,17 +520,17 @@ public class LogSolution {
 		FileInputStream fis = null;
 		BufferedReader br = null;
 		String line="";
-		int q=0;
-		List<String> cl = Arrays.asList(cluster);
+		int q=1;
+		ArrayList<String> cl = new ArrayList<String>(Arrays.asList(cluster));
 		Integer ret=0;
 		try{
 			fis = new FileInputStream(freqQueries);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
-			while((line = br.readLine())!= null && cl.isEmpty()){
+			while((line = br.readLine())!= null && !cl.isEmpty()){
 				if(line.isEmpty()){continue;}
 				for(String qID : cl){
 					if(qID.equals("q"+q)){
-						ret+=Integer.parseInt(line.substring(line.lastIndexOf("\t")+1, line.length()));
+						ret+=Integer.parseInt(line.substring(line.lastIndexOf("\t")+1));
 						cl.remove(qID);
 						break;
 					}

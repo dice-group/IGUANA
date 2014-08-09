@@ -99,7 +99,7 @@ public class Benchmark {
 	}
 
 	public static void sendIfEnd(){
-		if(!end){
+		if(!end &&mail){
 			try{
 				EmailHandler.sendBadNews("Sys.exit", 
 						ZipUtils.folderToZip(
@@ -136,6 +136,8 @@ public class Benchmark {
 		log.setLevel(Level.FINE);
 		// Auch in Datei schreiben
 		LogHandler.initLogFileHandler(log, "benchmark");
+		
+		results = new HashMap<String, Collection<ResultSet>>();
 		
 		Calendar start = Calendar.getInstance();
 		start.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -209,9 +211,10 @@ public class Benchmark {
 				log.info("Finished Clustering");
 			}
 			
-			
+			//TODO Logging: Options 
+			log.info("Starting benchmark");
 			mainLoop(databaseIds, pathToXMLFile);
-			
+			log.info("Benchmark finished");
 			//<<<<<<<!!!!!!!!!!!!!>>>>>>>
 		} catch (Exception e) {
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
@@ -310,13 +313,16 @@ public class Benchmark {
 					ut.addCurrentResults(uploadRes);
 					ut.start();
 					upload = ut.getResults().iterator().next();
+					upload.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+"UploadTest_"+percents.get(i));
+					results.put("UploadTestcase", ut.getResults());
 					log.info("Upload Testcase finished for "+db+":"+percents.get(i));
 				}
 				try{
 					if(config.get("warmup-query-file")!=null &&config.get("warmup-time")!=null){
+						log.info("Warmup started");
 						warmup(con, String.valueOf(config.get("warmup-query-file")) ,
 								Long.valueOf(config.get("warmup-time")));
-						log.info("Warmup finished");
+						log.info("Warmup finished! Ready to get pumped!");
 					}
 				}catch(Exception e){
 					log.info("No warmup! ");
@@ -331,7 +337,6 @@ public class Benchmark {
 				dbCount++;
 
 			}
-			upload.setFileName("UploadTest_"+percents.get(i));
 			upload.save();
 		}
 		for (String key : results.keySet()) {
@@ -339,34 +344,44 @@ public class Benchmark {
 				log.info("Saving Results...");
 				String testCase = key.split("&")[0];
 				testCase.replaceAll("[^A-Za-z0-9]", "");
-				String[] fileName = res.getFileName().split(File.separator);
+				String fileSep =File.separator;
+				if(fileSep.equals("\\")){
+					fileSep=File.separator+File.separator;
+				}
+				String[] fileName = res.getFileName().split(fileSep);
+				new File("."+File.separator+
+						RESULT_FILE_NAME+
+						File.separator+testCase+
+						File.separator).mkdirs();
 				res.setFileName("."+File.separator+
 						RESULT_FILE_NAME+
 						File.separator+testCase+
 						File.separator+fileName[fileName.length-1]);
 				res.save();
 				res.saveAsPNG();
-				log.info("Finished saving results");
+				
 			}
 		}
+		log.info("Finished saving results");
 	}
 
 	
 	private static void warmup(Connection con, Collection<String> queries, Long time){
 		Long begin = new Date().getTime();
+		time=60*1000*time;
 		int i=0;
 		List<String> queryList = new LinkedList<String>(queries);
 		if(queryList.size()==0){
 			log.warning("No queries in File: No warmup! Ready to get pumped");
 			return;
 		}
-		while(begin+(new Date().getTime()) < time){
+		while((new Date().getTime())-begin < time){
 			if(queryList.size()<=i){
 				i=0;
 			}
 			con.execute(queryList.get(i));
 		}
-		log.info("Warmup finished! Ready to get pumped!");
+		
 	}
 	
 	private static void warmup(Connection con, String queriesFile, Long time){

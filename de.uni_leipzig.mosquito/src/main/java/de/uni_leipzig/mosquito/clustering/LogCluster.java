@@ -167,7 +167,6 @@ public class LogCluster {
 			while((line = br.readLine())!= null){
 				if(j==i){
 					line = line.substring(0, line.lastIndexOf("\t"));
-					//TODO patterns only literals or iris too as vars
 					pw.println(PatternSolution.queryToPattern(line));
 					j =queryList.get(++t);
 				}
@@ -198,18 +197,21 @@ public class LogCluster {
 		String line="";
 		String[] ret = new String[queryList.size()];
 		Collections.sort(queryList);
-		Collections.reverse(queryList);
+//		Collections.reverse(queryList);
 		try{
 			fis = new FileInputStream(input);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			int i=0, j=0, t=0;
-			j=queryList.get(t);
+			
 			while((line = br.readLine())!= null){
+				j=queryList.get(t);
 				if(j==i){
 					line = line.substring(0, line.lastIndexOf("\t"));
-					//TODO patterns only literals or iris too as vars
 					ret[t] = PatternSolution.queryToPattern(line);
-					j =queryList.get(++t);
+					t++;
+					if(t==queryList.size()){
+						break;
+					}
 				}
 				i++;
 			}
@@ -339,12 +341,16 @@ public class LogCluster {
 		String line;
 		String[] feat = LogSolution.getFeatures();
 		Integer[] momFreq = new Integer[feat.length];
+		for(int i=0; i<feat.length;i++){
+			momFreq[i]=0;
+		}
 		String[] momQueries = new String[feat.length];
 
 		try{
 			fis = new FileInputStream(input);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			while((line = br.readLine())!= null){
+				if(line.isEmpty()){continue;}
 				String[] cluster = line.split("\t")[1].replaceAll("(\\[|\\])", "").split(",\\s*");
 				if(cluster.length<minNodes){
 					continue;
@@ -357,19 +363,32 @@ public class LogCluster {
 						continue;
 					}
 					for(int j=0; j<cluster.length;j++){
+						try{
+						if(cluster[j]==null){
+							continue;
+						}
 						if(cluster[j].replaceAll("\\<.*?>","").replaceAll("\\\".*?\"","").contains(feat[i])){
 							momFreq[i]=freq;
 							momQueries[i]=cluster[j];
 							break;
+						}
+						}catch(Exception e){
+							e.printStackTrace();
 						}
 					}
 				}
 			}
 			int k;
 			for(k=0;k<momQueries.length-1;k++){
-				pw.println(momQueries[k]);
+				if(momQueries[k]!=null){
+					
+					pw.println(momQueries[k]);
+				}
+				else{
+					log.info("No Query for feature "+feat[k]);
+				}
 			}
-			pw.print(momQueries[k+1]);
+			pw.print(momQueries[k]);
 			pw.close();
 		}
 		catch(IOException e){

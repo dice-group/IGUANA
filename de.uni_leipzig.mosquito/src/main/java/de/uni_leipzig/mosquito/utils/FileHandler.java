@@ -204,15 +204,23 @@ public class FileHandler {
 		File p = new File(path);
 		File[] retF = p.listFiles();
 		String[] ret = new String[retF.length];
+		String fileSep =File.separator;
+		if(fileSep.equals("\\")){
+			fileSep=File.separator+File.separator;
+		}
 		for(int i=0; i<ret.length;i++){
-			ret[i] = (retF[i].getName()).replaceAll("(\\.\\w+)$", "").replaceAll("^(.*"+File.separator+")", "");
+			ret[i] = (retF[i].getName()).replaceAll("(\\.\\w+)$", "").replaceAll("^(.*"+fileSep+")", "");
 		}
 		return ret;
 	}
 	
 	public static String getNameInDirAtPos(String path, int pos){
+		String fileSep =File.separator;
+		if(fileSep.equals("\\")){
+			fileSep=File.separator+File.separator;
+		}
 		File p = new File(path);
-		return p.listFiles()[pos].getName().replaceAll("(\\.\\w+)$", "").replaceAll("^(.*"+File.separator+")", "");
+		return p.listFiles()[pos].getName().replaceAll("(\\.\\w+)$", "").replaceAll("^(.*"+fileSep+")", "");
 	}
 	
 	private static String getRegex(String[] extensions){

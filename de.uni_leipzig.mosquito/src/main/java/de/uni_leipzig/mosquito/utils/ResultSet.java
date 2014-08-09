@@ -5,19 +5,24 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.io.CSV;
+
 import com.xeiam.xchart.Chart;
-import com.xeiam.xchart.ChartBuilder;
-import com.xeiam.xchart.StyleManager.ChartType;
 
 public class ResultSet implements Iterator<List<Object>>{
 	
@@ -28,34 +33,37 @@ public class ResultSet implements Iterator<List<Object>>{
 		res.setyAxis("#Queries");
 		List<Object> row = new LinkedList<Object>();
 		List<String> header = new LinkedList<String>();
-		Random rand = new Random(123);
-		header.add("DB");
-		row.add("1");
-		for(int i =1; i<10;i++){
-			header.add(String.valueOf(i));
-			row.add(rand.nextInt(1000));
-		}
+//		Random rand = new Random(123);
+		header.add("Connection");
+		header.add("3");
+		row.add("dbpedia");
+		row.add(338427);
+//		for(int i =1; i<10;i++){
+//			header.add(String.valueOf(i));
+//			row.add(rand.nextInt(1000));
+//		}
 		res.addRow(row);
 		row.clear();
-		row.add("2");
-		for(int i =1; i<10;i++){
-			row.add(rand.nextInt(1000));
-		}
-		res.addRow(row);
-		row.clear();
-		row.add("3");
-		for(int i =1; i<10;i++){
-			row.add(rand.nextInt(1000));
-		}
-		res.addRow(row);
-		row.clear();
-		row.add("4");
-		for(int i =1; i<10;i++){
-			row.add(rand.nextInt(1000));
-		}
-		res.addRow(row);
+//		row.add("2");
+//		for(int i =1; i<10;i++){
+//			row.add(rand.nextInt(1000));
+//		}
+//		res.addRow(row);
+//		row.clear();
+//		row.add("3");
+//		for(int i =1; i<10;i++){
+//			row.add(rand.nextInt(1000));
+//		}
+//		res.addRow(row);
+//		row.clear();
+//		row.add("4");
+//		for(int i =1; i<10;i++){
+//			row.add(rand.nextInt(1000));
+//		}
+//		res.addRow(row);
 		res.setHeader(header);
 		res.setFileName("testCSV2");
+//		res.save();
 		res.saveAsPNG();
 		
 	}
@@ -139,7 +147,22 @@ public class ResultSet implements Iterator<List<Object>>{
 		
 	}
 	
+	public Boolean isEmpty(){
+		if(header.isEmpty()){
+			for(List<Object> row: table){
+				if(!row.isEmpty()){
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	public void save() throws IOException{
+		if(this.isEmpty()){
+			return;
+		}
 		File f = new File(this.fileName+".csv");
 		f.createNewFile();
 		PrintWriter pw = new PrintWriter(fileName+".csv");
@@ -147,15 +170,19 @@ public class ResultSet implements Iterator<List<Object>>{
 		for(String cell : header){
 			head+=cell+";";
 		}
-		pw.write(head.substring(0, head.length()-1));
-    	pw.println();
+		if(!header.isEmpty()){
+			pw.write(head.substring(0, head.length()-1));
+    		pw.println();
+		}
         for(List<Object> row : table){
         	String currentRow = "";
         	for(Object cell : row){
         		currentRow += cell+";";
         	}
-        	pw.write(currentRow.substring(0, currentRow.length()-1));
-        	pw.println();
+        	if(!row.isEmpty()){
+        		pw.write(currentRow.substring(0, currentRow.length()-1));
+        		pw.println();
+        	}
         }
         pw.close();
 	}
@@ -188,6 +215,7 @@ public class ResultSet implements Iterator<List<Object>>{
 		return columns.subList(1, columns.size());
 	}
 	
+	@SuppressWarnings("unused")
 	private void streamPNG(Chart chart) throws IOException {
 		 
 	    BufferedImage lBufferedImage = new BufferedImage(chart.getWidth(), chart.getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -202,27 +230,26 @@ public class ResultSet implements Iterator<List<Object>>{
 	
 	public void saveAsPNG() throws FileNotFoundException, IOException{
 		save();
-		int width = 30*(header.size()*table.size());
-		int height = width/2;//?
-		Chart chart = new ChartBuilder().chartType(ChartType.Bar).width(width).height(height).title(title).xAxisTitle(xAxis).yAxisTitle(yAxis).build();
-
-		for(List<Object> row :table){
-			List<Number> subRow = new LinkedList<Number>();
-			for(int i=1;i< row.size(); i++){
-				subRow.add((Number) row.get(i));
-			}
-			chart.addSeries(String.valueOf(row.get(0)),
-						header.subList(1, header.size()), subRow);
-		}
-		streamPNG(chart);
+		int width = Math.max(30*(header.size()*table.size()), 300);
+		int height = Math.max(width/2, 300);//?
+//		Chart chart = new ChartBuilder().chartType(ChartType.Bar).width(width).height(height).title(title).xAxisTitle(xAxis).yAxisTitle(yAxis).build();
+//		for(List<Object> row :table){
+//			List<Number> subRow = new LinkedList<Number>();
+//			for(int i=1;i< row.size(); i++){
+//				subRow.add((Number) row.get(i));
+//			}
+//			chart.addSeries(String.valueOf(row.get(0)),
+//						header.subList(1, header.size()), subRow);
+//		}
+//		streamPNG(chart);
 		
-//		CategoryDataset dataset = new CSV(';','\n').readCategoryDataset(new FileReader(this.fileName+".csv"));
-//		JFreeChart ch = ChartFactory.createBarChart(this.fileName,"Query", "Value", dataset, PlotOrientation.VERTICAL, true, false, false);
-//		ch.setAntiAlias(true);
-//		ch.setTextAntiAlias(true);
-//		ch.setBorderVisible(false);
+		CategoryDataset dataset = new CSV(';','\n').readCategoryDataset(new FileReader(this.fileName+".csv"));
+		JFreeChart ch = ChartFactory.createBarChart(this.title,xAxis, yAxis, dataset, PlotOrientation.VERTICAL, true, false, false);
+		ch.setAntiAlias(true);
+		ch.setTextAntiAlias(true);
+		ch.setBorderVisible(false);
 //		StandardChartTheme ct = new StandardChartTheme(fileName);
-//		ChartUtilities.saveChartAsPNG(new File(this.fileName+".png"), ch, 800, 800);
+		ChartUtilities.saveChartAsPNG(new File(this.fileName+".png"), ch, width, height);
 	}
 	
 	public String getFileName() {

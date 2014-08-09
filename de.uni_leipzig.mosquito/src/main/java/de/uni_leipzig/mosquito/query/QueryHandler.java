@@ -135,13 +135,17 @@ public class QueryHandler {
 			if(p.isEmpty()){
 				continue;
 			}
-			if((p.toLowerCase().contains("ask") || p.toLowerCase().contains("select") || p.toLowerCase().contains("construct") || p.toLowerCase().contains("describe"))){
+			String test = " "+p.toLowerCase().replaceAll("\\{.*", "");
+			if((test.contains(" ask") || test.contains(" select") || test.contains(" construct") || test.contains(" describe"))){
 				//SELECT, ASK, DESCRIBE, CONSTRUCT
 //				QueryFactory.create(p);
+//				System.out.println(test);
 				valuesToCSV(p, String.valueOf(i));
 			}
 			else{
 				//UPDATE 
+				System.out.println(test);
+				System.out.println(p);
 				updatePattern(p, String.valueOf(i));
 			}
 			
@@ -165,23 +169,35 @@ public class QueryHandler {
 			PrintWriter pwfailed = new PrintWriter(new FileOutputStream(failed, true));
 			PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8), true);
 			String q = selectPattern(query);
-			ResultSet res = con.execute(q);
+			ResultSet res =null;
+			if(!QuerySorter.isSPARQL(q)){
+				
+			}
+			else{
+				res= con.execute(q);
+			}
 			Boolean result= false;
-			while(res.next()){
-				result=true;
-				ResultSetMetaData rsmd = res.getMetaData();
-				int columns = rsmd.getColumnCount();
-				String line ="";
-				List<Object> vars = new LinkedList<Object>();
-				for(int i=1 ;i<=columns;i++ ){
-					Object current = res.getObject(i);
-					Node cur = TripleStoreHandler.implToNode(current);
-					vars.add(GraphHandler.NodeToSPARQLString(cur));
+			if(res!=null){
+				while(res.next()){
+					result=true;
+					ResultSetMetaData rsmd = res.getMetaData();
+					int columns = rsmd.getColumnCount();
+					String line ="";
+					List<Object> vars = new LinkedList<Object>();
+					for(int i=1 ;i<=columns;i++ ){
+						Object current = res.getObject(i);
+						if(current==null){
+							vars.add("null");
+							continue;
+						}
+						Node cur = TripleStoreHandler.implToNode(current);
+						vars.add(GraphHandler.NodeToSPARQLString(cur));
+					}
+					line = patternToQuery(pattern, vars);
+					pw.write(line);
+					pw.println();
+					ret++;
 				}
-				line = patternToQuery(pattern, vars);
-				pw.write(line);
-				pw.println();
-				ret++;
 			}
 			pw.close();
 			if(!result){
@@ -209,6 +225,7 @@ public class QueryHandler {
 		while(matcher.find()){
 			String var = matcher.group();
 			if(!replaced.contains(var)){
+				//TODO!!!
 				query = query.replace(var, vars.get(i).toString());		
 				i++;
 				replaced.add(var);
