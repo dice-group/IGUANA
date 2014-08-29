@@ -178,11 +178,11 @@
 		</dependency>
 	</dependencies>
 	<repositories>
-		<repository>
-			<id>Libs</id>
-			<name>Benchmark Libs</name>
-			<url>file://${project.basedir}/src/main/resources/lib</url>
-		</repository>
+<!-- 		<repository> -->
+<!-- 			<id>Libs</id> -->
+<!-- 			<name>Benchmark Libs</name> -->
+<!-- 			<url>file://${project.basedir}/src/main/resources/lib</url> -->
+<!-- 		</repository> -->
 		<repository>
 			<releases>
 				<enabled>true</enabled>
@@ -199,14 +199,48 @@
 			<name>JBoss repository</name>
 			<url>https://repository.jboss.org/nexus/content/groups/public</url>
 		</repository>
-		<repository>
-			<id>repository.bio-gene</id>
-			<name>BioGene repository</name>
-			<url>http://maven.bio-gene.org/nexus/content/groups/public/</url>
-		</repository>
+<!-- 		<repository> -->
+<!-- 			<id>repository.bio-gene</id> -->
+<!-- 			<name>BioGene repository</name> -->
+<!-- 			<url>http://maven.bio-gene.org/nexus/content/groups/public/</url> -->
+<!-- 		</repository> -->
 	</repositories>
 	<build>
-		<plugins>
+	<plugins>
+<!-- 		<plugin> -->
+<!--             <groupId>org.apache.maven.plugins</groupId> -->
+<!--             <artifactId>maven-dependency-plugin</artifactId> -->
+<!--             <executions> -->
+<!--                 <execution> -->
+<!--                     <id>copy-dependencies</id> -->
+<!--                     <phase>prepare-package</phase> -->
+<!--                     <goals> -->
+<!--                         <goal>copy-dependencies</goal> -->
+<!--                     </goals> -->
+<!--                     <configuration> -->
+<!--                         <outputDirectory>${project.build.directory}/lib</outputDirectory> -->
+<!--                         <overWriteReleases>false</overWriteReleases> -->
+<!--                         <overWriteSnapshots>false</overWriteSnapshots> -->
+<!--                         <overWriteIfNewer>true</overWriteIfNewer> -->
+<!--                     </configuration> -->
+<!--                 </execution> -->
+<!--             </executions> -->
+<!--         </plugin> -->
+<!--         <plugin> -->
+<!--             <groupId>org.apache.maven.plugins</groupId> -->
+<!--             <artifactId>maven-jar-plugin</artifactId> -->
+<!--             <configuration> -->
+<!--                 <archive> -->
+<!--                     <manifest> -->
+<!--                         <addClasspath>true</addClasspath> -->
+<!--                         <classpathPrefix>lib/</classpathPrefix> -->
+<!--                         <mainClass>de.uni_leipzig.mosquito.benchmark.Benchmark</mainClass> -->
+<!--                     </manifest> -->
+<!--                 </archive> -->
+<!--             </configuration> -->
+<!--         </plugin> -->
+	
+		
 			<plugin>
               <artifactId>maven-assembly-plugin</artifactId>
               <configuration>
@@ -227,6 +261,11 @@
                       <goals>
                           <goal>single</goal>
                       </goals>
+                      <configuration>
+              <descriptors>
+                <descriptor>dist.xml</descriptor>
+              </descriptors>
+            </configuration>
                   </execution>
               </executions>
           </plugin>
