@@ -37,52 +37,58 @@ public class TripleStoreStatistics {
 	
 		public static Long tripleCount(Connection con, String graphURI){
 			//validated with 4store
-			String query="SELECT (COUNT(*) AS ?no) "+(graphURI!=null?"FROM <"+graphURI+">":"")+" { ?s ?p ?o  }";
+			String query="SELECT (COUNT(*) AS ?no) ";
+			query+=(graphURI!=null?"FROM <"+graphURI+">":"");
+			query+=" { ?s ?p ?o  }";
 			return query(con, query);
 			
 		}
 		
 		public static Long objectNodeCount(Connection con, String graphURI){
 			//validated with 4store 
-			String query="SELECT (COUNT(DISTINCT ?o) AS ?no) "+(graphURI!=null?"FROM <"+graphURI+">":"")+" WHERE{ ?s ?p ?o  filter (!isLiteral(?o)) }";
+			String query="SELECT (COUNT(DISTINCT ?o) AS ?no) ";
+			query+=(graphURI!=null?"FROM <"+graphURI+">":"");
+			query+=" WHERE{ ?s ?p ?o  filter (!isLiteral(?o)) }";
 			return query(con, query);
 		}
 		
 		public static Long subjectNodeCount(Connection con, String graphURI){
 			//validated with 4store 
-			String query="SELECT (COUNT(DISTINCT ?s) AS ?no) "+(graphURI!=null?"FROM <"+graphURI+">":"")+" WHERE { ?s ?p ?o  }";
+			String query="SELECT (COUNT(DISTINCT ?s) AS ?no) ";
+			query+=(graphURI!=null?"FROM <"+graphURI+">":"");
+			query+=" WHERE { ?s ?p ?o  }";
 			return query(con, query);
 		}
 		
 		public static Long entityCount(Connection con, String graphURI){
 			//validated with 4store 
-			String query="SELECT (COUNT(DISTINCT ?s) AS ?no) "+(graphURI!=null?"FROM <"+graphURI+">":"")+" WHERE{ ?s a []  }";
+			String query="SELECT (COUNT(DISTINCT ?s) AS ?no) ";
+			query+=(graphURI!=null?"FROM <"+graphURI+">":"");
+			query+=" WHERE{ ?s a []  }";
 			return query(con, query);
 		}
 		
 		public static Long avgOutDegree(Connection con, Boolean literals, String graphURI){
-			String query="";
+			String query="SELECT (AVG(?co) AS ?no)  ";
+			query+=(graphURI!=null?"FROM <"+graphURI+"> ":"");
 			if(literals){
 				
-				query="SELECT (AVG(?co) AS ?no)  "+(graphURI!=null?"FROM <"+graphURI+"> ":"")
-						+ " WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) WHERE  { ?s ?p ?t } GROUP BY ?s}";
+				query+="WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) WHERE  { ?s ?p ?t } GROUP BY ?s}";
 			}else{
 				
-				query="SELECT (AVG(?co) AS ?no)  "+(graphURI!=null?"FROM <"+graphURI+"> ":"")
-						+ " WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) "+
+				query+= " WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) "+
 						"WHERE  { ?s ?p ?t filter(!isLiteral(?t))} GROUP BY ?s}";
 			}
 			return query(con, query);
 		}
 		
 		public static Long avgInDegree(Connection con, Boolean literals, String graphURI){
-			String query="";
+			String query="SELECT (AVG(?co) AS ?no)  ";
+			query+=(graphURI!=null?"FROM <"+graphURI+"> ":"");
 			if(literals){
-				query="SELECT (AVG(?co) AS ?no) "+(graphURI!=null?"FROM <"+graphURI+"> ":"")
-						+ " WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) WHERE  { ?t ?p ?o } GROUP BY ?o}";
+				query+=" WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) WHERE  { ?t ?p ?o } GROUP BY ?o}";
 			}else{
-				query="SELECT (AVG(?co) AS ?no) "+(graphURI!=null?"FROM <"+graphURI+"> ":"")
-						+ "WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) "
+				query+="WHERE { SELECT (SAMPLE(?s) AS ?NAME) (COUNT(?t) AS ?co) "
 						+ "WHERE  { ?t ?p ?o filter(!isLiteral(?o)) } GROUP BY ?o}";
 			}
 			return query(con, query);

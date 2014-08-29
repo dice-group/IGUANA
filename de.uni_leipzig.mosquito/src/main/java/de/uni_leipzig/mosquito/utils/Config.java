@@ -136,13 +136,13 @@ public class Config {
 		}
 		map.put("convert-processing", pgnprocess);
 		cp.setNode(benchmark);
-		String outputFormat = "TURTLE";
+		String outputFormat = "N-TRIPLE";
 		try{
 			outputFormat=  cp.getElementAt("output-format", 0)
 					.getAttribute("name");
 		}
 		catch(Exception e){
-			outputFormat = "N3";
+			outputFormat = "N-TRIPLE";
 		}
 		map.put("output-format", outputFormat);
 		cp.setNode(benchmark);

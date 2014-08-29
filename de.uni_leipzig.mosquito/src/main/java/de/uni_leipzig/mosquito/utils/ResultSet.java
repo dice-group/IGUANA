@@ -89,6 +89,10 @@ public class ResultSet implements Iterator<List<Object>>{
 		return header;
 	}
 	
+	public List<List<Object>> getTable(){
+		return table;
+	}
+	
 	public void setHeader(List<String> header){
 		this.header = new LinkedList<String>(header);
 	}
@@ -230,8 +234,8 @@ public class ResultSet implements Iterator<List<Object>>{
 	
 	public void saveAsPNG() throws FileNotFoundException, IOException{
 		save();
-		int width = Math.max(30*(header.size()*table.size()), 300);
-		int height = Math.max(width/2, 300);//?
+		int width = Math.max(70*(header.size()*table.size()), 800);
+		int height = Math.max(width/2, 500);//?
 //		Chart chart = new ChartBuilder().chartType(ChartType.Bar).width(width).height(height).title(title).xAxisTitle(xAxis).yAxisTitle(yAxis).build();
 //		for(List<Object> row :table){
 //			List<Number> subRow = new LinkedList<Number>();

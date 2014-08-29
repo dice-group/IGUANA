@@ -23,6 +23,7 @@ import org.apache.commons.mail.EmailException;
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.connection.ConnectionFactory;
 import org.bio_gene.wookie.utils.ConfigParser;
+import org.bio_gene.wookie.utils.FileExtensionToRDFContentTypeMapper;
 import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -31,6 +32,7 @@ import de.uni_leipzig.mosquito.clustering.clusterer.Clusterer;
 import de.uni_leipzig.mosquito.converter.RDFVocabulary;
 import de.uni_leipzig.mosquito.data.TripleStoreHandler;
 import de.uni_leipzig.mosquito.generation.DataGenerator;
+import de.uni_leipzig.mosquito.generation.ExtendedDatasetGenerator;
 import de.uni_leipzig.mosquito.testcases.Testcase;
 import de.uni_leipzig.mosquito.testcases.UploadTestcase;
 import de.uni_leipzig.mosquito.utils.Config;
@@ -131,6 +133,10 @@ public class Benchmark {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void start(String pathToXMLFile) {
+		
+		ConnectionFactory.setDriver("org.apache.jena.jdbc.remote.RemoteEndpointDriver");
+		ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=http://");
+
 		// Logging ermöglichen
 		log = Logger.getLogger("benchmark");
 		log.setLevel(Level.FINE);
@@ -189,7 +195,8 @@ public class Benchmark {
 								config.get("graph-uri"), log);
 				
 				//To one File & upload to refTS
-				String output=config.get("output-path")+File.separator+StringHandler.stringToAlphanumeric(UUID.randomUUID().toString());
+				String output=config.get("output-path")+File.separator+StringHandler.stringToAlphanumeric(UUID.randomUUID().toString())+"."
+				+FileExtensionToRDFContentTypeMapper.guessFileExtensionFromFormat(config.get("output-format"));
 				FileHandler.writeFilesToFile(config.get("output-path"), output);
 				refCon.uploadFile(output);
 				config.put("random-function-gen", "true");
@@ -288,8 +295,9 @@ public class Benchmark {
 		else{
 			randFiles = Config.getRandomFiles(rootNode);
 		}
+		ResultSet upload = new ResultSet();
 		for (int i = 0; i < percents.size(); i++) {
-			ResultSet upload = new ResultSet();
+			
 			for (String db : ids) {
 				log.info("DB:PERCENT: "+db+":"+percents.get(i));
 				// Connection zur jetzigen DB
@@ -305,15 +313,17 @@ public class Benchmark {
 					Properties up = testcases.get(UploadTestcase.class
 							.getName());
 					up.setProperty("file", randFiles[i]);
+					up.setProperty("graph-uri", config.get("graph-uri"));
 					ut.setProperties(up);
 					ut.setConnection(con);
+					ut.setCurrentPercent(String.valueOf(percents.get(i)));
 					ut.setCurrentDBName(db);
 					Collection<ResultSet> uploadRes = new LinkedList<ResultSet>();
 					uploadRes.add(upload);
 					ut.addCurrentResults(uploadRes);
 					ut.start();
 					upload = ut.getResults().iterator().next();
-					upload.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+"UploadTest_"+percents.get(i));
+					upload.setFileName("UploadTest_");//+percents.get(i));
 					results.put("UploadTestcase", ut.getResults());
 					log.info("Upload Testcase finished for "+db+":"+percents.get(i));
 				}
@@ -358,8 +368,12 @@ public class Benchmark {
 						File.separator+testCase+
 						File.separator+fileName[fileName.length-1]);
 				res.save();
-				res.saveAsPNG();
-				
+				try{
+					res.saveAsPNG();
+				}
+				catch(Exception e){
+					log.warning("Couldn't make image");
+				}
 			}
 		}
 		log.info("Finished saving results");
@@ -406,7 +420,7 @@ public class Benchmark {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void start(Connection con, String dbName, String percent) throws IOException {
-
+		
 		for (String testcase : testcases.keySet()) {
 			if (testcase.equals(UploadTestcase.class.getName())) {
 				continue;
@@ -414,11 +428,14 @@ public class Benchmark {
 			log.info("Starting "+testcase+" for "+dbName+":"+percent);
 			try {
 				Properties testProps = testcases.get(testcase);
+				if(!testProps.containsKey("graphURI")){
+					testProps.setProperty("graphURI", config.get("graph-uri"));
+				}
 				Class<Testcase> t = (Class<Testcase>) Class.forName(testcase);
 				Testcase test = t.newInstance();
 				test.setProperties(testProps);
-				if (results.containsKey(testcase+percent)) {
-					test.addCurrentResults(results.get(testcase+percent));
+				if (results.containsKey(testcase+"&"+percent)) {
+					test.addCurrentResults(results.get(testcase+"&"+percent));
 				}
 				test.setConnection(con);
 				test.setCurrentDBName(dbName);
@@ -448,8 +465,14 @@ public class Benchmark {
 				ret[i] = fileName;
 				continue;
 			}
-			String outputFile ="datasets"+File.separator+"ds_"+i*100+".nt";
-			DataGenerator.generateData(con, config.get("graph-uri"), fileName, outputFile, config.get("random-function"), percents.get(i));
+			Double per = percents.get(i)*100.0;
+			String outputFile ="datasets"+File.separator+"ds_"+per+".nt";
+			if(per<100){
+				DataGenerator.generateData(con, config.get("graph-uri"), fileName, outputFile, config.get("random-function"), percents.get(i));
+			}
+			else{
+				ExtendedDatasetGenerator.generatedExtDataset(fileName, outputFile, percents.get(i));
+			}
 			log.info("Writing "+percents.get(i)*100+"% Dataset to File");
 		}
 		return ret;

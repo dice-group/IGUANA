@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.xml.sax.SAXException;
 
 import de.uni_leipzig.mosquito.converter.ConverterI;
@@ -37,7 +36,7 @@ public class Converter {
 			IOException, ParserConfigurationException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 //		PGNToRDFConverterRanged pg = new PGNToRDFConverterRanged();
 		
-		ConverterI pg = (ConverterI) ClassUtils.getClass(converter).newInstance();
+		ConverterI pg = (ConverterI) Class.forName(converter).newInstance();
 
 				
 		new File(oPath).mkdirs();
@@ -61,8 +60,8 @@ public class Converter {
 					}})) 
 		{
 			log.info("Processing file: " + file);
-			pg.processToStream(path + File.separator + file, oPath
-					+ File.separator + file + outputFormat);
+			pg.processToStream(path + File.separator + file.getName(), oPath
+					+ File.separator + file.getName() + outputFormat);
 			file.delete();
 		}
 

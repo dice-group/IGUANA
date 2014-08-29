@@ -5,7 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.update.UpdateFactory;
+import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.sparql.lang.SPARQLParser;
+import com.hp.hpl.jena.sparql.lang.UpdateParser;
+import com.hp.hpl.jena.sparql.modify.UpdateRequestSink;
+import com.hp.hpl.jena.sparql.modify.UpdateSink;
+import com.hp.hpl.jena.update.UpdateRequest;
 
 import de.uni_leipzig.mosquito.utils.FileHandler;
 
@@ -75,7 +80,8 @@ public class QuerySorter {
 	
 	public static Boolean isSPARQL(String query){
 		try{
-			QueryFactory.create(query);
+			SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
+			sp.parse(QueryFactory.create(), query);
 			return true;
 		}
 		catch(Exception e){
@@ -85,7 +91,9 @@ public class QuerySorter {
 	
 	public static Boolean isSPARQLUpdate(String query){
 		try{
-			UpdateFactory.create(query);
+			UpdateParser up = UpdateParser.createParser(Syntax.syntaxSPARQL_11);
+			UpdateSink sink = new UpdateRequestSink(new UpdateRequest());
+			up.parse(sink, query);
 			return true;
 		}
 		catch(Exception e)

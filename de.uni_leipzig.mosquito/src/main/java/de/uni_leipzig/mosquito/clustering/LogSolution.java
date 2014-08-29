@@ -27,10 +27,13 @@ import java.util.regex.Pattern;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryException;
 import com.hp.hpl.jena.query.QueryFactory;
-
+import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.sparql.lang.SPARQLParser;
 import uk.ac.shef.wit.simmetrics.similaritymetrics.Levenshtein;
+import de.uni_leipzig.mosquito.query.QuerySorter;
 import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.StringHandler;
 import de.uni_leipzig.mosquito.utils.comparator.OccurrencesComparator;
@@ -188,6 +191,15 @@ public class LogSolution {
 				int index = line.indexOf("\"");
 				int lastIndex = line.indexOf("\"", index+1);
 				line = line.substring(index, lastIndex);
+				String graph = null;
+				Pattern  p = Pattern.compile("\\?default-graph-uri=[^&]+&");
+				Matcher m = p.matcher(line);
+				if(m.find()){
+					String complete = m.group();
+					graph = complete.substring(complete.indexOf("=")+1, complete.lastIndexOf("&"));
+					graph = URLDecoder.decode(graph, "UTF-8");
+				}
+				
 				line = line.replaceFirst(".*query=", "");
 				if((index=line.indexOf("&"))>=0)
 					line = line.substring(0, index);
@@ -195,7 +207,16 @@ public class LogSolution {
 				line = line.replaceAll("^\\s+", "");
 				line = queryVarRename(line);
 				try{
-					QueryFactory.create(line);
+					if(!QuerySorter.isSPARQL(line)&&!QuerySorter.isSPARQLUpdate(line)){
+						throw new QueryException();
+					}
+					if(graph!=null &&QuerySorter.isSPARQL(line)){
+						SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
+						Query q =sp.parse(QueryFactory.create(),line);
+						q.addGraphURI(graph);
+						line = q.toString().replace("\n", " ");
+					}
+					
 					pw.println(line.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " "));
 				}
 				catch(QueryException e){
@@ -435,14 +456,11 @@ public class LogSolution {
 			return null;
 		}
 		vdist =1.0/(1+vdist);
-		
-		
- 
 //		ldist = lev.getSimilarity(query1, query2);
 		double ldist = StringHandler.levenshtein(query1, query2, threshold[1]);
-//		if(Math.max(query1.length(), query2.length())*(1-ldist)>threshold[1]){
-//			return null;
-//		}
+		if(ldist==0.0){
+			return null;
+		}
 		return Math.max(vdist, ldist);
 	}
 	
@@ -568,18 +586,21 @@ public class LogSolution {
 		String line, line2, struct;
 		try{
 			fis = new FileInputStream(structs);
-			fis2 = new FileInputStream(freq);
+			
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
-			br2 = new BufferedReader(new InputStreamReader(fis2, Charset.forName("UTF-8")));
 			while((line = br.readLine())!= null){
+				fis2 = new FileInputStream(freq);
+				br2 = new BufferedReader(new InputStreamReader(fis2, Charset.forName("UTF-8")));
 				line = line.substring(0, line.lastIndexOf("\t"));
 				while((line2=br2.readLine())!=null){
 					struct = queryToStructure(line2.substring(0, line2.lastIndexOf("\t")));
 					if(struct.equals(line)){
 						pw.println(line2);
+						break;
 					}
 				}
-				pw.flush();
+				br2.close();
+//				pw.flush();
 			}
 		}
 		catch(IOException e){
@@ -594,6 +615,7 @@ public class LogSolution {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			}
 		}
+		pw.close();
 	}
 	
 	

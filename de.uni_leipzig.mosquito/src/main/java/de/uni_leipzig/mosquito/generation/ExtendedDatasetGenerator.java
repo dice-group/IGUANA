@@ -54,9 +54,12 @@ public class ExtendedDatasetGenerator {
     }
     
     public static String getNewLine(String line, int index) throws URISyntaxException{
+    	if(index-2==0){
+    		return line;
+    	}
     	Collection<String> uris = getUrisOfLine(line);
     	for(String uri : uris){
-    		line = replaceWithNewUri(line, uri, index);
+    		line = replaceWithNewUri(line, uri, index-2);
     	}
     	return line;
     }
@@ -72,7 +75,7 @@ public class ExtendedDatasetGenerator {
     		File output = new File(outputFileName);
     		output.createNewFile();
     		pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8), true);
-    		for(int i=0; i<genHundred; i++){
+    		for(int i=0; i<=genHundred; i++){
     			int index = i+2;
     			FileInputStream fis = new FileInputStream(inputFileName);
     			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));

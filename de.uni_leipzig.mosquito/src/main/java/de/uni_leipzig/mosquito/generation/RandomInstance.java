@@ -2,14 +2,17 @@ package de.uni_leipzig.mosquito.generation;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+
 import de.uni_leipzig.mosquito.utils.FileHandler;
 
-import org.apache.log4j.Logger;
 import org.bio_gene.wookie.connection.Connection;
+import org.bio_gene.wookie.utils.LogHandler;
 import org.lexicon.jdbc4sparql.SPARQLConstructResultSet;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,13 +25,19 @@ import java.io.OutputStream;
  */
 public class RandomInstance {
 
-    private static Logger logger = Logger.getLogger(RandomInstance.class);
+    private static Logger logger = Logger.getLogger(RandomInstance.class.getName());
 
     private static long numberOfGeneratedTriples = 0;
 
     private static String graphURI=null;
     
     private static String outputFormat;
+
+	private static String outputFile;
+	
+	static {
+		LogHandler.initLogFileHandler(logger, RandomInstance.class.getSimpleName());
+	}
     
     public static void setGraphURI(String graphURI){
     	RandomInstance.graphURI = graphURI;
@@ -49,11 +58,11 @@ public class RandomInstance {
     public static void generateTripleForInstance(Connection con, RDFNode instance){
         Model outputModel = null;
 //        QueryEngineHTTP queryExecuter = null;
-
-        String query = String.format("CONSTRUCT {?s ?p ?o} "+
-        			graphURI==null?"":"FROM "+graphURI+
-        					" WHERE { {?s ?p ?o}. " +
-                    "FILTER (?s = <%s>)}", instance.toString());
+        String q = "CONSTRUCT {?s ?p ?o} ";
+        q+= graphURI==null?"":"FROM <"+graphURI+">";
+    	q+=	" WHERE { {?s ?p ?o}. " +
+                "FILTER (?s = <%s>)}";
+        String query = String.format(q, instance.toString());
         //We should place it in a loop in order to try again and again till the server responds
 //        _query = " CONSTRUCT {?s ?p ?o} FROM <http://dbpedia.org>  WHERE { {?s ?p ?o}. FILTER (?s = <http://dbpedia.org/resource/Mahela_Jayawardene>)}";
         while(true){
@@ -65,7 +74,7 @@ public class RandomInstance {
 
                 //Write the model to output file
                 numberOfGeneratedTriples += outputModel.size();
-                OutputStream stream = new FileOutputStream(outputFormat, true);
+                OutputStream stream = new FileOutputStream(outputFile, true);
                 try{
                     outputModel.write(stream , outputFormat.toUpperCase());
                 }
@@ -78,15 +87,21 @@ public class RandomInstance {
                 break;
             }
             catch(com.hp.hpl.jena.shared.JenaException exp){
-                logger.error("Triples for instance " + instance +" cannot be fetched", exp);
+                logger.severe("Triples for instance " + instance +" cannot be fetched");
+                LogHandler.writeStackTrace(logger, exp, Level.SEVERE);
                 break;
             }
             catch (Exception exp){
-                logger.error("Query = " + query);
-                logger.error("Triples for instance " + instance +" cannot be fetched", exp);
+                logger.severe("Query = " + query);
+                logger.severe("Triples for instance " + instance +" cannot be fetched");
+                LogHandler.writeStackTrace(logger, exp, Level.SEVERE);
                 logger.info("Trying to get it again, as the server may be down");
             }
 
         }
     }
+
+	public static void setOutputFile(String outputFile) {
+		RandomInstance.outputFile = outputFile;
+	}
 }

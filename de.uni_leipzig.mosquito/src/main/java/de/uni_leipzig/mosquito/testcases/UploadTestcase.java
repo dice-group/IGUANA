@@ -2,7 +2,6 @@ package de.uni_leipzig.mosquito.testcases;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -16,7 +15,6 @@ import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
 
 import de.uni_leipzig.mosquito.benchmark.Benchmark;
-import de.uni_leipzig.mosquito.utils.EmailHandler;
 import de.uni_leipzig.mosquito.utils.ResultSet;
 
 public class UploadTestcase implements Testcase {
@@ -25,22 +23,31 @@ public class UploadTestcase implements Testcase {
 	private Connection con;
 	private ResultSet res = new ResultSet();
 	private String name;
-	private Logger log = Logger.getLogger(UploadTestcase.class.getName()); 
-	
+	private Logger log = Logger.getLogger(UploadTestcase.class.getName());
+	private String graphUri=null;
 	@Override
 	public void start() {
 		LogHandler.initLogFileHandler(log, "UploadTestcase");
 		List<Object> row = new LinkedList<Object>();
 		List<String> header = res.getHeader();
-		Boolean newHeader = false;
 		if(header.isEmpty()){
-			newHeader = true;
 			header.add("Connection");
 		}
 		if(name == null){
 			name = String.valueOf(con.hashCode());
 		}
-		row.add(name);
+		Boolean newRow = true;
+		for(List<Object> crow : res.getTable()){
+			if(crow.get(0).toString().equals(name)){
+				newRow =false;
+				row = crow;
+				break;
+			}
+		}
+		if(newRow){
+			row = new LinkedList<Object>();
+			row.add(name);
+		}
 		File f = new File(file);
 		long time =0L;
 		//TODO: insteead of File use Paths. 
@@ -55,26 +62,33 @@ public class UploadTestcase implements Testcase {
 //					}
 //				})){
 				Long a = new Date().getTime();
-				con.uploadFile(f);
+				if(!con.uploadFile(f, graphUri)){
+					log.severe("Couldn't upload File - see Log for more details");
+					
+				}
 				Long b = new Date().getTime();
 				time += b-a;
 				row.add(String.valueOf((b-a)));
-				if(newHeader){
+				if(!header.get(header.size()-1).equals(f.getName())){
+				
 					header.add(f.getName());
 				}
 				log.info("Uploaded File "+file+" into "+name);
 //		}
-		if(newHeader){
-			header.add("sum");
+//		if(newHeader){
+//			header.add("sum");
 			res.setHeader(header);
-		}
+//		}
 		Calendar end = Calendar.getInstance();
 		end.setTimeInMillis(time);
 		Calendar start = Calendar.getInstance();
 		start.setTimeInMillis(time);
-		row.add(EmailHandler.getWellFormatDateDiff(start, end ));
-		res.addRow(row);
-		res.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"UpdateTest"+ DateFormat.getDateInstance().format(new Date()));
+//		row.add(EmailHandler.getWellFormatDateDiff(start, end ));
+		if(newRow)
+			res.addRow(row);
+		res.setxAxis("Percentage File");
+		res.setyAxis("time");
+		res.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"UpdateTest");//+ percent);
 //		res.setFileName(name);
 		log.info("Finished uploading");
 		try {
@@ -98,12 +112,13 @@ public class UploadTestcase implements Testcase {
 			List<Object> row = current.next();
 			res.addRow(row);
 		}
-		
+		res.setHeader(current.getHeader());
 	}
 
 	@Override
 	public void setProperties(Properties p) {
 		file = p.getProperty("file");
+		graphUri = p.getProperty("graph-uri");
 	}
 
 	@Override
@@ -117,7 +132,6 @@ public class UploadTestcase implements Testcase {
 
 	@Override
 	public void setCurrentPercent(String percent) {
-		//Currently managed in Class Benchmark
 	}
 
 }

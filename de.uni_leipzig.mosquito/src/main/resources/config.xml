@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mosquito xmlns="http://github.com/TortugaAttack/mosquito"
+<mosquito 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<data-description>
 		<namespace name="http://localhost/" />
@@ -8,7 +8,7 @@
 		<property-prefix-name name="bgprop" />
 		<resource-prefix-name name="bgres" />
 	</data-description>
-<databases main="curl">
+	<databases main="dbpedia">
 		<database id="curl" type="curl">
 			<endpoint uri="localhost/sparql-auth" />
 			<user value="dba" />
@@ -24,26 +24,53 @@
 			<pwd value="dba" />
 		</database>
 	</databases>
-
+	<log-clustering class="de.uni_leipzig.mosquito.clustering.clusterer.BorderFlowQueryClusterer" path="../../LogFiles/" output-file="Q_S.txt">
+	</log-clustering>
 	<benchmark log="Benchmark">
+<!-- 		<convert-processing value="true"/> -->
+<!-- 		<convert-input-path name="src/test/resources/" /> -->
+<!-- 		<rdf-vocabulary-class class="de.uni_leipzig.informatik.swp13_sc.datamodel.rdf.ChessRDFVocabulary"/> -->
+<!-- 		<converter-class class="de.uni_leipzig.informatik.swp13_sc.converter.PGNToRDFConverterRanged"/> -->
+<!-- 		<output-path name="src/test/java/"/> -->
 		<drop-db value="false" />
-		<pgn-processing value="false" />
-		<pgn-input-path name="PGNS" />
-		<output-format name="RDF/XML" />
-		<output-path name="res" />
-		<graph-uri name="http://localhost/benchtest/" />
-		<query-diversity value="2000" />
-		<random-function type="seed" generate="true">
-			<class-enabled value="false" />
-			<data-path path="asd"/>
+		<graph-uri name="http://purl.org/dc/elements/1.1/" />
+		<query-diversity value="1" />
+		<random-function type="RandomTriple" generate="false">
+<!-- 			<percent value="1.0" file-name="datasets/ds_250.0.nt"/> -->
+<!-- 			<percent value="0.5" file-name="datasets/ds_50.0.nt"/> -->
+			<percent value="1.0" file-name=""/>
 		</random-function>
-		<test-db type="choose">
-			<db id="4store" />
+		<warmup time="0" file-name="Q.txt"/>
+		<test-db type="choose" reference="dbpedia3">
+			<db id="dbpedia" />
+<!-- 			<db id="dbpedia2" /> -->
 		</test-db>
-                <testcases>
-                   <testcase class="asdv">
-                   		<property name="b" value="a"/>
-                   </testcase>
-                </testcases>
+		<testcases>
+<!-- 			<testcase class="de.uni_leipzig.mosquito.testcases.QueryTestcase"> -->
+<!-- 				<property name="queryPatternFile" value="Q.txt"/> -->
+<!-- 				<property name="limit" value="2"/> -->
+<!-- 				<property name="time-limit" value="10000"/> -->
+<!-- 				<property name="updateStrategy" value="fixed"/> -->
+<!-- 				<property name="ldPath" value="ld"/> -->
+				<!-- insertsfirst, deletesfirst, ID, DI  -->
+<!-- 				<property name="ldLinking" value="insertsFirst"/> -->
+<!-- 				<property name="ldLinking" value="deletesFirst"/> -->
+<!-- 				<property name="ldLinking" value="ID"/> -->
+<!-- 				<property name="ldLinking" value="DI"/> -->
+<!-- 			</testcase> -->
+<!-- 			<testcase class="de.uni_leipzig.mosquito.testcases.StressTestcase"> -->
+<!-- 				<property name="users" value="3"/> -->
+<!-- 				<property name="queryPatternFile" value="Q.txt"/> -->
+<!-- 				<property name="limit" value="2"/> -->
+<!-- 				<property name="time-limit" value="10000"/> -->
+<!-- 			</testcase> -->
+<!-- 			<testcase class="de.uni_leipzig.mosquito.testcases.UploadTestcase"> -->
+			
+<!-- 			</testcase> -->
+		</testcases>
 	</benchmark>
+	<email-notification attach-results="false"> 
+		<hostname value="smtp.gmail.com"/>
+		<port value="465"/>
+	</email-notification>
 </mosquito>

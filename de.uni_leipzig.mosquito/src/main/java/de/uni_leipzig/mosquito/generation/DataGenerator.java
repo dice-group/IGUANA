@@ -6,7 +6,6 @@ import de.uni_leipzig.mosquito.data.Selector;
 import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.TripleStoreStatistics;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,8 +31,13 @@ public class DataGenerator {
     public static void generateData(Connection con, String graphURI, String inputFile, String outputFile, String method, Double percent) {
     	
     	
-        int numberOfTriplesToBeGenerated = (int)(TripleStoreStatistics.tripleCount(con, null) * percent);
-
+        long numberOfTriplesToBeGenerated = (int)(TripleStoreStatistics.tripleCount(con, graphURI) * percent);
+        RandomInstance.setGraphURI(graphURI);
+        RandomInstance.setOutputFormat("N-TRIPLES");
+        RandomInstance.setOutputFile(outputFile);
+        RandomTriple.setGraphURI(graphURI);
+        RandomTriple.setOutputFormat("N-TRIPLES");
+        RandomTriple.setOutputFileName(outputFile);
 
         if(method.compareTo("RandomInstance") == 0){
             //List of visited nodes, in order not process the same nodes more than once 
@@ -104,8 +108,8 @@ public class DataGenerator {
 //				}
 //            	
 //            })){
-                File file = new File(inputFile);
-                RandomTriple.readTriplesFromFile(file.getName(), percent);
+                
+                RandomTriple.readTriplesFromFile(inputFile, percent);
 //            }
 //            RandomTriple.readTriplesFromFile();
         }

@@ -3,11 +3,12 @@ package de.uni_leipzig.mosquito.generation;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+
 import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.TripleStoreStatistics;
 
-import org.apache.log4j.Logger;
 import org.bio_gene.wookie.connection.Connection;
+import org.bio_gene.wookie.utils.LogHandler;
 import org.lexicon.jdbc4sparql.SPARQLConstructResultSet;
 
 import java.io.File;
@@ -17,6 +18,8 @@ import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,7 +31,7 @@ import java.util.UUID;
  * adjusted by Felix Conrads
  */
 public class RandomTriple {
-    private static Logger logger = Logger.getLogger(RandomTriple.class);
+    private static Logger logger = Logger.getLogger(RandomTriple.class.getSimpleName());
     private static long numberOfGeneratedTriples  = 0;
 
     private static Model outputModel;
@@ -36,6 +39,10 @@ public class RandomTriple {
 	private static String outputFormat;
 	private static String outputFileName = UUID.randomUUID().toString();
 
+	static {
+		LogHandler.initLogFileHandler(logger, RandomInstance.class.getSimpleName());
+	}
+	
 	public static void init(String outputFile){
     	numberOfGeneratedTriples = FileHandler.getLineCount(outputFile);
     }
@@ -65,9 +72,9 @@ public class RandomTriple {
         try{
             int randomOffset = generator.nextInt(TripleStoreStatistics.tripleCount(con, graphURI).intValue());
 
-            String query = "CONSTRUCT {?s ?p ?o} "+
-        			graphURI==null?"":"FROM "+graphURI+
-        					" WHERE { {?s ?p ?o}. LIMIT 1000 OFFSET " + randomOffset;
+            String query = "CONSTRUCT {?s ?p ?o} ";
+            query+=	graphURI==null?"":"FROM <"+graphURI+">";
+        	query+=" WHERE { {?s ?p ?o}. LIMIT 1000 OFFSET " + randomOffset;
 
             model = ((SPARQLConstructResultSet)con.execute(query)).getModel();
 //            queryExecuter = new QueryEngineHTTP(BenchmarkConfigReader.sparqlEndpoint, query);
@@ -106,7 +113,8 @@ public class RandomTriple {
             model.write(new FileOutputStream(outputFileName), outputFormat);
         }
         catch(Exception exp){
-            logger.error("Random triple cannot be extracted due to " + exp.getMessage(), exp);
+            logger.severe("Random triple cannot be extracted due to " + exp.getMessage());
+            LogHandler.writeStackTrace(logger, exp, Level.SEVERE);
         }
     }
 
@@ -117,9 +125,8 @@ public class RandomTriple {
      * 3 out of 10 and so forth
      * @param   filename    The name of the file that will be used to get triples from
      */
-    public static void readTriplesFromFile(String filename, Double precent){
-        int numberOfTriplesToSelectFromGroup = (int)(precent*100.0 /10);
-
+    public static void readTriplesFromFile(String filename, Double percent){
+        int numberOfTriplesToSelectFromGroup = (int)(percent*100.0 /10);
         File file = null;
         FileReader fReader = null;
         Random generator = new Random();
@@ -136,7 +143,7 @@ public class RandomTriple {
             LineNumberReader lnReader = new LineNumberReader(fReader);
 
             //Output file
-            fWriter = new FileOutputStream(outputFileName, true);
+            fWriter = new FileOutputStream(outputFileName);
             int numberOfTriplesExtracted = 0;
             logger.info("Extraction of triples from file " + filename + " has started");
             while ((line = lnReader.readLine()) != null){
@@ -174,7 +181,8 @@ public class RandomTriple {
 
         }
         catch(Exception exp){
-            logger.error("Triple cannot be read from the triples file, due to " + exp.getMessage(), exp);
+            logger.severe("Triple cannot be read from the triples file, due to " + exp.getMessage());
+            LogHandler.writeStackTrace(logger, exp, Level.SEVERE);
         }
 //        finally{
 //            if(fReader != null)
@@ -184,5 +192,6 @@ public class RandomTriple {
 //                fReader.close();
 //        }
     }
+
 
 }

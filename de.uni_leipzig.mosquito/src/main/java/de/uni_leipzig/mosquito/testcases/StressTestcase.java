@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,11 +28,29 @@ public class StressTestcase implements Testcase {
 	private String percent; 
 	
 	@Override
-	public void start() {
+	public void start() throws IOException {
 		log = Logger.getLogger(StressTestcase.class.getName());
 		LogHandler.initLogFileHandler(log, StressTestcase.class.getSimpleName());
 		Map<Thread, QueryTestcase> threadPool = new HashMap<Thread, QueryTestcase>();
 		log.info("Initialize users as threads");
+		String queryPatterns = String.valueOf(props.get("queryPatternFile"));
+		String updateStrategy = String.valueOf(props.get("updateStrategy"));
+		int limit =0;
+		try{
+			limit = Integer.parseInt(String.valueOf(props.get("limit")));
+		}
+		catch(Exception e){
+			limit=5000;
+		}
+		String ldpath = null;
+		try{
+
+			ldpath = String.valueOf(props.get("ldPath"));
+		}
+		catch(Exception e){
+			//NO Live Data
+		}
+		QueryTestcase.initQH(queryPatterns, updateStrategy, ldpath, limit, log);
 		for(Integer i=0; i<users; i++){
 			QueryTestcase qt = new QueryTestcase();
 			qt.setConnection(con);
@@ -65,9 +82,10 @@ public class StressTestcase implements Testcase {
 		}
 		log.info("Merging results");
 		mergeResults(results);
+		
 		log.info("Saving Results...");
 		for(ResultSet result : res){
-			result.setFileName(result.getFileName()+"_stresstest_"+UUID.randomUUID().toString());
+			result.setFileName(result.getFileName().replace("_stresstest", "")+"_stresstest");
 			try {
 				result.save();
 			} catch (IOException e) {
@@ -78,56 +96,64 @@ public class StressTestcase implements Testcase {
 		log.info("...Done saving results");
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void mergeResults(Collection<Collection<ResultSet>> results){
-		List<Integer> qps = new LinkedList<Integer>();
-		List<Integer> qmph = new LinkedList<Integer>();
-		for(Collection<ResultSet> resultSets : results){
-			int i=0;
-			for(ResultSet result : resultSets){
-				if(i==0){
-					if(qps.size()==0){
-						for(Object obj : result.getRow()){
-							qps.add(Integer.parseInt(String.valueOf(obj)));
-						}
+		List<String>[] headers = new List[results.iterator().next().size()];
+		String[] fileNames = new String[results.iterator().next().size()];
+		List<List<Object>>[] mergeLists = new List[results.iterator().next().size()];
+		Iterator<ResultSet> ir = results.iterator().next().iterator();
+		for(int i=0; i<mergeLists.length; i++){
+			//init
+			ResultSet res = ir.next();
+			headers[i] = res.getHeader();
+			fileNames[i] = res.getFileName();
+			mergeLists[i] = new LinkedList<List<Object>>(res.getTable());
+		}
+		Iterator<Collection<ResultSet>> icrs = results.iterator();
+		icrs.next();
+		for(int t=1; t<results.size();t++){
+			Collection<ResultSet> resultSets = icrs.next();
+			Iterator<ResultSet> irs = resultSets.iterator(); 
+			for(int k=0; k< resultSets.size();k++){
+				ResultSet res = irs.next();
+				int r=0;
+				while(res.hasNext()){
+					List<Object>current = res.next();
+					for(int i=1; i< current.size();i++){
+						Integer oldInt = Integer.parseInt(String.valueOf(mergeLists[k].get(r).get(i)));
+						Integer newInt = Integer.parseInt(String.valueOf(current.get(i)));
+						mergeLists[k].get(r).set(i, oldInt+newInt);
 					}
-					else{
-						for(int j = 0; j<qps.size();i++){
-							Integer current = qps.get(j);
-							Integer newInt = result.getInteger(j+1);
-							qps.set(j, current+newInt);
-						}
-					}
-				}
-				else{
-					if(qmph.size()==0){
-						for(Object obj : result.getRow()){
-							qmph.add(Integer.parseInt(String.valueOf(obj)));
-						}
-					}
-					else{
-						for(int j = 0; j<qps.size();i++){
-							Integer current = qmph.get(j);
-							Integer newInt = result.getInteger(j+1);
-							qmph.set(j, current+newInt);
-						}
-					}
-					i=0;
+					r++;
 				}
 			}
 		}
-		//MEAN
-		for(int i=0; i<qps.size();i++){
-			qps.set(i, qps.get(i)/results.size());
+		
+		//Mean
+		for(int k=0; k<mergeLists.length;k++){
+			//ResultSet
+			for(int t=0;t<mergeLists[k].size();t++){
+				//Row
+				for(int i=1;i<mergeLists[k].get(0).size();i++){
+					//Cell
+					Integer mean = Integer.parseInt(String.valueOf(mergeLists[k].get(t).get(i)))/mergeLists.length;
+					mergeLists[k].get(t).set(i, mean);
+				}
+			}
 		}
-		for(int i=0; i<qmph.size();i++){
-			qmph.set(i, qmph.get(i)/results.size());
+//		res.clear();
+		//Set results
+		Collection<ResultSet> resNew = new LinkedList<ResultSet>();
+		for(int k=0; k<mergeLists.length;k++){
+			ResultSet r = new ResultSet();
+			for(int t=0;t<mergeLists[k].size();t++){
+				r.addRow(mergeLists[k].get(t));
+			}
+			r.setHeader(headers[k]);
+			r.setFileName(fileNames[k]);
+			resNew.add(r);
 		}
-		ResultSet qpsRes = new ResultSet();
-		qpsRes.addRow(new LinkedList<Object>(qps));
-		ResultSet qmphRes = new ResultSet();
-		qmphRes.addRow(new LinkedList<Object>(qmph));
-		res.add(qpsRes);
-		res.add(qmphRes);
+		addCurrentResults(resNew);
 	}
 
 	@Override
@@ -139,7 +165,7 @@ public class StressTestcase implements Testcase {
 	public void setProperties(Properties p) {
 		users = Integer.parseInt(String.valueOf(p.get("users")));
 		props = p;
-		props.remove("users");
+//		props.remove("users");
 	}
 
 	@Override

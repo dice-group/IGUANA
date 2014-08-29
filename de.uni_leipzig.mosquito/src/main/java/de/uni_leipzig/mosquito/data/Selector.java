@@ -34,8 +34,9 @@ public class Selector {
          int classInt = rand.nextInt(classes.size());
          List<String> instances = new ArrayList<String>(classInstanceMap.get(classes.get(classInt)));
          int instanceInt = rand.nextInt(instances.size());
+         RDFNode ret= new ResourceImpl(instances.get(instanceInt));
          instances.remove(instanceInt);
-         return new ResourceImpl(instances.get(instanceInt));
+         return ret;
 	}
 	
 	public Boolean areInstancesLeft(){
