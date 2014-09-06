@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 /**
  * Created by IntelliJ IDEA.
  * User: Mohamed Morsey
@@ -25,36 +26,67 @@ import java.util.logging.Logger;
  */
 public class RandomInstance {
 
+    /** The logger. */
     private static Logger logger = Logger.getLogger(RandomInstance.class.getName());
 
+    /** The number of generated triples. */
     private static long numberOfGeneratedTriples = 0;
 
+    /** The graph uri. */
     private static String graphURI=null;
     
+    /** The output format. */
     private static String outputFormat;
 
+	/** The output file. */
 	private static String outputFile;
 	
 	static {
 		LogHandler.initLogFileHandler(logger, RandomInstance.class.getSimpleName());
 	}
     
+    /**
+     * Sets the graph uri.
+     *
+     * @param graphURI the new graph uri
+     */
     public static void setGraphURI(String graphURI){
     	RandomInstance.graphURI = graphURI;
     }
     
+    /**
+     * Sets the output format.
+     *
+     * @param outputFormat the new output format
+     */
     public static void setOutputFormat(String outputFormat){
     	RandomInstance.outputFormat = outputFormat;
     }
     
+    /**
+     * Gets the number of triples.
+     *
+     * @return the number of triples
+     */
     public static long getNumberOfTriples(){
         return numberOfGeneratedTriples;
     }
     
+    /**
+     * Initialize
+     *
+     * @param outputFile the output file
+     */
     public static void init(String outputFile){
     	numberOfGeneratedTriples = FileHandler.getLineCount(outputFile);
     }
 
+    /**
+     * Generate triple for instance.
+     *
+     * @param con Connection to use
+     * @param instance the instance
+     */
     public static void generateTripleForInstance(Connection con, RDFNode instance){
         Model outputModel = null;
 //        QueryEngineHTTP queryExecuter = null;
@@ -101,6 +133,11 @@ public class RandomInstance {
         }
     }
 
+	/**
+	 * Sets the output file.
+	 *
+	 * @param outputFile the new output file
+	 */
 	public static void setOutputFile(String outputFile) {
 		RandomInstance.outputFile = outputFile;
 	}

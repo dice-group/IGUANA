@@ -18,8 +18,27 @@ import org.xml.sax.SAXException;
 
 import de.uni_leipzig.mosquito.benchmark.Benchmark.DBTestType;
 
+/**
+ * The Class Config.
+ * Provides functions to get specific configurations of the config file
+ * 
+ * 
+ * @author Felix Conrads
+ */
 public class Config {
 	
+	/**
+	 * Gets the database ids.
+	 *
+	 * @param rootNode the root node
+	 * @param type the type
+	 * @param refID the ref id
+	 * @param log the log
+	 * @return the database ids
+	 * @throws ParserConfigurationException the parser configuration exception
+	 * @throws SAXException the SAX exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static List<String> getDatabaseIds(Node rootNode, DBTestType type, String refID, Logger log)
 			throws ParserConfigurationException, SAXException, IOException {
 		List<String> ids = new ArrayList<String>();
@@ -56,6 +75,15 @@ public class Config {
 		return ids;
 	}
 	
+	/**
+	 * Gets the test cases.
+	 *
+	 * @param rootNode the root node
+	 * @return the test cases
+	 * @throws SAXException the SAX exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws ParserConfigurationException the parser configuration exception
+	 */
 	public static HashMap<String, Properties> getTestCases(Node rootNode) throws SAXException, IOException, ParserConfigurationException{
 		
 		HashMap<String, Properties> ret = new HashMap<String, Properties>();
@@ -76,6 +104,15 @@ public class Config {
 		
 	}
 	
+	/**
+	 * Gets the log cluster properties.
+	 *
+	 * @param rootNode the root node
+	 * @return the log cluster properties
+	 * @throws ParserConfigurationException the parser configuration exception
+	 * @throws SAXException the SAX exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static Properties getLogClusterProperties(Node rootNode) throws ParserConfigurationException, SAXException, IOException{
 		ConfigParser cp = ConfigParser.getParser(rootNode);
 		cp.getElementAt("log-clustering", 0);
@@ -84,6 +121,15 @@ public class Config {
 		return getProps(tests);
 	}
 	
+	/**
+	 * Gets the props.
+	 *
+	 * @param property the property
+	 * @return the props
+	 * @throws ParserConfigurationException the parser configuration exception
+	 * @throws SAXException the SAX exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private static Properties getProps(NodeList property) throws ParserConfigurationException, SAXException, IOException{
 		
 		Properties prop = new Properties();
@@ -95,6 +141,15 @@ public class Config {
 		return prop;
 	}
 	
+	/**
+	 * Gets the general parameters.
+	 *
+	 * @param root the root node of the xml file
+	 * @return the general parameters
+	 * @throws ParserConfigurationException the parser configuration exception
+	 * @throws SAXException the SAX exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static HashMap<String, String> getParameter(Node root)
 			throws ParserConfigurationException, SAXException, IOException {
 		ConfigParser cp = ConfigParser.getParser(root);
@@ -164,6 +219,9 @@ public class Config {
 		map.put("random-function", rand.getAttribute("type"));
 		map.put("random-function-gen", rand.getAttribute("generate"));
 		map.put("random-hundred-file", rand.getAttribute("initFile"));
+		//TODO v2.1 roh and ch in percents or in general 
+		map.put("coherence-roh", rand.getAttribute("roh")); 
+		map.put("coherence-ch", rand.getAttribute("coherence"));
 		cp.setNode(benchmark);
 		try{
 			Element warmup = cp.getElementAt("warmup", 0);
@@ -178,6 +236,15 @@ public class Config {
 	}
 	
 	
+	/**
+	 * Gets the self generated filenames.
+	 *
+	 * @param rootNode the root node
+	 * @return the self generated files
+	 * @throws SAXException the SAX exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws ParserConfigurationException the parser configuration exception
+	 */
 	public static String[] getRandomFiles(Node rootNode) throws SAXException, IOException, ParserConfigurationException{
 		
 		ConfigParser cp = ConfigParser.getParser(rootNode);
@@ -193,6 +260,15 @@ public class Config {
 		return ret;
 	}
 	
+	/**
+	 * Gets the percentages
+	 *
+	 * @param rootNode the root node
+	 * @return the percentages
+	 * @throws ParserConfigurationException the parser configuration exception
+	 * @throws SAXException the SAX exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static List<Double> getPercents(Node rootNode) throws ParserConfigurationException, SAXException, IOException{
 		List<Double> ret = new LinkedList<Double>();
 		
@@ -207,6 +283,12 @@ public class Config {
 		return ret;
 	}
 	
+	/**
+	 * Gets the email configurations.
+	 *
+	 * @param rootNode the root node
+	 * @return the email configs
+	 */
 	public static HashMap<String,Object> getEmail(Node rootNode){
 		HashMap<String,Object>ret =  new HashMap<String,Object>();
 		try{
@@ -237,6 +319,12 @@ public class Config {
 		return ret;
 	}
 	
+	/**
+	 * Gets the data description.
+	 *
+	 * @param rootNode the root node
+	 * @return the data description
+	 */
 	public static HashMap<String, String> getDataDescription(Node rootNode){
 	          HashMap<String, String> map = new HashMap<String, String>();
 	          try{

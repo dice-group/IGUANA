@@ -17,14 +17,34 @@ import org.bio_gene.wookie.utils.LogHandler;
 import de.uni_leipzig.mosquito.benchmark.Benchmark;
 import de.uni_leipzig.mosquito.utils.ResultSet;
 
+/**
+ * This testcase tests the time to upload a given file into a given Connection
+ * 
+ * @author Felix Conrads
+ */
 public class UploadTestcase implements Testcase {
 	
+	/** The file. */
 	private String file;
+	
+	/** The con. */
 	private Connection con;
+	
+	/** The res. */
 	private ResultSet res = new ResultSet();
+	
+	/** The name. */
 	private String name;
+	
+	/** The log. */
 	private Logger log = Logger.getLogger(UploadTestcase.class.getName());
+	
+	/** The graph uri. */
 	private String graphUri=null;
+	
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#start()
+	 */
 	@Override
 	public void start() {
 		LogHandler.initLogFileHandler(log, "UploadTestcase");
@@ -98,6 +118,9 @@ public class UploadTestcase implements Testcase {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#getResults()
+	 */
 	@Override
 	public Collection<ResultSet> getResults() {
 		Collection<ResultSet> resList = new LinkedList<ResultSet>();
@@ -105,6 +128,9 @@ public class UploadTestcase implements Testcase {
 		return resList;
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#addCurrentResults(java.util.Collection)
+	 */
 	@Override
 	public void addCurrentResults(Collection<ResultSet> currentResults) {
 		ResultSet current =  currentResults.iterator().next();
@@ -115,21 +141,33 @@ public class UploadTestcase implements Testcase {
 		res.setHeader(current.getHeader());
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setProperties(java.util.Properties)
+	 */
 	@Override
 	public void setProperties(Properties p) {
 		file = p.getProperty("file");
 		graphUri = p.getProperty("graph-uri");
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setConnection(org.bio_gene.wookie.connection.Connection)
+	 */
 	@Override
 	public void setConnection(Connection con) {
 		this.con = con;
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setCurrentDBName(java.lang.String)
+	 */
 	public void setCurrentDBName(String name){
 		this.name = name;
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setCurrentPercent(java.lang.String)
+	 */
 	@Override
 	public void setCurrentPercent(String percent) {
 	}

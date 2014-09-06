@@ -1,42 +1,69 @@
-====== Mosquito Benchmark Framework v0.0.1 (Features/Changelog) ======
+====== Mosquito Benchmark Framework (Features/Changelog) ======
 
 
 THIS IS A SHORT REPRESENTATION OF THE FEATURES AND CHANGES 
 THROUGH THE VERSIONS OF THE MBF
 
 For more Information how to use the MBF as an API or to use it as a 
-Benchmark please consider the Manual (coming soon) and the Javadoc (coming soon).
-
+Benchmark please consider the Manual (coming soon) and/or the Javadoc (better described javadoc coming soon).
 
 CHANGELOG:
 ==========
-= v0.0.X =
+= vX.Y.Z =
 ==========
 
 Features:
 -----------------------------------------------------------------------------
 +
-
+ 
 -
 
 -----------------------------------------------------------------------------
 
 BugFixes:
 -----------------------------------------------------------------------------
-+
-
--
+- 
 
 -----------------------------------------------------------------------------
 
 Currently known Bugs:
 -----------------------------------------------------------------------------
+None (found one? put them on https://github.com/TortugaAttack/mosquito)
 
+
+
+CHANGELOG:
+==========
+= v0.2.0 =
+==========
+
+Features:
+-----------------------------------------------------------------------------
++ Email Password can now be entered in Command Line due to security reason
+  (just leave the pwd field in the config.xml out)
+
++ DataGenerator as describe in Paper: http://dl.acm.org/citation.cfm?id=1989340
+  (<random-function type="coherence" )
+	-> attribute roh (relaxation parameter) added (only for type="coherence")
+	-> attribute ch (wanted coherence) added (only for type="coherence")
+
+-----------------------------------------------------------------------------
+
+BugFixes:
+-----------------------------------------------------------------------------
+- If Update Queries in QueryTestcase were used there was an Exception due to 
+  sorting them as LiveData Files.
+
+-----------------------------------------------------------------------------
+
+Currently known Bugs:
+-----------------------------------------------------------------------------
+None (found one? put them on https://github.com/TortugaAttack/mosquito)
 
 
 
 ==========
-= v0.0.1 =
+= v0.1.0 = (Initial)
 ==========
 
 CORE FEATURES:

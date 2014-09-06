@@ -1,21 +1,35 @@
 package de.uni_leipzig.mosquito.utils;
 
+/**
+ * The Class StringHandler.
+ * 
+ * @author Felix Conrads
+ */
 public class StringHandler {
 
+	/** The keyword list. */
 	private static String [] KEYWORD_LIST = new String[]{"select", "from", "where", "limit", "offset",
         "ask", "construct", "describe", "prefix", "optional", "filter", "distinct", "union", "_query="};
 	
+	/**
+	 * Writes strings to alphanumeric strings by replace all non alphanumeric strings with nothing
+	 *
+	 * @param str the str
+	 * @return the alphanumeric string
+	 */
 	public static String stringToAlphanumeric(String str) {
 		return str.replaceAll("[^A-Za-z0-9]", "");
 	}
 	
-	public static void main(String argc[]){
-		System.out.println(levenshteinDistance("HAUS","RAUS ASD sad { }."));
-		System.out.println(levenshtein("HAUS","RAUS ASD sad { }.",5));
-		
-	}
-	
 
+	/**
+	 * Removes the keywords from query.
+	 * keywords: "select", "from", "where", "limit", "offset",
+     *   "ask", "construct", "describe", "prefix", "optional", "filter", "distinct", "union", "_query="
+	 *
+	 * @param query the query
+	 * @return the query with removed keywords
+	 */
 	public static String removeKeywordsFromQuery(String query) {
 		for (String keyword : KEYWORD_LIST) {
 			int keywordPos = 0;
@@ -56,6 +70,14 @@ public class StringHandler {
 		return query;
 	}
 
+	/**
+	 * Like indexOf but ignores case
+	 *
+	 * @param mainString the main string
+	 * @param str the string to find the index 
+	 * @param fromIndex the index from where should be searched
+	 * @return the index (if not found -1)
+	 */
 	public static int ignoreCaseIndexOf(String mainString, String str,
 			int fromIndex) {
 		String s1 = mainString.toLowerCase();
@@ -65,10 +87,10 @@ public class StringHandler {
 	
 	/**
 	 * Taken from "http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Java"
-	 * 
-	 * @param s0
-	 * @param s1
-	 * @return
+	 *
+	 * @param s0 the s0
+	 * @param s1 the s1
+	 * @return the float
 	 */
 	public static float levenshteinDistance (String s0, String s1) {                          
 	    int len0 = s0.length() + 1;                                                     
@@ -110,6 +132,15 @@ public class StringHandler {
 	    return cost[len0 - 1];                                                          
 	}
 	
+	/**
+	 * Calculates Levenshtein of two strings. 
+	 * If a given threshold can't be maintained the result will be 0.0
+	 *
+	 * @param str1 String to compare with the other string
+	 * @param str2 String to compare with the other string
+	 * @param threshold maximal allowed steps 
+	 * @return levenshtein if threshold could be maintained otherwise 0.0
+	 */
 	public static double levenshtein(String str1, String str2, int threshold){
 		int horizontal=0, vertikal=0;
 		int dist=0, n = str1.length(), m=str2.length();

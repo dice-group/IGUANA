@@ -28,11 +28,18 @@ import java.util.regex.Pattern;
 */
 public class ExternalSort {
 
+    /** The logger. */
     private static Logger logger = Logger.getLogger(ExternalSort.class);
 
 	// we divide the file into small blocks. If the blocks
 	// are too small, we shall create too many temporary files.
 	// If they are too big, we shall be using too much memory.
+	/**
+	 * Estimate best size of blocks.
+	 *
+	 * @param filetobesorted the file to be sorted
+	 * @return the estimated best size for blocks
+	 */
 	public static long estimateBestSizeOfBlocks(File filetobesorted) {
 		long sizeoffile = filetobesorted.length();
 		// we don't want to open up much more than 1024 temporary files, better run
@@ -55,14 +62,15 @@ public class ExternalSort {
 	 * This will simply load the file by blocks of x rows, then
 	 * sort them in-memory, and write the result to a bunch of
 	 * temporary files that have to be merged later.
-     * Modified by M.Morsey
-     * I added a call to a function to normalize the _query, by renaming all _query variables, in order to make similar queries
-     * that use different variables counted as same _query.
+	 * Modified by M.Morsey
+	 * I added a call to a function to normalize the _query, by renaming all _query variables, in order to make similar queries
+	 * that use different variables counted as same _query.
 	 *
 	 * @param file some flat  file
-     * @param   cmp The comparator
-     * @param   renameVariables Whether to rename the variables of the _query or not
+	 * @param cmp the comparator to use
+	 * @param renameVariables should variables be renamed as ?var1 ,...
 	 * @return a list of temporary flat files
+	 * @throws IOException Signals that an IOException has occurred.
 	 */
 	public static List<File> sortInBatch(File file, Comparator<String> cmp, boolean renameVariables) throws IOException {
 
@@ -112,6 +120,11 @@ public class ExternalSort {
 
     //Removes any unnecessary stuff at the beginning of the _query, so get only the SPARQL _query without any metadata, e.g.
     //the time at which the _query is executed
+    /**
+     * Eliminate unnecessary data.
+     *
+     * @param lineFromFile the line from file
+     */
     private static String eliminateUnnecessaryData(String lineFromFile) {
         int endingQuotePos = lineFromFile.lastIndexOf("\"");
         int startingQuestionMarkPos = lineFromFile.indexOf("?");
@@ -131,6 +144,10 @@ public class ExternalSort {
     }
 
 
+    /**
+     * Sort and save.
+     *
+     */
     public static File sortAndSave(List<String> tmplist, Comparator<String> cmp) throws IOException  {
 		Collections.sort(tmplist,cmp);  //
 		File newtmpfile = File.createTempFile("sortInBatch", "flatfile");
@@ -146,11 +163,11 @@ public class ExternalSort {
 		}
 		return newtmpfile;
 	}
+	
 	/**
-	 * This merges a bunch of temporary flat files
-	 * @param files
-	 * @param output file
-         * @return The number of lines sorted. (P. Beaudoin)
+	 * This merges a bunch of temporary flat files.
+	 *
+	 * @return The number of lines sorted. (P. Beaudoin)
 	 */
 	public static int mergeSortedFiles(List<File> files, File outputfile, final Comparator<String> cmp) throws IOException {
 		PriorityQueue<BinaryFileBuffer> pq = new PriorityQueue<BinaryFileBuffer>(11,
@@ -202,10 +219,11 @@ public class ExternalSort {
 //	}
 
     /**
-     * Counts the occurrence of each _query in the inFile and writes each _query along with its occurrences in the outFile
-     * @param inFile    The input file
-     * @param outFile   The output file
-     */
+ * Counts the occurrence of each _query in the inFile and writes each _query along with its occurrences in the outFile.
+ *
+ * @param inFile    The input file
+ * @param outFile   The output file
+ */
     public static void countQueryOccurrencesInFile(File inFile, File outFile){
         FileReader inReader;
         FileWriter outWriter;
@@ -260,6 +278,7 @@ public class ExternalSort {
      * Normalizes all queries that exist in the passed file by renaming all variables to sequential variable set, e.g.
      * var1, var2, var3, ....
      * So the queries that give the same results but use different variables names will be counted as same queries   
+     *
      * @param inFile    The file containing the queries
      */
     private static String normalizeFileVariables(File inFile) {
@@ -369,9 +388,8 @@ public class ExternalSort {
     }
 
     /**
-     * Renames all variables of the _query part
-     * @param queryPart 
-     * @return
+     * Renames all variables of the _query part.
+     *
      */
     private static String renameVariables(String queryPart) {
         
@@ -413,12 +431,12 @@ public class ExternalSort {
     }
 
     /**
-    * Removes the the queries that did occur few times
-     * @param   inFile  Input file
-     * @param   outFile Output file
-    * @param    leastNumberOfOccurrences   The number of occurrences, so only the queries that occur more than that number
-    * will be included, and the other will be discarded
-    */
+     * Removes the the queries that did occur few times.
+     *
+     * @param inFile the input file
+     * @param outFile the output file
+     * @param leastNumberOfOccurrences the least number of occurrences
+     */
     public static void removeLeastFrequentQueries(File inFile, File outFile, int leastNumberOfOccurrences){
         
         FileReader inReader;

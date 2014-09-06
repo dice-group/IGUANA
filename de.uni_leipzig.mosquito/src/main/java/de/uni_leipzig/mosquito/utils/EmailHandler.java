@@ -12,17 +12,45 @@ import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 
+/**
+ * Provides an easy to use interface to send emails if the Benchmark succeeded or aborted
+ * with the option to attach the results
+ * 
+ * @author Felix Conrads
+ */
 public class EmailHandler {
 	
 
 
+	/** The email. */
 	private static MultiPartEmail email;
+	
+	/** The a host name. */
 	private static String aHostName;
+	
+	/** The port. */
 	private static int port;
+	
+	/** The da. */
 	private static DefaultAuthenticator da;
+	
+	/** The email from. */
 	private static String emailFrom;
+	
+	/** The email to. */
 	private static List<String> emailTo;
 	
+	/**
+	 * Inits the email with the given configuration.
+	 *
+	 * @param aHostName the a host name
+	 * @param port the port
+	 * @param user the user
+	 * @param pwd the password
+	 * @param emailFrom the email from
+	 * @param emailTo the email to list
+	 * @throws EmailException  email exception
+	 */
 	public static void initEmail(String aHostName, int port, String user, String pwd, String emailFrom, List<String> emailTo) throws EmailException{
 		EmailHandler.aHostName = aHostName;
 		EmailHandler.port = port;
@@ -32,6 +60,14 @@ public class EmailHandler {
 		
 	}
 	
+	/**
+	 * Send news.
+	 *
+	 * @param subject the subject
+	 * @param msg the message
+	 * @param attachmentPath the attachment file
+	 * @throws EmailException the email exception
+	 */
 	private static void sendNews(String subject, String msg, String attachmentPath) throws EmailException{
 		email = new MultiPartEmail();
 		
@@ -59,18 +95,40 @@ public class EmailHandler {
 		email.send();
 	}
 	
+	/**
+	 * Send good news.
+	 *
+	 * @param msg the message
+	 * @param attachmentPath the attachment file
+	 * @throws EmailException the email exception
+	 */
 	public static void sendGoodNews(String msg, String attachmentPath) throws EmailException{
 		String news="Benchmark finished!";
 		String msg2 = news+"\nHOOORAYYY\n"+msg;
 		sendNews(news, msg2, attachmentPath);
 	}
 	
+	/**
+	 * Send bad news.
+	 *
+	 * @param msg the message
+	 * @param attachmentPath the attachment file
+	 * @throws EmailException the email exception
+	 */
 	public static void sendBadNews(String msg, String attachmentPath) throws EmailException{
 		String news="Benchmark doesn't feel good!";
 		String msg2 = news+"\nTo find out why the Benchmark ended unexpected see the log Files\n\n"+msg;
 		sendNews(news, msg2, attachmentPath);
 	}
 	
+	/**
+	 * Sends a good mail. (if the benchmark succeeded)
+	 *
+	 * @param start starttime
+	 * @param end endtime
+	 * @param attachmentPath the attachmentfile
+	 * @throws EmailException the email exception
+	 */
 	public static void sendGoodMail(Calendar start, Calendar end, String attachmentPath)
 			throws EmailException {
 		List<String> to = new LinkedList<String>();
@@ -83,6 +141,13 @@ public class EmailHandler {
 		EmailHandler.sendGoodNews(msg, attachmentPath);
 	}
 
+	/**
+	 * Gets the well format date difference
+	 *
+	 * @param start2 the starttime
+	 * @param end2 the endtime
+	 * @return the well format date diff
+	 */
 	public static String getWellFormatDateDiff(Calendar start2, Calendar end2){
 		long diff2 = end2.getTimeInMillis()-start2.getTimeInMillis();
 		Calendar start = Calendar.getInstance();
@@ -104,6 +169,15 @@ public class EmailHandler {
 		return msg;
 	}
 	
+	/**
+	 * Sends a bad mail. (if benchmark aborted)
+	 *
+	 * @param start the starttime
+	 * @param end the endtime
+	 * @param e the exception which causes the abortion
+	 * @param attachmentPath the attachment file
+	 * @throws EmailException the email exception
+	 */
 	public static void sendBadMail(Calendar start, Calendar end, Exception e, String attachmentPath)
 			throws EmailException {
 		String msg = "Problem at: ";

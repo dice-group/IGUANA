@@ -41,122 +41,67 @@ import com.hp.hpl.jena.update.UpdateRequest;
 import de.uni_leipzig.mosquito.data.TripleStoreHandler;
 import de.uni_leipzig.mosquito.utils.RandomStringBuilder;
 
+/**
+ * Provides an handler which converts given query patterns into
+ * queries with existing values (or if there aren't values) it will be written in a file
+ * called queriesWithNoValues 
+ * There will be only generate queries for a querypattern, until limit is reached
+ *  
+ * @author Felix Conrads
+ */
 public class QueryHandler {
 	
-		
-	public static void main(String args[]) throws IOException{
-		String insert = "INSERT DATA {GRAPH %%v%% {%%v1%% %%v2%% %%v%% . %%v1%% %%v3%% %%v%% . %%v1%% %%v2%% %%v4%% . %%v4%% %%v2%% %%v%% . %%v4%% %%v5%% %%v%%}}";
-		String select = "select distinct ?s where {?s <http://dbpedia.org/property/einwohner> ?v} LIMIT 10";
-		String construct = "CONSTRUCT   { [] ?p ?name } WHERE { %%v1%% ?p ?name }";
-		String ask = "PREFIX foaf:<http://xmlns.com/foaf/0.1/ASD>  ASK  { ?x foaf:name  %%v%% }";
-		String describe = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> DESCRIBE %%v%%";
-		
-		
-		insert = insert.replaceAll("%%v[0-9]*%%", "<http://bla.com>");
-		select = select.replaceAll("%%v[0-9]*%%", "<http://bla.com>");
-		construct = construct.replaceAll("%%v[0-9]*%%", "<http://bla.com>");
-		describe = describe.replaceAll("%%v[0-9]*%%", "<http://bla.com>");
-		ask = ask.replaceAll(" %%v[0-9]*%% ", "<http://bla.com>");
-		
-		UpdateParser ps11 = UpdateParser.createParser(Syntax.syntaxSPARQL_11);
-
-		SPARQLParser ps10 = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
-		Query q = QueryFactory.create();
-		UpdateSink u = new UpdateRequestSink(new UpdateRequest());
-		try{
-			ps11.parse(u, insert);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		try{
-			u = new UpdateRequestSink(new UpdateRequest());
-			ps11.parse(u, "BULLSHIT ");
-		}catch(Exception e){
-			System.out.println("superst");
-		}
-		try{
-			u = new UpdateRequestSink(new UpdateRequest());
-			ps11.parse(u, "LOAD <asd> ");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		try{
-			u = new UpdateRequestSink(new UpdateRequest());
-			ps11.parse(u, select);
-		}catch(Exception e){
-			System.out.println("superst");
-		}
-		try{
-			q = QueryFactory.create();
-			System.out.println(ps10.parse(q, insert));
-		}catch(Exception e){
-			System.out.println("superst");
-		}
-		try{
-			q = QueryFactory.create();
-			System.out.println(ps10.parse(q, select));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		try{
-			q = QueryFactory.create();
-			System.out.println(ps10.parse(q, construct));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		try{
-			q = QueryFactory.create();
-			System.out.println(ps10.parse(q, describe));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		try{
-			q = QueryFactory.create();
-			System.out.println(ps10.parse(q, ask));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-
-		
-		
-//		PrintWriter pw = new PrintWriter(new File("queries.txt"));
-//		pw.write(ask);
-//		pw.println();
-//		pw.write(construct);
-//		pw.println();
-//		pw.write(select);
-//		pw.println();
-//		pw.write(describe);
-//		pw.println();
-//		pw.write(insert);
-//		pw.println("SELECT ?abstract WHERE { <http://dbpedia.org/resource/Ernesto_J._Cordero> <http://dbpedia.org/ontology/abstract> ?abstract. FILTER langMatches(lang(?abstract), %%v%%)}");
-//		pw.close();
-//		
-//		
-//		
-//		Connection con = ConnectionFactory.createImplConnection("dbpedia.org/sparql");
-//		QueryHandler qh = new QueryHandler(con, "queries.txt");
-//		qh.init();
-	
-	}
-	
+	/** The con. */
 	private Connection con;
+	
+	/** The path. */
 	private String path = "queryvalues"+File.separator;
+	
+	/** The failed queries. */
 	private String failedQueries = "queriesWithNoValues";
+	
+	/** The limit. */
 	private int limit = 5000;
+	
+	/** The rand. */
 	private Random rand;
+	
+	/** The file for queries. */
 	private String fileForQueries;
 	
+	/**
+	 * Instantiates a new query handler.
+	 *
+	 * @param con the con
+	 * @param fileForQueries the file for queries
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public QueryHandler(Connection con, String fileForQueries) throws IOException{
 		this.con = con;
 		this.fileForQueries = fileForQueries;
 	}
 	
 	
+	/**
+	 * NTRIPLE File to an insert or delete query.
+	 *
+	 * @param file the filename
+	 * @param insert if query should be insert (true) or delete (false)
+	 * @param graphUri the graph to use (can be null)
+	 * @return the query
+	 */
 	public static String ntToQuery(String file, Boolean insert, String graphUri){
 		return ntToQuery(new File(file), insert, graphUri);
 	}
 	
+	/**
+	 * NTRIPLE File to an insert or delete query.
+	 *
+	 * @param file the file
+	 * @param insert if query should be insert (true) or delete (false)
+	 * @param graphUri the graph to use (can be null)
+	 * @return the query
+	 */
 	public static String ntToQuery(File file, Boolean insert, String graphUri){
 //		try{
 			String query = "";
@@ -197,28 +142,61 @@ public class QueryHandler {
 //		}
 	}
 	
+	/**
+	 * Initialization
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void init() throws IOException{
 		new File(path).mkdir();
 		init(fileForQueries);
 	}
 	
+	/**
+	 * Sets the path.
+	 *
+	 * @param path the new path
+	 */
 	public void setPath(String path){
 		this.path = path;
 	}
 	
+	/**
+	 * Gets the path.
+	 *
+	 * @return the path
+	 */
 	public String getPath(){
 		return path;
 	}
 	
+	/**
+	 * Gets the absolut path.
+	 *
+	 * @return the absolut path
+	 */
 	public String getAbsolutPath(){
 		return new File(path+File.separator).getAbsolutePath();
 	}
 	
+	/**
+	 * Sets the limit.
+	 *
+	 * @param i the new limit
+	 */
 	public void setLimit(int i){
 		limit = i;
 	}
 
 	
+	/**
+	 * Initialization of the QueryHandler.
+	 * Generating The Queries out of the given Patterns
+	 * 
+	 *
+	 * @param queriesFile the queriePatterns file
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private void init(String queriesFile) throws IOException{
 		rand = new Random(2);
 		File f = new File(failedQueries);
@@ -273,6 +251,14 @@ public class QueryHandler {
 	
 	
 	
+	/**
+	 * Values to csv.
+	 *
+	 * @param pattern the pattern
+	 * @param fileName the file name
+	 * @return the int
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private int valuesToCSV(String pattern, String fileName) throws IOException{
 		String query = String.valueOf(pattern);
 		int ret = 0;
@@ -334,6 +320,13 @@ public class QueryHandler {
 	}
 
 
+	/**
+	 * Pattern to query.
+	 *
+	 * @param pattern the pattern
+	 * @param vars the vars
+	 * @return the string
+	 */
 	private String patternToQuery(String pattern, List<Object> vars){
 		String query = String.valueOf(pattern);
 		Pattern regex = Pattern.compile("%%v[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
@@ -353,6 +346,14 @@ public class QueryHandler {
 		return query;
 	}
 	
+	/**
+	 * Update pattern.
+	 *
+	 * @param pattern the pattern
+	 * @param fileName the file name
+	 * @return the string
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private String updatePattern(String pattern, String fileName) throws IOException{
 		String query = String.valueOf(pattern);
 		RandomStringBuilder rsb = new RandomStringBuilder(100);
@@ -389,6 +390,12 @@ public class QueryHandler {
 		return query;
 	}
 	
+	/**
+	 * Select pattern.
+	 *
+	 * @param query the query
+	 * @return the string
+	 */
 	private String selectPattern(String query){
 		Pattern regex = Pattern.compile("%%v[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 		Matcher matcher = regex.matcher(query);
@@ -418,6 +425,14 @@ public class QueryHandler {
 		return query;
 	}
 	
+	/**
+	 * Type query.
+	 *
+	 * @param q the q
+	 * @param select the select
+	 * @param type the type
+	 * @return the string
+	 */
 	private String typeQuery(Query q, String select, String type){
 		String clause = q.serialize();
 		int i = clause.toLowerCase().indexOf(type);

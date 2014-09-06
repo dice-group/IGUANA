@@ -7,11 +7,13 @@ import java.security.CodeSource;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -28,10 +30,12 @@ import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import de.uni_leipzig.mosquito.clustering.ExternalSort;
 import de.uni_leipzig.mosquito.clustering.clusterer.Clusterer;
 import de.uni_leipzig.mosquito.converter.RDFVocabulary;
 import de.uni_leipzig.mosquito.data.TripleStoreHandler;
 import de.uni_leipzig.mosquito.generation.DataGenerator;
+import de.uni_leipzig.mosquito.generation.DataProducer;
 import de.uni_leipzig.mosquito.generation.ExtendedDatasetGenerator;
 import de.uni_leipzig.mosquito.testcases.Testcase;
 import de.uni_leipzig.mosquito.testcases.UploadTestcase;
@@ -42,11 +46,12 @@ import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.ResultSet;
 import de.uni_leipzig.mosquito.utils.StringHandler;
 import de.uni_leipzig.mosquito.utils.ZipUtils;
+import de.uni_leipzig.mosquito.utils.comparator.TripleComparator;
 
+// TODO v2.1 if roh and ch are given for each of them 
 /**
  * 
- * Schreibt die Testdaten in den TripleStore, führt den Benchmark aus und
- * speichert diesen als CSV Datei ab.
+ * The Benchmark algorithm itself
  * 
  * @author Felix Conrads
  * 
@@ -78,6 +83,13 @@ public class Benchmark {
 		seed, rand
 	};
 
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 * @throws IOException Signals that an IOException has occurred.
+	 * @throws URISyntaxException Signals that an URISyntaxException has occured.
+	 */
 	public static void main(String[] args) throws IOException, URISyntaxException {
 		if (args.length < 1) {
 			
@@ -100,13 +112,25 @@ public class Benchmark {
 		}
 	}
 
-	public static void sendIfEnd(){
+	/**
+	 * If Benchmark finished unexpected, this sends (if email is enabled) an Email  with the current Results
+	 * or write the Excpetion in log file if the email couldn't be sended.
+	 */
+	private static void sendIfEnd(){
 		if(!end &&mail){
 			try{
-				EmailHandler.sendBadNews("Sys.exit", 
-						ZipUtils.folderToZip(
-								"."+File.separator+Benchmark.RESULT_FILE_NAME, 
-								"."+File.separator+Benchmark.RESULT_FILE_NAME+".zip"));
+				String attachment=null;
+				if(attach){
+					try {
+						attachment = ZipUtils.folderToZip(
+								"."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME, 
+								"."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+".zip");
+
+					}
+					catch(IOException e1){
+					}
+				}
+				EmailHandler.sendBadNews("Sys.exit", attachment);
 			}
 			catch(Exception e){
 				log.warning("Couldn't send email due to: ");
@@ -118,21 +142,12 @@ public class Benchmark {
 	
 
 	/**
-	 * Beginnt den Benchmark für die, in der angegebenen Konfigurationsdatei,
-	 * TripleStores
-	 * 
-	 * 
-	 * @param pathToXMLFile
-	 *            XML Datei in der die benötigten Daten drin stehen.
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 * @throws SQLException
-	 * @throws InterruptedException
+	 * Starts the Benchmark with the given config file
+	 *
+	 * @param pathToXMLFile name of the config file
 	 */
 	@SuppressWarnings("unchecked")
-	public static void start(String pathToXMLFile) {
+	private static void start(String pathToXMLFile) {
 		
 		ConnectionFactory.setDriver("org.apache.jena.jdbc.remote.RemoteEndpointDriver");
 		ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=http://");
@@ -166,6 +181,12 @@ public class Benchmark {
 			refCon = ConnectionFactory.createConnection(dbNode, config.get("ref-con"));
 			if(email!=null){
 				log.info("Initialize Email...");
+				if(email.get("pwd")==null){
+					log.info("Password for email-account "+email.get("user")+" required: ");
+					Scanner scanner = new Scanner(System.in); 
+					email.put("pwd", scanner.next());
+					scanner.close();
+				}
 				EmailHandler.initEmail(
 						String.valueOf(email.get("hostname")),
 						Integer.parseInt(String.valueOf(email.get("port"))), 
@@ -199,7 +220,7 @@ public class Benchmark {
 				+FileExtensionToRDFContentTypeMapper.guessFileExtensionFromFormat(config.get("output-format"));
 				FileHandler.writeFilesToFile(config.get("output-path"), output);
 				refCon.uploadFile(output);
-				config.put("random-function-gen", "true");
+//				config.put("random-function-gen", "true");
 				config.put("random-hundred-file", output);
 				log.info("Data Converted");
 			}
@@ -218,7 +239,7 @@ public class Benchmark {
 				log.info("Finished Clustering");
 			}
 			
-			//TODO Logging: Options 
+			//TODO v2.1 Logging: Options 
 			log.info("Starting benchmark");
 			mainLoop(databaseIds, pathToXMLFile);
 			log.info("Benchmark finished");
@@ -270,7 +291,14 @@ public class Benchmark {
 	}
 	
 	
-	public static void clustering(String name, String logPath, String queriesFile){
+	/**
+	 * Clustering process of the given logFiles
+	 *
+	 * @param name The name of the clustering class to use 
+	 * @param logPath The path of the log files to cluster
+	 * @param queriesFile the file name in which the query patterns should be saved in
+	 */
+	private static void clustering(String name, String logPath, String queriesFile){
 		try {
 			Clusterer cl = (Clusterer) Class.forName(name).newInstance();
 			cl.setProperties(logCluster);
@@ -282,7 +310,20 @@ public class Benchmark {
 		
 	}
 
-	public static void mainLoop(List<String> ids, String pathToXMLFile)
+	/**
+	 * Main loop.
+	 * Tests for every percentage and for every given database the given testcases
+	 *
+	 * @param ids the ids of the databases which should be tested given in the config.xml
+	 * @param pathToXMLFile the name to the config file
+	 * @throws ClassNotFoundException Signals that a ClassNotFoundException has occured.
+	 * @throws SAXException Signals that a SAXEception has occured.
+	 * @throws IOException Signals that an IOException has occurred.
+	 * @throws ParserConfigurationException Signals that a ParserConfigurationException has occured.
+	 * @throws SQLException Signals that a SQLException has occured.
+	 * @throws InterruptedException Signals that an InterruptedException has occured.
+	 */
+	private static void mainLoop(List<String> ids, String pathToXMLFile)
 			throws ClassNotFoundException, SAXException, IOException,
 			ParserConfigurationException, SQLException, InterruptedException {
 		Integer dbCount = 0;
@@ -380,6 +421,13 @@ public class Benchmark {
 	}
 
 	
+	/**
+	 * Warmups the given Connection with the given queries for time in miliseconds
+	 *
+	 * @param con Connection to warump
+	 * @param queries the queries to use for the warmup
+	 * @param time time how long the warump should be executed
+	 */
 	private static void warmup(Connection con, Collection<String> queries, Long time){
 		Long begin = new Date().getTime();
 		time=60*1000*time;
@@ -398,28 +446,28 @@ public class Benchmark {
 		
 	}
 	
+	/**
+	 * Warmups the given Connection with the given queries for time in miliseconds
+	 *
+	 * @param con Connection to warump
+	 * @param queriesFile the queries file in which the queries are saved to use for the warmup
+	 * @param time time how long the warump should be executed
+	 */
 	private static void warmup(Connection con, String queriesFile, Long time){
 		Collection<String> queries = FileHandler.getQueriesInFile(queriesFile);
 		warmup(con, queries, time);
 	}
 	
 	/**
-	 * 
-	 * Starten den Benchmark und testet die angegeben Testcases
-	 * 
-	 * @param con
-	 *            Connection zum Triplestore
-	 * @param queries
-	 *            Die SPARQL Anfragen als Strings
-	 * @param logName
-	 *            Log Name welcher fürs Loggen benutzt werden soll
-	 * @param fromGraph
-	 *            Named Graph welcher benutzt wird
-	 * @return gibt Liste mit gemessenen Parametern zurück zu jeweiligem Test
-	 * @throws IOException 
+	 * Starts every testcase except for the UploadTestcase for the given connection and percentage
+	 *
+	 * @param con The Connection to test
+	 * @param dbName the name of the connection (the id of the connection in the config file)
+	 * @param percent the percentage on which will be tested
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	@SuppressWarnings("unchecked")
-	public static void start(Connection con, String dbName, String percent) throws IOException {
+	private static void start(Connection con, String dbName, String percent) throws IOException {
 		
 		for (String testcase : testcases.keySet()) {
 			if (testcase.equals(UploadTestcase.class.getName())) {
@@ -451,6 +499,13 @@ public class Benchmark {
 		}
 	}
 
+	/**
+	 * Gets the dataset files.
+	 *
+	 * @param con Connection to use if the initial File must be generated
+	 * @param hundredFile the file with 100% data in it
+	 * @return the dataset files for every percentage
+	 */
 	private static String[] getDatasetFiles(Connection con, String hundredFile) {
 		String[] ret = new String[percents.size()];
 		new File("datasets"+File.separator).mkdir();
@@ -458,8 +513,18 @@ public class Benchmark {
 		if(hundredFile==null||!(new File(hundredFile).exists())){
 			fileName ="datasets"+File.separator+"ds_100.nt";
 			log.info("Writing 100% Dataset to File");
-			TripleStoreHandler.writeDatasetToFile(con, config.get("graph-uri"), fileName);
+			TripleStoreHandler.writeDatasetToFile(con, config.get("graph-uri"), fileName);	
 		}
+		Comparator<String> cmp = new TripleComparator();
+		File f = new File(DataProducer.SORTED_FILE);
+		try {
+			f.createNewFile();
+			ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(new File(fileName), cmp, false), f, cmp);
+		} catch (IOException e) {
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			return null;
+		}
+		
 		for (int i = 0; i < percents.size(); i++) {
 			if(percents.get(i)==1.0){
 				ret[i] = fileName;
@@ -468,7 +533,8 @@ public class Benchmark {
 			Double per = percents.get(i)*100.0;
 			String outputFile ="datasets"+File.separator+"ds_"+per+".nt";
 			if(per<100){
-				DataGenerator.generateData(con, config.get("graph-uri"), fileName, outputFile, config.get("random-function"), percents.get(i));
+				fileName = DataProducer.SORTED_FILE;
+				DataGenerator.generateData(con, config.get("graph-uri"), fileName, outputFile, config.get("random-function"), percents.get(i), Double.valueOf(config.get("coherence-roh")), Double.valueOf(config.get("coherence-ch")));
 			}
 			else{
 				ExtendedDatasetGenerator.generatedExtDataset(fileName, outputFile, percents.get(i));
@@ -479,6 +545,11 @@ public class Benchmark {
 
 	}
 
+	/**
+	 * Gets the reference connection.
+	 *
+	 * @return the reference connection
+	 */
 	public static Connection getReferenceConnection(){
 		return refCon;
 	}

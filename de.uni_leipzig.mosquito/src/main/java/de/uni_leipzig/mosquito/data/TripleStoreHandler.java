@@ -28,15 +28,30 @@ import com.hp.hpl.jena.rdf.model.impl.ResourceImpl;
 
 import de.uni_leipzig.mosquito.utils.TripleStoreStatistics;
 
+/**
+ * The Class TripleStoreHandler.
+ * Handles some important functions for a given Connection. 
+ * Like writing the whole Dataset to a file
+ * 
+ * @author Felix Conrads
+ */
 public class TripleStoreHandler {
 
 	
+	/** The logger. */
 	private static Logger log = Logger.getLogger(TripleStoreHandler.class.getName());
 	
 	static {
 		LogHandler.initLogFileHandler(log, TripleStoreHandler.class.getSimpleName());
 	}
 	
+	/**
+	 * Converts an Object to a RDFNode 
+	 * if nothing fits (it will return a Literal node with impl.toString())
+	 *
+	 * @param impl the object which should be converted
+	 * @return the converted node
+	 */
 	public static Node implToNode(Object impl){
 		Node s;
 		try{
@@ -69,6 +84,13 @@ public class TripleStoreHandler {
 		return s;
 	}
 	
+	/**
+	 * Writes the dataset to file.
+	 *
+	 * @param con Connection to use
+	 * @param graphURI graphURI on which the Connection will work (if null = every graph will be used)
+	 * @param fileName The name of the file in which the dataset should be saved
+	 */
 	public static void writeDatasetToFile(Connection con, String graphURI, String fileName){
 		File file = new File(fileName);
 		PrintWriter pw = null;
@@ -107,6 +129,14 @@ public class TripleStoreHandler {
 		}
 	}
 	
+	/**
+	 * Writes the instances to the given file.
+	 *
+	 * @param con Connection to use
+	 * @param fileName The name of the file in which the instances should be saved
+	 * @param graphURI graphURI on which the Connection will work (if null = every graph will be used)
+	 * @param className the class name for which the instances should be saved
+	 */
 	public static void writeInstancesToFile(Connection con, String fileName, String graphURI, String className){
 		Collection<String> instances = getInstancesFromClass(con, graphURI, className);
 		File file = new File(fileName);
@@ -128,6 +158,14 @@ public class TripleStoreHandler {
 		}
 	}
 	
+	/**
+	 * Gets the instances from a given class.
+	 *
+	 * @param con Connection to use
+	 * @param graphURI graphURI on which the Connection will work (if null = every graph will be used)
+	 * @param className the class name
+	 * @return the instances from the given class
+	 */
 	public static Collection<String> getInstancesFromClass(Connection con, String graphURI, String className){
 		Set<String> instances = new HashSet<String>();
 		String query = "SELECT ?instance ";
@@ -145,6 +183,13 @@ public class TripleStoreHandler {
 		return instances;
 	}
 	
+	/**
+	 * Writes the classes to the given file.
+	 *
+	 * @param con Connection to use
+	 * @param fileName The name of the file in which the classes should be saved
+	 * @param graphURI graphURI on which the Connection will work (if null = every graph will be used)
+	 */
 	public static void writeClassesToFile(Connection con, String fileName, String graphURI){
 		Collection<String> classes = getClasses(con, graphURI);
 		File file = new File(fileName);
@@ -166,6 +211,13 @@ public class TripleStoreHandler {
 		}
 	}
 
+	/**
+	 * Gets the classes of the connection in the graphURI
+	 *
+	 * @param con Connection to use
+	 * @param graphURI graphURI on which the Connection will work (if null = every graph will be used)
+	 * @return Classes which are in the given graphURI on the Connection
+	 */
 	public static Collection<String> getClasses(Connection con, String graphURI){
 		Set<String> classes = new HashSet<String>();
 		String query = "SELECT distinct ?class ";

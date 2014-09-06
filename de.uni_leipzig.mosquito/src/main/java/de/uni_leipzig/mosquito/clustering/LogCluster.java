@@ -28,27 +28,45 @@ import de.uni_leipzig.bf.cluster.harden.QualityMeasureSilhouette;
 import de.uni_leipzig.mosquito.query.PatternSolution;
 
 
+// TODO: Auto-generated private Javadoc
+/**
+ * Provides the clustering algorithms for the log clustering process
+ * 
+ * @author Felix Conrads
+ * 
+ */
 public class LogCluster {
 	
+	/** The logger. */
 	private static Logger log = LogSolution.getLogger();
 
 
-	public static void main(String[] argc){
-//		try {
-//			clusterProcess("../../LogFiles", "queriesFile.txt", 100, 100);
-			
-//		} catch (IOException e) {
-//			
-//			LogHandler.writeStackTrace(log, e, Level.SEVERE);
-//		}
-	}
-
+	/**
+	 * the sorted structure algoritm.
+	 * for every frequent structure (cluster) it will match the most frequent query (if there is one) 
+	 * and write it in the output file
+	 *
+	 * @param inputQueries the name of the file with the sorted frequent queries
+	 * @param inputSortedStructure the name of the file with the sorted frequent structures
+	 * @param output the name of the file in which the resulting queries should be saved
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void sortedStructure(String inputQueries,
 			String inputSortedStructure, String output) throws IOException {
 		sortedStructure(new File(inputQueries), new File(inputSortedStructure),
 				new File(output));
 	}
 
+	/**
+	 * the sorted structure algoritm.
+	 * for every frequent structure (cluster) it will match the most frequent query (if there is one) 
+	 * and write it in the output file
+	 *
+	 * @param inputQueries the file with the sorted frequent queries
+	 * @param inputSortedStructure the file with the sorted frequeunt structures
+	 * @param output the file in which the resulting queries should be saved
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void sortedStructure(File inputQueries,
 			File inputSortedStructure, File output) throws IOException {
 		output.createNewFile();
@@ -121,7 +139,29 @@ public class LogCluster {
 		} 
 	}
 
-	public static void borderFlow(String clusterHarden, String qualityMeasure, double connThreshold, boolean testOne, boolean heuristic, boolean caching, Integer minNodes, String inputQueries, String input, String clusterOutput, String clQueryOutput,String output) throws IOException{
+	/**
+	 * The border flow clustering algorithm. 
+	 * for more information on the border flow clusterer  @see <a href="http://borderflow.sourceforge.net/">Border Flow</a>
+	 * 
+	 * <b>First step:</b> processing the border flow clustering algorithm
+	 * <b>Second step:</b> with the resulting cluster rank those clusters and for every feature 
+	 * tries to get a query by the best ranked cluster
+	 * 
+	 *
+	 * @param clusterHarden <b>see</b> <a href="http://borderflow.sourceforge.net/">Border Flow</a>
+	 * @param qualityMeasure <b>see</b> <a href="http://borderflow.sourceforge.net/">Border Flow</a>
+	 * @param connThreshold <b>see</b> <a href="http://borderflow.sourceforge.net/">Border Flow</a>
+	 * @param testOne <b>see</b> <a href="http://borderflow.sourceforge.net/">Border Flow</a>
+	 * @param heuristic <b>see</b> <a href="http://borderflow.sourceforge.net/">Border Flow</a>
+	 * @param caching <b>see</b> <a href="http://borderflow.sourceforge.net/">Border Flow</a>
+	 * @param minNodes the no of minimal Nodes a cluster should have
+	 * @param inputQueries the name of the file with the frequent queries
+	 * @param input the name of the file with the queries IDs and their similarity 
+	 * @param clusterOutput the name of the output file in which the cluster should be written
+	 * @param output the name of the output file in which the resulting queries should be written
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	public static void borderFlow(String clusterHarden, String qualityMeasure, double connThreshold, boolean testOne, boolean heuristic, boolean caching, Integer minNodes, String inputQueries, String input, String clusterOutput, String output) throws IOException{
 		Harden h = null;
 		switch(clusterHarden.toLowerCase().replaceAll("\\s", "")){
 		case"hardensharedshed":
@@ -146,11 +186,27 @@ public class LogCluster {
 		rankAndChoose(inputQueries, clusterOutput, output, minNodes);
 	}
 	
+	/**
+	 * Query list to file.
+	 *
+	 * @param queryList the query list
+	 * @param input the input
+	 * @param output the output
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	@SuppressWarnings("unused")
 	private static void queryListToFile(LinkedList<Integer> queryList, String input, String output) throws IOException{
 		queryListToFile(queryList, new File(input), new File(output));
 	}
 	
+	/**
+	 * Query list to file.
+	 *
+	 * @param queryList the query list
+	 * @param input the input
+	 * @param output the output
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private static void queryListToFile(LinkedList<Integer> queryList, File input , File output) throws IOException{
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(output);
@@ -191,6 +247,14 @@ public class LogCluster {
 	
 
 	
+	/**
+	 * Query id list to queries.
+	 *
+	 * @param queryList the query list
+	 * @param input the input
+	 * @return the string[]
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private static String[] queryIDListToQueries(LinkedList<Integer> queryList, File input) throws IOException{
 		FileInputStream fis = null;
 		BufferedReader br = null;
@@ -231,11 +295,29 @@ public class LogCluster {
 		return ret;
 	}
 	
+	/**
+	 * Bf cluster to query set.
+	 *
+	 * @param inputSim the input sim
+	 * @param input the input
+	 * @param minNodes the min nodes
+	 * @return the linked list
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	@SuppressWarnings("unused")
 	private static LinkedList<Integer> bfClusterToQuerySet(String inputSim, String input, Integer minNodes) throws IOException{
 		return bfClusterToQuerySet(inputSim, new File(input), minNodes);
 	}
 
+	/**
+	 * Bf cluster to query set.
+	 *
+	 * @param inputSim the input sim
+	 * @param input the input
+	 * @param minNodes the min nodes
+	 * @return the linked list
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private static LinkedList<Integer> bfClusterToQuerySet(String inputSim, File input, Integer minNodes) throws IOException {
 //			output.createNewFile();
 			FileInputStream fis = null;
@@ -284,6 +366,13 @@ public class LogCluster {
 			return queryList;
 	}
 	
+	/**
+	 * Gets the query id.
+	 *
+	 * @param simFile the sim file
+	 * @param cluster the cluster
+	 * @return the query id
+	 */
 	private static Integer getQueryID(String simFile, String[] cluster){
 		Integer ret=null;
 		
@@ -329,10 +418,29 @@ public class LogCluster {
 		return ret;
 	}
 	
+	/**
+	 * Rank and choose.
+	 *
+	 * @param freqQueries the freq queries
+	 * @param input the input
+	 * @param output the output
+	 * @param minNodes the min nodes
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private static void rankAndChoose(String freqQueries, String input, String output, Integer minNodes) throws IOException{
 		rankAndChoose(new File(freqQueries), new File(input), new File(output), minNodes);
 	}
 	
+	/**
+	 * Rank and choose.
+	 *
+	 * @param freqQueries the freq queries
+	 * @param input the input
+	 * @param output the output
+	 * @param minNodes the min nodes
+	 * @return the string[]
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private static String[] rankAndChoose(File freqQueries,File input, File output, Integer minNodes) throws IOException{
 		FileInputStream fis = null;
 		BufferedReader br = null;
@@ -406,6 +514,12 @@ public class LogCluster {
 		return momQueries;
 	}
 	
+	/**
+	 * Cluster to id.
+	 *
+	 * @param cluster the cluster
+	 * @return the linked list
+	 */
 	private static LinkedList<Integer> clusterToID(String[] cluster){
 		LinkedList<Integer> ret = new LinkedList<Integer>();
 		for(String cl : cluster){

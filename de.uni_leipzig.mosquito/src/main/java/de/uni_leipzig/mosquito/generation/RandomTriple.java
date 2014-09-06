@@ -31,40 +31,78 @@ import java.util.logging.Logger;
  * adjusted by Felix Conrads
  */
 public class RandomTriple {
+    
+    /** The logger. */
     private static Logger logger = Logger.getLogger(RandomTriple.class.getSimpleName());
+    
+    /** The number of generated triples. */
     private static long numberOfGeneratedTriples  = 0;
 
+    /** The output model. */
     private static Model outputModel;
+	
+	/** The graph uri. */
 	private static String graphURI=null;
+	
+	/** The output format. */
 	private static String outputFormat;
+	
+	/** The output file name. */
 	private static String outputFileName = UUID.randomUUID().toString();
 
 	static {
 		LogHandler.initLogFileHandler(logger, RandomInstance.class.getSimpleName());
 	}
 	
+	/**
+	 * Initialization
+	 *
+	 * @param outputFile the output file
+	 */
 	public static void init(String outputFile){
     	numberOfGeneratedTriples = FileHandler.getLineCount(outputFile);
     }
 	
+	/**
+	 * Sets the graph uri.
+	 *
+	 * @param graphURI the new graph uri
+	 */
 	public static void setGraphURI(String graphURI){
     	RandomTriple.graphURI = graphURI;
     }
 	
+	/**
+	 * Sets the output file name.
+	 *
+	 * @param outputFileName the new output file name
+	 */
 	public static void setOutputFileName(String outputFileName){
 		RandomTriple.outputFileName = outputFileName;
 	}
 	
+	/**
+	 * Sets the output format.
+	 *
+	 * @param outputFormat the new output format
+	 */
 	public static void setOutputFormat(String outputFormat){
     	RandomTriple.outputFormat = outputFormat;
     }
 	
+    /**
+     * Gets the number of triples.
+     *
+     * @return the number of triples
+     */
     public static long getNumberOfTriples(){
         return numberOfGeneratedTriples;
     }
 
     /**
-     * Generates a new random triple and stores it into the model, by selecting a random offset each time it is called
+     * Generates a new random triple and stores it into the model, by selecting a random offset each time it is called.
+     *
+     * @param con Connection to use
      */
     public static void generateTriple(Connection con){
         Model model = null;
@@ -123,7 +161,9 @@ public class RandomTriple {
      * The idea is that we read 10 triple from the file and then select some of them at random according to the
      * percentage of instances that should be generated e.g. 10% we should select 1 out of 10, 30% we should select
      * 3 out of 10 and so forth
-     * @param   filename    The name of the file that will be used to get triples from
+     *
+     * @param filename the filename
+     * @param percent the percentage to genrate
      */
     public static void readTriplesFromFile(String filename, Double percent){
         int numberOfTriplesToSelectFromGroup = (int)(percent*100.0 /10);

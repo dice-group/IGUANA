@@ -24,84 +24,83 @@ import org.jfree.data.io.CSV;
 
 import com.xeiam.xchart.Chart;
 
+
+/**
+ * The Class ResultSet for the results of each testcase.
+ * 
+ * @author Felix Conrads
+ */
 public class ResultSet implements Iterator<List<Object>>{
 	
-	public static void main(String[] args) throws IOException{
-		ResultSet res = new ResultSet();
-		res.setTitle("Queries per Second");
-		res.setxAxis("Query");
-		res.setyAxis("#Queries");
-		List<Object> row = new LinkedList<Object>();
-		List<String> header = new LinkedList<String>();
-//		Random rand = new Random(123);
-		header.add("Connection");
-		header.add("3");
-		row.add("dbpedia");
-		row.add(338427);
-//		for(int i =1; i<10;i++){
-//			header.add(String.valueOf(i));
-//			row.add(rand.nextInt(1000));
-//		}
-		res.addRow(row);
-		row.clear();
-//		row.add("2");
-//		for(int i =1; i<10;i++){
-//			row.add(rand.nextInt(1000));
-//		}
-//		res.addRow(row);
-//		row.clear();
-//		row.add("3");
-//		for(int i =1; i<10;i++){
-//			row.add(rand.nextInt(1000));
-//		}
-//		res.addRow(row);
-//		row.clear();
-//		row.add("4");
-//		for(int i =1; i<10;i++){
-//			row.add(rand.nextInt(1000));
-//		}
-//		res.addRow(row);
-		res.setHeader(header);
-		res.setFileName("testCSV2");
-//		res.save();
-		res.saveAsPNG();
-		
-	}
 	
-	
+	/** The file name. */
 	private String fileName = UUID.randomUUID().toString();
 
+	/** The header. */
 	private List<String> header = new LinkedList<String>();
 	
+	/** The table. */
 	private List<List<Object>> table = new LinkedList<List<Object>>();
 	
+	/** The row. */
 	private int row=-1;
 	
+	/** The removed. */
 	private Boolean removed=false;
 
+	/** The title. */
 	private String title="";
 	
+	/** The x axis. */
 	private String xAxis="";
 	
+	/** The y axis. */
 	private String yAxis="";
 	
+	/**
+	 * Gets the header.
+	 *
+	 * @return the header
+	 */
 	public List<String> getHeader(){
 		return header;
 	}
 	
+	/**
+	 * Gets the table.
+	 *
+	 * @return the table
+	 */
 	public List<List<Object>> getTable(){
 		return table;
 	}
 	
+	/**
+	 * Sets the header.
+	 *
+	 * @param header the new header
+	 */
 	public void setHeader(List<String> header){
 		this.header = new LinkedList<String>(header);
 	}
 	
+	/**
+	 * Adds the row.
+	 *
+	 * @param row the row
+	 * @return true if succeded, else false
+	 */
 	public Boolean addRow(List<Object> row){
 		table.add(new LinkedList<Object>(row));
 		return true;
 	}
 	
+	/**
+	 * Gets the String of the header at Index i
+	 *
+	 * @param i the index
+	 * @return the string at the header of the given index
+	 */
 	public String getHeadAt(int i){
 		int t=1;
 		String ret=null;
@@ -113,36 +112,73 @@ public class ResultSet implements Iterator<List<Object>>{
 		return t<i?ret:null;
 	}
 	
+	/**
+	 * Gets the string on position i
+	 *
+	 * @param i the index
+	 * @return the string
+	 */
 	public String getString(int i){
 		return table.get(row).get(i-1).toString();
 	}
 	
+	/**
+	 * Gets the integer on position i
+	 *
+	 * @param i the index
+	 * @return the integer
+	 */
 	public Integer getInteger(int i){
 		return Integer.parseInt(table.get(row).get(i-1).toString());
 	}
 	
+	/**
+	 * Gets the object at position i
+	 *
+	 * @param i the index
+	 * @return the object
+	 */
 	public Object getObject(int i){
 		return table.get(row).get(i-1);
 	}
 
+	/**
+	 * Gets the row as an array
+	 *
+	 * @return the row as an array
+	 */
 	public Object[] getArray(){
 		return table.get(row).toArray();
 	}
 	
+	/**
+	 * Gets the row as a List
+	 *
+	 * @return the row
+	 */
 	public List<Object> getRow(){
 		return table.get(row);
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.util.Iterator#next()
+	 */
 	@Override
 	public List<Object> next() {
 		return table.get(++row);
 	}
 
+	/* (non-Javadoc)
+	 * @see java.util.Iterator#hasNext()
+	 */
 	@Override
 	public boolean hasNext() {
 		return row+1 < table.size();
 	}
 
+	/* (non-Javadoc)
+	 * @see java.util.Iterator#remove()
+	 */
 	@Override
 	public void remove() {
 		if(!removed){
@@ -151,6 +187,11 @@ public class ResultSet implements Iterator<List<Object>>{
 		
 	}
 	
+	/**
+	 * Checks if is empty.
+	 *
+	 * @return true if the resultset is empty, false otherwise
+	 */
 	public Boolean isEmpty(){
 		if(header.isEmpty()){
 			for(List<Object> row: table){
@@ -163,6 +204,11 @@ public class ResultSet implements Iterator<List<Object>>{
 		return false;
 	}
 	
+	/**
+	 * Save as csv file
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void save() throws IOException{
 		if(this.isEmpty()){
 			return;
@@ -192,6 +238,11 @@ public class ResultSet implements Iterator<List<Object>>{
 	}
 
 
+	/**
+	 * Transform.
+	 *
+	 * @return the list
+	 */
 	@SuppressWarnings("unused")
 	private List<List<Object>> transform(){
 		List<List<Object>> columns = new LinkedList<List<Object>>();
@@ -219,6 +270,12 @@ public class ResultSet implements Iterator<List<Object>>{
 		return columns.subList(1, columns.size());
 	}
 	
+	/**
+	 * Stream png.
+	 *
+	 * @param chart the chart
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	@SuppressWarnings("unused")
 	private void streamPNG(Chart chart) throws IOException {
 		 
@@ -232,6 +289,12 @@ public class ResultSet implements Iterator<List<Object>>{
 	    fos.close();
 	  }
 	
+	/**
+	 * Save as png file.
+	 *
+	 * @throws FileNotFoundException the file not found exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void saveAsPNG() throws FileNotFoundException, IOException{
 		save();
 		int width = Math.max(70*(header.size()*table.size()), 800);
@@ -256,34 +319,74 @@ public class ResultSet implements Iterator<List<Object>>{
 		ChartUtilities.saveChartAsPNG(new File(this.fileName+".png"), ch, width, height);
 	}
 	
+	/**
+	 * Gets the file name.
+	 *
+	 * @return the file name
+	 */
 	public String getFileName() {
 		return fileName;
 	}
 
+	/**
+	 * Sets the file name.
+	 *
+	 * @param fileName the new file name
+	 */
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
 
+	/**
+	 * Gets the title.
+	 *
+	 * @return the title
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * Sets the title.
+	 *
+	 * @param title the new title
+	 */
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
+	/**
+	 * Gets the x axis.
+	 *
+	 * @return the x axis
+	 */
 	public String getxAxis() {
 		return xAxis;
 	}
 
+	/**
+	 * Sets the x axis.
+	 *
+	 * @param xAxis the new x axis
+	 */
 	public void setxAxis(String xAxis) {
 		this.xAxis = xAxis;
 	}
 
+	/**
+	 * Gets the y axis.
+	 *
+	 * @return the y axis
+	 */
 	public String getyAxis() {
 		return yAxis;
 	}
 
+	/**
+	 * Sets the y axis.
+	 *
+	 * @param yAxis the new y axis
+	 */
 	public void setyAxis(String yAxis) {
 		this.yAxis = yAxis;
 	}

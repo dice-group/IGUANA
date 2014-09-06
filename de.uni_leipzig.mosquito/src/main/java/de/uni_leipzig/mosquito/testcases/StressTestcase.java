@@ -17,16 +17,38 @@ import org.jfree.util.Log;
 
 import de.uni_leipzig.mosquito.utils.ResultSet;
 
+/**
+ * The testcase tests the Querytestcase in a given no of threads
+ * it should provide a real case situation
+ * 
+ * @author Felix Conrads
+ */
 public class StressTestcase implements Testcase {
 	
+	/** The log. */
 	private Logger log;
+	
+	/** The users. */
 	private int users;
+	
+	/** The props. */
 	private Properties props;
+	
+	/** The res. */
 	private Collection<ResultSet> res = new LinkedList<ResultSet>();
+	
+	/** The con. */
 	private Connection con;
+	
+	/** The current db name. */
 	private String currentDBName;
+	
+	/** The percent. */
 	private String percent; 
 	
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#start()
+	 */
 	@Override
 	public void start() throws IOException {
 		log = Logger.getLogger(StressTestcase.class.getName());
@@ -96,6 +118,11 @@ public class StressTestcase implements Testcase {
 		log.info("...Done saving results");
 	}
 	
+	/**
+	 * Merge all the results by mean.
+	 *
+	 * @param results the results which should be merged together
+	 */
 	@SuppressWarnings("unchecked")
 	private void mergeResults(Collection<Collection<ResultSet>> results){
 		List<String>[] headers = new List[results.iterator().next().size()];
@@ -156,11 +183,17 @@ public class StressTestcase implements Testcase {
 		addCurrentResults(resNew);
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#getResults()
+	 */
 	@Override
 	public Collection<ResultSet> getResults() {
 		return res;
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setProperties(java.util.Properties)
+	 */
 	@Override
 	public void setProperties(Properties p) {
 		users = Integer.parseInt(String.valueOf(p.get("users")));
@@ -168,6 +201,9 @@ public class StressTestcase implements Testcase {
 //		props.remove("users");
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#addCurrentResults(java.util.Collection)
+	 */
 	@Override
 	public void addCurrentResults(Collection<ResultSet> currentResults) {
 		Iterator<ResultSet> it = currentResults.iterator();
@@ -187,16 +223,25 @@ public class StressTestcase implements Testcase {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setConnection(org.bio_gene.wookie.connection.Connection)
+	 */
 	@Override
 	public void setConnection(Connection con) {
 		this.con = con;
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setCurrentDBName(java.lang.String)
+	 */
 	@Override
 	public void setCurrentDBName(String name) {
 		this.currentDBName = name;
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setCurrentPercent(java.lang.String)
+	 */
 	@Override
 	public void setCurrentPercent(String percent) {
 		this.percent = percent;

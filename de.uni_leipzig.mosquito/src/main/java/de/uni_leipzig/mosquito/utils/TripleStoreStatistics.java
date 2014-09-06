@@ -10,17 +10,23 @@ import org.bio_gene.wookie.utils.LogHandler;
 
 import com.hp.hpl.jena.rdf.model.impl.LiteralImpl;
 
-
-
+// TODO should be rewritten with offset limit strategy
 /**
- * Erst ab SPARQL 1.1 möglich
- * Problem: Möglicherweise könnten die Queries nicht schnell genug ausführbar sein, dann muss das über denn RAM laufen
+ * 
+ * Pre Defined queries for stastic usage 
  * 
  * @author Felix Conrads
  *
  */
 public class TripleStoreStatistics {
 
+		/**
+		 * Querying the Connection with a Single Result query
+		 *
+		 * @param con Connection to use
+		 * @param query the query to execute
+		 * @return the result of the query
+		 */
 		private static Long query(Connection con, String query){
 			Logger log = Logger.getLogger("TripleStoreStatistics");
 			try {
@@ -35,6 +41,13 @@ public class TripleStoreStatistics {
 			return -1L;
 		}
 	
+		/**
+		 * Counts the no of triples in the dataset
+		 *
+		 * @param con Connection to use
+		 * @param graphURI graph to use (can be null)
+		 * @return no of triples in the dataset(graph)
+		 */
 		public static Long tripleCount(Connection con, String graphURI){
 			//validated with 4store
 			String query="SELECT (COUNT(*) AS ?no) ";
@@ -44,6 +57,13 @@ public class TripleStoreStatistics {
 			
 		}
 		
+		/**
+		 * Counts the no of object resources
+		 *
+		 * @param con Connection to use
+		 * @param graphURI the graph to use (can be null)
+		 * @return the result
+		 */
 		public static Long objectNodeCount(Connection con, String graphURI){
 			//validated with 4store 
 			String query="SELECT (COUNT(DISTINCT ?o) AS ?no) ";
@@ -52,6 +72,13 @@ public class TripleStoreStatistics {
 			return query(con, query);
 		}
 		
+		/**
+		 * Counts the no of subjects
+		 *
+		 * @param con Connection to use
+		 * @param graphURI the graph to use (can be null)
+		 * @return the result
+		 */
 		public static Long subjectNodeCount(Connection con, String graphURI){
 			//validated with 4store 
 			String query="SELECT (COUNT(DISTINCT ?s) AS ?no) ";
@@ -60,6 +87,13 @@ public class TripleStoreStatistics {
 			return query(con, query);
 		}
 		
+		/**
+		 * Counts the no of Entities
+		 *
+		 * @param con Connection to use
+		 * @param graphURI the graph to use (can be null)
+		 * @return the result
+		 */
 		public static Long entityCount(Connection con, String graphURI){
 			//validated with 4store 
 			String query="SELECT (COUNT(DISTINCT ?s) AS ?no) ";
@@ -68,6 +102,14 @@ public class TripleStoreStatistics {
 			return query(con, query);
 		}
 		
+		/**
+		 * Avg out degree.
+		 *
+		 * @param con Connection to use
+		 * @param literals the literals
+		 * @param graphURI the graph to use (can be null)
+		 * @return the result
+		 */
 		public static Long avgOutDegree(Connection con, Boolean literals, String graphURI){
 			String query="SELECT (AVG(?co) AS ?no)  ";
 			query+=(graphURI!=null?"FROM <"+graphURI+"> ":"");
@@ -82,6 +124,14 @@ public class TripleStoreStatistics {
 			return query(con, query);
 		}
 		
+		/**
+		 * Avg in degree.
+		 *
+		 * @param con Connection to use
+		 * @param literals the literals
+		 * @param graphURI the graph to use (can be null)
+		 * @return the result
+		 */
 		public static Long avgInDegree(Connection con, Boolean literals, String graphURI){
 			String query="SELECT (AVG(?co) AS ?no)  ";
 			query+=(graphURI!=null?"FROM <"+graphURI+"> ":"");

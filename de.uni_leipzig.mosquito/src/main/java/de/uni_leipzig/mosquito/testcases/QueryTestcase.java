@@ -26,61 +26,152 @@ import de.uni_leipzig.mosquito.utils.ResultSet;
 import de.uni_leipzig.mosquito.utils.StringHandler;
 import de.uni_leipzig.mosquito.utils.comparator.LivedataComparator;
 
+/**
+ * The testcase tests given querypatterns (and turn them into real queries) for a given time
+ * against a given Connection and tests how much querymixes were tested, for every query the avg per second and
+ * the complete time every query were tested
+ * 
+ * (Queries can be also LiveData files) 
+ * 
+ * @author Felix Conrads
+ */
 public class QueryTestcase implements Testcase, Runnable {
 
+	/** The log. */
 	private Logger log;
+	
+	/** The con. */
 	private Connection con;
+	
+	/** The query patterns. */
 	private String queryPatterns;
+	
+	/** The current db. */
 	private String currentDB="";
+	
+	/** The percent. */
 	private String percent;
+	
+	/** The patterns. */
 	private static Long patterns=0L;
+	
+	/** The path. */
 	private String path;
+	
+	/** The update strategy. */
 	private String updateStrategy;
+	
+	/** The q qp s. */
 	private Random qQpS;
+	
+	/** The s qp s. */
 	private int patternQpS=0, iQpS=0,sQpS=0;
+	
+	/** The qps time. */
 	private List<Long> qpsTime;
+	
+	/** The q count. */
 	private List<Long> qCount;
+	
+	/** The time limit. */
 	private Long timeLimit = 3600000L;
+	
+	/** The limit. */
 	private int limit=5000;
+	
+	/** The x count. */
 	private int xCount = 0;
+	
+	/** The ld linking. */
 	private String ldLinking;
+	
+	/** The ldpath. */
 	private String ldpath;
+	
+	/** The live data format. */
 	private static String liveDataFormat = "[0-9]{6}\\.(added|removed)\\.nt";
+	
+	/** The ld insert format. */
 	private static String ldInsertFormat = "[0-9]{6}\\.added\\.nt";
+	
+	/** The ld delete format. */
 	private static String ldDeleteFormat = "[0-9]{6}\\.removed\\.nt";
+	
+	/** The ld it. */
 	private int ldIt=0;
 
+	/** The graph uri. */
 	private String graphURI;
 	
+	/** The x. */
 	private static int x = -1;
+	
+	/** The sig. */
 	private static int[] sig  = {0, 0};
+	
+	/** The selects. */
 	private static List<String> selects;
+	
+	/** The inserts. */
 	private static List<String> inserts;
+	
 	private static Boolean selectGTinserts;
 	
+	/** The QueryHandler. */
 	private static QueryHandler qh;
 	
+	/**
+	 * Sets the QueryHandler
+	 *
+	 * @param qh the QueryHandler
+	 */
 	public static void setQh(QueryHandler qh) {
 		QueryTestcase.qh = qh;
 	}
 
+	/** The res. */
 	private Collection<ResultSet> res = new LinkedList<ResultSet>();
+	
+	/** The ld. */
 	private boolean ld=false;
 
+	/** The qhs. */
 	private static Hashtable<String, QueryHandler> qhs;
+	
+	/** The ld strategy. */
 	private int ldStrategy;
 	
+	/**
+	 * Gets the id of the QueryTestcase.
+	 *
+	 * @return the id
+	 */
 	private String getID(){
 		String id = queryPatterns!="null"?StringHandler.stringToAlphanumeric(queryPatterns):"";		
 		id+= ldpath!="null"?"_"+StringHandler.stringToAlphanumeric(ldpath):"";
 		return "QueryTestcase"+id+File.separator;
 	}
 	
+	/**
+	 * Test qh.
+	 *
+	 * @return the boolean
+	 */
 	private Boolean testQh(){
 		String id = getID();
 		return !id.equals(qh.getPath());
 	}
 	
+	/**
+	 * Inits the QueryHandler.
+	 *
+	 * @param queryPatterns the query patterns
+	 * @param updateStrategy the update strategy
+	 * @param ldpath the path with the LiveData files 
+	 * @param limit the limitation of queries from query patterns
+	 * @param log the logger
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void initQH(String queryPatterns, String updateStrategy, String ldpath, int limit, Logger log) throws IOException{
 		log.info("Initialize QueryHandler");
 		String id = queryPatterns!="null"?StringHandler.stringToAlphanumeric(queryPatterns):"";		
@@ -149,6 +240,9 @@ public class QueryTestcase implements Testcase, Runnable {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#start()
+	 */
 	@Override
 	public void start() throws IOException {
 		
@@ -169,8 +263,9 @@ public class QueryTestcase implements Testcase, Runnable {
 				qhs.put(getID(), qh);
 			}
 		}
-		Collections.sort(inserts, new LivedataComparator(ldStrategy));
-
+		if(!ldpath.equals("null")){
+			Collections.sort(inserts, new LivedataComparator(ldStrategy));
+		}
 		path = qh.getAbsolutPath();
 		log.info("Queries Path: "+path);
 //		pQMpH = new Random(seed1);
@@ -248,6 +343,12 @@ public class QueryTestcase implements Testcase, Runnable {
 		log.info("...Done saving results");
 	}
 	
+	/**
+	 * test the time a query needs to be executed.
+	 *
+	 * @param query the query
+	 * @return the query time
+	 */
 	private Long getQueryTime(String query){
 		Long a = new Date().getTime();
 		con.execute(query);
@@ -256,6 +357,11 @@ public class QueryTestcase implements Testcase, Runnable {
 		return b-a;
 	}
 	
+	/**
+	 * Tests the actual testcase 
+	 *
+	 * @return the results
+	 */
 	private ResultSet querySeconds(){
 		ResultSet res = new ResultSet();
 		List<Object> row = new LinkedList<Object>();
@@ -302,6 +408,11 @@ public class QueryTestcase implements Testcase, Runnable {
 		return res;
 	}
 	
+	/**
+	 * Checks if the hotrun phase is finished.
+	 *
+	 * @return true if finished, false otherwise
+	 */
 	private Boolean isQpSFinished(){
 		long t=0;
 		for(long time: qpsTime){
@@ -312,6 +423,11 @@ public class QueryTestcase implements Testcase, Runnable {
 		return true;
 	}
 	
+	/**
+	 * Gets the next liveData query
+	 *
+	 * @return [query, fileName of the query]
+	 */
 	private String[] getNextLD(){
 		String[] ret = {"", ""};
 		if(ldIt>=inserts.size()){
@@ -336,6 +452,11 @@ public class QueryTestcase implements Testcase, Runnable {
 	}
 	
 	
+	/**
+	 * Gets the next query.
+	 *
+	 * @return the next query
+	 */
 	private String[] getNextQpSQuery(){
 		String[] ret = {"", ""};
 		String currentFile;
@@ -466,12 +587,18 @@ public class QueryTestcase implements Testcase, Runnable {
 	}
 
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#getResults()
+	 */
 	@Override
 	public Collection<ResultSet> getResults() {
 		return res;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#addCurrentResults(java.util.Collection)
+	 */
 	@Override
 	public void addCurrentResults(Collection<ResultSet> currentResults) {
 		Iterator<ResultSet> it = currentResults.iterator();
@@ -491,6 +618,9 @@ public class QueryTestcase implements Testcase, Runnable {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setProperties(java.util.Properties)
+	 */
 	@Override
 	public void setProperties(Properties p) {
 		if(p.getProperty("graphURI")!= null)	
@@ -532,21 +662,33 @@ public class QueryTestcase implements Testcase, Runnable {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setConnection(org.bio_gene.wookie.connection.Connection)
+	 */
 	@Override
 	public void setConnection(Connection con) {
 		this.con = con;
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setCurrentDBName(java.lang.String)
+	 */
 	@Override
 	public void setCurrentDBName(String name) {
 		this.currentDB =  name;
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.testcases.Testcase#setCurrentPercent(java.lang.String)
+	 */
 	@Override
 	public void setCurrentPercent(String percent) {
 		this.percent = percent;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		try {

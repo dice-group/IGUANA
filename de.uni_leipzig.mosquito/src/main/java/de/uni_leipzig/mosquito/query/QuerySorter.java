@@ -14,44 +14,78 @@ import com.hp.hpl.jena.update.UpdateRequest;
 
 import de.uni_leipzig.mosquito.utils.FileHandler;
 
+/**
+ * The Class QuerySorter helps to differs between SPARQL and UPDATE queries and
+ * calculates necessary intervalls and variables for the {@link QueryHandler}
+ * 
+ * @author Felix Conrads
+ */
 public class QuerySorter {
 
-	public static void main(String[] args){
-		String select = "SELECT ?s FROM <asd> WHERE {?s ?p ?o}";
-		String insert = "INSERT DATA {<a> <b> <d>}";
-		String drop = "DROP GRAPH <asd>";
-		String bla = "asd";
-		System.out.println("select: sparql: "+isSPARQL(select));
-		System.out.println("insert: sparql: "+isSPARQL(insert));
-		System.out.println("drop: sparql: "+isSPARQL(drop));
-		System.out.println("bla: sparql: "+isSPARQL(bla));
-		System.out.println("select: sparqlu: "+isSPARQLUpdate(select));
-		System.out.println("insert: sparqlu: "+isSPARQLUpdate(insert));
-		System.out.println("drop: sparqlu: "+isSPARQLUpdate(drop));
-		System.out.println("bla: sparqlu: "+isSPARQLUpdate(bla));
-	}
 	
-	
+	/**
+	 * Gets the x.
+	 *
+	 * @param selects the selects
+	 * @param inserts the inserts
+	 * @return the x
+	 */
 	public static double getX(int selects, int inserts){
 		return Math.max(selects, inserts)/(Math.min(selects,inserts)*1.0);
 	}
 	
+	/**
+	 * Gets the round x.
+	 *
+	 * @param selects the selects
+	 * @param inserts the inserts
+	 * @return the round x
+	 */
 	public static int getRoundX(int selects, int inserts){
 		return (int) getX(selects, inserts);
 	}
 	
+	/**
+	 * Gets the lambda.
+	 *
+	 * @param selects the selects
+	 * @param inserts the inserts
+	 * @param mu the mu
+	 * @return the lambda
+	 */
 	public static double getLambda(int selects, int inserts, double mu){
 		return (Math.pow((selects-mu), 2)+Math.pow((inserts-mu), 2))/2;
 	}
 	
+	/**
+	 * Gets the sig.
+	 *
+	 * @param selects the selects
+	 * @param inserts the inserts
+	 * @return the sig
+	 */
 	public static double getSig(int selects, int inserts){
 		return Math.sqrt( getX(selects, inserts));
 	}
 	
+	/**
+	 * Gets the round sig.
+	 *
+	 * @param selects the selects
+	 * @param inserts the inserts
+	 * @return the round sig
+	 */
 	public static int getRoundSig(int selects, int inserts){
 		return (int) getSig(selects, inserts);
 	}
 	
+	/**
+	 * Gets the intervall.
+	 *
+	 * @param selects the selects
+	 * @param inserts the inserts
+	 * @return the intervall
+	 */
 	public static int[] getIntervall(int selects, int inserts){
 		int roundX = getRoundX(selects, inserts);
 		int roundSD = getRoundSig(selects, inserts);
@@ -61,11 +95,24 @@ public class QuerySorter {
 		return intervall;
 	}
 	
+	/**
+	 * Gets the intervall.
+	 *
+	 * @param queriesPath the queries path
+	 * @return the intervall
+	 */
 	public static int[] getIntervall(String queriesPath){
 		int[] q = getSelectAndInsertCounts(queriesPath);
 		return getIntervall(q[0], q[1]);
 	}
 	
+	/**
+	 * Gets the no of selects and inserts.
+	 * [noOfSelects, noOfInserts]
+	 *
+	 * @param queriesPath the queries path
+	 * @return the select and insert counts
+	 */
 	@SuppressWarnings("unused")
 	public static int[] getSelectAndInsertCounts(String queriesPath){
 		int[] ret = {0, 0};
@@ -78,6 +125,12 @@ public class QuerySorter {
 		return ret;
 	}
 	
+	/**
+	 * Checks if query is a SPARQL query.
+	 *
+	 * @param query the query
+	 * @return true if it is, false otherwise
+	 */
 	public static Boolean isSPARQL(String query){
 		try{
 			SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
@@ -89,6 +142,12 @@ public class QuerySorter {
 		}
 	}
 	
+	/**
+	 * Checks if query is an UPDATE query.
+	 *
+	 * @param query the query
+	 * @return true if it is, false otherwise
+	 */
 	public static Boolean isSPARQLUpdate(String query){
 		try{
 			UpdateParser up = UpdateParser.createParser(Syntax.syntaxSPARQL_11);
@@ -102,6 +161,12 @@ public class QuerySorter {
 		}
 	}
 	
+	/**
+	 * Gets all SPARQL queries of a given path
+	 *
+	 * @param queriesPath the path with query files in it
+	 * @return the sparql queries 
+	 */
 	public static List<String> getSPARQL(String queriesPath){
 		List<String> sparqlFiles = new LinkedList<String>();
 		for(File f : new File(queriesPath).listFiles()){
@@ -113,6 +178,12 @@ public class QuerySorter {
 		return sparqlFiles;
 	}
 	
+	/**
+	 * Gets all UPDATE queries of a given path
+	 *
+	 * @param queriesPath the path with query files in it
+	 * @return the update queries 
+	 */
 	public static List<String> getSPARQLUpdate(String queriesPath){
 		List<String> sparqlFiles = new LinkedList<String>();
 		for(File f : new File(queriesPath).listFiles()){

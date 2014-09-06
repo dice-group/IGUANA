@@ -24,11 +24,22 @@ import org.bio_gene.wookie.utils.LogHandler;
  */
 public class DataGenerator {
 
+    /** The log. */
     private static Logger log = Logger.getLogger(DataGenerator.class.getName());
+    
     /**
-     * Generates the data using the generation method set in the configuration file
+     * Generates the data using the generation method set in the configuration file.
+     *
+     * @param con Connection to use
+     * @param graphURI graphURI to use for the Connection (can be null)
+     * @param inputFile the input file
+     * @param outputFile the output file
+     * @param method the method to use for generation (RandomInstance, RandomTriples, coherence)
+     * @param percent the percentage to reach
+     * @param roh the relaxtion parameter if the method coherence should be used
+     * @param coherence the coherence to reach if method coherence should be used
      */
-    public static void generateData(Connection con, String graphURI, String inputFile, String outputFile, String method, Double percent) {
+    public static void generateData(Connection con, String graphURI, String inputFile, String outputFile, String method, Double percent, Double roh, Double coherence) {
     	
     	
         long numberOfTriplesToBeGenerated = (int)(TripleStoreStatistics.tripleCount(con, graphURI) * percent);
@@ -112,6 +123,10 @@ public class DataGenerator {
                 RandomTriple.readTriplesFromFile(inputFile, percent);
 //            }
 //            RandomTriple.readTriplesFromFile();
+        }
+        else if(method.compareTo("coherence")==0){
+        	DataProducer.setRoh(roh);
+        	DataProducer.writeData(inputFile, outputFile, graphURI, percent, coherence);
         }
         else{
             log.severe("Unknown extraction method, program should terminate");

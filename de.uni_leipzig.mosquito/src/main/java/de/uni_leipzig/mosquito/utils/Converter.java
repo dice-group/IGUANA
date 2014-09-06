@@ -11,25 +11,29 @@ import org.xml.sax.SAXException;
 
 import de.uni_leipzig.mosquito.converter.ConverterI;
 
+
+/**
+ * The Class Converter to use for converting raw files into rdf formatted files
+ * 
+ * @author Felix Conrads
+ */
 public class Converter {
 
 	/**
-	 * 
-	 * Konvertiert PGN Daten zu gewünschten Output Format als RDF Graph und
-	 * löscht die PGN Daten
-	 * 
-	 * @param con
-	 * @param outputFormat
-	 * @param path
-	 * @param oPath
-	 * @param graphURI
-	 * @param logName
-	 * @throws SAXException
-	 * @throws IOException
-	 * @throws ParserConfigurationException
-	 * @throws ClassNotFoundException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
+	 * Converts given files in a path through a given converter class to files in an output path
+	 *
+	 * @param converter the converter class name
+	 * @param outputFormat the output format
+	 * @param path the path of the files
+	 * @param oPath the output path in which the files should be written
+	 * @param graphURI the graph to use (can be null)
+	 * @param log the logger to use for logging
+	 * @throws SAXException the SAX exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws ParserConfigurationException the parser configuration exception
+	 * @throws InstantiationException the instantiation exception
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws ClassNotFoundException the class not found exception
 	 */
 	public static void rawToFormat(String converter, String outputFormat, String path,
 			String oPath, String graphURI, Logger log) throws SAXException,

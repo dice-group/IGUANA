@@ -12,20 +12,49 @@ import de.uni_leipzig.mosquito.clustering.LogCluster;
 import de.uni_leipzig.mosquito.clustering.LogSolution;
 import de.uni_leipzig.mosquito.utils.EmailHandler;
 
+/**
+ * The Class BorderFlowStructureClusterer.
+ * 
+ * uses the border flow algorithm for clustering but instead of queries it clusters on their strucutres
+ * 
+ * @author Felix Conrads
+ */
 public class BorderFlowStructureClusterer implements Clusterer {
 
+	/** The path. */
 	public static String PATH = "cluster" + File.separator;
+	
+	/** The log. */
 	private static Logger log = LogSolution.getLogger();
+	
+	/** The threshold queries. */
 	private Integer thresholdQueries=10;
+	
+	/** The delta. */
 	private Integer delta=2;
+	
+	/** The harden. */
 	private String harden=null;
+	
+	/** The quality. */
 	private String quality=null;
+	
+	/** The threshold. */
 	private Double threshold=0.8;
+	
+	/** The caching. */
 	private Boolean testOne=true, heuristic=true, caching=true;
+	
+	/** The threshold structs. */
 	private Integer thresholdStructs;
+	
+	/** The min nodes. */
 	private Integer minNodes;
 
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.clustering.clusterer.Clusterer#cluster(java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void cluster(String logsPath, String queries) throws IOException {
 		String start = DateFormat.getDateTimeInstance().format(new Date());
@@ -40,13 +69,13 @@ public class BorderFlowStructureClusterer implements Clusterer {
 		String freqFileQ = PATH + "freqQ.log";
 		String sortedFreqFileQ = PATH + "sortedFreqQ.log";
 		String clusterOutput = PATH +"cluster.log";
-		String clQueryOutput = PATH +"choosenClusterQuery.log";
+//		String clQueryOutput = PATH +"choosenClusterQuery.log";
 		String simFile = PATH + "similarity.log";
 		String queriesStruct = PATH + "choosenStructs.log";
 		
 		log.info("Start logs2Queries: "
 				+ DateFormat.getDateTimeInstance().format(new Date()));
-		LogSolution.logsToPatterns(logsPath, queriesFile);
+		LogSolution.logsToQueries(logsPath, queriesFile);
 		log.info("End logs2Queries: "
 				+ DateFormat.getDateTimeInstance().format(new Date()));
 		
@@ -82,7 +111,7 @@ public class BorderFlowStructureClusterer implements Clusterer {
 		log.info("End matching structs to queries: "+ DateFormat.getDateTimeInstance().format(new Date()));
 		
 		log.info("Start Clustering...");
-		LogCluster.borderFlow(harden, quality, threshold, testOne, heuristic, caching, minNodes, queriesStruct, simFile, clusterOutput, clQueryOutput, queries);
+		LogCluster.borderFlow(harden, quality, threshold, testOne, heuristic, caching, minNodes, queriesStruct, simFile, clusterOutput, queries);
 		String end = DateFormat.getDateTimeInstance().format(new Date());
 		Calendar calE = Calendar.getInstance();
 		log.info("Ended ClusterProcess " + end);
@@ -93,6 +122,9 @@ public class BorderFlowStructureClusterer implements Clusterer {
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see de.uni_leipzig.mosquito.clustering.clusterer.Clusterer#setProperties(java.util.Properties)
+	 */
 	@Override
 	public void setProperties(Properties p) {
 		if(p.get("threshold-queries")!=null){

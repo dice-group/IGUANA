@@ -5,66 +5,19 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class is used to convert queries into patterns
+ * 
+ * @author Felix Conrads
+ */
 public class PatternSolution {
 
-	public static void main(String[] argc) {
-//		// Propertie = true
-//		String sparql = "SELECT ?v WHERE { <asd> %%v%% 'abc'^^<http://example.org/datatype#specialDatatype> }";
-//		System.out.println(findLiterals(sparql)); //abc
-//		System.out.println(queryToPattern(sparql));
-//		System.out.println(mustBeResource(sparql, "%%v%%"));
-//		// Resource = true
-//		sparql = "SELECT ?v WHERE {  %%v%% ?v 'abc'^^<http://example.org/datatype#specialDatatype> }";
-//		System.out.println(findLiterals(sparql)); //abc
-//		System.out.println(queryToPattern(sparql));
-//		System.out.println(mustBeResource(sparql, "%%v%%"));
-//		// transitive =true
-//		sparql = "SELECT ?v WHERE { {?v ?q %%v%%} {%%v%% ?s ?q}}";
-//		System.out.println(findLiterals(sparql)); //%%v%%
-//		System.out.println(queryToPattern(sparql));
-//		System.out.println(mustBeResource(sparql, "%%v%%"));
-//		// ; = true
-//		sparql = "SELECT ?v WHERE { ?v ?q 'abc'^^<http://example.org/datatype#specialDatatype> ;"
-//				+ " %%v%% 'vsd'^^<aasd>}";
-//		System.out.println(findLiterals(sparql));//vsd, abc
-//		System.out.println(queryToPattern(sparql));
-//		System.out.println(mustBeResource(sparql, "%%v%%"));
-//		// . = true
-//		sparql = "SELECT ?v WHERE { ?v ?q 'abc'^^<http://example.org/datatype#specialDatatype>."
-//				+ "?q %%v%% 'vsd'^^<aasd>}";
-//		System.out.println(findLiterals(sparql)); //vsd, abc
-//		System.out.println(queryToPattern(sparql));
-//		System.out.println(mustBeResource(sparql, "%%v%%"));
-//		// ; = false
-//		sparql = "SELECT ?v WHERE { ?v ?q 'abc'^^<http://example.org/datatype#specialDatatype> ;"
-//				+ " <aasd> %%v%%}";
-//		System.out.println(findLiterals(sparql));  //%%v%%, 'abc'
-//		System.out.println(queryToPattern(sparql));
-//		System.out.println(mustBeResource(sparql, "%%v%%"));
-//		// . = false
-//		sparql = "SELECT ?v WHERE { ?v ?q 'abc'^^<http://example.org/datatype#specialDatatype>."
-//				+ "?q <aasd> %%v%%}";
-//		System.out.println(findLiterals(sparql)); //{'abc'^^..., %%v%%}
-//		System.out.println(queryToPattern(sparql));
-//		System.out.println(mustBeResource(sparql, "%%v%%"));
-//		// Res or Literal = false
-//		sparql = "SELECT ?v WHERE { ?v <http://example.org/datatype#specialDatatype> %%v%%}";
-//		System.out.println(findLiterals(sparql)); //{}
-//		System.out.println(queryToPattern(sparql));
-//		System.out.println(mustBeResource(sparql, "%%v%%"));
-		
-//		String test = "SELECT DISTINCT * WHERE { { { ?place rdfs:label 'London'@en .} UNION { ?place rdfs:label 'London, Greater London'@en .} UNION { ?place dbpedia-prop:officialName 'London'@en .} UNION { ?place dbpedia-prop:name 'London'@en .} UNION { ?place foaf:name 'London'@en .} UNION { ?place owl:sameAs <http://rdf.freebase.com/ns/guid.9202a8c04000641f80000000000242b2> .} } { { ?place rdf:type ?type . FILTER regex(?type, '.+/((Place)|(PopulatedPlace)|(Town)|(City)|(.*CitiesIn.*))$', 'i') } UNION { ?place dbpedia-prop:population ''' asdasd ' ''' .} } { ?place rdfs:label ?label . FILTER ( lang(?label) = 'en' ) } OPTIONAL { { ?place dbpedia-prop:latm ?latm ; dbpedia-prop:longm ?longm . } UNION { ?place dbpedia-prop:latM ?latm ; dbpedia-prop:longM ''' asdasv ' \"v''' . } UNION { ?place geo:lat ?latitude ; geo:long ?longitude . } UNION { ?place owl:sameAs ?sameAsUri .} UNION { ?place foaf:page ?linkUrl .} } }";
-		String test = "PREFIX : <http://dbpedia.org/resource/> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX dbpedia-owl: <http://dbpedia.org/ontology/> PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX dbpedia-prop: <http://dbpedia.org/property/> PREFIX yago: <http://dbpedia.org/class/yago/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX umbel-sc: <http://umbel.org/umbel/sc/> PREFIX dbpedia: <http://dbpedia.org/> PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?place ?label ?longitude ?latitude ?latm ?longm ?sameAsUri ?linkUrl WHERE { { { ?place rdfs:label 'London'@en .} UNION { ?place rdfs:label 'London, Greater London'@en .} UNION { ?place dbpedia-prop:officialName 'London'@en .} UNION { ?place dbpedia-prop:name 'London'@en .} UNION { ?place foaf:name 'London'@en .} UNION { ?place owl:sameAs <http://rdf.freebase.com/ns/guid.9202a8c04000641f80000000000242b2> .} } { { ?place rdf:type ?type . FILTER regex(?type, '.+/((Place)|(PopulatedPlace)|(Town)|(City)|(.*CitiesIn.*))$', 'i') } UNION { ?place dbpedia-prop:population ''' asdasd '''' .} } { ?place rdfs:label ?label . FILTER ( lang(?label) = 'en' ) } OPTIONAL { { ?place dbpedia-prop:latm ?latm ; dbpedia-prop:longm ?longm . } UNION { ?place dbpedia-prop:latM ?latm ; dbpedia-prop:longM ''' asdasv ' \"v''' . } UNION { ?place geo:lat ?latitude ; geo:long ?longitude . } UNION { ?place owl:sameAs ?sameAsUri .} UNION { ?place foaf:page ?linkUrl .} } }";
-		test="select distinct * where { <http://dbpedia.org/resource/> <http://dbpedia.org/property/associatedBands> ?var0 . } order by ?var0";
-		System.out.println(test);
-		System.out.println(queryIRIsToVars(test, 0));
-		System.out.println(queryToPattern(test));
-
-//		String q = "''' asdasds ' '''. adsdasd '''Adc ''' .";
-//		System.out.println(findLiterals(q));
-	}
-	
-
+	/**
+	 * converts a query to a pattern.
+	 *
+	 * @param query the query
+	 * @return the querypattern
+	 */
 	public static String queryToPattern(String query) {
 		String pattern = query;
 		int i=1;
@@ -93,6 +46,12 @@ public class PatternSolution {
 		return pattern;
 	}
 
+	/**
+	 * Find all literals in a given query.
+	 *
+	 * @param query the query
+	 * @return the literals
+	 */
 	public static Collection<String> findLiterals(String query){
 		Collection<String> ret = new HashSet<String>();
 		String regex =  "'''(.*[^'])'''(|^^\\S+|@\\S+)";
@@ -147,6 +106,13 @@ public class PatternSolution {
 		return ret;
 	}
 	
+	/**
+	 * tests if a literal is in a filter clause
+	 *
+	 * @param query the query
+	 * @param literal the literal
+	 * @return true if the literal is in a filter clause, false otherwise
+	 */
 	public static Boolean literalInFilterClause(String query, String literal){
 		//Gets everything up till filter...
 		String filterReg = "(f|F)(i|I)(l|L)(t|T)(e|E)(r|R)";
@@ -185,6 +151,13 @@ public class PatternSolution {
 	}
 	
 
+	/**
+	 * Tests if the variable in the query must be a resource
+	 *
+	 * @param query the query
+	 * @param var the variable
+	 * @return true if the var must be a resource, false otherwise
+	 */
 	public static Boolean mustBeResource(String query, String var) {
 		String regex = ".*(\\{\\s*" + var + "|\\s*(\\.|;)\\s*" + var
 				+ "|\\{\\s*\\S+\\s*" + var + ").*";
@@ -195,6 +168,13 @@ public class PatternSolution {
 		return false;
 	}
 	
+	/**
+	 * Query ir is to vars.
+	 *
+	 * @param query the query
+	 * @param literals the literals
+	 * @return the string
+	 */
 	private static String queryIRIsToVars(String query, int literals){
 		String ret = query;
 		Pattern p = Pattern.compile("\\{.*<\\S+>", Pattern.UNICODE_CHARACTER_CLASS);

@@ -1,35 +1,40 @@
 package de.uni_leipzig.mosquito.utils.comparator;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
+/**
+ * The Class OccurrencesComparator compares two Strings build as following
+ * "word"splitter"number" and compares the number (occurences) with each other
+ * 
+ * @author Felix Conrads
+ * 
+ */
 public class OccurrencesComparator implements Comparator<String> {
 
-	public static void main(String[] argc){
-		Comparator<String> cmp = new OccurrencesComparator();
-		List<String> list = new ArrayList<String>();
-		list.add("asd\t3");
-		list.add("asd\t312");
-		list.add("asd\t2");
-		list.add("asd\t123123");
-		System.out.println(list);
-		Collections.sort(list, cmp);
-		System.out.println(list);
-	}
 	
+	/** The splitter. */
 	private String splitter;
 	
+	/**
+	 * Instantiates a new occurrences comparator.
+	 */
 	public OccurrencesComparator(){
 		splitter = "\t";
 	}
 	
+	/**
+	 * Instantiates a new occurrences comparator.
+	 *
+	 * @param splitter the splitter
+	 */
 	public OccurrencesComparator(String splitter){
 		this.splitter = splitter;
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+	 */
 	@Override
 	public int compare(String o1, String o2) {
 		Integer occ1 = Integer.parseInt(o1.substring(o1.lastIndexOf(splitter)+1));

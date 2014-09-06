@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -32,14 +31,19 @@ import com.hp.hpl.jena.query.QueryException;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.sparql.lang.SPARQLParser;
-import uk.ac.shef.wit.simmetrics.similaritymetrics.Levenshtein;
 import de.uni_leipzig.mosquito.query.QuerySorter;
 import de.uni_leipzig.mosquito.utils.FileHandler;
 import de.uni_leipzig.mosquito.utils.StringHandler;
 import de.uni_leipzig.mosquito.utils.comparator.OccurrencesComparator;
 
+/**
+ * Provides some necessary algorithms for the clustering process
+ * 
+ * @author Felix Conrads
+ */
 public class LogSolution {
 	
+	/** The logger. */
 	private static Logger log;
 	
 	static {
@@ -47,28 +51,34 @@ public class LogSolution {
 		LogHandler.initLogFileHandler(log, "LogCluster");
 	}
 	
+	/**
+	 * Gets the logger.
+	 *
+	 * @return the logger
+	 */
 	public static Logger getLogger(){
 		return log;
 	}
-
-	public static void main(String[] argc) throws IOException{
-//		logToPatterns("./src/main/resources/logFile.log", "test.log");
-//		queriesToStructure("test.log", "structure.log");
-//		patternsToFrequents("structure.log", "frequent.log", 2);
-//		sortFrequents("frequent.log", "sortedFrequent.log");
-		String test = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dbpedia2: <http://dbpedia.org/property/> PREFIX owl: <http://dbpedia.org/ontology/> SELECT ?yearVar WHERE { {?subject dbpedia2:name ?name } {?subject dbpedia2:artist ?artist . ?artist dbpedia2:name \"ÊÈÍÎ\"@en . ?subject rdf:type <http://dbpedia.org/ontology/Album> . ?subject owl:releaseDate ?yearVar.FILTER (regex(str(?name), \"Ëó÷øèå ïåñíè.. 88-90\"@en, \"i\"))}}Limit 10";
-		log.info(queryToStructure(test));
-		countTriplesInQuery(test);
-		
-		Levenshtein lev = new Levenshtein();
-		log.info(String.valueOf(lev.getSimilarity("FELIS", "HELIX")));
-	}
 	
 
+	/**
+	 * Writes queries to their structures.
+	 *
+	 * @param input the name of the file with the queries to be converted
+	 * @param output the name of the file in which the structures should be written
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void queriesToStructure(String input, String output) throws IOException{
 		queriesToStructure(new File(input), new File(output));
 	}	
 	
+	/**
+	 * Writes queries to their structures.
+	 *
+	 * @param input the file with the queries to be converted
+	 * @param output the file in which the structures should be written
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void queriesToStructure(File input, File output) throws IOException{
 		output.createNewFile();
 		FileInputStream fis = null;
@@ -106,6 +116,13 @@ public class LogSolution {
 		}
 	}
 	
+	/**
+	 * Replaces all Literals of the form '''what ever is written in here''' to '''string'''
+	 * for a given query
+	 * 
+	 * @param query the query 
+	 * @return the query with the replacement
+	 */
 	private static String queryWith(String query){
 		String regex =  "'''(.*[^'])'''(|^^\\S+|@\\S+)";
 		String q = query,ret = query;
@@ -134,12 +151,30 @@ public class LogSolution {
 		return ret;
 	}
 	
+	/**
+	 * Converts a query to its structure by replacing:
+	 * '''what ever stands here''' to '''string'''
+	 * "what ever stands here" to "string"
+	 * 'what ever stands here' to 'string'
+	 * what:ever to prefix:suffix
+	 * <what ever> to \<r\>
+	 * <> to blank
+	 * true or false to Bool
+	 * any number to Number
+	 * any variable to ?var
+	 * any tag to \@tag
+	 * any type of a literal to ^^"type"
+	 *  
+	 *  
+	 * @param query the query
+	 * @return the structure of the query
+	 */
 	public static String queryToStructure(String query){
 		return queryWith(query)
 				.replaceAll("'[^']*'", "\'string\'")
 				.replaceAll("\"[^\"]*\"", "\\\"string\\\"")
-				.replaceAll("\\S+\\s*:", "prefix:")
-				.replaceAll("prefix:\\s*\\S+", "prefix:suffix")
+				.replaceAll("\\S+\\s*:", " prefix:")
+				.replaceAll("prefix:\\s*\\S+", "prefix:suffix ")
 				.replaceAll("<\\S+>", "<r>")
 				.replace("<>", "blank")
 				.replaceAll("(true|false)", "Bool")
@@ -151,36 +186,76 @@ public class LogSolution {
 				.replaceAll("\\s*;\\s*", " ; ");
 	}
 	
-	public static void logsToPatterns(String inputPath, String output) throws IOException{
-		logsToPatterns(inputPath, new File(output));
+	/**
+	 * Converts the encoded queries in the logfiles to queries
+	 *
+	 * @param inputPath the path of the logfiles
+	 * @param output the name of the output file in which the queries should be saved
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	public static void logsToQueries(String inputPath, String output) throws IOException{
+		logsToQueries(inputPath, new File(output));
 	}
 	
-	public static void logsToPatterns(String inputPath, File output) throws IOException{
+	/**
+	 * Converts the encoded queries in the logfiles to queries
+	 *
+	 * @param inputPath the path of the logfiles
+	 * @param output the output file in which the queries should be saved
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	public static void logsToQueries(String inputPath, File output) throws IOException{
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8), true);
 		String[] extensions = {"log"};
 		for(File f : FileHandler.getFilesInDir(inputPath, extensions)){
-			logToPatterns(pw, f);
+			logToQueries(pw, f);
 		}
 		pw.close();
 	}
 	
-	public static void logToPatterns(String input, String output) throws IOException{
-		logToPatterns(new File(input), new File(output));
+	/**
+	 * Converts the encoded queries in a given logfile to queries
+	 *
+	 * @param input the name of the logfile
+	 * @param output the name of the output file in which the queries should be saved
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	public static void logToQueries(String input, String output) throws IOException{
+		logToQueries(new File(input), new File(output));
 	}
 	
-	public static void logToPatterns(File input, File output) throws IOException{
+	/**
+	 * Converts the encoded queries in a given logfile to queries
+	 *
+	 * @param input the logfile
+	 * @param output the output file in which the queries should be saved
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	public static void logToQueries(File input, File output) throws IOException{
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8), true);
-		logToPatterns(pw, input);
+		logToQueries(pw, input);
 		pw.close();
 	}
 	
-	public static void logToPatterns(PrintWriter pw, String input){
-		logToPatterns(pw, new File(input));
+	/**
+	 * Converts the encoded queries in a given logfile to queries
+	 *
+	 * @param pw the Printwriter to use to write the queries
+	 * @param input the name of the logfile
+	 */
+	public static void logToQueries(PrintWriter pw, String input){
+		logToQueries(pw, new File(input));
 	}
 	
-	public static void logToPatterns(PrintWriter pw, File input){
+	/**
+	  * Converts the encoded queries in a given logfile to queries
+	 *
+	 * @param pw the Printwriter to use to write the queries
+	 * @param input the logfile
+	 */
+	public static void logToQueries(PrintWriter pw, File input){
 		FileInputStream fis = null;
 		BufferedReader br = null;
 		String line;
@@ -241,6 +316,14 @@ public class LogSolution {
 		}
 	}
 	
+	/**
+	 * Renames the variables of a query to ?var 
+	 * or in the case of mutliple variables to ?var1,...,?varn
+	 * where n is the no of distinct variables in the query
+	 *
+	 * @param query the query
+	 * @return the query with the renamed variables
+	 */
 	public static String queryVarRename(String query){
 		String ret = query;
 		Pattern p = Pattern.compile("\\?\\w+", Pattern.UNICODE_CHARACTER_CLASS);
@@ -255,56 +338,41 @@ public class LogSolution {
 		return ret;
 	}
 	
+	/**
+	 * For all queries in the input file the query and its frequency
+	 * will be written in the output file if the frequency is greater or equal than the threshold
+	 *
+	 * @param input the input file name
+	 * @param output the output file name
+	 * @param threshold the threshold 
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void patternsToFrequents(String input, String output, Integer threshold) throws IOException{
 		patternsToFrequents(new File(input), new File(output), threshold);
 	}
 	
+	/**
+	 * For all queries in the input file the query and its frequency will be saved in 
+	 * a Map {query: frequency}
+	 * 	
+	 * @param input the input file name
+	 * @return The map with the queries and their frequencies
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static Map<String, Integer> patternsToFrequents(String input) throws IOException{
 		return patternsToFrequents(new File(input));
 	}
 	
-	public static void testPatternsToFrequents(String input, String output, Integer threshold) throws IOException{
-		testPatternsToFrequents(new File(input), new File(output), threshold);
-	}
 	
-	public static void testPatternsToFrequents(File input, File output, Integer threshold) throws IOException{
-		FileInputStream fis = null;
-		BufferedReader br = null;
-		output.createNewFile();
-		RandomAccessFile ra;
-		String line="";
-		try{
-			fis = new FileInputStream(input);
-			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
-			while((line = br.readLine())!= null){
-				if(line.isEmpty())continue;
-				String line2;
-				ra = new RandomAccessFile(output, "rw");
-				while((line2 = ra.readLine())!=null){
-					String q = line2.substring(0, line2.indexOf("\t"));
-					Integer i = Integer.parseInt(line2.substring(line2.indexOf("\t")+1));
-					if(line.equals(q))
-						ra.writeBytes(q+"\t"+String.valueOf(i+1));
-				}
-				ra.close();
-			}
-		}
-		catch(IOException e){
-			
-			LogHandler.writeStackTrace(log, e, Level.SEVERE);
-		}
-		finally{
-			try {
-//				ra.close();
-				fis.close();
-				br.close();
-			} catch (IOException e) {
-				
-				LogHandler.writeStackTrace(log, e, Level.SEVERE);
-			}
-		}
-	}
 	
+	/**
+	 * For all queries in the input file the query and its frequency will be saved in 
+	 * a Map {query: frequency}
+	 * 	
+	 * @param input the input file
+	 * @return The map with the queries and their frequencies
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static Map<String, Integer> patternsToFrequents(File input) throws IOException{
 		
 		Map<String, Integer> map = new HashMap<String, Integer>();
@@ -341,6 +409,15 @@ public class LogSolution {
 		return map;
 	}
 	
+	/**
+	 * For all queries in the input file the query and its frequency
+	 * will be written in the output file if the frequency is greater or equal than the threshold
+	 *
+	 * @param input the input file
+	 * @param output the output file
+	 * @param threshold the threshold 
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void patternsToFrequents(File input, File output, Integer threshold) throws IOException{
 		Map<String, Integer> map = patternsToFrequents(input);
 		output.createNewFile();
@@ -352,6 +429,13 @@ public class LogSolution {
 		pw.close();
 	}
 	
+	/**
+	 * Sort the frequent queries and write the sorted queries into the output file.
+	 *
+	 * @param input the input file name
+	 * @param output the output file name
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void sortFrequents(String input, String output) throws IOException{
 		File f = new File(output);
 		f.createNewFile();
@@ -362,10 +446,22 @@ public class LogSolution {
 		pw.close();
 	}
 	
+	/**
+	 * Sort the frequent queries and returns the list where the queries are sorted by their frequency
+	 *
+	 * @param freq The name of the file with the frequent queries
+	 * @return the sorted frequent list
+	 */
 	public static List<String> sortFrequents(String freq){
 		return sortFrequents(new File(freq));
 	}
 	
+	/**
+	 * Sort the frequent queries and returns the list where the queries are sorted by their frequency
+	 *
+	 * @param freq The file with the frequent queries
+	 * @return the sorted frequent list
+	 */
 	public static List<String> sortFrequents(File freq){
 			List<String> sortedSet = new ArrayList<String>();
 			FileInputStream fis = null;
@@ -396,10 +492,29 @@ public class LogSolution {
 	}
 
 	
+	/**
+	 * Calculates for every query with every query in the input file their similarity 
+	 * and if the similarity is over a calculated threshold it will be written in the output file
+	 *
+	 * @param input the name of the input file with the queries
+	 * @param output the name of the output file in  which the (calculated) query ids and their similarity will be written
+	 * @param delta a given parameter for the threshold calculation <b>see also</b> <a href="http://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/download/5168/5384">DBpedia SPARQL Benchmark</a>
+
+	 * @throws FileNotFoundException the file not found exception
+	 */
 	public static void similarity(String input, String output, int delta) throws FileNotFoundException{
 		similarity(new File(input), new File(output), delta);
 	}
 	
+	/**
+	 * Calculates for every query with every query in the input file their similarity 
+	 * and if the similarity is over a calculated threshold it will be written in the output file
+	 *
+	 * @param input the input file with the queries
+	 * @param output the output file in  which the (calculated) query ids and their similarity will be written
+	 * @param delta a given parameter for the threshold calculation <b>see also</b> <a href="http://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/download/5168/5384">DBpedia SPARQL Benchmark</a>
+	 * @throws FileNotFoundException the file not found exception
+	 */
 	public static void similarity(File input, File output, int delta) throws FileNotFoundException{
 		FileInputStream fis = null;
 		FileInputStream fis2 = null;
@@ -450,6 +565,18 @@ public class LogSolution {
 		}
 	}
 	
+	/**
+	 * Gets the similarity of two queries.
+	 * 
+	 * <b>First step</b> calculating the feature vector distance and test if it's over the given threshold
+ 	 * <b>Second step</b> if this is the case, calculate the levenshtein distance with the given threshold
+ 	 * <b>Third step</b> if levenshtein is not 0.0 it will return the max of the two similarities
+ 	 *
+	 * @param query1 the query1
+	 * @param query2 the query2
+	 * @param threshold the thresholds [featureVectorDistance, levenshtein steps]
+	 * @return the similarity if the similarity is in the given thresholds, null otherwise
+	 */
 	public static Double getSimilarity(String query1, String query2, int[] threshold){
 		double vdist = getFeatureVectorDistance(query1, query2);
 		if(vdist>threshold[0]){
@@ -464,10 +591,24 @@ public class LogSolution {
 		return Math.max(vdist, ldist);
 	}
 	
+	/**
+	 * calculates the thresholds.
+	 *
+	 * @param input the name of the input file
+	 * @param delta the delta
+	 * @return the thresholds
+	 */
 	public static int[] getThreshold(String input, int delta){
 		return getThreshold(new File(input), delta);
 	}
 	
+	/**
+	 * calculates the thresholds.
+	 *
+	 * @param input the input file
+	 * @param delta the delta
+	 * @return the thresholds
+	 */
 	public static int[] getThreshold(File input, int delta){
 		int s=0;
 		int[] ret = {0,0}; 
@@ -506,12 +647,23 @@ public class LogSolution {
 		return ret;
 	}	
 	
+	/**
+	 * Gets the features.
+	 *
+	 * @return the features
+	 */
 	public static String[] getFeatures(){
 		return new String []{"offset", "limit", "union", "optional", "filter", "regex", "sameterm",
 			     "isliteral", "bound", "isiri", "isblank", "lang", "datatype", "distinct", "group", "order", "str"};
 
 	}
 	
+	/**
+	 * Counts triples in a given query.
+	 *
+	 * @param query the query
+	 * @return the no of triples in the query
+	 */
 	public static int countTriplesInQuery(String query){
 		int ret=0;
 		String qOp = queryToStructure(query).replaceAll("[^\\{\\}\\.;]", "").replace(" ", "");
@@ -530,10 +682,24 @@ public class LogSolution {
 		return ret;
 	}
 	
+	/**
+	 * Gets the sum of every query in the cluster by adding their frequents
+	 *
+	 * @param cluster the cluster
+	 * @param freqQueries the name of the file with the frequent queries
+	 * @return the frequent sum of the cluster
+	 */
 	public static Integer getFreqSum(String[] cluster, String freqQueries){
 		return getFreqSum(cluster, new File(freqQueries));
 	}
 	
+	/**
+	 * Gets the sum of every query in the cluster by adding their frequents
+	 *
+	 * @param cluster the cluster
+	 * @param freqQueries the file with the frequent queries
+	 * @return the frequent sum of the cluster
+	 */
 	public static Integer getFreqSum(String[] cluster, File freqQueries){
 		FileInputStream fis = null;
 		BufferedReader br = null;
@@ -572,10 +738,28 @@ public class LogSolution {
 	}
 	
 	
+	/**
+	 * Matches the structures in a given file with the most frequent query  and write it 
+	 * in the output file
+	 * 
+	 * @param structs the name of the file with the structures to match with
+	 * @param freq the name of the file with the sorted frequent queries
+	 * @param output the name of the output file
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void structsToFreqQueries(String structs, String freq, String output) throws IOException{
 		structsToFreqQueries(new File(structs), new File(freq), new File(output));
 	}
 
+	/**
+	 * Matches the structures in a given file with the most frequent query  and write it 
+	 * in the output file
+	 * 
+	 * @param structs the file with the structures to match with
+	 * @param freq the file with the sorted frequent queries
+	 * @param output the output file
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void structsToFreqQueries(File structs, File freq, File output) throws IOException{
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(output);
@@ -619,6 +803,13 @@ public class LogSolution {
 	}
 	
 	
+	/**
+	 * Gets the feature vector.
+	 *
+	 * @param query the query
+	 * @param features the features
+	 * @return the feature vector
+	 */
 	private static Byte[] getFeatureVector(String query, String[] features){
 		Byte[] vec = new Byte[features.length];
 		for(int i=0;i<features.length;i++){
@@ -632,6 +823,13 @@ public class LogSolution {
 		return vec;
 	}
 	
+	/**
+	 * Gets the feature vector distance.
+	 *
+	 * @param query1 the query1
+	 * @param query2 the query2
+	 * @return the feature vector distance
+	 */
 	private static double getFeatureVectorDistance(String query1, String query2){
 		Byte[] q1= getFeatureVector(query1, getFeatures());
 		Byte[] q2= getFeatureVector(query2, getFeatures());
