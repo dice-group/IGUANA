@@ -1,0 +1,10 @@
+de.uni_leipzig.mosquito.benchmark
+de.uni_leipzig.mosquito.clustering
+de.uni_leipzig.mosquito.clustering.clusterer
+de.uni_leipzig.mosquito.converter
+de.uni_leipzig.mosquito.data
+de.uni_leipzig.mosquito.generation
+de.uni_leipzig.mosquito.query
+de.uni_leipzig.mosquito.testcases
+de.uni_leipzig.mosquito.utils
+de.uni_leipzig.mosquito.utils.comparator
