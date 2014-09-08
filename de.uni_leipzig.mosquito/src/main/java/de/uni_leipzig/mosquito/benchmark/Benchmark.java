@@ -1,5 +1,6 @@
 package de.uni_leipzig.mosquito.benchmark;
 
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,7 +14,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -182,10 +182,15 @@ public class Benchmark {
 			if(email!=null){
 				log.info("Initialize Email...");
 				if(email.get("pwd")==null){
-					log.info("Password for email-account "+email.get("user")+" required: ");
-					Scanner scanner = new Scanner(System.in); 
-					email.put("pwd", scanner.next());
-					scanner.close();
+					log.info("Password for email-account "+email.get("user")+" required: "); 
+					Console cons;
+					 char[] passwd;
+					 if ((cons = System.console()) != null &&
+					     (passwd = cons.readPassword("[%s]", "Password:")) != null) {
+						 email.put("pwd", passwd.toString());
+					     java.util.Arrays.fill(passwd, ' ');
+					 }
+					
 				}
 				EmailHandler.initEmail(
 						String.valueOf(email.get("hostname")),

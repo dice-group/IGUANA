@@ -78,8 +78,10 @@ public class PowerSetIterator<E> implements Iterator<Set<E>> {
 		int i=0;
 		Iterator<E> ik = set.iterator();
 		while(ik.hasNext()){
+			E next = ik.next();
 			if(powerSetIndex.get(i)==1)
-				ret.add(ik.next());
+				ret.add(next);
+			
 			i++;
 		}
 		return ret;

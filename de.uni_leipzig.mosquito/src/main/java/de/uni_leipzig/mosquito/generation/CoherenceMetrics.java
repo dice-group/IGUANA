@@ -25,6 +25,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 
 import de.uni_leipzig.mosquito.utils.PowerSetIterator;
 
+
 /**
  * The Class CoherenceMetrics.
  * @see <a href="http://dl.acm.org/citation.cfm?id=1989340">Paper</a>
@@ -181,11 +182,17 @@ public class CoherenceMetrics {
 				if(line.isEmpty()){continue;}
 				
 				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
 				if(split[1].trim().equals(TYPE_STRING)){
 					String add = split[2];
-					add.replaceAll("\\.\\s*$", "");
+					for(int k=3;k<split.length;k++){
+						add+=" "+split[k];
+					}
 					add = add.trim();
+					if(add.endsWith(".")){
+						add = add.substring(0,add.length()-1);
+					}
 					ret.add(add);
 				}
 			}
@@ -253,9 +260,16 @@ public class CoherenceMetrics {
 			while((line = br.readLine())!=null){
 				if(line.isEmpty()){continue;}
 				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
 				String o = split[2];
-				o.replaceAll("\\.\\s*$", "");
+				for(int k=3;k<split.length;k++){
+					o+=" "+split[k];
+				}
+				o = o.trim();
+				if(o.endsWith(".")){
+					o = o.substring(0,o.length()-1);
+				}
 				o = o.trim();
 				if(split[1].trim().equals(TYPE_STRING) && o.equals(type)){
 					String add = split[0];
@@ -329,6 +343,7 @@ public class CoherenceMetrics {
 			while((line = br.readLine())!=null){
 				if(line.isEmpty()){continue;}
 				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
 				if(!split[0].trim().equals(subject)){
 					if(add){
@@ -339,7 +354,13 @@ public class CoherenceMetrics {
 					subject = split[0].trim();
 				}
 				String o = split[2];
-				o.replaceAll("\\.\\s*$", "");
+				for(int k=3;k<split.length;k++){
+					o+=" "+split[k];
+				}
+				o = o.trim();
+				if(o.endsWith(".")){
+					o = o.substring(0,o.length()-1);
+				}
 				o = o.trim();
 				if(split[1].trim().equals(TYPE_STRING)){
 					if(o.equals(type)){
@@ -350,6 +371,9 @@ public class CoherenceMetrics {
 				
 				tmp.add(split[1].trim());
 				
+			}
+			if(add){
+				ret.addAll(tmp);
 			}
 		
 		} catch (IOException e) {
@@ -422,6 +446,7 @@ public class CoherenceMetrics {
 			while((line = br.readLine())!=null){
 				if(line.isEmpty()){continue;}
 				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
 				if(instances.contains(split[0].trim())&&split[1].trim().equals(property)){
 					ret.add(split[0].trim());
@@ -641,6 +666,7 @@ public class CoherenceMetrics {
 			while((line = br.readLine())!=null){
 				if(line.isEmpty()){continue;}
 				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
 				if(!split[0].trim().equals(subject)){
 					if(prop && tmp.equals(S)){
@@ -655,10 +681,19 @@ public class CoherenceMetrics {
 				}				
 				if(split[1].trim().equals(TYPE_STRING)){
 					String o = split[2];
-					o.replaceAll("\\.\\s*$", "");
+					for(int k=3;k<split.length;k++){
+						o+=" "+split[k];
+					}
+					o = o.trim();
+					if(o.endsWith(".")){
+						o = o.substring(0,o.length()-1);
+					}
 					o = o.trim();
 					tmp.add(o);
 				}
+			}
+			if(prop && tmp.equals(S)){
+				ret.add(subject);
 			}
 		
 		} catch (IOException e) {
@@ -810,6 +845,7 @@ public class CoherenceMetrics {
 			while((line = br.readLine())!=null){
 				if(line.isEmpty()){continue;}
 				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
 				if(!split[0].trim().equals(subject)){
 					if(tmp.equals(S)){
@@ -820,10 +856,19 @@ public class CoherenceMetrics {
 				}			
 				if(split[1].trim().equals(TYPE_STRING)){
 					String o = split[2];
-					o.replaceAll("\\.\\s*$", "");
+					for(int k=3;k<split.length;k++){
+						o+=" "+split[k];
+					}
+					o = o.trim();
+					if(o.endsWith(".")){
+						o = o.substring(0,o.length()-1);
+					}
 					o = o.trim();
 					tmp.add(o);
 				}
+			}
+			if(tmp.equals(S)){
+				return true;
 			}
 		
 		} catch (IOException e) {
@@ -924,6 +969,7 @@ public class CoherenceMetrics {
 	public Set<List<Set<String>>> getCombinations(Set<String> typeSystem){
 		Set<List<Set<String>>> ret = new HashSet<List<Set<String>>>();
 		PowerSetIterator<String> psi = new PowerSetIterator<String>();
+		psi.set(typeSystem);
 		while(psi.hasNext()){
 			Set<String> current = psi.next();
 			Set<String> props = val(current);
@@ -952,7 +998,7 @@ public class CoherenceMetrics {
 			
 			for(String p : combi.get(1)){
 				String hash = combi.get(0).hashCode()+"_"+p.hashCode();
-				Number[] values = new Long[3];
+				Number[] values = new Number[3];
 				//coin
 				values[0] = givenCoin(typeSystem, combi.get(0), p, ch);
 				//|coin|
@@ -1006,6 +1052,7 @@ public class CoherenceMetrics {
 			while((line = br.readLine())!=null){
 				if(line.isEmpty()){continue;}
 				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
 				if(!split[0].trim().equals(s)){
 					continue;
@@ -1123,6 +1170,7 @@ public class CoherenceMetrics {
 			while((line = br.readLine())!=null){
 				if(line.isEmpty()){continue;}
 				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
 				if(!subject.equals(split[0].trim())){
 					subject = split[0].trim();
@@ -1131,7 +1179,7 @@ public class CoherenceMetrics {
 						count += tmpP;
 					}
 					tmpP=0;
-					
+					tmpSet.clear();
 				}
 				if(split[1].trim().equals(TYPE_STRING)){
 					String type = split[2];
@@ -1142,12 +1190,16 @@ public class CoherenceMetrics {
 					if(type.endsWith(".")){
 						type = type.substring(0, type.lastIndexOf("."));
 					}
-					
+					tmpSet.add(type);
 					continue;
 				}
 				if(split[1].trim().equals(p)){
 					tmpP++;
 				}
+			}
+			if(tmpSet.equals(S)){
+				subjectCount++;
+				count += tmpP;
 			}
 		
 		} catch (IOException e) {
@@ -1161,6 +1213,9 @@ public class CoherenceMetrics {
 			} catch (IOException e) {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			}
+		}
+		if(subjectCount==0){
+			return 0.0;
 		}
 		return count*1.0/subjectCount;
 	}

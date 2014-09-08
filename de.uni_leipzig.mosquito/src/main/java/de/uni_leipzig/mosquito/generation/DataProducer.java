@@ -46,7 +46,7 @@ import de.uni_leipzig.mosquito.utils.comparator.TripleComparator;
 public class DataProducer {
 
 	/** The roh. */
-	private static Double roh=0.0;
+	private static Double roh=0.5;
 	
 	/** The log. */
 	private static Logger log = Logger.getLogger(DataProducer.class.getSimpleName());
@@ -123,21 +123,31 @@ public class DataProducer {
 	 * @param originalSize the original size
 	 * @param removeSize the remove size
 	 */
-	@SuppressWarnings("null")
 	private static void writeData(Object input, String output, CoherenceMetrics cm, String graphURI, Double coherence, Long originalSize, Long removeSize){
 		Map<String, Number> solution=null;
+		String newFile = input.toString();
+		int attemps=0;
+		long s = originalSize;
 		do{
 			Set<String> typeSystem = cm.getTypeSystem();
 			Double coh = cm.getCoherence(typeSystem);
-			Double c1 = coh - coherence;
+			Double c1 = coh - Math.min(coherence, coh*0.9);
 			Long c3 = (long) ((1-roh)*removeSize);
 			Long c4 = (long) ((1+roh)*removeSize);
 		
 			solution =  getSolution(cm, typeSystem, coh, c1, c3, c4);
 			if(solution==null){
-				int remove = Double.valueOf(1-coh/coherence*(1.0*originalSize-removeSize)/originalSize).intValue();
+				//TODO ask about function correctnes!!
+//				Double d = coh/coherence*(1.0*originalSize-removeSize)/originalSize;
+				int remove = 1;
 				if(input instanceof String){
-					String newFile = writeFileWithRemovedInstances((String) input, remove);
+					newFile = writeFileWithRemovedInstances(newFile, remove);
+					long newS = FileHandler.getLineCount(newFile);
+					if(newS==s){
+						log.severe("No Solution can be found!");
+						return;
+					}
+					s = newS;
 					cm.setDataFile(newFile);
 				}
 				else if(input instanceof Connection){
@@ -145,7 +155,8 @@ public class DataProducer {
 					cm.setBlackList(bl);
 				}
 			}
-		}while(solution!=null);
+			attemps++;
+		}while(solution==null&&attemps<100);
 
 		Long sum =0L;
 		for(Number n : solution.values()){
@@ -174,7 +185,9 @@ public class DataProducer {
 		PrintWriter pw = null;
 		try{
 			String suffix = dataFile.endsWith(".tmp")?".tmp2":".tmp"; 
-			output = File.createTempFile(dataFile.replaceAll("\\.(tmp|tmp2)", ""), suffix);
+			output = new File(dataFile.replaceAll("\\.(tmp2|tmp|nt)", suffix));
+			output.createNewFile();
+//			output = File.createTempFile(dataFile.replaceAll("\\.(tmp|tmp2)", ""), suffix);
 			output.deleteOnExit();
 			pw = new PrintWriter(output);
 			fis = new FileInputStream(f);
@@ -200,6 +213,10 @@ public class DataProducer {
 					else{
 						remove--;
 					}
+					if(remove == 0){
+						pw.println(line);
+						continue;
+					}
 					canBeDeleted = false;
 					subject = split[0].trim();
 					tmp.clear();
@@ -211,7 +228,7 @@ public class DataProducer {
 			}
 			if(!dataFile.endsWith(".nt"))
 				f.delete();
-			return dataFile.replaceAll("\\.(tmp|tmp2)", "")+suffix;
+			return dataFile.replaceAll("\\.(tmp2|tmp|nt)", "")+suffix;
 		}
 		catch(IOException e){
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
@@ -468,7 +485,7 @@ public class DataProducer {
 		
 		Linear l = new Linear();
 		for(String sp : combi.keySet()){
-			l.add(combi.get(sp)[0].longValue(), sp);
+			l.add(combi.get(sp)[0].doubleValue(), sp);
 		}
 		problem.setObjective(l, OptType.MAX);
 		//c1
@@ -489,7 +506,7 @@ public class DataProducer {
 		
 		l = new Linear();
 		for(String sp : combi.keySet()){
-			l.add(combi.get(sp)[2].longValue(), sp);
+			l.add(combi.get(sp)[2].doubleValue(), sp);
 		}
 		problem.add(l, "<=", c4);
 		problem.add(l, ">=", c3);

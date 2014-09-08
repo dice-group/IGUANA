@@ -139,6 +139,13 @@
 			<systemPath>${project.basedir}/src/main/resources/lib/javailp-1.2a.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>lpsolve</groupId>
+			<artifactId>lpsolve</artifactId>
+			<version>55j</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/lpsolve55j.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>org.bio_gene.wookie</groupId>
 			<artifactId>connection</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
