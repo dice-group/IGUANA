@@ -4,6 +4,12 @@
 	<groupId>de.uni_leipzig</groupId>
 	<artifactId>mosquito</artifactId>
 	<version>0.2.0</version>
+	<licenses>
+		<license>
+			<name>MIT Licence</name>
+            <url>http://opensource.org/licenses/MIT</url>
+		</license>
+	</licenses>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -117,13 +123,7 @@
 			<artifactId>javautil</artifactId>
 			<version>3.1.1</version>
 		</dependency>
-		<dependency>
-			<groupId>uk.ac.shef.wit.simmetrics</groupId>
-			<artifactId>simmetrics</artifactId>
-			<version>1.6.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/simmetrics-1.6.2.jar</systemPath>
-		</dependency>
+		
 		<dependency>
 			<groupId>de.uni-leipzig.bf</groupId>
 			<artifactId>BorderFlow</artifactId>
@@ -149,6 +149,9 @@
 			<groupId>org.bio_gene.wookie</groupId>
 			<artifactId>connection</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/connection-0.0.1-SNAPSHOT.jar</systemPath>
+			
 <!-- 			<exclusions> -->
 <!-- 				<exclusion> -->
 <!-- 					<artifactId>httpclient</artifactId> -->
@@ -183,6 +186,8 @@
 			<groupId>de.uni_leipzig.informatik</groupId>
 			<artifactId>swp13_sc</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/de.uni_leipzig.informatik.swp13_sc-0.0.1-SNAPSHOT.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -220,6 +225,15 @@
 <!-- 		</repository> -->
 	</repositories>
 	<build>
+	<resources> 
+        <resource>
+            <directory>src/main/resources</directory>
+            <excludes>
+                <exclude>**/*.*</exclude>
+            </excludes>
+            <filtering>false</filtering>
+        </resource>
+     </resources> 
 	<plugins>
 <!-- 		<plugin> -->
 <!--             <groupId>org.apache.maven.plugins</groupId> -->
@@ -264,9 +278,9 @@
                           <mainClass>de.uni_leipzig.mosquito.benchmark.Benchmark</mainClass>
                       </manifest>
                   </archive>
-                  <descriptorRefs>
-                      <descriptorRef>jar-with-dependencies</descriptorRef>
-                  </descriptorRefs>
+                 <descriptorRefs>
+                 	<descriptorRef>jar-with-dependencies</descriptorRef>
+                 </descriptorRefs>
               </configuration>
               <executions>
                   <execution>
@@ -286,9 +300,9 @@
 		</plugins>
 	</build>
 	<name>Mosquito Benchmark Framework</name>
-	<url>https://github.com/TortugaAttack/mosquito</url>
+	<url>https://github.com/AKSW/mosquito</url>
 	<issueManagement>
-		<url>https://github.com/TortugaAttack/mosquito/issues</url>
+		<url>https://github.com/AKSW/mosquito/issues</url>
 	</issueManagement>
 </project>
   

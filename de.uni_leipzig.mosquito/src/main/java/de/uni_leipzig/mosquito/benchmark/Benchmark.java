@@ -91,6 +91,7 @@ public class Benchmark {
 	 * @throws URISyntaxException Signals that an URISyntaxException has occured.
 	 */
 	public static void main(String[] args) throws IOException, URISyntaxException {
+			
 		if (args.length < 1) {
 			
 			//If the FileName of the Jar is changed it still shows the correct Name

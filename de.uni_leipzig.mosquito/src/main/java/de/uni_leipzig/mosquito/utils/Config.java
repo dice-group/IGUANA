@@ -299,9 +299,13 @@ public class Config {
 			cp.setNode(email);
 			ret.put("port",cp.getElementAt("port", 0).getAttribute("value"));
 			cp.setNode(email);
-			ret.put("user",cp.getElementAt("username", 0).getAttribute("value"));
+			ret.put("user",cp.getElementAt("user", 0).getAttribute("value"));
 			cp.setNode(email);
-			ret.put("pwd",cp.getElementAt("password", 0).getAttribute("value"));
+			try{
+				ret.put("pwd",cp.getElementAt("password", 0).getAttribute("value"));
+				
+			}catch(Exception e){
+			}
 			cp.setNode(email);
 			ret.put("email-name",cp.getElementAt("email-name", 0).getAttribute("address"));
 			cp.setNode(email);

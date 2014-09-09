@@ -6,6 +6,25 @@
   <formats>
     <format>zip</format>
   </formats>
+  <fileSets>
+  	<fileSet>
+  		<directory>${project.basedir}/..</directory>
+  		<outputDirectory>/</outputDirectory>
+  		<includes>
+  			<include>README*</include>
+        	<include>LICENSE*</include>
+        	<include>LIBRARIES*</include>
+       	 	<include>INSTALL*</include>
+  		</includes>
+  	</fileSet>
+  	<fileSet>
+  		<directory>${project.basedir}/src/main/resources/lib</directory>
+  		<outputDirectory>lib</outputDirectory>
+  		<includes>
+  			<include>*.jar</include>
+  		</includes>
+  	</fileSet>
+  </fileSets>
   <includeBaseDirectory>false</includeBaseDirectory>
   <dependencySets>
     <dependencySet>

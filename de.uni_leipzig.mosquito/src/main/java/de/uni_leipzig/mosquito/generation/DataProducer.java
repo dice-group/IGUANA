@@ -126,12 +126,15 @@ public class DataProducer {
 	private static void writeData(Object input, String output, CoherenceMetrics cm, String graphURI, Double coherence, Long originalSize, Long removeSize){
 		Map<String, Number> solution=null;
 		String newFile = input.toString();
-		int attemps=0;
+		int attempts=0;
 		long s = originalSize;
 		do{
 			Set<String> typeSystem = cm.getTypeSystem();
 			Double coh = cm.getCoherence(typeSystem);
 			Double c1 = coh - Math.min(coherence, coh*0.9);
+			if(coherence > coh*0.9&&attempts==0){
+				log.info("desired coherence "+coherence+" is too high \nActual coherence is :"+coh+"\nusing as desired coherence: "+coh*0.9);
+			}
 			Long c3 = (long) ((1-roh)*removeSize);
 			Long c4 = (long) ((1+roh)*removeSize);
 		
@@ -145,7 +148,7 @@ public class DataProducer {
 					long newS = FileHandler.getLineCount(newFile);
 					if(newS==s){
 						log.severe("No Solution can be found!");
-						return;
+						throw new RuntimeException(new Exception("Can't generate data - may set roh a little bit higher "));
 					}
 					s = newS;
 					cm.setDataFile(newFile);
@@ -155,8 +158,8 @@ public class DataProducer {
 					cm.setBlackList(bl);
 				}
 			}
-			attemps++;
-		}while(solution==null&&attemps<100);
+			attempts++;
+		}while(solution==null&&attempts<100);
 
 		Long sum =0L;
 		for(Number n : solution.values()){
