@@ -212,7 +212,8 @@ public class Benchmark {
 						dataDescription.get("prefix"),
 						dataDescription.get("resourceURI"),
 						dataDescription.get("propertyPrefixName"),
-						dataDescription.get("resourcePrefixName")		
+						dataDescription.get("resourcePrefixName"),
+						Boolean.valueOf(dataDescription.get("metaData"))
 						);
 				
 				// COnverting the Data 

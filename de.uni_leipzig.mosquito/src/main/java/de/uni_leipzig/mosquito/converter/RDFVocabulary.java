@@ -23,7 +23,8 @@ public class RDFVocabulary {
 			String prefix,
 			String resourceURI,
 			String propertyPrefixName,
-			String resourcePrefixName		
+			String resourcePrefixName,
+			Boolean metaData
 			){
 		
 	}

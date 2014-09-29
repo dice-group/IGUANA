@@ -3,6 +3,7 @@ package de.uni_leipzig.mosquito.testcases;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -293,7 +294,10 @@ public class QueryTestcase implements Testcase, Runnable {
 		row.add(currentDB);
 		for(int i=0; i<qCount.size();i++){
 			sum+=qCount.get(i);
-			row.add(Math.round(1000L*qCount.get(i)/(1.0*qpsTime.get(i))));
+			if(qpsTime.get(i)!=0)
+				row.add(Math.round(1000L*qCount.get(i)/(1.0*qpsTime.get(i))));
+			else
+				row.add(0);
 		}
 
 		seconds.setHeader(qps.getHeader());
@@ -350,10 +354,26 @@ public class QueryTestcase implements Testcase, Runnable {
 	 * @return the query time
 	 */
 	private Long getQueryTime(String query){
-		Long a = new Date().getTime();
-		con.execute(query);
-		
-		Long b = new Date().getTime();
+		Boolean isSPARQL = QuerySorter.isSPARQL(query);
+		Long a=0L, b=0L;
+		if(isSPARQL){
+			try {
+				a = new Date().getTime();
+				java.sql.ResultSet res = con.select(query);
+				b = new Date().getTime();
+				if(res==null)
+					return -1L;
+			} catch (SQLException e) {
+				return -1L;
+			}
+		}
+		else{
+			a = new Date().getTime();
+			Boolean suc = con.update(query);
+			b = new Date().getTime();
+			if(!suc)
+				return -1L;
+		}
 		return b-a;
 	}
 	
@@ -392,10 +412,15 @@ public class QueryTestcase implements Testcase, Runnable {
 			
 			int i=header.indexOf(qFile);
 			Long time = getQueryTime(query);
+			if(time==-1L){
+				time=0L;
+			}
+			else{
+				qCount.set(i-1, 1+qCount.get(i-1));
+			}
 			Long newTime = qpsTime.get(i-1)+time;
 			qpsTime.set(i-1, newTime);
 			
-			qCount.set(i-1, 1+qCount.get(i-1));
 			row.set(i, qpsTime.get(i-1));
 			log.info("Query # "+qFile.replace(".txt", "")+" has taken "+time+" microseconds");
 		}

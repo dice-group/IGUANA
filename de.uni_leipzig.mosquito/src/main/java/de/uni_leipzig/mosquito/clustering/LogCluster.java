@@ -1,5 +1,6 @@
 package de.uni_leipzig.mosquito.clustering;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,24 +9,34 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
-import de.uni_leipzig.bf.cluster.BorderFlow;
-import de.uni_leipzig.bf.cluster.harden.Harden;
-import de.uni_leipzig.bf.cluster.harden.HardenSharedShed;
-import de.uni_leipzig.bf.cluster.harden.HardenSuperset;
-import de.uni_leipzig.bf.cluster.harden.QualityMeasureRelativeFlow;
-import de.uni_leipzig.bf.cluster.harden.QualityMeasureSilhouette;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
+
+import de.uni_leipzig.bf.cluster.Main;
+import de.uni_leipzig.bf.cluster.Main.HardenStrategy;
 import de.uni_leipzig.mosquito.query.PatternSolution;
+import de.uni_leipzig.mosquito.utils.StringHandler;
+import de.uni_leipzig.mosquito.utils.comparator.OccurrencesComparator;
+import de.uni_leipzig.simba.controller.PPJoinController;
 
 
 // TODO: Auto-generated private Javadoc
@@ -40,7 +51,16 @@ public class LogCluster {
 	/** The logger. */
 	private static Logger log = LogSolution.getLogger();
 
-
+	public static final String DIR_FOR_FILES = "limes";
+	public static final String LIMES_FILE = "LIMES.xml";
+	public static final String LIMES_OUT_FILE = "LIMES_POST.xml";
+	public static final String SOURCE_FILE = "SOURCE.ttl";
+	public static final String ACCEPTANCE_FILE = "ACCEPTANCE.nt";
+	public static final String SIMILARITY_FILE = "SIMILARITY.txt";
+	public static final String TYPE_STRING = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+	public static final String MOSQUITO_STRING = "http://www.mosquito.com/#";
+	
+	
 	/**
 	 * the sorted structure algoritm.
 	 * for every frequent structure (cluster) it will match the most frequent query (if there is one) 
@@ -162,27 +182,8 @@ public class LogCluster {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public static void borderFlow(String clusterHarden, String qualityMeasure, double connThreshold, boolean testOne, boolean heuristic, boolean caching, Integer minNodes, String inputQueries, String input, String clusterOutput, String output) throws IOException{
-		Harden h = null;
-		switch(clusterHarden.toLowerCase().replaceAll("\\s", "")){
-		case"hardensharedshed":
-			switch(qualityMeasure.toLowerCase().replaceAll("\\s", "")){
-			case "qualitymeasurerelativeflow":
-				h = new HardenSharedShed(new QualityMeasureRelativeFlow());
-				break;
-			case "qualitymeasuresilhoutte":
-				h = new HardenSharedShed(new QualityMeasureSilhouette());
-				break;
-			default:
-				h = new HardenSharedShed();
-			}
-			break;
-		case"hardensuperset":h = new HardenSuperset();break;
-		default:
-			h = new HardenSuperset();
-		}
-		BorderFlow bf = new BorderFlow(input, h);
-		bf.clusterToFile(clusterOutput, connThreshold, testOne, heuristic, caching);
-//		queryListToFile(bfClusterToQuerySet(input, clusterOutput), inputQueries, clQueryOutput);
+		Main.borderFlowDemo(input, clusterOutput, connThreshold, testOne, heuristic, caching, HardenStrategy.valueOf(clusterHarden));
+		//queryListToFile(bfClusterToQuerySet(input, clusterOutput), inputQueries, clQueryOutput);
 		rankAndChoose(inputQueries, clusterOutput, output, minNodes);
 	}
 	
@@ -447,13 +448,9 @@ public class LogCluster {
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(output);
 		String line;
-		String[] feat = LogSolution.getFeatures();
-		Integer[] momFreq = new Integer[feat.length];
-		for(int i=0; i<feat.length;i++){
-			momFreq[i]=0;
-		}
-		String[] momQueries = new String[feat.length];
-
+		String[] momQueries = new String[25];
+		Comparator<String> cmp = new OccurrencesComparator();
+		List<String> bestQueries = new ArrayList<String>(); 
 		try{
 			fis = new FileInputStream(input);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
@@ -464,38 +461,43 @@ public class LogCluster {
 					continue;
 				}
 				Integer freq = LogSolution.getFreqSum(cluster, freqQueries);
-
 				cluster = queryIDListToQueries(clusterToID(cluster), freqQueries);
-				for(int i=0;i<feat.length;i++){
-					if(momFreq[i]>=freq){
-						continue;
-					}
-					for(int j=0; j<cluster.length;j++){
-						try{
-						if(cluster[j]==null){
-							continue;
-						}
-						if(cluster[j].replaceAll("\\<.*?>","").replaceAll("\\\".*?\"","").contains(feat[i])){
-							momFreq[i]=freq;
-							momQueries[i]=cluster[j];
-							break;
-						}
-						}catch(Exception e){
-							e.printStackTrace();
-						}
-					}
-				}
+				bestQueries.add(cluster[0]+"\t"+freq);
+				Collections.sort(bestQueries, cmp);
+				if(bestQueries.size()>25)
+					bestQueries.remove(bestQueries.size()-1);
+				
+				
+				//<<<< OLD >>>>
+				
+//				for(int i=0;i<feat.length;i++){
+//					if(momFreq[i]>=freq){
+//						continue;
+//					}
+//					for(int j=0; j<cluster.length;j++){
+//						try{
+//						if(cluster[j]==null){
+//							continue;
+//						}
+//						if(cluster[j].replaceAll("\\<.*?>","").replaceAll("\\\".*?\"","").contains(feat[i])){
+//							momFreq[i]=freq;
+//							momQueries[i]=cluster[j];
+//							break;
+//						}
+//						}catch(Exception e){
+//							e.printStackTrace();
+//						}
+//					}
+//				}
 			}
 			int k;
-			for(k=0;k<momQueries.length-1;k++){
-				if(momQueries[k]!=null){
-					
-					pw.println(momQueries[k]);
-				}
-				else{
-					log.info("No Query for feature "+feat[k]);
-				}
+			for(k=0;k<bestQueries.size()-1;k++){
+				String q = bestQueries.get(k);
+				momQueries[k]=q.substring(0, q.lastIndexOf("\t"));
+				pw.println(momQueries[k]);
 			}
+			String q = bestQueries.get(k);
+			momQueries[k]=q.substring(0, q.lastIndexOf("\t"));
 			pw.print(momQueries[k]);
 			pw.close();
 		}
@@ -528,5 +530,171 @@ public class LogCluster {
 		return ret;
 	}
 	
+
+	public static void executeLimes(String queriesFile){
+		new File(DIR_FOR_FILES).mkdir();
+		executeLimes(DIR_FOR_FILES+File.separator+LIMES_FILE, 
+				DIR_FOR_FILES+File.separator+LIMES_OUT_FILE, 
+				queriesFile, 
+				DIR_FOR_FILES+File.separator+SOURCE_FILE, 
+				DIR_FOR_FILES+File.separator+ACCEPTANCE_FILE, 
+				DIR_FOR_FILES+File.separator+SIMILARITY_FILE);
+	}
+	
+	private static void executeLimes(String configFile, String outputConfigFile, String queriesFile, String source, String outputFile, String similiarityFile){
+		//query rdf:type rdf:query
+		//query rdf:feature_n feature 0 oder 1
+		writeQueriesNTFile(queriesFile, source);
+		preProcessLimes(configFile, outputConfigFile, new File(source).getAbsolutePath(), outputFile);
+		PPJoinController.run(outputConfigFile);
+		postProcessLimes(outputFile, similiarityFile);
+	}
+	
+	
+	private static void writeQueriesNTFile(String inputFile, String outputFile){
+		writeQueriesNTFile(new File(inputFile), new File(outputFile));
+	}
+	
+	private static void writeQueriesNTFile(File inputFile, File outputFile){
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		BufferedOutputStream bos = null;
+//		PrintWriter pw = null;
+//		String[] features = LogSolution.getFeatures();
+		try{
+			outputFile.createNewFile();
+			bos = new BufferedOutputStream(new FileOutputStream(outputFile));
+//			pw = new PrintWriter(outputFile);
+			fis = new FileInputStream(inputFile);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			Model m = ModelFactory.createDefaultModel();
+			while((line = br.readLine())!= null){
+				String q = line.trim().split("\t")[0].trim();
+				String qOld = q;
+				File f = new File(URLEncoder.encode(q, "UTF-8"));
+				q = f.toURI().toString().replace("file:/", "file:///");
+				Resource s = ResourceFactory.createResource(q);
+				Property p = ResourceFactory.createProperty(TYPE_STRING.replaceAll("(<|>)", ""));
+				RDFNode o =  ResourceFactory.createResource(MOSQUITO_STRING+"query");
+				m.add(s, p, o);
+//				String write = "<"+URLEncoder.encode(q, "UTF-8")+"> "+TYPE_STRING+" <"+MOSQUITO_STRING+"query> .";
+//				pw.println(write);
+				p = ResourceFactory.createProperty(MOSQUITO_STRING+"label");
+				o = ResourceFactory.createResource(URLEncoder.encode(qOld, "UTF-8"));
+				m.add(s, p, o);
+//				write = "<"+URLEncoder.encode(q, "UTF-8")+"> <"+MOSQUITO_STRING+"label> <"+URLEncoder.encode(q, "UTF-8")+"> .";
+//				pw.println(write);
+//				Byte[] feat = LogSolution.getFeatureVector(q, features);
+//				for(int i=0;i<feat.length;i++){
+//					p = ResourceFactory.createProperty(MOSQUITO_STRING+features[i]);
+////					m.add(s, p, o);
+//					m.addLiteral(s, p, feat[i].intValue());
+////					write = "<"+URLEncoder.encode(q, "UTF-8")+"> <"+MOSQUITO_STRING+features[i]+"> "+feat[i]+" .";
+////					pw.println(write);
+//				}
+			}
+			m.write(bos, "TURTLE");
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+//			pw.close();
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+	}
+	
+	private static void preProcessLimes(String configFile, String outputConfigFile, String source, String outputFile){
+		preProcessLimes(new File(configFile), new File(outputConfigFile), source, outputFile);
+	}
+	
+	private static void preProcessLimes(File configFile, File outputConfigFile, String source, String outputFile){
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		PrintWriter pw = null;
+		try{
+			outputConfigFile.createNewFile();
+			pw = new PrintWriter(outputConfigFile);
+			fis = new FileInputStream(configFile);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			while((line = br.readLine())!= null){
+				pw.println(line.replace("$1", source).replace("$2", outputFile).replace("$3", "NEIN.nt"));
+			}
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			pw.close();
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+	}
+	
+	
+	private static void postProcessLimes(String inputFile, String outputFile){
+		postProcessLimes(new File(inputFile), new File(outputFile));
+	}
+	
+	private static void postProcessLimes(File inputFile, File outputFile){
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		PrintWriter pw = null;
+		try{
+			outputFile.createNewFile();
+			pw = new PrintWriter(outputFile);
+			fis = new FileInputStream(inputFile);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			String uri = new File(".").toURI().toString().replace("file:/", "file:///");
+			uri = uri.substring(0, uri.lastIndexOf("."));
+			while((line = br.readLine())!= null){
+				String[] split = line.trim().replaceAll("\\s+", " ").split(" ");
+				if(split[2].endsWith(".")){
+					split[2] =split[2].substring(0, split[2].length()-1);
+				}
+				
+				split[0] = split[0].replace(uri, "").replace("<", "").replace(">", "");
+				split[2] = split[2].replace(uri, "").replace("<", "").replace(">", "");
+				if(split[0].equals(split[2])){
+					continue;
+				}
+				double vecDist = LogSolution.getFeatureVectorDistance(split[0], split[2]);
+				if(vecDist<0.33)
+					continue;
+				Double sim = 1/(1+Math.min(
+						StringHandler.levenshteinDistance(split[0], split[2]), 
+						vecDist));
+				
+				pw.println(split[0]+"\t"+split[2]+"\t"+sim);
+			}
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			pw.close();
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+	}
 	
 }

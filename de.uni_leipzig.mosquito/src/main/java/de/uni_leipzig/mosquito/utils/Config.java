@@ -334,7 +334,11 @@ public class Config {
 	          try{
 	      	   ConfigParser cp = ConfigParser.getParser(rootNode);
 	      	   Element e = cp.getElementAt("data-description", 0);
-	      	   
+	      	   String meta = e.getAttribute("meta-data");
+	      	   if(meta.isEmpty()||meta == null||meta.equals("null")){
+	      		   meta = "true";
+	      	   }
+	      	   map.put("metaData", meta);
 	      	   map.put("namespace", cp.getElementAt("namespace", 0).getAttribute("name"));
 	      	   cp.setNode(e);
 	           map.put("anchor", cp.getElementAt("anchor", 0).getAttribute("name"));

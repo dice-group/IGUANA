@@ -810,10 +810,10 @@ public class LogSolution {
 	 * @param features the features
 	 * @return the feature vector
 	 */
-	private static Byte[] getFeatureVector(String query, String[] features){
+	public static Byte[] getFeatureVector(String query, String[] features){
 		Byte[] vec = new Byte[features.length];
 		for(int i=0;i<features.length;i++){
-			if(query.contains(features[i])){
+			if(query.toLowerCase().contains(features[i])){
 				vec[i]=1;
 			}
 			else{
@@ -830,7 +830,7 @@ public class LogSolution {
 	 * @param query2 the query2
 	 * @return the feature vector distance
 	 */
-	private static double getFeatureVectorDistance(String query1, String query2){
+	public static double getFeatureVectorDistance(String query1, String query2){
 		Byte[] q1= getFeatureVector(query1, getFeatures());
 		Byte[] q2= getFeatureVector(query2, getFeatures());
 		double ret =0;
