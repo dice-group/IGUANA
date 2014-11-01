@@ -1,8 +1,9 @@
-package de.uni_leipzig.mosquito.utils;
+package de.uni_leipzig.iguana.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -15,6 +16,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bio_gene.wookie.utils.LogHandler;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 
 /**
@@ -31,6 +35,20 @@ public class FileHandler {
 		LogHandler.initLogFileHandler(log, FileHandler.class.getSimpleName());
 	}
 	
+	public static void writeLinesToFile(String fileName, Collection<String> lines) throws IOException{
+		writeLinesToFile(new File(fileName), lines);
+	}
+	
+	public static void writeLinesToFile(File file, Collection<String> lines) throws IOException{
+		file.createNewFile();
+		PrintWriter pw = new PrintWriter(file);
+		for(String line : lines){
+			pw.println(line);
+		}
+		try{
+			pw.close();
+		}catch(Exception e){}
+	}
 	
 	/**
 	 * Write files in a given directory to one file.
@@ -55,8 +73,18 @@ public class FileHandler {
 		String line;
 		PrintWriter pw = new PrintWriter(f);
 		for(File file : dir.listFiles()){
+			String ntFile = file.getAbsolutePath();
 			FileInputStream fis = new FileInputStream(file);
-			BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			if(!file.getName().endsWith(".nt")&&!file.getName().endsWith(".n3")){
+				Model m = ModelFactory.createDefaultModel();
+				m.read(fis, null);
+				ntFile = file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf("."))+".nt";
+				new File(ntFile).createNewFile();
+				m.write(new FileOutputStream(ntFile), "N-TRIPLE");
+			}
+			FileInputStream fis2 = new FileInputStream(ntFile);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis2, Charset.forName("UTF-8")));
+
 			while((line=br.readLine())!=null){
 				pw.println(line);
 			}
@@ -85,10 +113,12 @@ public class FileHandler {
 	 */
 	public static long getLineCount(File file){
 		long lines=0;
+		FileInputStream fis = null;
 		BufferedReader br= null;
 		try {
-			file.createNewFile();
-			FileInputStream fis = new FileInputStream(file);
+			if(!file.exists())
+				file.createNewFile();
+			fis = new FileInputStream(file);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			String line ="";
 			while((line=br.readLine()) != null){
@@ -97,11 +127,19 @@ public class FileHandler {
 				}
 			}
 		} catch (IOException e) {
+			LogHandler.writeStackTrace(log, e, Level.WARNING);
 			lines= -1;
 		} finally{
 			if(br!=null){
 				try {
-					br.close();
+					if(br!=null)		
+						br.close();
+				} catch (IOException e) {
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
+				}
+				try {
+					if(fis!=null)
+						fis.close();
 				} catch (IOException e) {
 					LogHandler.writeStackTrace(log, e, Level.WARNING);
 				}
@@ -110,6 +148,50 @@ public class FileHandler {
 		return lines;
 	}
 	
+	
+	public static Collection<String> getLines(String fileName){
+		return getLines(new File(fileName));
+	}
+	
+	/**
+	 * Gets the line count of a given file
+	 *
+	 * @param file the file
+	 * @return the line count
+	 */
+	public static Collection<String> getLines(File file){
+		BufferedReader br= null;
+		FileInputStream fis=null;
+		LinkedList<String> ret = new LinkedList<String>();
+		try {
+			file.createNewFile();
+			fis = new FileInputStream(file);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			String line ="";
+			while((line=br.readLine()) != null){
+				if(!line.isEmpty() && !line.equals("\n")){
+					ret.add(line);
+				}
+			}
+		} catch (IOException e) {
+		} finally{
+			if(br!=null){
+				try {
+					br.close();
+				} catch (IOException e) {
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
+				}
+			}
+			if(fis!=null){
+				try {
+					fis.close();
+				} catch (IOException e) {
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
+				}
+			}
+		}
+		return ret;
+	}
 
 	/**
 	 * Gets the subjects in a given file.
@@ -132,10 +214,11 @@ public class FileHandler {
 			return new HashSet<String>();
 		}
 		Set<String> subjects = new HashSet<String>();
+		FileInputStream fis = null;
 		BufferedReader br= null;
 		try {
 			file.createNewFile();
-			FileInputStream fis = new FileInputStream(file);
+			fis = new FileInputStream(file);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			String line ="";
 			while((line=br.readLine()) != null){
@@ -156,6 +239,13 @@ public class FileHandler {
 			if(br!=null){
 				try {
 					br.close();
+				} catch (IOException e) {
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
+				}
+			}
+			if(fis!=null){
+				try {
+					fis.close();
 				} catch (IOException e) {
 					LogHandler.writeStackTrace(log, e, Level.WARNING);
 				}
@@ -235,11 +325,11 @@ public class FileHandler {
 	 */
 	public static Collection<String> getQueriesInFile(File file){
 		Collection<String> queries = new LinkedList<String>();
-		
+		FileInputStream fis  = null;
 		BufferedReader br= null;
 		try {
 			file.createNewFile();
-			FileInputStream fis = new FileInputStream(file);
+			fis = new FileInputStream(file);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			String line ="";
 			while((line=br.readLine()) != null){
@@ -253,6 +343,13 @@ public class FileHandler {
 			if(br!=null){
 				try {
 					br.close();
+				} catch (IOException e) {
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
+				}
+			}
+			if(fis!=null){
+				try {
+					fis.close();
 				} catch (IOException e) {
 					LogHandler.writeStackTrace(log, e, Level.WARNING);
 				}

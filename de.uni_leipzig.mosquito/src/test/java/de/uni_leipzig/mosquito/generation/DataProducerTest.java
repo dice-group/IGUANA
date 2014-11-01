@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
+
 import org.junit.Test;
 
-import de.uni_leipzig.mosquito.clustering.ExternalSort;
-import de.uni_leipzig.mosquito.utils.comparator.TripleComparator;
+import de.uni_leipzig.iguana.clustering.ExternalSort;
+import de.uni_leipzig.iguana.generation.CoherenceMetrics;
+import de.uni_leipzig.iguana.generation.DataProducer;
+import de.uni_leipzig.iguana.utils.comparator.TripleComparator;
 
 
 public class DataProducerTest {

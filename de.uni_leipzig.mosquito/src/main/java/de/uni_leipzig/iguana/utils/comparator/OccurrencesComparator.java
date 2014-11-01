@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.utils.comparator;
+package de.uni_leipzig.iguana.utils.comparator;
 
 import java.util.Comparator;
 

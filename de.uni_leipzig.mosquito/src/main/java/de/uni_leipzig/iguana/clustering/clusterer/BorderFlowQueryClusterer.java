@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.clustering.clusterer;
+package de.uni_leipzig.iguana.clustering.clusterer;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +8,9 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import de.uni_leipzig.mosquito.clustering.LogCluster;
-import de.uni_leipzig.mosquito.clustering.LogSolution;
-import de.uni_leipzig.mosquito.utils.EmailHandler;
+import de.uni_leipzig.iguana.clustering.LogCluster;
+import de.uni_leipzig.iguana.clustering.LogSolution;
+import de.uni_leipzig.iguana.utils.EmailHandler;
 
 /**
  * The Class BorderFlowQueryClusterer.
@@ -31,13 +31,11 @@ public class BorderFlowQueryClusterer implements Clusterer {
 	private Integer thresholdQueries=10;
 	
 	/** The delta. */
-	private Integer delta=2;
+//	private Integer delta=2;
 	
 	/** The harden. */
 	private String harden=null;
 	
-	/** The quality. */
-	private String quality=null;
 	
 	/** The threshold. */
 	private Double threshold=0.8;
@@ -47,6 +45,8 @@ public class BorderFlowQueryClusterer implements Clusterer {
 	
 	/** The min nodes. */
 	private Integer minNodes;
+
+	private Boolean onlyComplexQueries;
 	
 //	public static void main(String[] argc){
 //		BorderFlowQueryClusterer bfqc = new BorderFlowQueryClusterer();
@@ -78,7 +78,7 @@ public class BorderFlowQueryClusterer implements Clusterer {
 		
 		log.info("Start logs2Queries: "
 				+ DateFormat.getDateTimeInstance().format(new Date()));
-		LogSolution.logsToQueries(logsPath, queriesFile);
+		LogSolution.logsToQueries(logsPath, queriesFile, onlyComplexQueries);
 		log.info("End logs2Queries: "
 				+ DateFormat.getDateTimeInstance().format(new Date()));
 		
@@ -91,11 +91,13 @@ public class BorderFlowQueryClusterer implements Clusterer {
 				+ DateFormat.getDateTimeInstance().format(new Date()));
 		
 		log.info("Start calculating query similarities: ");
-		LogSolution.similarity(sortedFreqFile, simFile, delta);
+//		LogSolution.similarity(sortedFreqFile, simFile, delta);
+		LogCluster.executeLimes(sortedFreqFile);
+		simFile = LogCluster.DIR_FOR_FILES+File.separator+LogCluster.SIMILARITY_FILE;
 		log.info("End calculating query similarities: ");
 		
 		log.info("Start Clustering...");
-		LogCluster.borderFlow(harden, quality, threshold, testOne, heuristic, caching, minNodes, sortedFreqFile, simFile, clusterOutput,  queries);
+		LogCluster.borderFlow(harden, threshold, testOne, heuristic, caching, minNodes, sortedFreqFile, simFile, clusterOutput,  queries);
 		String end = DateFormat.getDateTimeInstance().format(new Date());
 		Calendar calE = Calendar.getInstance();
 		log.info("Ended ClusterProcess " + end);
@@ -116,12 +118,12 @@ public class BorderFlowQueryClusterer implements Clusterer {
 		else{
 			thresholdQueries=10;
 		}
-		if(p.get("delta")!=null){
-			delta=Integer.parseInt(String.valueOf(p.get("delta")).trim());
-		}
-		else{
-			delta=2;
-		}
+//		if(p.get("delta")!=null){
+//			delta=Integer.parseInt(String.valueOf(p.get("delta")).trim());
+//		}
+//		else{
+//			delta=2;
+//		}
 		if(p.get("min-nodes")!=null){
 			minNodes=Integer.parseInt(String.valueOf(p.get("min-nodes")).trim());
 		}
@@ -151,9 +153,9 @@ public class BorderFlowQueryClusterer implements Clusterer {
 		else{
 			caching=Boolean.valueOf(String.valueOf(p.get("caching")).trim());
 		}
-		harden=String.valueOf(p.get("harden")).trim();
-		quality=String.valueOf(p.get("quality")).trim();
-		
+
+		onlyComplexQueries = Boolean.valueOf(String.valueOf(p.get("only-complex-queries")));
+		harden=String.valueOf(p.get("harden")).trim();		
 	}
 
 }

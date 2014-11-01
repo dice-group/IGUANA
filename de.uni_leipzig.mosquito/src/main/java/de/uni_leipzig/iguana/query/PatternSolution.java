@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.query;
+package de.uni_leipzig.iguana.query;
 
 import java.util.Collection;
 import java.util.HashSet;

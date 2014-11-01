@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.data;
+package de.uni_leipzig.iguana.data;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import com.hp.hpl.jena.rdf.model.impl.LiteralImpl;
 import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
 import com.hp.hpl.jena.rdf.model.impl.ResourceImpl;
 
-import de.uni_leipzig.mosquito.utils.TripleStoreStatistics;
+import de.uni_leipzig.iguana.utils.TripleStoreStatistics;
 
 /**
  * The Class TripleStoreHandler.
@@ -114,6 +114,7 @@ public class TripleStoreHandler {
 						pw.println(line.replace("\n", "\\n")+" .");
 						k++;
 					}
+					res.getStatement().close();
 					log.info("Written "+k+" triples to file");
 				} catch (SQLException e) {
 					LogHandler.writeStackTrace(log, e, Level.SEVERE);
@@ -177,6 +178,8 @@ public class TripleStoreHandler {
 			while(res.next()){
 				instances.add(res.getString(1));
 			}
+			res.getStatement().close();
+
 		} catch (SQLException e) {
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
 		}
@@ -229,6 +232,8 @@ public class TripleStoreHandler {
 			while(res.next()){
 				classes.add(res.getString(1));
 			}
+			res.getStatement().close();
+
 		} catch (SQLException e) {
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
 		}

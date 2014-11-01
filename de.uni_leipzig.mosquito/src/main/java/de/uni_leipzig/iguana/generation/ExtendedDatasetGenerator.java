@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.generation;
+package de.uni_leipzig.iguana.generation;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
-import de.uni_leipzig.mosquito.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.FileHandler;
 
 
 /**

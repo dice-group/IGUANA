@@ -10,7 +10,7 @@
 	</data-description>
 	<databases main="dbpedia">
 		<database id="curl" type="curl">
-			<endpoint uri="localhost/sparql-auth" />
+			<endpoint uri="bio-gene.org:8891/sparql-auth" />
 			<user value="dba" />
 			<pwd value="dba" />
 			<curl-url url="http://localhost/sparql-graph-crud-auth" />
@@ -24,8 +24,10 @@
 			<pwd value="dba" />
 		</database>
 	</databases>
-	<log-clustering class="de.uni_leipzig.mosquito.clustering.clusterer.BorderFlowQueryClusterer" path="../../LogFiles/" output-file="Q_S.txt">
-	</log-clustering>
+<!-- 	<log-clustering class="de.uni_leipzig.mosquito.clustering.clusterer.BorderFlowQueryClusterer" path="../../LogFiles/" output-file="Q_S.txt"> -->
+<!-- 		<property name="harden" value="SILHOUETTE"/> -->
+<!-- 		<property name="min-nodes" value="2"/> -->
+<!-- 	</log-clustering> -->
 	<benchmark log="Benchmark">
 <!-- 		<convert-processing value="true"/> -->
 <!-- 		<convert-input-path name="src/test/resources/" /> -->
@@ -38,11 +40,11 @@
 		<random-function type="RandomTriple" generate="false">
 <!-- 			<percent value="1.0" file-name="datasets/ds_250.0.nt"/> -->
 <!-- 			<percent value="0.5" file-name="datasets/ds_50.0.nt"/> -->
-			<percent value="1.0" file-name=""/>
+<!-- 			<percent value="1.0" file-name=""/> -->
 		</random-function>
-		<warmup time="0" file-name="Q.txt"/>
-		<test-db type="choose" reference="dbpedia3">
-			<db id="dbpedia" />
+<!-- 		<warmup time="0" file-name="Q.txt"/> -->
+		<test-db type="choose" reference="curl">
+			<db id="impl" />
 <!-- 			<db id="dbpedia2" /> -->
 		</test-db>
 		<testcases>
@@ -72,5 +74,6 @@
 	<email-notification attach-results="false"> 
 		<hostname value="smtp.gmail.com"/>
 		<port value="465"/>
+		
 	</email-notification>
 </mosquito>

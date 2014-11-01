@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.clustering.clusterer;
+package de.uni_leipzig.iguana.clustering.clusterer;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +8,9 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import de.uni_leipzig.mosquito.clustering.LogCluster;
-import de.uni_leipzig.mosquito.clustering.LogSolution;
-import de.uni_leipzig.mosquito.utils.EmailHandler;
+import de.uni_leipzig.iguana.clustering.LogCluster;
+import de.uni_leipzig.iguana.clustering.LogSolution;
+import de.uni_leipzig.iguana.utils.EmailHandler;
 
 /**
  * The Class SortedStructureClusterer.
@@ -62,7 +62,7 @@ public class SortedStructureClusterer implements Clusterer {
 
 		log.info("Start logs2Queries: "
 				+ DateFormat.getDateTimeInstance().format(new Date()));
-		LogSolution.logsToQueries(logsPath, queriesFile);
+		LogSolution.logsToQueries(logsPath, queriesFile, false);
 		log.info("End logs2Queries: "
 				+ DateFormat.getDateTimeInstance().format(new Date()));
 

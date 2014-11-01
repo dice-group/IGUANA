@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.utils;
+package de.uni_leipzig.iguana.utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.uni_leipzig.mosquito.benchmark.Benchmark.DBTestType;
+import de.uni_leipzig.iguana.benchmark.Benchmark.DBTestType;
 
 /**
  * The Class Config.
@@ -211,6 +211,9 @@ public class Config {
 		map.put("graph-uri", graph);
 		cp.setNode(benchmark);
 		
+		map.put("graph-uri", graph);
+		cp.setNode(benchmark);
+		
 		Element testDB = cp.getElementAt("test-db", 0);
 		map.put("dbs", testDB.getAttribute("type"));
 		map.put("ref-con", testDB.getAttribute("reference"));
@@ -227,6 +230,10 @@ public class Config {
 			Element warmup = cp.getElementAt("warmup", 0);
 			map.put("warmup-query-file", warmup.getAttribute("file-name"));
 			map.put("warmup-time", warmup.getAttribute("time"));
+			String path = warmup.getAttribute("update-path");
+			if(path.isEmpty())
+				path=null;
+			map.put("warmup-updates", path);
 		}catch(Exception e){
 			
 		}
@@ -361,5 +368,32 @@ public class Config {
 	      	}
 	        return map;
 	    
+	}
+
+	public static String getDBStop(Node dbNode, String db) {
+		return getCommand(dbNode, db, "stop-script");
+	}
+
+	public static String getDBStartUp(Node dbNode, String db) {
+		return getCommand(dbNode, db, "start-script");
+	}
+	
+	private static String getCommand(Node dbNode, String db, String tagName){
+		try{
+			ConfigParser cp = ConfigParser.getParser(dbNode);
+			NodeList dbs = cp.getNodeList("database");
+			for(int i=0; i<dbs.getLength();i++){
+				String id = ((Element) dbs.item(i)).getAttribute("id");
+				if(!id.equals(db)){
+					cp.setNode(((Element) dbs.item(i)));
+					NodeList tags = cp.getNodeList(tagName);
+					if(tags.getLength()>0){
+						return ((Element)tags.item(0)).getAttribute("command");
+					}
+					break;
+				}
+			}
+		}catch(Exception e){}
+		return null;
 	}
 }

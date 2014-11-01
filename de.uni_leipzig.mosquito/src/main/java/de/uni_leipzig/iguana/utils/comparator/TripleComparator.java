@@ -1,8 +1,8 @@
-package de.uni_leipzig.mosquito.utils.comparator;
+package de.uni_leipzig.iguana.utils.comparator;
 
 import java.util.Comparator;
 
-import de.uni_leipzig.mosquito.generation.CoherenceMetrics;
+import de.uni_leipzig.iguana.generation.CoherenceMetrics;
 
 
 /**

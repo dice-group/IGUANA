@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.utils;
+package de.uni_leipzig.iguana.utils;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -166,6 +166,10 @@ public class ResultSet implements Iterator<List<Object>>{
 	@Override
 	public List<Object> next() {
 		return table.get(++row);
+	}
+	
+	public void reset(){
+		row=-1;
 	}
 
 	/* (non-Javadoc)

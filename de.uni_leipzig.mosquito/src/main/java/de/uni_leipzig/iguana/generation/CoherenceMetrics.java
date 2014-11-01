@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.generation;
+package de.uni_leipzig.iguana.generation;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,7 +23,7 @@ import org.bio_gene.wookie.utils.LogHandler;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
-import de.uni_leipzig.mosquito.utils.PowerSetIterator;
+import de.uni_leipzig.iguana.utils.PowerSetIterator;
 
 
 /**
@@ -150,6 +150,7 @@ public class CoherenceMetrics {
 					ret.add("<"+res.getString(1)+">");
 					results++;
 				}
+				res.getStatement().close();
 				r+=results;
 				if(results<limit){
 					hasResults =false;
@@ -489,6 +490,7 @@ public class CoherenceMetrics {
 				if(res.next()){
 					ret++;
 				}
+				res.getStatement().close();
 			}catch(SQLException e){
 				LogHandler.writeStackTrace(log, e, Level.WARNING);
 			}
@@ -745,6 +747,7 @@ public class CoherenceMetrics {
 						ret.add("<"+s+">");
 					}
 				}
+				res.getStatement().close();
 				offset+=l;
 				if(l<limit){
 					hasNext = false;
@@ -905,14 +908,18 @@ public class CoherenceMetrics {
 		query+=" } LIMIT 1";
 		try{
 			ResultSet res = con.select(query);
-			if(res.next())
+			if(res.next()){
+				res.getStatement().close();
 				return true;
+			}
+			res.getStatement().close();
 			return false;
 		}
 		catch(SQLException e){
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			return null;
 		}
+		
 	}
 	
 	/**
@@ -1136,6 +1143,7 @@ public class CoherenceMetrics {
 					}
 					count += res.getLong(2);
 				}
+				res.getStatement().close();
 				l+=offset;
 				if(l<limit){
 					hasNext = false;

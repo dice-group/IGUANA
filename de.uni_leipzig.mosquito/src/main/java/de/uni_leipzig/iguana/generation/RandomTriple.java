@@ -1,11 +1,11 @@
-package de.uni_leipzig.mosquito.generation;
+package de.uni_leipzig.iguana.generation;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
-import de.uni_leipzig.mosquito.utils.FileHandler;
-import de.uni_leipzig.mosquito.utils.TripleStoreStatistics;
+import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.TripleStoreStatistics;
 
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
@@ -113,8 +113,9 @@ public class RandomTriple {
             String query = "CONSTRUCT {?s ?p ?o} ";
             query+=	graphURI==null?"":"FROM <"+graphURI+">";
         	query+=" WHERE { {?s ?p ?o}. LIMIT 1000 OFFSET " + randomOffset;
-
-            model = ((SPARQLConstructResultSet)con.execute(query)).getModel();
+        	SPARQLConstructResultSet res = (SPARQLConstructResultSet)con.execute(query);
+            model = res.getModel();
+            res.getStatement().close();
 //            queryExecuter = new QueryEngineHTTP(BenchmarkConfigReader.sparqlEndpoint, query);
 //            model =  queryExecuter.execConstruct();
 

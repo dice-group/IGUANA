@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.utils;
+package de.uni_leipzig.iguana.utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,6 +34,8 @@ public class TripleStoreStatistics {
 				result.next();
 				LiteralImpl ret = (LiteralImpl) result.getObject("no");
 				Long count = ret.getLong();
+				result.getStatement().close();
+
 				return count;
 			} catch ( SQLException | NullPointerException e) {
 				LogHandler.writeStackTrace(log, e, Level.WARNING);

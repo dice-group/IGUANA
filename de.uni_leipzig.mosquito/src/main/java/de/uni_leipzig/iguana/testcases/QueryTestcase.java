@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.testcases;
+package de.uni_leipzig.iguana.testcases;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -19,13 +19,13 @@ import java.util.logging.Logger;
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
 
-import de.uni_leipzig.mosquito.benchmark.Benchmark;
-import de.uni_leipzig.mosquito.query.QueryHandler;
-import de.uni_leipzig.mosquito.query.QuerySorter;
-import de.uni_leipzig.mosquito.utils.FileHandler;
-import de.uni_leipzig.mosquito.utils.ResultSet;
-import de.uni_leipzig.mosquito.utils.StringHandler;
-import de.uni_leipzig.mosquito.utils.comparator.LivedataComparator;
+import de.uni_leipzig.iguana.benchmark.Benchmark;
+import de.uni_leipzig.iguana.query.QueryHandler;
+import de.uni_leipzig.iguana.query.QuerySorter;
+import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.ResultSet;
+import de.uni_leipzig.iguana.utils.StringHandler;
+import de.uni_leipzig.iguana.utils.comparator.LivedataComparator;
 
 /**
  * The testcase tests given querypatterns (and turn them into real queries) for a given time
@@ -39,7 +39,7 @@ import de.uni_leipzig.mosquito.utils.comparator.LivedataComparator;
 public class QueryTestcase implements Testcase, Runnable {
 
 	/** The log. */
-	private Logger log;
+	protected Logger log;
 	
 	/** The con. */
 	private Connection con;
@@ -48,7 +48,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	private String queryPatterns;
 	
 	/** The current db. */
-	private String currentDB="";
+	protected String currentDB="";
 	
 	/** The percent. */
 	private String percent;
@@ -56,11 +56,13 @@ public class QueryTestcase implements Testcase, Runnable {
 	/** The patterns. */
 	private static Long patterns=0L;
 	
+	private static Long queries=0L;
+	
 	/** The path. */
 	private String path;
 	
 	/** The update strategy. */
-	private String updateStrategy;
+	protected String updateStrategy;
 	
 	/** The q qp s. */
 	private Random qQpS;
@@ -69,13 +71,13 @@ public class QueryTestcase implements Testcase, Runnable {
 	private int patternQpS=0, iQpS=0,sQpS=0;
 	
 	/** The qps time. */
-	private List<Long> qpsTime;
+	protected List<Long> qpsTime;
 	
 	/** The q count. */
-	private List<Long> qCount;
+	protected List<Long> qCount;
 	
 	/** The time limit. */
-	private Long timeLimit = 3600000L;
+	protected Long timeLimit = 3600000L;
 	
 	/** The limit. */
 	private int limit=5000;
@@ -87,7 +89,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	private String ldLinking;
 	
 	/** The ldpath. */
-	private String ldpath;
+	protected String ldpath;
 	
 	/** The live data format. */
 	private static String liveDataFormat = "[0-9]{6}\\.(added|removed)\\.nt";
@@ -111,10 +113,10 @@ public class QueryTestcase implements Testcase, Runnable {
 	private static int[] sig  = {0, 0};
 	
 	/** The selects. */
-	private static List<String> selects;
+	protected static List<String> selects;
 	
 	/** The inserts. */
-	private static List<String> inserts;
+	protected static List<String> inserts;
 	
 	private static Boolean selectGTinserts;
 	
@@ -141,6 +143,10 @@ public class QueryTestcase implements Testcase, Runnable {
 	
 	/** The ld strategy. */
 	private int ldStrategy;
+
+	private int randomNumber=2;
+
+	private boolean endSignal = false;
 	
 	/**
 	 * Gets the id of the QueryTestcase.
@@ -149,8 +155,8 @@ public class QueryTestcase implements Testcase, Runnable {
 	 */
 	private String getID(){
 		String id = queryPatterns!="null"?StringHandler.stringToAlphanumeric(queryPatterns):"";		
-		id+= ldpath!="null"?"_"+StringHandler.stringToAlphanumeric(ldpath):"";
-		return "QueryTestcase"+id+File.separator;
+		id+= ldpath!="null"?StringHandler.stringToAlphanumeric(ldpath):"";
+		return id+File.separator;
 	}
 	
 	/**
@@ -159,8 +165,16 @@ public class QueryTestcase implements Testcase, Runnable {
 	 * @return the boolean
 	 */
 	private Boolean testQh(){
-		String id = getID();
+	String id = "QueryTestcase"+getID();
 		return !id.equals(qh.getPath());
+	}
+	
+	public static void deccQueries(int amount){
+		queries -= amount;
+	}
+	
+	public static long getExecutedQueries(){
+		return queries;
 	}
 	
 	/**
@@ -175,6 +189,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	 */
 	public static void initQH(String queryPatterns, String updateStrategy, String ldpath, int limit, Logger log) throws IOException{
 		log.info("Initialize QueryHandler");
+		queries = 0L;
 		String id = queryPatterns!="null"?StringHandler.stringToAlphanumeric(queryPatterns):"";		
 		id+= ldpath!="null"?StringHandler.stringToAlphanumeric(ldpath):"";
 		File path = new File("QueryTestcase"+id+File.separator);
@@ -182,15 +197,25 @@ public class QueryTestcase implements Testcase, Runnable {
 		for(String f : path.list()){
 			new File(f).delete();
 		}
-		path.delete();
+//		path.delete();
+		log.info("Ref connection: "+Benchmark.getReferenceConnection().getEndpoint()+"");
+		log.info("Pattern file: "+queryPatterns);
 		qh = new QueryHandler(Benchmark.getReferenceConnection(), queryPatterns);
-		
 		qh.setPath("QueryTestcase"+id+File.separator);
 		qh.setLimit(limit);
 		qh.init();
+		if(qhs ==null){
+			qhs =new Hashtable<String, QueryHandler>();
+		}
+		qhs.put(id, qh);
+		log.info("QueryHandler ID: "+id);
+		for(File f: new File(qh.getPath()).listFiles())
+			log.info("DEBUG: "+f.getAbsolutePath());
 		patterns = FileHandler.getFileCountInDir(qh.getPath());
 		log.info("Gettint Queries and diverse them into SPARQL and SPARQL Update");
 		selects = QuerySorter.getSPARQL("QueryTestcase"+id+File.separator);
+//		selects = QuerySorter.getSPARQL(queryPatterns);
+
 		int insertSize = 0;
 	
 		if(!ldpath.equals("null")){
@@ -209,7 +234,10 @@ public class QueryTestcase implements Testcase, Runnable {
 		}
 		else{
 			inserts = QuerySorter.getSPARQLUpdate("QueryTestcase"+id+File.separator);
+//			inserts = QuerySorter.getSPARQLUpdate(queryPatterns);
 		}
+		for(File f: new File(qh.getPath()).listFiles())
+			log.info("DEBUG2: "+f.getAbsolutePath());
 		insertSize = inserts.size();
 		log.info("Query Patterns: "+patterns);
 		log.info("SPARQL Queries: "+selects.size());
@@ -239,6 +267,8 @@ public class QueryTestcase implements Testcase, Runnable {
 		else{
 			updateStrategy = "null";
 		}
+		for(File f: new File(qh.getPath()).listFiles())
+			log.info("DEBUG3: "+f.getAbsolutePath());
 	}
 	
 	/* (non-Javadoc)
@@ -246,12 +276,17 @@ public class QueryTestcase implements Testcase, Runnable {
 	 */
 	@Override
 	public void start() throws IOException {
-		
+		start(randomNumber);
+	}
+	
+	
+	
+	public void start(int randomNumber) throws IOException {
 		
 		log = Logger.getLogger(QueryTestcase.class.getName());
 		LogHandler.initLogFileHandler(log, QueryTestcase.class.getSimpleName());
-		qQpS = new Random(2);
-		qQpS.setSeed(2);
+		qQpS = new Random(randomNumber);
+		qQpS.setSeed(randomNumber);
 		if(qhs ==null){
 			qhs =new Hashtable<String, QueryHandler>();
 		}
@@ -260,8 +295,10 @@ public class QueryTestcase implements Testcase, Runnable {
 				qh = qhs.get(getID());
 			}
 			else{
+				log.info(getID());
+
 				initQH(queryPatterns, updateStrategy, ldpath, limit, log);
-				qhs.put(getID(), qh);
+//				qhs.put(getID(), qh);
 			}
 		}
 		if(!ldpath.equals("null")){
@@ -287,7 +324,7 @@ public class QueryTestcase implements Testcase, Runnable {
 		//This isn't the correct results yet, so we need to 
 		ResultSet sumRes = new ResultSet();
 		ResultSet seconds = new ResultSet();
-		sumRes.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryMixesPerHour"+percent);		
+		sumRes.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryMixesPerTimeLimit"+percent);		
 		seconds.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueriesPerSeconds"+percent);		
 		Long sum = 0L;
 		List<Object> row = new LinkedList<Object>();
@@ -353,27 +390,45 @@ public class QueryTestcase implements Testcase, Runnable {
 	 * @param query the query
 	 * @return the query time
 	 */
-	private Long getQueryTime(String query){
+	protected Long getQueryTime(String query){
 		Boolean isSPARQL = QuerySorter.isSPARQL(query);
 		Long a=0L, b=0L;
+		java.sql.ResultSet res=null;
 		if(isSPARQL){
 			try {
 				a = new Date().getTime();
-				java.sql.ResultSet res = con.select(query);
+				res = con.select(query);
 				b = new Date().getTime();
 				if(res==null)
-					return -1L;
+					throw new SQLException("Result was null");
+				queries++;
+				log.info("Executed Queries: "+queries);
 			} catch (SQLException e) {
+				
+				log.warning("Query "+query+" problems: ");
+				LogHandler.writeStackTrace(log, e, Level.WARNING);
+				log.info("This doesn't effect the results");
 				return -1L;
+			}
+			finally{
+				if(res!=null)
+					try {
+						res.getStatement().close();
+					} catch (SQLException e) {
+						LogHandler.writeStackTrace(log, e, Level.WARNING);
+					}
 			}
 		}
 		else{
+			log.info("Testing Query now");
 			a = new Date().getTime();
 			Boolean suc = con.update(query);
 			b = new Date().getTime();
+			log.info("Finished testing");
 			if(!suc)
 				return -1L;
 		}
+		
 		return b-a;
 	}
 	
@@ -382,11 +437,12 @@ public class QueryTestcase implements Testcase, Runnable {
 	 *
 	 * @return the results
 	 */
-	private ResultSet querySeconds(){
+	protected ResultSet querySeconds(){
 		ResultSet res = new ResultSet();
 		List<Object> row = new LinkedList<Object>();
 		List<String> header = new LinkedList<String>();
 		row.add(currentDB);
+		int nullCounter=0;
 		header.add("Connection");
 		for(int i=0; i<patterns ;i++){
 			row.add(0);
@@ -407,6 +463,12 @@ public class QueryTestcase implements Testcase, Runnable {
 		}
 		while(!isQpSFinished()){
 			String[] next = getNextQpSQuery();
+			if(next==null){
+				nullCounter++;
+				if(nullCounter>=2)
+					break;
+				continue;
+			}
 			String query = next[0];
 			String qFile = next[1];
 			
@@ -438,7 +500,8 @@ public class QueryTestcase implements Testcase, Runnable {
 	 *
 	 * @return true if finished, false otherwise
 	 */
-	private Boolean isQpSFinished(){
+	protected Boolean isQpSFinished(){
+		if(endSignal){return true;}
 		long t=0;
 		for(long time: qpsTime){
 			t+=time;
@@ -453,7 +516,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	 *
 	 * @return [query, fileName of the query]
 	 */
-	private String[] getNextLD(){
+	protected String[] getNextLD(){
 		String[] ret = {"", ""};
 		if(ldIt>=inserts.size()){
 			return null;
@@ -481,8 +544,8 @@ public class QueryTestcase implements Testcase, Runnable {
 	 * Gets the next query.
 	 *
 	 * @return the next query
-	 */
-	private String[] getNextQpSQuery(){
+	 *///TODO if selects ==0 and inserts ==0 
+	protected String[] getNextQpSQuery(){
 		String[] ret = {"", ""};
 		String currentFile;
 		Boolean not, hasLD=true;
@@ -496,7 +559,12 @@ public class QueryTestcase implements Testcase, Runnable {
 						patternQpS =0;
 					}
 					currentFile = path+File.separator+FileHandler.getNameInDirAtPos(path, patternQpS)+".txt";
-					int queryNr = qQpS.nextInt((int)FileHandler.getLineCount(currentFile));
+					log.info(currentFile);
+					Long fileLength = Long.valueOf(FileHandler.getLineCount(currentFile));
+					if(fileLength.intValue()<0){
+						log.severe(currentFile+" long: "+fileLength+" int: "+fileLength.intValue());
+					}
+					int queryNr = qQpS.nextInt(fileLength.intValue());
 				
 					patternQpS++;
 					ret = new String[2];
@@ -528,7 +596,7 @@ public class QueryTestcase implements Testcase, Runnable {
 				not = false;
 			}
 				//SELECT OR INSERT
-				if(not ^ selectGTinserts){
+				if(not ^ selectGTinserts && selects.size()!=0){
 					if(sQpS>=selects.size())
 						sQpS=0;
 //					s = qQpS.nextInt(selects.size());
@@ -539,7 +607,7 @@ public class QueryTestcase implements Testcase, Runnable {
 					if(!ldpath.equals("null")){
 						xCount--;
 						String[] r = getNextLD();
-						if(r==null){
+						if(r==null  && selects.size()!=0){
 							if(sQpS>=selects.size())
 								sQpS=0;
 //							s = qQpS.nextInt(selects.size());
@@ -552,10 +620,17 @@ public class QueryTestcase implements Testcase, Runnable {
 					else{
 						if(iQpS>=inserts.size())
 							iQpS=0;
+						if(inserts.size()==0)
+							return null;
 						currentFile = path+File.separator+inserts.get(iQpS++);
 					}
 				}
-			int queryNr = qQpS.nextInt((int)FileHandler.getLineCount(currentFile));
+				log.info(currentFile);
+				Long fileLength = Long.valueOf(FileHandler.getLineCount(currentFile));
+				if(fileLength.intValue()<0){
+					log.severe(currentFile+" long: "+fileLength+" int: "+fileLength.intValue());
+				}
+			int queryNr = qQpS.nextInt(fileLength.intValue());
 			xCount--;
 			ret[0] =  FileHandler.getLineAt(currentFile, queryNr);
 			ret[1] = new File(currentFile).getName();
@@ -575,7 +650,7 @@ public class QueryTestcase implements Testcase, Runnable {
 				xCount = -1;
 			}
 			
-			if(not ^ selectGTinserts){
+			if(not ^ selectGTinserts  && selects.size()!=0){
 				if(sQpS>=selects.size())
 					sQpS=0;
 //				s = qQpS.nextInt(selects.size());
@@ -585,7 +660,7 @@ public class QueryTestcase implements Testcase, Runnable {
 				if(!ldpath.equals("null")){
 					xCount++;
 					String[] r = getNextLD();
-					if(r==null){
+					if(r==null  &&selects.size()!=0){
 						if(sQpS>=selects.size())
 							sQpS=0;
 //						s = qQpS.nextInt(selects.size());
@@ -598,11 +673,17 @@ public class QueryTestcase implements Testcase, Runnable {
 				else{
 					if(iQpS>=inserts.size())
 						iQpS=0;
+					if(inserts.size()==0)
+						return null;
 					currentFile = path+File.separator+inserts.get(iQpS++);
 				}
 			}
-			
-			queryNr = qQpS.nextInt((int)FileHandler.getLineCount(currentFile));
+			log.info(currentFile);
+			fileLength = Long.valueOf(FileHandler.getLineCount(currentFile));
+			if(fileLength.intValue()<0){
+				log.severe(currentFile+" long: "+fileLength+" int: "+fileLength.intValue());
+			}
+			queryNr = qQpS.nextInt(fileLength.intValue());
 			xCount++;
 			ret[0] =  FileHandler.getLineAt(currentFile, queryNr);
 			ret[1] = new File(currentFile).getName();
@@ -711,6 +792,10 @@ public class QueryTestcase implements Testcase, Runnable {
 		this.percent = percent;
 	}
 
+	public void setRandomNumber(int randomNumber){
+		this.randomNumber = randomNumber;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
@@ -721,6 +806,10 @@ public class QueryTestcase implements Testcase, Runnable {
 		} catch (IOException e) {
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
 		}
+	}
+
+	public void sendEndSignal() {
+		this.endSignal  = true;
 	}
 
 }

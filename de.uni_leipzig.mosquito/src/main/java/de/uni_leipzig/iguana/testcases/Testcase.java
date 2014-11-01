@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.testcases;
+package de.uni_leipzig.iguana.testcases;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -6,7 +6,7 @@ import java.util.Properties;
 
 import org.bio_gene.wookie.connection.Connection;
 
-import de.uni_leipzig.mosquito.utils.ResultSet;
+import de.uni_leipzig.iguana.utils.ResultSet;
 
 /**
  * Testcase Interface to test several Cases easily in the Benchmark.

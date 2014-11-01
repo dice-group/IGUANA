@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.testcases;
+package de.uni_leipzig.iguana.testcases;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +14,8 @@ import java.util.logging.Logger;
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
 
-import de.uni_leipzig.mosquito.benchmark.Benchmark;
-import de.uni_leipzig.mosquito.utils.ResultSet;
+import de.uni_leipzig.iguana.benchmark.Benchmark;
+import de.uni_leipzig.iguana.utils.ResultSet;
 
 /**
  * This testcase tests the time to upload a given file into a given Connection
@@ -41,6 +41,10 @@ public class UploadTestcase implements Testcase {
 	
 	/** The graph uri. */
 	private String graphUri=null;
+	
+	public void setGraphURI(String graphURI){
+		this.graphUri = graphURI;
+	}
 	
 	/* (non-Javadoc)
 	 * @see de.uni_leipzig.mosquito.testcases.Testcase#start()
@@ -82,9 +86,25 @@ public class UploadTestcase implements Testcase {
 //					}
 //				})){
 				Long a = new Date().getTime();
+				if(f.isFile()){
 				if(!con.uploadFile(f, graphUri)){
 					log.severe("Couldn't upload File - see Log for more details");
 					
+				}}
+				else{
+					for(File f2 : f.listFiles()){
+						try{
+							if(!con.uploadFile(f2, graphUri)){
+								log.severe("Couldn't upload File - see Log for more details");	
+							}
+							else
+								log.info("uploaded file "+f2.getName()+" into "+con.getEndpoint());
+						}
+						catch(Exception e){
+							log.warning("Couldn't process file: "+f2.getName()+" due to: ");
+							LogHandler.writeStackTrace(log, e, Level.SEVERE);
+						}
+					}
 				}
 				Long b = new Date().getTime();
 				time += b-a;
@@ -93,7 +113,7 @@ public class UploadTestcase implements Testcase {
 				
 					header.add(f.getName());
 				}
-				log.info("Uploaded File "+file+" into "+name);
+				log.info("Uploaded "+file+" into "+name+":"+con.getEndpoint());
 //		}
 //		if(newHeader){
 //			header.add("sum");

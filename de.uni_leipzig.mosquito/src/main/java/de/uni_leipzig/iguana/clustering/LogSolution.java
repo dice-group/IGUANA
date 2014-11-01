@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.clustering;
+package de.uni_leipzig.iguana.clustering;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -31,10 +32,11 @@ import com.hp.hpl.jena.query.QueryException;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.sparql.lang.SPARQLParser;
-import de.uni_leipzig.mosquito.query.QuerySorter;
-import de.uni_leipzig.mosquito.utils.FileHandler;
-import de.uni_leipzig.mosquito.utils.StringHandler;
-import de.uni_leipzig.mosquito.utils.comparator.OccurrencesComparator;
+
+import de.uni_leipzig.iguana.query.QuerySorter;
+import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.StringHandler;
+import de.uni_leipzig.iguana.utils.comparator.OccurrencesComparator;
 
 /**
  * Provides some necessary algorithms for the clustering process
@@ -45,9 +47,12 @@ public class LogSolution {
 	
 	/** The logger. */
 	private static Logger log;
+	private static String dir = "mosqCache"+File.separator;
+	private static String cacheFile="cache.log";
 	
 	static {
 		log = Logger.getLogger(LogSolution.class.getName());
+		log.setLevel(Level.INFO);
 		LogHandler.initLogFileHandler(log, "LogCluster");
 	}
 	
@@ -191,10 +196,11 @@ public class LogSolution {
 	 *
 	 * @param inputPath the path of the logfiles
 	 * @param output the name of the output file in which the queries should be saved
+	 * @param onlyComplexQueries 
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static void logsToQueries(String inputPath, String output) throws IOException{
-		logsToQueries(inputPath, new File(output));
+	public static void logsToQueries(String inputPath, String output, Boolean onlyComplexQueries) throws IOException{
+		logsToQueries(inputPath, new File(output), onlyComplexQueries);
 	}
 	
 	/**
@@ -204,12 +210,23 @@ public class LogSolution {
 	 * @param output the output file in which the queries should be saved
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static void logsToQueries(String inputPath, File output) throws IOException{
+	public static void logsToQueries(String inputPath, File output, Boolean onlyComplexQueries) throws IOException{
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8), true);
 		String[] extensions = {"log"};
+//		cacheFile =output.getAbsolutePath()+"\t"+output.length();
+//		cacheFile = String.valueOf(cacheFile.hashCode())+".log";
+//		if(isListInCache(new LinkedList<File>(FileHandler.getFilesInDir(inputPath, extensions)), new File(dir+cacheFile))){
+//			pw.close();
+//			return;
+//		}
+		new File(dir).mkdirs();
+		File cF = new File(dir+cacheFile);
+		cF.delete();
+		cF.createNewFile();
 		for(File f : FileHandler.getFilesInDir(inputPath, extensions)){
-			logToQueries(pw, f);
+			log.log(Level.INFO, "Clustering file "+f.getAbsolutePath());
+			logToQueries(pw, f, onlyComplexQueries);
 		}
 		pw.close();
 	}
@@ -221,8 +238,8 @@ public class LogSolution {
 	 * @param output the name of the output file in which the queries should be saved
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static void logToQueries(String input, String output) throws IOException{
-		logToQueries(new File(input), new File(output));
+	public static void logToQueries(String input, String output, Boolean onlyComplexQueries) throws IOException{
+		logToQueries(new File(input), new File(output), onlyComplexQueries);
 	}
 	
 	/**
@@ -232,10 +249,10 @@ public class LogSolution {
 	 * @param output the output file in which the queries should be saved
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static void logToQueries(File input, File output) throws IOException{
+	public static void logToQueries(File input, File output, Boolean onlyComplexQueries) throws IOException{
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8), true);
-		logToQueries(pw, input);
+		logToQueries(pw, input, onlyComplexQueries);
 		pw.close();
 	}
 	
@@ -245,8 +262,8 @@ public class LogSolution {
 	 * @param pw the Printwriter to use to write the queries
 	 * @param input the name of the logfile
 	 */
-	public static void logToQueries(PrintWriter pw, String input){
-		logToQueries(pw, new File(input));
+	public static void logToQueries(PrintWriter pw, String input, String output, Boolean onlyComplexQueries){
+		logToQueries(pw, new File(input), onlyComplexQueries);
 	}
 	
 	/**
@@ -255,7 +272,11 @@ public class LogSolution {
 	 * @param pw the Printwriter to use to write the queries
 	 * @param input the logfile
 	 */
-	public static void logToQueries(PrintWriter pw, File input){
+	public static void logToQueries(PrintWriter pw, File input, Boolean onlyComplexQueries){
+		
+//		if(isInCache(input, new File(dir+cacheFile))){
+//			
+//		}
 		FileInputStream fis = null;
 		BufferedReader br = null;
 		String line;
@@ -285,13 +306,26 @@ public class LogSolution {
 					if(!QuerySorter.isSPARQL(line)&&!QuerySorter.isSPARQLUpdate(line)){
 						throw new QueryException();
 					}
-					if(graph!=null &&QuerySorter.isSPARQL(line)){
+					if(graph!=null &&QuerySorter.isSPARQL(line)){			
 						SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
 						Query q =sp.parse(QueryFactory.create(),line);
 						q.addGraphURI(graph);
+						if(onlyComplexQueries){
+							if(countTriplesInQuery(q.toString())<=1){
+								continue;
+							}
+							Boolean cont=false;
+							for(String feat : getFeatures()){
+								if(q.toString().toLowerCase().contains(feat)){
+									cont=true;
+									break;
+								}
+							}
+							if(!cont)
+								continue;
+						}
 						line = q.toString().replace("\n", " ");
 					}
-					
 					pw.println(line.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " "));
 				}
 				catch(QueryException e){
@@ -314,6 +348,102 @@ public class LogSolution {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			}
 		}
+	}
+	
+	
+	@SuppressWarnings("unused")
+	private static Boolean isListInCache(List<File> collection, File cacheFile){
+		List<String> characts = new LinkedList<String>();
+		for(int i=0; i<collection.size();i++){
+			File input = collection.get(i);
+			characts.add(input.getAbsolutePath()+"\t"+input.length()+"\t"+input.lastModified());
+		}
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		Boolean ret = true;
+		try{
+			if(cacheFile.exists()){
+				String line="";
+				fis = new FileInputStream(cacheFile);
+				br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+				while((line = br.readLine())!= null){
+					for(int  i=0; i<characts.size(); i++){
+						if(characts.get(i).equals(line))
+							characts.set(characts.indexOf(line), "null");
+					}
+				}
+				for(String s : characts){
+					if(!s.equals("null")){
+						ret=false;
+					}
+				}
+			}else{
+				return false;
+			}
+			
+		}catch(IOException e){
+			log.warning("Couldn't use cacheing due to: ");
+			LogHandler.writeStackTrace(log, e, Level.WARNING);
+		}
+		finally{
+			try{
+				if(br!=null)
+					br.close();
+				if(fis!=null)
+					fis.close();
+			}
+			catch(IOException e){
+				log.severe("Couldn't close file stream due to: ");
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		return ret;
+	}
+	
+	@SuppressWarnings("unused")
+	private static Boolean isInCache(File input, File cacheFile){
+		String characteristics=input.getAbsolutePath()+"\t"+input.length()+"\t"+input.lastModified();
+		PrintWriter pw=null;
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		Boolean ret = false;
+		try{
+			if(cacheFile.exists()){
+				String line="";
+				fis = new FileInputStream(cacheFile);
+				br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+				while((line = br.readLine())!= null){
+					if(line.equals(characteristics)){
+						ret = true;
+						break;
+					}
+				}
+			}
+			if(!ret){
+				cacheFile.createNewFile();
+				pw = new PrintWriter(new FileOutputStream(cacheFile, true));
+				pw.println(characteristics);
+				return false;
+			}
+		}catch(IOException e){
+			log.warning("Couldn't use cacheing due to: ");
+			LogHandler.writeStackTrace(log, e, Level.WARNING);
+		}
+		finally{
+			if(pw!=null)
+				pw.close();
+			try{
+				if(br!=null)
+					br.close();
+				if(fis!=null)
+					fis.close();
+			}
+			catch(IOException e){
+				log.severe("Couldn't close file stream due to: ");
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		return ret;
 	}
 	
 	/**
@@ -704,7 +834,6 @@ public class LogSolution {
 		FileInputStream fis = null;
 		BufferedReader br = null;
 		String line="";
-		int q=1;
 		ArrayList<String> cl = new ArrayList<String>(Arrays.asList(cluster));
 		Integer ret=0;
 		try{
@@ -712,14 +841,21 @@ public class LogSolution {
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			while((line = br.readLine())!= null && !cl.isEmpty()){
 				if(line.isEmpty()){continue;}
+				//TODO to hash
 				for(String qID : cl){
-					if(qID.equals("q"+q)){
+					try{
+					String q = line.substring(0, line.lastIndexOf("\t")).trim();
+					
+					if(q.equals(qID.trim())){
 						ret+=Integer.parseInt(line.substring(line.lastIndexOf("\t")+1));
-						cl.remove(qID);
+						cl.remove(qID.trim());
 						break;
 					}
+					}
+					catch(Exception e){
+						LogHandler.writeStackTrace(log, e, Level.SEVERE);
+					}
 				}
-				q++;
 			}
 		}
 		catch(IOException e){
@@ -837,7 +973,7 @@ public class LogSolution {
 		for(int i=0;i<q1.length;i++){
 			ret+=Math.pow(q1[i]-q2[i], 2);
 		}
-		return Math.abs(ret);
+		return 1/(1+ret);
 	}
 	
 	

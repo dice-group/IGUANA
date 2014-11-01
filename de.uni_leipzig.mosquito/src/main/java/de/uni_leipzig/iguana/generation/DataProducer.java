@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.generation;
+package de.uni_leipzig.iguana.generation;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,9 +33,9 @@ import org.bio_gene.wookie.utils.LogHandler;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
-import de.uni_leipzig.mosquito.utils.FileHandler;
-import de.uni_leipzig.mosquito.utils.TripleStoreStatistics;
-import de.uni_leipzig.mosquito.utils.comparator.TripleComparator;
+import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.TripleStoreStatistics;
+import de.uni_leipzig.iguana.utils.comparator.TripleComparator;
 
 /**
  * The Class DataProducer.
@@ -287,6 +287,7 @@ public class DataProducer {
 					pw.println(s);
 					
 				}
+				res.getStatement().close();
 				offset+=l;
 				if(l<limit){
 					hasResults=false;
@@ -435,6 +436,7 @@ public class DataProducer {
 						
 						offset++;
 					}
+					res.getStatement().close();
 				}
 				catch(Exception e){
 					LogHandler.writeStackTrace(log, e, Level.SEVERE);

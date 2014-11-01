@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.clustering;
+package de.uni_leipzig.iguana.clustering;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,9 +35,9 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 import de.uni_leipzig.bf.cluster.Main;
 import de.uni_leipzig.bf.cluster.Main.HardenStrategy;
-import de.uni_leipzig.mosquito.query.PatternSolution;
-import de.uni_leipzig.mosquito.utils.StringHandler;
-import de.uni_leipzig.mosquito.utils.comparator.OccurrencesComparator;
+import de.uni_leipzig.iguana.query.PatternSolution;
+import de.uni_leipzig.iguana.utils.StringHandler;
+import de.uni_leipzig.iguana.utils.comparator.OccurrencesComparator;
 import de.uni_leipzig.simba.controller.PPJoinController;
 
 
@@ -48,6 +50,8 @@ import de.uni_leipzig.simba.controller.PPJoinController;
  */
 public class LogCluster {
 	
+
+	
 	/** The logger. */
 	private static Logger log = LogSolution.getLogger();
 
@@ -59,7 +63,8 @@ public class LogCluster {
 	public static final String SIMILARITY_FILE = "SIMILARITY.txt";
 	public static final String TYPE_STRING = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 	public static final String MOSQUITO_STRING = "http://www.mosquito.com/#";
-	
+	public static final String ID_MAPPING = "IDMAPPING.txt";
+	public static final String PREFIX_FILE = "prefixes.properties";
 	
 	/**
 	 * the sorted structure algoritm.
@@ -181,7 +186,7 @@ public class LogCluster {
 	 * @param output the name of the output file in which the resulting queries should be written
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static void borderFlow(String clusterHarden, String qualityMeasure, double connThreshold, boolean testOne, boolean heuristic, boolean caching, Integer minNodes, String inputQueries, String input, String clusterOutput, String output) throws IOException{
+	public static void borderFlow(String clusterHarden,  double connThreshold, boolean testOne, boolean heuristic, boolean caching, Integer minNodes, String inputQueries, String input, String clusterOutput, String output) throws IOException{
 		Main.borderFlowDemo(input, clusterOutput, connThreshold, testOne, heuristic, caching, HardenStrategy.valueOf(clusterHarden));
 		//queryListToFile(bfClusterToQuerySet(input, clusterOutput), inputQueries, clQueryOutput);
 		rankAndChoose(inputQueries, clusterOutput, output, minNodes);
@@ -256,6 +261,7 @@ public class LogCluster {
 	 * @return the string[]
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
+	@SuppressWarnings("unused")
 	private static String[] queryIDListToQueries(LinkedList<Integer> queryList, File input) throws IOException{
 		FileInputStream fis = null;
 		BufferedReader br = null;
@@ -419,6 +425,53 @@ public class LogCluster {
 		return ret;
 	}
 	
+	
+	private static String[] getHashID(String[] input, File queries){
+		String[] ret = new String[input.length];
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line;
+		try{
+			fis = new FileInputStream(queries);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			while((line = br.readLine())!= null){
+				if(line.isEmpty()){continue;}
+				String hash=line.substring(0, line.lastIndexOf("\t"));
+				String q = line.substring(line.indexOf("\t")+1);
+				for(int i=0; i< input.length; i++){
+					if(input[i].equals(hash)){
+						ret[i] = URLDecoder.decode(URLDecoder.decode(q, "UTF-8"), "UTF-8");
+						input[i] = "nothing";
+						break;
+					}
+				}
+				Boolean cont = false;
+				for(String i : input){
+					if(!i.equals("nothing")){
+						cont=true;
+					}
+				}
+				if(cont==true){
+					continue;
+				}
+				break;
+			}
+		}
+		catch(IOException e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		finally{
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		return ret;
+	}
+	
 	/**
 	 * Rank and choose.
 	 *
@@ -457,11 +510,39 @@ public class LogCluster {
 			while((line = br.readLine())!= null){
 				if(line.isEmpty()){continue;}
 				String[] cluster = line.split("\t")[1].replaceAll("(\\[|\\])", "").split(",\\s*");
+				String cl = "[";
+				for(int i=0; i<cluster.length-1;i++){
+					cl+=cluster[i]+", ";
+				}
+				cl+=cluster[cluster.length-1]+"]";
+				log.info("Current Cluster: "+cl);
 				if(cluster.length<minNodes){
+					log.info("Current cluster length "+cluster.length+" is to small");
+					log.info("Ignoring cluster");
 					continue;
 				}
+				cluster = getHashID(cluster, new File(DIR_FOR_FILES+File.separator+ID_MAPPING));
+				int size = 0;
+				for(String c : cluster){
+					if(c!=null){
+						size++;
+					}
+				}
+				String[] actCluster = new String[size];
+				int t=0;
+				for(int q =0; q<cluster.length; q++){
+					if(cluster[q]!=null){
+						actCluster[t++]=cluster[q];
+					}
+				}
+				cluster = actCluster;
+				cl = "[";
+				for(int i=0; i<cluster.length-1;i++){
+					cl+=cluster[i]+", ";
+				}
+				cl+=cluster[cluster.length-1]+"]";
 				Integer freq = LogSolution.getFreqSum(cluster, freqQueries);
-				cluster = queryIDListToQueries(clusterToID(cluster), freqQueries);
+				log.info("Freq: "+freq+"\n"+"Actual Cluster: "+cl);
 				bestQueries.add(cluster[0]+"\t"+freq);
 				Collections.sort(bestQueries, cmp);
 				if(bestQueries.size()>25)
@@ -494,10 +575,16 @@ public class LogCluster {
 			for(k=0;k<bestQueries.size()-1;k++){
 				String q = bestQueries.get(k);
 				momQueries[k]=q.substring(0, q.lastIndexOf("\t"));
+				momQueries[k] = URLDecoder.decode(momQueries[k], "UTF-8");
+				momQueries[k] = addPrefixes(momQueries[k]);
 				pw.println(momQueries[k]);
 			}
 			String q = bestQueries.get(k);
 			momQueries[k]=q.substring(0, q.lastIndexOf("\t"));
+			try{
+				momQueries[k] = URLDecoder.decode(momQueries[k], "UTF-8");
+			}catch(Exception e){}
+			momQueries[k] = addPrefixes(momQueries[k]);
 			pw.print(momQueries[k]);
 			pw.close();
 		}
@@ -522,6 +609,7 @@ public class LogCluster {
 	 * @param cluster the cluster
 	 * @return the linked list
 	 */
+	@SuppressWarnings("unused")
 	private static LinkedList<Integer> clusterToID(String[] cluster){
 		LinkedList<Integer> ret = new LinkedList<Integer>();
 		for(String cl : cluster){
@@ -538,16 +626,17 @@ public class LogCluster {
 				queriesFile, 
 				DIR_FOR_FILES+File.separator+SOURCE_FILE, 
 				DIR_FOR_FILES+File.separator+ACCEPTANCE_FILE, 
-				DIR_FOR_FILES+File.separator+SIMILARITY_FILE);
+				DIR_FOR_FILES+File.separator+SIMILARITY_FILE,
+				DIR_FOR_FILES+File.separator+ID_MAPPING);
 	}
 	
-	private static void executeLimes(String configFile, String outputConfigFile, String queriesFile, String source, String outputFile, String similiarityFile){
+	private static void executeLimes(String configFile, String outputConfigFile, String queriesFile, String source, String outputFile, String similiarityFile, String idMapping){
 		//query rdf:type rdf:query
 		//query rdf:feature_n feature 0 oder 1
 		writeQueriesNTFile(queriesFile, source);
 		preProcessLimes(configFile, outputConfigFile, new File(source).getAbsolutePath(), outputFile);
 		PPJoinController.run(outputConfigFile);
-		postProcessLimes(outputFile, similiarityFile);
+		postProcessLimes(outputFile, similiarityFile, idMapping);
 	}
 	
 	
@@ -626,7 +715,7 @@ public class LogCluster {
 			fis = new FileInputStream(configFile);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			while((line = br.readLine())!= null){
-				pw.println(line.replace("$1", source).replace("$2", outputFile).replace("$3", "NEIN.nt"));
+				pw.println(line.replace("$1", source).replace("$2", outputFile).replace("$3", "NotUsed.nt"));
 			}
 		}
 		catch(IOException e){
@@ -645,18 +734,21 @@ public class LogCluster {
 	}
 	
 	
-	private static void postProcessLimes(String inputFile, String outputFile){
-		postProcessLimes(new File(inputFile), new File(outputFile));
+	private static void postProcessLimes(String inputFile, String outputFile, String idMapping){
+		postProcessLimes(new File(inputFile), new File(outputFile), new File(idMapping));
 	}
 	
-	private static void postProcessLimes(File inputFile, File outputFile){
+	private static void postProcessLimes(File inputFile, File outputFile, File idMapping){
 		FileInputStream fis = null;
 		BufferedReader br = null;
 		String line="";
+		PrintWriter pwMap = null;
 		PrintWriter pw = null;
 		try{
+			idMapping.createNewFile();
 			outputFile.createNewFile();
 			pw = new PrintWriter(outputFile);
+			pwMap = new PrintWriter(idMapping);
 			fis = new FileInputStream(inputFile);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			String uri = new File(".").toURI().toString().replace("file:/", "file:///");
@@ -673,13 +765,15 @@ public class LogCluster {
 					continue;
 				}
 				double vecDist = LogSolution.getFeatureVectorDistance(split[0], split[2]);
-				if(vecDist<0.33)
+				if(vecDist<0.3)
 					continue;
-				Double sim = 1/(1+Math.min(
-						StringHandler.levenshteinDistance(split[0], split[2]), 
-						vecDist));
-				
-				pw.println(split[0]+"\t"+split[2]+"\t"+sim);
+				Float lev = StringHandler.levenshteinDistance(split[0], split[2]);
+				Double sim = Math.max(1/
+						lev, 
+						vecDist);
+				pwMap.println(Math.abs(split[0].hashCode())+"\t"+split[0]);
+				pwMap.println(Math.abs(split[2].hashCode())+"\t"+split[2]);
+				pw.println(Math.abs(split[0].hashCode())+"\t"+Math.abs(split[2].hashCode())+"\t"+sim);
 			}
 		}
 		catch(IOException e){
@@ -695,6 +789,22 @@ public class LogCluster {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			}
 		}
+	}
+	
+	public static String addPrefixes(String query){
+//		SPARQLPARSER SP = SPARQLPARSER.CREATEPARSER(SYNTAX.SYNTAXSPARQL_11);
+//		QUERY Q =SP.PARSE(QUERYFACTORY.CREATE(),QUERY);
+		Properties p = new Properties();
+		String prefix="";
+		try {
+			p.load(new FileInputStream(PREFIX_FILE));
+		} catch (IOException e) {
+			return query;
+		}
+		for(Object key: p.keySet())
+			prefix+="PREFIX "+String.valueOf(key)+": <"+String.valueOf(p.get(key))+"> ";
+		
+		return prefix + query;
 	}
 	
 }

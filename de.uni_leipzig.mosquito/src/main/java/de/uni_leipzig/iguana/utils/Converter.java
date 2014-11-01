@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.utils;
+package de.uni_leipzig.iguana.utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import de.uni_leipzig.mosquito.converter.ConverterI;
+import de.uni_leipzig.iguana.converter.ConverterI;
 
 
 /**

@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.data;
+package de.uni_leipzig.iguana.data;
 
 import java.util.ArrayList;
 import java.util.Collection;

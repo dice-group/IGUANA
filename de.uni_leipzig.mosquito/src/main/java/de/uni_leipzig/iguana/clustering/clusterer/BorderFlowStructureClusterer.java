@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.clustering.clusterer;
+package de.uni_leipzig.iguana.clustering.clusterer;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +8,9 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import de.uni_leipzig.mosquito.clustering.LogCluster;
-import de.uni_leipzig.mosquito.clustering.LogSolution;
-import de.uni_leipzig.mosquito.utils.EmailHandler;
+import de.uni_leipzig.iguana.clustering.LogCluster;
+import de.uni_leipzig.iguana.clustering.LogSolution;
+import de.uni_leipzig.iguana.utils.EmailHandler;
 
 /**
  * The Class BorderFlowStructureClusterer.
@@ -35,9 +35,7 @@ public class BorderFlowStructureClusterer implements Clusterer {
 	
 	/** The harden. */
 	private String harden=null;
-	
-	/** The quality. */
-	private String quality=null;
+
 	
 	/** The threshold. */
 	private Double threshold=0.8;
@@ -75,7 +73,7 @@ public class BorderFlowStructureClusterer implements Clusterer {
 		
 		log.info("Start logs2Queries: "
 				+ DateFormat.getDateTimeInstance().format(new Date()));
-		LogSolution.logsToQueries(logsPath, queriesFile);
+		LogSolution.logsToQueries(logsPath, queriesFile, false);
 		log.info("End logs2Queries: "
 				+ DateFormat.getDateTimeInstance().format(new Date()));
 		
@@ -111,7 +109,7 @@ public class BorderFlowStructureClusterer implements Clusterer {
 		log.info("End matching structs to queries: "+ DateFormat.getDateTimeInstance().format(new Date()));
 		
 		log.info("Start Clustering...");
-		LogCluster.borderFlow(harden, quality, threshold, testOne, heuristic, caching, minNodes, queriesStruct, simFile, clusterOutput, queries);
+		LogCluster.borderFlow(harden, threshold, testOne, heuristic, caching, minNodes, queriesStruct, simFile, clusterOutput, queries);
 		String end = DateFormat.getDateTimeInstance().format(new Date());
 		Calendar calE = Calendar.getInstance();
 		log.info("Ended ClusterProcess " + end);
@@ -174,9 +172,7 @@ public class BorderFlowStructureClusterer implements Clusterer {
 		else{
 			caching=Boolean.valueOf(String.valueOf(p.get("caching")).trim());
 		}
-		harden=String.valueOf(p.get("harden")).trim();
-		quality=String.valueOf(p.get("quality")).trim();
-		
+		harden=String.valueOf(p.get("harden")).trim();		
 	}
 	
 

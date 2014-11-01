@@ -1,9 +1,9 @@
-package de.uni_leipzig.mosquito.generation;
+package de.uni_leipzig.iguana.generation;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 
-import de.uni_leipzig.mosquito.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.FileHandler;
 
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
@@ -101,7 +101,9 @@ public class RandomInstance {
 //            queryExecuter = new QueryEngineHTTP(BenchmarkConfigReader.sparqlEndpoint, query);
             try{
 //                outputModel =  queryExecuter.execConstruct();
-                outputModel = ((SPARQLConstructResultSet)con.execute(query)).getModel();
+            	SPARQLConstructResultSet res = (SPARQLConstructResultSet)con.execute(query);
+                outputModel = res.getModel();
+                res.getStatement().close();
 
 
                 //Write the model to output file

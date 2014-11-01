@@ -1,14 +1,11 @@
-package de.uni_leipzig.mosquito.query;
+package de.uni_leipzig.iguana.query;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.HashSet;
@@ -38,8 +35,9 @@ import com.hp.hpl.jena.sparql.modify.UpdateRequestSink;
 import com.hp.hpl.jena.sparql.modify.UpdateSink;
 import com.hp.hpl.jena.update.UpdateRequest;
 
-import de.uni_leipzig.mosquito.data.TripleStoreHandler;
-import de.uni_leipzig.mosquito.utils.RandomStringBuilder;
+import de.uni_leipzig.iguana.data.TripleStoreHandler;
+import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.RandomStringBuilder;
 
 /**
  * Provides an handler which converts given query patterns into
@@ -60,6 +58,8 @@ public class QueryHandler {
 	/** The failed queries. */
 	private String failedQueries = "queriesWithNoValues";
 	
+	private Logger log = Logger.getLogger(QueryHandler.class.getSimpleName());
+	
 	/** The limit. */
 	private int limit = 5000;
 	
@@ -78,6 +78,7 @@ public class QueryHandler {
 	 */
 	public QueryHandler(Connection con, String fileForQueries) throws IOException{
 		this.con = con;
+		LogHandler.initLogFileHandler(log, QueryHandler.class.getSimpleName());
 		this.fileForQueries = fileForQueries;
 	}
 	
@@ -105,9 +106,9 @@ public class QueryHandler {
 	public static String ntToQuery(File file, Boolean insert, String graphUri){
 //		try{
 			String query = "";
-			query= "INSERT DATA {";
+			query= "INSERT {";
 			if(!insert){
-				query="DELETE DATA {";
+				query="DELETE WHERE {";
 			}
 			if(graphUri!=null){
 				query+=" GRAPH <"+graphUri+"> { ";
@@ -133,6 +134,8 @@ public class QueryHandler {
 				query+=" }";
 			}
 			query+=" }";
+			if(insert)
+				query+=" WHERE {?s ?p ?o}";
 //			br.close();
 			return query;
 //		}
@@ -203,22 +206,25 @@ public class QueryHandler {
 		if(f.exists())
 			f.delete();
 		//Gets the Values
-		List<String> queryPatterns = Files.readAllLines(Paths.get(queriesFile), Charset.forName("UTF-8")); 
+		List<String> queryPatterns = new LinkedList<String>(FileHandler.getLines(queriesFile)); 
 		int i=0;
 		for(String p : queryPatterns){
 			if(p.isEmpty()){
 				continue;
 			}
-			String test = " "+p.toLowerCase().replaceAll("%%v[0-9]*%%", "<http://example.com>");
+			log.info("Processing query: "+p);
+			String test="";
 			
 			try{
-				
+				test = " "+p.toLowerCase().replaceAll("%%v[0-9]*%%", "?v");
 				SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
 				sp.parse(QueryFactory.create(), test);
+				
 				valuesToCSV(p, String.valueOf(i));		
 			}
 			catch(QueryParseException e){
 				try{
+					test = " "+p.toLowerCase().replaceAll("%%v[0-9]*%%", "<http://example.com>");
 					UpdateParser up = UpdateParser.createParser(Syntax.syntaxSPARQL_11);
 					UpdateSink sink = new UpdateRequestSink(new UpdateRequest());
 					up.parse(sink, test);
@@ -272,10 +278,18 @@ public class QueryHandler {
 			
 			PrintWriter pwfailed = new PrintWriter(new FileOutputStream(failed, true));
 			PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8), true);
+			
 			String q = selectPattern(query);
 			ResultSet res =null;
 			if(!QuerySorter.isSPARQL(q)){
 				
+			}
+			else if(!query.matches(".*%%v[0-9]*%%.*")){
+				pw.write(query);
+				pw.println();
+				pw.close();
+				pwfailed.close();
+				return 1;
 			}
 			else{
 				res= con.execute(q);
@@ -302,6 +316,10 @@ public class QueryHandler {
 					pw.println();
 					ret++;
 				}
+				res.getStatement().close();
+			}
+			else{
+				log.severe("Result of "+con.getEndpoint()+" is null.");
 			}
 			pw.close();
 			if(!result){
@@ -408,12 +426,14 @@ public class QueryHandler {
 		if(vars.isEmpty()){
 			return query;
 		}
-
 		Query q = QueryFactory.create(query);
 		q.setLimit(Long.valueOf(limit));
 		String select = "SELECT DISTINCT ";
 		for(String v : vars){
 			select+="?"+v+" ";
+			if(q.hasGroupBy()){
+				q.addGroupBy("?"+v);
+			}
 		}
 		
 		switch(q.getQueryType()){

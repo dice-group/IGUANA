@@ -1,10 +1,10 @@
-package de.uni_leipzig.mosquito.generation;
+package de.uni_leipzig.iguana.generation;
 
 import com.hp.hpl.jena.rdf.model.RDFNode;
 
-import de.uni_leipzig.mosquito.data.Selector;
-import de.uni_leipzig.mosquito.utils.FileHandler;
-import de.uni_leipzig.mosquito.utils.TripleStoreStatistics;
+import de.uni_leipzig.iguana.data.Selector;
+import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.TripleStoreStatistics;
 
 import java.util.Collection;
 import java.util.logging.Level;

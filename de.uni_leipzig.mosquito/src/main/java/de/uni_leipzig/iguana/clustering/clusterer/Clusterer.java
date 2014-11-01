@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.clustering.clusterer;
+package de.uni_leipzig.iguana.clustering.clusterer;
 
 import java.io.IOException;
 import java.util.Properties;

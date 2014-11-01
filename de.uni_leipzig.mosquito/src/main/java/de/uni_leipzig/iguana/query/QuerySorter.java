@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.query;
+package de.uni_leipzig.iguana.query;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -12,7 +12,7 @@ import com.hp.hpl.jena.sparql.modify.UpdateRequestSink;
 import com.hp.hpl.jena.sparql.modify.UpdateSink;
 import com.hp.hpl.jena.update.UpdateRequest;
 
-import de.uni_leipzig.mosquito.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.FileHandler;
 
 /**
  * The Class QuerySorter helps to differs between SPARQL and UPDATE queries and

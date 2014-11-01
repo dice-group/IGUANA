@@ -1,4 +1,4 @@
-package de.uni_leipzig.mosquito.benchmark;
+package de.uni_leipzig.iguana.benchmark;
 
 import java.io.Console;
 import java.io.File;
@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -30,23 +31,25 @@ import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import de.uni_leipzig.mosquito.clustering.ExternalSort;
-import de.uni_leipzig.mosquito.clustering.clusterer.Clusterer;
-import de.uni_leipzig.mosquito.converter.RDFVocabulary;
-import de.uni_leipzig.mosquito.data.TripleStoreHandler;
-import de.uni_leipzig.mosquito.generation.DataGenerator;
-import de.uni_leipzig.mosquito.generation.DataProducer;
-import de.uni_leipzig.mosquito.generation.ExtendedDatasetGenerator;
-import de.uni_leipzig.mosquito.testcases.Testcase;
-import de.uni_leipzig.mosquito.testcases.UploadTestcase;
-import de.uni_leipzig.mosquito.utils.Config;
-import de.uni_leipzig.mosquito.utils.Converter;
-import de.uni_leipzig.mosquito.utils.EmailHandler;
-import de.uni_leipzig.mosquito.utils.FileHandler;
-import de.uni_leipzig.mosquito.utils.ResultSet;
-import de.uni_leipzig.mosquito.utils.StringHandler;
-import de.uni_leipzig.mosquito.utils.ZipUtils;
-import de.uni_leipzig.mosquito.utils.comparator.TripleComparator;
+import de.uni_leipzig.iguana.clustering.ExternalSort;
+import de.uni_leipzig.iguana.clustering.clusterer.Clusterer;
+import de.uni_leipzig.iguana.converter.RDFVocabulary;
+import de.uni_leipzig.iguana.data.TripleStoreHandler;
+import de.uni_leipzig.iguana.generation.DataGenerator;
+import de.uni_leipzig.iguana.generation.DataProducer;
+import de.uni_leipzig.iguana.generation.ExtendedDatasetGenerator;
+import de.uni_leipzig.iguana.query.QueryHandler;
+import de.uni_leipzig.iguana.testcases.Testcase;
+import de.uni_leipzig.iguana.testcases.UploadTestcase;
+import de.uni_leipzig.iguana.utils.Config;
+import de.uni_leipzig.iguana.utils.Converter;
+import de.uni_leipzig.iguana.utils.EmailHandler;
+import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.ResultSet;
+import de.uni_leipzig.iguana.utils.ShellProcessor;
+import de.uni_leipzig.iguana.utils.StringHandler;
+import de.uni_leipzig.iguana.utils.ZipUtils;
+import de.uni_leipzig.iguana.utils.comparator.TripleComparator;
 
 // TODO v2.1 if roh and ch are given for each of them 
 /**
@@ -180,6 +183,7 @@ public class Benchmark {
 			HashMap<String, Object> email = Config.getEmail(rootNode);
 			log.info("Making Reference Connection");
 			refCon = ConnectionFactory.createConnection(dbNode, config.get("ref-con"));
+			log.info(refCon.getEndpoint());
 			if(email!=null){
 				log.info("Initialize Email...");
 				if(email.get("pwd")==null){
@@ -248,6 +252,12 @@ public class Benchmark {
 			
 			//TODO v2.1 Logging: Options 
 			log.info("Starting benchmark");
+			String options ="";
+			for(String key : config.keySet()){
+				if(config.get(key)==null || config.get(key).isEmpty()){continue;}
+				options+=key+" - "+config.get(key)+"\n";
+			}
+			log.info("Options:\n"+options);
 			mainLoop(databaseIds, pathToXMLFile);
 			log.info("Benchmark finished");
 			//<<<<<<<!!!!!!!!!!!!!>>>>>>>
@@ -272,7 +282,7 @@ public class Benchmark {
 					log.warning("Couldn't send email due to: ");
 					LogHandler.writeStackTrace(log, e1, Level.WARNING);
 				}
-				
+				return;
 			}
 		}
 		if(mail){
@@ -349,8 +359,12 @@ public class Benchmark {
 			for (String db : ids) {
 				log.info("DB:PERCENT: "+db+":"+percents.get(i));
 				// Connection zur jetzigen DB
+				//Start if neccessary 
+				String command=null;
+				if((command=Config.getDBStartUp(dbNode, db))!=null){
+					ShellProcessor.executeCommand(command);
+				}
 				Connection con = ConnectionFactory.createConnection(dbNode, db);
-			
 				// drop
 				if (Boolean.valueOf(config.get("drop-db"))) {
 					con.dropGraph(config.get("graph-uri"));
@@ -363,6 +377,7 @@ public class Benchmark {
 					up.setProperty("file", randFiles[i]);
 					up.setProperty("graph-uri", config.get("graph-uri"));
 					ut.setProperties(up);
+					ut.setGraphURI(config.get("graph-uri"));
 					ut.setConnection(con);
 					ut.setCurrentPercent(String.valueOf(percents.get(i)));
 					ut.setCurrentDBName(db);
@@ -379,10 +394,13 @@ public class Benchmark {
 					if(config.get("warmup-query-file")!=null &&config.get("warmup-time")!=null){
 						log.info("Warmup started");
 						warmup(con, String.valueOf(config.get("warmup-query-file")) ,
+								config.get("warmup-updates"),
+								config.get("graph-uri"),
 								Long.valueOf(config.get("warmup-time")));
 						log.info("Warmup finished! Ready to get pumped!");
 					}
 				}catch(Exception e){
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
 					log.info("No warmup! ");
 				}
 				log.info("Start other testcases");
@@ -391,6 +409,11 @@ public class Benchmark {
 				if (Boolean.valueOf(config.get("drop-db"))) {
 					log.info("Drop Graph "+config.get("graph-uri"));
 					con.dropGraph(config.get("graph-uri"));
+				}
+				//stop if neccessary
+				con.close();
+				if((command=Config.getDBStop(dbNode, db))!=null){
+					ShellProcessor.executeCommand(command);
 				}
 				dbCount++;
 
@@ -420,7 +443,8 @@ public class Benchmark {
 					res.saveAsPNG();
 				}
 				catch(Exception e){
-					log.warning("Couldn't make image");
+					log.warning("Couldn't make image due to ");
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
 				}
 			}
 		}
@@ -435,20 +459,58 @@ public class Benchmark {
 	 * @param queries the queries to use for the warmup
 	 * @param time time how long the warump should be executed
 	 */
-	private static void warmup(Connection con, Collection<String> queries, Long time){
+	private static void warmup(Connection con, Collection<String> queries, File path, String graphURI, Long time){
 		Long begin = new Date().getTime();
 		time=60*1000*time;
 		int i=0;
 		List<String> queryList = new LinkedList<String>(queries);
-		if(queryList.size()==0){
+		int updateCount=0;
+		if(path!=null)
+			updateCount += path.listFiles().length;
+		if(queryList.size()+updateCount==0){
 			log.warning("No queries in File: No warmup! Ready to get pumped");
 			return;
 		}
+		Boolean update=false;
+
+		
+		Collection<File> updates = new LinkedList<File>();
+		if(path!=null && path.exists()){
+			for(File f: path.listFiles()){
+				updates.add(f);
+			}
+		}
+		Iterator<File> updIt = updates.iterator();
 		while((new Date().getTime())-begin < time){
 			if(queryList.size()<=i){
 				i=0;
 			}
-			con.execute(queryList.get(i));
+			String query = "";
+			if(queryList.size()==0)
+				update=true;
+			if(updIt.hasNext() && update){
+				File f = updIt.next();
+				query = QueryHandler.ntToQuery(f, true, graphURI);
+				update=false;
+			}
+			else if(queryList.size()>0){
+				query = queryList.get(i++);
+				update =true;
+			}
+			else{
+				log.info("Nothing to warmup anymore, Are You READY?? NO? okay... ");
+				return;
+			}
+			
+			java.sql.ResultSet res = con.execute(query);
+			if(res!=null){
+				try {
+					res.getStatement().close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		
 	}
@@ -460,9 +522,12 @@ public class Benchmark {
 	 * @param queriesFile the queries file in which the queries are saved to use for the warmup
 	 * @param time time how long the warump should be executed
 	 */
-	private static void warmup(Connection con, String queriesFile, Long time){
+	private static void warmup(Connection con, String queriesFile, String path, String graphURI, Long time){
 		Collection<String> queries = FileHandler.getQueriesInFile(queriesFile);
-		warmup(con, queries, time);
+		File f = null;
+		if(path!=null)
+			f = new File(path);
+		warmup(con, queries, f, graphURI, time);
 	}
 	
 	/**
@@ -484,7 +549,8 @@ public class Benchmark {
 			try {
 				Properties testProps = testcases.get(testcase);
 				if(!testProps.containsKey("graphURI")){
-					testProps.setProperty("graphURI", config.get("graph-uri"));
+					if(config.get("graph-uri")!=null)
+						testProps.setProperty("graphURI", config.get("graph-uri"));
 				}
 				Class<Testcase> t = (Class<Testcase>) Class.forName(testcase);
 				Testcase test = t.newInstance();
@@ -517,10 +583,20 @@ public class Benchmark {
 		String[] ret = new String[percents.size()];
 		new File("datasets"+File.separator).mkdir();
 		String fileName = hundredFile;
-		if(hundredFile==null||!(new File(hundredFile).exists())){
+		if(hundredFile==null||!(new File(hundredFile).exists())||new File(hundredFile).isDirectory()){
+			
 			fileName ="datasets"+File.separator+"ds_100.nt";
-			log.info("Writing 100% Dataset to File");
-			TripleStoreHandler.writeDatasetToFile(con, config.get("graph-uri"), fileName);	
+			if(new File(hundredFile).isDirectory()){
+				try {
+					FileHandler.writeFilesToFile(hundredFile, fileName);
+				} catch (IOException e) {
+					LogHandler.writeStackTrace(log, e, Level.SEVERE);
+					return null;
+				}
+			}else{
+				log.info("Writing 100% Dataset to File");
+				TripleStoreHandler.writeDatasetToFile(con, config.get("graph-uri"), fileName);	
+			}
 		}
 		Comparator<String> cmp = new TripleComparator();
 		File f = new File(DataProducer.SORTED_FILE);
