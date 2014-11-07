@@ -22,6 +22,8 @@ public class TripleComparator implements Comparator<String>{
 	public int compare(String s1, String s2) {
 		s1 = s1.trim();
 		s2 = s2.trim();
+		s1 = s1.replace("\t", " ");
+		s2 = s2.replace("\t", " ");
 		String[] cmp1 = s1.split(" ");
 		for(int k=3;k<cmp1.length;k++){
 			cmp1[2]+=" "+cmp1[k];

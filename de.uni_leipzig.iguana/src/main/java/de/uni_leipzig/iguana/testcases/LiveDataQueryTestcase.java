@@ -1,5 +1,6 @@
 package de.uni_leipzig.iguana.testcases;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -77,10 +78,12 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 			if(qCount.size()<=i){
 				qCount.add(0L);
 				qpsTime.add(0L);
+				qFailCount.add(0L);
 			}
 			else{
 				qCount.set(i, 0L);
 				qpsTime.set(i, 0L);
+				qFailCount.set(i, 0L);
 			}
 			
 			log.info(inserts.get(i));
@@ -92,13 +95,13 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 			int actualAmount = getAmount();
 			if(!strategy.equals(UpdateStrategy.NULL)){
 				log.info("Amount of Queries before next update"+actualAmount);
-				long am=QueryTestcase.getExecutedQueries();
+				long am=new Date().getTime();
 				long amQ;
-				while((amQ = QueryTestcase.getExecutedQueries())<actualAmount){
-					if(am<amQ){
-						log.info("DEBUG Executed Queries: "+amQ);
-						am = amQ;
-					}
+				while((amQ = new Date().getTime())-am<actualAmount){
+//					if(am<amQ){
+//						log.info("DEBUG Executed Queries: "+amQ);
+//						am = amQ;
+//					}
 				}
 			}
 			else{
@@ -108,7 +111,7 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 					LogHandler.writeStackTrace(log, e, Level.SEVERE);
 				}
 			}
-			QueryTestcase.deccQueries(actualAmount);
+//			QueryTestcase.deccQueries(actualAmount);
 			String[] next = getNextLD();
 			if(next==null){
 				log.info("No Next LiveData File");
@@ -120,8 +123,9 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 			log.info("Query File: "+qFile);
 			int i=header.indexOf(qFile);
 			Long time = getQueryTime(query);
-			if(time==-1L){
-				time=0L;
+			if(time<0){
+				time = -1*time;
+				qFailCount.set(i-1, 1+qCount.get(i-1));
 			}
 			else{
 				qCount.set(i-1, 1+qCount.get(i-1));

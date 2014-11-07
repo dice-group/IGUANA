@@ -99,7 +99,7 @@ public class ExternalSort {
 					long currentblocksize = 0;// in bytes
 					while((currentblocksize < blocksize)
 					&&(   (line = fbr.readLine()) != null) ){ // as long as you have 2MB
-                        line = eliminateUnnecessaryData(line);
+//                        line = eliminateUnnecessaryData(line);
 						tmplist.add(line);
 						currentblocksize += line.length() * 2; // java uses 16 bits per character?
 					}

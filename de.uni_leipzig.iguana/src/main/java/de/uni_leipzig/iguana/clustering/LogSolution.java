@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
+import uk.ac.shef.wit.simmetrics.similaritymetrics.EuclideanDistance;
+
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryException;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -44,6 +46,8 @@ import de.uni_leipzig.iguana.utils.comparator.OccurrencesComparator;
  * @author Felix Conrads
  */
 public class LogSolution {
+	
+	
 	
 	/** The logger. */
 	private static Logger log;
@@ -128,7 +132,7 @@ public class LogSolution {
 	 * @param query the query 
 	 * @return the query with the replacement
 	 */
-	private static String queryWith(String query){
+	public static String queryWith(String query){
 		String regex =  "'''(.*[^'])'''(|^^\\S+|@\\S+)";
 		String q = query,ret = query;
 		q = q.replaceAll("<\\S+>", "<>");
@@ -214,6 +218,7 @@ public class LogSolution {
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8), true);
 		String[] extensions = {"log"};
+		Map<String, Long> map = new HashMap<String, Long>();
 //		cacheFile =output.getAbsolutePath()+"\t"+output.length();
 //		cacheFile = String.valueOf(cacheFile.hashCode())+".log";
 //		if(isListInCache(new LinkedList<File>(FileHandler.getFilesInDir(inputPath, extensions)), new File(dir+cacheFile))){
@@ -226,9 +231,25 @@ public class LogSolution {
 		cF.createNewFile();
 		for(File f : FileHandler.getFilesInDir(inputPath, extensions)){
 			log.log(Level.INFO, "Clustering file "+f.getAbsolutePath());
-			logToQueries(pw, f, onlyComplexQueries);
+			logToQueries(pw, f, onlyComplexQueries, map);
+		}
+		File stats = new File("queryStatistics.csv");
+		stats.createNewFile();
+		PrintWriter pwStats = new PrintWriter(stats);
+		String feat ="";
+		String[] features = LogSolution.getFeatures();
+		for(int i=0;i<features.length-1;i++){
+			feat+=features[i]+",";
+		}
+		feat+=features[features.length-1];
+		pwStats.println(feat+"\tTriple Count\t"+"\tCount");
+		for(String key : map.keySet()){
+			
+			
+			pwStats.println(key+"\t"+map.get(key));
 		}
 		pw.close();
+		pwStats.close();
 	}
 	
 	/**
@@ -238,8 +259,8 @@ public class LogSolution {
 	 * @param output the name of the output file in which the queries should be saved
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static void logToQueries(String input, String output, Boolean onlyComplexQueries) throws IOException{
-		logToQueries(new File(input), new File(output), onlyComplexQueries);
+	public static void logToQueries(String input, String output, Boolean onlyComplexQueries, Map<String, Long> map) throws IOException{
+		logToQueries(new File(input), new File(output), onlyComplexQueries, map);
 	}
 	
 	/**
@@ -249,10 +270,10 @@ public class LogSolution {
 	 * @param output the output file in which the queries should be saved
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static void logToQueries(File input, File output, Boolean onlyComplexQueries) throws IOException{
+	public static void logToQueries(File input, File output, Boolean onlyComplexQueries, Map<String, Long> map) throws IOException{
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8), true);
-		logToQueries(pw, input, onlyComplexQueries);
+		logToQueries(pw, input, onlyComplexQueries, map);
 		pw.close();
 	}
 	
@@ -262,8 +283,8 @@ public class LogSolution {
 	 * @param pw the Printwriter to use to write the queries
 	 * @param input the name of the logfile
 	 */
-	public static void logToQueries(PrintWriter pw, String input, String output, Boolean onlyComplexQueries){
-		logToQueries(pw, new File(input), onlyComplexQueries);
+	public static void logToQueries(PrintWriter pw, String input, String output, Boolean onlyComplexQueries, Map<String, Long> map){
+		logToQueries(pw, new File(input), onlyComplexQueries, map);
 	}
 	
 	/**
@@ -272,7 +293,7 @@ public class LogSolution {
 	 * @param pw the Printwriter to use to write the queries
 	 * @param input the logfile
 	 */
-	public static void logToQueries(PrintWriter pw, File input, Boolean onlyComplexQueries){
+	public static void logToQueries(PrintWriter pw, File input, Boolean onlyComplexQueries, Map<String, Long> map){
 		
 //		if(isInCache(input, new File(dir+cacheFile))){
 //			
@@ -299,32 +320,51 @@ public class LogSolution {
 				line = line.replaceFirst(".*query=", "");
 				if((index=line.indexOf("&"))>=0)
 					line = line.substring(0, index);
-				line = URLDecoder.decode(line, "UTF-8");
+				try{
+					line = URLDecoder.decode(line, "UTF-8");
+				}
+				catch(Exception e){
+					log.warning("Couldnt handle line: \n"+line);
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
+				}
 				line = line.replaceAll("^\\s+", "");
 				line = queryVarRename(line);
 				try{
 					if(!QuerySorter.isSPARQL(line)&&!QuerySorter.isSPARQLUpdate(line)){
 						throw new QueryException();
 					}
+					Byte[] features = LogSolution.getFeatureVector(line, LogSolution.getFeatures());
+					int count = LogSolution.countTriplesInQuery(line);
+					String feat2 ="";
+					for(int i=0;i<features.length-1;i++){
+						feat2+=features[i]+",";
+					}
+					feat2+=features[features.length-1];
+					Long n = map.get(feat2+"\t"+count);
+					if(n==null)
+						n=0L;
+					map.put(features+"\t"+count, n+1);
+					
 					if(graph!=null &&QuerySorter.isSPARQL(line)){			
 						SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
 						Query q =sp.parse(QueryFactory.create(),line);
 						q.addGraphURI(graph);
-						if(onlyComplexQueries){
-							if(countTriplesInQuery(q.toString())<=1){
-								continue;
-							}
-							Boolean cont=false;
-							for(String feat : getFeatures()){
-								if(q.toString().toLowerCase().contains(feat)){
-									cont=true;
-									break;
-								}
-							}
-							if(!cont)
-								continue;
-						}
+						
 						line = q.toString().replace("\n", " ");
+					}
+					if(onlyComplexQueries){
+						if(countTriplesInQuery(line)<=1){
+							continue;
+						}
+						Boolean cont=false;
+						for(String feat : getFeatures()){
+							if(line.contains(feat)){
+								cont=true;
+								break;
+							}
+						}
+						if(!cont)
+							continue;
 					}
 					pw.println(line.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " "));
 				}
@@ -948,8 +988,11 @@ public class LogSolution {
 	 */
 	public static Byte[] getFeatureVector(String query, String[] features){
 		Byte[] vec = new Byte[features.length];
+		query = URLDecoder.decode(queryWith(query)
+				.replaceAll("'[^']*'", "\'string\'")
+				.replaceAll("\"[^\"]*\"", "\\\"string\\\"").toLowerCase());
 		for(int i=0;i<features.length;i++){
-			if(query.toLowerCase().contains(features[i])){
+			if(query.matches(".*[^\\w*]"+features[i]+"[^\\w*].*")){
 				vec[i]=1;
 			}
 			else{
@@ -968,12 +1011,19 @@ public class LogSolution {
 	 */
 	public static double getFeatureVectorDistance(String query1, String query2){
 		Byte[] q1= getFeatureVector(query1, getFeatures());
-		Byte[] q2= getFeatureVector(query2, getFeatures());
-		double ret =0;
-		for(int i=0;i<q1.length;i++){
-			ret+=Math.pow(q1[i]-q2[i], 2);
+		Byte[] q2= getFeatureVector(query2, getFeatures()); 
+		EuclideanDistance ed = new EuclideanDistance();
+		String s1="", s2="";
+		for(int i=0;i<q1.length-1;i++){
+			s1+=q1[i]+" ";
+			s2+=q2[i]+" ";
 		}
-		return 1/(1+ret);
+		s1+=q1[q1.length-1];
+		s2+=q2[q2.length-1];
+//		System.out.println(s1);
+//		System.out.println(s2);
+		return ed.getSimilarity(s1, s2);
+
 	}
 	
 	

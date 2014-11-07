@@ -4,7 +4,6 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.CodeSource;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Collection;
@@ -97,12 +96,8 @@ public class Benchmark {
 			
 		if (args.length < 1) {
 			
-			//If the FileName of the Jar is changed it still shows the correct Name
-			CodeSource codeSource = Benchmark.class.getProtectionDomain().getCodeSource();
-			File jarFile = new File(codeSource.getLocation().toURI().getPath());
-			String jarName = jarFile.getName();
 			
-			System.out.println("Usage: "+jarName+" configfile.xml");
+			System.out.println("Usage: java (-Djava.library.path=\"path/To/lpsolve/Libs\")? -cp \"lib/*\" "+Benchmark.class.getName()+" configfile.xml");
 			end=true;
 			return;
 		} else {
@@ -599,15 +594,23 @@ public class Benchmark {
 			}
 		}
 		Comparator<String> cmp = new TripleComparator();
-		File f = new File(DataProducer.SORTED_FILE);
-		try {
-			f.createNewFile();
-			ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(new File(fileName), cmp, false), f, cmp);
-		} catch (IOException e) {
-			LogHandler.writeStackTrace(log, e, Level.SEVERE);
-			return null;
+		File f = null;
+		if(!(new File(hundredFile).getName().contains("sorted"))){
+			log.info("Sorting data");
+			f = new File(DataProducer.SORTED_FILE);
+			try {
+				f.createNewFile();
+				ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(new File(fileName), cmp, false), f, cmp);
+			} catch (IOException e) {
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+				return null;
+			}
 		}
-		
+		else
+		{
+			log.info("File is sorted");
+			f = new File(hundredFile);
+		}
 		for (int i = 0; i < percents.size(); i++) {
 			if(percents.get(i)==1.0){
 				ret[i] = fileName;
@@ -616,7 +619,7 @@ public class Benchmark {
 			Double per = percents.get(i)*100.0;
 			String outputFile ="datasets"+File.separator+"ds_"+per+".nt";
 			if(per<100){
-				fileName = DataProducer.SORTED_FILE;
+				fileName = f.getAbsolutePath();
 				DataGenerator.generateData(con, config.get("graph-uri"), fileName, outputFile, config.get("random-function"), percents.get(i), Double.valueOf(config.get("coherence-roh")), Double.valueOf(config.get("coherence-ch")));
 			}
 			else{

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -23,8 +25,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.bio_gene.wookie.utils.LogHandler;
+
+import uk.ac.shef.wit.simmetrics.similaritymetrics.EuclideanDistance;
+import uk.ac.shef.wit.simmetrics.similaritymetrics.Levenshtein;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -38,6 +46,7 @@ import de.uni_leipzig.bf.cluster.Main.HardenStrategy;
 import de.uni_leipzig.iguana.query.PatternSolution;
 import de.uni_leipzig.iguana.utils.StringHandler;
 import de.uni_leipzig.iguana.utils.comparator.OccurrencesComparator;
+import de.uni_leipzig.iguana.utils.comparator.StringComparator;
 import de.uni_leipzig.simba.controller.PPJoinController;
 
 
@@ -65,6 +74,13 @@ public class LogCluster {
 	public static final String MOSQUITO_STRING = "http://www.mosquito.com/#";
 	public static final String ID_MAPPING = "IDMAPPING.txt";
 	public static final String PREFIX_FILE = "prefixes.properties";
+	
+	public static void main(String[] argc) throws UnsupportedEncodingException{
+		EuclideanDistance ed = new EuclideanDistance();
+		System.out.println(ed.getSimilarity("1 1 1 1 0 0", "1 1 1 0 0 0"));
+		System.out.println(1-1/6.0);
+	}
+	
 	
 	/**
 	 * the sorted structure algoritm.
@@ -440,7 +456,7 @@ public class LogCluster {
 				String q = line.substring(line.indexOf("\t")+1);
 				for(int i=0; i< input.length; i++){
 					if(input[i].equals(hash)){
-						ret[i] = URLDecoder.decode(URLDecoder.decode(q, "UTF-8"), "UTF-8");
+						ret[i] = URLDecoder.decode(q, "UTF-8");
 						input[i] = "nothing";
 						break;
 					}
@@ -500,6 +516,9 @@ public class LogCluster {
 		BufferedReader br = null;
 		output.createNewFile();
 		PrintWriter pw = new PrintWriter(output);
+		File output2 = new File(output.getAbsolutePath()+"2");
+		output2.createNewFile();
+		PrintWriter pw2 = new PrintWriter(output2);
 		String line;
 		String[] momQueries = new String[25];
 		Comparator<String> cmp = new OccurrencesComparator();
@@ -507,6 +526,7 @@ public class LogCluster {
 		try{
 			fis = new FileInputStream(input);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			line = br.readLine();
 			while((line = br.readLine())!= null){
 				if(line.isEmpty()){continue;}
 				String[] cluster = line.split("\t")[1].replaceAll("(\\[|\\])", "").split(",\\s*");
@@ -538,6 +558,22 @@ public class LogCluster {
 				cluster = actCluster;
 				cl = "[";
 				for(int i=0; i<cluster.length-1;i++){
+					String[] feat = LogSolution.getFeatures();
+					Byte[] bs = LogSolution.getFeatureVector(cluster[i], feat);
+					String features = "";
+					Boolean first=true;
+					for(int j =0; j<feat.length;j++){
+						if(bs[j]==1){
+							if(!first){
+								features+=", ";
+							}
+							else{
+								first=false;
+							}
+							features+=feat[j];
+						}
+					}
+					pw2.println(features+", "+LogSolution.countTriplesInQuery(cluster[i])+"-triples"+"\t"+PatternSolution.queryToPattern(cluster[i]));
 					cl+=cluster[i]+", ";
 				}
 				cl+=cluster[cluster.length-1]+"]";
@@ -576,8 +612,9 @@ public class LogCluster {
 				String q = bestQueries.get(k);
 				momQueries[k]=q.substring(0, q.lastIndexOf("\t"));
 				momQueries[k] = URLDecoder.decode(momQueries[k], "UTF-8");
+				System.out.println(LogSolution.countTriplesInQuery(momQueries[k]));
 				momQueries[k] = addPrefixes(momQueries[k]);
-				pw.println(momQueries[k]);
+				pw.println(PatternSolution.queryToPattern(momQueries[k]));
 			}
 			String q = bestQueries.get(k);
 			momQueries[k]=q.substring(0, q.lastIndexOf("\t"));
@@ -585,8 +622,11 @@ public class LogCluster {
 				momQueries[k] = URLDecoder.decode(momQueries[k], "UTF-8");
 			}catch(Exception e){}
 			momQueries[k] = addPrefixes(momQueries[k]);
-			pw.print(momQueries[k]);
+			pw.print(PatternSolution.queryToPattern(momQueries[k]));
 			pw.close();
+			pw2.close();
+			Comparator<String> cmp2 = new StringComparator();
+			ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(output2, cmp2, false), new File(output2.getAbsolutePath()+"sorted"), cmp2);
 		}
 		catch(IOException e){
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
@@ -648,6 +688,7 @@ public class LogCluster {
 		FileInputStream fis = null;
 		BufferedReader br = null;
 		String line="";
+		long resCount=0;
 		BufferedOutputStream bos = null;
 //		PrintWriter pw = null;
 //		String[] features = LogSolution.getFeatures();
@@ -661,8 +702,16 @@ public class LogCluster {
 			while((line = br.readLine())!= null){
 				String q = line.trim().split("\t")[0].trim();
 				String qOld = q;
-				File f = new File(URLEncoder.encode(q, "UTF-8"));
+//				URI u = URI.create(q);
+				File f = new File(q);
 				q = f.toURI().toString().replace("file:/", "file:///");
+				Pattern pat = Pattern.compile("https?:/[^/]");
+				Matcher match = pat.matcher(q);
+				while(match.find()){
+					String group = match.group();
+					group = group.replace(":/", "://");	
+				}
+				
 				Resource s = ResourceFactory.createResource(q);
 				Property p = ResourceFactory.createProperty(TYPE_STRING.replaceAll("(<|>)", ""));
 				RDFNode o =  ResourceFactory.createResource(MOSQUITO_STRING+"query");
@@ -670,7 +719,15 @@ public class LogCluster {
 //				String write = "<"+URLEncoder.encode(q, "UTF-8")+"> "+TYPE_STRING+" <"+MOSQUITO_STRING+"query> .";
 //				pw.println(write);
 				p = ResourceFactory.createProperty(MOSQUITO_STRING+"label");
-				o = ResourceFactory.createResource(URLEncoder.encode(qOld, "UTF-8"));
+				qOld = qOld.replaceAll("(P|p)(R|r)(E|e)(F|f)(I|i)(X|x)", "prefix").replaceAll("prefix\\s+\\S*\\s*:\\s*\\S+", "");
+				qOld = LogSolution.queryWith(qOld)
+						.replaceAll("'[^']*'", "\'string\'")
+						.replaceAll("\"[^\"]*\"", "\\\"string\\\"")
+						.replaceAll("(true|false)", "Bool")
+						.replaceAll("[^\\?\\w+][+-]?[0-9]+(\\.[0-9])?", "Number")
+//						.replaceAll("\\s*\\.\\s*", " . ")
+						.replaceAll("\\s*;\\s*", " ; ").trim();
+				o = m.createLiteral(URLEncoder.encode(qOld, "UTF-8"));
 				m.add(s, p, o);
 //				write = "<"+URLEncoder.encode(q, "UTF-8")+"> <"+MOSQUITO_STRING+"label> <"+URLEncoder.encode(q, "UTF-8")+"> .";
 //				pw.println(write);
@@ -682,6 +739,10 @@ public class LogCluster {
 ////					write = "<"+URLEncoder.encode(q, "UTF-8")+"> <"+MOSQUITO_STRING+features[i]+"> "+feat[i]+" .";
 ////					pw.println(write);
 //				}
+				resCount++;
+				if((resCount%100)==0){
+					log.info("Written "+resCount+" Resources");
+				}
 			}
 			m.write(bos, "TURTLE");
 		}
@@ -699,7 +760,7 @@ public class LogCluster {
 			}
 		}
 	}
-	
+
 	private static void preProcessLimes(String configFile, String outputConfigFile, String source, String outputFile){
 		preProcessLimes(new File(configFile), new File(outputConfigFile), source, outputFile);
 	}
@@ -753,6 +814,8 @@ public class LogCluster {
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			String uri = new File(".").toURI().toString().replace("file:/", "file:///");
 			uri = uri.substring(0, uri.lastIndexOf("."));
+			Levenshtein lv = new Levenshtein();
+
 			while((line = br.readLine())!= null){
 				String[] split = line.trim().replaceAll("\\s+", " ").split(" ");
 				if(split[2].endsWith(".")){
@@ -767,13 +830,31 @@ public class LogCluster {
 				double vecDist = LogSolution.getFeatureVectorDistance(split[0], split[2]);
 				if(vecDist<0.3)
 					continue;
-				Float lev = StringHandler.levenshteinDistance(split[0], split[2]);
-				Double sim = Math.max(1/
+				String q1="", q2="";
+				q1 = q1.replaceAll("(P|p)(R|r)(E|e)(F|f)(I|i)(X|x)", "prefix").replaceAll("prefix\\s+\\S*:\\S+", "");
+				q1 = LogSolution.queryWith(q1)
+						.replaceAll("'[^']*'", "\'string\'")
+						.replaceAll("\"[^\"]*\"", "\\\"string\\\"")
+						.replaceAll("(true|false)", "Bool")
+						.replaceAll("[+-]?[0-9]+(\\.[0-9])?", "Number")
+						.replaceAll("\\s*\\.\\s*", " . ")
+						.replaceAll("\\s*;\\s*", " ; ");
+				q2 = q2.replaceAll("(P|p)(R|r)(E|e)(F|f)(I|i)(X|x)", "prefix").replaceAll("prefix\\s+\\S*:\\S+", "");
+				q2 = LogSolution.queryWith(q2)
+						.replaceAll("'[^']*'", "\'string\'")
+						.replaceAll("\"[^\"]*\"", "\\\"string\\\"")
+						.replaceAll("(true|false)", "Bool")
+						.replaceAll("[+-]?[0-9]+(\\.[0-9])?", "Number")
+						.replaceAll("\\s*\\.\\s*", " . ")
+						.replaceAll("\\s*;\\s*", " ; ");
+				Float lev =lv.getSimilarity(q1, q2);
+//				log.info(split[0].hashCode()+" - "+split[2].hashCode()+" : "+vecDist+" - "+lev);
+				Double sim = Math.max(
 						lev, 
 						vecDist);
-				pwMap.println(Math.abs(split[0].hashCode())+"\t"+split[0]);
-				pwMap.println(Math.abs(split[2].hashCode())+"\t"+split[2]);
-				pw.println(Math.abs(split[0].hashCode())+"\t"+Math.abs(split[2].hashCode())+"\t"+sim);
+				pwMap.println(split[0].hashCode()+"\t"+split[0]);
+				pwMap.println(split[2].hashCode()+"\t"+split[2]);
+				pw.println(split[0].hashCode()+"\t"+split[2].hashCode()+"\t"+sim);
 			}
 		}
 		catch(IOException e){

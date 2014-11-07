@@ -320,12 +320,14 @@ public class DataProducer {
 		FileInputStream fis = null;
 		BufferedReader br = null;
 		try {
-			String pOld="";
+			String pOld="", sOld="";
 			out.createNewFile();
 			pw = new PrintWriter(out);
 			fis = new FileInputStream(f);
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			String line="";
+			Boolean delete=false;
+			//TODO if untyped solution remove as much as possible
 			while((line = br.readLine())!=null){
 				if(line.isEmpty()){continue;}
 				String[] split = line.split(" ");
@@ -333,9 +335,23 @@ public class DataProducer {
 				String combiHash=cm.getInstanceTypesHash(s)+"_";
 				String p = split[1].trim();
 				combiHash+=p.hashCode();
+				//p changes and Type_String is not the first one, set boolean to true, 
+				//write first line, delete everything else until desired size is reached 
 				if(p.equals(CoherenceMetrics.TYPE_STRING)){
 					pw.println(line);
 					pOld = p;
+					sOld = s;
+					delete=false;
+					continue;
+				}
+				if(!sOld.equals(s)){
+					sOld = s;
+					//untyped resource!
+					pw.println(s);
+					delete=true;
+				}
+				if(delete){
+					//still the untyped resource
 					continue;
 				}
 				if(solution.containsKey(combiHash)){

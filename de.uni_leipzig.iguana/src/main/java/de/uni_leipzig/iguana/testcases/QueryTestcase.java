@@ -147,6 +147,8 @@ public class QueryTestcase implements Testcase, Runnable {
 	private int randomNumber=2;
 
 	private boolean endSignal = false;
+
+	protected LinkedList<Long> qFailCount;
 	
 	/**
 	 * Gets the id of the QueryTestcase.
@@ -304,12 +306,20 @@ public class QueryTestcase implements Testcase, Runnable {
 		if(!ldpath.equals("null")){
 			Collections.sort(inserts, new LivedataComparator(ldStrategy));
 		}
+		if(inserts.size()>0)
+			iQpS = new Random(randomNumber).nextInt(inserts.size());
+		if(selects.size()>0)
+			sQpS = new Random(randomNumber).nextInt(selects.size());
+		if(patterns.intValue()>0)
+			patternQpS = new Random(randomNumber).nextInt(patterns.intValue());;
+		
 		path = qh.getAbsolutPath();
 		log.info("Queries Path: "+path);
 //		pQMpH = new Random(seed1);
 //		qQMpH = new Random(seed2);
 		qpsTime = new LinkedList<Long>();
 		qCount = new LinkedList<Long>();
+		qFailCount = new LinkedList<Long>();
 		Collection<ResultSet> r = new LinkedList<ResultSet>();
 
 		//qps
@@ -324,12 +334,22 @@ public class QueryTestcase implements Testcase, Runnable {
 		//This isn't the correct results yet, so we need to 
 		ResultSet sumRes = new ResultSet();
 		ResultSet seconds = new ResultSet();
+		ResultSet failCount = new ResultSet();
+		ResultSet succededCount = new ResultSet();
 		sumRes.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryMixesPerTimeLimit"+percent);		
-		seconds.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueriesPerSeconds"+percent);		
+		seconds.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueriesPerSeconds"+percent);
+		failCount.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"failedQueriesCount"+percent);
+		succededCount.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"succededQueriesCount"+percent);
 		Long sum = 0L;
 		List<Object> row = new LinkedList<Object>();
+		List<Object> fail = new LinkedList<Object>();
+		List<Object> suc = new LinkedList<Object>();
 		row.add(currentDB);
+		fail.add(currentDB);
+		suc.add(currentDB);
 		for(int i=0; i<qCount.size();i++){
+			fail.add(qFailCount.get(i));
+			suc.add(qCount.get(i));
 			sum+=qCount.get(i);
 			if(qpsTime.get(i)!=0)
 				row.add(Math.round(1000L*qCount.get(i)/(1.0*qpsTime.get(i))));
@@ -344,6 +364,22 @@ public class QueryTestcase implements Testcase, Runnable {
 		seconds.addRow(row);
 		
 		r.add(seconds);
+		
+		failCount.setHeader(qps.getHeader());
+		failCount.setTitle("Querie fail count");
+		failCount.setxAxis("Query");
+		failCount.setyAxis("#Queries");
+		failCount.addRow(fail);
+		
+		r.add(failCount);
+		
+		succededCount.setHeader(qps.getHeader());
+		succededCount.setTitle("Querie succeded count");
+		succededCount.setxAxis("Query");
+		succededCount.setyAxis("#Queries");
+		succededCount.addRow(suc);
+		
+		r.add(succededCount);
 		
 		row = new LinkedList<Object>();
 		row.add(currentDB);
@@ -384,31 +420,38 @@ public class QueryTestcase implements Testcase, Runnable {
 		log.info("...Done saving results");
 	}
 	
+	protected Long getQueryTime(String query){
+		return getQueryTime(query, null);
+	}
+	
 	/**
 	 * test the time a query needs to be executed.
 	 *
 	 * @param query the query
 	 * @return the query time
 	 */
-	protected Long getQueryTime(String query){
+	protected Long getQueryTime(String query, Integer queryTimeout){
 		Boolean isSPARQL = QuerySorter.isSPARQL(query);
 		Long a=0L, b=0L;
 		java.sql.ResultSet res=null;
 		if(isSPARQL){
 			try {
 				a = new Date().getTime();
-				res = con.select(query);
+				if(queryTimeout==null)
+					res = con.select(query);
+				else
+					res = con.select(query, queryTimeout);
 				b = new Date().getTime();
 				if(res==null)
 					throw new SQLException("Result was null");
-				queries++;
+//				queries++;
 				log.info("Executed Queries: "+queries);
 			} catch (SQLException e) {
 				
 				log.warning("Query "+query+" problems: ");
 				LogHandler.writeStackTrace(log, e, Level.WARNING);
 				log.info("This doesn't effect the results");
-				return -1L;
+				return -1*(b-a);
 			}
 			finally{
 				if(res!=null)
@@ -426,7 +469,7 @@ public class QueryTestcase implements Testcase, Runnable {
 			b = new Date().getTime();
 			log.info("Finished testing");
 			if(!suc)
-				return -1L;
+				return -1*(b-a);
 		}
 		
 		return b-a;
@@ -449,10 +492,12 @@ public class QueryTestcase implements Testcase, Runnable {
 			if(qCount.size()<=i){
 				qCount.add(0L);
 				qpsTime.add(0L);
+				qFailCount.add(0L);
 			}
 			else{
 				qCount.set(i, 0L);
 				qpsTime.set(i, 0L);
+				qFailCount.set(i, 0L);
 			}
 			if(selects.size()<=i){
 				header.add(inserts.get(i-selects.size()));
@@ -474,8 +519,9 @@ public class QueryTestcase implements Testcase, Runnable {
 			
 			int i=header.indexOf(qFile);
 			Long time = getQueryTime(query);
-			if(time==-1L){
-				time=0L;
+			if(time<0){
+				time=-1*time;
+				qFailCount.set(i-1, 1+qFailCount.get(i-1));
 			}
 			else{
 				qCount.set(i-1, 1+qCount.get(i-1));
@@ -559,7 +605,7 @@ public class QueryTestcase implements Testcase, Runnable {
 						patternQpS =0;
 					}
 					currentFile = path+File.separator+FileHandler.getNameInDirAtPos(path, patternQpS)+".txt";
-					log.info(currentFile);
+					log.info("User "+randomNumber+currentFile);
 					Long fileLength = Long.valueOf(FileHandler.getLineCount(currentFile));
 					if(fileLength.intValue()<0){
 						log.severe(currentFile+" long: "+fileLength+" int: "+fileLength.intValue());

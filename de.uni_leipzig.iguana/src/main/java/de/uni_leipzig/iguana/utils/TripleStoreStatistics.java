@@ -6,8 +6,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bio_gene.wookie.connection.Connection;
+import org.bio_gene.wookie.connection.ConnectionFactory;
 import org.bio_gene.wookie.utils.LogHandler;
 
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.impl.LiteralImpl;
 
 // TODO should be rewritten with offset limit strategy
@@ -19,6 +22,10 @@ import com.hp.hpl.jena.rdf.model.impl.LiteralImpl;
  *
  */
 public class TripleStoreStatistics {
+	
+	public static void main(String[] argc){
+		System.out.println(TripleStoreStatistics.tripleCount(ConnectionFactory.createImplConnection("bio-gene.org:8890/sparql", "", 180)));
+	}
 
 		/**
 		 * Querying the Connection with a Single Result query
@@ -32,10 +39,12 @@ public class TripleStoreStatistics {
 			try {
 				ResultSet result = con.select(query);
 				result.next();
-				LiteralImpl ret = (LiteralImpl) result.getObject("no");
-				Long count = ret.getLong();
+				String ret = result.getString("no");
+				if(ret.matches("\"?(\\+|-)?[0-9]+\\.?[0-9]*\"?\\^\\^.*")){
+					ret = ret.replaceAll("\\^\\^.*", "").replace("\"", "");
+				}
 				result.getStatement().close();
-
+				Long count = Long.parseLong(ret);
 				return count;
 			} catch ( SQLException | NullPointerException e) {
 				LogHandler.writeStackTrace(log, e, Level.WARNING);
@@ -43,6 +52,10 @@ public class TripleStoreStatistics {
 			return -1L;
 		}
 	
+		public static Long tripleCount(Connection con){
+			return tripleCount(con, null);
+		}
+		
 		/**
 		 * Counts the no of triples in the dataset
 		 *

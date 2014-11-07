@@ -370,7 +370,14 @@ public class FileHandler {
 		if(!p.isDirectory()){
 			return -1L;
 		}
-		return (p.listFiles().length)*1L;
+		int ret=0;
+		for(File f : p.listFiles()){
+			String test = FileHandler.getLineAt(f, 0);
+			if(test!=null&&!test.isEmpty()){
+				ret++;
+			}
+		}
+		return ret*1L;
 	}	
 
 	/**

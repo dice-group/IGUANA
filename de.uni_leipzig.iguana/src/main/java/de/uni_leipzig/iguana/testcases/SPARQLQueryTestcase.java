@@ -22,10 +22,12 @@ public class SPARQLQueryTestcase extends QueryTestcase {
 			if(qCount.size()<=i){
 				qCount.add(0L);
 				qpsTime.add(0L);
+				qFailCount.add(0L);
 			}
 			else{
 				qCount.set(i, 0L);
 				qpsTime.set(i, 0L);
+				qFailCount.set(i, 0L);
 			}
 			header.add(selects.get(i));
 		}
@@ -43,8 +45,9 @@ public class SPARQLQueryTestcase extends QueryTestcase {
 			
 			int i=header.indexOf(qFile);
 			Long time = getQueryTime(query);
-			if(time==-1L){
-				time=0L;
+			if(time<0){
+				time = -1*time;
+				qFailCount.set(i-1, 1+qCount.get(i-1));
 			}
 			else{
 				qCount.set(i-1, 1+qCount.get(i-1));

@@ -367,7 +367,7 @@ public class StressTestcase implements Testcase {
 				ResultSet tmp = new ResultSet();
 				
 					
-				tmp.setTitle(res2.getTitle());
+				tmp.setTitle(res2.getTitle()+" (Mean of Users)");
 				tmp.setxAxis(res2.getxAxis());
 				tmp.setxAxis(res2.getyAxis());
 				if(first){

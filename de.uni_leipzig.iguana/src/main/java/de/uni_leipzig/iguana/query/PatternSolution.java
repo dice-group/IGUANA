@@ -186,7 +186,7 @@ public class PatternSolution {
 		if(count==0){
 			return "0\t"+ret;
 		}
-		if(count<2 && literals==0){
+		if(count<1 && literals==0){
 			if(m.find(0)){
 				String gr = m.group();
 				ret = ret.replace(gr.substring(gr.lastIndexOf("<")), "%%v%%");
@@ -200,5 +200,104 @@ public class PatternSolution {
 			i++;
 		}while(m.find());
 		return i+"\t"+ret;
+	}
+	
+	
+	public static String replaceNextIRI(String query){
+		int i = findHighestVar(query);
+		i++;
+		String pre = query.substring(0, query.indexOf("{"));
+		String suff = query.substring(query.lastIndexOf("}")+1);
+		String q = query.substring(query.indexOf("{"), query.lastIndexOf("}")+1);
+		Pattern p = Pattern.compile("<\\S*>");
+		Matcher m = p.matcher(q);
+		if(m.find()){
+			String group = m.group();
+			q = q.replace(group, "%%v"+i+"%%");
+			i++;
+		}
+		return pre+q+suff;
+		
+	}
+	
+	public static Boolean hasIRIs(String query){
+		String q = query.substring(query.indexOf("{"), query.lastIndexOf("}")+1);
+		Pattern p = Pattern.compile("<\\S*>");
+		Matcher m = p.matcher(q);
+		if(m.find()){
+			return true;
+		}
+		return false;
+	}
+	
+	private static int findHighestVar(String query){
+		Pattern p = Pattern.compile("%%v[0-9]*%%");
+		Matcher m = p.matcher(query);
+		int i=0, now =0;
+		while(m.find()){
+			String var = m.group().replace("%", "").replace("v", "");
+			if(var.isEmpty()){
+				continue;
+			}
+			else if(i<(now = Integer.parseInt(var))){
+				i = now;
+			}
+		}
+		return i;
+	}
+	
+	private static int prefixCount(String query){
+		int ret=0;
+		Pattern p = Pattern.compile("\\S*:\\S+");
+		Matcher m = p.matcher(query);
+		if(m.find()){
+//			String replace = m.group();
+			ret++;
+		}
+		return ret;
+	}
+	
+	public static boolean hasPrefixes(String query){
+		String q = query.substring(query.indexOf("{"), query.lastIndexOf("}")+1);
+		return prefixCount(q)!=0;
+	}
+	
+	
+	private static int prefixCount(String query, String prefix){
+		int ret=0;
+		Pattern p = Pattern.compile(prefix);
+		Matcher m = p.matcher(query);
+		while(m.find()){
+//			String replace = m.group();
+			ret++;
+		}
+		return ret;
+	}
+	
+	public static String nextPrefixToVar(String query){
+		int i = findHighestVar(query);
+		i++;
+		String pre = query.substring(0, query.indexOf("{"));
+		String suff = query.substring(query.lastIndexOf("}")+1);
+		String q = query.substring(query.indexOf("{"), query.lastIndexOf("}")+1);
+		//q  = {...}, no prefixes will be deleted afterwards
+		q = q.replace("{:", "{ :");
+		int count = prefixCount(q);
+		Pattern p = Pattern.compile(("\\S*:\\S+"));
+		Matcher m = p.matcher(q);
+		if(m.find()){
+			String replace = m.group();
+			
+			//only first one or every one?
+			if(count==prefixCount(q, replace)){
+				//yes
+				q = q.replaceFirst(replace, "%%v"+i+"%%");
+			}
+			else{
+				//no
+				q = q.replace(replace, "%%v"+i+"%%");
+			}
+		}
+		return pre+q+suff;
 	}
 }

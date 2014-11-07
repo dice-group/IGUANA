@@ -42,7 +42,7 @@ public class DataGenerator {
     public static void generateData(Connection con, String graphURI, String inputFile, String outputFile, String method, Double percent, Double roh, Double coherence) {
     	
     	
-        long numberOfTriplesToBeGenerated = (int)(TripleStoreStatistics.tripleCount(con, graphURI) * percent);
+      
         RandomInstance.setGraphURI(graphURI);
         RandomInstance.setOutputFormat("N-TRIPLES");
         RandomInstance.setOutputFile(outputFile);
@@ -51,6 +51,7 @@ public class DataGenerator {
         RandomTriple.setOutputFileName(outputFile);
 
         if(method.compareTo("RandomInstance") == 0){
+        	  long numberOfTriplesToBeGenerated = (int)(TripleStoreStatistics.tripleCount(con, graphURI) * percent);
             //List of visited nodes, in order not process the same nodes more than once 
             Collection<String> visitedNodesList = FileHandler.getSubjectsInFile(outputFile);
 //            ArrayList<RDFNode> visitedNodesList = new ArrayList<RDFNode> ();
