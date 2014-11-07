@@ -1,8 +1,8 @@
-#Mosquito
+#IGUANA
 
 ##What is it?
 
-Mosquito is both a program and an API framework for benchmarking SPARQL Endpoints.
+IGUANA is both a program and an API framework for benchmarking SPARQL Endpoints.
 On one side it provides the ability to benchmark different SPARQL endpoints (e.g. triplestores) with 
 given or generated datasets and predefined test cases on the other side it provides a framework and API 
 to implement either a complete different benchmark or just parts of the benchmark (e.g. own test cases).
@@ -37,7 +37,7 @@ Please see the file called [INSTALL](https://github.com/AKSW/mosquito/blob/maste
 
 ##Licensing
 
-Mosquito is licensed under the MIT License
+IGUANA is licensed under the MIT License
 Please see the file called [LICENSE](https://github.com/AKSW/mosquito/blob/master/LICENSE)
 
 The whole list of libraries we use and their licenses is stated in the file called [LIBARIES](https://github.com/AKSW/mosquito/blob/master/LIBRARIES)
