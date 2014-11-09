@@ -610,8 +610,14 @@ public class QueryTestcase implements Testcase, Runnable {
 					if(fileLength.intValue()<0){
 						log.severe(currentFile+" long: "+fileLength+" int: "+fileLength.intValue());
 					}
-					int queryNr = qQpS.nextInt(fileLength.intValue());
-				
+					int queryNr=0;
+					try{
+						queryNr = qQpS.nextInt(fileLength.intValue());
+					}
+					catch(Exception e){
+						patternQpS++;
+						continue;
+					}
 					patternQpS++;
 					ret = new String[2];
 					ret[0] =  FileHandler.getLineAt(currentFile, queryNr);

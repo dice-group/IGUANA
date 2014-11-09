@@ -18,32 +18,32 @@ It should be...
 
 ##The latest version
 
-+ The latest version can always be found under the [master branch](https://github.com/AKSW/mosquito/tree/master).
-+ The simple jar file will be the mosquito-x.y.z.jar file. 
-+ The whole benchmark will be the mosquito-x.y.z-distribution.zip file.
++ The latest version can always be found under the [master branch](https://github.com/AKSW/IGUANA/tree/master).
++ The simple jar file will be the iguana-x.y.z.jar file. 
++ The whole benchmark will be the iguana-x.y.z-distribution.zip file.
 
-The Changelog can be found [here](https://github.com/AKSW/mosquito/blob/master/CHANGELOG)
+The Changelog can be found [here](https://github.com/AKSW/IGUANA/blob/master/CHANGELOG)
 
 ##Documentation
 
 The documentation consist of the javadoc and the manual.
 
-+ Tha JavaDoc can be found [here](http://aksw.github.io/mosquito/javadoc/)
-+ The Manual can be found [here](https://github.com/AKSW/mosquito/blob/master/MANUAL.pdf)
++ Tha JavaDoc can be found [here](http://aksw.github.io/IGUANA/javadoc/)
++ The Manual can be found [here](https://github.com/AKSW/IGUANA/blob/master/MANUAL.pdf)
 
 ##Installation
 
-Please see the file called [INSTALL](https://github.com/AKSW/mosquito/blob/master/INSTALL).
+Please see the file called [INSTALL](https://github.com/AKSW/IGUANA/blob/master/INSTALL).
 
 ##Licensing
 
 IGUANA is licensed under the MIT License
-Please see the file called [LICENSE](https://github.com/AKSW/mosquito/blob/master/LICENSE)
+Please see the file called [LICENSE](https://github.com/AKSW/IGUANA/blob/master/LICENSE)
 
-The whole list of libraries we use and their licenses is stated in the file called [LIBARIES](https://github.com/AKSW/mosquito/blob/master/LIBRARIES)
+The whole list of libraries we use and their licenses is stated in the file called [LIBARIES](https://github.com/AKSW/IGUANA/blob/master/LIBRARIES)
 
 ##Contacts
 
-+ If you want to be informed about new releases, bug fixes, ... about Mosquito subscribe to the github repository
-+ If you found a bug please report it [here](https://github.com/AKSW/mosquito/issues) and please describe the bug as much as possible. 
++ If you want to be informed about new releases, bug fixes, ... about IGUANA subscribe to the github repository
++ If you found a bug please report it [here](https://github.com/AKSW/IGUANA/issues) and please describe the bug as much as possible. 
 + If you want support please contact one of the contributors. We can't ensure you to help but at least you can ask us.

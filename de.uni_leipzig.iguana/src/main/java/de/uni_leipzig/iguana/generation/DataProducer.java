@@ -105,9 +105,12 @@ public class DataProducer {
 	 * @param coherence the coherence to reach
 	 */
 	public static void writeData(String dataFile, String output, String graphURI, Double size, Double coherence){
+		log.info("Intializing Metrics");
 		CoherenceMetrics cm = new CoherenceMetrics(dataFile);
 		long originalSize = FileHandler.getLineCount(dataFile);
+		log.info("Original Triple Size is: "+originalSize);
 		Long removeSize = (long)(originalSize-originalSize*size);
+		log.info("Remove Size is: "+removeSize);
 		writeData(dataFile, output, cm, graphURI, coherence, originalSize, removeSize);
 		
 	}
@@ -129,19 +132,25 @@ public class DataProducer {
 		int attempts=0;
 		long s = originalSize;
 		do{
+			log.info("Attempt: "+(attempts+1));
 			Set<String> typeSystem = cm.getTypeSystem();
+			log.info("Size of typesystem: "+typeSystem.size());
 			Double coh = cm.getCoherence(typeSystem);
+			log.info("Coherence is: "+coh);
 			Double c1 = coh - Math.min(coherence, coh*0.9);
+			log.info("Constraint 1 is: "+c1);
 			if(coherence > coh*0.9&&attempts==0){
 				log.info("desired coherence "+coherence+" is too high \nActual coherence is :"+coh+"\nusing as desired coherence: "+coh*0.9);
 			}
 			Long c3 = (long) ((1-roh)*removeSize);
+			log.info("Constraint 3 is: "+c3);
 			Long c4 = (long) ((1+roh)*removeSize);
-		
+			log.info("Constraint 4 is: "+c4);
 			solution =  getSolution(cm, typeSystem, coh, c1, c3, c4);
 			if(solution==null){
 				//TODO ask about function correctnes!!
 //				Double d = coh/coherence*(1.0*originalSize-removeSize)/originalSize;
+				log.warning("Couldn't find a Solution, trying again");
 				int remove = 1;
 				if(input instanceof String){
 					newFile = writeFileWithRemovedInstances(newFile, remove);
@@ -319,6 +328,7 @@ public class DataProducer {
 		PrintWriter pw = null;
 		FileInputStream fis = null;
 		BufferedReader br = null;
+		log.info("Solution found...writing it down");
 		try {
 			String pOld="", sOld="";
 			out.createNewFile();

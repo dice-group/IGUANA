@@ -44,6 +44,11 @@ public class SPARQLQueryTestcase extends QueryTestcase {
 			String qFile = next[1];
 			
 			int i=header.indexOf(qFile);
+			if(i<0){
+				log.warning("no "+qFile);
+				log.info("Skipping the file");
+				continue;
+			}
 			Long time = getQueryTime(query);
 			if(time<0){
 				time = -1*time;

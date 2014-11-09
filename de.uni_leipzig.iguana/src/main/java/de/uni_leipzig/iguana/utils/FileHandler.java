@@ -380,6 +380,26 @@ public class FileHandler {
 		return ret*1L;
 	}	
 
+	public static void removeRecursive(String path){
+		removeRecursive(new File(path));
+	}
+	
+	public static void  removeRecursive(File path){
+		if(path.isDirectory()){
+			for(String f : path.list()){
+				removeRecursive(path.getAbsolutePath()+File.separator+f);
+			}
+			path.delete();
+		}
+		else if(path.isFile()){
+			path.delete();
+		}
+		else{
+			path.delete();
+		}
+	}
+	
+	
 	/**
 	 * Gets all names of files in dir.
 	 *

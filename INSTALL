@@ -1,7 +1,7 @@
 INSTALLATION
 ------------
 
-1. 	To install the benchmark download the latest version [here](https://github.com/AKSW/mosquito/tree/master).
+1. 	To install the benchmark download the latest version [here](https://github.com/AKSW/IGUANA/tree/master).
 	The file you need is called mosquito-x.y.z-distribution.zip. 
 
 2.	Extract the file in a folder you wish.
@@ -16,7 +16,7 @@ INSTALLATION
 		+ lp_solve_5.5.2.0_exe_"platform" .zip or .tar.gz
 		+ lp_solve_5.5.2.0_dev_"platform" .zip or .tar.gz
 
-4.	Extract the libraries (or if you're lazy all the files) into a new folder called lpsolve_lib in your folder with the mosquito.jar file
+4.	Extract the libraries (or if you're lazy all the files) into a new folder called lpsolve_lib in your folder with the lib folder
 
 5.	configure your config.xml file as you wish (see the MANUAL for more information)
 
@@ -24,11 +24,11 @@ INSTALLATION
 
 		WITHOUT coherence data generation:
 
-			java -cp "mosquito-x.y.z.jar;lib/*" de.uni_leipzig.mosquito.benchmark.Benchmark config.xml
+			java -cp "lib/*" de.uni_leipzig.iguana.benchmark.Benchmark config.xml
 	
 		WITH coherence	data generation (assuming your path of the lp_solve libraries is lpsolve_lib):
 			 	
-			java -Djava.library.path=lpsolve_lib -cp "mosquito-x.y.z.jar;lib/*" de.uni_leipzig.mosquito.benchmark.Benchmark config.xml
+			java -Djava.library.path=lpsolve_lib -cp "lib/*" de.uni_leipzig.iguana.benchmark.Benchmark config.xml
 
 		You can also use the start.bat or start.sh file 
 			

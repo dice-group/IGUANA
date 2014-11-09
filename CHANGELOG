@@ -1,11 +1,11 @@
-====== Mosquito Benchmark Framework (Features/Changelog) ======
+====== IGUANA (Features/Changelog) ======
 
 
 THIS IS A SHORT REPRESENTATION OF THE FEATURES AND CHANGES 
 THROUGH THE VERSIONS OF THE MBF
 
-For more Information how to use the MBF as an API or to use it as a 
-Benchmark please consider the Manual (coming soon) and/or the Javadoc (better described javadoc coming soon).
+For more Information how to use the IGUANA as an API or to use it as a 
+Benchmark please consider the Manual and/or the Javadoc (better described javadoc coming soon).
 
 CHANGELOG:
 ==========
@@ -28,8 +28,41 @@ BugFixes:
 
 Currently known Bugs:
 -----------------------------------------------------------------------------
-None (found one? put them on https://github.com/TortugaAttack/mosquito)
+None (found one? put them on https://github.com/AKSW/IGUANA)
 
+
+
+CHANGELOG:
+==========
+= v0.2.1 =
+==========
+
+Features:
+-----------------------------------------------------------------------------
++ Generating small statistics csv file while clustering the log files
++ Using LIMES from now on to calculate similarities in the log clustering process (much faster!)
++ Stresstest has now UpdateUsers (which are only there to simulate an Update User) 
+  and normal User (which are on there to simulate User with SPARQL Queries)
+  You can configure how many of each taken part of the Stresstest
+ 
+
+-----------------------------------------------------------------------------
+
+BugFixes:
+-----------------------------------------------------------------------------
+- BIG Peformance issues on data generation with coherence fixed 
+- BIG Peformance issues on Log Clustering fixed 
+- several other small bug fixes
+
+-----------------------------------------------------------------------------
+
+Currently known Bugs:
+-----------------------------------------------------------------------------
+- If the logclustering is completely automated there's a possibility that several similar queries will not be clustered together! and therefore 
+  it can occur that you test queries which are very similar!
+- DataGeneration (coherence) and Log clustering needs large amounts of RAM if the files are big
+
+(found one? put them on https://github.com/AKSW/IGUANA)
 
 
 CHANGELOG:
@@ -58,7 +91,7 @@ BugFixes:
 
 Currently known Bugs:
 -----------------------------------------------------------------------------
-None (found one? put them on https://github.com/TortugaAttack/mosquito)
+None (found one? put them on https://github.com/AKSW/IGUANA)
 
 
 
@@ -167,4 +200,4 @@ ADDITIONAL FEATURES:
 
 CURRENTLY KNOWN BUGS:
 -----------------------------------------------------------------------------
-None (found one? put them on https://github.com/TortugaAttack/mosquito)
+None (found one? put them on https://github.com/AKSW/IGUANA)

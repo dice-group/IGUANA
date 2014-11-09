@@ -236,6 +236,8 @@ public class Benchmark {
 		
 			
 			//mkdirs
+			FileHandler.removeRecursive(RESULT_FILE_NAME);
+			FileHandler.removeRecursive(TEMP_RESULT_FILE_NAME);
 			new File(RESULT_FILE_NAME).mkdir();
 			new File(TEMP_RESULT_FILE_NAME).mkdir();
 			//<<<<<<<!!!!!!!!!!!!!>>>>>>>

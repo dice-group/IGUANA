@@ -241,6 +241,57 @@ public class CoherenceMetrics {
 	
 	
 	
+	private Map<String, Set<String>> getInstancesOfType(Set<String> types, String dataFile){
+		File f = new File(dataFile);
+		Map<String, Set<String>> ret = new HashMap<String, Set<String>>();
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		try {
+			fis = new FileInputStream(f);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			while((line = br.readLine())!=null){
+				if(line.isEmpty()){continue;}
+				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
+				String[] split = line.split(" ");
+				String o = split[2];
+				for(int k=3;k<split.length;k++){
+					o+=" "+split[k];
+				}
+				o = o.trim();
+				if(o.endsWith(".")){
+					o = o.substring(0,o.length()-1);
+				}
+				o = o.trim();
+				if(split[1].trim().equals(TYPE_STRING) && types.contains(o)){
+					String add = split[0];
+					add = add.trim();
+					if(ret.containsKey(o))
+						ret.get(o).add(add);
+					else{
+						Set<String> tmp = new HashSet<String>();
+						tmp.add(add);
+						ret.put(o, tmp);
+					}
+				}
+			}
+		
+		} catch (IOException e) {
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			return null;
+		}
+		finally{
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		return ret;
+	}
+	
 	
 	/**
 	 * Gets the instances of a given type.
@@ -321,6 +372,93 @@ public class CoherenceMetrics {
 		}
 		return null;
 	}
+	
+	
+	/**
+	 * Gets the properties of a given type.
+	 *
+	 * @param type the type
+	 * @param dataFile the data file
+	 * @return the properties of type
+	 */
+	private Map<String, Set<String>> getPropertiesOfType(Set<String> types, String dataFile){
+		File f = new File(dataFile);
+		Map<String, Set<String>> ret = new HashMap<String, Set<String>>();
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		String line="";
+		try {
+			fis = new FileInputStream(f);
+			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+			Set<String> tmp = new HashSet<String>();
+			Set<String> ret2 = new HashSet<String>();
+			String subject="";
+			Boolean add=false;
+			String currentType="";
+			while((line = br.readLine())!=null){
+				if(line.isEmpty()){continue;}
+				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
+				String[] split = line.split(" ");
+				if(!split[0].trim().equals(subject)){
+					if(add){
+						ret2.addAll(tmp);
+						if(ret.containsKey(currentType)){
+							ret.get(currentType).addAll(ret2);
+						}
+						else{
+							ret.put(currentType, ret2);
+						}
+					}
+					tmp.clear();
+					add =false;
+					subject = split[0].trim();
+				}
+				String o = split[2];
+				for(int k=3;k<split.length;k++){
+					o+=" "+split[k];
+				}
+				o = o.trim();
+				if(o.endsWith(".")){
+					o = o.substring(0,o.length()-1);
+				}
+				o = o.trim();
+				if(split[1].trim().equals(TYPE_STRING)){
+					if(types.contains(o)){
+						currentType = o;
+						add =true;
+					}
+					continue;	
+				}
+				
+				tmp.add(split[1].trim());
+				
+			}
+			if(add){
+				ret2.addAll(tmp);
+				if(ret.containsKey(currentType)){
+					ret.get(currentType).addAll(ret2);
+				}
+				else{
+					ret.put(currentType, ret2);
+				}
+			}
+		
+		} catch (IOException e) {
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			return null;
+		}
+		finally{
+			try {
+				fis.close();
+				br.close();
+			} catch (IOException e) {
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		return ret;
+	}
+	
 	
 	/**
 	 * Gets the properties of a given type.
@@ -601,11 +739,21 @@ public class CoherenceMetrics {
 	public Double getCoherence(Set<String> typeSystem){
 		Double ret=0.0;
 		Long denominator = getDenominator(typeSystem);
+		log.info("Denomintator: "+denominator);
+		Map<String, Set<String>> props = getPropertiesOfType(typeSystem, dataFile);
+		log.info("Properties: "+props.size());
+		Map<String, Set<String>> inst = getInstancesOfType(typeSystem, dataFile);
+		log.info("Instances: "+inst.size());
 		for(String type : typeSystem){
-			Set<String> properties = getPropertiesOfType(type);
-			Set<String> instances = getInstancesOfType(type);
-			Double weight = getWeightForType(properties, instances, typeSystem, denominator);
-			ret+=getCoverage(type, properties, instances)*weight;
+			log.info("current type: "+type);
+//			Set<String> properties = getPropertiesOfType(type);
+//			log.info("Properties: "+properties.size());
+//			Set<String> instances = getInstancesOfType(type);
+//			log.info("Instances: "+instances.size());
+			Double weight = getWeightForType(props.get(type), inst.get(type), typeSystem, denominator);
+			log.info("Weight: "+weight);
+			ret+=getCoverage(type, props.get(type), inst.get(type))*weight;
+			log.info("Coherence until now: "+ret);
 		}
 		return ret;
 	}

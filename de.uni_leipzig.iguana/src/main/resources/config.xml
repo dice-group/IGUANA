@@ -9,10 +9,10 @@
 		<resource-prefix-name name="bgres" />
 	</data-description>
 	<databases main="dbpedia">
+		
 		<database id="curl" type="curl">
-			<endpoint uri="bio-gene.org:8891/sparql-auth" />
-			<user value="dba" />
-			<pwd value="dba" />
+			<endpoint uri="dbpedia.org/sparql/" />
+<!-- 			<update-endpoint uri="bio-gene.org:8000/update/" /> -->
 			<curl-url url="http://localhost/sparql-graph-crud-auth" />
 			<curl-command command="curl --digest --user $USER:$PWD --url '$CURL-URL?graph-uri=$GRAPH-URI' $UPLOAD-TYPE -T $FILE"/>
 			<curl-drop command="curl -X DELETE $GRAPH-URI --url '$CURL-URL'"/>
@@ -24,9 +24,12 @@
 			<pwd value="dba" />
 		</database>
 	</databases>
-<!-- 	<log-clustering class="de.uni_leipzig.mosquito.clustering.clusterer.BorderFlowQueryClusterer" path="../../LogFiles/" output-file="Q_S.txt"> -->
+<!-- 	<log-clustering class="de.uni_leipzig.iguana.clustering.clusterer.BorderFlowQueryClusterer" path="../../LogFiles/" output-file="Q_S.txt"> -->
 <!-- 		<property name="harden" value="SILHOUETTE"/> -->
-<!-- 		<property name="min-nodes" value="2"/> -->
+<!-- 		<property name="only-complex-queries" value="true"/> -->
+<!-- 		<property name="only-complex-queries" value="true"/> -->
+<!-- 		<property name="test-one" value="false"/> -->
+<!--         <property name="conn-threshold" value="0.5" /> -->
 <!-- 	</log-clustering> -->
 	<benchmark log="Benchmark">
 <!-- 		<convert-processing value="true"/> -->
@@ -40,11 +43,11 @@
 		<random-function type="RandomTriple" generate="false">
 <!-- 			<percent value="1.0" file-name="datasets/ds_250.0.nt"/> -->
 <!-- 			<percent value="0.5" file-name="datasets/ds_50.0.nt"/> -->
-<!-- 			<percent value="1.0" file-name=""/> -->
+			<percent value="1.0" file-name=""/>
 		</random-function>
 <!-- 		<warmup time="0" file-name="Q.txt"/> -->
-		<test-db type="choose" reference="curl">
-			<db id="impl" />
+		<test-db type="choose" reference="impl">
+			<db id="curl" />
 <!-- 			<db id="dbpedia2" /> -->
 		</test-db>
 		<testcases>
@@ -54,12 +57,20 @@
 <!-- 				<property name="time-limit" value="10000"/> -->
 <!-- 				<property name="updateStrategy" value="fixed"/> -->
 <!-- 				<property name="ldPath" value="ld"/> -->
-				<!-- insertsfirst, deletesfirst, ID, DI  -->
+<!-- 				insertsfirst, deletesfirst, ID, DI  -->
 <!-- 				<property name="ldLinking" value="insertsFirst"/> -->
 <!-- 				<property name="ldLinking" value="deletesFirst"/> -->
 <!-- 				<property name="ldLinking" value="ID"/> -->
 <!-- 				<property name="ldLinking" value="DI"/> -->
 <!-- 			</testcase> -->
+					<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+                                <property name="users" value="1"/>
+                                <property name="update-users" value="0"/>
+                                <property name="queryPatternFile" value="C:/Users/urFaust/queries.txt2sorted"/>
+                                <property name="limit" value="2000"/>
+                                <property name="time-limit" value="960000"/>
+                        </testcase>
+
 <!-- 			<testcase class="de.uni_leipzig.mosquito.testcases.StressTestcase"> -->
 <!-- 				<property name="users" value="3"/> -->
 <!-- 				<property name="queryPatternFile" value="Q.txt"/> -->
