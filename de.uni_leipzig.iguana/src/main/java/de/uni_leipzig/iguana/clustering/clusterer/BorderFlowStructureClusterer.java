@@ -99,7 +99,8 @@ public class BorderFlowStructureClusterer implements Clusterer {
 				+ DateFormat.getDateTimeInstance().format(new Date()));
 		
 		log.info("Start calculating Structure similarities: ");
-		LogSolution.similarity(sortedFreqFile, simFile, delta);
+		//LogSolution.similarity(sortedFreqFile, simFile, delta);
+		LogCluster.executeLimes(sortedFreqFile);
 		log.info("End calculating Structure similarities: "+ DateFormat.getDateTimeInstance().format(new Date()));
 		
 		

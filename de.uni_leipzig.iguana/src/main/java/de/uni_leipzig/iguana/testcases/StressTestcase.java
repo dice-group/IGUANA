@@ -232,7 +232,7 @@ public class StressTestcase implements Testcase {
 			for(ResultSet result : resultsUser){
 				String file = new File(result.getFileName()).getName();
 				file=file.replace("_stresstest", "")+"_stresstest";
-				if(user<users)
+				if(user<users+updateUsers)
 					file=file.replaceAll("_user[0-9]+", "")+"_user"+user;
 				else
 					file = file.replaceAll("_userUpdate[0-9]+", "")+"_userUpdate"+(user);

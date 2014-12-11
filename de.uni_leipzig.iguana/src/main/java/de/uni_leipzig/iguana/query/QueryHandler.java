@@ -144,6 +144,7 @@ public class QueryHandler {
 			if(insert)
 				query+=" WHERE {?s ?p ?o}";
 //			br.close();
+			System.out.println(query);
 			return query;
 //		}
 //		catch(IOException e){
