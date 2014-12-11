@@ -144,6 +144,8 @@
 			<groupId>org.lexicon</groupId>
 			<artifactId>jdbc4sparql</artifactId>
 			<version>0.0.1</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/jdbc4sparql-0.0.1.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
@@ -175,11 +177,15 @@
 			<groupId>it.unimi.dsi</groupId>
 			<artifactId>dsiutils</artifactId>
 			<version>1.0.10</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/dsiutils-1.0.10.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>it.unimi.dsi</groupId>
 			<artifactId>fastutil</artifactId>
 			<version>5.1.5</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/fastutil-5.1.5.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
