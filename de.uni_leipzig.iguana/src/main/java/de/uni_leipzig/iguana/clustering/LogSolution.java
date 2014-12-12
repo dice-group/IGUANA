@@ -331,18 +331,27 @@ public class LogSolution {
 			while ((line = br.readLine()) != null) {
 				int index = line.indexOf("\"");
 				int lastIndex = line.indexOf("\"", index + 1);
-				line = line.substring(index, lastIndex);
+				String line2 = line.substring(index, lastIndex);
 				String graph = null;
 				Pattern p = Pattern.compile("\\?default-graph-uri=[^&]+&");
-				Matcher m = p.matcher(line);
+				Matcher m = p.matcher(line2);
 				if (m.find()) {
 					String complete = m.group();
 					graph = complete.substring(complete.indexOf("=") + 1,
 							complete.lastIndexOf("&"));
 					graph = URLDecoder.decode(graph, "UTF-8");
 				}
+				
+				List<String> tokens = Arrays.asList(line.split("\\s+"));
+				String prequery = "";
+				for (int j = 0; j < tokens.size(); j++) {
+					if (tokens.get(j).contains("query=")) {
+						prequery = tokens.get(j).replaceFirst(".*query=", "");
+					}
+				}
 
-				line = line.replaceFirst(".*query=", "");
+				line = prequery.replaceAll("\"|&.*", "");
+
 				if ((index = line.indexOf("&")) >= 0)
 					line = line.substring(0, index);
 				try {
