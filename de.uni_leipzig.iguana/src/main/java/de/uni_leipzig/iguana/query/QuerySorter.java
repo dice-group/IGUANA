@@ -162,14 +162,16 @@ public class QuerySorter {
 	 *            the query
 	 * @return true if it is, false otherwise
 	 */
-	static int counter;
+	static int counter = 0;
 
 	public static Query isSPARQL(String query) {
-		counter = 0;
+		
 		parseSPARQL(query);
 		if (SPARQLquery != null) {
+			counter = 0;
 			return SPARQLquery;
 		} else {
+			counter = 0;
 			return null;
 		}
 
@@ -179,11 +181,11 @@ public class QuerySorter {
 
 	public static void parseSPARQL(String query) {
 
-		if (counter > 40) {
+		if (counter > 30) {
 			log.warning("Recursion limit is riched within the query: \n" + query);
-			
-
 			SPARQLquery = null;
+			return;
+			
 		}
 		counter++;
 		try {

@@ -17,7 +17,7 @@ public class CopyOfPrefixes {
 		prefixes.put("b3s", "http://b3s.openlinksw.com/");
 		prefixes.put("batch", "http://schemas.google.com/gdata/batch");
 		prefixes.put("bibo", "http://purl.org/ontology/bibo/");
-		prefixes.put("bif", "bif:");
+		//		prefixes.put("bif", "bif:");
 		prefixes.put("bugzilla", "http://www.openlinksw.com/schemas/bugzilla#");
 		prefixes.put("c", "http://www.w3.org/2002/12/cal/icaltzd#");
 		prefixes.put("category", "http://dbpedia.org/resource/Category:");
@@ -110,7 +110,7 @@ public class CopyOfPrefixes {
 		prefixes.put("sioct", "http://rdfs.org/sioc/types#");
 		prefixes.put("skos", "http://www.w3.org/2004/02/skos/core#");
 		prefixes.put("slash", "http://purl.org/rss/1.0/modules/slash/");
-		prefixes.put("sql", "sql:");
+		//		prefixes.put("sql", "sql:");
 		prefixes.put("stock",
 				"http://xbrlontology.com/ontology/finance/stock_market#");
 		prefixes.put("twfy", "http://www.openlinksw.com/schemas/twfy#");
