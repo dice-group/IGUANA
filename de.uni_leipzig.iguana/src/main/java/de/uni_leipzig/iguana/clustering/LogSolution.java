@@ -341,7 +341,7 @@ public class LogSolution {
 							complete.lastIndexOf("&"));
 					graph = URLDecoder.decode(graph, "UTF-8");
 				}
-				
+
 				List<String> tokens = Arrays.asList(line.split("\\s+"));
 				String prequery = "";
 				for (int j = 0; j < tokens.size(); j++) {
@@ -365,44 +365,55 @@ public class LogSolution {
 				Query q = QuerySorter.isSPARQL(line);
 				try {
 					if (q == null && !QuerySorter.isSPARQLUpdate(line)) {
-						throw new QueryException();
+						log.warning("Error parsing query: \n" + line);
+						QueryException e = new QueryException();
+						LogHandler.writeStackTrace(log, e, Level.WARNING);
+						continue;
 
 					}
-					Byte[] features = LogSolution.getFeatureVector(line,
-							LogSolution.getFeatures());
-					int count = LogSolution.countTriplesInQuery(line);
-					String feat2 = "";
-					for (int i = 0; i < features.length - 1; i++) {
-						feat2 += features[i] + ",";
-					}
-					feat2 += features[features.length - 1];
-					Long n = map.get(feat2 + "\t" + count);
-					if (n == null)
-						n = 0L;
-					map.put(features + "\t" + count, n + 1);
 					if (q != null) {
 						if (graph != null) {
 							q.addGraphURI(graph);
 						}
 						line = q.toString().replace("\n", " ");
-					}
-					if (onlyComplexQueries) {
-						if (countTriplesInQuery(line) <= 1) {
-							continue;
+						Byte[] features = LogSolution.getFeatureVector(line,
+								LogSolution.getFeatures());
+						int count = LogSolution.countTriplesInQuery(line);
+						String feat2 = "";
+						for (int i = 0; i < features.length - 1; i++) {
+							feat2 += features[i] + ",";
 						}
-						Boolean cont = false;
-						for (String feat : getFeatures()) {
-							if (line.contains(feat)) {
-								cont = true;
-								break;
+						feat2 += features[features.length - 1];
+						Long n = map.get(feat2 + "\t" + count);
+						if (n == null)
+							n = 0L;
+						map.put(features + "\t" + count, n + 1);
+						if (q != null) {
+							if (graph != null) {
+								q.addGraphURI(graph);
 							}
+							line = q.toString().replace("\n", " ");
 						}
-						if (!cont)
-							continue;
+						if (onlyComplexQueries) {
+							if (countTriplesInQuery(line) <= 1) {
+								continue;
+							}
+							Boolean cont = false;
+							for (String feat : getFeatures()) {
+								if (line.contains(feat)) {
+									cont = true;
+									break;
+								}
+							}
+							if (!cont)
+								continue;
+						}
+						pw.println(line.replace("\n", " ").replace("\r", " ")
+								.replaceAll("\\s+", " "));
+
 					}
-					pw.println(line.replace("\n", " ").replace("\r", " ")
-							.replaceAll("\\s+", " "));
-				} catch (QueryException e) {
+
+				} catch (Exception e) {
 					// log.info("Messed up Query in logfile: "+line+"\nException: "+e);
 				}
 

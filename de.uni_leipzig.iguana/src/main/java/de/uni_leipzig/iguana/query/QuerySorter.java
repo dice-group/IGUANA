@@ -183,9 +183,10 @@ public class QuerySorter {
 
 		if (counter > 30) {
 			log.warning("Recursion limit is riched within the query: \n" + query);
+			
+
 			SPARQLquery = null;
 			return;
-			
 		}
 		counter++;
 		try {
@@ -243,6 +244,11 @@ public class QuerySorter {
 				LogHandler.writeStackTrace(log, e, Level.WARNING);
 				SPARQLquery = null;
 			}
+		}catch (Exception e) {
+			log.warning("Query couldn't be parsed: \n" + query);
+			LogHandler.writeStackTrace(log, e, Level.WARNING);
+			SPARQLquery = null;
+
 		}
 
 	}
