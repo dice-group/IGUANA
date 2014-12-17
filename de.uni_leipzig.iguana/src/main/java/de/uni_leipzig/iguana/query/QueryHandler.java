@@ -291,7 +291,7 @@ public class QueryHandler {
 			
 			String q = selectPattern(query);
 			ResultSet res =null;
-			if(!QuerySorter.isSPARQL(q)){
+			if(QuerySorter.isSPARQL(q) == null){
 				
 			}
 			else if(!query.matches(".*%%v[0-9]*%%.*")){
