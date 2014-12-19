@@ -431,7 +431,12 @@ public class QueryTestcase implements Testcase, Runnable {
 	 * @return the query time
 	 */
 	protected Long getQueryTime(String query, Integer queryTimeout){
-		Boolean isSPARQL = QuerySorter.isSPARQL(query);
+		Boolean isSPARQL;
+		if (QuerySorter.isSPARQL(query)==null){
+			isSPARQL = false;
+		}else{
+			isSPARQL = true;
+		}
 		Long a=0L, b=0L;
 		java.sql.ResultSet res=null;
 		if(isSPARQL){
