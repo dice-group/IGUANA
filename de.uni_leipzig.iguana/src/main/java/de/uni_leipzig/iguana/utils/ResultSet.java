@@ -56,6 +56,8 @@ public class ResultSet implements Iterator<List<Object>>{
 	
 	/** The y axis. */
 	private String yAxis="";
+
+	private String[] prefixes = new String[0];
 	
 	/**
 	 * Gets the header.
@@ -394,5 +396,12 @@ public class ResultSet implements Iterator<List<Object>>{
 	public void setyAxis(String yAxis) {
 		this.yAxis = yAxis;
 	}
+
+	public String[] getPrefixes() {
+		return prefixes ;
+	}
 	
+	public void setPrefixes(String[] prefixes){
+		this.prefixes = prefixes;
+	}
 }

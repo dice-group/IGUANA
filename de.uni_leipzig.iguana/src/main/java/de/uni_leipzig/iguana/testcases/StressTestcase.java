@@ -119,6 +119,8 @@ public class StressTestcase implements Testcase {
 
 	private int updateUsers;
 
+	private String[] prefixes;
+
 	
 	/* (non-Javadoc)
 	 * @see de.uni_leipzig.mosquito.testcases.Testcase#start()
@@ -236,6 +238,7 @@ public class StressTestcase implements Testcase {
 					file=file.replaceAll("_user[0-9]+", "")+"_user"+user;
 				else
 					file = file.replaceAll("_userUpdate[0-9]+", "")+"_userUpdate"+(user);
+				result.setPrefixes(prefixes);
 				result.setFileName(File.separator+file);
 				try {
 					result.save();
@@ -264,6 +267,7 @@ public class StressTestcase implements Testcase {
 					log.severe("Can't save Results due to: ");
 					LogHandler.writeStackTrace(log, e, Level.SEVERE);
 				}
+				result.setPrefixes(prefixes);
 			}
 			resUU.addAll(resultsUser);
 			user++;
@@ -436,7 +440,9 @@ public class StressTestcase implements Testcase {
 		}catch(Exception e){
 			updateUsers = 0;
 		}
-	
+		prefixes = new String[2];
+		prefixes[0] = String.valueOf(users);
+		prefixes[1] = String.valueOf(updateUsers);
 		props = p;
 //		props.remove("users");
 	}

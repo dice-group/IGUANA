@@ -10,10 +10,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -76,6 +78,7 @@ public class Benchmark {
 	private static HashMap<String, String> dataDescription;
 	private static boolean attach = false;
 	private static Properties logCluster;
+	private static Set<String> hasUploaded = new HashSet<String>();
 
 	public enum DBTestType {
 		all, choose
@@ -366,7 +369,8 @@ public class Benchmark {
 				if (Boolean.valueOf(config.get("drop-db"))) {
 					con.dropGraph(config.get("graph-uri"));
 				}
-				if (testcases.containsKey(UploadTestcase.class.getName())) {
+				if (testcases.containsKey(UploadTestcase.class.getName()) && !hasUploaded.contains(db+i)) {
+					
 					log.info("Upload Testcase starting for "+db+":"+percents.get(i));
 					UploadTestcase ut = new UploadTestcase();
 					Properties up = testcases.get(UploadTestcase.class
@@ -385,6 +389,7 @@ public class Benchmark {
 					upload = ut.getResults().iterator().next();
 					upload.setFileName("UploadTest_");//+percents.get(i));
 					results.put("UploadTestcase", ut.getResults());
+					hasUploaded.add(db+i);
 					log.info("Upload Testcase finished for "+db+":"+percents.get(i));
 				}
 				try{
@@ -427,14 +432,19 @@ public class Benchmark {
 					fileSep=File.separator+File.separator;
 				}
 				String[] fileName = res.getFileName().split(fileSep);
+				String[] prefixes = res.getPrefixes();
+				String suffix="";
+				for(String prefix : prefixes){
+					suffix+=prefix+File.separator;
+				}
 				new File("."+File.separator+
 						RESULT_FILE_NAME+
 						File.separator+testCase+
-						File.separator).mkdirs();
+						File.separator+suffix).mkdirs();
 				res.setFileName("."+File.separator+
 						RESULT_FILE_NAME+
 						File.separator+testCase+
-						File.separator+fileName[fileName.length-1]);
+						File.separator+suffix+fileName[fileName.length-1]);
 				res.save();
 				try{
 					res.saveAsPNG();
