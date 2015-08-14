@@ -57,11 +57,13 @@ public class SPARQLQueryTestcase extends QueryTestcase {
 			else{
 				qCount.set(i-1, 1+qCount.get(i-1));
 			}
+			log.info("DEBUG: old time: "+qpsTime.get(i-1));
 			Long newTime = qpsTime.get(i-1)+time;
 			qpsTime.set(i-1, newTime);
 			
 			row.set(i, qpsTime.get(i-1));
 			log.info("Query # "+qFile.replace(".txt", "")+" has taken "+time+" microseconds");
+			log.info("Row at "+i+": "+row.get(i));
 		}
 		for(int i=1;i<header.size();i++){
 			String cell = header.get(i);

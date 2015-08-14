@@ -9,6 +9,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import de.uni_leipzig.iguana.converter.ConverterI;
+import de.uni_leipzig.informatik.swp13_sc.converter.PGNToRDFConverterRanged;
 
 
 /**
@@ -18,6 +19,11 @@ import de.uni_leipzig.iguana.converter.ConverterI;
  */
 public class Converter {
 
+	
+	public static void main(String[] argc) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SAXException, IOException, ParserConfigurationException{
+		Converter.rawToFormat("de.uni_leipzig.informatik.swp13_sc.converter.PGNToRDFConverterRanged", "RDF/XML", "C:\\Users\\urFaust\\Documents\\PGNS", "C:\\Users\\urFaust\\Documents\\RDFS", "http://www.chess-example.com", Logger.getGlobal());
+	}
+	
 	/**
 	 * Converts given files in a path through a given converter class to files in an output path
 	 *
@@ -37,9 +43,11 @@ public class Converter {
 	public static void rawToFormat(String converter, String outputFormat, String path,
 			String oPath, String graphURI, Logger log) throws SAXException,
 			IOException, ParserConfigurationException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+		System.out.println("test 2");
 //		PGNToRDFConverterRanged pg = new PGNToRDFConverterRanged();
-		
 		ConverterI pg = (ConverterI) Class.forName(converter).newInstance();
+
+		System.out.println("test 2");
 
 				
 		new File(oPath).mkdirs();

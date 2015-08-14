@@ -212,15 +212,16 @@ public class QuerySorter {
 					query = query.replaceAll("(" + prefix + ":" + suffix + ")",
 							"<$1>");
 					isSPARQL(query);
-				} else if (CopyOfPrefixes.prefixes.containsKey(prefix
-						.toLowerCase())) {
-					String onePrefix = CopyOfPrefixes.prefixes.get(prefix
-							.toLowerCase());
-					String prefix2 = "PREFIX " + prefix.toLowerCase() + ": <"
-							+ onePrefix + ">\n" + query;
-					isSPARQL(prefix2);
-
-				}
+				} 
+//				else if (CopyOfPrefixes.prefixes.containsKey(prefix
+//						.toLowerCase())) {
+//					String onePrefix = CopyOfPrefixes.prefixes.get(prefix
+//							.toLowerCase());
+//					String prefix2 = "PREFIX " + prefix.toLowerCase() + ": <"
+//							+ onePrefix + ">\n" + query;
+//					isSPARQL(prefix2);
+//
+//				}
 
 			} else if (e.getMessage().contains("Encountered \" \",\" \", \"\"")) {
 				if (query.toLowerCase().contains("select.*?,")) {

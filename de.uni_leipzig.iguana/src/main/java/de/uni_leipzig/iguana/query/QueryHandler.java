@@ -159,6 +159,9 @@ public class QueryHandler {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public void init() throws IOException{
+		if(new File(path).exists()){
+			log.info("Path "+path+"already exists. Use cached Queries");
+		}
 		new File(path).mkdir();
 		init(fileForQueries);
 	}

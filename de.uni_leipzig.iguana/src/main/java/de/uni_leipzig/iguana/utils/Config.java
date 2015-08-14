@@ -98,7 +98,8 @@ public class Config {
 			cp.setNode((Element)testcase); 
 			NodeList testcaseProperties = cp.getNodeList("property");
 			cp.setNode(testcases);
-			ret.put(((Element)testcase).getAttribute("class"), getProps(testcaseProperties));
+			//&i as unique Identifier
+			ret.put(((Element)testcase).getAttribute("class")+"&"+i, getProps(testcaseProperties));
 		}
 		return ret;
 		
@@ -213,6 +214,27 @@ public class Config {
 		
 		map.put("graph-uri", graph);
 		cp.setNode(benchmark);
+		
+		//NEW START
+		String sparqlLoad;
+		try{
+			sparqlLoad = cp.getElementAt("sparql-load", 0).getAttribute("value");
+		}
+		catch(Exception e){
+			sparqlLoad=null;
+		}
+		map.put("sparqlLoad", sparqlLoad);
+		cp.setNode(benchmark);
+		String numberOfTriples;
+		try{
+			numberOfTriples = cp.getElementAt("number-of-triples", 0).getAttribute("value");
+		}
+		catch(Exception e){
+			numberOfTriples="-1";
+		}
+		map.put("number-of-triples", numberOfTriples);
+		cp.setNode(benchmark);
+		//NEW END
 		
 		Element testDB = cp.getElementAt("test-db", 0);
 		map.put("dbs", testDB.getAttribute("type"));

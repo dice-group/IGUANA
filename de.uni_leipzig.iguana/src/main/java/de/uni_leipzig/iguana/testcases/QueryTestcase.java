@@ -23,6 +23,7 @@ import de.uni_leipzig.iguana.benchmark.Benchmark;
 import de.uni_leipzig.iguana.query.QueryHandler;
 import de.uni_leipzig.iguana.query.QuerySorter;
 import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.FileUploader;
 import de.uni_leipzig.iguana.utils.ResultSet;
 import de.uni_leipzig.iguana.utils.StringHandler;
 import de.uni_leipzig.iguana.utils.comparator.LivedataComparator;
@@ -190,22 +191,32 @@ public class QueryTestcase implements Testcase, Runnable {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public static void initQH(String queryPatterns, String updateStrategy, String ldpath, int limit, Logger log) throws IOException{
+		log = Logger.getLogger(QueryTestcase.class.getName());
 		log.info("Initialize QueryHandler");
 		queries = 0L;
+		//TODO test if queryPatterns is dir or file
 		String id = queryPatterns!="null"?StringHandler.stringToAlphanumeric(queryPatterns):"";		
-		id+= ldpath!="null"?StringHandler.stringToAlphanumeric(ldpath):"";
+		//id+= ldpath!="null"?StringHandler.stringToAlphanumeric(ldpath):"";
 		File path = new File("QueryTestcase"+id+File.separator);
-		path.mkdir();
-		for(String f : path.list()){
-			new File(f).delete();
+		Boolean pathExists = false;
+		if(path.exists()){
+			log.info("Path "+path+" already exists. Using cached results.");
+			pathExists = true;
 		}
+		path.mkdir();
+		//for(String f : path.list()){
+		//	new File(f).delete();
+		//}
 //		path.delete();
 		log.info("Ref connection: "+Benchmark.getReferenceConnection().getEndpoint()+"");
 		log.info("Pattern file: "+queryPatterns);
 		qh = new QueryHandler(Benchmark.getReferenceConnection(), queryPatterns);
 		qh.setPath("QueryTestcase"+id+File.separator);
 		qh.setLimit(limit);
-		qh.init();
+		inserts = new LinkedList<String>();
+		if(!pathExists){
+			qh.init();
+		}
 		if(qhs ==null){
 			qhs =new Hashtable<String, QueryHandler>();
 		}
@@ -219,8 +230,9 @@ public class QueryTestcase implements Testcase, Runnable {
 //		selects = QuerySorter.getSPARQL(queryPatterns);
 
 		int insertSize = 0;
-	
+		//TODO! BUG with ldpath WHAT EVERY HAPPEND HERE
 		if(!ldpath.equals("null")){
+			log.info("LDPATH: "+ldpath);
 			File ldDir = new File(ldpath);
 			String[] files = ldDir.list(new FilenameFilter(){
 				@Override
@@ -236,6 +248,7 @@ public class QueryTestcase implements Testcase, Runnable {
 		}
 		else{
 			inserts = QuerySorter.getSPARQLUpdate("QueryTestcase"+id+File.separator);
+			log.info(inserts.size()+"");
 //			inserts = QuerySorter.getSPARQLUpdate(queryPatterns);
 		}
 		for(File f: new File(qh.getPath()).listFiles())
@@ -292,6 +305,7 @@ public class QueryTestcase implements Testcase, Runnable {
 		if(qhs ==null){
 			qhs =new Hashtable<String, QueryHandler>();
 		}
+		//TODO the fuck is happening? Was i drunk or so?
 		if(qh==null || testQh()){
 			if(qhs.containsKey(getID())){
 				qh = qhs.get(getID());
@@ -336,10 +350,10 @@ public class QueryTestcase implements Testcase, Runnable {
 		ResultSet seconds = new ResultSet();
 		ResultSet failCount = new ResultSet();
 		ResultSet succededCount = new ResultSet();
-		sumRes.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryMixesPerTimeLimit"+percent);		
-		seconds.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueriesPerSeconds"+percent);
-		failCount.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"failedQueriesCount"+percent);
-		succededCount.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"succededQueriesCount"+percent);
+		sumRes.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueryMixesPerTimeLimit"+percent);		
+		seconds.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueriesPerSeconds"+percent);
+		failCount.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"failedQueriesCount"+percent);
+		succededCount.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"succededQueriesCount"+percent);
 		Long sum = 0L;
 		List<Object> row = new LinkedList<Object>();
 		List<Object> fail = new LinkedList<Object>();
@@ -431,6 +445,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	 * @return the query time
 	 */
 	protected Long getQueryTime(String query, Integer queryTimeout){
+		//TODO if user wishes save results into files, merge if Testcase finished
 		Boolean isSPARQL;
 		if (QuerySorter.isSPARQL(query)==null){
 			isSPARQL = false;
@@ -521,7 +536,7 @@ public class QueryTestcase implements Testcase, Runnable {
 			}
 			String query = next[0];
 			String qFile = next[1];
-			
+			log.info("Next LD File: "+qFile);
 			int i=header.indexOf(qFile);
 			Long time = getQueryTime(query);
 			if(time<0){
@@ -584,7 +599,13 @@ public class QueryTestcase implements Testcase, Runnable {
 		else{
 			return null;
 		}
-		String query=QueryHandler.ntToQuery(ldpath+File.separator+queryFile, insert, graphURI);
+		String query;
+		if(Benchmark.sparqlLoad){
+			query=FileUploader.fileToQuery(new File(ldpath+File.separator+queryFile), graphURI);
+		}
+		else{
+			query=QueryHandler.ntToQuery(ldpath+File.separator+queryFile, insert, graphURI);
+		}
 		ret[0]=query;
 		ret[1]=queryFile;
 		return ret;
@@ -638,7 +659,7 @@ public class QueryTestcase implements Testcase, Runnable {
 					hasLD=false;
 				}
 			}
-		case "variation":
+		case "variable":
 			if(xCount == 0){
 				not = true;
 				if(sig[1]-sig[0]>0){	
@@ -858,7 +879,9 @@ public class QueryTestcase implements Testcase, Runnable {
 	 */
 	@Override
 	public void run() {
+		log = Logger.getLogger(QueryTestcase.class.getName());
 		try {
+			log.info("DEBUG: QueryTestcase started");
 			start();
 		} catch (IOException e) {
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);

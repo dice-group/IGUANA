@@ -64,11 +64,15 @@
 <!-- 				<property name="ldLinking" value="DI"/> -->
 <!-- 			</testcase> -->
 					<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
-                                <property name="users" value="1"/>
-                                <property name="update-users" value="0"/>
+                                <property name="users" value="0"/>
+                                <property name="update-users" value="1"/>
                                 <property name="queryPatternFile" value="C:/Users/urFaust/queries.txt2sorted"/>
                                 <property name="limit" value="2000"/>
                                 <property name="time-limit" value="960000"/>
+                                <property name="ldLinking" value="DI"/>
+                                <property name="ldPath" value="ld"/>
+                                <property name="updateStrategy" value="fixed"/>
+                                <property name="x" value="0"/>
                         </testcase>
 
 <!-- 			<testcase class="de.uni_leipzig.mosquito.testcases.StressTestcase"> -->

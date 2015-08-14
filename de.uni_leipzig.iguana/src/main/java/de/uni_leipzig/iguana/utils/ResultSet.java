@@ -59,6 +59,35 @@ public class ResultSet implements Iterator<List<Object>>{
 
 	private String[] prefixes = new String[0];
 	
+	public ResultSet(){
+		
+	}
+	
+	public ResultSet(ResultSet res) {
+		this.fileName = res.fileName;
+		this.xAxis = res.xAxis;
+		this.yAxis = res.yAxis;
+		this.title = res.title;
+		this.row = res.row;
+		this.removed = res.removed;
+		this.prefixes = res.prefixes;
+		this.header = new LinkedList<String>(res.header);
+		this.table = new LinkedList<List<Object>>();
+		//For all Rows in the table
+//		for(int i=0; i<res.table.size();i++){
+//			//copied List
+//			LinkedList<Object> copyList = new LinkedList<Object>();
+//			//old Row
+//			List<Object> resRow = res.table.get(i);
+//			//For every Cell in the row
+//			for(int j=0; j<resRow.size();j++){
+//				copyList.add(resRow.get(j));
+//			}
+//			//Add copied row
+//			this.table.add(copyList);
+		}
+//	}
+
 	/**
 	 * Gets the header.
 	 *

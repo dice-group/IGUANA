@@ -15,6 +15,7 @@ import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
 
 import de.uni_leipzig.iguana.benchmark.Benchmark;
+import de.uni_leipzig.iguana.utils.FileUploader;
 import de.uni_leipzig.iguana.utils.ResultSet;
 
 /**
@@ -45,6 +46,7 @@ public class UploadTestcase implements Testcase {
 	public void setGraphURI(String graphURI){
 		this.graphUri = graphURI;
 	}
+	
 	
 	/* (non-Javadoc)
 	 * @see de.uni_leipzig.mosquito.testcases.Testcase#start()
@@ -87,10 +89,18 @@ public class UploadTestcase implements Testcase {
 //				})){
 				Long a = new Date().getTime();
 				if(f.isFile()){
-				if(!con.uploadFile(f, graphUri)){
-					log.severe("Couldn't upload File - see Log for more details");
-					
-				}}
+				
+					if(Benchmark.sparqlLoad){
+						if(!FileUploader.loadFile(con, f, graphUri)){
+							log.severe("Couldn't upload File - see Log for more details");
+						}
+					}// TODO as uploadFile does indeed take some time if it needs to split the files, the results aren't correct
+					else{
+						if(!con.uploadFile(f, graphUri)){
+							log.severe("Couldn't upload File - see Log for more details");
+						}
+					}
+				}
 				else{
 					for(File f2 : f.listFiles()){
 						try{

@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
-import org.jfree.util.Log;
 
 import de.uni_leipzig.iguana.benchmark.Benchmark;
 import de.uni_leipzig.iguana.utils.ResultSet;
@@ -156,10 +155,16 @@ public class StressTestcase implements Testcase {
 		catch(Exception e){
 			//NO Live Data
 		}
+		//TODO just a Hotfix
+		if(updateUsers==0){
+			ldpath="null";
+			props.put("ldPath", "null");
+		}
 		QueryTestcase.initQH(queryPatterns, updateStrategy, ldpath, limit, log);
 		ExecutorService executor = Executors.newFixedThreadPool(users+updateUsers);
 		
-		
+		log.info("#User: "+users);
+		log.info("#Update Users: "+updateUsers);
 		for(Integer i=0; i<users; i++){
 			SPARQLQueryTestcase qt = new SPARQLQueryTestcase();
 			qt.setRandomNumber(i+1);
@@ -169,11 +174,13 @@ public class StressTestcase implements Testcase {
 			qt.setProperties(props);
 			
 //			Thread t = new Thread(qt);
-			Log.info("User "+i+" starting");
+			log.info("User "+i+" starting");
 			executor.execute(qt);
 //			t.start();
 			threadPool.put("u"+i, qt);
+			log.info("DEBUG: threadPoolSize: "+threadPool.size());
 		}
+		log.info("SPARQL Users started...Starting now Update Users if there are any");
 		for(int i=users; i<updateUsers+users;i++){
 //			QueryTestcase qt = new QueryTestcase();
 			LiveDataQueryTestcase qt = new LiveDataQueryTestcase();
@@ -181,18 +188,23 @@ public class StressTestcase implements Testcase {
 			qt.setConnection(con);
 			qt.setCurrentDBName(currentDBName);
 			qt.setCurrentPercent(percent);
+			log.info("Setting Props for Update User#"+i);
 			qt.setProperties(propsUpdate);
+			log.info("Props are set");
 			if(propsUpdate.containsKey("x")){
 				qt.setAmount(Integer.parseInt(String.valueOf(propsUpdate.get("x"))));
 			}
 			qt.setStrategyRandom(i);
+			log.info("Setting Strategy "+propsUpdate.get("updateStrategy")+" for User#"+i);
 			qt.setStrategy(String.valueOf(propsUpdate.get("updateStrategy")));
+			log.info("Done setting strategy");
 //			Thread t = new Thread(qt);
 			log.info("Update User "+(i-users)+" starting");
 			executor.execute(qt);
 			threadPool.put("uu"+i, qt);
 
 		}
+		log.info("DEBUG: UU started");
 		executor.shutdown();
 		long time = new Date().getTime();
 		while(new Date().getTime()-time<timeLimit){
@@ -227,11 +239,15 @@ public class StressTestcase implements Testcase {
 //		log.info("Merging results");
 //		mergeResults(results);
 		
-		log.info("Saving Results...");
+		log.info("Saving Results Stresstest...");
 		int user =0;
+		new File("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+
+				StressTestcase.class.getName()+File.separator+
+				users+File.separator+updateUsers+File.separator).mkdirs();
 		for(Collection<ResultSet> resultsUser : results){
 			
 			for(ResultSet result : resultsUser){
+				
 				String file = new File(result.getFileName()).getName();
 				file=file.replace("_stresstest", "")+"_stresstest";
 				if(user<users+updateUsers)
@@ -239,7 +255,9 @@ public class StressTestcase implements Testcase {
 				else
 					file = file.replaceAll("_userUpdate[0-9]+", "")+"_userUpdate"+(user);
 				result.setPrefixes(prefixes);
-				result.setFileName(File.separator+file);
+				result.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+
+						StressTestcase.class.getName()+File.separator+
+						users+File.separator+updateUsers+File.separator+file);
 				try {
 					result.save();
 				} catch (IOException e) {
@@ -260,7 +278,10 @@ public class StressTestcase implements Testcase {
 					file=file.replaceAll("_user[0-9]+", "")+"_user"+user;
 				else
 					file = file.replaceAll("_userUpdate[0-9]+", "")+"_userUpdate"+(user);
-				result.setFileName(File.separator+file);
+				result.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+
+						StressTestcase.class.getName()+File.separator+
+						users+File.separator+updateUsers+File.separator
+						+file);
 				try {
 					result.save();
 				} catch (IOException e) {
@@ -272,7 +293,8 @@ public class StressTestcase implements Testcase {
 			resUU.addAll(resultsUser);
 			user++;
 		}
-		String dir = Benchmark.TEMP_RESULT_FILE_NAME+File.separator+StressTestcase.class.getName();
+		String dir = Benchmark.TEMP_RESULT_FILE_NAME+File.separator+StressTestcase.class.getName()+File.separator+
+				users+File.separator+updateUsers;
 		new File(dir).mkdirs();
 		for(ResultSet result : res){
 			result.setFileName(dir+File.separator+result.getFileName().replace("_stresstest", "")+"_stresstest");
@@ -351,9 +373,10 @@ public class StressTestcase implements Testcase {
 		addCurrentResults(resNew);
 	}
 	
-	public static Collection<ResultSet> merge(Collection<ResultSet> results, String regex, String suffix){
+	public Collection<ResultSet> merge(Collection<ResultSet> results, String regex, String suffix){
 		HashMap<String, Collection<ResultSet>> map = new HashMap<String, Collection<ResultSet>>();
 		Collection<ResultSet> ret = new LinkedList<ResultSet>();
+		//Put same kind of ResultSets together in one COllection
 		for(ResultSet res : results){
 			String parentFile = res.getFileName().replaceAll(regex, "");
 			if(!map.containsKey(parentFile)){
@@ -362,30 +385,41 @@ public class StressTestcase implements Testcase {
 			map.get(parentFile).add(res);
 		}
 		
+		//Add ResultSet of same kind together
 		for(String key : map.keySet()){
 			ResultSet res = new ResultSet();
-			
+			ResultSet resSum = new ResultSet();
 			res.setFileName(key+suffix);
+			resSum.setFileName(key+"_Sum_"+suffix);
 			Boolean first = true;
+			//For all ResultSet of the same Kind (users)
 			for(ResultSet res2 : map.get(key)){
 				ResultSet tmp = new ResultSet();
 				
 					
-				tmp.setTitle(res2.getTitle()+" (Mean of Users)");
+				tmp.setTitle(res2.getTitle());
 				tmp.setxAxis(res2.getxAxis());
 				tmp.setxAxis(res2.getyAxis());
+				//If it is the first ResultSet of this kind just add the Row
 				if(first){
 					first = false;
-					while(res2.hasNext())
-						res.addRow(res2.next());
-				}else{
-					
 					while(res2.hasNext()){
-						List<Object> rowAdd = new LinkedList<Object>();
 						List<Object> row = res2.next();
+						res.addRow(row);
+//						resSum.addRow(row);
+					}
+				}else{
+					//Otherwise add the rows together
+					while(res2.hasNext()){
+						//New Row with added values
+						List<Object> rowAdd = new LinkedList<Object>();
+						//New rew to add
+						List<Object> row = res2.next();
+						//old row
 						List<Object> row2 = res.next();
 						//add the rows together
 						rowAdd.add(row.get(0));
+						//begin at 1, as 0 is the label
 						for(int i=1;i<row.size();i++){
 							double old = Double.valueOf(String.valueOf(row.get(i)));
 							double newVal = Double.valueOf(String.valueOf(row2.get(i)));
@@ -395,21 +429,42 @@ public class StressTestcase implements Testcase {
 						tmp.addRow(rowAdd);
 					}
 					res = tmp;
+//					resSum = tmp;
 					res.reset();
+//					resSum.reset();
 				}
 				res.setHeader(res2.getHeader());
-				
+				resSum.setHeader(res2.getHeader());
+
 			}
+			//Finished Adding values together
 			res.setFileName(key+suffix);
-			int divide = Math.max(1, map.size());
+			
+			//Copy all of res to ResultSet//
+			resSum.setTitle(res.getTitle()+" (Sum of Users)");			res.setTitle(res.getTitle()+" (Mean of Users)");
+			resSum.setFileName(key+"_Sum_"+suffix);
+			//Copying res to resSum
+			for(int i=0;i<res.getTable().size();i++){
+				List<Object> currentRow = res.getTable().get(i);
+				List<Object> tmpRow = new LinkedList<Object>();
+				for(int j=0;j<currentRow.size();j++){
+					tmpRow.add(currentRow.get(j));
+				}
+				resSum.addRow(tmpRow);
+			}
+			//divide it by the number of users
+			int divide = Math.max(1, map.get(key).size());
 			while(res.hasNext()){
 				List<Object> row = res.next();
+				//begin at 1, as 0 is the label
 				for(int i=1;i<row.size();i++){
 					row.set(i, Double.valueOf(String.valueOf(row.get(i)))/divide);
 				}
 			}
 			res.setFileName(key+suffix);
+			resSum.setFileName(key+"_Sum_"+suffix);
 			ret.add(res);
+			ret.add(resSum);
 		}
 		
 		return ret;

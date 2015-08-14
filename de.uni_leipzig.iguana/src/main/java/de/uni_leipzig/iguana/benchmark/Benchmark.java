@@ -10,12 +10,10 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -46,6 +44,7 @@ import de.uni_leipzig.iguana.utils.Config;
 import de.uni_leipzig.iguana.utils.Converter;
 import de.uni_leipzig.iguana.utils.EmailHandler;
 import de.uni_leipzig.iguana.utils.FileHandler;
+import de.uni_leipzig.iguana.utils.FileUploader;
 import de.uni_leipzig.iguana.utils.ResultSet;
 import de.uni_leipzig.iguana.utils.ShellProcessor;
 import de.uni_leipzig.iguana.utils.StringHandler;
@@ -63,7 +62,7 @@ import de.uni_leipzig.iguana.utils.comparator.TripleComparator;
 public class Benchmark {
 
 	private static final String RESULT_FILE_NAME = "results";
-	public static final String TEMP_RESULT_FILE_NAME = "tempResults";
+	public static final String TEMP_RESULT_FILE_NAME = "./tempResults";
 	private static HashMap<String, String> config;
 	private static List<String> databaseIds;
 	private static Logger log;
@@ -78,8 +77,9 @@ public class Benchmark {
 	private static HashMap<String, String> dataDescription;
 	private static boolean attach = false;
 	private static Properties logCluster;
-	private static Set<String> hasUploaded = new HashSet<String>();
-
+	public static boolean sparqlLoad=false;
+	private static Integer numberOfTriples;
+	
 	public enum DBTestType {
 		all, choose
 	};
@@ -171,6 +171,8 @@ public class Benchmark {
 			rootNode = cp.getElementAt("mosquito", 0);
 			dbNode = cp.getElementAt("databases", 0);
 			config = Config.getParameter(rootNode);
+			sparqlLoad = Boolean.valueOf(config.get("sparqlLoad"));
+			numberOfTriples = Integer.valueOf(config.get("number-of-triples"));
 			testcases = Config.getTestCases(rootNode);
 			percents = Config.getPercents(rootNode);
 			dataDescription = Config.getDataDescription(rootNode);
@@ -365,15 +367,23 @@ public class Benchmark {
 					ShellProcessor.executeCommand(command);
 				}
 				Connection con = ConnectionFactory.createConnection(dbNode, db);
+				con.setTriplesToUpload(numberOfTriples);
 				// drop
 				if (Boolean.valueOf(config.get("drop-db"))) {
 					con.dropGraph(config.get("graph-uri"));
 				}
-				if (testcases.containsKey(UploadTestcase.class.getName()) && !hasUploaded.contains(db+i)) {
-					
+				Boolean isUpload = false;
+				for(String testcase :testcases.keySet()){
+					String testcaseWithoutID = testcase.substring(0, testcase.lastIndexOf("&"));
+					if (testcaseWithoutID.equals(UploadTestcase.class.getName())) {
+						isUpload= true;
+						break;
+					}
+				}
+				if(isUpload){
 					log.info("Upload Testcase starting for "+db+":"+percents.get(i));
 					UploadTestcase ut = new UploadTestcase();
-					Properties up = testcases.get(UploadTestcase.class
+					Properties up = getTestcasesWithoutIdentifier(UploadTestcase.class
 							.getName());
 					up.setProperty("file", randFiles[i]);
 					up.setProperty("graph-uri", config.get("graph-uri"));
@@ -389,22 +399,22 @@ public class Benchmark {
 					upload = ut.getResults().iterator().next();
 					upload.setFileName("UploadTest_");//+percents.get(i));
 					results.put("UploadTestcase", ut.getResults());
-					hasUploaded.add(db+i);
 					log.info("Upload Testcase finished for "+db+":"+percents.get(i));
-				}
-				try{
-					if(config.get("warmup-query-file")!=null &&config.get("warmup-time")!=null){
-						log.info("Warmup started");
-						warmup(con, String.valueOf(config.get("warmup-query-file")) ,
-								config.get("warmup-updates"),
-								config.get("graph-uri"),
-								Long.valueOf(config.get("warmup-time")));
-						log.info("Warmup finished! Ready to get pumped!");
+					upload.save();
 					}
-				}catch(Exception e){
-					LogHandler.writeStackTrace(log, e, Level.WARNING);
-					log.info("No warmup! ");
-				}
+//				try{
+//					if(config.get("warmup-query-file")!=null &&config.get("warmup-time")!=null){
+//						log.info("Warmup started");
+//						warmup(con, String.valueOf(config.get("warmup-query-file")) ,
+//								config.get("warmup-updates"),
+//								config.get("graph-uri"),
+//								Long.valueOf(config.get("warmup-time")));
+//						log.info("Warmup finished! Ready to get pumped!");
+//					}
+//				}catch(Exception e){
+//					LogHandler.writeStackTrace(log, e, Level.WARNING);
+//					log.info("No warmup! ");
+//				}
 				log.info("Start other testcases");
 				start(con, db, String.valueOf(percents.get(i)));
 				// drop
@@ -420,11 +430,11 @@ public class Benchmark {
 				dbCount++;
 
 			}
-			upload.save();
+			
 		}
 		for (String key : results.keySet()) {
 			for (ResultSet res : results.get(key)) {
-				log.info("Saving Results...");
+				log.info("Saving Results for "+key+"...");
 				String testCase = key.split("&")[0];
 				testCase.replaceAll("[^A-Za-z0-9]", "");
 				String fileSep =File.separator;
@@ -439,11 +449,11 @@ public class Benchmark {
 				}
 				new File("."+File.separator+
 						RESULT_FILE_NAME+
-						File.separator+testCase+
+						File.separator+key.replaceAll("[^A-Za-z0-9]", "")+
 						File.separator+suffix).mkdirs();
 				res.setFileName("."+File.separator+
 						RESULT_FILE_NAME+
-						File.separator+testCase+
+						File.separator+key.replaceAll("[^A-Za-z0-9]", "")+
 						File.separator+suffix+fileName[fileName.length-1]);
 				res.save();
 				try{
@@ -497,7 +507,12 @@ public class Benchmark {
 				update=true;
 			if(updIt.hasNext() && update){
 				File f = updIt.next();
-				query = QueryHandler.ntToQuery(f, true, graphURI);
+				if(!sparqlLoad){
+					query = QueryHandler.ntToQuery(f, true, graphURI);
+				}
+				else{
+					FileUploader.loadFile(con, f, graphURI);
+				}
 				update=false;
 			}
 			else if(queryList.size()>0){
@@ -508,14 +523,17 @@ public class Benchmark {
 				log.info("Nothing to warmup anymore, Are You READY?? NO? okay... ");
 				return;
 			}
-			
-			java.sql.ResultSet res = con.execute(query);
-			if(res!=null){
-				try {
-					res.getStatement().close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if(!sparqlLoad){
+				java.sql.ResultSet res = con.execute(query);
+				
+				if(res!=null){
+					try {
+						res.getStatement().close();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				
 				}
 			}
 		}
@@ -549,17 +567,31 @@ public class Benchmark {
 	private static void start(Connection con, String dbName, String percent) throws IOException {
 		
 		for (String testcase : testcases.keySet()) {
-			if (testcase.equals(UploadTestcase.class.getName())) {
+			try{
+				if(config.get("warmup-query-file")!=null &&config.get("warmup-time")!=null){
+					log.info("Warmup started");
+					warmup(con, String.valueOf(config.get("warmup-query-file")) ,
+							config.get("warmup-updates"),
+							config.get("graph-uri"),
+							Long.valueOf(config.get("warmup-time")));
+					log.info("Warmup finished! Ready to get pumped!");
+				}
+			}catch(Exception e){
+				LogHandler.writeStackTrace(log, e, Level.WARNING);
+				log.info("No warmup! ");
+			}
+			String testcaseWithoutID = testcase.substring(0, testcase.lastIndexOf("&"));
+			if (testcaseWithoutID.equals(UploadTestcase.class.getName())) {
 				continue;
 			}
-			log.info("Starting "+testcase+" for "+dbName+":"+percent);
+			log.info("Starting "+testcaseWithoutID+" id: "+testcase.substring(testcase.lastIndexOf("&")+1)+" for "+dbName+":"+percent);
 			try {
 				Properties testProps = testcases.get(testcase);
 				if(!testProps.containsKey("graphURI")){
 					if(config.get("graph-uri")!=null)
 						testProps.setProperty("graphURI", config.get("graph-uri"));
 				}
-				Class<Testcase> t = (Class<Testcase>) Class.forName(testcase);
+				Class<Testcase> t = (Class<Testcase>) Class.forName(testcaseWithoutID);
 				Testcase test = t.newInstance();
 				test.setProperties(testProps);
 				if (results.containsKey(testcase+"&"+percent)) {
@@ -650,5 +682,16 @@ public class Benchmark {
 	 */
 	public static Connection getReferenceConnection(){
 		return refCon;
+	}
+	
+	public static Properties getTestcasesWithoutIdentifier(String testcase){
+		for(String testWithID : testcases.keySet()){
+			if(testcase.equals(testWithID.substring(0, testWithID.lastIndexOf("&")))){
+				return testcases.get(testWithID);
+			}
+		}
+		return null;
+		
+		
 	}
 }

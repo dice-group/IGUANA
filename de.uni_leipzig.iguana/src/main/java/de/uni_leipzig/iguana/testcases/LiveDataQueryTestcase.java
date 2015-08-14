@@ -46,6 +46,7 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 		this.strategy = UpdateStrategy.valueOf(strategy.toUpperCase());
 		switch(this.strategy){
 		case VARIABLE:
+			log.info("Using Variable strategy");
 			rand = new Random(stratRand);
 			if (amount < 0){
 				intervall = QuerySorter.getIntervall(selects.size(), inserts.size());
@@ -54,12 +55,16 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 				intervall[0] = 1;
 				intervall[1] = 2*amount;
 			}
+			log.info("["+intervall[0]+";"+intervall[1]+"]");
 			break;
 		case FIXED:
+			log.info("Using fixed strategy");
 			if(amount <0)
 				amount = QuerySorter.getRoundX(selects.size(), inserts.size());
+			log.info("X: "+amount);
 			break;
 		default:
+			log.info("Using default strategy");
 			amount=0;
 			break;
 		}
@@ -93,8 +98,10 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 		}
 		while(!isQpSFinished()){
 			int actualAmount = getAmount();
+			log.info("DEBUG ActualAmount: "+actualAmount);
 			if(!strategy.equals(UpdateStrategy.NULL)){
 				log.info("Amount of Queries before next update"+actualAmount);
+				//TODO:THis doesn't make sense, why time? we need to check if the amount of QUeries is passed
 				long am=new Date().getTime();
 				long amQ;
 				while((amQ = new Date().getTime())-am<actualAmount){
@@ -105,6 +112,7 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 				}
 			}
 			else{
+				//TODO WHY should i sleep if the strategy is null? Should it wait the ms if there is no strategy? Visit the manual
 				try {
 					Thread.sleep(actualAmount);
 				} catch (InterruptedException e) {
@@ -112,6 +120,7 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 				}
 			}
 //			QueryTestcase.deccQueries(actualAmount);
+			//TODO check if after the waiting if there are more stupid things
 			String[] next = getNextLD();
 			if(next==null){
 				log.info("No Next LiveData File");
@@ -122,6 +131,7 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 			log.info("Query: "+query);
 			log.info("Query File: "+qFile);
 			int i=header.indexOf(qFile);
+			//TODO sparqlLoad or what ever
 			Long time = getQueryTime(query);
 			if(time<0){
 				time = -1*time;
