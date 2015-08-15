@@ -188,14 +188,14 @@ public class StressTestcase implements Testcase {
 			qt.setConnection(con);
 			qt.setCurrentDBName(currentDBName);
 			qt.setCurrentPercent(percent);
-			log.info("Setting Props for Update User#"+i);
+			log.info("Setting Props for Update User#"+(i-users));
 			qt.setProperties(propsUpdate);
 			log.info("Props are set");
 			if(propsUpdate.containsKey("x")){
 				qt.setAmount(Integer.parseInt(String.valueOf(propsUpdate.get("x"))));
 			}
 			qt.setStrategyRandom(i);
-			log.info("Setting Strategy "+propsUpdate.get("updateStrategy")+" for User#"+i);
+			log.info("Setting Strategy "+propsUpdate.get("updateStrategy")+" for Update User#"+(i-users));
 			qt.setStrategy(String.valueOf(propsUpdate.get("updateStrategy")));
 			log.info("Done setting strategy");
 //			Thread t = new Thread(qt);
@@ -253,7 +253,7 @@ public class StressTestcase implements Testcase {
 				if(user<users+updateUsers)
 					file=file.replaceAll("_user[0-9]+", "")+"_user"+user;
 				else
-					file = file.replaceAll("_userUpdate[0-9]+", "")+"_userUpdate"+(user);
+					file = file.replaceAll("_user[0-9]*Update[0-9]*", "")+"_userUpdate"+(user);
 				result.setPrefixes(prefixes);
 				result.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+
 						StressTestcase.class.getName()+File.separator+
@@ -277,7 +277,7 @@ public class StressTestcase implements Testcase {
 				if(user<users)
 					file=file.replaceAll("_user[0-9]+", "")+"_user"+user;
 				else
-					file = file.replaceAll("_userUpdate[0-9]+", "")+"_userUpdate"+(user);
+					file = file.replaceAll("_user[0-9]*Update[0-9]*", "")+"_userUpdate"+(user);
 				result.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+
 						StressTestcase.class.getName()+File.separator+
 						users+File.separator+updateUsers+File.separator

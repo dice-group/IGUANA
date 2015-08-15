@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -449,11 +450,11 @@ public class Benchmark {
 				}
 				new File("."+File.separator+
 						RESULT_FILE_NAME+
-						File.separator+key.replaceAll("[^A-Za-z0-9]", "")+
+						File.separator+testCase+
 						File.separator+suffix).mkdirs();
 				res.setFileName("."+File.separator+
 						RESULT_FILE_NAME+
-						File.separator+key.replaceAll("[^A-Za-z0-9]", "")+
+						File.separator+testCase+
 						File.separator+suffix+fileName[fileName.length-1]);
 				res.save();
 				try{
@@ -555,6 +556,14 @@ public class Benchmark {
 		warmup(con, queries, f, graphURI, time);
 	}
 	
+	private static String[] testcaseSorting(){
+		String[] sortedTestcases = new String[testcases.size()];
+		for(String testcase: testcases.keySet()){
+			sortedTestcases[Integer.valueOf(testcase.split("&")[1])] = testcase;
+		}
+		return sortedTestcases;
+	}
+	
 	/**
 	 * Starts every testcase except for the UploadTestcase for the given connection and percentage
 	 *
@@ -566,9 +575,10 @@ public class Benchmark {
 	@SuppressWarnings("unchecked")
 	private static void start(Connection con, String dbName, String percent) throws IOException {
 		
-		for (String testcase : testcases.keySet()) {
+		for (String testcase : testcaseSorting()) {
 			try{
-				if(config.get("warmup-query-file")!=null &&config.get("warmup-time")!=null){
+				if(config.get("warmup-query-file")!=null 
+						&&(config.get("warmup-time")!=null&&Integer.valueOf(config.get("warmup-time"))!=0)){
 					log.info("Warmup started");
 					warmup(con, String.valueOf(config.get("warmup-query-file")) ,
 							config.get("warmup-updates"),
@@ -576,9 +586,12 @@ public class Benchmark {
 							Long.valueOf(config.get("warmup-time")));
 					log.info("Warmup finished! Ready to get pumped!");
 				}
+				else{
+					log.info("No warmup!");
+				}
 			}catch(Exception e){
 				LogHandler.writeStackTrace(log, e, Level.WARNING);
-				log.info("No warmup! ");
+				log.info("ERROR: No warmup! ");
 			}
 			String testcaseWithoutID = testcase.substring(0, testcase.lastIndexOf("&"));
 			if (testcaseWithoutID.equals(UploadTestcase.class.getName())) {

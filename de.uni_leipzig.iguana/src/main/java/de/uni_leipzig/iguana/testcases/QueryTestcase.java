@@ -43,7 +43,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	protected Logger log;
 	
 	/** The con. */
-	private Connection con;
+	protected Connection con;
 	
 	/** The query patterns. */
 	private String queryPatterns;
@@ -105,7 +105,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	private int ldIt=0;
 
 	/** The graph uri. */
-	private String graphURI;
+	protected String graphURI;
 	
 	/** The x. */
 	private static int x = -1;
@@ -464,8 +464,8 @@ public class QueryTestcase implements Testcase, Runnable {
 				b = new Date().getTime();
 				if(res==null)
 					throw new SQLException("Result was null");
-//				queries++;
-				log.info("Executed Queries: "+queries);
+//				QueryTestcase.queries++;
+//				log.info("Executed Queries: "+QueryTestcase.queries);
 			} catch (SQLException e) {
 				
 				log.warning("Query "+query+" problems: ");
@@ -485,11 +485,10 @@ public class QueryTestcase implements Testcase, Runnable {
 		else{
 			log.info("Testing Query now");
 			a = new Date().getTime();
-			Boolean suc = con.update(query);
+			long suc = con.update(query);
 			b = new Date().getTime();
 			log.info("Finished testing");
-			if(!suc)
-				return -1*(b-a);
+			return suc;
 		}
 		
 		return b-a;
@@ -599,17 +598,25 @@ public class QueryTestcase implements Testcase, Runnable {
 		else{
 			return null;
 		}
-		String query;
-		if(Benchmark.sparqlLoad){
-			query=FileUploader.fileToQuery(new File(ldpath+File.separator+queryFile), graphURI);
-		}
-		else{
+		String query="";
+		if(!insert){
 			query=QueryHandler.ntToQuery(ldpath+File.separator+queryFile, insert, graphURI);
 		}
 		ret[0]=query;
-		ret[1]=queryFile;
+		ret[1]=ldpath+File.separator+queryFile;
 		return ret;
 	}
+	
+	public long getQueryUploadTime(String f){
+		Date a = new Date();
+		if(Benchmark.sparqlLoad){
+			return con.loadUpdate(f, graphURI);
+		}
+		else{
+			return con.uploadFile(f, graphURI);
+		}
+	}
+	
 	
 	
 	/**
@@ -838,10 +845,16 @@ public class QueryTestcase implements Testcase, Runnable {
 			case "ID":ldStrategy=LivedataComparator.INSERT_DELETE;break;
 			case "DI": ldStrategy=LivedataComparator.DELETE_INSERT;break;
 			}
-			
+		}	
+		catch(Exception e){
+			log.info("No ld-Linking is set. using default: INSERTS DELETES");
+			ldStrategy=LivedataComparator.INSERT_DELETE;
+		}
+		try{	
 			ldpath = String.valueOf(p.get("ldPath"));
 		}
 		catch(Exception e){
+			
 			//NO Live Data
 		}
 	}

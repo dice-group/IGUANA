@@ -88,15 +88,16 @@ public class UploadTestcase implements Testcase {
 //					}
 //				})){
 				Long a = new Date().getTime();
+				Long ret=0L;
 				if(f.isFile()){
 				
 					if(Benchmark.sparqlLoad){
-						if(!FileUploader.loadFile(con, f, graphUri)){
+						if((ret=FileUploader.loadFile(con, f, graphUri))==-1){
 							log.severe("Couldn't upload File - see Log for more details");
 						}
 					}// TODO as uploadFile does indeed take some time if it needs to split the files, the results aren't correct
 					else{
-						if(!con.uploadFile(f, graphUri)){
+						if((ret=con.uploadFile(f, graphUri))==-1){
 							log.severe("Couldn't upload File - see Log for more details");
 						}
 					}
@@ -104,7 +105,7 @@ public class UploadTestcase implements Testcase {
 				else{
 					for(File f2 : f.listFiles()){
 						try{
-							if(!con.uploadFile(f2, graphUri)){
+							if((ret=con.uploadFile(f2, graphUri))==-1){
 								log.severe("Couldn't upload File - see Log for more details");	
 							}
 							else
@@ -117,8 +118,8 @@ public class UploadTestcase implements Testcase {
 					}
 				}
 				Long b = new Date().getTime();
-				time += b-a;
-				row.add(String.valueOf((b-a)));
+				time += ret;
+				row.add(String.valueOf((ret)));
 				if(!header.get(header.size()-1).equals(f.getName())){
 				
 					header.add(f.getName());

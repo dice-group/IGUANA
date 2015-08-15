@@ -1,24 +1,31 @@
 package de.uni_leipzig.iguana.testcases;
 
+import java.io.File;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bio_gene.wookie.utils.LogHandler;
 
+import de.uni_leipzig.iguana.benchmark.Benchmark;
 import de.uni_leipzig.iguana.query.QuerySorter;
+import de.uni_leipzig.iguana.utils.FileUploader;
 import de.uni_leipzig.iguana.utils.ResultSet;
 
 public class LiveDataQueryTestcase extends QueryTestcase {
 
-	
+	public LiveDataQueryTestcase(){
+		super();
+		log = Logger.getLogger(QueryTestcase.class.getName());
+	}
 	
 
 	private int amount=-1;
 
-	private int[] intervall;
+	private int[] intervall = {0,0};
 	
 	private Random rand;
 
@@ -49,7 +56,11 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 			log.info("Using Variable strategy");
 			rand = new Random(stratRand);
 			if (amount < 0){
-				intervall = QuerySorter.getIntervall(selects.size(), inserts.size());
+				Double x = timeLimit*1.0/inserts.size();
+				Double sig = Math.sqrt(x);
+				intervall[0] = Math.round(Double.valueOf(x-sig).floatValue());
+				intervall[1] = Math.round(Double.valueOf(x+sig).floatValue());
+//				intervall = QuerySorter.getIntervall(selects.size(), inserts.size());
 			}
 			else{ 
 				intervall[0] = 1;
@@ -58,9 +69,12 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 			log.info("["+intervall[0]+";"+intervall[1]+"]");
 			break;
 		case FIXED:
+			//TODO use time instead of queries
 			log.info("Using fixed strategy");
-			if(amount <0)
-				amount = QuerySorter.getRoundX(selects.size(), inserts.size());
+			if(amount <0){
+//				amount = QuerySorter.getRoundX(selects.size(), inserts.size());
+				amount = Double.valueOf((timeLimit*1.0)/inserts.size()).intValue();
+			}
 			log.info("X: "+amount);
 			break;
 		default:
@@ -99,21 +113,21 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 		while(!isQpSFinished()){
 			int actualAmount = getAmount();
 			log.info("DEBUG ActualAmount: "+actualAmount);
-			if(!strategy.equals(UpdateStrategy.NULL)){
-				log.info("Amount of Queries before next update"+actualAmount);
-				//TODO:THis doesn't make sense, why time? we need to check if the amount of QUeries is passed
-				long am=new Date().getTime();
-				long amQ;
-				while((amQ = new Date().getTime())-am<actualAmount){
-//					if(am<amQ){
-//						log.info("DEBUG Executed Queries: "+amQ);
-//						am = amQ;
-//					}
+			if(strategy.equals(UpdateStrategy.VARIABLE)){
+				log.info("Amount of Queries before next update: "+actualAmount);
+				//Wait till the amount of queries is passed by
+				long time=new Date().getTime();
+				while((new Date().getTime()-time)<actualAmount){
+					//Time to drink tea
 				}
+//				log.info("Executed Queries: "+execQueries);
+//				QueryTestcase.deccQueries(actualAmount);
+				
 			}
-			else{
-				//TODO WHY should i sleep if the strategy is null? Should it wait the ms if there is no strategy? Visit the manual
+			else if(strategy.equals(UpdateStrategy.FIXED)){
 				try {
+					log.info("Milliseconds to wait before next Query: "+actualAmount);;
+					//Wait actualAmount until next Query
 					Thread.sleep(actualAmount);
 				} catch (InterruptedException e) {
 					LogHandler.writeStackTrace(log, e, Level.SEVERE);
@@ -126,13 +140,25 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 				log.info("No Next LiveData File");
 				break;
 			}
-			String query = next[0];
+//			String query = next[0];
 			String qFile = next[1];
-			log.info("Query: "+query);
+//			log.info("Query: "+query);
 			log.info("Query File: "+qFile);
-			int i=header.indexOf(qFile);
-			//TODO sparqlLoad or what ever
-			Long time = getQueryTime(query);
+
+			int i=header.indexOf(new File(qFile).getName());
+			Long time=0L;
+			//TODO only if added else
+			if(next[0].isEmpty()){
+				if(Benchmark.sparqlLoad){
+					time = FileUploader.loadFile(con, new File(qFile), graphURI);
+				}
+				else{
+					time = con.uploadFile(qFile, graphURI);
+				}
+			}
+			else{
+				time = con.update(next[0]);
+			}
 			if(time<0){
 				time = -1*time;
 				qFailCount.set(i-1, 1+qCount.get(i-1));
@@ -162,7 +188,8 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 		case VARIABLE:
 			return rand.nextInt(intervall[1]-intervall[0])+intervall[0];
 		default:
-			return Double.valueOf((timeLimit*1.0)/inserts.size()).intValue();
+			//Time to wait until next insert
+			return 0;
 		}
 	}
 	

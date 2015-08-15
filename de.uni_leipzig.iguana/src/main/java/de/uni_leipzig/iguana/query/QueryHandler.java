@@ -1,10 +1,13 @@
 package de.uni_leipzig.iguana.query;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -121,7 +124,20 @@ public class QueryHandler {
 				query+=" GRAPH <"+graphUri+"> { ";
 			}
 			Model m = ModelFactory.createDefaultModel();
-			m.read(file.toURI().toString());
+			String uriFile="";
+			try {
+				uriFile = file.toURI().normalize().toURL().toString();
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+				//			m.read(uriFile);
+			try {
+				m.read(uriFile);
+			} catch (Exception e) {
+				Logger.getGlobal().severe("Problems with model");
+				return "";
+			}
 			String lines = GraphHandler.GraphToSPARQLString(m.getGraph());
 			lines = lines.substring(1, lines.length()-1);
 //			FileInputStream fis = new FileInputStream(file);
