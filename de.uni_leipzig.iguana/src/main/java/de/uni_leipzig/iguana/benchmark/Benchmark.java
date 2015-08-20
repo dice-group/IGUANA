@@ -80,6 +80,8 @@ public class Benchmark {
 	private static Properties logCluster;
 	public static boolean sparqlLoad=false;
 	private static Integer numberOfTriples;
+	private static String testcasePre;
+	private static String testcasePost;
 	
 	public enum DBTestType {
 		all, choose
@@ -174,6 +176,8 @@ public class Benchmark {
 			config = Config.getParameter(rootNode);
 			sparqlLoad = Boolean.valueOf(config.get("sparqlLoad"));
 			numberOfTriples = Integer.valueOf(config.get("number-of-triples"));
+			testcasePre = config.get("testcase-pre");
+			testcasePost = config.get("testcase-post");
 			testcases = Config.getTestCases(rootNode);
 			percents = Config.getPercents(rootNode);
 			dataDescription = Config.getDataDescription(rootNode);
@@ -436,8 +440,8 @@ public class Benchmark {
 		for (String key : results.keySet()) {
 			for (ResultSet res : results.get(key)) {
 				log.info("Saving Results for "+key+"...");
-				String testCase = key.split("&")[0];
-				testCase.replaceAll("[^A-Za-z0-9]", "");
+				String testCase = key.split("&")[0]+key.split("&")[2];
+				testCase.replaceAll("[^A-Za-z0-9.]", "");
 				String fileSep =File.separator;
 				if(fileSep.equals("\\")){
 					fileSep=File.separator+File.separator;
@@ -576,6 +580,12 @@ public class Benchmark {
 	private static void start(Connection con, String dbName, String percent) throws IOException {
 		
 		for (String testcase : testcaseSorting()) {
+			
+			 if(testcasePre!=null&&!testcasePre.isEmpty()){
+				 testcaseShellProcessing(testcasePre, dbName, percent, testcase.split("&")[1]);
+			 }
+			 
+			
 			try{
 				if(config.get("warmup-query-file")!=null 
 						&&(config.get("warmup-time")!=null&&Integer.valueOf(config.get("warmup-time"))!=0)){
@@ -607,16 +617,22 @@ public class Benchmark {
 				Class<Testcase> t = (Class<Testcase>) Class.forName(testcaseWithoutID);
 				Testcase test = t.newInstance();
 				test.setProperties(testProps);
-				if (results.containsKey(testcase+"&"+percent)) {
-					test.addCurrentResults(results.get(testcase+"&"+percent));
-				}
 				test.setConnection(con);
 				test.setCurrentDBName(dbName);
 				test.setCurrentPercent(percent);
 				test.start();
+				if (results.containsKey(testcase+"&"+percent)) {
+					test.addCurrentResults(results.get(testcase+"&"+percent));
+				}
 				Collection<ResultSet> tcResults = test.getResults();
+				
 				results.put(testcase+"&"+percent, tcResults);
 				log.info("Finished "+testcase+" for "+dbName+":"+percent);
+				
+				if(testcasePost!=null&&!testcasePost.isEmpty()){
+				  testcaseShellProcessing(testcasePost, dbName, percent, testcase.split("&")[1]);
+				}
+				 
 			} catch (ClassNotFoundException | InstantiationException
 					| IllegalAccessException e) {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
@@ -705,6 +721,12 @@ public class Benchmark {
 		}
 		return null;
 		
+		
+	}
+	
+	public static void testcaseShellProcessing(String command, String dbId, String percent, String testcaseID){
+		ShellProcessor.executeCommand(command.replace("%DBID%", dbId).replace("%PERCENT%", percent)
+				.replace("%TESTCASEID%", testcaseID));
 		
 	}
 }

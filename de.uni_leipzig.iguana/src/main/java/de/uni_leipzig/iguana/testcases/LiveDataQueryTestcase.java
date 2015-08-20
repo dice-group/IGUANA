@@ -33,6 +33,8 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 
 	private int stratRand;
 	
+	private long elapsedTime=0;
+	
 	public enum UpdateStrategy{
 		FIXED, NULL, VARIABLE
 	}
@@ -63,8 +65,9 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 //				intervall = QuerySorter.getIntervall(selects.size(), inserts.size());
 			}
 			else{ 
-				intervall[0] = 1;
-				intervall[1] = 2*amount;
+				Double sig = Math.sqrt(amount);
+				intervall[0] = Math.round(Double.valueOf(amount-sig).floatValue());
+				intervall[1] = Math.round(Double.valueOf(amount+sig).floatValue());
 			}
 			log.info("["+intervall[0]+";"+intervall[1]+"]");
 			break;
@@ -112,14 +115,15 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 		}
 		while(!isQpSFinished()){
 			int actualAmount = getAmount();
-			log.info("DEBUG ActualAmount: "+actualAmount);
+ 			log.info("DEBUG ActualAmount: "+actualAmount);
 			if(strategy.equals(UpdateStrategy.VARIABLE)){
-				log.info("Amount of Queries before next update: "+actualAmount);
+				log.info("Amount of ms before next update: "+actualAmount);
 				//Wait till the amount of queries is passed by
 				long time=new Date().getTime();
 				while((new Date().getTime()-time)<actualAmount){
 					//Time to drink tea
 				}
+				elapsedTime+=(new Date().getTime()-time);
 //				log.info("Executed Queries: "+execQueries);
 //				QueryTestcase.deccQueries(actualAmount);
 				
@@ -186,7 +190,11 @@ public class LiveDataQueryTestcase extends QueryTestcase {
 		case FIXED:
 			return amount;
 		case VARIABLE:
-			return rand.nextInt(intervall[1]-intervall[0])+intervall[0];
+			int ret = rand.nextInt(intervall[1]-intervall[0])+intervall[0];
+			if(timeLimit-elapsedTime<ret){
+				return Long.valueOf(timeLimit-elapsedTime).intValue();
+			}
+			return ret;
 		default:
 			//Time to wait until next insert
 			return 0;

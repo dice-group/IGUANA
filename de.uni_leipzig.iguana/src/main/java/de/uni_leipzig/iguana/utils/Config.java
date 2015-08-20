@@ -234,6 +234,21 @@ public class Config {
 		}
 		map.put("number-of-triples", numberOfTriples);
 		cp.setNode(benchmark);
+		
+		Element testcases = cp.getElementAt("testcases", 0);
+		try{
+			map.put("testcase-pre", testcases.getAttribute("testcase-pre"));
+		}
+		catch(Exception e){
+			
+		}
+		try{
+			map.put("testcase-post", testcases.getAttribute("testcase-post"));
+		}
+		catch(Exception e){
+			
+		}
+		cp.setNode(benchmark);
 		//NEW END
 		
 		Element testDB = cp.getElementAt("test-db", 0);

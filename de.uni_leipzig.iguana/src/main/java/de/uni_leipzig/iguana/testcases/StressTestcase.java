@@ -250,10 +250,10 @@ public class StressTestcase implements Testcase {
 				
 				String file = new File(result.getFileName()).getName();
 				file=file.replace("_stresstest", "")+"_stresstest";
-				if(user<users+updateUsers)
+				if(user<users)
 					file=file.replaceAll("_user[0-9]+", "")+"_user"+user;
 				else
-					file = file.replaceAll("_user[0-9]*Update[0-9]*", "")+"_userUpdate"+(user);
+					file = file.replaceAll("_user[0-9]*Update[0-9]*", "")+"_userUpdate"+(users+updateUsers-user);
 				result.setPrefixes(prefixes);
 				result.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+
 						StressTestcase.class.getName()+File.separator+
@@ -268,7 +268,7 @@ public class StressTestcase implements Testcase {
 			resU.addAll(resultsUser);
 			user++;
 		}
-		user =0;
+//		user =0;
 		for(Collection<ResultSet> resultsUser : results2){
 			
 			for(ResultSet result : resultsUser){
@@ -277,7 +277,7 @@ public class StressTestcase implements Testcase {
 				if(user<users)
 					file=file.replaceAll("_user[0-9]+", "")+"_user"+user;
 				else
-					file = file.replaceAll("_user[0-9]*Update[0-9]*", "")+"_userUpdate"+(user);
+					file = file.replaceAll("_user[0-9]*Update[0-9]*", "")+"_userUpdate"+(user-users);
 				result.setFileName("."+File.separator+Benchmark.TEMP_RESULT_FILE_NAME+File.separator+
 						StressTestcase.class.getName()+File.separator+
 						users+File.separator+updateUsers+File.separator
@@ -399,7 +399,13 @@ public class StressTestcase implements Testcase {
 					
 				tmp.setTitle(res2.getTitle());
 				tmp.setxAxis(res2.getxAxis());
-				tmp.setxAxis(res2.getyAxis());
+				tmp.setyAxis(res2.getyAxis());
+				res.setTitle(res2.getTitle());
+				res.setxAxis(res2.getxAxis());
+				res.setyAxis(res2.getyAxis());
+				resSum.setTitle(res2.getTitle());
+				resSum.setxAxis(res2.getxAxis());
+				resSum.setyAxis(res2.getyAxis());
 				//If it is the first ResultSet of this kind just add the Row
 				if(first){
 					first = false;
@@ -435,13 +441,16 @@ public class StressTestcase implements Testcase {
 				}
 				res.setHeader(res2.getHeader());
 				resSum.setHeader(res2.getHeader());
-
+				
 			}
 			//Finished Adding values together
 			res.setFileName(key+suffix);
-			
+			resSum.setxAxis(res.getxAxis());
+			resSum.setyAxis(res.getyAxis());
 			//Copy all of res to ResultSet//
-			resSum.setTitle(res.getTitle()+" (Sum of Users)");			res.setTitle(res.getTitle()+" (Mean of Users)");
+			resSum.setTitle(res.getTitle()+" (Sum of all users)");			res.setTitle(res.getTitle()+" (Mean of all users)");
+	
+			
 			resSum.setFileName(key+"_Sum_"+suffix);
 			//Copying res to resSum
 			for(int i=0;i<res.getTable().size();i++){
@@ -481,7 +490,9 @@ public class StressTestcase implements Testcase {
 		ret.addAll(resU);
 		ret.addAll(merge(resUU, "_userUpdate[0-9]+", "update"));
 		ret.addAll(resUU);
-		return ret;
+		addCurrentResults(ret);
+		
+		return res;
 	}
 
 	/* (non-Javadoc)
@@ -513,8 +524,14 @@ public class StressTestcase implements Testcase {
 		while(it.hasNext()){
 			if(!end && ir.hasNext()){
 				ResultSet r = it.next();
+				r.reset();
+				log.info("DEBUG: "+r.getFileName());
+				log.info("DEBUG: "+r.hasNext());
 				while(r.hasNext()){
-					ir.next().addRow(r.next());
+					ResultSet ires = ir.next();
+					log.info("DEBUG: "+ires.getFileName());
+					ires.addRow(r.next());
+					
 				}
 			}
 			else{

@@ -3,6 +3,7 @@ package de.uni_leipzig.iguana.testcases;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -196,8 +197,9 @@ public class QueryTestcase implements Testcase, Runnable {
 		queries = 0L;
 		//TODO test if queryPatterns is dir or file
 		String id = queryPatterns!="null"?StringHandler.stringToAlphanumeric(queryPatterns):"";		
-		//id+= ldpath!="null"?StringHandler.stringToAlphanumeric(ldpath):"";
-		File path = new File("QueryTestcase"+id+File.separator);
+		File path = new File(queryPatterns);
+		if(!path.isDirectory())
+			path = new File("QueryTestcase"+id+File.separator);
 		Boolean pathExists = false;
 		if(path.exists()){
 			log.info("Path "+path+" already exists. Using cached results.");
@@ -343,7 +345,7 @@ public class QueryTestcase implements Testcase, Runnable {
 		qps.setFileName(Benchmark.TEMP_RESULT_FILE_NAME+File.separator+"QueriesTotalTime"+percent);		
 		qps.setTitle("Queries total Executiontime");
 		qps.setxAxis("Query");
-		qps.setyAxis("time");
+		qps.setyAxis("time in ms");
 		r.add(qps);
 		//This isn't the correct results yet, so we need to 
 		ResultSet sumRes = new ResultSet();
@@ -380,7 +382,7 @@ public class QueryTestcase implements Testcase, Runnable {
 		r.add(seconds);
 		
 		failCount.setHeader(qps.getHeader());
-		failCount.setTitle("Querie fail count");
+		failCount.setTitle("failed queries count");
 		failCount.setxAxis("Query");
 		failCount.setyAxis("#Queries");
 		failCount.addRow(fail);
@@ -388,7 +390,7 @@ public class QueryTestcase implements Testcase, Runnable {
 		r.add(failCount);
 		
 		succededCount.setHeader(qps.getHeader());
-		succededCount.setTitle("Querie succeded count");
+		succededCount.setTitle("Succeded queries count");
 		succededCount.setxAxis("Query");
 		succededCount.setyAxis("#Queries");
 		succededCount.addRow(suc);
@@ -403,9 +405,9 @@ public class QueryTestcase implements Testcase, Runnable {
 		header.add("0");
 		sumRes.setHeader(header);
 		sumRes.addRow(row);
-		sumRes.setTitle("Query Mixes per Hour");
+		sumRes.setTitle("Query Mixes per TimeLimit");
 		sumRes.setxAxis("triplestore");
-		sumRes.setyAxis("#QueryMixes");
+		sumRes.setyAxis("#Queries");
 		r.add(sumRes);
 		
 		
@@ -549,7 +551,7 @@ public class QueryTestcase implements Testcase, Runnable {
 			qpsTime.set(i-1, newTime);
 			
 			row.set(i, qpsTime.get(i-1));
-			log.info("Query # "+qFile.replace(".txt", "")+" has taken "+time+" microseconds");
+			log.info("Query # "+qFile.replace(".txt", "")+" has taken "+time+" milliseconds");
 		}
 		for(int i=1;i<header.size();i++){
 			String cell = header.get(i);
