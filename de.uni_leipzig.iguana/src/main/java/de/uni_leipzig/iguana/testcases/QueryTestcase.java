@@ -3,7 +3,6 @@ package de.uni_leipzig.iguana.testcases;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.sql.Array;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,7 +23,6 @@ import de.uni_leipzig.iguana.benchmark.Benchmark;
 import de.uni_leipzig.iguana.query.QueryHandler;
 import de.uni_leipzig.iguana.query.QuerySorter;
 import de.uni_leipzig.iguana.utils.FileHandler;
-import de.uni_leipzig.iguana.utils.FileUploader;
 import de.uni_leipzig.iguana.utils.ResultSet;
 import de.uni_leipzig.iguana.utils.StringHandler;
 import de.uni_leipzig.iguana.utils.comparator.LivedataComparator;
@@ -610,7 +608,7 @@ public class QueryTestcase implements Testcase, Runnable {
 	}
 	
 	public long getQueryUploadTime(String f){
-		Date a = new Date();
+//		Date a = new Date();
 		if(Benchmark.sparqlLoad){
 			return con.loadUpdate(f, graphURI);
 		}

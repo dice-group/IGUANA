@@ -1123,6 +1123,7 @@ public class LogSolution {
 	 *            the features
 	 * @return the feature vector
 	 */
+	@SuppressWarnings("deprecation")
 	public static Byte[] getFeatureVector(String query, String[] features) {
 		Byte[] vec = new Byte[features.length];
 		query = URLDecoder.decode(queryWith(query)

@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -28,7 +27,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.bio_gene.wookie.utils.LogHandler;
 
 import uk.ac.shef.wit.simmetrics.similaritymetrics.EuclideanDistance;
@@ -44,7 +42,6 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import de.uni_leipzig.bf.cluster.Main;
 import de.uni_leipzig.bf.cluster.Main.HardenStrategy;
 import de.uni_leipzig.iguana.query.PatternSolution;
-import de.uni_leipzig.iguana.utils.StringHandler;
 import de.uni_leipzig.iguana.utils.comparator.OccurrencesComparator;
 import de.uni_leipzig.iguana.utils.comparator.StringComparator;
 import de.uni_leipzig.simba.controller.PPJoinController;

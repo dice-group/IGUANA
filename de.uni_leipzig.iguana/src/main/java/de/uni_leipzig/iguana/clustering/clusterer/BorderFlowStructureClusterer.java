@@ -31,6 +31,7 @@ public class BorderFlowStructureClusterer implements Clusterer {
 	private Integer thresholdQueries=10;
 	
 	/** The delta. */
+	@SuppressWarnings("unused")
 	private Integer delta=2;
 	
 	/** The harden. */

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -87,7 +86,7 @@ public class UploadTestcase implements Testcase {
 //						return false;
 //					}
 //				})){
-				Long a = new Date().getTime();
+//				Long a = new Date().getTime();
 				Long ret=0L;
 				if(f.isFile()){
 				
@@ -117,7 +116,7 @@ public class UploadTestcase implements Testcase {
 						}
 					}
 				}
-				Long b = new Date().getTime();
+//				Long b = new Date().getTime();
 				time += ret;
 				row.add(String.valueOf((ret)));
 				if(!header.get(header.size()-1).equals(f.getName())){

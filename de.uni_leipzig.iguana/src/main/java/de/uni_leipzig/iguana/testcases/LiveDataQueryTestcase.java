@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import org.bio_gene.wookie.utils.LogHandler;
 
 import de.uni_leipzig.iguana.benchmark.Benchmark;
-import de.uni_leipzig.iguana.query.QuerySorter;
 import de.uni_leipzig.iguana.utils.FileUploader;
 import de.uni_leipzig.iguana.utils.ResultSet;
 

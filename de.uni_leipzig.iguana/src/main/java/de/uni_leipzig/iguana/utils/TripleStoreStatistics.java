@@ -9,10 +9,6 @@ import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.connection.ConnectionFactory;
 import org.bio_gene.wookie.utils.LogHandler;
 
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.impl.LiteralImpl;
-
 // TODO should be rewritten with offset limit strategy
 /**
  * 

@@ -9,7 +9,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import de.uni_leipzig.iguana.converter.ConverterI;
-import de.uni_leipzig.informatik.swp13_sc.converter.PGNToRDFConverterRanged;
 
 
 /**
