@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import org.bio_gene.wookie.connection.Connection;
+import org.w3c.dom.Node;
 
 import de.uni_leipzig.iguana.utils.ResultSet;
 
@@ -50,6 +51,8 @@ public interface Testcase {
 	 */
 	public void setConnection(Connection con);
 	
+	
+	public void setConnectionNode(Node con, String id);
 	/**
 	 * Sets the current db name.
 	 *
@@ -63,4 +66,6 @@ public interface Testcase {
 	 * @param percent the new current percentage
 	 */
 	public void setCurrentPercent(String percent);
+	
+	public Boolean isOneTest();
 }

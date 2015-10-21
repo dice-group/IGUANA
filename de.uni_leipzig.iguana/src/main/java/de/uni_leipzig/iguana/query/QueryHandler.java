@@ -1,11 +1,12 @@
 package de.uni_leipzig.iguana.query;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -29,8 +30,6 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.lang.SPARQLParser;
 import com.hp.hpl.jena.sparql.lang.UpdateParser;
 import com.hp.hpl.jena.sparql.modify.UpdateRequestSink;
@@ -51,8 +50,14 @@ import de.uni_leipzig.iguana.utils.RandomStringBuilder;
  */
 public class QueryHandler {
 	
+	private static final String FEASIBLE_QUERY_START = "#--";
+
 	public static void main(String[] argc) throws IOException{
-		QueryHandler qh = new QueryHandler(ConnectionFactory.createImplConnection("dbpedia.org/sparql", "dbpedia.org/sparql", 180), "C:/Users/urFaust/queries.txt2sorted");
+		org.apache.log4j.Logger.getLogger("log4j.logger.org.apache.jena.arq.info").setLevel(org.apache.log4j.Level.OFF);
+		org.apache.log4j.Logger.getLogger("log4j.logger.org.apache.jena.arq.exec").setLevel(org.apache.log4j.Level.OFF);
+		org.apache.log4j.Logger.getLogger("log4j.logger.org.apache.jena").setLevel(org.apache.log4j.Level.OFF);
+		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
+		QueryHandler qh = new QueryHandler(ConnectionFactory.createImplConnection("dbpedia.org/sparql", "dbpedia.org/sparql", 300), "pattern.txt");
 		qh.init();
 	}
 	
@@ -69,7 +74,7 @@ public class QueryHandler {
 	private Logger log = Logger.getLogger(QueryHandler.class.getSimpleName());
 	
 	/** The limit. */
-	private int limit = 5000;
+	private int limit = 2000;
 	
 	/** The rand. */
 	private Random rand;
@@ -100,7 +105,11 @@ public class QueryHandler {
 	 * @return the query
 	 */
 	public static String ntToQuery(String file, Boolean insert, String graphUri){
-		return ntToQuery(new File(file), insert, graphUri);
+		try {
+			return ntToQuery(new File(file), insert, graphUri);
+		} catch (IOException e) {
+			return null;
+		}
 	}
 	
 	/**
@@ -110,8 +119,9 @@ public class QueryHandler {
 	 * @param insert if query should be insert (true) or delete (false)
 	 * @param graphUri the graph to use (can be null)
 	 * @return the query
+	 * @throws IOException 
 	 */
-	public static String ntToQuery(File file, Boolean insert, String graphUri){
+	public static String ntToQuery(File file, Boolean insert, String graphUri) throws IOException{
 //		try{
 			String query = "";
 			query= "INSERT {";
@@ -121,36 +131,43 @@ public class QueryHandler {
 			if(graphUri!=null){
 				query+=" GRAPH <"+graphUri+"> { ";
 			}
-			Model m = ModelFactory.createDefaultModel();
-			String uriFile="";
-			try {
-				uriFile = file.toURI().normalize().toURL().toString();
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-				//			m.read(uriFile);
-			try {
-				m.read(uriFile);
-			} catch (Exception e) {
-				Logger.getGlobal().severe("Problems with model");
-				return "";
-			}
-			String lines = GraphHandler.GraphToSPARQLString(m.getGraph());
-			lines = lines.substring(1, lines.length()-1);
-//			FileInputStream fis = new FileInputStream(file);
-//			BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
-//			String line ="";
-//			while((line=br.readLine()) != null){
-//				if(line.isEmpty() || line.equals("\n")){
-//					continue;
-//				}
-//				query +="";
-//				query +=line;
-//				query +=" . ";
+//			Model m = ModelFactory.createDefaultModel();
+//			String uriFile="";
+//			try {
+//				uriFile = file.toURI().normalize().toURL().toString();
+//			} catch (MalformedURLException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
 //			}
-//			query = query.substring(0, query.lastIndexOf("."));
-			query+=lines;
+//				//			m.read(uriFile);
+//			try {
+//				m.read(uriFile);
+//			} catch (Exception e) {
+//				Logger.getGlobal().severe("Problems with model");
+//				return "";
+//			}
+//			String lines = GraphHandler.GraphToSPARQLString(m.getGraph());
+//			lines = lines.substring(1, lines.length()-1);
+////			FileInputStream fis = new FileInputStream(file);
+////			BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+////			String line ="";
+////			while((line=br.readLine()) != null){
+////				if(line.isEmpty() || line.equals("\n")){
+////					continue;
+////				}
+////				query +="";
+////				query +=line;
+////				query +=" . ";
+////			}
+////			query = query.substring(0, query.lastIndexOf("."));
+//			query+=lines;
+			FileReader fis = new FileReader(file);
+			BufferedReader bis = new BufferedReader(fis);
+			String triple="";
+			while((triple=bis.readLine())!=null){
+				query+=triple;
+			}
+			bis.close();
 			if(graphUri!=null){
 				query+=" }";
 			}
@@ -166,6 +183,35 @@ public class QueryHandler {
 //			return null;
 //		}
 	}
+	
+	public static List<String[]> getFeasibleToList(String file) throws IOException{
+		List<String[]> feasibleList = new LinkedList<String[]>();
+		File f = new File(file);
+		FileReader fr = new FileReader(f);
+		BufferedReader br = new BufferedReader(fr);
+		String line;
+		int index =0;
+		String[] add = new String[2];
+		String query="";
+		while((line=br.readLine())!=null){
+			if(line.startsWith(FEASIBLE_QUERY_START)){
+				if(!query.isEmpty()){
+					add[0]=query.replaceAll(" +", " ");
+					add[1]=index+"";
+					index++;
+					feasibleList.add(add);
+				    add = new String[2];
+					query="";
+				}
+				continue;
+			}
+			query+=" "+line;
+		}
+		br.close();
+		return feasibleList;
+		
+	}
+	
 	
 	/**
 	 * Initialization
@@ -294,7 +340,7 @@ public class QueryHandler {
 		String query = String.valueOf(pattern);
 //		query  = PatternSolution.queryToPattern(query);
 		int ret = 0;
-		File f = new File(path+fileName+".txt");
+		File f = new File(path+File.separator+fileName+".txt");
 		PrintWriter pwfailed=null;
 		PrintWriter pw =null;
 		try{
@@ -320,6 +366,10 @@ public class QueryHandler {
 				return 1;
 			}
 			else{
+				for(int i=0;i<10;i++){
+					con.execute(q);
+				}
+				
 				res= con.execute(q);
 			}
 			Boolean result= false, hasPrefixes=true,notFirst=false;
@@ -331,6 +381,9 @@ public class QueryHandler {
 					query = PatternSolution.nextPrefixToVar(query);
 				log.info("With query: "+query);
 				q = selectPattern(query);
+				for(int i=0;i<10;i++){
+					con.execute(q);
+				}
 				res= con.execute(q);
 				System.out.println(res);
 			}
@@ -353,6 +406,9 @@ public class QueryHandler {
 							query = PatternSolution.nextPrefixToVar(query);
 						q = selectPattern(query);
 						log.info("with: "+query+"\nas "+q);
+						for(int i=0;i<10;i++){
+							con.execute(q);
+						}
 						res= con.execute(q);
 						if(res==null)
 							continue;
@@ -366,6 +422,7 @@ public class QueryHandler {
 						int columns = rsmd.getColumnCount();
 						String line ="";
 						List<Object> vars = new LinkedList<Object>();
+						List<String> varMap = new LinkedList<String>();
 						for(int i=1 ;i<=columns;i++ ){
 							Object current = res.getObject(i);
 							if(current==null){
@@ -374,8 +431,9 @@ public class QueryHandler {
 							}
 							Node cur = TripleStoreHandler.implToNode(current);
 							vars.add(GraphHandler.NodeToSPARQLString(cur));
+							varMap.add(rsmd.getColumnLabel(i));
 						}
-						line = patternToQuery(pattern, vars);
+						line = patternToQuery(pattern, vars, varMap);
 						pw.write(line);
 						pw.println();
 						ret++;
@@ -433,18 +491,18 @@ public class QueryHandler {
 	 * @param vars the vars
 	 * @return the string
 	 */
-	private String patternToQuery(String pattern, List<Object> vars){
+	private String patternToQuery(String pattern, List<Object> vars, List<String> varMap){
 		String query = String.valueOf(pattern);
 		Pattern regex = Pattern.compile("%%v[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
 		Matcher matcher = regex.matcher(pattern);
-		int i=0;
+//		int i=0;
 		List<String> replaced = new LinkedList<String>();
 		while(matcher.find()){
 			String var = matcher.group();
+			String varEsc = var.replace("%", "");
 			if(!replaced.contains(var)){
-				//TODO!!!
-				query = query.replace(var, vars.get(i).toString());		
-				i++;
+				query = query.replace(var, vars.get(varMap.indexOf(varEsc)).toString());		
+//				i++;
 				replaced.add(var);
 			}
 		}

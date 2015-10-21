@@ -251,8 +251,10 @@ public class PatternSolution {
 		Pattern p = Pattern.compile("\\S*:\\S+");
 		Matcher m = p.matcher(query);
 		if(m.find()){
-//			String replace = m.group();
-			ret++;
+			String replace = m.group();
+			if(!replace.startsWith("\"")&&!replace.startsWith("'")){
+				ret++;
+			}
 		}
 		return ret;
 	}

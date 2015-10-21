@@ -20,7 +20,6 @@ import com.hp.hpl.jena.sparql.modify.UpdateRequestSink;
 import com.hp.hpl.jena.sparql.modify.UpdateSink;
 import com.hp.hpl.jena.update.UpdateRequest;
 
-import de.uni_leipzig.iguana.clustering.LogSolution;
 import de.uni_leipzig.iguana.utils.FileHandler;
 
 /**
@@ -35,9 +34,9 @@ public class QuerySorter {
 	private static Logger log;
 
 	static {
-		log = Logger.getLogger(LogSolution.class.getName());
+		log = Logger.getLogger(QuerySorter.class.getName());
 		log.setLevel(Level.INFO);
-		LogHandler.initLogFileHandler(log, "LogClusterQueries");
+		LogHandler.initLogFileHandler(log, QuerySorter.class.getName());
 	}
 	/**
 	 * Gets the x.

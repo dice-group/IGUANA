@@ -7,20 +7,20 @@
 	<licenses>
 		<license>
 			<name>MIT Licence</name>
-            <url>http://opensource.org/licenses/MIT</url>
+			<url>http://opensource.org/licenses/MIT</url>
 		</license>
 	</licenses>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
-		
+
 	</properties>
-	
+
 	<dependencies>
-	
-	
-	
+
+
+
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-core</artifactId>
@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-jdbc-driver-remote</artifactId>
-			<version>1.1.0</version>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>xerces</groupId>
@@ -105,7 +105,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-      		<version>4.11</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -155,7 +155,7 @@
 			<artifactId>transaction-api</artifactId>
 			<version>1.1</version>
 		</dependency>
-	<dependency>
+		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
@@ -175,7 +175,7 @@
 			<artifactId>httpcore-nio</artifactId>
 			<version>4.1</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>it.unimi.dsi</groupId>
 			<artifactId>dsiutils</artifactId>
@@ -183,6 +183,14 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/resources/lib/dsiutils-1.0.10.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>de.uni_leipzig.aksw</groupId>
+			<artifactId>feasible</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/feasible-1.0.jar</systemPath>
+		</dependency>
+		
 		<dependency>
 			<groupId>it.unimi.dsi</groupId>
 			<artifactId>fastutil</artifactId>
@@ -210,14 +218,14 @@
 			<artifactId>javautil</artifactId>
 			<version>3.1.1</version>
 		</dependency>
-		
-<!-- 		<dependency> -->
-<!-- 			<groupId>de.uni-leipzig.bf</groupId> -->
-<!-- 			<artifactId>BorderFlow</artifactId> -->
-<!-- 			<version>0.4.0</version> -->
-<!-- 			<scope>system</scope> -->
-<!-- 			<systemPath>${project.basedir}/src/main/resources/lib/BorderFlow-0.4.0.jar</systemPath> -->
-<!-- 		</dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>de.uni-leipzig.bf</groupId> -->
+		<!-- <artifactId>BorderFlow</artifactId> -->
+		<!-- <version>0.4.0</version> -->
+		<!-- <scope>system</scope> -->
+		<!-- <systemPath>${project.basedir}/src/main/resources/lib/BorderFlow-0.4.0.jar</systemPath> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>prefuse</groupId>
@@ -260,7 +268,7 @@
 			<version>2.0.1</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/resources/lib/jung-api-2.0.1.jar</systemPath>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>jung-graph-impl</groupId>
 			<artifactId>jung-graph-impl</artifactId>
@@ -386,37 +394,37 @@
 			<version>0.0.1-SNAPSHOT</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/resources/lib/connection-0.0.1-SNAPSHOT.jar</systemPath>
-			
-<!-- 			<exclusions> -->
-<!-- 				<exclusion> -->
-<!-- 					<artifactId>httpclient</artifactId> -->
-<!-- 					<groupId>org.apache.httpcomponents</groupId> -->
-<!-- 				</exclusion> -->
-<!-- 				<exclusion> -->
-<!-- 					<artifactId>httpcore</artifactId> -->
-<!-- 					<groupId>org.apache.httpcomponents</groupId> -->
-<!-- 				</exclusion> -->
-<!-- 				<exclusion> -->
-<!-- 					<artifactId>httpmime</artifactId> -->
-<!-- 					<groupId>org.apache.httpcomponents</groupId> -->
-<!-- 				</exclusion> -->
-<!-- 			</exclusions> -->
+
+			<!-- <exclusions> -->
+			<!-- <exclusion> -->
+			<!-- <artifactId>httpclient</artifactId> -->
+			<!-- <groupId>org.apache.httpcomponents</groupId> -->
+			<!-- </exclusion> -->
+			<!-- <exclusion> -->
+			<!-- <artifactId>httpcore</artifactId> -->
+			<!-- <groupId>org.apache.httpcomponents</groupId> -->
+			<!-- </exclusion> -->
+			<!-- <exclusion> -->
+			<!-- <artifactId>httpmime</artifactId> -->
+			<!-- <groupId>org.apache.httpcomponents</groupId> -->
+			<!-- </exclusion> -->
+			<!-- </exclusions> -->
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.httpcomponents</groupId> -->
-<!-- 			<artifactId>httpclient</artifactId> -->
-<!-- 			<version>4.2.3</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.httpcomponents</groupId> -->
-<!-- 			<artifactId>httpcore</artifactId> -->
-<!-- 			<version>4.2.2</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.httpcomponents</groupId> -->
-<!-- 			<artifactId>httpmime</artifactId> -->
-<!-- 			<version>4.2.3</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.httpcomponents</groupId> -->
+		<!-- <artifactId>httpclient</artifactId> -->
+		<!-- <version>4.2.3</version> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.httpcomponents</groupId> -->
+		<!-- <artifactId>httpcore</artifactId> -->
+		<!-- <version>4.2.2</version> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.httpcomponents</groupId> -->
+		<!-- <artifactId>httpmime</artifactId> -->
+		<!-- <version>4.2.3</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>de.uni_leipzig.informatik</groupId>
 			<artifactId>swp13_sc</artifactId>
@@ -470,8 +478,8 @@
 			<artifactId>java-getopt</artifactId>
 			<version>1.0.9</version>
 		</dependency>
-		
-		<!--  -->
+
+		<!-- -->
 		<dependency>
 			<groupId>annotations</groupId>
 			<artifactId>annotations</artifactId>
@@ -626,7 +634,7 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/resources/lib/libsvm-1.0.jar</systemPath>
 		</dependency>
-		<!--  -->
+		<!-- -->
 
 		<dependency>
 			<groupId>mysql</groupId>
@@ -640,11 +648,11 @@
 		</dependency>
 	</dependencies>
 	<repositories>
-<!-- 		<repository> -->
-<!-- 			<id>Libs</id> -->
-<!-- 			<name>Benchmark Libs</name> -->
-<!-- 			<url>file://${project.basedir}/src/main/resources/lib</url> -->
-<!-- 		</repository> -->
+		<!-- <repository> -->
+		<!-- <id>Libs</id> -->
+		<!-- <name>Benchmark Libs</name> -->
+		<!-- <url>file://${project.basedir}/src/main/resources/lib</url> -->
+		<!-- </repository> -->
 		<repository>
 			<releases>
 				<enabled>true</enabled>
@@ -661,85 +669,85 @@
 			<name>JBoss repository</name>
 			<url>https://repository.jboss.org/nexus/content/groups/public</url>
 		</repository>
-<!-- 		<repository> -->
-<!-- 			<id>repository.bio-gene</id> -->
-<!-- 			<name>BioGene repository</name> -->
-<!-- 			<url>http://maven.bio-gene.org/nexus/content/groups/public/</url> -->
-<!-- 		</repository> -->
+		<!-- <repository> -->
+		<!-- <id>repository.bio-gene</id> -->
+		<!-- <name>BioGene repository</name> -->
+		<!-- <url>http://maven.bio-gene.org/nexus/content/groups/public/</url> -->
+		<!-- </repository> -->
 	</repositories>
 	<build>
-	<resources> 
-        <resource>
-            <directory>src/main/resources</directory>
-            <excludes>
-                <exclude>**/*.*</exclude>
-            </excludes>
-            <filtering>false</filtering>
-        </resource>
-     </resources> 
-	<plugins>
-<!-- 		<plugin> -->
-<!--             <groupId>org.apache.maven.plugins</groupId> -->
-<!--             <artifactId>maven-dependency-plugin</artifactId> -->
-<!--             <executions> -->
-<!--                 <execution> -->
-<!--                     <id>copy-dependencies</id> -->
-<!--                     <phase>prepare-package</phase> -->
-<!--                     <goals> -->
-<!--                         <goal>copy-dependencies</goal> -->
-<!--                     </goals> -->
-<!--                     <configuration> -->
-<!--                         <outputDirectory>${project.build.directory}/lib</outputDirectory> -->
-<!--                         <overWriteReleases>false</overWriteReleases> -->
-<!--                         <overWriteSnapshots>false</overWriteSnapshots> -->
-<!--                         <overWriteIfNewer>true</overWriteIfNewer> -->
-<!--                     </configuration> -->
-<!--                 </execution> -->
-<!--             </executions> -->
-<!--         </plugin> -->
-<!--         <plugin> -->
-<!--             <groupId>org.apache.maven.plugins</groupId> -->
-<!--             <artifactId>maven-jar-plugin</artifactId> -->
-<!--             <configuration> -->
-<!--                 <archive> -->
-<!--                     <manifest> -->
-<!--                         <addClasspath>true</addClasspath> -->
-<!--                         <classpathPrefix>lib/</classpathPrefix> -->
-<!--                         <mainClass>de.uni_leipzig.mosquito.benchmark.Benchmark</mainClass> -->
-<!--                     </manifest> -->
-<!--                 </archive> -->
-<!--             </configuration> -->
-<!--         </plugin> -->
-	
-		
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*.*</exclude>
+				</excludes>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
+		<plugins>
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-dependency-plugin</artifactId> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <id>copy-dependencies</id> -->
+			<!-- <phase>prepare-package</phase> -->
+			<!-- <goals> -->
+			<!-- <goal>copy-dependencies</goal> -->
+			<!-- </goals> -->
+			<!-- <configuration> -->
+			<!-- <outputDirectory>${project.build.directory}/lib</outputDirectory> -->
+			<!-- <overWriteReleases>false</overWriteReleases> -->
+			<!-- <overWriteSnapshots>false</overWriteSnapshots> -->
+			<!-- <overWriteIfNewer>true</overWriteIfNewer> -->
+			<!-- </configuration> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- </plugin> -->
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-jar-plugin</artifactId> -->
+			<!-- <configuration> -->
+			<!-- <archive> -->
+			<!-- <manifest> -->
+			<!-- <addClasspath>true</addClasspath> -->
+			<!-- <classpathPrefix>lib/</classpathPrefix> -->
+			<!-- <mainClass>de.uni_leipzig.mosquito.benchmark.Benchmark</mainClass> -->
+			<!-- </manifest> -->
+			<!-- </archive> -->
+			<!-- </configuration> -->
+			<!-- </plugin> -->
+
+
 			<plugin>
-              <artifactId>maven-assembly-plugin</artifactId>
-              <configuration>
-                  <archive>
-                      <manifest>
-                          <addClasspath>true</addClasspath>
-                          <mainClass>de.uni_leipzig.iguana.benchmark.Benchmark</mainClass>
-                      </manifest>
-                  </archive>
-                 <descriptorRefs>
-                 	<descriptorRef>jar-with-dependencies</descriptorRef>
-                 </descriptorRefs>
-              </configuration>
-              <executions>
-                  <execution>
-                      <id>make-my-jar-with-dependencies</id>
-                      <phase>package</phase>
-                      <goals>
-                          <goal>single</goal>
-                      </goals>
-                      <configuration>
-              <descriptors>
-                <descriptor>dist.xml</descriptor>
-              </descriptors>
-            </configuration>
-                  </execution>
-              </executions>
-          </plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>de.uni_leipzig.iguana.benchmark.Benchmark</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-my-jar-with-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>dist.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<name>IGUANA</name>

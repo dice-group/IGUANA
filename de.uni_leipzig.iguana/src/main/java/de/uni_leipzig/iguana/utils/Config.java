@@ -5,18 +5,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.bio_gene.wookie.utils.ConfigParser;
+import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import de.uni_leipzig.iguana.benchmark.Benchmark.DBTestType;
 
 /**
  * The Class Config.
@@ -26,6 +26,197 @@ import de.uni_leipzig.iguana.benchmark.Benchmark.DBTestType;
  * @author Felix Conrads
  */
 public class Config {
+	
+	private static final String MAIN_NODE = "iguana";
+
+	private static final String BENCHMARK_NODE = "benchmark";
+
+	private static final String DROP_DB_ELEMENT = "drop-db";
+
+	private static final String GRAPH_URI_ELEMENT = "graph-uri";
+
+	private static final String NUMBER_OF_TRIPLES_ELEMENT = "number-of-triples";
+
+	private static final String SPARQL_LOAD_ELEMENT = "sparql-load";
+
+	private static final String TESTCASE_PRE_ATTR = "testcase-pre";
+
+	private static final String TESTCASE_ELEMENT = "testcases";
+
+	private static final String TESTCASE_POST_ATTR = "testcase-post";
+
+	private static final String TEST_DB_ELEMENT = "test-db";
+
+	private static final String RANDOM_FUNCTION_ELEMENT = "random-function";
+
+	private static final String WARMUP_ELEMENT = "warmup";
+
+	private static Logger log = Logger.getLogger(Config.class
+			.getSimpleName());
+
+	static {
+		LogHandler.initLogFileHandler(log,
+				Config.class.getSimpleName());
+	}
+	
+	public enum DBTestType {
+		all, choose
+	};
+
+	public enum RandomFunctionType {
+		seed, rand
+	};
+	
+	/** Should the results be attached to the email */
+	public static boolean attach=false;
+	
+	/**The connection IDs*/
+	public static List<String> databaseIDs = new LinkedList<String>();
+	
+	/**The properties for each testcase*/
+	public static Map<String, Properties> testcaseProperties = new HashMap<String, Properties>();
+	
+	/**The logclustering properties if Log Clustering should be done*/
+	public static Properties logClusteringProperties=null;
+	
+	public static List<Double> datasetPercantage = new LinkedList<Double>();
+	
+	public static String[] randomFiles = new String[0];
+	
+	public static Map<String, Object> emailConfiguration = new HashMap<String, Object>();
+
+	public static String logClusterClass;
+
+	public static String logClusterPath;
+
+	public static String logClusterOutput;
+
+	public static Boolean dropDB=false;
+
+	public static String graphURI;
+
+	public static Boolean sparqlLoad=false;
+
+	public static Long numberOfTriples=-1L;
+
+	public static String testcasePre;
+
+	public static String testcasePost;
+
+	public static DBTestType testDBType;
+
+	public static String refConID;
+
+	public static String randomFunction;
+
+	public static String randomFunctionGen;
+
+	public static String randomHundredFile;
+
+	public static String coherenceRoh;
+
+	public static String coherenceCh;
+
+	public static String warmupQueryFile;
+
+	public static Long warmupTime=0L;
+
+	public static String warmupUpdatePath = null;
+
+	public static Element dbNode;
+	
+	public static void init(String pathToXMLFile) throws ParserConfigurationException, SAXException, IOException{
+		
+		ConfigParser cp = ConfigParser.getParser(pathToXMLFile);
+		Element root = cp.getElementAt(MAIN_NODE, 0);
+		Element benchmark = (Element) cp.getElementAt(BENCHMARK_NODE, 0);
+		cp.setNode(root);
+		try{		
+			Element logCluster = cp.getElementAt("log-clustering", 0);
+			logClusterClass = logCluster.getAttribute("class");
+			logClusterPath = logCluster.getAttribute("path");
+			logClusterOutput = logCluster.getAttribute("output-file");
+		}
+		catch(Exception e){
+		}
+		cp.setNode(benchmark);
+		
+		dropDB = Boolean.valueOf(cp.getElementAt(DROP_DB_ELEMENT, 0).getAttribute("value"));
+		cp.setNode(benchmark);
+
+		try{
+			graphURI = cp.getElementAt(GRAPH_URI_ELEMENT, 0).getAttribute("name");
+		}
+		catch(Exception e){
+			graphURI=null;
+		}
+		cp.setNode(benchmark);
+		try{
+			sparqlLoad = Boolean.valueOf(cp.getElementAt(SPARQL_LOAD_ELEMENT, 0).getAttribute("value"));
+		}
+		catch(Exception e){
+			sparqlLoad=false;
+		}
+		cp.setNode(benchmark);
+	
+		try{
+			numberOfTriples = Long.valueOf(cp.getElementAt(NUMBER_OF_TRIPLES_ELEMENT, 0).getAttribute("value"));
+		}
+		catch(Exception e){
+			numberOfTriples=-1L;
+		}
+		cp.setNode(benchmark);
+		
+		Element testcases = cp.getElementAt(TESTCASE_ELEMENT, 0);
+		try{
+			testcasePre =  testcases.getAttribute(TESTCASE_PRE_ATTR);
+		}
+		catch(Exception e){
+		}
+		try{
+			testcasePost =  testcases.getAttribute(TESTCASE_POST_ATTR);
+		}
+		catch(Exception e){
+		}
+		cp.setNode(benchmark);
+
+		Element testDB = cp.getElementAt(TEST_DB_ELEMENT, 0);
+		testDBType = DBTestType.valueOf(testDB.getAttribute("type"));
+		refConID = testDB.getAttribute("reference");
+		
+		cp.setNode(benchmark);
+		
+		Element rand = cp.getElementAt(RANDOM_FUNCTION_ELEMENT, 0);
+		randomFunction = rand.getAttribute("type");
+		randomFunctionGen = rand.getAttribute("generate");
+		randomHundredFile =  rand.getAttribute("initFile");
+
+		coherenceRoh = rand.getAttribute("roh"); 
+		coherenceCh = rand.getAttribute("coherence");
+		cp.setNode(benchmark);
+		try{
+			Element warmup = cp.getElementAt(WARMUP_ELEMENT, 0);
+			warmupQueryFile =  warmup.getAttribute("file-name");
+			warmupTime = Long.valueOf(warmup.getAttribute("time"));
+			warmupUpdatePath = warmup.getAttribute("update-path");
+			if(warmupUpdatePath.isEmpty())
+				warmupUpdatePath=null;
+		}catch(Exception e){	
+		}
+		
+		
+		databaseIDs = getDatabaseIds((Node)root, testDBType, refConID, null);
+		testcaseProperties = getTestCases((Node)root);
+		logClusteringProperties = getLogClusterProperties((Node)root);
+		randomFiles = getRandomFiles((Node)root);
+		datasetPercantage = getPercents((Node)root);
+		emailConfiguration = getEmail((Node)root);
+		
+	}
+	
+	public static void printConfig(){
+		
+	}
 	
 	/**
 	 * Gets the database ids.
@@ -58,13 +249,14 @@ public class Config {
 			databases = cp.getNodeList("db");
 			break;
 		default:
-			log.warning("test-db type not or not correctly set {all|choose}\nuse default: all");
+//			log.warning("test-db type not or not correctly set {all|choose}\nuse default: all");
 			cp.resetNode();
 			cp.setNode((Element) rootNode);
 			cp.getElementAt("databases", 0);
 			databases = cp.getNodeList("database");
 		}
-
+			cp.setNode((Element) rootNode);
+			dbNode = cp.getElementAt("databases", 0);
 		
 		for (Integer i = 0; i < databases.getLength(); i++) {
 			String id = ((Element) databases.item(i)).getAttribute("id");
@@ -163,7 +355,6 @@ public class Config {
 			map.put("log-queries-file", logCluster.getAttribute("output-file"));
 		}
 		catch(Exception e){
-			
 		}
 		cp.setNode((Element)root);
 		Element benchmark = (Element) cp.getElementAt("benchmark", 0);
@@ -249,6 +440,7 @@ public class Config {
 			
 		}
 		cp.setNode(benchmark);
+
 		//NEW END
 		
 		Element testDB = cp.getElementAt("test-db", 0);
@@ -271,8 +463,7 @@ public class Config {
 			if(path.isEmpty())
 				path=null;
 			map.put("warmup-updates", path);
-		}catch(Exception e){
-			
+		}catch(Exception e){	
 		}
 		
 		return map;
@@ -339,6 +530,7 @@ public class Config {
 			ConfigParser cp = ConfigParser.getParser(rootNode);
 			Element email = cp.getElementAt("email-notification", 0);
 			ret.put("attach", email.getAttribute("attach-results"));
+			attach=Boolean.valueOf(email.getAttribute("attach-results"));
 			ret.put("hostname", cp.getElementAt("hostname", 0).getAttribute("value"));
 			cp.setNode(email);
 			ret.put("port",cp.getElementAt("port", 0).getAttribute("value"));
@@ -361,7 +553,7 @@ public class Config {
 			ret.put("email-to", emTo);
 		}
 		catch(Exception e){
-			e.printStackTrace();
+//			e.printStackTrace();
 			return null;
 		}
 		return ret;

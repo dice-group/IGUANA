@@ -24,6 +24,8 @@ import org.jfree.data.io.CSV;
 
 import com.xeiam.xchart.Chart;
 
+import de.uni_leipzig.iguana.utils.comparator.ResultSorting;
+
 
 /**
  * The Class ResultSet for the results of each testcase.
@@ -248,6 +250,13 @@ public class ResultSet implements Iterator<List<Object>>{
 		if(this.isEmpty()){
 			return;
 		}
+		ResultSorting resSort = new ResultSorting();
+		Boolean sort=true;
+		try {
+			header = resSort.produceMapping(header);
+		} catch (Exception e) {
+			sort=false;
+		}
 		File f = new File(this.fileName+".csv");
 		f.createNewFile();
 		PrintWriter pw = new PrintWriter(fileName+".csv");
@@ -261,6 +270,8 @@ public class ResultSet implements Iterator<List<Object>>{
 		}
         for(List<Object> row : table){
         	String currentRow = "";
+        	if(sort)
+        		row = resSort.sortRow(row);
         	for(Object cell : row){
         		currentRow += cell+";";
         	}

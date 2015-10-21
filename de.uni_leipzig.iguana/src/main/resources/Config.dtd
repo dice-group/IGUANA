@@ -1,6 +1,6 @@
 <!--<?xml version="1.0" encoding="UTF-8"?>-->
 <!--<!DOCTYPE mosquito [ -->
-<!ELEMENT mosquito (data-description, databases, benchmark, email-notification?)>
+<!ELEMENT iguana (data-description, databases, benchmark, email-notification?)>
 <!ELEMENT data-description (namespace, resource-uri, property-prefix-name, resource-prefix-name)>
 	<!ELEMENT namespace EMPTY>
 		<!ATTLIST namespace name CDATA #REQUIRED>
@@ -8,8 +8,8 @@
 		<!ATTLIST anchor name CDATA "#">
 	<!ELEMENT resource-uri EMPTY>
 		<!ATTLIST resource-uri name CDATA #REQUIRED>
-	<!ELEMENT property-preifx-name EMPTY>
-		<!ATTLIST property-preifx-name name CDATA "mprop">
+	<!ELEMENT property-prefix-name EMPTY>
+		<!ATTLIST property-prefix-name name CDATA "mprop">
 	<!ELEMENT resource-prefix-name EMPTY>
 		<!ATTLIST resource-prefix-name name CDATA "mres">
 
@@ -34,7 +34,7 @@
 		<!ELEMENT curl-update EMPTY>
 			<!ATTLIST curl-update command CDATA #REQUIRED>
 
-<!ELEMENT benchmark (drop-db, (pgn-processing, pgn-input-path, output-format, output-path)?, graph-uri?, query-diversity?, warmup?, random-function, test-db, testcases)>
+<!ELEMENT benchmark (drop-db, (pgn-processing, pgn-input-path, output-format, output-path)?, sparql-load?, graph-uri?, query-diversity?, warmup?, random-function, test-db, testcases)>
 	<!ATTLIST benchmark log CDATA #REQUIRED>
 	<!ELEMENT drop-db EMPTY>
 		<!ATTLIST drop-db value (true|false) #REQUIRED>
@@ -46,14 +46,17 @@
 		<!ATTLIST output-format name CDATA #REQUIRED>
 	<!ELEMENT output-path EMPTY>
 		<!ATTLIST output-path name CDATA #REQUIRED>
+	<!ELEMENT sparql-load EMPTY>
+		<!ATTLIST sparql-load value CDATA #REQUIRED>
 	<!ELEMENT graph-uri EMPTY>
 		<!ATTLIST graph-uri name CDATA #REQUIRED>
 	<!ELEMENT query-diversity EMPTY>
 		<!ATTLIST query-diversity value CDATA #REQUIRED>
 	<!ELEMENT warmup EMPTY>
 		<!ATTLIST warmup time CDATA #REQUIRED
-						 file-name CDATA #REQUIRED>
-	<!ELEMENT random-function (class-enabled?, (data-path+|percent+))>
+						 file-name CDATA #REQUIRED
+						 update-path CDATA>
+	<!ELEMENT random-function (class-enabled?, (data-file+|percent+))>
 		<!ATTLIST random-function 
 					type (seed|rand) #REQUIRED
 					generate (true|false) #REQUIRED>
