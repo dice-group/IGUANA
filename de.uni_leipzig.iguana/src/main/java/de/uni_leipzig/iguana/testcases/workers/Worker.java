@@ -167,7 +167,7 @@ public class Worker {
 				continue;
 			}
 			if(query[1]!=null&&!query[1].equals("null")){
-				log.finest(workerType+"Worker "+workerNr+": Query "+query[1]+" took "+time+"ms");
+				log.info(workerType+"Worker "+workerNr+": Query "+query[1]+" took "+time+"ms");
 				//PUT RESULTS
 				putResults(time, query[1]);
 			}

@@ -1,10 +1,7 @@
 package de.uni_leipzig.iguana.clustering.clusterer;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -17,50 +14,49 @@ import org.aksw.simba.benchmark.clustring.QueryClustering;
 import org.aksw.simba.benchmark.clustring.VoronoiPanel;
 import org.aksw.simba.benchmark.comparisons.AvgStats;
 import org.aksw.simba.benchmark.log.operations.CleanQueryReader;
-import org.bio_gene.wookie.utils.FileHandler;
 
 public class FeasibleClusterer implements Clusterer {
 
 	private static final String OUTPUT_DIR = "output-dir";
 
 	public static void main(String argc[]) throws Exception {
-		
-//		long c = FileHandler.getLineCount("dbpedia.txt");
-//		c = c/4;
-//		FileReader fr = new FileReader("dbpedia.txt");
-//		BufferedReader br = new BufferedReader(fr);
-//		new File("dbpedia2.txt").createNewFile();
-//		PrintWriter pw = new PrintWriter("dbpedia2.txt");
-//		for(int i =0;i<c;i++){
-//			String line="";
-//			if((line=br.readLine())!=null){
-//				pw.println(line);
-//			}
-//		}
-//		br.close();
-//		pw.close();
-//		System.out.println("finished");
+
+		// long c = FileHandler.getLineCount("dbpedia.txt");
+		// c = c/4;
+		// FileReader fr = new FileReader("dbpedia.txt");
+		// BufferedReader br = new BufferedReader(fr);
+		// new File("dbpedia2.txt").createNewFile();
+		// PrintWriter pw = new PrintWriter("dbpedia2.txt");
+		// for(int i =0;i<c;i++){
+		// String line="";
+		// if((line=br.readLine())!=null){
+		// pw.println(line);
+		// }
+		// }
+		// br.close();
+		// pw.close();
+		// System.out.println("finished");
 		FeasibleClusterer fc = new FeasibleClusterer();
-		fc.cluster("../../LogFiles/access2.log", "");
+		fc.cluster("../../LogFiles/dbpedia.txt", "");
 
 	}
 
-	private Integer number=1;
-	private String outputDir="FEASIBLE";
+	private Integer number = 10;
+	private String outputDir = "FEASIBLE";
 
 	@Override
-	public void cluster(String logPath, String queriesFile) throws IOException {
-		clustering(logPath, number, queriesFile);
+	public String cluster(String logPath, String queriesFile) throws IOException {
+		return clustering(logPath, number, queriesFile);
 
 	}
 
-	public void clustering(String pattern, int number, String queriesFile) throws IOException {
+	public String clustering(String pattern, int number, String queriesFile)
+			throws IOException {
 		// --Configuration and input files specifications ------------
 		// String queryFileWithStats = "SWDF-CleanQueries.txt";
 		String queryFileWithStats = pattern;
 		int numberOfQueries = number; // number of queries to be generated for a
-									// benchmark
-		selectCustomFilters();
+										// benchmark
 		long curTime = System.currentTimeMillis();
 		// Set<String> queries =
 		// Queries.getBenchmarkQueries(queryFileWithStats,10);
@@ -69,10 +65,13 @@ public class FeasibleClusterer implements Clusterer {
 				.getNormalizedFeaturesVectors(queryFileWithStats);
 		Set<String> queriesIds = qc.getPrototypicalQueries(normalizedVectors,
 				numberOfQueries);
-		Set<String> benchmarkQueriesIds = new HashSet<String>(queriesIds); 
-		
+		Set<String> benchmarkQueriesIds = new HashSet<String>(queriesIds);
+
 		Set<String> queries = CleanQueryReader.getQueriesWithStats(
 				queryFileWithStats, queriesIds);
+		if(!outputDir.endsWith("\\")&&!outputDir.endsWith("/")){
+			outputDir+=File.separator;
+		}
 		new File(outputDir).mkdirs();
 		Queries.printBenchmarkQueries(queries, outputDir);
 		System.out.println("\n-----\nBenchmark details saved to " + outputDir
@@ -87,38 +86,71 @@ public class FeasibleClusterer implements Clusterer {
 				.println("------------Detailed Analysis of the Generated Benchmark--------------");
 		AvgStats.getPercentUsedLogConstructs(outputDir + "queries-stats.txt");
 		AvgStats.getAvgLogFeatures(outputDir + "queries-stats.txt");
+		
+		return outputDir+"queries.txt";
 	}
 
 	/**
 	 * Customize your benchmark by activating various filters. See examples
 	 * below
 	 */
-	private static void selectCustomFilters() {
-		// Config.drawVoronoiDiagram = true ;
-		// You can set various Filters on benchmark query features and SPARQL
-		// clauses . e.g Resultsize should be between 5 to 10 and BGPs must be
-		// greater than 2
-		// and Triple patterns should be less or equal to 10 or Mean triple
-		// pattern selectivity >= 0.0001
-		// See the config file for further deatils
-		// Config.featureFilter = "(RunTime >= 50)";
-		// Config.featureFilter =
-		// "(ResultSize >= 5 AND ResultSize <= 100 AND BGPs >= 2 AND TriplePatterns <=10) OR (MeanTriplePatternsSelectivity >= 0.0001)";
-		// Config.clauseFilter = "(OPTIONAL AND DISTINCT) OR (UNION)";
-		// Config.featureFilter =
-		// "(ResultSize >= 100 AND TriplePatternsCount >= 2 AND TriplePatternsCount <= 5)";
-		// Config.clauseFilter = "(DISTINCT AND FILTER) OR (GROUPBY)";
-		// ------ You can turn on/of basic query types -----
-		// Config.ASK =false;
-		// Config.DESCRIBE = false;
-		// Config.SELECT=false;
-		// Config.CONSTRUCT = false;
+	private void selectCustomFilters(Properties p) {
+		setConfigElement(Config.drawVoronoiDiagram,
+				p.getProperty("draw-voronoi-diagram"), true);
+
+		if (p.getProperty("feature-filter") != null
+				&& !p.getProperty("feature-filter").isEmpty()) {
+			Config.featureFilter = p.getProperty("feature-filter");
+		}
+		if (p.getProperty("clause-filter") != null
+				&& !p.getProperty("clause-filter").isEmpty()) {
+			Config.clauseFilter = p.getProperty("clause-filter");
+		}
+
+		setConfigElement(Config.ASK, p.getProperty("ask"), false);
+		setConfigElement(Config.DESCRIBE, p.getProperty("describe"), false);
+		setConfigElement(Config.SELECT, p.getProperty("select"), false);
+		setConfigElement(Config.CONSTRUCT, p.getProperty("construct"), false);
+
+		setConfigElement(Config.triplePatternsCount,
+				p.getProperty("triple-patterns-count"), true);
+		setConfigElement(Config.resultSize, p.getProperty("result-size"), true);
+		setConfigElement(Config.joinVertices, p.getProperty("join-vertices"),
+				true);
+		setConfigElement(Config.meanJoinVerticesDegree,
+				p.getProperty("mean-join-vertices-degree"), true);
+		setConfigElement(Config.meanTriplePatternSelectivity,
+				p.getProperty("mean-triple-pattern-selectivity"), true);
+		setConfigElement(Config.BGPs, p.getProperty("bgps"), true);
+
+		setConfigElement(Config.UNION, p.getProperty("union"), true);
+		setConfigElement(Config.FILTER, p.getProperty("filter"), true);
+		setConfigElement(Config.OPTIONAL, p.getProperty("optional"), true);
+		setConfigElement(Config.DISTINCT, p.getProperty("distinct"), true);
+		setConfigElement(Config.ORDERBY, p.getProperty("orderby"), true);
+		setConfigElement(Config.GROUPBY, p.getProperty("groupby"), true);
+		setConfigElement(Config.LIMIT, p.getProperty("limit"), true);
+		setConfigElement(Config.REGEX, p.getProperty("regex"), true);
+		setConfigElement(Config.OFFSET, p.getProperty("offset"), true);
+
+		setConfigElement(Config.runTime, p.getProperty("run-time"), true);
+
+	}
+
+	private void setConfigElement(Boolean element, String value,
+			boolean defaultValue) {
+		if (value != null && !value.isEmpty()) {
+			element = Boolean.valueOf(value);
+		} else {
+			element = defaultValue;
+		}
 	}
 
 	@Override
 	public void setProperties(Properties p) {
 		number = Integer.valueOf(p.getProperty("number-of-queries"));
-		outputDir= p.getProperty(OUTPUT_DIR);
+		outputDir = p.getProperty(OUTPUT_DIR);
+		selectCustomFilters(p);
 	}
 
 }

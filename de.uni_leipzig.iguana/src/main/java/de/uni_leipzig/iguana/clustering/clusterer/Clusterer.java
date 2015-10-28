@@ -17,7 +17,7 @@ public interface Clusterer {
 	 * @param queriesFile the name of the file in which the query patterns should be saved
 	 * @throws IOException Signals that an IOException has occurred.
 	 */
-	public void cluster(String logPath, String queriesFile) throws IOException;
+	public String cluster(String logPath, String queriesFile) throws IOException;
 	
 	/**
 	 * Sets the properties.

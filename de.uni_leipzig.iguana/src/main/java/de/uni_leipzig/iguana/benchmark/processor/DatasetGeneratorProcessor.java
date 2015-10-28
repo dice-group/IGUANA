@@ -3,6 +3,8 @@ package de.uni_leipzig.iguana.benchmark.processor;
 import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +25,7 @@ public class DatasetGeneratorProcessor {
 	
 	private static Logger log = Logger.getLogger(DatasetGeneratorProcessor.class
 			.getSimpleName());
+	private static Map<String, String[]> map = new HashMap<String, String[]>();
 
 	static {
 		LogHandler
@@ -31,6 +34,9 @@ public class DatasetGeneratorProcessor {
 	
 	
 	public static String[] getDatasetFiles(Connection con, String hundredFile) {
+		if(map.containsKey(hundredFile+""+Config.datasetPercantage.hashCode())){
+			return map .get(hundredFile+""+Config.datasetPercantage.hashCode());
+		}
 		String[] ret = new String[Config.datasetPercantage.size()];
 		new File("datasets" + File.separator).mkdir();
 		String fileName = hundredFile;
@@ -89,6 +95,7 @@ public class DatasetGeneratorProcessor {
 			}
 			log.info("Writing " + Config.datasetPercantage.get(i) * 100 + "% Dataset to File");
 		}
+		map.put(hundredFile+""+Config.datasetPercantage.hashCode(), ret);
 		return ret;
 
 	}

@@ -10,42 +10,47 @@ import org.xml.sax.SAXException;
 
 import de.uni_leipzig.iguana.benchmark.processor.EmailProcessor;
 import de.uni_leipzig.iguana.benchmark.processor.ResultProcessor;
-import de.uni_leipzig.iguana.utils.Config;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException, URISyntaxException, ParserConfigurationException, SAXException {
-		
+	public static void main(String[] args) throws IOException,
+			URISyntaxException, ParserConfigurationException, SAXException {
+
 		if (args.length < 1) {
-			
-			
-			System.out.println("Usage: java (-Djava.library.path=\"path/To/lpsolve/Libs\")? -cp \"lib/*\" "+Main.class.getName()+" configfile.xml");
+
+			System.out
+					.println("Usage: java (-Djava.library.path=\"path/To/lpsolve/Libs\")? -cp \"lib/*\" "
+							+ Main.class.getName() + " configfile.xml");
 			return;
 		} else {
-			org.apache.log4j.Logger.getLogger(
-					"log4j.logger.org.apache.jena.arq.info").setLevel(
-					org.apache.log4j.Level.OFF);
-			org.apache.log4j.Logger.getLogger(
-					"log4j.logger.org.apache.jena.arq.exec").setLevel(
-					org.apache.log4j.Level.OFF);
-			org.apache.log4j.Logger.getLogger("log4j.logger.org.apache.jena")
-					.setLevel(org.apache.log4j.Level.OFF);
-			org.apache.log4j.Logger.getRootLogger().setLevel(
-					org.apache.log4j.Level.OFF);
-			ConnectionFactory
-					.setDriver("org.apache.jena.jdbc.remote.RemoteEndpointDriver");
-			ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=http://");
-			
-			Config.init(args[0]);
-			Config.printConfig();
-			Runtime.getRuntime().addShutdownHook(new Thread(){
-				@Override public void run() {
-					EmailProcessor.sendAborted(Config.attach, ResultProcessor.TEMP_RESULT_FOLDER);
+
+			initJena();
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				@Override
+				public void run() {
+					EmailProcessor.sendAborted(false,
+							ResultProcessor.getTempResultFolder());
 				}
 			});
-			Benchmark.execute();
+			Benchmark.execute(args[0]);
 		}
 	}
-	
-	
+
+	private static void initJena() {
+		org.apache.log4j.Logger.getLogger(
+				"log4j.logger.org.apache.jena.arq.info").setLevel(
+				org.apache.log4j.Level.OFF);
+		org.apache.log4j.Logger.getLogger(
+				"log4j.logger.org.apache.jena.arq.exec").setLevel(
+				org.apache.log4j.Level.OFF);
+		org.apache.log4j.Logger.getLogger("log4j.logger.org.apache.jena")
+				.setLevel(org.apache.log4j.Level.OFF);
+		org.apache.log4j.Logger.getRootLogger().setLevel(
+				org.apache.log4j.Level.OFF);
+		ConnectionFactory
+				.setDriver("org.apache.jena.jdbc.remote.RemoteEndpointDriver");
+		ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=http://");
+
+	}
+
 }

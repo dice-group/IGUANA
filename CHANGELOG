@@ -31,6 +31,36 @@ Currently known Bugs:
 None (found one? put them on https://github.com/AKSW/IGUANA)
 
 
+==========
+= v0.3.0 =
+==========
+
+Features:
+-----------------------------------------------------------------------------
++ Complete new Structure & Architecture
++ New stable Stresstest with the option of several updateusers and more strategies
++ LogClusterer now Feasible 
++ FederatedStresstest
++ UploadShellTestcase
++ ...
+ 
+- old LogClustering
+- converter
+- UploadTestcase
+
+-----------------------------------------------------------------------------
+
+BugFixes:
+-----------------------------------------------------------------------------
+- way too much
+- it's stable now :) 
+
+-----------------------------------------------------------------------------
+
+Currently known Bugs:
+-----------------------------------------------------------------------------
+- DataProducer neeeeeeds waaaay too long and way to much memeory. 
+(found one? put them on https://github.com/AKSW/IGUANA)
 
 CHANGELOG:
 ==========

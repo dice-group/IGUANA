@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.uni_leipzig</groupId>
 	<artifactId>iguana</artifactId>
-	<version>0.2.1</version>
+	<version>0.3.0</version>
 	<licenses>
 		<license>
 			<name>MIT Licence</name>
@@ -751,9 +751,9 @@
 		</plugins>
 	</build>
 	<name>IGUANA</name>
-	<url>https://github.com/AKSW/mosquito</url>
+	<url>https://github.com/AKSW/iguana</url>
 	<issueManagement>
-		<url>https://github.com/AKSW/mosquito/issues</url>
+		<url>https://github.com/AKSW/iguana/issues</url>
 	</issueManagement>
 </project>
   

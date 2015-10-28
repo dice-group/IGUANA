@@ -1,10 +1,14 @@
 package de.uni_leipzig.iguana.generation;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,6 +46,8 @@ public class CoherenceMetrics {
 	
 	/** The Constant TYPE_STRING. */
 	public static final String TYPE_STRING = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+
+	private static final String CACHE_FILE = null;
 	
 	/** The endpoint. */
 	private int endpoint;
@@ -63,6 +69,8 @@ public class CoherenceMetrics {
 	
 	/** The black list. */
 	private File blackList=null;
+
+	private Map<Integer, Long> denominators = new HashMap<Integer, Long>();
 	
 	
 	/**
@@ -130,6 +138,14 @@ public class CoherenceMetrics {
 	 */
 	public void setBlackList(String blackList){
 		this.blackList = new File(blackList);
+	}
+	
+	public void setGraphURI(String graphURI){
+		this.graphURI=graphURI;
+	}
+	
+	public void setLimit(int limit){
+		this.limit=limit;
 	}
 	
 	private Set<String> getSet(String query, Connection con){
@@ -220,14 +236,53 @@ public class CoherenceMetrics {
 	 * @return the type system
 	 */
 	private Set<String> getTypeSystem(Connection con){
-		String query="SELECT DISTINCT ?type WHERE {?s "+TYPE_STRING+" ?type . ";
+		String query="SELECT DISTINCT ?type ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+TYPE_STRING+" ?type . ";
 		query+=getBlackList();
 		query+=" }";
 		return getSet(query, con);
 	}
 	
-	/**
-	 * Gets the type system.
+	public Long getTypeSystemSize(){
+		switch(endpoint){
+		case RDFFILE_ENDPOINT:return getTypeSystemSize(dataFile);
+		case REMOTE_ENDPOINT:return getTypeSystemSize(con); 
+		}
+		return null;
+	}
+	
+	private Long getTypeSystemSize(String dataFile){
+		return (long) getTypeSystem().size();
+	}
+	
+	private Long getTypeSystemSize(Connection con){
+		String query="SELECT (COUNT(DISTINCT ?type) AS ?typesize) ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+TYPE_STRING+" ?type . ";
+		query+=getBlackList();
+		query+=" }";
+		return getCount(con, query, "typesize");
+	}
+	
+	private Long getCount(Connection con, String query, String var){
+		try{
+			ResultSet res = con.select(query);
+			if(res.next()){
+				return res.getLong(var);
+			}
+		}catch(Exception e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			return 0L;
+		}
+		return 0L;
+	}
+	
+	/**#
 	 *
 	 * @return the type system
 	 */
@@ -241,6 +296,7 @@ public class CoherenceMetrics {
 	
 	
 	
+	@SuppressWarnings("unused")
 	private Map<String, Set<String>> getInstancesOfType(Set<String> types, String dataFile){
 		File f = new File(dataFile);
 		Map<String, Set<String>> ret = new HashMap<String, Set<String>>();
@@ -323,7 +379,7 @@ public class CoherenceMetrics {
 					o = o.substring(0,o.length()-1);
 				}
 				o = o.trim();
-				if(split[1].trim().equals(TYPE_STRING) && o.equals(type)){
+				if(split[1].trim().equals(TYPE_STRING) && o.equals(type.trim())){
 					String add = split[0];
 					add = add.trim();
 					ret.add(add);
@@ -353,7 +409,11 @@ public class CoherenceMetrics {
 	 * @return the instances of type
 	 */
 	private Set<String> getInstancesOfType(String type, Connection con){
-		String query="SELECT DISTINCT ?s WHERE {?s "+TYPE_STRING+" "+type+" . ";
+		String query="SELECT DISTINCT ?s ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+TYPE_STRING+" "+type+" . ";
 		query+=getBlackList();
 		query+=" }";
 		return getSet(query, con);
@@ -374,6 +434,31 @@ public class CoherenceMetrics {
 	}
 	
 	
+	public Long getInstancesOfTypeCount(String type){
+		switch(endpoint){
+		case RDFFILE_ENDPOINT:return getInstancesOfTypeCount(type, dataFile);
+		case REMOTE_ENDPOINT:return getInstancesOfTypeCount(type, con);
+		}
+		return null;
+	}
+	
+	
+	private Long getInstancesOfTypeCount(String type, Connection con2) {
+		String query="SELECT (COUNT(DISTINCT ?s) AS ?count) ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+TYPE_STRING+" "+type+" . ";
+		query+=getBlackList();
+		query+=" }";
+		return getCount(con, query, "count");
+	}
+
+	private Long getInstancesOfTypeCount(String type, String dataFile2) {
+		return (long) getInstancesOfType(type, dataFile2).size();
+	}
+
+	
 	/**
 	 * Gets the properties of a given type.
 	 *
@@ -381,6 +466,7 @@ public class CoherenceMetrics {
 	 * @param dataFile the data file
 	 * @return the properties of type
 	 */
+	@SuppressWarnings("unused")
 	private Map<String, Set<String>> getPropertiesOfType(Set<String> types, String dataFile){
 		File f = new File(dataFile);
 		Map<String, Set<String>> ret = new HashMap<String, Set<String>>();
@@ -502,7 +588,7 @@ public class CoherenceMetrics {
 				}
 				o = o.trim();
 				if(split[1].trim().equals(TYPE_STRING)){
-					if(o.equals(type)){
+					if(o.equals(type.trim())){
 						add =true;
 					}
 					continue;	
@@ -538,7 +624,11 @@ public class CoherenceMetrics {
 	 * @return the properties of type
 	 */
 	private Set<String> getPropertiesOfType(String type, Connection con){
-		String query="SELECT DISTINCT ?p WHERE {?s "+TYPE_STRING+" "+type+" . ?s ?p ?o .";
+		String query="SELECT DISTINCT ?p ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+TYPE_STRING+" "+type+" . ?s ?p ?o .";
 		String bl = getBlackList();
 		if(bl.isEmpty()){
 			query+="FILTER ( !sameTerm(?p, "+TYPE_STRING+") )";
@@ -564,6 +654,36 @@ public class CoherenceMetrics {
 		return null;
 	}
 	
+	public Long getPropertiesOfTypeCount(String type){
+		switch(endpoint){
+		case RDFFILE_ENDPOINT:return getPropertiesOfTypeCount(type, dataFile);
+		case REMOTE_ENDPOINT:return getPropertiesOfTypeCount(type, con);
+		}
+		return null;
+	}
+	
+	
+	private Long getPropertiesOfTypeCount(String type, Connection con2) {
+		String query="SELECT (COUNT(DISTINCT ?p) as ?count) ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+TYPE_STRING+" "+type+" . ?s ?p ?o .";
+		String bl = getBlackList();
+		if(bl.isEmpty()){
+			query+="FILTER ( !sameTerm(?p, "+TYPE_STRING+") )";
+		}
+		else{
+			query+=bl.replace("FILTER (", "FILTER ( !sameTerm(?p, "+TYPE_STRING+") && ");
+		}
+		query+=" }";
+		return getCount(con, query, "count");
+	}
+
+	private Long getPropertiesOfTypeCount(String type, String dataFile2) {
+		return (long) getPropertiesOfType(type, dataFile2).size();
+	}
+
 	/**
 	 * Gets the occurences of a given property 
 	 * |{s | (s in instances and ex. (s, p, o) in D)}|
@@ -587,7 +707,7 @@ public class CoherenceMetrics {
 				line = line.trim();
 				line = line.replaceAll("\\s+", " ");
 				String[] split = line.split(" ");
-				if(instances.contains(split[0].trim())&&split[1].trim().equals(property)){
+				if(instances.contains(split[0].trim())&&split[1].trim().equals(property.trim())){
 					ret.add(split[0].trim());
 				}
 			}
@@ -617,13 +737,17 @@ public class CoherenceMetrics {
 	 * @return the occurences
 	 */
 	private Long getOccurences(String property, Set<String> instances, Connection con){
-		String query="SELECT DISTINCT ?o WHERE {<%s> "+property+" ?o} LIMIT 1 ORDER BY ?o";
+		String query="SELECT DISTINCT ?o ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {%s "+property+" ?o} ORDER BY(?o) LIMIT 1";
 		Long ret=0L;
+//		int index=0;
 		for(String instance : instances){
+//			index++;
 			try{
-				Query q = QueryFactory.create(String.format(query, instance));
-				if(graphURI!=null)
-					q.addGraphURI(graphURI);
+				Query q = QueryFactory.create(query.replace("%s", instance));
 				ResultSet res = con.select(q.toString().replace("\n", " "));
 				if(res.next()){
 					ret++;
@@ -673,7 +797,9 @@ public class CoherenceMetrics {
 	 */
 	public Long getOccurencesSum(Set<String> properties, Set<String> instances){
 		Long ret =0L;
+//		int i=0;
 		for(String property : properties){
+//			i++;
 			ret+=getOccurences(property, instances);
 		}
 		return ret;
@@ -698,6 +824,9 @@ public class CoherenceMetrics {
 	 * @return the coverage
 	 */
 	public Double getCoverage(String type, Set<String> properties, Set<String> instances){
+		if(properties.size()<=0||instances.size()<=0){
+			return 0.0;
+		}
 		return getOccurencesSum(properties, instances)/(1.0*properties.size()*instances.size());
 	}
 	
@@ -709,10 +838,14 @@ public class CoherenceMetrics {
 	 */
 	public Long getDenominator(Set<String> typeSystem){
 		Long ret=0L;
-		for(String type : typeSystem){
-			ret+=getPropertiesOfType(type).size();
-			ret+=getInstancesOfType(type).size();
+		if(denominators.containsKey(typeSystem.hashCode())){
+			return denominators .get(typeSystem.hashCode());
 		}
+		for(String type : typeSystem){
+			ret+=getPropertiesOfTypeCount(type);
+			ret+=getInstancesOfTypeCount(type);
+		}
+		denominators.put(typeSystem.hashCode(), ret);
 		return ret;
 	}
 	
@@ -729,6 +862,9 @@ public class CoherenceMetrics {
 		return (properties.size()+instances.size())/(1.0*denominator);
 	}
 	
+	public Double getWeightForType(long props, long inst, Long denominator){
+		return (props+inst)/(1.0*denominator);
+	}
 	
 	/**
 	 * Gets the coherence.
@@ -737,26 +873,71 @@ public class CoherenceMetrics {
 	 * @return the coherence
 	 */
 	public Double getCoherence(Set<String> typeSystem){
+		
 		Double ret=0.0;
 		Long denominator = getDenominator(typeSystem);
 		log.info("Denomintator: "+denominator);
-		Map<String, Set<String>> props = getPropertiesOfType(typeSystem, dataFile);
-		log.info("Properties: "+props.size());
-		Map<String, Set<String>> inst = getInstancesOfType(typeSystem, dataFile);
-		log.info("Instances: "+inst.size());
+//		Map<String, Set<String>> props = getPropertiesOfType(typeSystem, dataFile);
+//		log.info("Properties: "+props.size());
+//		Map<String, Set<String>> inst = getInstancesOfType(typeSystem, dataFile);
+//		log.info("Instances: "+inst.size());
 		for(String type : typeSystem){
 			log.info("current type: "+type);
 //			Set<String> properties = getPropertiesOfType(type);
 //			log.info("Properties: "+properties.size());
 //			Set<String> instances = getInstancesOfType(type);
 //			log.info("Instances: "+instances.size());
-			Double weight = getWeightForType(props.get(type), inst.get(type), typeSystem, denominator);
+			Set<String> props = getPropertiesOfType(type);
+			Set<String> inst = getInstancesOfType(type);
+			Double weight = getWeightForType(props, inst, typeSystem, denominator);
 			log.info("Weight: "+weight);
-			ret+=getCoverage(type, props.get(type), inst.get(type))*weight;
+			ret+=getCoverage(type, props, inst)*weight;
 			log.info("Coherence until now: "+ret);
 		}
 		return ret;
 	}
+	
+	
+	@SuppressWarnings("unused")
+	private Double getCachedCoherence(String hash){
+		File f = new File(CACHE_FILE);
+		BufferedReader br=null;
+		try{
+			if(!f.exists()){
+				f.createNewFile();
+			}
+			FileReader fr = new FileReader(f);
+			br = new BufferedReader(fr);
+			String line;
+			while((line=br.readLine())!=null){
+				if(line.split(";")[0].equals(hash)){
+					return Double.valueOf(line.split(";")[1]);
+				}
+			}
+		}
+		catch(Exception e){
+			LogHandler.writeStackTrace(log, e, Level.WARNING);
+		}
+		finally{
+			try {
+				br.close();
+			} catch (IOException e) {
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			}
+		}
+		return null;
+	}
+	
+	public void appendCoherence(String hash, Double coh){
+		try{
+			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(CACHE_FILE, true)));
+			pw.println(hash+";"+coh);
+			pw.close();
+		}
+		catch (IOException e) {
+		}
+	}
+	
 	
 	/**
 	 * Gets the coherence.
@@ -767,19 +948,29 @@ public class CoherenceMetrics {
 	 * @return the coherence
 	 */
 	public Double getCoherence(Set<String> typeSystem, Set<String> typesOfS, String p){
+//		String hash="";
+//		Double cache = getCachedCoherence(hash);
+//		if(cache!=null){
+//			return cache;
+//		}
+		
 		Double ret=0.0;
+		//Cached
 		Long denominator = getDenominator(typeSystem);
 		for(String type : typeSystem){
-			Set<String> properties = getPropertiesOfType(type);
-			Set<String> instances = getInstancesOfType(type);
-			Double weight = getWeightForType(properties, instances, typeSystem, denominator);
+//			Set<String> properties = getPropertiesOfType(type);
+//			Set<String> instances = getInstancesOfType(type);
+			long props = getPropertiesOfTypeCount(type);
+			long inst = getInstancesOfTypeCount(type);
+			Double weight = getWeightForType(props, inst,  denominator);
 			if(typesOfS.contains(type)){
-				ret+=newCoverage(p, type, properties, instances)*weight;
+				ret+=newCoverage(p, type, props, inst)*weight;
 			}
 			else{
-				ret+=getCoverage(type, properties, instances)*weight;
+				ret+=getCoverage(type)*weight;
 			}
 		}
+//		appendCoherence(hash, ret);
 		return ret;
 	}
 	
@@ -870,13 +1061,15 @@ public class CoherenceMetrics {
 	 * @return the sets the
 	 */
 	private Set<String> coin(Set<String> S, String property, Connection con){
-		String query = "SELECT DISTINCT ?s WHERE {?s "+property+" ?o . ";
+		String query = "SELECT DISTINCT ?s ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+property+" ?o . ";
 		query+=getBlackList();
 		query+=" } ";
 		Long offset = 0L;
 		Query q = QueryFactory.create(query);
-		if(graphURI!=null)
-			q.addGraphURI(graphURI);
 		q.setLimit(limit);
 		Boolean hasNext =true;
 		Set<String> ret = new HashSet<String>();
@@ -906,6 +1099,48 @@ public class CoherenceMetrics {
 		}
 		return ret;
 	}
+
+	private long coinSize(Set<String> S, String property, Connection con){
+		String query = "SELECT DISTINCT ?s ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+property+" ?o . ";
+		query+=getBlackList();
+		query+=" } ";
+		Long offset = 0L;
+		Query q = QueryFactory.create(query);
+		q.setLimit(limit);
+		Boolean hasNext =true;
+		long ret=0;
+		try {
+			while(hasNext){
+				q.setOffset(offset);
+				ResultSet res = con.select(q.toString().replace("\n", " "));
+				int l = 0;
+				while(res.next()){
+					
+					l++;
+					String s=res.getString(1);
+					query = "SELECT DISTINCT ?type WHERE {<"+s+"> "+TYPE_STRING+" ?type} ";
+					Set<String> currentTypes = getSet(query, con);
+					if(currentTypes.equals(S)){
+						ret++;
+					}
+				}
+				res.getStatement().close();
+				offset+=l;
+				if(l<limit){
+					hasNext = false;
+				}
+			}
+		} catch (SQLException e) {
+			LogHandler.writeStackTrace(log, e, Level.WARNING);
+		}
+		return ret;
+	}
+
+	
 	
 	/**
 	 * calculates the coins of a given typeset S and property
@@ -920,6 +1155,14 @@ public class CoherenceMetrics {
 		case REMOTE_ENDPOINT:return coin(S, property, con);
 		}
 		return null;
+	}
+	
+	public long coinSize(Set<String> S, String property){
+		switch(endpoint){
+		case RDFFILE_ENDPOINT:return coin(S, property, dataFile).size();
+		case REMOTE_ENDPOINT:return coinSize(S, property, con);
+		}
+		return 0;
 	}
 	
 	
@@ -960,9 +1203,11 @@ public class CoherenceMetrics {
 	 * @param instances the instances
 	 * @return the double
 	 */
-	public Double newCoverage(String p, String type, Set<String> properties, Set<String> instances){
+	public Double newCoverage(String p, String type, long props, long inst){
 		Long ret =0L;
-		Double denominator = properties.size()*instances.size()*1.0;
+		Double denominator = props*inst*1.0;
+		Set<String> properties = getPropertiesOfType(type);
+		Set<String> instances = getInstancesOfType(type);
 		for(String q : properties){
 			if(q.equals(p)){
 				ret+= getOccurences(q, instances) -1;
@@ -1148,6 +1393,9 @@ public class CoherenceMetrics {
 	 */
 	public Map<String, Number[]> getCalculations(Set<String> typeSystem, Double ch) {
 		Map<String, Number[]> ret = new HashMap<String, Number[]>();
+		//TODO WWAAAAAYYYY TOOO LONG
+		//TODO WHAT IF: we use Files where we cache the results of coherence. 
+		//First we look in the file. Oh not there? okay. then we can calculate it still 
 		Set<List<Set<String>>> combis = getCombinations(typeSystem);
 		for(List<Set<String>> combi : combis){
 			
@@ -1157,7 +1405,7 @@ public class CoherenceMetrics {
 				//coin
 				values[0] = givenCoin(typeSystem, combi.get(0), p, ch);
 				//|coin|
-				values[1] = coin(combi.get(0), p).size();
+				values[1] = coinSize(combi.get(0), p);
 				//ct
 				values[2] = ct(combi.get(0), p);
 				ret.put(hash, values);
@@ -1184,7 +1432,11 @@ public class CoherenceMetrics {
 	 * @return the instance types
 	 */
 	public Set<String> getInstanceTypes(String s, Connection con) {
-		String query="SELECT DISTINCT ?type WHERE { "+s+" "+TYPE_STRING+" ?type}";
+		String query="SELECT DISTINCT ?type ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE { "+s+" "+TYPE_STRING+" ?type}";
 		return getSet(query, con);
 	}
 	
@@ -1266,16 +1518,17 @@ public class CoherenceMetrics {
 	 * @return the double
 	 */
 	private Double ct(Set<String> S, String p, Connection con){
-		String query = "SELECT DISTINCT ?s (COUNT(?s) AS ?co) WHERE {?s "+p+" ?o ";
+		String query = "SELECT ?s (COUNT(?s) AS ?co) ";
+		if(graphURI!=null&&!graphURI.isEmpty()){
+			query+="FROM <"+graphURI+">";
+		}
+		query+=" WHERE {?s "+p+" ?o ";
 		for(String type : S){
 			query += " . ?s "+TYPE_STRING+" "+type;
 		}
-		query +=" } ";
+		query +=" } GROUP BY ?s";
 		Long offset = 0L;
 		Query q = QueryFactory.create(query);
-		if(graphURI != null){
-			q.addGraphURI(graphURI);
-		}
 		q.setLimit(limit);
 		Long count =0L;
 		Boolean hasNext =true;

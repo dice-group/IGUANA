@@ -29,7 +29,7 @@ public class Config {
 	
 	private static final String MAIN_NODE = "iguana";
 
-	private static final String BENCHMARK_NODE = "benchmark";
+	private static final String BENCHMARK_NODE = "suite";
 
 	private static final String DROP_DB_ELEMENT = "drop-db";
 
@@ -50,6 +50,8 @@ public class Config {
 	private static final String RANDOM_FUNCTION_ELEMENT = "random-function";
 
 	private static final String WARMUP_ELEMENT = "warmup";
+
+	private static final String LOG_CLUSTERING_ELEMENT = "log-clustering";
 
 	private static Logger log = Logger.getLogger(Config.class
 			.getSimpleName());
@@ -126,13 +128,26 @@ public class Config {
 	public static Element dbNode;
 	
 	public static void init(String pathToXMLFile) throws ParserConfigurationException, SAXException, IOException{
+		init(pathToXMLFile, 0);
+	}
+	
+	public static int getSuites(String pathToXMLFile) throws ParserConfigurationException, SAXException, IOException{
+		ConfigParser cp = ConfigParser.getParser(pathToXMLFile);
+		cp.getElementAt(MAIN_NODE, 0);
+		return cp.getNodeList(BENCHMARK_NODE).getLength();
+	}
+	
+	public static void init(String pathToXMLFile, int suite) throws ParserConfigurationException, SAXException, IOException{
 		
 		ConfigParser cp = ConfigParser.getParser(pathToXMLFile);
 		Element root = cp.getElementAt(MAIN_NODE, 0);
-		Element benchmark = (Element) cp.getElementAt(BENCHMARK_NODE, 0);
+//		Element benchmark = (Element) cp.getElementAt(BENCHMARK_NODE, suite);
+//		int le = root.getElementsByTagName(BENCHMARK_NODE).getLength();
+		NodeList nl = root.getElementsByTagName(BENCHMARK_NODE);
+		Element benchmark = (Element) nl.item(suite);
 		cp.setNode(root);
 		try{		
-			Element logCluster = cp.getElementAt("log-clustering", 0);
+			Element logCluster = cp.getElementAt(LOG_CLUSTERING_ELEMENT, 0);
 			logClusterClass = logCluster.getAttribute("class");
 			logClusterPath = logCluster.getAttribute("path");
 			logClusterOutput = logCluster.getAttribute("output-file");
@@ -183,7 +198,8 @@ public class Config {
 		Element testDB = cp.getElementAt(TEST_DB_ELEMENT, 0);
 		testDBType = DBTestType.valueOf(testDB.getAttribute("type"));
 		refConID = testDB.getAttribute("reference");
-		
+
+		//TODO not benchmark node!
 		cp.setNode(benchmark);
 		
 		Element rand = cp.getElementAt(RANDOM_FUNCTION_ELEMENT, 0);
@@ -206,10 +222,10 @@ public class Config {
 		
 		
 		databaseIDs = getDatabaseIds((Node)root, testDBType, refConID, null);
-		testcaseProperties = getTestCases((Node)root);
+		testcaseProperties = getTestCases((Node)root, suite);
 		logClusteringProperties = getLogClusterProperties((Node)root);
-		randomFiles = getRandomFiles((Node)root);
-		datasetPercantage = getPercents((Node)root);
+		randomFiles = getRandomFiles((Node)root, suite);
+		datasetPercantage = getPercents((Node)root, suite);
 		emailConfiguration = getEmail((Node)root);
 		
 	}
@@ -276,12 +292,12 @@ public class Config {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @throws ParserConfigurationException the parser configuration exception
 	 */
-	public static HashMap<String, Properties> getTestCases(Node rootNode) throws SAXException, IOException, ParserConfigurationException{
+	private static HashMap<String, Properties> getTestCases(Node rootNode, int suite) throws SAXException, IOException, ParserConfigurationException{
 		
 		HashMap<String, Properties> ret = new HashMap<String, Properties>();
 		
 		ConfigParser cp = ConfigParser.getParser(rootNode);
-		cp.getElementAt("benchmark", 0);
+		cp.getElementAt(BENCHMARK_NODE, suite);
 		Element testcases = cp.getElementAt("testcases", 0);
 		
 		NodeList tests = cp.getNodeList("testcase");
@@ -306,7 +322,7 @@ public class Config {
 	 * @throws SAXException the SAX exception
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static Properties getLogClusterProperties(Node rootNode) throws ParserConfigurationException, SAXException, IOException{
+	private static Properties getLogClusterProperties(Node rootNode) throws ParserConfigurationException, SAXException, IOException{
 		ConfigParser cp = ConfigParser.getParser(rootNode);
 		cp.getElementAt("log-clustering", 0);
 		
@@ -451,7 +467,7 @@ public class Config {
 		map.put("random-function", rand.getAttribute("type"));
 		map.put("random-function-gen", rand.getAttribute("generate"));
 		map.put("random-hundred-file", rand.getAttribute("initFile"));
-		//TODO v2.1 roh and ch in percents or in general 
+ 
 		map.put("coherence-roh", rand.getAttribute("roh")); 
 		map.put("coherence-ch", rand.getAttribute("coherence"));
 		cp.setNode(benchmark);
@@ -480,10 +496,10 @@ public class Config {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @throws ParserConfigurationException the parser configuration exception
 	 */
-	public static String[] getRandomFiles(Node rootNode) throws SAXException, IOException, ParserConfigurationException{
+	private static String[] getRandomFiles(Node rootNode, int suite) throws SAXException, IOException, ParserConfigurationException{
 		
 		ConfigParser cp = ConfigParser.getParser(rootNode);
-		cp.getElementAt("benchmark", 0);
+		cp.getElementAt(BENCHMARK_NODE, suite);
 		cp.getElementAt("random-function", 0);
 		NodeList percents = cp.getNodeList("percent");
 		
@@ -504,11 +520,11 @@ public class Config {
 	 * @throws SAXException the SAX exception
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static List<Double> getPercents(Node rootNode) throws ParserConfigurationException, SAXException, IOException{
+	private static List<Double> getPercents(Node rootNode, int suite) throws ParserConfigurationException, SAXException, IOException{
 		List<Double> ret = new LinkedList<Double>();
 		
 		ConfigParser cp = ConfigParser.getParser(rootNode);
-		cp.getElementAt("benchmark", 0);
+		cp.getElementAt(BENCHMARK_NODE, suite);
 		cp.getElementAt("random-function", 0);
 		NodeList percents = cp.getNodeList("percent");
 		for(int i=0;i<percents.getLength();i++){
@@ -524,7 +540,7 @@ public class Config {
 	 * @param rootNode the root node
 	 * @return the email configs
 	 */
-	public static HashMap<String,Object> getEmail(Node rootNode){
+	private static HashMap<String,Object> getEmail(Node rootNode){
 		HashMap<String,Object>ret =  new HashMap<String,Object>();
 		try{
 			ConfigParser cp = ConfigParser.getParser(rootNode);
@@ -559,51 +575,53 @@ public class Config {
 		return ret;
 	}
 	
-	/**
-	 * Gets the data description.
-	 *
-	 * @param rootNode the root node
-	 * @return the data description
-	 */
-	public static HashMap<String, String> getDataDescription(Node rootNode){
-	          HashMap<String, String> map = new HashMap<String, String>();
-	          try{
-	      	   ConfigParser cp = ConfigParser.getParser(rootNode);
-	      	   Element e = cp.getElementAt("data-description", 0);
-	      	   String meta = e.getAttribute("meta-data");
-	      	   if(meta.isEmpty()||meta == null||meta.equals("null")){
-	      		   meta = "true";
-	      	   }
-	      	   map.put("metaData", meta);
-	      	   map.put("namespace", cp.getElementAt("namespace", 0).getAttribute("name"));
-	      	   cp.setNode(e);
-	           map.put("anchor", cp.getElementAt("anchor", 0).getAttribute("name"));
-	      	   cp.setNode(e);
-	      	   map.put("prefix", map.get("namespace")+map.get("anchor"));
-	      	   map.put("resourceURI", cp.getElementAt("resource-uri", 0).getAttribute("name"));
-	      	   cp.setNode(e);
-	      	   map.put("propertyPrefixName", cp.getElementAt("property-prefix-name", 0).getAttribute("name"));
-	      	   cp.setNode(e);
-	      	   map.put("resourcePrefixName", cp.getElementAt("resource-prefix-name", 0).getAttribute("name"));
-	      	   cp.setNode(e);
-	      	   try{
-	      		 map.put("metadata", cp.getElementAt("meta-data", 0).getAttribute("value"));
-	           }
-	           catch(Exception ex){
-	           }
-	          }
-	        catch(Exception e){
-	        	return null;
-	      	}
-	        return map;
-	    
-	}
+//	/**
+//	 * Gets the data description.
+//	 *
+//	 * @param rootNode the root node
+//	 * @return the data description
+//	 */
+//	private static HashMap<String, String> getDataDescription(Node rootNode){
+//	          HashMap<String, String> map = new HashMap<String, String>();
+//	          try{
+//	      	   ConfigParser cp = ConfigParser.getParser(rootNode);
+//	      	   Element e = cp.getElementAt("data-description", 0);
+//	      	   String meta = e.getAttribute("meta-data");
+//	      	   if(meta.isEmpty()||meta == null||meta.equals("null")){
+//	      		   meta = "true";
+//	      	   }
+//	      	   map.put("metaData", meta);
+//	      	   map.put("namespace", cp.getElementAt("namespace", 0).getAttribute("name"));
+//	      	   cp.setNode(e);
+//	           map.put("anchor", cp.getElementAt("anchor", 0).getAttribute("name"));
+//	      	   cp.setNode(e);
+//	      	   map.put("prefix", map.get("namespace")+map.get("anchor"));
+//	      	   map.put("resourceURI", cp.getElementAt("resource-uri", 0).getAttribute("name"));
+//	      	   cp.setNode(e);
+//	      	   map.put("propertyPrefixName", cp.getElementAt("property-prefix-name", 0).getAttribute("name"));
+//	      	   cp.setNode(e);
+//	      	   map.put("resourcePrefixName", cp.getElementAt("resource-prefix-name", 0).getAttribute("name"));
+//	      	   cp.setNode(e);
+//	      	   try{
+//	      		 map.put("metadata", cp.getElementAt("meta-data", 0).getAttribute("value"));
+//	           }
+//	           catch(Exception ex){
+//	           }
+//	          }
+//	        catch(Exception e){
+//	        	return null;
+//	      	}
+//	        return map;
+//	    
+//	}
 
-	public static String getDBStop(Node dbNode, String db) {
+	@SuppressWarnings("unused")
+	private static String getDBStop(Node dbNode, String db) {
 		return getCommand(dbNode, db, "stop-script");
 	}
 
-	public static String getDBStartUp(Node dbNode, String db) {
+	@SuppressWarnings("unused")
+	private static String getDBStartUp(Node dbNode, String db) {
 		return getCommand(dbNode, db, "start-script");
 	}
 	

@@ -89,6 +89,8 @@ public class DataProducer {
 	 */
 	public static void writeData(Connection con, String output, String graphURI, Double size, Double coherence){
 		CoherenceMetrics cm = new CoherenceMetrics(con);
+		cm.setGraphURI(graphURI);
+		cm.setLimit(10000);
 		long originalSize=TripleStoreStatistics.tripleCount(con, graphURI);
 		Long removeSize = Long.valueOf((long) (originalSize-originalSize*size));
 		writeData(con, output, cm, graphURI, coherence, originalSize, removeSize);
@@ -133,8 +135,9 @@ public class DataProducer {
 		long s = originalSize;
 		do{
 			log.info("Attempt: "+(attempts+1));
+			Long typeSystemSize = cm.getTypeSystemSize();
+			log.info("Size of typesystem: "+typeSystemSize);
 			Set<String> typeSystem = cm.getTypeSystem();
-			log.info("Size of typesystem: "+typeSystem.size());
 			Double coh = cm.getCoherence(typeSystem);
 			log.info("Coherence is: "+coh);
 			Double c1 = coh - Math.min(coherence, coh*0.9);

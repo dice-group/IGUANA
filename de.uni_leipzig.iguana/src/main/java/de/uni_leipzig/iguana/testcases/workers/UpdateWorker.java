@@ -74,8 +74,7 @@ public class UpdateWorker extends Worker implements Runnable{
 	
 	private int index=0;
 
-	private List<File> liveDataList = new LinkedList<File>();
-	private static List<File> liveDataListAll = new LinkedList<File>();
+	
 
 	
 	private Logger log = Logger.getLogger(UpdateWorker.class.getSimpleName());
@@ -93,6 +92,9 @@ public class UpdateWorker extends Worker implements Runnable{
 	private int[] intervall = new int[2];
 	private boolean first = true;
 	private WorkerStrategy workerStrategy = WorkerStrategy.NONE;
+	
+	private UpdateFileHandler ufh;
+	private List<File> liveDataList = new LinkedList<File>();
 	
 	public enum UpdateStrategy{
 		VARIABLE, FIXED, NONE
@@ -189,9 +191,6 @@ public class UpdateWorker extends Worker implements Runnable{
 		this.sparqlLoad = sparqlLoad;
 	}
 	
-	public void setLiveDataList(List<File> files){
-		this.liveDataList = files;
-	}
 	
 	public void setConnection(Connection con){
 		this.con = con;
@@ -230,7 +229,7 @@ public class UpdateWorker extends Worker implements Runnable{
 		File current;
 		if(workerStrategy.equals(WorkerStrategy.NEXT)){
 			current= liveDataList.remove(index);
-			while(!liveDataListAll.contains(current)){
+			while(!ufh.getLiveDataListAll().contains(current)){
 				if(index>= liveDataList.size()){
 					// no more files, exit thread
 					this.sendEndSignal();
@@ -238,7 +237,7 @@ public class UpdateWorker extends Worker implements Runnable{
 				}
 				current= liveDataList.remove(index);
 			}
-			liveDataListAll.remove(current);
+			ufh.getLiveDataListAll().remove(current);
 		}
 		else{
 			current = liveDataList.get(index);
@@ -353,13 +352,19 @@ public class UpdateWorker extends Worker implements Runnable{
 	}
 
 
-	public static List<File> getLiveDataListAll() {
-		return liveDataListAll;
+
+	public UpdateFileHandler getUfh() {
+		return ufh;
 	}
 
 
-	public static void setLiveDataListAll(List<File> liveDataListAll) {
-		UpdateWorker.liveDataListAll = liveDataListAll;
+	public void setUfh(UpdateFileHandler ufh) {
+		this.ufh = ufh;
+	}
+
+
+	public void setLiveDataList(List<File> list) {
+		this.liveDataList  = list;
 	}
 	
 }

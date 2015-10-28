@@ -13,8 +13,10 @@ import de.uni_leipzig.iguana.utils.ResultSet;
 
 public class ResultProcessor {
 
-	public static final String RESULT_FOLDER = "results";
-	public static final String TEMP_RESULT_FOLDER = "tempResults";
+	private static final String RESULT_FOLDER = "results";
+	private static final String TEMP_RESULT_FOLDER = "tempResults";
+	
+	private static int suite=0;
 	
 	private static HashMap<String, Collection<ResultSet>> results;
 	
@@ -29,10 +31,10 @@ public class ResultProcessor {
 	
 	public static void init(){
 		//mkdirs
-		FileHandler.removeRecursive(RESULT_FOLDER);
-		FileHandler.removeRecursive(TEMP_RESULT_FOLDER);
-		new File(RESULT_FOLDER).mkdir();
-		new File(TEMP_RESULT_FOLDER).mkdir();
+		FileHandler.removeRecursive(getResultFolder());
+		FileHandler.removeRecursive(getTempResultFolder());
+		new File(getResultFolder()).mkdir();
+		new File(getTempResultFolder()).mkdir();
 		
 		results = new HashMap<String, Collection<ResultSet>>();
 	}
@@ -64,11 +66,11 @@ public class ResultProcessor {
 					suffix+=prefix+File.separator;
 				}
 				new File("."+File.separator+
-						RESULT_FOLDER+
+						getResultFolder()+
 						File.separator+testCase+
 						File.separator+suffix).mkdirs();
 				res.setFileName("."+File.separator+
-						RESULT_FOLDER+
+						getResultFolder()+
 						File.separator+testCase+
 						File.separator+suffix+fileName[fileName.length-1]);
 				try {
@@ -81,6 +83,17 @@ public class ResultProcessor {
 		log.info("Finished saving results");
 	}
 
+
+	public static void setSuite(int suite) {
+		ResultProcessor.suite = suite;
+	}
+
+	public static String getResultFolder(){
+		return RESULT_FOLDER+"_"+suite;
+	}
 	
+	public static String getTempResultFolder(){
+		return TEMP_RESULT_FOLDER+"_"+suite;
+	}
 	
 }
