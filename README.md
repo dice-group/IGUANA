@@ -16,6 +16,10 @@ It should be...
 + ...understandable
 + ...well documented
 
+##Architecture
+
+![Architecture of IGUANA](IGUANA_v0.3_Architecture.png)
+
 ##The latest version
 
 + The latest version can always be found under the [master branch](https://github.com/AKSW/IGUANA/tree/master).
