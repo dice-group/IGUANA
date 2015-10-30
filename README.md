@@ -1,5 +1,8 @@
 #IGUANA
 
+![Logo of IGUANA](IGUANA_Logo.png)
+
+
 ##What is it?
 
 IGUANA is both a program and an API framework for benchmarking SPARQL Endpoints.
