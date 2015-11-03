@@ -31,7 +31,7 @@ public class Config {
 
 	private static final String BENCHMARK_NODE = "suite";
 
-	private static final String DROP_DB_ELEMENT = "drop-db";
+//	private static final String DROP_DB_ELEMENT = "drop-db";
 
 	private static final String GRAPH_URI_ELEMENT = "graph-uri";
 
@@ -93,7 +93,7 @@ public class Config {
 
 	public static String logClusterOutput;
 
-	public static Boolean dropDB=false;
+//	public static Boolean dropDB=false;
 
 	public static String graphURI;
 
@@ -156,8 +156,8 @@ public class Config {
 		}
 		cp.setNode(benchmark);
 		
-		dropDB = Boolean.valueOf(cp.getElementAt(DROP_DB_ELEMENT, 0).getAttribute("value"));
-		cp.setNode(benchmark);
+//		dropDB = Boolean.valueOf(cp.getElementAt(DROP_DB_ELEMENT, 0).getAttribute("value"));
+//		cp.setNode(benchmark);
 
 		try{
 			graphURI = cp.getElementAt(GRAPH_URI_ELEMENT, 0).getAttribute("name");
@@ -199,7 +199,6 @@ public class Config {
 		testDBType = DBTestType.valueOf(testDB.getAttribute("type"));
 		refConID = testDB.getAttribute("reference");
 
-		//TODO not benchmark node!
 		cp.setNode(benchmark);
 		
 		Element rand = cp.getElementAt(RANDOM_FUNCTION_ELEMENT, 0);

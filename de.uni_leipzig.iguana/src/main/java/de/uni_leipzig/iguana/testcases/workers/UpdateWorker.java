@@ -366,5 +366,7 @@ public class UpdateWorker extends Worker implements Runnable{
 	public void setLiveDataList(List<File> list) {
 		this.liveDataList  = list;
 	}
+
+
 	
 }

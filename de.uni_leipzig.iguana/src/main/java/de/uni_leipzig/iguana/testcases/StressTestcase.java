@@ -86,8 +86,8 @@ public class StressTestcase implements Testcase{
 	ExecutorService executor;
 	
 	private String tempResultPath=ResultProcessor.getTempResultFolder();
-	private Map<Integer, SparqlWorker> sparqlWorkerPool = new HashMap<Integer, SparqlWorker>();
-	private Map<Integer, UpdateWorker> updateWorkerPool = new HashMap<Integer, UpdateWorker>();
+	protected Map<Integer, SparqlWorker> sparqlWorkerPool = new HashMap<Integer, SparqlWorker>();
+	protected Map<Integer, UpdateWorker> updateWorkerPool = new HashMap<Integer, UpdateWorker>();
 	
 	//only for logging
 	protected String connectionName;
@@ -96,12 +96,12 @@ public class StressTestcase implements Testcase{
 
 	private Logger log = Logger.getLogger(StressTestcase.class.getSimpleName());
 	protected Node node;
-	private Collection<ResultSet> results = new LinkedList<ResultSet>();
-	private String[] prefixes;
+	protected Collection<ResultSet> results = new LinkedList<ResultSet>();
+	protected String[] prefixes;
 	@SuppressWarnings("unused")
 	private Connection con;
 	protected String updatePath;
-	private Collection<ResultSet> currResults = new LinkedList<ResultSet>();
+	protected Collection<ResultSet> currResults = new LinkedList<ResultSet>();
 	protected int limit=5000;
 	protected Boolean isPattern=true;
 	
@@ -131,7 +131,7 @@ public class StressTestcase implements Testcase{
 		log.info("StressTestcase finished");
 	}
 	
-	private void saveResults() {
+	protected void saveResults() {
 		for(ResultSet res : results){
 			String fileName = res.getFileName();
 			String[] prefixes = res.getPrefixes();
@@ -154,7 +154,7 @@ public class StressTestcase implements Testcase{
 		}
 	}
 
-	private void waitTimeLimit(){
+	protected void waitTimeLimit(){
 		Calendar start = Calendar.getInstance();
 		log.info("Starting StressTestcase at: "+CalendarHandler.getFormattedTime(start));
 		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<timeLimit){}
@@ -172,11 +172,11 @@ public class StressTestcase implements Testcase{
 		log.info("StressTestcase took "+CalendarHandler.getWellFormatDateDiff(start, end));
 	}
 	
-	private void initLogger(){
+	protected void initLogger(){
 		LogHandler.initLogFileHandler(log, StressTestcase.class.getSimpleName());
 	}
 	
-	private void startAllWorkers(){
+	protected void startAllWorkers(){
 		log.info("Starting Workers");
 		//Starting all workers in new threads
 		executor = Executors.newFixedThreadPool(sparqlWorkers+updateWorkers);
@@ -196,7 +196,7 @@ public class StressTestcase implements Testcase{
 	}
 	
 	
-	private void initSparqlWorkers(){
+	protected void initSparqlWorkers(){
 		for(int i=0;i<sparqlWorkers;i++){
 			SparqlWorker worker = new SparqlWorker();
 			worker.setWorkerNr(i);
@@ -224,7 +224,7 @@ public class StressTestcase implements Testcase{
 	}
 
 	@SuppressWarnings("unchecked")
-	private void initUpdateWorkers(){
+	protected void initUpdateWorkers(){
 		for(int i=0;i<updateWorkers;i++){
 			UpdateWorker worker = new UpdateWorker();
 			worker.setWorkerNr(i);
@@ -247,14 +247,15 @@ public class StressTestcase implements Testcase{
 			worker.setLiveDataList((List<File>)updateProps[i].get(FILES));
 			UpdateFileHandler ufh = UpdateFileHandler.getUpdateFileHandler(updateProps[i].getProperty(CONNECTION_NAME));
 //			ufh.setLiveDataList((List<File>)updateProps[i].get(FILES));
-			ufh.setLiveDataListAll(getFilesForUpdateWorker(updatePath, null, WorkerStrategy.NONE));
+			if(ufh.getLiveDataListAll().isEmpty())
+				ufh.setLiveDataListAll(getFilesForUpdateWorker(updateProps[i].getProperty(UPDATEPATH), null, WorkerStrategy.NONE));
 			worker.setUfh(ufh);
 			worker.setSparqlLoad((Boolean) updateProps[i].get(SPARQLLOAD));
 			worker.setTimeLimit(timeLimit);
 			worker.setUpdateStrategy((UpdateStrategy) updateProps[i].get(UPDATESTRATEGY));
 			worker.setWorkerStrategy((WorkerStrategy) updateProps[i].get(WORKERSTRATEGY));
 //		    UpdateWorker.setLiveDataListAll(getFilesForUpdateWorker(updatePath, null, WorkerStrategy.NONE));
-		    worker.setConName(connectionName);
+		    worker.setConName(updateProps[i].getProperty(CONNECTION_NAME));
 		    worker.init();
 			updateWorkerPool.put(i, worker);
 		}
@@ -412,7 +413,7 @@ public class StressTestcase implements Testcase{
 		return ret;
 	}
 	
-	private void initPatterns(){
+	protected void initPatterns(){
 		if(!isPattern){
 			return;
 		}
@@ -448,7 +449,7 @@ public class StressTestcase implements Testcase{
 		
 	}
 	
-	private void mergeCurrentResults(Collection<ResultSet> currentResults, Collection<ResultSet> results){
+	protected void mergeCurrentResults(Collection<ResultSet> currentResults, Collection<ResultSet> results){
 		Iterator<ResultSet> resIt1 = currentResults.iterator();
 		Iterator<ResultSet> resIt2 = results.iterator();
 		while(resIt1.hasNext()){
@@ -555,18 +556,36 @@ public class StressTestcase implements Testcase{
 			up.put(CONNECTION, ConnectionFactory.createConnection(database, connectionName));
 			up.put(CONNECTION_NAME, connectionName);
 			
-			WorkerStrategy ws = WorkerStrategy.valueOf(p.getProperty(WORKERSTRATEGY+j));
-			if(ws==null)
-				ws=WorkerStrategy.NONE;
-			UpdateStrategy us = UpdateStrategy.valueOf(p.getProperty(UPDATESTRATEGY));
-			if(us==null)
+			String workStr = p.getProperty(WORKERSTRATEGY+j);
+			WorkerStrategy ws;
+			if(workStr == null){
+				ws=WorkerStrategy.NEXT;				
+			}
+			else{
+				ws = WorkerStrategy.valueOf(workStr);
+			}
+
+			String upStr = p.getProperty(UPDATESTRATEGY);
+			UpdateStrategy us;
+			if(upStr==null){
 				us = UpdateStrategy.NONE;
-			LivedataComparator2.LinkingStrategy ls = 
-					LivedataComparator2.LinkingStrategy.valueOf(p.getProperty(LINKINGSTRATEGY));
+			}
+			else{
+				us = UpdateStrategy.valueOf(upStr);
+			}
+				
+			String lsStr = p.getProperty(LINKINGSTRATEGY);
+			LivedataComparator2.LinkingStrategy ls;
+			if(lsStr == null){
+				ls = LivedataComparator2.LinkingStrategy.DI;
+			}else{
+				ls = LivedataComparator2.LinkingStrategy.valueOf(lsStr);
+			}
 			updatePath = p.getProperty(UPDATEPATH);
 			up.put(FILES, getFilesForUpdateWorker(p.getProperty(UPDATEPATH), ls ,ws));
 			up.put(WORKERSTRATEGY, ws);
 			up.put(UPDATESTRATEGY, us);
+			up.put(UPDATEPATH, updatePath);
 			up.put(SPARQLLOAD, Boolean.valueOf(p.getProperty(SPARQLLOAD)));
 			up.put(GRAPHURI, p.getProperty("graphURI"));			
 			up.put(TIMELIMIT, Long.valueOf(p.getProperty(TIMELIMIT)));

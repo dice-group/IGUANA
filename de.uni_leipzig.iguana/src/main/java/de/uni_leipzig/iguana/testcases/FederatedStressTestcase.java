@@ -1,14 +1,22 @@
 package de.uni_leipzig.iguana.testcases;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.bio_gene.wookie.connection.ConnectionFactory;
+import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Node;
 
 import de.uni_leipzig.iguana.testcases.workers.UpdateWorker.UpdateStrategy;
 import de.uni_leipzig.iguana.testcases.workers.UpdateWorker.WorkerStrategy;
 import de.uni_leipzig.iguana.testcases.workers.Worker.LatencyStrategy;
+import de.uni_leipzig.iguana.utils.ResultSet;
 import de.uni_leipzig.iguana.utils.StringHandler;
 import de.uni_leipzig.iguana.utils.comparator.LivedataComparator2;
 
@@ -16,7 +24,79 @@ public class FederatedStressTestcase extends StressTestcase{
 	
 	
 	private static final String WORKER = "worker";
+	private Logger log = Logger.getLogger(FederatedStressTestcase.class.getSimpleName());
 
+	
+	protected void initLogger(){
+		LogHandler.initLogFileHandler(log, FederatedStressTestcase.class.getSimpleName());
+	}
+	
+	@Override
+	public void start() throws IOException {
+		//Init Logger
+		initLogger();
+		//Init patterns if there is no cached queries
+		initPatterns();
+		//Init prefixes
+		this.prefixes = new String[2];
+		this.prefixes[0]=sparqlWorkers+"";
+		this.prefixes[1]=updateWorkers+"";
+		//Init SparqlWorkers
+		initSparqlWorkers();
+		//Init updateWorkers
+		initUpdateWorkers();
+		//Start all Workers to begin their tests
+		startAllWorkers();
+		//wait time-limit
+		waitTimeLimit();
+		//getResults
+		makeResults();
+		//
+		saveResults();
+		//Stop
+		log.info("StressTestcase finished");
+	}
+
+	private void makeResults(){
+		List<List<ResultSet>> sparqlResults = new LinkedList<List<ResultSet>>();
+		for(Integer key : sparqlWorkerPool.keySet()){
+			List<ResultSet> res = (List<ResultSet>) sparqlWorkerPool.get(key).makeResults();
+			sparqlResults.add(res);
+			results.addAll(res);
+		}
+		
+		Map<String, List<List<ResultSet>>> updateResults = new HashMap<String, List<List<ResultSet>>>();
+		
+		for(Integer key : updateWorkerPool.keySet()){
+			//Work with Maps
+			List<ResultSet> res = (List<ResultSet>) updateWorkerPool.get(key).makeResults();
+			if(updateResults.containsKey(updateWorkerPool.get(key).getConName())){
+				for(ResultSet r : res){
+					r.setFileName(r.getFileName()+"_"+updateWorkerPool.get(key).getConName());
+				}
+				updateResults.get(updateWorkerPool.get(key).getConName()).add(res);
+			}
+			else{
+				
+				List<List<ResultSet>> listOfList = new LinkedList<List<ResultSet>>();
+				for(ResultSet r : res){
+					r.setFileName(r.getFileName()+"_"+updateWorkerPool.get(key).getConName());
+				}
+				listOfList.add(res);
+				
+				updateResults.put(updateWorkerPool.get(key).getConName(), listOfList);
+			}
+			results.addAll(res);
+		}
+		if(sparqlResults.size()>0)
+			results.addAll(getCalculatedResults(sparqlResults));
+		for(String key : updateResults.keySet()){
+//			if(updateResults.size()>0)
+			results.addAll(getCalculatedResults(updateResults.get(key)));
+		}
+		mergeCurrentResults(currResults, results);
+	}
+	
 	@Override
 	public void setProperties(Properties p) {
 		//split Properties in sparqlWorker props and updateWorker props
@@ -104,27 +184,44 @@ public class FederatedStressTestcase extends StressTestcase{
 				up.put(LATENCYSTRATEGY+i, latStrat);
 				i++;
 			}
-			
+			String workStr = p.getProperty(WORKERSTRATEGY+j);
+			WorkerStrategy ws;
+			if(workStr == null){
+				ws=WorkerStrategy.NEXT;				
+			}
+			else{
+				ws = WorkerStrategy.valueOf(workStr);
+			}
+
+			String upStr = p.getProperty(UPDATESTRATEGY);
+			UpdateStrategy us;
+			if(upStr==null){
+				us = UpdateStrategy.NONE;
+			}
+			else{
+				us = UpdateStrategy.valueOf(upStr);
+			}
+			String lsStr = p.getProperty(LINKINGSTRATEGY);
+			LivedataComparator2.LinkingStrategy ls;
+			if(lsStr == null){
+				ls = LivedataComparator2.LinkingStrategy.DI;
+			}else{
+				ls = LivedataComparator2.LinkingStrategy.valueOf(lsStr);
+			}
 			if(p.containsKey(WORKER+j)){
 				String conName = p.getProperty(WORKER+j);
+				up.put(FILES, getFilesForUpdateWorker(p.getProperty(UPDATEPATH+j), ls ,ws));
 				up.put(CONNECTION, ConnectionFactory.createConnection(database, conName));
 				up.put(CONNECTION_NAME, conName);
 			}
 			else{
+				up.put(FILES, getFilesForUpdateWorker(p.getProperty(UPDATEPATH+j), ls ,ws));
 				up.put(CONNECTION, ConnectionFactory.createConnection(database, connectionName));
 				up.put(CONNECTION_NAME, connectionName);
 			}
 			
-			WorkerStrategy ws = WorkerStrategy.valueOf(p.getProperty(WORKERSTRATEGY+j));
-			if(ws==null)
-				ws=WorkerStrategy.NONE;
-			UpdateStrategy us = UpdateStrategy.valueOf(p.getProperty(UPDATESTRATEGY));
-			if(us==null)
-				us = UpdateStrategy.NONE;
-			LivedataComparator2.LinkingStrategy ls = 
-					LivedataComparator2.LinkingStrategy.valueOf(p.getProperty(LINKINGSTRATEGY));
-			updatePath = p.getProperty(UPDATEPATH);
-			up.put(FILES, getFilesForUpdateWorker(p.getProperty(UPDATEPATH), ls ,ws));
+			updatePath = p.getProperty(UPDATEPATH+j);
+			up.put(UPDATEPATH, updatePath);
 			up.put(WORKERSTRATEGY, ws);
 			up.put(UPDATESTRATEGY, us);
 			up.put(SPARQLLOAD, Boolean.valueOf(p.getProperty(SPARQLLOAD)));

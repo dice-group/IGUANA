@@ -40,6 +40,10 @@ public class Worker {
 	public void setConName(String conName) {
 		this.conName = conName;
 	}
+	
+	public String getConName() {
+		return this.conName;
+	}
 
 	public String[] getPrefixes() {
 		return prefixes;
