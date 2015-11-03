@@ -1,1 +1,1 @@
-java %2 -cp "lib/*" de.uni_leipzig.iguana.benchmark.Benchmark %1
+java %2 -cp "lib/*" de.uni_leipzig.iguana.benchmark.Main %1
