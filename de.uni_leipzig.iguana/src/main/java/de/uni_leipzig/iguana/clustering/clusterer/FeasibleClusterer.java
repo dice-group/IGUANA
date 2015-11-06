@@ -1,11 +1,15 @@
 package de.uni_leipzig.iguana.clustering.clusterer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.aksw.simba.benchmark.Config;
 import org.aksw.simba.benchmark.Queries;
@@ -14,6 +18,8 @@ import org.aksw.simba.benchmark.clustring.QueryClustering;
 import org.aksw.simba.benchmark.clustring.VoronoiPanel;
 import org.aksw.simba.benchmark.comparisons.AvgStats;
 import org.aksw.simba.benchmark.log.operations.CleanQueryReader;
+
+import de.uni_leipzig.iguana.query.QueryHandler;
 
 public class FeasibleClusterer implements Clusterer {
 
@@ -37,12 +43,14 @@ public class FeasibleClusterer implements Clusterer {
 		// pw.close();
 		// System.out.println("finished");
 		FeasibleClusterer fc = new FeasibleClusterer();
-		fc.cluster("../../LogFiles/dbpedia.txt", "");
+//		fc.cluster("../../LogFiles/dbpedia.txt", "");
+		
+		fc.saveFeasibleToInstances("queries-175.txt", "queries.txt");
 
 	}
 
 	private Integer number = 10;
-	private String outputDir = "FEASIBLE";
+	private String outputDir = "FEASIBLE"+File.separator;
 
 	@Override
 	public String cluster(String logPath, String queriesFile) throws IOException {
@@ -87,7 +95,17 @@ public class FeasibleClusterer implements Clusterer {
 		AvgStats.getPercentUsedLogConstructs(outputDir + "queries-stats.txt");
 		AvgStats.getAvgLogFeatures(outputDir + "queries-stats.txt");
 		
-		return outputDir+"queries.txt";
+		saveFeasibleToInstances(outputDir+"queries.txt", queriesFile);
+		return queriesFile;
+	}
+	
+	public void saveFeasibleToInstances(String input, String queriesFile) throws IOException{
+		List<String[]> qs = QueryHandler.getFeasibleToList(input, Logger.getGlobal());
+		PrintWriter pw = new PrintWriter(queriesFile);
+		for(String[] query : qs){
+			pw.println(query[0]);
+		}
+		pw.close();
 	}
 
 	/**

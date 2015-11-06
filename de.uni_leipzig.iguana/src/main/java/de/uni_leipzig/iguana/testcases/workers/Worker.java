@@ -12,7 +12,7 @@ import org.bio_gene.wookie.connection.Connection;
 
 import de.uni_leipzig.iguana.utils.ResultSet;
 
-public class Worker {
+public abstract class Worker {
 
 	public enum LatencyStrategy{
 		FIXED, NONE, VARIABLE
@@ -157,6 +157,7 @@ public class Worker {
 
 	
 	public void start(){
+		
 		//Finally start the test
 		while(!endSignal){
 			//GET NEXT QUERY 
@@ -181,14 +182,9 @@ public class Worker {
 	}
 	
 
-	protected String[] getNextQuery() {
-		return null;
-	}
-
-	protected Long testQuery(String string) {
-		return null;
-	}
-
+	protected abstract String[] getNextQuery();
+	protected abstract Long testQuery(String string);
+	
 	protected void putResults(Long time, String queryNr){
 		Long oldTime = 0L;
 		if(resultMap.containsKey(queryNr)){

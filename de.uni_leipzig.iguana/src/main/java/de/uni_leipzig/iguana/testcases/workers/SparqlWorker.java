@@ -141,7 +141,6 @@ public class SparqlWorker extends Worker implements Runnable {
 		}
 		
 		initQueryList();
-		
 	}
 	
 	public void setConnection(Connection con){
@@ -177,7 +176,13 @@ public class SparqlWorker extends Worker implements Runnable {
 		}
 		else{
 			try {
-				queryStringList = QueryHandler.getFeasibleToList(queriesPath);
+//				queryStringList = QueryHandler.getFeasibleToList(queriesPath, log);
+				queryStringList = QueryHandler.getInstancesToList(queriesPath, log);
+				if(queryStringList.isEmpty()){
+					log.warning("There is no query to execute");
+					index=-1;
+					return;
+				}
 				index = rand.nextInt(queryStringList.size());
 			} catch (IOException e) {
 				log.severe("Couldn't initialize Query List due to: ");
@@ -190,6 +195,9 @@ public class SparqlWorker extends Worker implements Runnable {
 
 	@Override
 	protected String[] getNextQuery(){
+		if(index==-1){
+			return null;
+		}
 		if(isPattern){
 			return getNextFileQuery();
 		}

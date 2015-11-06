@@ -13,6 +13,7 @@ import java.sql.ResultSetMetaData;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
@@ -26,10 +27,15 @@ import org.bio_gene.wookie.utils.GraphHandler;
 import org.bio_gene.wookie.utils.LogHandler;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
+import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.lang.SPARQLParser;
 import com.hp.hpl.jena.sparql.lang.UpdateParser;
 import com.hp.hpl.jena.sparql.modify.UpdateRequestSink;
@@ -59,6 +65,8 @@ public class QueryHandler {
 		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
 		QueryHandler qh = new QueryHandler(ConnectionFactory.createImplConnection("dbpedia.org/sparql", "dbpedia.org/sparql", 300), "pattern.txt");
 		qh.init();
+		
+		
 	}
 	
 	
@@ -184,7 +192,7 @@ public class QueryHandler {
 //		}
 	}
 	
-	public static List<String[]> getFeasibleToList(String file) throws IOException{
+	public static List<String[]> getFeasibleToList(String file, Logger log) throws IOException{
 		List<String[]> feasibleList = new LinkedList<String[]>();
 		File f = new File(file);
 		FileReader fr = new FileReader(f);
@@ -196,6 +204,15 @@ public class QueryHandler {
 		while((line=br.readLine())!=null){
 			if(line.startsWith(FEASIBLE_QUERY_START)){
 				if(!query.isEmpty()){
+					try{
+						QueryFactory.create(query.replaceAll(" +", " "));
+					}
+					catch(Exception e){
+						index++;
+						log.warning("Couldn't create Query: "+query.replaceAll(" +", " "));
+						LogHandler.writeStackTrace(log, e, Level.WARNING);
+						continue;
+					}
 					add[0]=query.replaceAll(" +", " ");
 					add[1]=index+"";
 					index++;
@@ -206,6 +223,25 @@ public class QueryHandler {
 				continue;
 			}
 			query+=" "+line;
+		}
+		br.close();
+		return feasibleList;
+		
+	}
+	
+	public static List<String[]> getInstancesToList(String file, Logger log) throws IOException{
+		List<String[]> feasibleList = new LinkedList<String[]>();
+		File f = new File(file);
+		FileReader fr = new FileReader(f);
+		BufferedReader br = new BufferedReader(fr);
+		String line;
+		int index =0;
+		while((line=br.readLine())!=null){
+			String[] add = new String[2];
+			add[0]=line.replaceAll(" +", " ");
+			add[1]=index+"";
+			index++;
+			feasibleList.add(add);
 		}
 		br.close();
 		return feasibleList;
@@ -291,7 +327,7 @@ public class QueryHandler {
 				SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
 				sp.parse(QueryFactory.create(), test);
 				
-				valuesToCSV(p, String.valueOf(i));		
+				valuesToCSV2(p, String.valueOf(i));		
 			}
 			catch(QueryParseException e){
 				try{
@@ -327,6 +363,85 @@ public class QueryHandler {
 	}
 	
 	
+	private int valuesToCSV2(String pattern, String fileName){
+		
+		String query = String.valueOf(pattern);
+//		query  = PatternSolution.queryToPattern(query);
+		int ret = 0;
+		File f = new File(path+File.separator+fileName+".txt");
+		PrintWriter pwfailed=null;
+		PrintWriter pw =null;
+		try{
+			new File(path).mkdirs();
+			File failed = new File(failedQueries+".txt");
+			failed.createNewFile();
+			
+			f.createNewFile();
+			pwfailed= new PrintWriter(new FileOutputStream(failed, true));
+			pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8), true);
+			
+			String q = selectPattern(query);
+			if(!query.matches(".*%%v[0-9]*%%.*")){
+				log.info("No Variables are set");
+				pw.write(query);
+				pw.println();
+				pw.close();
+				pwfailed.close();
+				return 1;
+			}
+			com.hp.hpl.jena.query.ResultSet m = (com.hp.hpl.jena.query.ResultSet)getModelFromQuery(QueryFactory.create(q));
+			
+			while(m.hasNext()){
+				QuerySolution qs = m.next();
+				String line = query;
+				for(String varName : m.getResultVars()){
+					RDFNode node = qs.get(varName);
+					String rep = "%%"+varName+"%%";
+					String nodeRep = node.asNode().toString(true);
+					if(node.isURIResource()){
+						nodeRep = "<"+nodeRep+">";
+					}
+					line =line.replace(rep, nodeRep);
+				}
+				pw.println(line);
+			}
+						
+		}
+		catch(Exception e){
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			if(pwfailed!=null){
+				pwfailed.write(pattern);
+				pwfailed.println();
+			}
+			f.delete();
+			return ret;
+		}
+		finally{
+			if(pw!=null)	
+				pw.close();
+			if(pwfailed!=null)
+				pwfailed.close();
+		}
+		return ret;
+		
+	}
+	
+	
+	private Object getModelFromQuery(Query q){
+		QueryExecution qe = QueryExecutionFactory.createServiceRequest(this.con.getEndpoint(), q);
+		switch(q.getQueryType()){
+		case Query.QueryTypeAsk: 
+			return qe.execAsk();
+		case Query.QueryTypeConstruct:
+			return qe.execConstruct();
+		case Query.QueryTypeDescribe:
+			return qe.execDescribe();
+		case Query.QueryTypeSelect:
+			return qe.execSelect();
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * Values to csv.
@@ -336,6 +451,7 @@ public class QueryHandler {
 	 * @return the int
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
+	@SuppressWarnings("unused")
 	private int valuesToCSV(String pattern, String fileName) throws IOException{
 		String query = String.valueOf(pattern);
 //		query  = PatternSolution.queryToPattern(query);
@@ -354,10 +470,7 @@ public class QueryHandler {
 			
 			String q = selectPattern(query);
 			ResultSet res =null;
-			if(QuerySorter.isSPARQL(q) == null){
-				
-			}
-			else if(!query.matches(".*%%v[0-9]*%%.*")){
+			if(!query.matches(".*%%v[0-9]*%%.*")){
 				log.info("No Variables are set");
 				pw.write(query);
 				pw.println();
@@ -391,27 +504,27 @@ public class QueryHandler {
 				while(hasPrefixes){
 					if(!result){
 						if(notFirst){
-						log.info("trying again...");
-						//try to redo
-						Boolean iri = false;
-						if(PatternSolution.hasIRIs(query))
-							iri = true;
-						else if(!PatternSolution.hasPrefixes(query)){
-							hasPrefixes=false;
-							break;
-						}
-						if(iri)
-							query = PatternSolution.replaceNextIRI(query);
-						else
-							query = PatternSolution.nextPrefixToVar(query);
-						q = selectPattern(query);
-						log.info("with: "+query+"\nas "+q);
-						for(int i=0;i<10;i++){
-							con.execute(q);
-						}
-						res= con.execute(q);
-						if(res==null)
-							continue;
+							log.info("trying again...");
+							//try to redo
+							Boolean iri = false;
+							if(PatternSolution.hasIRIs(query))
+								iri = true;
+							else if(!PatternSolution.hasPrefixes(query)){
+								hasPrefixes=false;
+								break;
+							}
+							if(iri)
+								query = PatternSolution.replaceNextIRI(query);
+							else
+								query = PatternSolution.nextPrefixToVar(query);
+							q = selectPattern(query);
+							log.info("with: "+query+"\nas "+q);
+							for(int i=0;i<10;i++){
+								con.execute(q);
+							}
+							res= con.execute(q);
+							if(res==null)
+								continue;
 						}
 					}
 					notFirst=true;
@@ -424,7 +537,14 @@ public class QueryHandler {
 						List<Object> vars = new LinkedList<Object>();
 						List<String> varMap = new LinkedList<String>();
 						for(int i=1 ;i<=columns;i++ ){
-							Object current = res.getObject(i);
+							String current = res.getObject(i).toString();
+//							com.hp.hpl.jena.query.ResultSet r = (com.hp.hpl.jena.query.ResultSet) res;
+//							RDFNode n = r.nextSolution().get("v");
+							
+							
+							System.out.println(NodeFactory.createLiteral("Camp", "en", null).getLiteralLexicalForm());
+//							res.get
+//							  t = ((TripleIteratorResults)res).getObject(i);		
 							if(current==null){
 								vars.add("null");
 								continue;
@@ -601,21 +721,26 @@ public class QueryHandler {
 	 * @return the string
 	 */
 	private String typeQuery(Query q, String select, String type){
-		String clause = q.serialize();
-		int i = clause.toLowerCase().indexOf(type);
-		String prefix = clause.substring(0, i);
-		clause = clause.substring(i);
-		i = clause.indexOf('\n');
-		clause = clause.substring(i);
-		if(type.equals("construct")){
-			clause = clause.substring(1);
-			i = clause.indexOf('\n');
-			clause = clause.substring(i);
+//		String clause = q.serialize();
+//		System.out.println(q.getPrefixMapping().toString());
+//		System.out.println(q.getQueryPattern().toString());
+		Map<String, String> prefixes = q.getPrefixMapping().getNsPrefixMap();
+		String prefix="";
+		for(String shortForm : prefixes.keySet()){
+			prefix += "PREFIX "+shortForm+": <"+prefixes.get(shortForm)+"> ";
 		}
-		if(type.equals("describe") && !clause.contains("WHERE")){
-			return "SELECT DISTINCT ?g WHERE {GRAPH ?g {?s ?p ?o}}";
+		String clause = q.getQueryPattern().toString();
+		Query ret = QueryFactory.create(prefix+select+clause);
+		ret.setOffset(q.getOffset());
+		ret.setLimit(limit);
+		ret.setDistinct(true);
+		if(!q.getGraphURIs().isEmpty()){
+			for(String graph : q.getGraphURIs())
+			ret.addGraphURI(graph);
 		}
-		return (prefix+select+clause).replace("\n"," ");
+
+
+		return ret.serialize().replace("\n", " ");
 	}
 	
 }
