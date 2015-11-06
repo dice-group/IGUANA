@@ -8,13 +8,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,11 +20,8 @@ import java.util.regex.Pattern;
 
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.connection.ConnectionFactory;
-import org.bio_gene.wookie.utils.GraphHandler;
 import org.bio_gene.wookie.utils.LogHandler;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -37,14 +31,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.lang.SPARQLParser;
-import com.hp.hpl.jena.sparql.lang.UpdateParser;
-import com.hp.hpl.jena.sparql.modify.UpdateRequestSink;
-import com.hp.hpl.jena.sparql.modify.UpdateSink;
-import com.hp.hpl.jena.update.UpdateRequest;
-
-import de.uni_leipzig.iguana.data.TripleStoreHandler;
 import de.uni_leipzig.iguana.utils.FileHandler;
-import de.uni_leipzig.iguana.utils.RandomStringBuilder;
 
 /**
  * Provides an handler which converts given query patterns into
@@ -84,9 +71,6 @@ public class QueryHandler {
 	/** The limit. */
 	private int limit = 2000;
 	
-	/** The rand. */
-	private Random rand;
-	
 	/** The file for queries. */
 	private String fileForQueries;
 	
@@ -103,6 +87,11 @@ public class QueryHandler {
 		this.fileForQueries = fileForQueries;
 	}
 	
+	public static Query isSPARQL(String query) {
+		SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
+		Query q = sp.parse(QueryFactory.create(), query);
+		return q;
+	}
 	
 	/**
 	 * NTRIPLE File to an insert or delete query.
@@ -308,7 +297,7 @@ public class QueryHandler {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	private void init(String queriesFile) throws IOException{
-		rand = new Random(2);
+//		rand = new Random(2);
 		File f = new File(failedQueries);
 		if(f.exists())
 			f.delete();
@@ -330,20 +319,20 @@ public class QueryHandler {
 				valuesToCSV2(p, String.valueOf(i));		
 			}
 			catch(QueryParseException e){
-				try{
-					test = " "+p.toLowerCase().replaceAll("%%v[0-9]*%%", "<http://example.com>");
-					UpdateParser up = UpdateParser.createParser(Syntax.syntaxSPARQL_11);
-					UpdateSink sink = new UpdateRequestSink(new UpdateRequest());
-					up.parse(sink, test);
-					updatePattern(p, String.valueOf(i));
-				}
-				catch(QueryParseException e1){
-					Logger.getGlobal().warning("Couldn't validate Query\n"+test+"\nneither as SPARQL nor Update. Following are both Stack traces");
+//				try{
+//					test = " "+p.toLowerCase().replaceAll("%%v[0-9]*%%", "<http://example.com>");
+//					UpdateParser up = UpdateParser.createParser(Syntax.syntaxSPARQL_11);
+//					UpdateSink sink = new UpdateRequestSink(new UpdateRequest());
+//					up.parse(sink, test);
+//					updatePattern(p, String.valueOf(i));
+//				}
+//				catch(QueryParseException e1){
+//					Logger.getGlobal().warning("Couldn't validate Query\n"+test+"\n. Following are both Stack traces");
 					Logger.getGlobal().warning("SPARQL Parse exception");
 					LogHandler.writeStackTrace(Logger.getGlobal(), e, Level.SEVERE);
-					Logger.getGlobal().warning("Update Parse exception");
-					LogHandler.writeStackTrace(Logger.getGlobal(), e1, Level.SEVERE);
-				}
+//					Logger.getGlobal().warning("Update Parse exception");
+//					LogHandler.writeStackTrace(Logger.getGlobal(), e1, Level.SEVERE);
+//				}
 			}
 //			if((test.contains(" ask") || test.contains(" select") || test.contains(" construct") || test.contains(" describe"))){
 //				//SELECT, ASK, DESCRIBE, CONSTRUCT
@@ -443,237 +432,10 @@ public class QueryHandler {
 	}
 	
 	
-	/**
-	 * Values to csv.
-	 *
-	 * @param pattern the pattern
-	 * @param fileName the file name
-	 * @return the int
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unused")
-	private int valuesToCSV(String pattern, String fileName) throws IOException{
-		String query = String.valueOf(pattern);
-//		query  = PatternSolution.queryToPattern(query);
-		int ret = 0;
-		File f = new File(path+File.separator+fileName+".txt");
-		PrintWriter pwfailed=null;
-		PrintWriter pw =null;
-		try{
-			new File(path).mkdirs();
-			File failed = new File(failedQueries+".txt");
-			failed.createNewFile();
-			
-			f.createNewFile();
-			pwfailed= new PrintWriter(new FileOutputStream(failed, true));
-			pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8), true);
-			
-			String q = selectPattern(query);
-			ResultSet res =null;
-			if(!query.matches(".*%%v[0-9]*%%.*")){
-				log.info("No Variables are set");
-				pw.write(query);
-				pw.println();
-				pw.close();
-				pwfailed.close();
-				return 1;
-			}
-			else{
-				for(int i=0;i<10;i++){
-					con.execute(q);
-				}
-				
-				res= con.execute(q);
-			}
-			Boolean result= false, hasPrefixes=true,notFirst=false;
-			while(res==null&&(PatternSolution.hasIRIs(query)||PatternSolution.hasPrefixes(query))){
-				log.info("trying again...");
-				if(PatternSolution.hasIRIs(query))	
-					query  = PatternSolution.replaceNextIRI(query);
-				else
-					query = PatternSolution.nextPrefixToVar(query);
-				log.info("With query: "+query);
-				q = selectPattern(query);
-				for(int i=0;i<10;i++){
-					con.execute(q);
-				}
-				res= con.execute(q);
-				System.out.println(res);
-			}
-			if(res!=null){
-				while(hasPrefixes){
-					if(!result){
-						if(notFirst){
-							log.info("trying again...");
-							//try to redo
-							Boolean iri = false;
-							if(PatternSolution.hasIRIs(query))
-								iri = true;
-							else if(!PatternSolution.hasPrefixes(query)){
-								hasPrefixes=false;
-								break;
-							}
-							if(iri)
-								query = PatternSolution.replaceNextIRI(query);
-							else
-								query = PatternSolution.nextPrefixToVar(query);
-							q = selectPattern(query);
-							log.info("with: "+query+"\nas "+q);
-							for(int i=0;i<10;i++){
-								con.execute(q);
-							}
-							res= con.execute(q);
-							if(res==null)
-								continue;
-						}
-					}
-					notFirst=true;
-					while(res.next()){
-						result=true;
-						hasPrefixes=false;
-						ResultSetMetaData rsmd = res.getMetaData();
-						int columns = rsmd.getColumnCount();
-						String line ="";
-						List<Object> vars = new LinkedList<Object>();
-						List<String> varMap = new LinkedList<String>();
-						for(int i=1 ;i<=columns;i++ ){
-							String current = res.getObject(i).toString();
-//							com.hp.hpl.jena.query.ResultSet r = (com.hp.hpl.jena.query.ResultSet) res;
-//							RDFNode n = r.nextSolution().get("v");
-							
-							
-							System.out.println(NodeFactory.createLiteral("Camp", "en", null).getLiteralLexicalForm());
-//							res.get
-//							  t = ((TripleIteratorResults)res).getObject(i);		
-							if(current==null){
-								vars.add("null");
-								continue;
-							}
-							Node cur = TripleStoreHandler.implToNode(current);
-							vars.add(GraphHandler.NodeToSPARQLString(cur));
-							varMap.add(rsmd.getColumnLabel(i));
-						}
-						line = patternToQuery(pattern, vars, varMap);
-						pw.write(line);
-						pw.println();
-						ret++;
-						hasPrefixes=false;
-					}
-					res.getStatement().close();
-				
-				}
-//				res.getStatement().close();
-			}
-			else{
-				log.severe("Result of "+con.getEndpoint()+" is null for "+pattern+"\n"+q);
-			}
-			
-			if(!result){
-				log.info("Has no Results... writing the pattern to the file");
-				String newQuery=pattern;
-				Pattern p  =Pattern.compile("%%v[0-9]*%%");
-				Matcher m = p.matcher(pattern);
-				while(m.find()){
-					String group = m.group();
-					newQuery = newQuery.replace(group, "?"+group.replace("%", ""));
-				}
-				pw.println(newQuery);
-				pwfailed.write(pattern);
-				pwfailed.println();
-//				f.delete();
-			}
-			
-			return ret;
-		}
-		catch(Exception e){
-			LogHandler.writeStackTrace(log, e, Level.SEVERE);
-			if(pwfailed!=null){
-				pwfailed.write(pattern);
-				pwfailed.println();
-			}
-			f.delete();
-			return ret;
-		}
-		finally{
-			if(pw!=null)	
-				pw.close();
-			if(pwfailed!=null)
-				pwfailed.close();
-		}
-		
-	}
 
 
-	/**
-	 * Pattern to query.
-	 *
-	 * @param pattern the pattern
-	 * @param vars the vars
-	 * @return the string
-	 */
-	private String patternToQuery(String pattern, List<Object> vars, List<String> varMap){
-		String query = String.valueOf(pattern);
-		Pattern regex = Pattern.compile("%%v[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
-		Matcher matcher = regex.matcher(pattern);
-//		int i=0;
-		List<String> replaced = new LinkedList<String>();
-		while(matcher.find()){
-			String var = matcher.group();
-			String varEsc = var.replace("%", "");
-			if(!replaced.contains(var)){
-				query = query.replace(var, vars.get(varMap.indexOf(varEsc)).toString());		
-//				i++;
-				replaced.add(var);
-			}
-		}
-		
-		return query;
-	}
-	
-	/**
-	 * Update pattern.
-	 *
-	 * @param pattern the pattern
-	 * @param fileName the file name
-	 * @return the string
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	private String updatePattern(String pattern, String fileName) throws IOException{
-		String query = String.valueOf(pattern);
-		RandomStringBuilder rsb = new RandomStringBuilder(100);
-		new File(path).mkdirs();
-		File f = new File(path+fileName+".txt");
-		f.createNewFile();
-		PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8), true);
-		for(int i=0;i<limit;i++){
-			Pattern regex = Pattern.compile("%%v[0-9]*%%", Pattern.UNICODE_CHARACTER_CLASS);
-			Matcher matcher = regex.matcher(pattern);
-			while(matcher.find()){
-				String var = matcher.group();
-				if(PatternSolution.mustBeResource(query, var)){
-					query = query.replace(var, "<http://example.com/"+rsb.buildString(15)+">");
-				}
-				else{
-					//i=0;d=1;b=2;s=3
-					int type = rand.nextInt(4);
-					if(type==0)
-						query = query.replace(var, String.valueOf(rand.nextInt()));
-					else if(type==1)
-						query = query.replace(var, String.valueOf(rand.nextDouble()));
-					else if(type==2)
-						query = query.replace(var, String.valueOf(rand.nextBoolean()));
-					else if(type==3)
-						query = query.replace(var, "'"+rsb.buildString(15)+"'");
-				}
-			}
-			pw.println(query);
-			query = String.valueOf(pattern);
-		}
-		pw.close();
-		
-		return query;
-	}
-	
+
+
 	/**
 	 * Select pattern.
 	 *
