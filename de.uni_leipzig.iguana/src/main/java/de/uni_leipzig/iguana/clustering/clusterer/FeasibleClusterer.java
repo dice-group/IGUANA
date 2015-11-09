@@ -1,7 +1,6 @@
 package de.uni_leipzig.iguana.clustering.clusterer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
@@ -95,8 +94,8 @@ public class FeasibleClusterer implements Clusterer {
 		AvgStats.getPercentUsedLogConstructs(outputDir + "queries-stats.txt");
 		AvgStats.getAvgLogFeatures(outputDir + "queries-stats.txt");
 		
-		saveFeasibleToInstances(outputDir+"queries.txt", queriesFile);
-		return queriesFile;
+		saveFeasibleToInstances(outputDir+"queries.txt", outputDir+queriesFile);
+		return outputDir+queriesFile;
 	}
 	
 	public void saveFeasibleToInstances(String input, String queriesFile) throws IOException{
@@ -121,7 +120,7 @@ public class FeasibleClusterer implements Clusterer {
 			Config.featureFilter = p.getProperty("feature-filter");
 		}
 		if (p.getProperty("clause-filter") != null
-				&& !p.getProperty("clause-filter").isEmpty()) {
+				&& !p.getProperty("clause--filter").isEmpty()) {
 			Config.clauseFilter = p.getProperty("clause-filter");
 		}
 
@@ -168,6 +167,9 @@ public class FeasibleClusterer implements Clusterer {
 	public void setProperties(Properties p) {
 		number = Integer.valueOf(p.getProperty("number-of-queries"));
 		outputDir = p.getProperty(OUTPUT_DIR);
+		if(outputDir==null){
+			outputDir="";
+		}
 		selectCustomFilters(p);
 	}
 

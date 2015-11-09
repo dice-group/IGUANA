@@ -171,7 +171,7 @@ public abstract class Worker {
 				endSignal=true;
 				continue;
 			}
-			if(query[1]!=null&&!query[1].equals("null")){
+			if(query[1]!=null&&!query[1].equals("null")&&!endSignal){
 				log.info(workerType+"Worker "+workerNr+": Query "+query[1]+" took "+time+"ms");
 				//PUT RESULTS
 				putResults(time, query[1]);

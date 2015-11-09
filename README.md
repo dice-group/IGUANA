@@ -44,10 +44,10 @@ Please see the file called [INSTALL](https://github.com/AKSW/IGUANA/blob/master/
 
 ##Licensing
 
-IGUANA is licensed under the MIT License
+IGUANA is licensed under the LGPL License
 Please see the file called [LICENSE](https://github.com/AKSW/IGUANA/blob/master/LICENSE)
 
-The whole list of libraries we use and their licenses is stated in the file called [LIBRARIES](https://github.com/AKSW/IGUANA/blob/master/LIBRARIES)
+The (not anymore whole) list of libraries we use and their licenses is stated in the file called [LIBRARIES](https://github.com/AKSW/IGUANA/blob/master/LIBRARIES)
 
 ##Contacts
 

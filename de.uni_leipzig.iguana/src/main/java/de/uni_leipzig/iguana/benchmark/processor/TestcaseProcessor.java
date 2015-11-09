@@ -60,6 +60,16 @@ public class TestcaseProcessor {
 	}
 
 	@SuppressWarnings("unchecked")
+	public static Boolean isOneTest(String testcase) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
+		String testcaseWithoutID = testcase.substring(0,
+				testcase.lastIndexOf(CONCAT));
+		Class<Testcase> t = (Class<Testcase>) Class
+				.forName(testcaseWithoutID);
+		Testcase test = t.newInstance();
+		return test.isOneTest();
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Collection<ResultSet> testTestcase(String testcase, String graphURI,
 			String dbName, Connection con, String percent,
 			Collection<ResultSet> results, String testcasePost,

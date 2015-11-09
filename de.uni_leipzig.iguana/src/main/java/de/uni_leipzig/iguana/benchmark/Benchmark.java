@@ -88,10 +88,22 @@ public class Benchmark {
 				log.info("Current Connection: "+dbName);
 				Connection con = ConnectionFactory.createConnection(Config.dbNode, dbName);
 				for(String testcase : TestcaseProcessor.testcaseSorting(Config.testcaseProperties)){
-					ResultProcessor.putResultsForTestcase(testcase + "&" + percent,
+					String key = testcase;
+					try {
+						if(!TestcaseProcessor.isOneTest(testcase)){
+							key +="&"+percent;
+						}
+						else{
+							key +="&"+1;
+						}
+					} catch (ClassNotFoundException | InstantiationException
+							| IllegalAccessException e) {
+						LogHandler.writeStackTrace(log, e, Level.INFO);
+					}
+					ResultProcessor.putResultsForTestcase(key,
 						TestcaseProcessor.testTestcase(testcase, Config.graphURI, 
 								dbName, con, percent+"", 
-								ResultProcessor.getResultsForTestcase(testcase + "&" + percent), 
+								ResultProcessor.getResultsForTestcase(key), 
 								Config.testcasePost, 
 								Config.testcasePre, 
 								Config.testcaseProperties.get(testcase), 

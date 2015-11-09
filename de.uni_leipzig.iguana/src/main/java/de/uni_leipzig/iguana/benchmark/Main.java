@@ -20,11 +20,16 @@ public class Main {
 
 			System.out
 					.println("Usage: java (-Djava.library.path=\"path/To/lpsolve/Libs\")? -cp \"lib/*\" "
-							+ Main.class.getName() + " configfile.xml");
+							+ Main.class.getName() + " configfile.xml (debug=(true|false))?");
 			return;
 		} else {
-
-			initJena();
+			Boolean debug=false;
+			if(args.length>1){
+				if(args[1].startsWith("debug=")){
+					debug = Boolean.valueOf(args[1].replace("debug=", ""));
+				}
+			}
+			initJena(debug);
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				@Override
 				public void run() {
@@ -36,17 +41,19 @@ public class Main {
 		}
 	}
 
-	private static void initJena() {
-//		org.apache.log4j.Logger.getLogger(
-//				"log4j.logger.org.apache.jena.arq.info").setLevel(
-//				org.apache.log4j.Level.OFF);
-//		org.apache.log4j.Logger.getLogger(
-//				"log4j.logger.org.apache.jena.arq.exec").setLevel(
-//				org.apache.log4j.Level.OFF);
-//		org.apache.log4j.Logger.getLogger("log4j.logger.org.apache.jena")
-//				.setLevel(org.apache.log4j.Level.OFF);
-//		org.apache.log4j.Logger.getRootLogger().setLevel(
-//				org.apache.log4j.Level.OFF);
+	private static void initJena(Boolean debug) {
+		if(!debug){
+			org.apache.log4j.Logger.getLogger(
+					"log4j.logger.org.apache.jena.arq.info").setLevel(
+							org.apache.log4j.Level.OFF);
+			org.apache.log4j.Logger.getLogger(
+				"log4j.logger.org.apache.jena.arq.exec").setLevel(
+				org.apache.log4j.Level.OFF);
+			org.apache.log4j.Logger.getLogger("log4j.logger.org.apache.jena")
+				.setLevel(org.apache.log4j.Level.OFF);
+			org.apache.log4j.Logger.getRootLogger().setLevel(
+				org.apache.log4j.Level.OFF);
+		}
 		ConnectionFactory
 				.setDriver("org.apache.jena.jdbc.remote.RemoteEndpointDriver");
 		ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=http://");
