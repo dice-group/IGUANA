@@ -101,9 +101,10 @@ public class FeasibleClusterer implements Clusterer {
 	public void saveFeasibleToInstances(String input, String queriesFile) throws IOException{
 		List<String[]> qs = QueryHandler.getFeasibleToList(input, Logger.getGlobal());
 		PrintWriter pw = new PrintWriter(queriesFile);
-		for(String[] query : qs){
-			pw.println(query[0]);
+		for(int i=0; i<qs.size()-1;i++){
+			pw.println(qs.get(i)[0]);
 		}
+		pw.print(qs.get(qs.size()-1)[0]);
 		pw.close();
 	}
 
@@ -120,7 +121,7 @@ public class FeasibleClusterer implements Clusterer {
 			Config.featureFilter = p.getProperty("feature-filter");
 		}
 		if (p.getProperty("clause-filter") != null
-				&& !p.getProperty("clause--filter").isEmpty()) {
+				&& !p.getProperty("clause-filter").isEmpty()) {
 			Config.clauseFilter = p.getProperty("clause-filter");
 		}
 

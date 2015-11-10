@@ -6,8 +6,8 @@
 	<version>0.3.0</version>
 	<licenses>
 		<license>
-			<name>MIT Licence</name>
-			<url>http://opensource.org/licenses/MIT</url>
+			<name>LGPL Licence</name>
+			<url>https://opensource.org/licenses/LGPL-3.0</url>
 		</license>
 	</licenses>
 	<properties>
@@ -682,6 +682,9 @@
 				<excludes>
 					<exclude>**/*.*</exclude>
 				</excludes>
+				<includes>
+					<include>examples/*</include>
+				</includes>
 				<filtering>false</filtering>
 			</resource>
 		</resources>
@@ -726,7 +729,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>de.uni_leipzig.iguana.benchmark.Benchmark</mainClass>
+							<mainClass>de.uni_leipzig.iguana.benchmark.Main</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

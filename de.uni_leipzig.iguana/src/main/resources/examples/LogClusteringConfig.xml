@@ -23,11 +23,13 @@
 			<endpoint uri="dbpedia.org/sparql" />
 		</database>
 	</databases>
-	<log-clustering class="de.uni_leipzig.iguana.clustering.clusterer.FeasibleClusterer" path="FEASIBLE/" output-file="queries.txt">
+	<log-clustering class="de.uni_leipzig.iguana.clustering.clusterer.FeasibleClusterer" path="../../LogFiles/dbpedia.txt" output-file="queriesG.txt">
 		<property name="ask" value="false"/>
 		<property name="union" value="false"/>
 		<property name="clause-filter" value="(OPTIONAL AND DISTINCT) OR (UNION)"/>
 		<property name="feature-filter" value="(ResultSize &gt;= 5 AND ResultSize &lt;= 100 AND BGPs &gt;= 2 AND TriplePatterns &lt;=10) OR (MeanTriplePatternsSelectivity &gt;= 0.0001)"/>
+		<property name="number-of-queries" value="25" />
+		<property name="output-dir" value="FEASIB/" />
 	</log-clustering>
 	<suite>
 		<drop-db value="false" />
@@ -50,7 +52,7 @@
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
@@ -59,7 +61,7 @@
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
@@ -68,7 +70,7 @@
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
@@ -77,7 +79,7 @@
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
@@ -86,7 +88,7 @@
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
@@ -95,7 +97,7 @@
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="linking-strategy" value="ID" />
 				<property name="update-path" value="ld" />
@@ -108,7 +110,7 @@
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="linking-strategy" value="ID" />
 				<property name="update-path" value="ld" />
@@ -121,7 +123,7 @@
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="linking-strategy" value="ID" />
 				<property name="update-path" value="ld" />
@@ -134,7 +136,7 @@
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="linking-strategy" value="ID" />
 				<property name="update-path" value="ld" />
@@ -147,7 +149,7 @@
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
 				<property name="latency-strategy0" value="VARIABLE" />
-				<property name="queries-path" value="FEASIBLE/queries.txt" />
+				<property name="queries-path" value="FEASIB/queriesG.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="linking-strategy" value="ID" />
 				<property name="update-path" value="ld" />

@@ -38,6 +38,7 @@ public class Benchmark {
 	
 	
 	public static void execute(String arg) throws ParserConfigurationException, SAXException, IOException{
+		Config.initLogClusterer(arg);
 		pre();
 		int suites = Config.getSuites(arg);		
 		for(int i=0; i<suites;i++){

@@ -1,87 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<iguana 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<data-description>
-		<namespace name="http://localhost/" />
-		<anchor name="#" />
-		<resource-uri name="http://localhost/resource/" />
-		<property-prefix-name name="bgprop" />
-		<resource-prefix-name name="bgres" />
-	</data-description>
+<iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<databases main="dbpedia">
 		<database id="owlim" type="impl">
-			<endpoint uri="localhost:8080/openrdf-workbench/repositories/owlim-lite/query" />
-			<update-endpoint uri="localhost:8080/openrdf-workbench/repositories/owlim-lite/update"/>
+			<endpoint
+				uri="localhost:8080/openrdf-workbench/repositories/owlim-lite/query" />
+			<update-endpoint
+				uri="localhost:8080/openrdf-workbench/repositories/owlim-lite/update" />
 		</database>
 		<database id="fuseki" type="impl">
 			<endpoint uri="localhost:3030/tdb/sparql" />
-			<update-endpoint uri="localhost:3030/tdb/update"/>
+			<update-endpoint uri="localhost:3030/tdb/update" />
 		</database>
 		<database id="blazegraph" type="impl">
 			<endpoint uri="localhost:9999/bigdata/sparql" />
 		</database>
 		<database id="virtuoso_4" type="impl">
 			<endpoint uri="dbpedia.org/sparql" />
-<!-- 			<user value="dba" /> -->
-<!-- 			<pwd value="dba" /> -->
+			<!-- <user value="dba" /> -->
+			<!-- <pwd value="dba" /> -->
 		</database>
 		<database id="ref" type="impl">
 			<endpoint uri="dbpedia.org/sparql" />
-		</database>		
+		</database>
 	</databases>
-	<benchmark log="Benchmark">
+	<suite>
 		<drop-db value="false" />
-<!-- 		<sparql-load value="true"/> -->
+		<!-- <sparql-load value="true"/> -->
 		<query-diversity value="2000" />
-		<graph-uri name="http://dbpedia.org"/>
-<!-- 	<graph-uri name="default"/> -->
+		<graph-uri name="http://dbpedia.org" />
+		<!-- <graph-uri name="default"/> -->
 		<random-function type="RandomTriple" generate="false">
-			<percent value="1.0" file-name="dbpedia2/"/>
-<!-- 			<percent value="0.5" file-name="dbpedia2/"/> -->
-<!-- 			<percent value="0.2" file-name="dbpedia2/"/> -->
-<!-- 			<percent value="0.1" file-name="dbpedia2/"/> -->
-<!-- 			<percent value="2.0" file-name="dbpedia2/"/> -->
+			<percent value="1.0" file-name="dbpedia2/" />
+			<percent value="2.0" file-name="dbpedia2/" />
+			<percent value="0.5" file-name="dbpedia2/" />
+			<percent value="0.2" file-name="dbpedia2/" />
+				
 		</random-function>
-		<warmup time="0" file-name="warmup.txt"/>
+		<warmup time="2" file-name="warmup.txt" update-path="ld/" />
 		<test-db type="choose" reference="ref">
-<!-- 			<db id="owlim" /> -->
+			<!-- <db id="owlim" /> -->
 			<db id="blazegraph" />
 			<db id="virtuoso_4" />
-<!-- 			<db id="fuseki" />-->
+			<db id="fuseki" />
 		</test-db>
 		<testcases>
-<!--                        <testcase class="de.uni_leipzig.iguana.testcases.StressTestcase"> -->
-<!--                                 <property name="users" value="4"/> -->
-<!--                                 <property name="update-users" value="1"/> -->
-<!--                                 <property name="queryPatternFile" value="pattern.txt"/> -->
-<!--                                 <property name="ldPath" value="ld"/> -->
-<!--                                 <property name="ldLinking" value="ID"/> -->
-<!--                                 <property name="updateStrategy" value="variable"/> -->
-<!--                                 <property name="limit" value="2000"/> -->
-<!--                                 <property name="time-limit" value="20000"/> -->
-<!--                        </testcase> -->
-<!-- 					   <testcase class="de.uni_leipzig.iguana.testcases.UploadShellTestcase"> -->
-<!-- 							<property name="script-name" value="test.bat %%FILE%% %%PERCENT%% %%DBNAME%%"/> -->
-<!-- 						</testcase> -->
-					   <testcase class="de.uni_leipzig.iguana.testcases.StressTestcase2">
-                                <property name="sparql-user" value="5"/>
-                                <property name="update-user" value="0"/>
-<!--                                 <property name="latency-amount0" value="20"/> -->
-<!--                                 <property name="latency-strategy0" value="VARIABLE"/> -->
-<!--                                 <property name="latency-amount1" value="[20:50]"/> -->
-<!--                                 <property name="latency-strategy1" value="VARIABLE"/> -->
-<!--                                 <property name="latency-amount2" value="20"/> -->
-<!--                                 <property name="latency-strategy2" value="FIXED"/> -->
-                                <property name="queries-path" value="queries-175.txt"/>
-                                <property name="is-pattern" value="false"/>
-                                <property name="linking-strategy" value="DI"/>
-                                <property name="update-path" value="ld"/>
-                                <property name="worker-strategy0" value="ADDED"/>
-                                <property name="worker-strategy1" value="NEXT"/>
-                                <property name="update-strategy" value="VARIABLE"/>
-                                <property name="timelimit" value="60000"/>
-                       </testcase>		
+			<testcase class="de.uni_leipzig.iguana.testcases.UploadShellTestcase">
+			<property name="script-name" value="test.bat %%FILE%% %%PERCENT%% 
+				%%DBNAME%%"/> 
+			</testcase>
+<!-- 			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase"> -->
+<!-- 				<property name="sparql-user" value="2" /> -->
+<!-- 				<property name="update-user" value="3" /> -->
+<!-- 				<property name="latency-amount0" value="20"/> -->
+<!-- 				<property name="latency-strategy0" value="VARIABLE"/> -->
+<!-- 				<property name="latency-amount1" value="[20:50]"/> -->
+<!-- 				<property name="latency-strategy1" value="VARIABLE"/> -->
+<!-- 				<property name="latency-amount2" value="20"/> -->
+<!-- 				<property name="latency-strategy2" value="FIXED"/> -->
+<!-- 				<property name="queries-path" value="queries.txt" /> -->
+<!-- 				<property name="is-pattern" value="false" /> -->
+<!-- 				<property name="linking-strategy" value="ID" /> -->
+<!-- 				<property name="update-path0" value="ld2" /> -->
+<!-- 				<property name="update-path1" value="ld" /> -->
+<!-- 				<property name="update-path2" value="ld" /> -->
+<!-- 				<property name="worker-strategy0" value="REMOVED" /> -->
+<!-- 				<property name="worker-strategy1" value="ADDED" /> -->
+<!-- 				<property name="worker-strategy2" value="REMOVED" /> -->
+<!-- 				<property name="worker0" value="blazegraph" /> -->
+<!-- 				<property name="worker1" value="fuseki" /> -->
+<!-- 				<property name="worker2" value="fuseki" /> -->
+<!-- 				<property name="worker-strategy1" value="NEXT"/> -->
+<!-- 				<property name="update-strategy" value="VARIABLE" /> -->
+<!-- 				<property name="timelimit" value="30000" /> -->
+<!-- 			</testcase> -->
 		</testcases>
-	</benchmark>
+	</suite>
+	<suite>
+		<drop-db value="false" />
+		<query-diversity value="2000" />
+		<graph-uri name="http://dbpedia.org" />
+		<random-function type="RandomTriple" generate="false">
+			<percent value="1.0" file-name="dbpedia2/" />
+		</random-function>
+		<warmup time="0" file-name="warmup.txt" />
+		<test-db type="choose" reference="ref">
+			<db id="virtuoso_4" />
+			<db id="fuseki"/>
+			<db id="blazegraph"/>
+		</test-db>
+		<testcases>
+<!-- 			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase"> -->
+<!-- 				<property name="sparql-user" value="2" /> -->
+<!-- 				<property name="update-user" value="0" /> -->
+<!-- 				<property name="queries-path" value="queries.txt" /> -->
+<!-- 				<property name="is-pattern" value="false" /> -->
+<!-- 				<property name="update-path" value="ld" /> -->
+
+<!-- 				<property name="timelimit" value="20000" /> -->
+<!-- 			</testcase> -->
+		</testcases>
+	</suite>
+
 </iguana>
 

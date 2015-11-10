@@ -128,36 +128,7 @@ public class QueryHandler {
 			if(graphUri!=null){
 				query+=" GRAPH <"+graphUri+"> { ";
 			}
-//			Model m = ModelFactory.createDefaultModel();
-//			String uriFile="";
-//			try {
-//				uriFile = file.toURI().normalize().toURL().toString();
-//			} catch (MalformedURLException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//				//			m.read(uriFile);
-//			try {
-//				m.read(uriFile);
-//			} catch (Exception e) {
-//				Logger.getGlobal().severe("Problems with model");
-//				return "";
-//			}
-//			String lines = GraphHandler.GraphToSPARQLString(m.getGraph());
-//			lines = lines.substring(1, lines.length()-1);
-////			FileInputStream fis = new FileInputStream(file);
-////			BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
-////			String line ="";
-////			while((line=br.readLine()) != null){
-////				if(line.isEmpty() || line.equals("\n")){
-////					continue;
-////				}
-////				query +="";
-////				query +=line;
-////				query +=" . ";
-////			}
-////			query = query.substring(0, query.lastIndexOf("."));
-//			query+=lines;
+
 			FileReader fis = new FileReader(file);
 			BufferedReader bis = new BufferedReader(fis);
 			String triple="";
@@ -172,7 +143,7 @@ public class QueryHandler {
 			if(insert)
 				query+=" WHERE {?s ?p ?o}";
 //			br.close();
-			System.out.println(query);
+//			System.out.println(query);
 			return query;
 //		}
 //		catch(IOException e){
@@ -190,7 +161,9 @@ public class QueryHandler {
 		int index =0;
 		String[] add = new String[2];
 		String query="";
+		String oldLine="";
 		while((line=br.readLine())!=null){
+			oldLine = line;
 			if(line.startsWith(FEASIBLE_QUERY_START)){
 				if(!query.isEmpty()){
 					try{
@@ -212,6 +185,22 @@ public class QueryHandler {
 				continue;
 			}
 			query+=" "+line;
+		}
+		if(!oldLine.equals(FEASIBLE_QUERY_START)){
+			if(!query.isEmpty()){
+				try{
+					QueryFactory.create(query.replaceAll(" +", " "));
+					add[0]=query.replaceAll(" +", " ");
+					add[1]=index+"";
+					index++;
+					feasibleList.add(add);
+				}
+				catch(Exception e){
+					index++;
+					log.warning("Couldn't create Query: "+query.replaceAll(" +", " "));
+					LogHandler.writeStackTrace(log, e, Level.WARNING);
+				}
+			}
 		}
 		br.close();
 		return feasibleList;

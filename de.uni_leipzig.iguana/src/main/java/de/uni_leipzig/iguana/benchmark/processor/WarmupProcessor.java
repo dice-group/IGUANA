@@ -68,6 +68,7 @@ public class WarmupProcessor {
 						LogHandler.writeStackTrace(log, e, Level.SEVERE);
 					}
 				} else {
+					log.finest("Updating now: "+f.getName());
 					FileUploader.loadFile(con, f, graphURI);
 				}
 				update = false;
@@ -79,8 +80,9 @@ public class WarmupProcessor {
 				return;
 			}
 			if (!sparqlLoad) {
+				log.finest("Requesting now: "+query);
 				java.sql.ResultSet res = con.execute(query);
-
+				
 				if (res != null) {
 					try {
 						res.getStatement().close();

@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -137,6 +138,23 @@ public class Config {
 		return cp.getNodeList(BENCHMARK_NODE).getLength();
 	}
 	
+	public static void initLogClusterer(String pathToXMLFile) throws ParserConfigurationException, SAXException, IOException{
+		ConfigParser cp = ConfigParser.getParser(pathToXMLFile);
+		Element root = cp.getElementAt(MAIN_NODE, 0);
+		cp.setNode(root);
+		try{		
+			Element logCluster = cp.getElementAt(LOG_CLUSTERING_ELEMENT, 0);
+			logClusterClass = logCluster.getAttribute("class");
+			logClusterPath = logCluster.getAttribute("path");
+			logClusterOutput = logCluster.getAttribute("output-file");
+		}
+		catch(Exception e){
+			log.info("LogClusterer is not or not correctly specified");
+			LogHandler.writeStackTrace(log, e, Level.FINEST);
+		}
+		logClusteringProperties = getLogClusterProperties((Node)root);
+	}
+	
 	public static void init(String pathToXMLFile, int suite) throws ParserConfigurationException, SAXException, IOException{
 		
 		ConfigParser cp = ConfigParser.getParser(pathToXMLFile);
@@ -146,14 +164,7 @@ public class Config {
 		NodeList nl = root.getElementsByTagName(BENCHMARK_NODE);
 		Element benchmark = (Element) nl.item(suite);
 		cp.setNode(root);
-		try{		
-			Element logCluster = cp.getElementAt(LOG_CLUSTERING_ELEMENT, 0);
-			logClusterClass = logCluster.getAttribute("class");
-			logClusterPath = logCluster.getAttribute("path");
-			logClusterOutput = logCluster.getAttribute("output-file");
-		}
-		catch(Exception e){
-		}
+		
 		cp.setNode(benchmark);
 		
 //		dropDB = Boolean.valueOf(cp.getElementAt(DROP_DB_ELEMENT, 0).getAttribute("value"));
@@ -222,7 +233,6 @@ public class Config {
 		
 		databaseIDs = getDatabaseIds((Node)root, testDBType, refConID, null);
 		testcaseProperties = getTestCases((Node)root, suite);
-		logClusteringProperties = getLogClusterProperties((Node)root);
 		randomFiles = getRandomFiles((Node)root, suite);
 		datasetPercantage = getPercents((Node)root, suite);
 		emailConfiguration = getEmail((Node)root);
