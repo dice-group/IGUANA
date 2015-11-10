@@ -1,7 +1,6 @@
 package de.uni_leipzig.iguana.benchmark.processor;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
@@ -14,7 +13,6 @@ import java.util.logging.Logger;
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
 
-import de.uni_leipzig.iguana.query.QueryHandler;
 import de.uni_leipzig.iguana.utils.FileHandler;
 import de.uni_leipzig.iguana.utils.FileUploader;
 
@@ -62,16 +60,19 @@ public class WarmupProcessor {
 			if (updIt.hasNext() && update) {
 				File f = updIt.next();
 				if (!sparqlLoad) {
-					try {
-						query = QueryHandler.ntToQuery(f, true, graphURI);
-					} catch (IOException e) {
-						LogHandler.writeStackTrace(log, e, Level.SEVERE);
+
+					if (f.getName().contains("removed")) {
+						con.deleteFile(f, graphURI);
+					} else {
+						con.uploadFile(f, graphURI);
 					}
+
 				} else {
-					log.finest("Updating now: "+f.getName());
+					log.finest("Updating now: " + f.getName());
 					FileUploader.loadFile(con, f, graphURI);
 				}
 				update = false;
+				continue;
 			} else if (queryList.size() > 0) {
 				query = queryList.get(i++);
 				update = true;
@@ -80,9 +81,9 @@ public class WarmupProcessor {
 				return;
 			}
 			if (!sparqlLoad) {
-				log.finest("Requesting now: "+query);
+				log.finest("Requesting now: " + query);
 				java.sql.ResultSet res = con.execute(query);
-				
+
 				if (res != null) {
 					try {
 						res.getStatement().close();
