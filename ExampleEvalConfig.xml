@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<databases main="dbpedia">
-		<database id="owlim" type="impl">
-			<endpoint
-				uri="localhost:8080/openrdf-workbench/repositories/owlim/query" />
-			<update-endpoint
-				uri="localhost:8080/openrdf-workbench/repositories/owlim/update" />
+		<database id="connection3" type="impl">
+			<endpoint uri="localhost:8080/sparql" />
+			<update-endpoint uri="localhost:8080/update" />
 		</database>
-		<database id="fuseki" type="impl">
-			<endpoint uri="localhost:3030/ds/sparql" />
-			<update-endpoint uri="localhost:3030/ds/update" />
+		<database id="connection2" type="impl">
+			<endpoint uri="localhost:8080/sparql" />
+			<update-endpoint uri="localhost:8080/update" />
 		</database>
-		<database id="blazegraph" type="impl">
-			<endpoint uri="localhost:9999/bigdata/sparql" />
-		</database>
-		<database id="virtuoso" type="impl">
-			<endpoint uri="localhost:8891/sparql-auth" />
-			<user value="dba" />
-			<pwd value="dba" />
+		<database id="connection1" type="impl">
+			<endpoint uri="localhost:8080/sparql" />
+			<update-endpoint uri="localhost:8080/update" />
 		</database>
 		<database id="ref" type="impl">
 			<endpoint uri="dbpedia.org/sparql" />
@@ -33,9 +27,9 @@
 		</random-function>
 		<warmup time="2" file-name="warmup2.txt" />
 		<test-db type="choose" reference="ref">
-			<db id="virtuoso" />
-			<db id="blazegraph" />
-			<db id="fuseki" />
+			<db id="connection1" />
+			<db id="connection2" />
+			<db id="connection3" />
 		</test-db>
 		<testcases testcase-pre="./testcasePre.sh %DBID% %PERCENT% %TESTCASEID%"
 			testcase-post="./testcasePre.sh">
