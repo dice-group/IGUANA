@@ -1,6 +1,6 @@
 #IGUANA
 
-![Logo of IGUANA](IGUANA_Logo.png)
+![Logo of IGUANA](images/IGUANA_Logo.png)
 
 
 ##What is it?
@@ -21,7 +21,7 @@ It should be...
 
 ##Architecture
 
-![Architecture of IGUANA](IGUANA_v0.3_Architecture.png)
+![Architecture of IGUANA](images/IGUANA_v0.3_Architecture.png)
 
 ##The latest version
 
