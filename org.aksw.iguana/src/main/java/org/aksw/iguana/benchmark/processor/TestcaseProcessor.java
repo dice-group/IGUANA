@@ -17,6 +17,12 @@ import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.utils.LogHandler;
 import org.w3c.dom.Node;
 
+/**
+ * The Processor to execute testcases, sort them and execute the suite
+ * 
+ * @author Felix Conrads
+ *
+ */
 public class TestcaseProcessor {
 
 	private static final String PERCENT_ONE = "1";
@@ -26,11 +32,21 @@ public class TestcaseProcessor {
 	private static Logger log = Logger.getLogger(TestcaseProcessor.class
 			.getSimpleName());
 
+	/**
+	 * Init the Logger with file
+	 */
 	static {
 		LogHandler.initLogFileHandler(log,
 				TestcaseProcessor.class.getSimpleName());
 	}
 
+	/**
+	 * Gets the Properties for the given testcase
+	 * 
+	 * @param testcase The Testcase without any identifier
+	 * @param testcases the Map with all Testcase Properties
+	 * @return Properties for testcase (can be null)
+	 */
 	public static Properties getTestcasesWithoutIdentifier(String testcase,
 			Map<String, Properties> testcases) {
 		for (String testWithID : testcases.keySet()) {
@@ -42,22 +58,49 @@ public class TestcaseProcessor {
 		return null;
 	}
 
+	/**
+	 * Gets an Array of the ordered testcases
+	 * Ordered means in the order the user spec. the testcases in the config file
+	 * 
+	 * @param testcases the map with all the testcases
+	 * @return Array of ordered testcases
+	 */
 	public static String[] testcaseSorting(Map<String, Properties> testcases) {
+		//init the array with the size of all spec testcases
 		String[] sortedTestcases = new String[testcases.size()];
+		//Sets the testcase at the position of it's order nr
 		for (String testcase : testcases.keySet()) {
 			sortedTestcases[Integer.valueOf(testcase.split(CONCAT)[1])] = testcase;
 		}
 		return sortedTestcases;
 	}
 
+	/**
+	 * Executes the Shell Command 
+	 * 
+	 * @param command Shell Command 
+	 * @param dbId will replace the %DBID% in the command
+	 * @param percent will replace the %PERCENT% in the command
+	 * @param testcaseID will replace the %TESTCASEID% in the command
+	 */
 	public static void testcaseShellProcessing(String command, String dbId,
 			String percent, String testcaseID) {
+		//Execute the Replaced shell command
 		ShellProcessor.executeCommand(command.replace("%DBID%", dbId)
 				.replace("%PERCENT%", percent)
 				.replace("%TESTCASEID%", testcaseID));
 
 	}
 
+	/**
+	 * Check if the testcase is a One Results Testcase
+	 * 
+	 * @param testcase Class name of the testcase
+	 * @return true if the testcase is a one results testcase, otherwise false
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
 	@SuppressWarnings("unchecked")
 	public static Boolean isOneTest(String testcase) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
 		String testcaseWithoutID = testcase.substring(0,
@@ -68,6 +111,25 @@ public class TestcaseProcessor {
 		return test.isOneTest();
 	}
 	
+	/**
+	 * Tests the testcase
+	 * 
+	 * @param testcase Class name of the testcase
+	 * @param graphURI graphURI which should be used (can be null)
+	 * @param dbName the ID of the current connection
+	 * @param con the current connection itself
+	 * @param percent the current dataset percentage
+	 * @param results the results which were tested before
+	 * @param testcasePost the testcasepost shell command
+	 * @param testcasePre the testcasepre shell command
+	 * @param testProps the testcase properties
+	 * @param dbNode the XML Node with the connections sepcified in it
+	 * @param warmupQueriesFile The warmup queries file
+	 * @param warmupUpdatePath the warmup upadtepath
+	 * @param warmupTimelimit the warmup time in minutes
+	 * @param sparqlLoad Should sparqls LOAD be used (true) or INSERT (false)
+	 * @return Results 
+	 */
 	@SuppressWarnings("unchecked")
 	public static Collection<ResultSet> testTestcase(String testcase, String graphURI,
 			String dbName, Connection con, String percent,
@@ -111,17 +173,22 @@ public class TestcaseProcessor {
 			test.setConnection(con);
 			test.setCurrentDBName(dbName);
 			test.setCurrentPercent(percent);
+
 			String percentBack = percent;
 			if (test.isOneTest()) {
 				percent = PERCENT_ONE;
 			}
 			if (results!=null) {
+				//add results if some exists
 				test.addCurrentResults(results);
 			}
 			Calendar start = Calendar.getInstance();
 			log.info("Starting testcase " + testcaseWithoutID + " at: "
 					+ CalendarHandler.getFormattedTime(start));
+
+			//Start the testcase
 			test.start();
+						
 			Calendar end = Calendar.getInstance();
 			log.info("Stopping testcase " + testcaseWithoutID + " at: "
 					+ CalendarHandler.getFormattedTime(end));
@@ -139,7 +206,7 @@ public class TestcaseProcessor {
 
 		} catch (ClassNotFoundException | InstantiationException
 				| IllegalAccessException | IOException e) {
-			log.severe("Testcase had some problems due: ");
+			log.severe("Testcase "+testcase+" had problems due: ");
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
 		}
 		return results;

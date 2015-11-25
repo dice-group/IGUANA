@@ -1,4 +1,4 @@
-package org.aksw.iguana.clustering;
+package org.aksw.iguana.utils;
 
 // filename: OldExternalSort.java
 
@@ -40,7 +40,7 @@ public class ExternalSort {
 	 * @param filetobesorted the file to be sorted
 	 * @return the estimated best size for blocks
 	 */
-	public static long estimateBestSizeOfBlocks(File filetobesorted) {
+	private static long estimateBestSizeOfBlocks(File filetobesorted) {
 		long sizeoffile = filetobesorted.length();
 		// we don't want to open up much more than 1024 temporary files, better run
 		// out of memory first. (Even 1024 is stretching it.)
@@ -148,7 +148,7 @@ public class ExternalSort {
      * Sort and save.
      *
      */
-    public static File sortAndSave(List<String> tmplist, Comparator<String> cmp) throws IOException  {
+    private static File sortAndSave(List<String> tmplist, Comparator<String> cmp) throws IOException  {
 		Collections.sort(tmplist,cmp);  //
 		File newtmpfile = File.createTempFile("sortInBatch", "flatfile");
 		newtmpfile.deleteOnExit();
@@ -204,75 +204,7 @@ public class ExternalSort {
 		return rowcounter;
 	}
 
-//	public static void main(String[] args) throws IOException {
-//		if(args.length<2) {
-//			System.out.println("please provide input and output file names");
-//			return;
-//		}
-//		String inputfile = args[0];
-//		String outputfile = args[1];
-//		Comparator<String> comparator = new Comparator<String>() {
-//			public int compare(String r1, String r2){
-//				return r1.compareTo(r2);}};
-//		List<File> l = sortInBatch(new File(inputfile), comparator) ;
-//		mergeSortedFiles(l, new File(outputfile), comparator);
-//	}
-
-    /**
- * Counts the occurrence of each _query in the inFile and writes each _query along with its occurrences in the outFile.
- *
- * @param inFile    The input file
- * @param outFile   The output file
- */
-    public static void countQueryOccurrencesInFile(File inFile, File outFile){
-        FileReader inReader;
-        FileWriter outWriter;
-        LineNumberReader lnReader;
-        String prevQuery = "";
-        int prevQueryCountOfOccurrences = 0;
-        String query = ""; 
-        try{
-            inReader = new FileReader(inFile);
-            outWriter = new FileWriter(outFile);
-            lnReader = new LineNumberReader(inReader);
-            boolean firstQuery = true;
-            try{
-                while ((query = lnReader.readLine()) != null){
-                    //That is the first _query to be read from the file, so we just set the prevQuery, and prevQueryCountOfOccurrences
-                    if(firstQuery){
-                        prevQuery = query;
-                        prevQueryCountOfOccurrences++;
-                        firstQuery = false;
-                        continue;
-                    }
-                    //The previous _query occurs once more, so we should just increment the counter and proceed
-                    if(query.compareTo(prevQuery) == 0){
-                        prevQueryCountOfOccurrences ++;
-                    }
-                    //The _query is different from the previous one, so we should write the prevQuery, and prevQueryCountOfOccurrences
-                    //to the output file, set prevQuery equal to _query and reset prevQueryCountOfOccurrences to 0
-                    else{
-                        outWriter.write(prevQuery + "\t" + prevQueryCountOfOccurrences + "\n");
-                        prevQuery = query;
-                        prevQueryCountOfOccurrences = 1;
-                        logger.info("Query = " + prevQuery + " along with its number of occurrences is successfully written to file");
-                    }
-                }
-
-                //Finalize and write the final _query and its number of occurrence
-                outWriter.write(prevQuery + "\t" + prevQueryCountOfOccurrences + "\n");
-                logger.info("Query = " + prevQuery + " along with its number of occurrences is successfully written to file");
-            }
-            finally{
-                lnReader.close();
-                outWriter.flush();
-                outWriter.close();
-            }
-        }
-        catch (Exception exp){
-            logger.error("Failed to count queries in file " + inFile.getAbsolutePath(), exp);
-        }
-    }
+    
 
     /**
      * Normalizes all queries that exist in the passed file by renaming all variables to sequential variable set, e.g.
@@ -339,7 +271,7 @@ public class ExternalSort {
      * @param query The _query the should be normalized
      * @return  The normalized _query.
      */
-    public static String normalizeQueryVariables(String query){
+    private static String normalizeQueryVariables(String query){
         //First we should split the _query using the "&" character, because this character separates the parts of the _query
         //as the other parts e.g. default-graph-uri = http%3A%2F%2Fdbpedia.org, should not be touched
         String ampersandPattern = "\\?|&";
@@ -430,54 +362,12 @@ public class ExternalSort {
         return queryPart;
     }
 
-    /**
-     * Removes the the queries that did occur few times.
-     *
-     * @param inFile the input file
-     * @param outFile the output file
-     * @param leastNumberOfOccurrences the least number of occurrences
-     */
-    public static void removeLeastFrequentQueries(File inFile, File outFile, int leastNumberOfOccurrences){
-        
-        FileReader inReader;
-        FileWriter outWriter;
-        LineNumberReader lnReader;
-        String query = "";
-        try{
-            inReader = new FileReader(inFile);
-            outWriter = new FileWriter(outFile);
-            lnReader = new LineNumberReader(inReader);
-
-            //Read a _query from input file
-            while ((query = lnReader.readLine()) != null){
-                try{
-                    int tabIndex = query.indexOf("\t");
-                    int numberOfOccurrences = Integer.parseInt(query.substring(tabIndex+1));
-
-                    //If the numberOfOccurrences is less than leastNumberOfOccurrences, we should not continue, as the
-                    //file is already sorted so all upcoming queries will have less or equal number of occurrences
-                    if(numberOfOccurrences < leastNumberOfOccurrences)
-                        break;
-                    outWriter.write(query + "\n");
-                }
-                catch (Exception exp){
-                    logger.error("Query " + query + " cannot be written into file, due to " + exp.getMessage(), exp );
-                }
-            }
-            inReader.close();
-
-            outWriter.flush();
-            outWriter.close();
-        }
-        catch(Exception exp){
-            logger.error("Removal of least frequent queries failed, due to " + exp.getMessage(), exp);
-        }
-    }
+    
 
 }
 
 class BinaryFileBuffer  {
-	public static int BUFFERSIZE = 2048;
+	private static int BUFFERSIZE = 2048;
 	public BufferedReader fbr;
 	public File originalfile;
 	private String cache;

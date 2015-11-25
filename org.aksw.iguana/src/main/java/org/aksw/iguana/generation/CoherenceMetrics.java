@@ -424,7 +424,7 @@ public class CoherenceMetrics {
 	 * @param type the type
 	 * @return the instances of type
 	 */
-	public Set<String> getInstancesOfType(String type){
+	private Set<String> getInstancesOfType(String type){
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return getInstancesOfType(type,dataFile);
 		case REMOTE_ENDPOINT:return getInstancesOfType(type, con); 
@@ -433,7 +433,7 @@ public class CoherenceMetrics {
 	}
 	
 	
-	public Long getInstancesOfTypeCount(String type){
+	private Long getInstancesOfTypeCount(String type){
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return getInstancesOfTypeCount(type, dataFile);
 		case REMOTE_ENDPOINT:return getInstancesOfTypeCount(type, con);
@@ -645,7 +645,7 @@ public class CoherenceMetrics {
 	 * @param type the type
 	 * @return the properties of type
 	 */
-	public Set<String> getPropertiesOfType(String type){
+	private Set<String> getPropertiesOfType(String type){
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return getPropertiesOfType(type, dataFile);
 		case REMOTE_ENDPOINT:return getPropertiesOfType(type, con);
@@ -653,7 +653,7 @@ public class CoherenceMetrics {
 		return null;
 	}
 	
-	public Long getPropertiesOfTypeCount(String type){
+	private Long getPropertiesOfTypeCount(String type){
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return getPropertiesOfTypeCount(type, dataFile);
 		case REMOTE_ENDPOINT:return getPropertiesOfTypeCount(type, con);
@@ -767,7 +767,7 @@ public class CoherenceMetrics {
 	 * @param instances the instances
 	 * @return the occurences
 	 */
-	public Long getOccurences(String property, Set<String> instances){
+	private Long getOccurences(String property, Set<String> instances){
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return getOccurences(property, instances, dataFile);
 		case REMOTE_ENDPOINT:return getOccurences(property, instances, con);
@@ -794,7 +794,7 @@ public class CoherenceMetrics {
 	 * @param instances the instances
 	 * @return the occurences sum
 	 */
-	public Long getOccurencesSum(Set<String> properties, Set<String> instances){
+	private Long getOccurencesSum(Set<String> properties, Set<String> instances){
 		Long ret =0L;
 //		int i=0;
 		for(String property : properties){
@@ -810,7 +810,7 @@ public class CoherenceMetrics {
 	 * @param type the type
 	 * @return the coverage
 	 */
-	public Double getCoverage(String type){
+	private Double getCoverage(String type){
 		return getCoverage(type, getPropertiesOfType(type), getInstancesOfType(type));
 	}
 	
@@ -822,7 +822,7 @@ public class CoherenceMetrics {
 	 * @param instances the instances
 	 * @return the coverage
 	 */
-	public Double getCoverage(String type, Set<String> properties, Set<String> instances){
+	private Double getCoverage(String type, Set<String> properties, Set<String> instances){
 		if(properties.size()<=0||instances.size()<=0){
 			return 0.0;
 		}
@@ -835,7 +835,7 @@ public class CoherenceMetrics {
 	 * @param typeSystem the type system
 	 * @return the denominator
 	 */
-	public Long getDenominator(Set<String> typeSystem){
+	private Long getDenominator(Set<String> typeSystem){
 		Long ret=0L;
 		if(denominators.containsKey(typeSystem.hashCode())){
 			return denominators .get(typeSystem.hashCode());
@@ -857,11 +857,11 @@ public class CoherenceMetrics {
 	 * @param denominator the denominator
 	 * @return the weight for type
 	 */
-	public Double getWeightForType(Set<String> properties, Set<String> instances, Set<String> typeSystem, Long denominator){
+	private Double getWeightForType(Set<String> properties, Set<String> instances, Set<String> typeSystem, Long denominator){
 		return (properties.size()+instances.size())/(1.0*denominator);
 	}
 	
-	public Double getWeightForType(long props, long inst, Long denominator){
+	private Double getWeightForType(long props, long inst, Long denominator){
 		return (props+inst)/(1.0*denominator);
 	}
 	
@@ -946,7 +946,7 @@ public class CoherenceMetrics {
 	 * @param p the p
 	 * @return the coherence
 	 */
-	public Double getCoherence(Set<String> typeSystem, Set<String> typesOfS, String p){
+	private Double getCoherence(Set<String> typeSystem, Set<String> typesOfS, String p){
 //		String hash="";
 //		Double cache = getCachedCoherence(hash);
 //		if(cache!=null){
@@ -1148,7 +1148,7 @@ public class CoherenceMetrics {
 	 * @param property the property
 	 * @return the sets the
 	 */
-	public Set<String> coin(Set<String> S, String property){
+	private Set<String> coin(Set<String> S, String property){
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return coin(S, property, dataFile);
 		case REMOTE_ENDPOINT:return coin(S, property, con);
@@ -1156,7 +1156,7 @@ public class CoherenceMetrics {
 		return null;
 	}
 	
-	public long coinSize(Set<String> S, String property){
+	private long coinSize(Set<String> S, String property){
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return coin(S, property, dataFile).size();
 		case REMOTE_ENDPOINT:return coinSize(S, property, con);
@@ -1188,7 +1188,7 @@ public class CoherenceMetrics {
 	 * @param ch the ch
 	 * @return the double
 	 */
-	public Double givenCoin(Set<String> typeSystem, Set<String> types, String p, Double ch){
+	private Double givenCoin(Set<String> typeSystem, Set<String> types, String p, Double ch){
 		Double chNew = getCoherence(typeSystem, types, p);
 		return ch- chNew;
 	}
@@ -1202,7 +1202,7 @@ public class CoherenceMetrics {
 	 * @param instances the instances
 	 * @return the double
 	 */
-	public Double newCoverage(String p, String type, long props, long inst){
+	private Double newCoverage(String p, String type, long props, long inst){
 		Long ret =0L;
 		Double denominator = props*inst*1.0;
 		Set<String> properties = getPropertiesOfType(type);
@@ -1335,7 +1335,7 @@ public class CoherenceMetrics {
 	 * @param S the s
 	 * @return the sets the
 	 */
-	public Set<String> val(Set<String> S){
+	private Set<String> val(Set<String> S){
 		Set<String> intersectProperties = null;
 		for(String T : S){
 			Set<String> current = getPropertiesOfType(T);
@@ -1365,7 +1365,7 @@ public class CoherenceMetrics {
 	 * @param typeSystem the type system
 	 * @return the combinations
 	 */
-	public Set<List<Set<String>>> getCombinations(Set<String> typeSystem){
+	private Set<List<Set<String>>> getCombinations(Set<String> typeSystem){
 		Set<List<Set<String>>> ret = new HashSet<List<Set<String>>>();
 		PowerSetIterator<String> psi = new PowerSetIterator<String>();
 		psi.set(typeSystem);
@@ -1430,7 +1430,7 @@ public class CoherenceMetrics {
 	 * @param con Connection to use
 	 * @return the instance types
 	 */
-	public Set<String> getInstanceTypes(String s, Connection con) {
+	private Set<String> getInstanceTypes(String s, Connection con) {
 		String query="SELECT DISTINCT ?type ";
 		if(graphURI!=null&&!graphURI.isEmpty()){
 			query+="FROM <"+graphURI+">";
@@ -1446,7 +1446,7 @@ public class CoherenceMetrics {
 	 * @param dataFile the data file
 	 * @return the instance types
 	 */
-	public Set<String> getInstanceTypes(String s,String dataFile) {
+	private Set<String> getInstanceTypes(String s,String dataFile) {
 		Set<String> ret = new HashSet<String>();
 		File f = new File(dataFile);
 		FileInputStream fis = null;
@@ -1498,7 +1498,7 @@ public class CoherenceMetrics {
 	 * @param s the s
 	 * @return the instance types
 	 */
-	public Set<String> getInstanceTypes(String s) {
+	private Set<String> getInstanceTypes(String s) {
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return getInstanceTypes(s, dataFile);
 		case REMOTE_ENDPOINT:return getInstanceTypes(s, con);
@@ -1635,7 +1635,7 @@ public class CoherenceMetrics {
 	 * @param p the p
 	 * @return the double
 	 */
-	public Double ct(Set<String> S, String p){
+	private Double ct(Set<String> S, String p){
 		switch(endpoint){
 		case RDFFILE_ENDPOINT:return ct(S, p, dataFile);
 		case REMOTE_ENDPOINT:return ct(S, p, con);

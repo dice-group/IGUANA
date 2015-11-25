@@ -1,4 +1,4 @@
-package org.aksw.iguana.clustering.clusterer;
+package org.aksw.iguana.analyzer;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,30 +19,24 @@ import org.aksw.simba.benchmark.clustring.VoronoiPanel;
 import org.aksw.simba.benchmark.comparisons.AvgStats;
 import org.aksw.simba.benchmark.log.operations.CleanQueryReader;
 
-public class FeasibleClusterer implements Clusterer {
+/**
+ * Analyzer using FEASIBLE
+ * 
+ * @author Felix Conrads
+ *
+ */
+public class FeasbileAnalyzer implements Analyzer {
 
 	private static final String OUTPUT_DIR = "output-dir";
 
+	/**
+	 * Convert a Feasbile queries list to a file query per line
+	 * 
+	 * @param argc arg1: FEASBILE queries , arg2: output file
+	 * @throws Exception
+	 */
 	public static void main(String argc[]) throws Exception {
-
-		// long c = FileHandler.getLineCount("dbpedia.txt");
-		// c = c/4;
-		// FileReader fr = new FileReader("dbpedia.txt");
-		// BufferedReader br = new BufferedReader(fr);
-		// new File("dbpedia2.txt").createNewFile();
-		// PrintWriter pw = new PrintWriter("dbpedia2.txt");
-		// for(int i =0;i<c;i++){
-		// String line="";
-		// if((line=br.readLine())!=null){
-		// pw.println(line);
-		// }
-		// }
-		// br.close();
-		// pw.close();
-		// System.out.println("finished");
-		FeasibleClusterer fc = new FeasibleClusterer();
-//		fc.cluster("../../LogFiles/dbpedia.txt", "");
-		
+		FeasbileAnalyzer fc = new FeasbileAnalyzer();		
 		fc.saveFeasibleToInstances(argc[0], argc[1]);
 
 	}
@@ -51,12 +45,12 @@ public class FeasibleClusterer implements Clusterer {
 	private String outputDir = "FEASIBLE"+File.separator;
 
 	@Override
-	public String cluster(String logPath, String queriesFile) throws IOException {
-		return clustering(logPath, number, queriesFile);
+	public String analyze(String logPath, String queriesFile) throws IOException {
+		return startAnalyzing(logPath, number, queriesFile);
 
 	}
 
-	public String clustering(String pattern, int number, String queriesFile)
+	public String startAnalyzing(String pattern, int number, String queriesFile)
 			throws IOException {
 		// --Configuration and input files specifications ------------
 		// String queryFileWithStats = "SWDF-CleanQueries.txt";

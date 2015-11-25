@@ -84,12 +84,7 @@ public class QueryHandler {
 		this.fileForQueries = fileForQueries;
 	}
 	
-	public static Query isSPARQL(String query) {
-		SPARQLParser sp = SPARQLParser.createParser(Syntax.syntaxSPARQL_11);
-		Query q = sp.parse(QueryFactory.create(), query);
-		return q;
-	}
-	
+
 	/**
 	 * NTRIPLE File to an insert or delete query.
 	 *
@@ -115,7 +110,7 @@ public class QueryHandler {
 	 * @return the query
 	 * @throws IOException 
 	 */
-	public static String ntToQuery(File file, Boolean insert, String graphUri) throws IOException{
+	private static String ntToQuery(File file, Boolean insert, String graphUri) throws IOException{
 //		try{
 			String query = "";
 			query= "INSERT {";
@@ -402,7 +397,7 @@ public class QueryHandler {
 	}
 	
 	
-	public Object getModelFromQuery(Query q){
+	private Object getModelFromQuery(Query q){
 		QueryExecution qe = QueryExecutionFactory.createServiceRequest(this.con.getEndpoint(), q);
 		switch(q.getQueryType()){
 		case Query.QueryTypeAsk: 

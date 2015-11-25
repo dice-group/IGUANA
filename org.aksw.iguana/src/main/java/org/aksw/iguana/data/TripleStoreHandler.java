@@ -51,7 +51,7 @@ public class TripleStoreHandler {
 	 * @param impl the object which should be converted
 	 * @return the converted node
 	 */
-	public static Node implToNode(Object impl){
+	private static Node implToNode(Object impl){
 		Node s;
 		try{
 			s = (Node) ((ResourceImpl)impl).asNode();
@@ -129,34 +129,7 @@ public class TripleStoreHandler {
 		}
 	}
 	
-	/**
-	 * Writes the instances to the given file.
-	 *
-	 * @param con Connection to use
-	 * @param fileName The name of the file in which the instances should be saved
-	 * @param graphURI graphURI on which the Connection will work (if null = every graph will be used)
-	 * @param className the class name for which the instances should be saved
-	 */
-	public static void writeInstancesToFile(Connection con, String fileName, String graphURI, String className){
-		Collection<String> instances = getInstancesFromClass(con, graphURI, className);
-		File file = new File(fileName);
-		PrintWriter pw = null;
-		try {
-			file.createNewFile();
-		
-			pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), true);
-			for(String instance : instances){
-				pw.write(instance);
-				pw.println();
-			}
-		} catch (IOException e) {
-			return;
-		} finally {
-			if(pw!= null){
-				pw.close();
-			}
-		}
-	}
+	
 	
 	/**
 	 * Gets the instances from a given class.
@@ -185,33 +158,7 @@ public class TripleStoreHandler {
 		return instances;
 	}
 	
-	/**
-	 * Writes the classes to the given file.
-	 *
-	 * @param con Connection to use
-	 * @param fileName The name of the file in which the classes should be saved
-	 * @param graphURI graphURI on which the Connection will work (if null = every graph will be used)
-	 */
-	public static void writeClassesToFile(Connection con, String fileName, String graphURI){
-		Collection<String> classes = getClasses(con, graphURI);
-		File file = new File(fileName);
-		PrintWriter pw = null;
-		try {
-			file.createNewFile();
-		
-			pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), true);
-			for(String className : classes){
-				pw.write(className);
-				pw.println();
-			}
-		} catch (IOException e) {
-			return;
-		} finally {
-			if(pw!= null){
-				pw.close();
-			}
-		}
-	}
+	
 
 	/**
 	 * Gets the classes of the connection in the graphURI

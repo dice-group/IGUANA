@@ -39,24 +39,25 @@ public class CacheTestcase implements Testcase {
 	private int index;
 	private Map<String,XYSeries> map = new HashMap<String, XYSeries>();
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void start() throws IOException {
 		XYSeriesCollection dataset = new XYSeriesCollection();
-		
 		Calendar a = Calendar.getInstance();
 		int i=0;
 //		int j=0;
-		int step=2000;
+		int step=0;
 		while(Calendar.getInstance().getTimeInMillis()-a.getTimeInMillis()<timeLimit){
-//			i++;
+			i++;
 //			j++;
 			try {
 				String query =getNextQuery();
-				if(step!=0){
-					step--;
+				if(step>0&&step<20000){
+					step++;
 					continue;
 				}
-				step =50;
+				
+				step =0;
 				double time = con.selectTime(query);
 //				if(i==0){
 //					continue;
@@ -79,10 +80,10 @@ public class CacheTestcase implements Testcase {
 			
 		}
 //		dataset.addSeries(series);
-		
+		i=0;
 		for(String key : map.keySet()){
 			dataset.addSeries(map.get(key));
-			
+			i++;
 			JFreeChart chart = ChartFactory.createXYLineChart(
 	            "Line Chart",      // chart title
 	            "X",                      // x axis label
@@ -96,9 +97,7 @@ public class CacheTestcase implements Testcase {
 			chart.setAntiAlias(true);
 			chart.setTextAntiAlias(true);
 			chart.setBorderVisible(false);
-			chart.getXYPlot().getRenderer().setSeriesStroke(0, new BasicStroke(20f));
-//			FileHandler.
-//			StandardChartTheme ct = new StandardChartTheme(fileName);
+			chart.getXYPlot().getRenderer().setStroke(new BasicStroke(5f));
 			ChartUtilities.saveChartAsPNG(new File(ResultProcessor.getResultFolder()+File.separator+"Line_"+name+"_"+key.hashCode()+".png"), chart, 6000, 2000);
 			dataset = new XYSeriesCollection();
 		}

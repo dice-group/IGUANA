@@ -28,7 +28,7 @@ public class Selector {
 	 * @param con Connection to use
 	 * @param graphURI graphURI on which the Connection will work (if null = every graph will be used)
 	 */
-	public void load(Connection con, String graphURI){
+	private void load(Connection con, String graphURI){
 		 List<String> classes = new ArrayList<String>(TripleStoreHandler.getClasses(con, graphURI));
          classInstanceMap = new HashMap<String, Collection<String>>();
          for(String className : classes){
@@ -62,17 +62,5 @@ public class Selector {
          return ret;
 	}
 	
-	/**
-	 * Checks if instances are left.
-	 *
-	 * @return true if there are instances left, false otherwise
-	 */
-	public Boolean areInstancesLeft(){
-		for(String className : classInstanceMap.keySet()){
-			if(!classInstanceMap.get(className).isEmpty()){
-				return true;
-			}
-		}
-		return false;
-	}
+	
 }
