@@ -6,10 +6,13 @@
 ##What is it?
 
 IGUANA is a Benchmark execution Framework. IGUANA can test SPARQL Endpoints, as well as Federated SPARQL Systems with a Stress test, which means it can handle several users which request the endpoint with SPARQL Queries (ASK, CONSTRUCT, DESCRIBE, SELECT) while several update users will update (inserts and deletes) the triplestore. 
+
 IGUANA can also analyze log files and get queries to test out of it. 
 You can define several benchmark suites which work seperated of each other. In each suite you can define several testcases.
+
 IGUANA gives you also the oppertunity to write own testcases and log analyzer without changing the code itself. IGUANA can be configured over one single config file.
 
+----------
 
 It should be...
 
@@ -18,6 +21,17 @@ It should be...
 + ...easy to install
 + ...understandable
 + ...well documented
+
+##TOC
+1. [Architecture](https://github.com/AKSW/IGUANA#architecture)
+	1. [User](https://github.com/AKSW/IGUANA#user)
+	2. [Developer](https://github.com/AKSW/IGUANA#developer)
+3. [The latest version](https://github.com/AKSW/IGUANA#the-latest-version)
+4. [Documentation](https://github.com/AKSW/IGUANA#documentation)
+5. [Examples](https://github.com/AKSW/IGUANA#examples)
+6. [Installation](https://github.com/AKSW/IGUANA#installation)
+7. [Licensing](https://github.com/AKSW/IGUANA#licensing)
+8. [Contacts](https://github.com/AKSW/IGUANA#contacts)
 
 ##Architecture
 ###User
@@ -43,7 +57,9 @@ The documentation consist of the javadoc and the manual.
 
 ##Examples
 
-Example Configurations are provided [here](http://aksw.github.com/AKSW/IGUANA/blob/develop/examples/). Be aware that these needs small adjustement (for example changing the endpoints)
+Example Configurations are provided [here](https://github.com/AKSW/IGUANA/tree/develop/examples). 
+
+Be aware that these needs small adjustement (for example changing the endpoints)
 
 ##Installation
 
