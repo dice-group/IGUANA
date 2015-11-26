@@ -50,30 +50,34 @@ public class FeasbileAnalyzer implements Analyzer {
 
 	}
 
-	public String startAnalyzing(String pattern, int number, String queriesFile)
+
+	private String startAnalyzing(String pattern, int number, String queriesFile)
 			throws IOException {
-		// --Configuration and input files specifications ------------
-		// String queryFileWithStats = "SWDF-CleanQueries.txt";
+		
 		String queryFileWithStats = pattern;
-		int numberOfQueries = number; // number of queries to be generated for a
-										// benchmark
+		int numberOfQueries = number; 
 		long curTime = System.currentTimeMillis();
-		// Set<String> queries =
-		// Queries.getBenchmarkQueries(queryFileWithStats,10);
+		
 		QueryClustering qc = new QueryClustering();
+		//Get normalized Vectors 
 		Map<String, Double[]> normalizedVectors = CleanQueryReader
 				.getNormalizedFeaturesVectors(queryFileWithStats);
 		Set<String> queriesIds = qc.getPrototypicalQueries(normalizedVectors,
 				numberOfQueries);
 		Set<String> benchmarkQueriesIds = new HashSet<String>(queriesIds);
 
+		//Get Queries
 		Set<String> queries = CleanQueryReader.getQueriesWithStats(
 				queryFileWithStats, queriesIds);
+		//Set output dir
 		if(!outputDir.endsWith("\\")&&!outputDir.endsWith("/")){
 			outputDir+=File.separator;
 		}
+		//Make dirs so no IOException will occure
 		new File(outputDir).mkdirs();
+		//Print the benchmark queries to the outputDir
 		Queries.printBenchmarkQueries(queries, outputDir);
+		//Some stats
 		System.out.println("\n-----\nBenchmark details saved to " + outputDir
 				+ "\nBenchmark generation time (sec): "
 				+ (System.currentTimeMillis() - curTime) / 1000);
@@ -86,11 +90,20 @@ public class FeasbileAnalyzer implements Analyzer {
 				.println("------------Detailed Analysis of the Generated Benchmark--------------");
 		AvgStats.getPercentUsedLogConstructs(outputDir + "queries-stats.txt");
 		AvgStats.getAvgLogFeatures(outputDir + "queries-stats.txt");
-		
+
+		//Finally convert the FEASIBLE Queries to Queries per Line
 		saveFeasibleToInstances(outputDir+"queries.txt", outputDir+queriesFile);
+		//return ouputFolder
 		return outputDir+queriesFile;
 	}
 	
+	/**
+	 * Saves a FEASIBLE Output to Query Per line
+	 * 
+	 * @param input FEASIBLE QUery list
+	 * @param queriesFile Output file
+	 * @throws IOException
+	 */
 	public void saveFeasibleToInstances(String input, String queriesFile) throws IOException{
 		List<String[]> qs = QueryHandler.getFeasibleToList(input, Logger.getGlobal());
 		PrintWriter pw = new PrintWriter(queriesFile);
