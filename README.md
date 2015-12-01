@@ -1,15 +1,18 @@
 #IGUANA
 
-![Logo of IGUANA](IGUANA_Logo.png)
+![Logo of IGUANA](images/IGUANA_Logo.png)
 
 
 ##What is it?
 
-IGUANA is both a program and an API framework for benchmarking SPARQL Endpoints.
-On one side it provides the ability to benchmark different SPARQL endpoints (e.g. triplestores) with 
-given or generated datasets and predefined test cases on the other side it provides a framework and API 
-to implement either a complete different benchmark or just parts of the benchmark (e.g. own test cases).
+IGUANA is a Benchmark execution Framework. IGUANA can test SPARQL Endpoints, as well as Federated SPARQL Systems with a Stress test, which means it can handle several users which request the endpoint with SPARQL Queries (ASK, CONSTRUCT, DESCRIBE, SELECT) while several update users will update (inserts and deletes) the triplestore. 
 
+IGUANA can also analyze log files and get queries to test out of it. 
+You can define several benchmark suites which work seperated of each other. In each suite you can define several testcases.
+
+IGUANA gives you also the oppertunity to write own testcases and log analyzer without changing the code itself. IGUANA can be configured over one single config file.
+
+----------
 
 It should be...
 
@@ -19,9 +22,23 @@ It should be...
 + ...understandable
 + ...well documented
 
-##Architecture
+##TOC
+1. [Architecture](https://github.com/AKSW/IGUANA#architecture)
+	1. [User](https://github.com/AKSW/IGUANA#user)
+	2. [Developer](https://github.com/AKSW/IGUANA#developer)
+3. [The latest version](https://github.com/AKSW/IGUANA#the-latest-version)
+4. [Documentation](https://github.com/AKSW/IGUANA#documentation)
+5. [Examples](https://github.com/AKSW/IGUANA#examples)
+6. [Installation](https://github.com/AKSW/IGUANA#installation)
+7. [Licensing](https://github.com/AKSW/IGUANA#licensing)
+8. [Contacts](https://github.com/AKSW/IGUANA#contacts)
 
-![Architecture of IGUANA](IGUANA_v0.3_Architecture.png)
+##Architecture
+###User
+![USER Architecture of IGUANA](images/IGUANA_v0.3_Architecture.png)
+
+###Developer
+![DEVELOPER Architecture of IGUANA](images/IGUANADetArch.png)
 
 ##The latest version
 
@@ -36,7 +53,13 @@ The Changelog can be found [here](https://github.com/AKSW/IGUANA/blob/master/CHA
 The documentation consist of the javadoc and the manual.
 
 + Tha JavaDoc can be found [here](http://aksw.github.io/IGUANA/javadoc/)
-+ The Manual can be found [here](https://github.com/AKSW/IGUANA/blob/master/MANUAL.pdf)
++ The Manuals can be found [here](https://github.com/AKSW/IGUANA/blob/master/release/)
+
+##Examples
+
+Example Configurations (v.0.3.0.2) are provided [here](https://github.com/AKSW/IGUANA/tree/master/examples). 
+
+Be aware that these needs small adjustement (for example changing the endpoints)
 
 ##Installation
 

@@ -24,11 +24,11 @@ INSTALLATION
 
 		WITHOUT coherence data generation:
 
-			java -cp "lib/*" de.uni_leipzig.iguana.benchmark.Main config.xml (debug=true)?
+			java -cp "lib/*" org.aksw.iguana.benchmark.Main config.xml (debug=true)?
 	
 		WITH coherence	data generation (assuming your path of the lp_solve libraries is lpsolve_lib):
 			 	
-			java -Djava.library.path=lpsolve_lib -cp "lib/*" de.uni_leipzig.iguana.benchmark.Main config.xml (debug=true)?
+			java -Djava.library.path=lpsolve_lib -cp "lib/*" org.aksw.iguana.benchmark.Main config.xml (debug=true)?
 
 		You can also use the start.bat or start.sh file 
 			

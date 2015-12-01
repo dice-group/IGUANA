@@ -1,0 +1,61 @@
+package org.aksw.iguana.utils.comparator;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+public class ResultSorting{
+
+	private Map<Integer, Integer> mapping= new HashMap<Integer, Integer>();
+	
+	
+	public List<String> produceMapping(List<String> header) throws Exception{
+		List<String> newHeader = new LinkedList<String>();
+
+		List<Integer> newIntHeader = new LinkedList<Integer>();
+		newHeader.add(header.get(0));
+		newIntHeader.add(-1);
+		try{
+			
+			for(int i=1;i<header.size();i++){
+				newIntHeader.add(Integer.valueOf(header.get(i)));
+				newHeader.add("");
+			}
+			Collections.sort(newIntHeader);
+			for(int j=1;j<header.size();j++){
+				mapping.put(j, newIntHeader.indexOf(Integer.valueOf(header.get(j))));
+				newHeader.set(newIntHeader.indexOf(Integer.valueOf(header.get(j))), header.get(j));
+			}
+		}
+		catch(NumberFormatException e){
+			
+			//no Integer header
+			LivedataComparator ldc = new LivedataComparator(LivedataComparator.INSERT_DELETE);
+			for(int i=0;i<header.size();i++){
+				newHeader.add(header.get(i));
+			}
+//			ldc.sort(newHeader);
+			Collections.sort(newHeader, ldc);
+			for(String cell: header){
+				mapping.put(header.indexOf(cell), newHeader.indexOf(cell));
+			}
+		}
+		
+		
+		return newHeader;
+	}
+	
+	public List<Object> sortRow(List<Object> row){
+		List<Object> ret = new LinkedList<Object>();
+		ret.add(row.get(0));
+		for(Integer i : mapping.keySet()){
+			
+			ret.add(row.get(mapping.get(i)));
+		}
+		return ret;
+	}
+	
+
+}
