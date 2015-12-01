@@ -53,11 +53,11 @@ The Changelog can be found [here](https://github.com/AKSW/IGUANA/blob/master/CHA
 The documentation consist of the javadoc and the manual.
 
 + Tha JavaDoc can be found [here](http://aksw.github.io/IGUANA/javadoc/)
-+ The Manual can be found [here](https://github.com/AKSW/IGUANA/blob/master/MANUAL.pdf)
++ The Manuals can be found [here](https://github.com/AKSW/IGUANA/blob/master/release/)
 
 ##Examples
 
-Example Configurations are provided [here](https://github.com/AKSW/IGUANA/tree/develop/examples). 
+Example Configurations (v.0.3.0.2) are provided [here](https://github.com/AKSW/IGUANA/tree/master/examples). 
 
 Be aware that these needs small adjustement (for example changing the endpoints)
 
