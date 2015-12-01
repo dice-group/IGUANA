@@ -2,23 +2,23 @@
 <iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<databases main="dbpedia">
 		<database id="federated" type="impl">
-			<endpoint uri="localhost:8080/sparql" />
-			<update-endpoint uri="localhost:8080/update" />
+			<endpoint uri="http://localhost:8080/sparql" />
+			<update-endpoint uri="http://localhost:8080/update" />
 		</database>
 		<database id="fuseki" type="impl">
-			<endpoint uri="localhost:3030/tdb/sparql" />
-			<update-endpoint uri="localhost:3030/tdb/update" />
+			<endpoint uri="http://localhost:3030/tdb/sparql" />
+			<update-endpoint uri="http://localhost:3030/tdb/update" />
 		</database>
 		<database id="blazegraph" type="impl">
-			<endpoint uri="localhost:9999/bigdata/sparql" />
+			<endpoint uri="http://localhost:9999/bigdata/sparql" />
 		</database>
 		<database id="virtuoso" type="impl">
-			<endpoint uri="localhost:8890/sparql-auth" />
+			<endpoint uri="http://localhost:8890/sparql-auth" />
 			<user value="dba"/>
 			<pwd value="secret"/>
 		</database>
 		<database id="ref" type="impl">
-			<endpoint uri="dbpedia.org/sparql" />
+			<endpoint uri="http://dbpedia.org/sparql" />
 		</database>
 	</databases>
 
@@ -35,42 +35,42 @@
 		</test-db>
 		<testcases testcase-pre="./testcasePre.sh %DBID% %PERCENT% %TESTCASEID%"
 			testcase-post="./testcasePost.sh %DBID% %PERCENT% %TESTCASEID%">
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="1" />
 				<property name="update-user" value="0" />
 				<property name="queries-path" value="queries-175.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="2" />
 				<property name="update-user" value="0" />
 				<property name="queries-path" value="queries-175.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="4" />
 				<property name="update-user" value="0" />
 				<property name="queries-path" value="queries-175.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="8" />
 				<property name="update-user" value="0" />
 				<property name="queries-path" value="queries-175.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="16" />
 				<property name="update-user" value="0" />
 				<property name="queries-path" value="queries-175.txt" />
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="1" />
 				<property name="update-user" value="3" />
 				<property name="queries-path" value="queries-175.txt" />
@@ -91,7 +91,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="1" />
 				<property name="update-user" value="4" />
 				<property name="queries-path" value="queries-175.txt" />
@@ -112,7 +112,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="2" />
 				<property name="update-user" value="4" />
 				<property name="queries-path" value="queries-175.txt" />
@@ -133,7 +133,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="4" />
 				<property name="update-user" value="4" />
 				<property name="queries-path" value="queries-175.txt" />
@@ -154,7 +154,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="8" />
 				<property name="update-user" value="4" />
 				<property name="queries-path" value="queries-175.txt" />
@@ -175,7 +175,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.FederatedStressTestcase">
+			<testcase class="org.aksw.iguana.testcases.FederatedStressTestcase">
 				<property name="sparql-user" value="16" />
 				<property name="update-user" value="4" />
 				<property name="queries-path" value="queries-175.txt" />

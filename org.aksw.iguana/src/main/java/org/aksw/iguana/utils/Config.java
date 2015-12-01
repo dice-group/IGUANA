@@ -228,6 +228,7 @@ public class Config {
 			if(warmupUpdatePath.isEmpty())
 				warmupUpdatePath=null;
 		}catch(Exception e){	
+			warmupTime = null;
 		}
 		
 		

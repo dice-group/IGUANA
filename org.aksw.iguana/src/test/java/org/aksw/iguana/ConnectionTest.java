@@ -23,11 +23,11 @@ public class ConnectionTest {
 		org.apache.log4j.Logger.getRootLogger().setLevel(
 			org.apache.log4j.Level.OFF);
 		ConnectionFactory.setDriver("org.apache.jena.jdbc.remote.RemoteEndpointDriver");
-	ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=http://");
+	ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=");
 //		Connection con = ConnectionFactory.createImplConnection("localhost:8080/openrdf-workbench/repositories/owlim-lite/query", 
 //				"localhost:8080/openrdf-workbench/repositories/owlim-lite/update", -1);
 //		Connection con = ConnectionFactory.createImplConnection("localhost:9999/bigdata/sparql", null, -1);
-		Connection con = ConnectionFactory.createImplConnection("localhost:8891/sparql", null, -1);
+		Connection con = ConnectionFactory.createImplConnection("http://localhost:8891/sparql", null, -1);
 		//		Connection con = ConnectionFactory.createImplConnection("dbpedia.org/sparql", null, -1);
 		ResultSet res = con.select("SELECT * {<http://example/book1> ?p ?o}");
 //		int i =0;

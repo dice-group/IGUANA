@@ -159,7 +159,11 @@ public class WarmupProcessor {
 	public static void warmup(Connection con, String queriesFile, String path,
 			String graphURI, Long time, Boolean sparqlLoad) {
 		if(time==0){
-			log.info("Warmup time is set to 0 minutes ... skipping warmup");
+			log.info("Warmup time is set to 0 minutes ... skipping warmup.");
+			return;
+		}
+		else if(time == null){
+			log.info("Warmup tag is not set ... skipping warmup.");
 			return;
 		}
 		//Get all the quedries from the query file

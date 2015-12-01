@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw</groupId>
 	<artifactId>iguana</artifactId>
-	<version>0.3.1</version>
+	<version>0.3.0.2</version>
 	<licenses>
 		<license>
 			<name>LGPL Licence</name>

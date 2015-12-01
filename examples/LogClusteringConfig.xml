@@ -3,27 +3,27 @@
 	<databases main="dbpedia">
 		<database id="owlim" type="impl">
 			<endpoint
-				uri="localhost:8080/openrdf-workbench/repositories/owlim-lite/query" />
+				uri="http://localhost:8080/openrdf-workbench/repositories/owlim-lite/query" />
 			<update-endpoint
-				uri="localhost:8080/openrdf-workbench/repositories/owlim-lite/update" />
+				uri="http://localhost:8080/openrdf-workbench/repositories/owlim-lite/update" />
 		</database>
 		<database id="fuseki" type="impl">
-			<endpoint uri="localhost:3030/tdb/sparql" />
-			<update-endpoint uri="localhost:3030/tdb/update" />
+			<endpoint uri="http://localhost:3030/tdb/sparql" />
+			<update-endpoint uri="http://localhost:3030/tdb/update" />
 		</database>
 		<database id="blazegraph" type="impl">
-			<endpoint uri="localhost:9999/bigdata/sparql" />
+			<endpoint uri="http://localhost:9999/bigdata/sparql" />
 		</database>
 		<database id="virtuoso" type="impl">
-			<endpoint uri="localhost:8890/sparql-auth" />
+			<endpoint uri="http://localhost:8890/sparql-auth" />
 			<user value="dba" />
 			<pwd value="dba" />
 		</database>
 		<database id="ref" type="impl">
-			<endpoint uri="dbpedia.org/sparql" />
+			<endpoint uri="http://dbpedia.org/sparql" />
 		</database>
 	</databases>
-	<log-clustering class="de.uni_leipzig.iguana.clustering.clusterer.FeasibleClusterer" path="../../LogFiles/dbpedia.txt" output-file="queriesG.txt">
+	<log-clustering class="org.aksw.iguana.clustering.clusterer.FeasibleClusterer" path="../../LogFiles/dbpedia.txt" output-file="queriesG.txt">
 		<property name="ask" value="false"/>
 		<property name="union" value="false"/>
 		<property name="clause-filter" value="(OPTIONAL AND DISTINCT) OR (UNION)"/>
@@ -47,7 +47,7 @@
 		</test-db>
 		<testcases testcase-pre="./testcasePre.sh %DBID% %PERCENT% %TESTCASEID%"
 			testcase-post="./testcasePost.sh %DBID% %PERCENT% %TESTCASEID%">
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="1" />
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
@@ -56,7 +56,7 @@
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="2" />
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
@@ -65,7 +65,7 @@
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="4" />
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
@@ -74,7 +74,7 @@
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="8" />
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
@@ -83,7 +83,7 @@
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="16" />
 				<property name="update-user" value="0" />
 				<property name="latency-amount0" value="20" />
@@ -92,7 +92,7 @@
 				<property name="is-pattern" value="false" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="1" />
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
@@ -105,7 +105,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="2" />
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
@@ -118,7 +118,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="4" />
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
@@ -131,7 +131,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="8" />
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
@@ -144,7 +144,7 @@
 				<property name="update-strategy" value="VARIABLE" />
 				<property name="timelimit" value="3600000" />
 			</testcase>
-			<testcase class="de.uni_leipzig.iguana.testcases.StressTestcase">
+			<testcase class="org.aksw.iguana.testcases.StressTestcase">
 				<property name="sparql-user" value="16" />
 				<property name="update-user" value="1" />
 				<property name="latency-amount0" value="20" />
