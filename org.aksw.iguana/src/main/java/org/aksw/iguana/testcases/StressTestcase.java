@@ -109,6 +109,7 @@ public class StressTestcase implements Testcase{
 	public void start() throws IOException {
 		//Init Logger
 		initLogger();
+		UpdateFileHandler.reset();
 		//Init patterns if there is no cached queries
 		initPatterns();
 		//Init prefixes
@@ -166,7 +167,8 @@ public class StressTestcase implements Testcase{
 			sparqlWorkerPool.get(t).sendEndSignal();
 			log.info("SPARQL user: "+t+" will be executed");
 		}
-		while(!executor.isTerminated()){}
+		while(!executor.isTerminated()){
+		}
 		Calendar end = Calendar.getInstance();
 		log.info("StressTestcase ended at: "+CalendarHandler.getFormattedTime(end));
 		log.info("StressTestcase took "+CalendarHandler.getWellFormatDateDiff(start, end));

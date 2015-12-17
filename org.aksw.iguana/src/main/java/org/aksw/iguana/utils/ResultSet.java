@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
@@ -16,14 +15,16 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 
 import org.aksw.iguana.utils.comparator.ResultSorting;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.io.CSV;
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.BitmapEncoder.BitmapFormat;
+import org.knowm.xchart.Chart;
+import org.knowm.xchart.ChartBuilder;
+import org.knowm.xchart.StyleManager.ChartTheme;
+import org.knowm.xchart.StyleManager.ChartType;
+import org.knowm.xchart.StyleManager.LegendPosition;
+import org.knowm.xchart.VectorGraphicsEncoder;
+import org.knowm.xchart.VectorGraphicsEncoder.VectorGraphicsFormat;
 
-import com.xeiam.xchart.Chart;
 
 
 /**
@@ -269,8 +270,12 @@ public class ResultSet implements Iterator<List<Object>>{
 		}
         for(List<Object> row : table){
         	String currentRow = "";
+        	try{
         	if(sort)
         		row = resSort.sortRow(row);
+        	}catch(Exception e){
+        		e.printStackTrace();
+        	}
         	for(Object cell : row){
         		currentRow += cell+";";
         	}
@@ -340,28 +345,47 @@ public class ResultSet implements Iterator<List<Object>>{
 	 * @throws FileNotFoundException the file not found exception
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public void saveAsPNG() throws FileNotFoundException, IOException{
-		save();
+	public void saveAsPNG(String format) throws FileNotFoundException, IOException{
 		int width = Math.max(70*(header.size()*table.size()), 800);
 		int height = Math.max(width/2, 500);//?
-//		Chart chart = new ChartBuilder().chartType(ChartType.Bar).width(width).height(height).title(title).xAxisTitle(xAxis).yAxisTitle(yAxis).build();
-//		for(List<Object> row :table){
-//			List<Number> subRow = new LinkedList<Number>();
-//			for(int i=1;i< row.size(); i++){
-//				subRow.add((Number) row.get(i));
-//			}
-//			chart.addSeries(String.valueOf(row.get(0)),
-//						header.subList(1, header.size()), subRow);
-//		}
-//		streamPNG(chart);
-		
-		CategoryDataset dataset = new CSV(';','\n').readCategoryDataset(new FileReader(this.fileName+".csv"));
-		JFreeChart ch = ChartFactory.createBarChart(this.title,xAxis, yAxis, dataset, PlotOrientation.VERTICAL, true, false, false);
-		ch.setAntiAlias(true);
-		ch.setTextAntiAlias(true);
-		ch.setBorderVisible(false);
-//		StandardChartTheme ct = new StandardChartTheme(fileName);
-		ChartUtilities.saveChartAsPNG(new File(this.fileName+".png"), ch, width, height);
+
+		Chart chart = new ChartBuilder().chartType(ChartType.Bar).theme(ChartTheme.Matlab).title(title).xAxisTitle(xAxis).yAxisTitle(yAxis)
+						.height(height).width(width).build();
+		chart.getStyleManager().setLegendPosition(LegendPosition.OutsideE);
+		for(List<Object> row : table){
+			List<Number> y = new LinkedList<Number>();
+			
+			for(int i=1;i<row.size();i++){
+				y.add((Number)row.get(i));
+			}
+			chart.addSeries(row.get(0).toString(), header.subList(1, header.size()), y);
+		}
+		switch(format.toLowerCase()){
+		case "png":
+			BitmapEncoder.saveBitmap(chart, fileName+".png", BitmapFormat.PNG);
+			break;	
+		case "jpg":
+			BitmapEncoder.saveBitmap(chart, fileName+".jpg", BitmapFormat.JPG);
+			break;	
+		case "gif":
+			BitmapEncoder.saveBitmap(chart, fileName+".png", BitmapFormat.GIF);
+			break;	
+		case "bmp":
+			BitmapEncoder.saveBitmap(chart, fileName+".png", BitmapFormat.BMP);
+			break;	
+		case "eps":
+			VectorGraphicsEncoder.saveVectorGraphic(chart, fileName, VectorGraphicsFormat.EPS);
+	    	break;
+		case "pdf":	
+			VectorGraphicsEncoder.saveVectorGraphic(chart, fileName, VectorGraphicsFormat.PDF);
+	    	break;
+		case "svg":
+	    	VectorGraphicsEncoder.saveVectorGraphic(chart, fileName, VectorGraphicsFormat.SVG);
+	    	break;
+	    default:
+	    	BitmapEncoder.saveBitmap(chart, fileName+".png", BitmapFormat.PNG);
+			break;	
+		}
 	}
 	
 	/**

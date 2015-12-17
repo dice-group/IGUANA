@@ -54,6 +54,8 @@ public class Config {
 
 	private static final String LOG_CLUSTERING_ELEMENT = "log-clustering";
 
+	private static final String SAVE_RESULT_DIAGRAM = "save-results-as-diagram";
+
 	private static Logger log = Logger.getLogger(Config.class
 			.getSimpleName());
 
@@ -127,6 +129,10 @@ public class Config {
 	public static String warmupUpdatePath = null;
 
 	public static Element dbNode;
+
+	public static boolean saveResultDiagrams = false;
+
+	public static String diagramFormat = "png";
 	
 	public static void init(String pathToXMLFile) throws ParserConfigurationException, SAXException, IOException{
 		init(pathToXMLFile, 0);
@@ -182,6 +188,15 @@ public class Config {
 		}
 		catch(Exception e){
 			sparqlLoad=false;
+		}
+		cp.setNode(benchmark);
+		try{
+			Element resultSaver =cp.getElementAt(SAVE_RESULT_DIAGRAM, 0);
+			saveResultDiagrams = Boolean.valueOf(resultSaver.getAttribute("value"));
+			diagramFormat = resultSaver.getAttribute("format");
+		}
+		catch(Exception e){
+			saveResultDiagrams=false;
 		}
 		cp.setNode(benchmark);
 	
