@@ -11,6 +11,8 @@ public class StringHandler {
 	private static String [] KEYWORD_LIST = new String[]{"select", "from", "where", "limit", "offset",
         "ask", "construct", "describe", "prefix", "optional", "filter", "distinct", "union", "_query="};
 	
+	
+	
 	/**
 	 * Writes strings to alphanumeric strings by replace all non alphanumeric strings with nothing
 	 *

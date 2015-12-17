@@ -12,6 +12,10 @@ public class ResultSorting{
 	
 	
 	public List<String> produceMapping(List<String> header) throws Exception{
+		if(header.get(1).equals("Mix")){
+			return header;
+		}
+
 		List<String> newHeader = new LinkedList<String>();
 
 		List<Integer> newIntHeader = new LinkedList<Integer>();
@@ -31,16 +35,16 @@ public class ResultSorting{
 		}
 		catch(NumberFormatException e){
 			
-			//no Integer header
-			LivedataComparator ldc = new LivedataComparator(LivedataComparator.INSERT_DELETE);
-			for(int i=0;i<header.size();i++){
-				newHeader.add(header.get(i));
-			}
-//			ldc.sort(newHeader);
-			Collections.sort(newHeader, ldc);
-			for(String cell: header){
-				mapping.put(header.indexOf(cell), newHeader.indexOf(cell));
-			}
+//			//no Integer header
+//			LivedataComparator ldc = new LivedataComparator(LivedataComparator.INSERT_DELETE);
+//			for(int i=0;i<header.size();i++){
+//				newHeader.add(header.get(i));
+//			}
+////			ldc.sort(newHeader);
+//			Collections.sort(newHeader, ldc);
+//			for(String cell: header){
+//				mapping.put(header.indexOf(cell), newHeader.indexOf(cell));
+//			}
 		}
 		
 		
@@ -48,10 +52,12 @@ public class ResultSorting{
 	}
 	
 	public List<Object> sortRow(List<Object> row){
+		if(mapping.isEmpty()){
+			return row;
+		}
 		List<Object> ret = new LinkedList<Object>();
 		ret.add(row.get(0));
-		for(Integer i : mapping.keySet()){
-			
+		for(Integer i : mapping.keySet()){			
 			ret.add(row.get(mapping.get(i)));
 		}
 		return ret;

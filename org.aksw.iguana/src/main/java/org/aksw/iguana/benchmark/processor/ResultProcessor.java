@@ -80,8 +80,9 @@ public class ResultProcessor {
 	/**
 	 * This will save all results in the Result Folder
 	 * and zips the result folder
+	 * @param saveResultDiagrams If the ResultSet should be saved as PNG Bar Charts
 	 */
-	public static void saveResults(){
+	public static void saveResults(boolean saveResultDiagrams, String format){
 		//For every Testcases 
 		for (String key : results.keySet()) {
 			//For every ResultSet for the testcase with the ID key
@@ -124,6 +125,15 @@ public class ResultProcessor {
 				} catch (IOException e) {
 					log.severe("Couldn't save Result "+res.getFileName()+" for "+key+" due to:");
 					LogHandler.writeStackTrace(log, e, Level.SEVERE);
+				}
+				if(saveResultDiagrams){
+					try {
+						//Save the ResultSet
+						res.saveAsPNG(format);
+					} catch (IOException e) {
+						log.severe("Couldn't save Diagram"+res.getFileName()+" for "+key+" due to:");
+						LogHandler.writeStackTrace(log, e, Level.SEVERE);
+					}
 				}
 			}
 			log.info("...finished saving results for "+key);

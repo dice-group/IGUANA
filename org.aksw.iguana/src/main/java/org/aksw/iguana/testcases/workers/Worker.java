@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 import org.aksw.iguana.utils.ResultSet;
+import org.aksw.iguana.utils.comparator.UpdateSorting;
 import org.bio_gene.wookie.connection.Connection;
 
 public abstract class Worker {
@@ -126,13 +127,23 @@ public abstract class Worker {
 		res.setyAxis(yAxis);
 		res.setPrefixes(this.prefixes);
 		res.setFileName(fileName);
-		res.setHeader(getHeader(map));
+		UpdateSorting updSort = new UpdateSorting();
+		if(workerType.equals("UPDATE")){
+			
+			res.setHeader(updSort.produceMapping(getHeader(map)));
+		}else{
+			res.setHeader(getHeader(map));
+		}
 		
 		List<Object> row = new LinkedList<Object>();
 		row.add(conName);
 		for(String k : map.keySet()){
-			row.add(map.get(k));
+				row.add(map.get(k));
 		}
+		if(workerType.equals("UPDATE")){
+			row = updSort.sortRow(row);
+		}
+		
 		res.addRow(row);
 		return res;
 	}
@@ -252,6 +263,8 @@ public abstract class Worker {
 	
 	public void sendEndSignal(){
 		this.endSignal=true;
+		con.close();
+		
 	}
 	
 	

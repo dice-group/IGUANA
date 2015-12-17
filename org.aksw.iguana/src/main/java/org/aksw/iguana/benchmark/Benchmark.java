@@ -97,8 +97,8 @@ public class Benchmark {
 	 */
 	public static void post() {
 		//Save the Results in the ResultProcessor
-		ResultProcessor.saveResults();
-		//Write an Email if the user defined an email 
+		ResultProcessor.saveResults(Config.saveResultDiagrams, Config.diagramFormat);
+		//Write an Email if the user# defined an email 
 		EmailProcessor.send(Config.attach, ResultProcessor.getResultFolder(), startTime, endTime);
 	}
 
@@ -165,6 +165,7 @@ public class Benchmark {
 					 * put the results of the current testcase 
 					 * into the ResultProcessor
 					 */
+					try{
 					ResultProcessor.putResultsForTestcase(key,
 						TestcaseProcessor.testTestcase(testcase, Config.graphURI, 
 								dbName, con, percent+"", 
@@ -175,6 +176,11 @@ public class Benchmark {
 								Config.dbNode, Config.warmupQueryFile, 
 								Config.warmupUpdatePath, Config.warmupTime, 
 								Config.sparqlLoad));
+					}
+					catch(NullPointerException e){
+						log.severe("Couldn't test testcase "+testcase+" due to:");
+						LogHandler.writeStackTrace(log, e, Level.SEVERE);
+					}
 				}
 			}
 		}

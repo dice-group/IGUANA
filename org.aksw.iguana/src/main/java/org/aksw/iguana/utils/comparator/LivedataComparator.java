@@ -81,7 +81,12 @@ public class LivedataComparator implements Comparator<String> {
 	 */
 	@Override
 	public int compare(String o1, String o2) {
-		
+		if(o1.equals("Connection")){
+			return -1;
+		}
+		if(o2.equals("Connection")){
+			return 1;
+		}
 		Integer i1 = Integer.parseInt(o1.substring(0,6));
 		Integer i2 = Integer.parseInt(o2.substring(0,6));
 		String s1 = o1.replaceAll("([0-9\\.]|nt)", "");
@@ -123,7 +128,7 @@ public class LivedataComparator implements Comparator<String> {
 			}
 			return intCompare;
 		}
-		return 0;
+		return 1;
 	}
 	
 	public List<String> sort(List<String> row){

@@ -35,6 +35,10 @@ public class UpdateFileHandler {
 	public void setLiveDataListAll(List<File> liveDataListAll) {
 		this.liveDataListAll = liveDataListAll;
 	}
+
+	public static void reset() {
+		mapping.clear();
+	}
 	
 	
 	

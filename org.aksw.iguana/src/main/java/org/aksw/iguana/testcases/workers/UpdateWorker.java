@@ -95,6 +95,7 @@ public class UpdateWorker extends Worker implements Runnable{
 	
 	private UpdateFileHandler ufh;
 	private List<File> liveDataList = new LinkedList<File>();
+	private long lastTime;
 	
 	public enum UpdateStrategy{
 		VARIABLE, FIXED, NONE
@@ -254,25 +255,34 @@ public class UpdateWorker extends Worker implements Runnable{
 	protected Long testQuery(String query){
 		try {
 			if(this.con.isClosed()){
+				lastTime =0;
 				return -2L;
 			}
 		} catch (SQLException e) {
+			lastTime =0;
 			return -2L;
 		}
 		if(query==null){
+			lastTime =0;
 			return 0L;
 		}
 //		waitTime();
 		//executeQuery
 		
 		if(sparqlLoad){
-			return this.con.loadUpdate(query, graphURI);
+			long ret =  this.con.loadUpdate(query, graphURI);
+			lastTime = ret;
+			return ret;
 		}else{
 			if(query.contains(UpdateWorker.DELETE_STRING)){
-				return this.con.deleteFile(query, graphURI);
+				long ret =  this.con.deleteFile(query, graphURI);
+				lastTime = ret;
+				return ret;
 			}
 			else{
-				return this.con.uploadFile(query, graphURI);
+				long ret = this.con.uploadFile(query, graphURI);
+				lastTime = ret;
+				return ret;
 			}
 		}
 	}
@@ -287,9 +297,11 @@ public class UpdateWorker extends Worker implements Runnable{
 			latency+=getLatency(latencyAmount.get(i), latencyStrategy.get(i), rand);
 		}
 		int wait=getAmount();
-		log.finest("Waiting "+(wait+latency)+"ms before next UPDATE Query");
+		long totalWait = Math.max(0, wait+latency-lastTime);
+		
+		log.finest("Waiting "+(totalWait)+"ms before next UPDATE Query");
 		Calendar start = Calendar.getInstance();
-		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<wait+latency){}
+		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<=totalWait){}
 	}
 	
 
