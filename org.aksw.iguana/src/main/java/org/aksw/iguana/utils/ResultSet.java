@@ -15,6 +15,7 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 
 import org.aksw.iguana.utils.comparator.ResultSorting;
+import org.aksw.iguana.utils.comparator.UpdateSorting;
 import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.Chart;
@@ -40,7 +41,7 @@ public class ResultSet implements Iterator<List<Object>>{
 
 	/** The header. */
 	private List<String> header = new LinkedList<String>();
-	
+
 	/** The table. */
 	private List<List<Object>> table = new LinkedList<List<Object>>();
 	
@@ -59,10 +60,29 @@ public class ResultSet implements Iterator<List<Object>>{
 	/** The y axis. */
 	private String yAxis="";
 
-	private String[] prefixes = new String[0];
+//	private boolean ISLOGSCALE = true;
 	
+	private ChartType chartType = ChartType.Bar;
+			
+	
+	private String[] prefixes = new String[0];
+
+	private boolean update = false;
+	
+	public boolean isUpdate() {
+		return update;
+	}
+
+	public void setUpdate(boolean update) {
+		this.update = update;
+	}
+
 	public ResultSet(){
 		
+	}
+	
+	public ResultSet(boolean isUpdate){
+		update = isUpdate;
 	}
 	
 	public ResultSet(ResultSet res) {
@@ -70,6 +90,7 @@ public class ResultSet implements Iterator<List<Object>>{
 		this.xAxis = res.xAxis;
 		this.yAxis = res.yAxis;
 		this.title = res.title;
+		this.update = res.update;
 		this.row = res.row;
 		this.removed = res.removed;
 		this.prefixes = res.prefixes;
@@ -251,9 +272,14 @@ public class ResultSet implements Iterator<List<Object>>{
 			return;
 		}
 		ResultSorting resSort = new ResultSorting();
+		UpdateSorting usSort = new UpdateSorting();
+		
 		Boolean sort=true;
 		try {
-			header = resSort.produceMapping(header);
+			if(!update)
+				header = resSort.produceMapping(header);
+			else
+				header = usSort.produceMapping(header);
 		} catch (Exception e) {
 			sort=false;
 		}
@@ -271,8 +297,12 @@ public class ResultSet implements Iterator<List<Object>>{
         for(List<Object> row : table){
         	String currentRow = "";
         	try{
-        	if(sort)
-        		row = resSort.sortRow(row);
+        	if(sort){
+        		if(!update )
+        			row = resSort.sortRow(row);
+        		else
+        			row = usSort.sortRow(row);
+        	}
         	}catch(Exception e){
         		e.printStackTrace();
         	}
@@ -349,9 +379,11 @@ public class ResultSet implements Iterator<List<Object>>{
 		int width = Math.max(70*(header.size()*table.size()), 800);
 		int height = Math.max(width/2, 500);//?
 
-		Chart chart = new ChartBuilder().chartType(ChartType.Bar).theme(ChartTheme.Matlab).title(title).xAxisTitle(xAxis).yAxisTitle(yAxis)
+		Chart chart = new ChartBuilder().chartType(chartType).theme(ChartTheme.Matlab).title(title).xAxisTitle(xAxis).yAxisTitle(yAxis)
 						.height(height).width(width).build();
+		
 		chart.getStyleManager().setLegendPosition(LegendPosition.OutsideE);
+
 		for(List<Object> row : table){
 			List<Number> y = new LinkedList<Number>();
 			

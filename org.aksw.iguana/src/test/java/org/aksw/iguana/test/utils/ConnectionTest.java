@@ -10,7 +10,7 @@ import org.junit.Test;
 
 public class ConnectionTest {
 
-	@Test
+//	@Test
 	public void ResultSetOwlimTest() throws SQLException{
 		org.apache.log4j.Logger.getLogger(
 				"log4j.logger.org.apache.jena.arq.info").setLevel(
