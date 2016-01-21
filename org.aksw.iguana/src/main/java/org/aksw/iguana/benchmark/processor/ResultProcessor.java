@@ -130,7 +130,7 @@ public class ResultProcessor {
 					try {
 						//Save the ResultSet
 						res.saveAsPNG(format);
-					} catch (IOException e) {
+					} catch (Exception e) {
 						log.severe("Couldn't save Diagram"+res.getFileName()+" for "+key+" due to:");
 						LogHandler.writeStackTrace(log, e, Level.SEVERE);
 					}

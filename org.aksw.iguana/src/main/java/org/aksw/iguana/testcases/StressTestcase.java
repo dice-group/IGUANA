@@ -30,6 +30,7 @@ import org.aksw.iguana.testcases.workers.Worker.LatencyStrategy;
 import org.aksw.iguana.utils.CalendarHandler;
 import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.StringHandler;
+import org.aksw.iguana.utils.TimeOutException;
 import org.aksw.iguana.utils.comparator.LivedataComparator2;
 import org.bio_gene.wookie.connection.Connection;
 import org.bio_gene.wookie.connection.ConnectionFactory;
@@ -155,10 +156,14 @@ public class StressTestcase implements Testcase{
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	protected void waitTimeLimit(){
 		Calendar start = Calendar.getInstance();
 		log.info("Starting StressTestcase at: "+CalendarHandler.getFormattedTime(start));
 		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<timeLimit){}
+		//Shutdown executor, no other workers can join now
+		executor.shutdown();
+		
 		for(Integer t : updateWorkerPool.keySet()){
 			updateWorkerPool.get(t).sendEndSignal();
 			log.info("Update user: "+t+" will be executed");
@@ -167,8 +172,18 @@ public class StressTestcase implements Testcase{
 			sparqlWorkerPool.get(t).sendEndSignal();
 			log.info("SPARQL user: "+t+" will be executed");
 		}
-		while(!executor.isTerminated()){
+		for(Thread t : Thread.getAllStackTraces().keySet()){
+			if(t.getName().matches("pool-[0-9]+-thread-[0-9]+")){			
+				//TODO change Stop Thread with something different
+				//Not cool as it's deprecated and in JAVA 8 throws a UnssuportedOPeration Execution
+				try{
+					t.stop(new TimeOutException());
+				}catch(Exception e){
+					log.warning("WarmupThread needed to be stopped");
+				}
+			}
 		}
+		while(!executor.isTerminated()){}
 		Calendar end = Calendar.getInstance();
 		log.info("StressTestcase ended at: "+CalendarHandler.getFormattedTime(end));
 		log.info("StressTestcase took "+CalendarHandler.getWellFormatDateDiff(start, end));
@@ -181,19 +196,21 @@ public class StressTestcase implements Testcase{
 	protected void startAllWorkers(){
 		log.info("Starting Workers");
 		//Starting all workers in new threads
+//		executor = Executors.newCachedThreadPool();
 		executor = Executors.newFixedThreadPool(sparqlWorkers+updateWorkers);
 		log.info("Starting now: "+sparqlWorkers+" Sparql Workers and "+updateWorkers+" Update Workers");
 		for(Integer i : sparqlWorkerPool.keySet()){
-			log.info("Starting SPARQL Worker "+sparqlWorkerPool.get(i).getWorkerNr());
-			executor.execute(sparqlWorkerPool.get(i));
+//			log.info("Starting SPARQL Worker "+sparqlWorkerPool.get(i).getWorkerNr());
+//			new Thread(sparqlWorkerPool.get(i), "worker-"+i).start();
+			executor.submit(sparqlWorkerPool.get(i));
 		}
 		for(Integer i : updateWorkerPool.keySet()){
 			log.info("Starting UPDATE Worker "+updateWorkerPool.get(i).getWorkerNr());
 			executor.execute(updateWorkerPool.get(i));
+//			updateWorkerPool.get(i).start();
 		}
 		log.info("All "+(sparqlWorkers+updateWorkers)+" workers have been started");
-		//Shutdown executor, no other workers can join now
-		executor.shutdown();
+
 
 	}
 	
@@ -315,6 +332,7 @@ public class StressTestcase implements Testcase{
 				ret.setFileName(res.getFileName().replaceAll("Worker\\d+", "Worker")+"_Mean");
 				ret.setHeader(res.getHeader());
 				ret.setPrefixes(prefixes);
+				ret.setUpdate(res.isUpdate());
 				ret.setTitle(res.getTitle()+" Mean");
 				ret.setxAxis(res.getxAxis());
 				ret.setyAxis(res.getyAxis());
@@ -353,6 +371,7 @@ public class StressTestcase implements Testcase{
 		ret.setTitle(r1.getTitle());
 		ret.setxAxis(r1.getxAxis());
 		ret.setyAxis(r1.getyAxis());
+		ret.setUpdate(r1.isUpdate());
 		List<String> header= new LinkedList<String>(r1.getHeader());
 		r1.next();
 		r2.next();
@@ -386,6 +405,7 @@ public class StressTestcase implements Testcase{
 				ret.setFileName(res.getFileName().replaceAll("Worker\\d+", "Worker")+"_Sum");
 				ret.setHeader(res.getHeader());
 				ret.setPrefixes(prefixes);
+				ret.setUpdate(res.isUpdate());
 				ret.setTitle(res.getTitle()+" Sum");
 				ret.setxAxis(res.getxAxis());
 				ret.setyAxis(res.getyAxis());

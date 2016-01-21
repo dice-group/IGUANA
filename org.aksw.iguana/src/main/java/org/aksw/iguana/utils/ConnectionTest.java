@@ -18,14 +18,17 @@ public class ConnectionTest {
 	
 	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException, SQLException{
 		ConfigParser cp = ConfigParser.getParser(args[0]);
-		Element rootNode = cp.getElementAt("mosquito", 0);
+		Element rootNode = cp.getElementAt("iguana", 0);
 		Element dbNode = cp.getElementAt("databases", 0);
 		Map<String, String> config = Config.getParameter(rootNode);
 		List<String> databaseIds = Config.getDatabaseIds(rootNode,
-				Config.DBTestType.valueOf(config.get("dbs")), config.get("ref-con"), null);
+				Config.DBTestType.valueOf(config.get("dbs")), config.get("ref"), null);
 		
 		for(String db : databaseIds){
-			Connection con = ConnectionFactory.createConnection(dbNode, db);
+//			Connection con = ConnectionFactory.createConnection(dbNode, db);
+			Connection con = ConnectionFactory.createImplConnection("http://localhost:8891/sparql", 
+					"dba", "dba", 
+					"http://localhost:8891/sparql-auth", 180);
 			//testing
 			con.update("DROP SILENT GRAPH <http://test.com>");
 
@@ -33,9 +36,9 @@ public class ConnectionTest {
 			con.uploadFile("000001.added.nt", "http://test.com");
 			java.sql.ResultSet res = con.select("SELECT * FROM <http://test.com> {?s ?p ?o}");
 			if(res.next()){
-				String a = res.getString(0);
-				String b = res.getString(1);
-				String c = res.getString(2);
+				String a = res.getString(1);
+				String b = res.getString(2);
+				String c = res.getString(3);
 				if(!a.equals("http://x.x")){
 					
 					System.out.println("ERROR: Couldn't upload: "+a+" "+b+" "+c);
@@ -57,7 +60,7 @@ public class ConnectionTest {
 			}
 			System.out.println("testing delete");
 			String query= QueryHandler.ntToQuery("000001.removed.nt", false, "http://test.com");
-			con.update(query);
+			con.deleteFile("000001.removed.nt", "http://test.com");
 			res = con.select("SELECT * FROM <http://test.com> {?s ?p ?o}");
 			if(res.next()){
 				System.out.println("ERROR: Couldn'T delte");

@@ -268,7 +268,7 @@ public class UpdateWorker extends Worker implements Runnable{
 		}
 //		waitTime();
 		//executeQuery
-		
+		//TODO change ret in ImplConnection
 		if(sparqlLoad){
 			long ret =  this.con.loadUpdate(query, graphURI);
 			lastTime = ret;

@@ -34,7 +34,7 @@ public class ResultSorting{
 			}
 		}
 		catch(NumberFormatException e){
-			
+			e.printStackTrace();
 //			//no Integer header
 //			LivedataComparator ldc = new LivedataComparator(LivedataComparator.INSERT_DELETE);
 //			for(int i=0;i<header.size();i++){

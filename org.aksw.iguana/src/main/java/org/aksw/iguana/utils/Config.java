@@ -400,7 +400,7 @@ public class Config {
 		cp.setNode((Element)root);
 		Element benchmark = (Element) cp.getElementAt("benchmark", 0);
 	
-		map.put("log-name", benchmark.getAttribute("log"));
+		
 
 		map.put("drop-db", cp.getElementAt("drop-db", 0).getAttribute("value"));
 		cp.setNode(benchmark);
