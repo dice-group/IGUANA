@@ -25,10 +25,8 @@ public class ConnectionTest {
 				Config.DBTestType.valueOf(config.get("dbs")), config.get("ref"), null);
 		
 		for(String db : databaseIds){
-//			Connection con = ConnectionFactory.createConnection(dbNode, db);
-			Connection con = ConnectionFactory.createImplConnection("http://localhost:8891/sparql", 
-					"dba", "dba", 
-					"http://localhost:8891/sparql-auth", 180);
+			Connection con = ConnectionFactory.createConnection(dbNode, db);
+
 			//testing
 			con.update("DROP SILENT GRAPH <http://test.com>");
 
@@ -59,7 +57,7 @@ public class ConnectionTest {
 				System.out.println("ERROR Couldnt upload");
 			}
 			System.out.println("testing delete");
-			String query= QueryHandler.ntToQuery("000001.removed.nt", false, "http://test.com");
+			QueryHandler.ntToQuery("000001.removed.nt", false, "http://test.com");
 			con.deleteFile("000001.removed.nt", "http://test.com");
 			res = con.select("SELECT * FROM <http://test.com> {?s ?p ?o}");
 			if(res.next()){

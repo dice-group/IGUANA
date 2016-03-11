@@ -11,6 +11,7 @@ public class ThreadJoiner implements Runnable{
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	public void start(){
 		for(Thread t : threads){
 			try {

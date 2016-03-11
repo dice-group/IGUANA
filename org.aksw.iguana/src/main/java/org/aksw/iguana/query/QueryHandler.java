@@ -397,7 +397,7 @@ public class QueryHandler {
 	}
 	
 	
-	private Object getModelFromQuery(Query q){
+	public Object getModelFromQuery(Query q){
 		QueryExecution qe = QueryExecutionFactory.createServiceRequest(this.con.getEndpoint(), q);
 		switch(q.getQueryType()){
 		case Query.QueryTypeAsk: 

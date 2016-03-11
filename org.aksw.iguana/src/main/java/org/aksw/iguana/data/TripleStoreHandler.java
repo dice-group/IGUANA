@@ -51,7 +51,7 @@ public class TripleStoreHandler {
 	 * @param impl the object which should be converted
 	 * @return the converted node
 	 */
-	private static Node implToNode(Object impl){
+	public static Node implToNode(Object impl){
 		Node s;
 		try{
 			s = (Node) ((ResourceImpl)impl).asNode();
