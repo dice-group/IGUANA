@@ -82,16 +82,16 @@ Further on it can dump a whole Triplestore with the following copmmand:
 java -Xmx8g -cp "./lib/*" org.aksw.iguana.utils.Dumper http://dbpedia.org/sparql 10000
 ```
 
+It will result in a file called dump.nt which has all Triples gained by the Query: `SELECT * {?s ?p ?o}`
+The second argument '10000' is needed, so it will not gain every Triple at once but in Blocks of 10000 (or whatever you whish).  
+
+
 If you diff two files and need the output to create changesets you  can use this command: 
 
 ```
 java -Xmx8g -cp "./lib/*" org.aksw.iguana.utils.ChangesetDivider file_to_add.nt file_to_remove.nt 200
 ```
 This will result in (max) 200 files to add and (max) 200 files to remove with the same no. of triples in each file.
-
-
-It will result in a file called dump.nt which has all Triples gained by the Query: `SELECT * {?s ?p ?o}`
-The second argument '10000' is needed, so it will not gain every Triple at once but in Blocks of 10000 (or whatever you whish).  
 
 
 To recalculate your results use this:
