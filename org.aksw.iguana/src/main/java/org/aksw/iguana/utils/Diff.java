@@ -26,7 +26,7 @@ public class Diff {
 		
 		File sorted1 = new File(sorted1Name);
 		sorted1.createNewFile();
-		ExternalSort.mergeSortedFiles(
+		ExternalSort.mergeSortedFiles( 
 				ExternalSort.sortInBatch(new File(input_pre), cmp, false), sorted1, cmp);
 		
 		File sorted2 = new File(sorted2Name);
