@@ -11,7 +11,10 @@ import java.util.List;
 public class ResultReader {
 
 	public static void main(String[] argc) throws IOException {
-//		String main = "C:\\Users\\urFaust\\results_0\\results_0\\org.aksw.iguana.testcases.StressTestcase1.0";
+		if(argc.length<1){
+			System.out.println("Usage: java -cp \"lib/*\" "+ResultReader.class.getCanonicalName()+" StresstestResultFolder/");
+			return;
+		}
 		String main = argc[0];
 		Long timeLimit = 3600000L;
 		Collection<ResultSet> ret = new LinkedList<ResultSet>();

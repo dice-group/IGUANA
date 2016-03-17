@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 
 
+
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -20,6 +21,10 @@ public class Dumper {
 	private static int limit = -1;
 	
 	public static void main(String[] argc) throws SQLException, IOException{
+		if(argc.length<2){
+			System.out.println("Usage: java -cp \"lib/*\" "+Dumper.class.getCanonicalName()+" http://endpoint/sparql #blockSize");
+			return;
+		}
 		Dumper.dump(argc[0], Integer.valueOf(argc[1]));
 		
 	}

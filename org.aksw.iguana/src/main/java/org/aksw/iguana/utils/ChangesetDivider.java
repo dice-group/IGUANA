@@ -9,6 +9,10 @@ import java.io.PrintWriter;
 public class ChangesetDivider {
 
 	public static void main(String[] argc) throws IOException {
+		if(argc.length<3){
+			System.out.println("Usage: java -cp \"lib/*\" "+ChangesetDivider.class.getCanonicalName()+" add.nt remove.nt #maxFilesPer");
+			return;
+		}
 		long maxFiles = Long.valueOf(argc[2]);
 		long limit = Math.max(FileHandler.getLineCount(argc[0])
 				,FileHandler.getLineCount(argc[1]))/maxFiles;

@@ -609,7 +609,7 @@ public class StressTestcase implements Testcase{
 			up.put(UPDATESTRATEGY, us);
 			up.put(UPDATEPATH, updatePath);
 			up.put(SPARQLLOAD, Boolean.valueOf(p.getProperty(SPARQLLOAD)));
-			up.put(GRAPHURI, p.getProperty("graphURI"));			
+			up.setProperty(GRAPHURI, p.getProperty("graphURI"));			
 			up.put(TIMELIMIT, Long.valueOf(p.getProperty(TIMELIMIT)));
 			updateProps[j] = up;
 		}

@@ -13,6 +13,10 @@ import org.aksw.iguana.utils.comparator.TripleComparator;
 public class Diff {
 
 	public static void main(String[] argc) throws IOException{
+		if(argc.length<2){
+			System.out.println("Usage: java -cp \"lib/*\" "+Diff.class.getCanonicalName()+" dump1.nt dump2.nt");
+			return;
+		}
 		diffToFiles(argc[0], argc[1], "only_in_first.nt",
 				"only_in_second.nt",
 				"in_both.nt");
