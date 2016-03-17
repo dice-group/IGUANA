@@ -22,9 +22,12 @@ public class TripleComparator implements Comparator<String>{
 	public int compare(String s1, String s2) {
 		s1 = s1.trim();
 		s2 = s2.trim();
-		s1 = s1.replace("\t", " ");
-		s2 = s2.replace("\t", " ");
+		s1 = s1.replace("\t", " ").replace("><", "> <").trim();
+		s2 = s2.replace("\t", " ").replace("><", "> <").trim();
 		String[] cmp1 = s1.split(" ");
+		if(cmp1.length<2){
+			System.out.println("Comparison is: "+cmp1[0]);
+		}
 		for(int k=3;k<cmp1.length;k++){
 			cmp1[2]+=" "+cmp1[k];
 		}

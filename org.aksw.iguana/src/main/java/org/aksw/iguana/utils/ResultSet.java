@@ -388,7 +388,11 @@ public class ResultSet implements Iterator<List<Object>>{
 			List<Number> y = new LinkedList<Number>();
 			
 			for(int i=1;i<row.size();i++){
-				y.add((Number)row.get(i));
+				try{
+				y.add((Number)Double.valueOf(String.valueOf(row.get(i))));
+				}catch(Exception e){
+					System.out.println("bla");
+				}
 			}
 			chart.addSeries(row.get(0).toString(), header.subList(1, header.size()), y);
 		}

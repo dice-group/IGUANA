@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw</groupId>
 	<artifactId>iguana</artifactId>
-	<version>0.3.0.2</version>
+	<version>1.0.0</version>
 	<licenses>
 		<license>
 			<name>LGPL Licence</name>
@@ -449,7 +449,7 @@
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-			<version>3.2.1</version>
+			<version>3.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>

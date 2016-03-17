@@ -29,9 +29,10 @@ It should be...
 3. [The latest version](https://github.com/AKSW/IGUANA#the-latest-version)
 4. [Documentation](https://github.com/AKSW/IGUANA#documentation)
 5. [Examples](https://github.com/AKSW/IGUANA#examples)
-6. [Installation](https://github.com/AKSW/IGUANA#installation)
-7. [Licensing](https://github.com/AKSW/IGUANA#licensing)
-8. [Contacts](https://github.com/AKSW/IGUANA#contacts)
+6. [Useful Tools](https://github.com/AKSW/IGUANA#useful-tools)
+7. [Installation](https://github.com/AKSW/IGUANA#installation)
+8. [Licensing](https://github.com/AKSW/IGUANA#licensing)
+9. [Contacts](https://github.com/AKSW/IGUANA#contacts)
 
 ##Architecture
 ###User
@@ -60,6 +61,35 @@ The documentation consist of the javadoc and the manual.
 Example Configurations (v.0.3.0.2) are provided [here](https://github.com/AKSW/IGUANA/tree/master/examples). 
 
 Be aware that these needs small adjustement (for example changing the endpoints)
+
+##Useful Tools
+
+IGUANA provides also some useful tools, like make a diff between two files. 
+
+```
+java -Xmx8g -cp "./lib/*" org.aksw.iguana.utils.Diff Dump1.nt Dump2.nt
+```
+
+It will result in 3 files called: in_both.nt, only_in_first.nt and only_in_second.nt
+
+
+Further on it can dump a whole Triplestore with the following copmmand:
+
+```
+java -Xmx8g -cp "./lib/*" org.aksw.iguana.utils.Dumper http://dbpedia.org/sparql 10000
+```
+
+It will result in a file called dump.nt which has all Triples gained by the Query: `SELECT * {?s ?p ?o}`
+The second argument '10000' is needed, so it will not gain every Triple at once but in Blocks of 10000 (or whatever you whish).  
+
+
+To recalculate your results use this:
+
+```
+java -Xmx8g -cp "./lib/*" org.aksw.iguana.utils.ResultReader ./results_0/org.aksw.iguana.testcases.StressTestcase1.0/
+```
+
+The output will be a folder called results_test
 
 ##Installation
 
