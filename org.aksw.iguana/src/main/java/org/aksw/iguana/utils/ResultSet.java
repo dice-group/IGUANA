@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,15 +28,19 @@ import org.knowm.xchart.VectorGraphicsEncoder;
 import org.knowm.xchart.VectorGraphicsEncoder.VectorGraphicsFormat;
 
 
-
 /**
  * The Class ResultSet for the results of each testcase.
  * 
  * @author Felix Conrads
  */
-public class ResultSet implements Iterator<List<Object>>{
+public class ResultSet implements Iterator<List<Object>>, Serializable{
 	
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6986063820611720336L;
+
 	/** The file name. */
 	private String fileName = UUID.randomUUID().toString();
 
@@ -65,6 +70,14 @@ public class ResultSet implements Iterator<List<Object>>{
 	private ChartType chartType = ChartType.Bar;
 			
 	
+	public ChartType getChartType() {
+		return chartType;
+	}
+
+	public void setChartType(ChartType chartType) {
+		this.chartType = chartType;
+	}
+
 	private String[] prefixes = new String[0];
 
 	private boolean update = false;

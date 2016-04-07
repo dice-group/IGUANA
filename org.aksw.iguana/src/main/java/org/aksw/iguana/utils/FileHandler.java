@@ -80,7 +80,9 @@ public class FileHandler {
 				m.read(fis, null);
 				ntFile = file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf("."))+".nt";
 				new File(ntFile).createNewFile();
-				m.write(new FileOutputStream(ntFile), "N-TRIPLE");
+				FileOutputStream out = new FileOutputStream(ntFile);
+				m.write(out, "N-TRIPLE");
+				out.close();
 			}
 			FileInputStream fis2 = new FileInputStream(ntFile);
 			BufferedReader br = new BufferedReader(new InputStreamReader(fis2, Charset.forName("UTF-8")));

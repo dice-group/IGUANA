@@ -139,12 +139,14 @@ public class WarmupProcessor {
 			if (res != null) {
 				try {
 					res.getStatement().close();
+					res.close();
+					res = null;
 				} catch (SQLException e) {
 					LogHandler.writeStackTrace(log, e, Level.WARNING);
 				}
 
 			}
-			
+		
 		}
 
 	}
@@ -164,6 +166,10 @@ public class WarmupProcessor {
 	@SuppressWarnings("deprecation")
 	public static void warmup(Connection con, String queriesFile, String path,
 			String graphURI, Long time, Boolean sparqlLoad) {
+		if(time==null){
+			log.info("No warmup was set.");
+			return;
+		}
 		if(time==0){
 			log.info("Warmup time is set to 0 minutes ... skipping warmup.");
 			return;
@@ -183,7 +189,14 @@ public class WarmupProcessor {
 		Thread t = new Thread(warmRun);
 		t.start();
 		Long start = Calendar.getInstance().getTimeInMillis();
-		while(Calendar.getInstance().getTimeInMillis()-start<time*60000){}
+		while(Calendar.getInstance().getTimeInMillis()-start<time*60000){
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			};
+		}
 		try{
 			t.stop(new TimeOutException());
 		}catch(Exception e){
@@ -309,6 +322,7 @@ class WarmupRunnable implements Runnable{
 			if (res != null) {
 				try {
 					res.getStatement().close();
+					res.close();
 				} catch (SQLException e) {
 					LogHandler.writeStackTrace(log, e, Level.WARNING);
 				}

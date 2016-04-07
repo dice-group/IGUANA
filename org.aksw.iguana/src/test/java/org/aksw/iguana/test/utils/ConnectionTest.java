@@ -59,7 +59,7 @@ public class ConnectionTest {
 		res.close();	
 	}
 	
-	@Test
+//	@Test
 	public void testDelete(){
 		Connection  con = ConnectionFactory.createImplConnection("http://localhost:8891/sparql", "dba", "dba", "http://localhost:8891/sparql-auth", -1);
 //		con.uploadFile("src/test/resources/dataset.nt", "http://urn.bla");

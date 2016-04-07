@@ -116,7 +116,14 @@ public class Benchmark {
 		//If DataGeneration should be used
 		if(Config.randomFunctionGen.equals("true")){
 			//Generated all the files
-			Config.randomFiles = DatasetGeneratorProcessor.getDatasetFiles(refCon, Config.randomHundredFile);
+			try {
+				Config.randomFiles = DatasetGeneratorProcessor.getDatasetFiles(refCon, Config.datasetGenClassName, Config.randomHundredFile, Config.datasetGenProperties);
+			} catch (InstantiationException | IllegalAccessException
+					| ClassNotFoundException e) {
+				log.severe("Couldn't generate datasets due to ");
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+				Config.randomFiles = null;
+			}
 		}
 	}
 	

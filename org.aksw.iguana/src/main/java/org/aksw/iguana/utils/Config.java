@@ -133,6 +133,10 @@ public class Config {
 	public static boolean saveResultDiagrams = false;
 
 	public static String diagramFormat = "png";
+
+	public static String datasetGenClassName;
+
+	public static Properties datasetGenProperties;
 	
 	public static void init(String pathToXMLFile) throws ParserConfigurationException, SAXException, IOException{
 		init(pathToXMLFile, 0);
@@ -228,6 +232,8 @@ public class Config {
 		cp.setNode(benchmark);
 		
 		Element rand = cp.getElementAt(RANDOM_FUNCTION_ELEMENT, 0);
+		datasetGenClassName = rand.getAttribute("class");
+		datasetGenProperties = getDatasetGeneratorProperties(rand);
 		randomFunction = rand.getAttribute("type");
 		randomFunctionGen = rand.getAttribute("generate");
 		randomHundredFile =  rand.getAttribute("initFile");
@@ -255,6 +261,17 @@ public class Config {
 		
 	}
 	
+	private static Properties getDatasetGeneratorProperties(Element rand) {
+		Properties ret = new Properties();
+		NodeList props = rand.getElementsByTagName("property");
+		for(int i=0;i<props.getLength();i++){
+			Element p = (Element)props.item(i);
+			ret.put(p.getAttribute("name"), p.getAttribute("value"));
+		}
+		
+		return ret;
+	}
+
 	public static void printConfig(){
 		
 	}

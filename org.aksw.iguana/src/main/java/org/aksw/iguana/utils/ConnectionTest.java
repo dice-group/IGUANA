@@ -66,6 +66,7 @@ public class ConnectionTest {
 			else{
 				System.out.println("Deletion works");
 			}
+			res.close();
 				
 			con.update("DROP SILENT GRAPH <http://test.com>");
 		}

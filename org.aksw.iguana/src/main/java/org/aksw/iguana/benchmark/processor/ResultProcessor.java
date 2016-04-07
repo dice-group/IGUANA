@@ -1,14 +1,20 @@
 package org.aksw.iguana.benchmark.processor;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.aksw.iguana.utils.ChartGenerator;
 import org.aksw.iguana.utils.FileHandler;
 import org.aksw.iguana.utils.ResultSet;
+import org.aksw.iguana.utils.ResultSetCollection;
 import org.aksw.iguana.utils.ZipUtils;
 import org.bio_gene.wookie.utils.LogHandler;
 
@@ -22,10 +28,11 @@ public class ResultProcessor {
 
 	private static final String RESULT_FOLDER = "results";
 	private static final String TEMP_RESULT_FOLDER = "tempResults";
+	private static final String SER_RESULTS_FOLDER = "tmp_ser";
 	
 	private static int suite=0;
 	
-	private static HashMap<String, Collection<ResultSet>> results;
+	private static HashMap<String, String> results;
 	
 	
 	private static Logger log = Logger.getLogger(ResultProcessor.class
@@ -48,12 +55,14 @@ public class ResultProcessor {
 		//Delete the result and temporary result folders
 		FileHandler.removeRecursive(getResultFolder());
 		FileHandler.removeRecursive(getTempResultFolder());
+		FileHandler.removeRecursive(SER_RESULTS_FOLDER);
 		//Create the result and temporary result folders
 		new File(getResultFolder()).mkdir();
 		new File(getTempResultFolder()).mkdir();
+		new File(SER_RESULTS_FOLDER).mkdir();
 		
 		//init the results map new
-		results = new HashMap<String, Collection<ResultSet>>();
+		results = new HashMap<String, String>();
 	}
 	
 	
@@ -63,7 +72,41 @@ public class ResultProcessor {
 	 * @return Results for the Testcase with the ID id
 	 */
 	public static Collection<ResultSet> getResultsForTestcase(String id){
-		return results.get(id);
+		Collection<ResultSet> ret = null;
+		if(!new File(SER_RESULTS_FOLDER+File.separator+id+".results").exists()){
+			return null;
+		}
+        try {
+        	FileInputStream fileIn = new FileInputStream(SER_RESULTS_FOLDER+File.separator+id+".results");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+			ret = ((ResultSetCollection) in.readObject()).getIntern();
+			in.close();
+	        fileIn.close();
+	        new File(SER_RESULTS_FOLDER+File.separator+id+".results").delete();
+		} catch (ClassNotFoundException | IOException e) {
+			log.severe("Couldn't load results for testcase id "+id);
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+        
+		return ret;
+	}
+	
+	
+	private static boolean saveResultsAsObject(String id, ResultSetCollection rsc){
+		try {
+			FileOutputStream fileOut = new FileOutputStream(SER_RESULTS_FOLDER+File.separator+id+".results");
+			ObjectOutputStream output = new ObjectOutputStream(fileOut);
+			output.writeObject(rsc);
+	        output.close();
+	        fileOut.close();
+	        rsc.clear();
+	        return true;
+		} catch (IOException e) {
+			log.severe("Couldn't save results!!!!");
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			return false;
+		}
+		
 	}
 	
 	/**
@@ -74,7 +117,20 @@ public class ResultProcessor {
 	 * @param testcaseResults The results of the testcase
 	 */
 	public static void putResultsForTestcase(String id, Collection<ResultSet> testcaseResults){
-		results.put(id, testcaseResults);
+		ResultSetCollection rsc = new ResultSetCollection();
+		
+		rsc.setIntern(testcaseResults);
+		
+		saveResultsAsObject(id, rsc);
+		
+		rsc = null;
+		testcaseResults =null;	
+		results.put(id, id+".results");
+		
+		log.info("Starting Garbage Collector");
+		System.gc();
+		log.info("Finished Garbage Collector");
+		
 	}
 	
 	/**
@@ -87,7 +143,8 @@ public class ResultProcessor {
 		for (String key : results.keySet()) {
 			//For every ResultSet for the testcase with the ID key
 			log.info("Saving Results for "+key+"...");
-			for (ResultSet res : results.get(key)) {
+			Collection<ResultSet> r = getResultsForTestcase(key);
+			for (ResultSet res : r) {
 				//Get the name of the testcase + percantage
 				String testCase = key.split("&")[0]+key.split("&")[2];
 				//Make the testcases to alphanumeric and _
@@ -129,7 +186,8 @@ public class ResultProcessor {
 				if(saveResultDiagrams){
 					try {
 						//Save the ResultSet
-						res.saveAsPNG(format);
+						ChartGenerator.saveAsPNG(res, format);
+//						res.saveAsPNG(format);
 					} catch (Exception e) {
 						log.severe("Couldn't save Diagram"+res.getFileName()+" for "+key+" due to:");
 						LogHandler.writeStackTrace(log, e, Level.SEVERE);

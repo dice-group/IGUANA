@@ -252,35 +252,35 @@ public class UpdateWorker extends Worker implements Runnable{
 	}
 	
 	@Override
-	protected Long testQuery(String query){
+	protected Integer testQuery(String query){
 		try {
 			if(this.con.isClosed()){
 				lastTime =0;
-				return -2L;
+				return -2;
 			}
 		} catch (SQLException e) {
 			lastTime =0;
-			return -2L;
+			return -2;
 		}
 		if(query==null){
 			lastTime =0;
-			return 0L;
+			return 0;
 		}
 //		waitTime();
 		//executeQuery
 		//TODO change ret in ImplConnection
 		if(sparqlLoad){
-			long ret =  this.con.loadUpdate(query, graphURI);
+			int ret =  Long.valueOf(this.con.loadUpdate(query, graphURI)).intValue();
 			lastTime = ret;
 			return ret;
 		}else{
 			if(query.contains(UpdateWorker.DELETE_STRING)){
-				long ret =  this.con.deleteFile(query, graphURI);
+				int ret =  Long.valueOf(this.con.deleteFile(query, graphURI)).intValue();
 				lastTime = ret;
 				return ret;
 			}
 			else{
-				long ret = this.con.uploadFile(query, graphURI);
+				int ret = Long.valueOf(this.con.uploadFile(query, graphURI)).intValue();
 				lastTime = ret;
 				return ret;
 			}
@@ -301,7 +301,15 @@ public class UpdateWorker extends Worker implements Runnable{
 		
 		log.finest("Waiting "+(totalWait)+"ms before next UPDATE Query");
 		Calendar start = Calendar.getInstance();
-		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<=totalWait){}
+		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<=totalWait){
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 	}
 	
 
@@ -357,9 +365,9 @@ public class UpdateWorker extends Worker implements Runnable{
 
 	private void initMaps(){
 		for(File f : liveDataList){
-			resultMap.put(f.getName(), 0L);
-			failMap.put(f.getName(), 0L);
-			succMap.put(f.getName(), 0L);
+			resultMap.put(f.getName(), 0);
+			failMap.put(f.getName(), 0);
+			succMap.put(f.getName(), 0);
 		}
 	}
 

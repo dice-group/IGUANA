@@ -265,6 +265,7 @@ public class ExternalSort {
         catch(Exception exp){
             logger.error("Normalized queries file cannot be generated due to, " + exp.getMessage(), exp);
             outFile.delete();//File should be deleted as there is a serious problem
+           
             return "";
         }
     }

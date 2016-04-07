@@ -89,16 +89,16 @@ public class SparqlWorker extends Worker implements Runnable {
 	private void initMaps(){
 		if(isPattern){
 			for(File f : queryFileList){
-				resultMap.put(f.getName().replace(".txt", ""), 0L);
-				failMap.put(f.getName().replace(".txt", ""), 0L);
-				succMap.put(f.getName().replace(".txt", ""), 0L);
+				resultMap.put(f.getName().replace(".txt", ""), 0);
+				failMap.put(f.getName().replace(".txt", ""), 0);
+				succMap.put(f.getName().replace(".txt", ""), 0);
 			}
 		}
 		else{
 			for(String[] s: queryStringList){
-				resultMap.put(s[1], 0L);
-				failMap.put(s[1], 0L);
-				succMap.put(s[1], 0L);
+				resultMap.put(s[1], 0);
+				failMap.put(s[1], 0);
+				succMap.put(s[1], 0);
 			}
 		}
 	}
@@ -232,20 +232,20 @@ public class SparqlWorker extends Worker implements Runnable {
 	}
 	
 	@Override
-	protected Long testQuery(String query){
+	protected Integer testQuery(String query){
 		waitTime();
-		Long time=-1L;
+		int time=-1;
 		try {
 			try {
 				if(this.con.isClosed()){
-					return -2L;
+					return -2;
 				}
 			} catch (SQLException e1) {
-				return -2L;
+				return -2;
 			}
-			time = this.con.selectTime(query);
+			time = Long.valueOf(this.con.selectTime(query)).intValue();
 		} catch (SQLException e) {
-			return -1L;
+			return -1;
 		}
 		return time;
 	}
@@ -261,7 +261,14 @@ public class SparqlWorker extends Worker implements Runnable {
 		}
 		log.finest("Waiting "+latency+"ms before next SPARQL Query");
 		Calendar start = Calendar.getInstance();
-		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<latency){}
+		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<latency){
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	

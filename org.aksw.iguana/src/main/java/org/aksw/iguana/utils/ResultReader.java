@@ -5,53 +5,67 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.aksw.iguana.utils.comparator.ResultSetComparator;
 
 public class ResultReader {
 
 	public static void main(String[] argc) throws IOException {
-		if(argc.length<1){
-			System.out.println("Usage: java -cp \"lib/*\" "+ResultReader.class.getCanonicalName()+" StresstestResultFolder/");
+		if (argc.length < 1) {
+			System.out.println("Usage: java -cp \"lib/*\" "
+					+ ResultReader.class.getCanonicalName()
+					+ " StresstestResultFolder/");
 			return;
 		}
 		String main = argc[0];
 		Long timeLimit = 3600000L;
 		Collection<ResultSet> ret = new LinkedList<ResultSet>();
 		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 1; j++) {
+			for (int j = 0; j < 2; j++) {
 				// Read all TotalTime, Succeded and Failed SPARQL and UPDATE in
 				// the main folder
-				String folderName = main + File.separator + ((Double)Math.pow(2, i)).intValue()
-						+ File.separator + j;
+				if (i == 4 && j == 1) {
+					System.out.println();
+				}
+				String folderName = main + File.separator
+						+ ((Double) Math.pow(2, i)).intValue() + File.separator
+						+ j;
 				File folder = new File(folderName);
 				List<List<ResultSet>> workers = new LinkedList<List<ResultSet>>();
 				boolean hasWorkers = true;
 				int k = 0;
-				boolean sparql=true;
+				boolean sparql = true;
 				while (hasWorkers) {// Workers
 					int fileCount = 0;
 					List<ResultSet> results = new LinkedList<ResultSet>();
-					
+
 					for (File f : folder.listFiles()) {
 						if (f.isDirectory()) {
 							continue;
 						}
-						//DIVIDE SPARQL & UPDATE
-						if(f.getName().toLowerCase().contains("totaltime")||f.getName().toLowerCase().contains("succ")||f.getName().toLowerCase().contains("fail")){
-						if(f.getName().toLowerCase().contains((sparql?"sparql":"update"))){
-							if (f.getName().toLowerCase().contains("worker" + k)) {
-								ResultSet res = ResultReader.readFile(f);
-								results.add(res);
-								fileCount++;
+						// DIVIDE SPARQL & UPDATE
+						if (f.getName().toLowerCase().contains("totaltime")
+								|| f.getName().toLowerCase().contains("succ")
+								|| f.getName().toLowerCase().contains("fail")) {
+							if (f.getName().toLowerCase()
+									.contains((sparql ? "sparql" : "update"))) {
+								if (f.getName().toLowerCase()
+										.contains("worker" + k)) {
+									ResultSet res = ResultReader.readFile(f);
+									results.add(res);
+									fileCount++;
+								}
 							}
-						}
 						}
 					}
 					if (fileCount == 0) {
-						if(sparql){
-							sparql=false;
-							k=0;
+						if (sparql) {
+							sparql = false;
+							k = 0;
 							continue;
 						}
 						hasWorkers = false;
@@ -76,53 +90,53 @@ public class ResultReader {
 					}
 					worker.add(getQPS(succ, total, timeLimit));
 					worker.add(getQMPT(succ, timeLimit));
-					if(worker.get(0).isUpdate()){
+					if (worker.get(0).isUpdate()) {
 						updateW.add(worker);
-					}
-					else{
+					} else {
 						sparqlW.add(worker);
 					}
 					ret.addAll(worker);
 				}
 
 				// Calculate mean & sum
-				//Divide SPARQL & UPDATE workers
-			
-				String[] pref = { Double.valueOf(Math.pow(2, i)).intValue() + "", j + "" };
-				if(!sparqlW.isEmpty()){
+				// Divide SPARQL & UPDATE workers
+
+				String[] pref = {
+						Double.valueOf(Math.pow(2, i)).intValue() + "", j + "" };
+				if (!sparqlW.isEmpty()) {
 					ret.addAll(getCalculatedResults(sparqlW, pref));
 				}
-				if(!updateW.isEmpty()){
+				if (!updateW.isEmpty()) {
 					ret.addAll(getCalculatedResults(updateW, pref));
 				}
 			}
 		}
-		for(ResultSet r : ret){
-			//Get the folder names
-			String fileSep =File.separator;
-			
-			if(fileSep.equals("\\")){
-				fileSep=File.separator+File.separator;
+		for (ResultSet r : ret) {
+			// Get the folder names
+			String fileSep = File.separator;
+
+			if (fileSep.equals("\\")) {
+				fileSep = File.separator + File.separator;
 			}
 			String[] fileName = r.getFileName().split(fileSep);
-			String suffix="";
-			for(String prefix : r.getPrefixes()){
-				suffix+=prefix+File.separator;
+			String suffix = "";
+			for (String prefix : r.getPrefixes()) {
+				suffix += prefix + File.separator;
 			}
-			//Make folders in which the ResultSet should be save
-			new File("."+File.separator+
-					"result_test"+
-					File.separator+suffix).mkdirs();
-			//Set filename
-			r.setFileName("."+File.separator+
-					"result_test"+
-					File.separator+suffix+fileName[fileName.length-1]);
-			System.out.println("Save: "+r.getFileName());
-			
+			// Make folders in which the ResultSet should be save
+			new File("." + File.separator + "result_test" + File.separator
+					+ suffix).mkdirs();
+			// Set filename
+			r.setFileName("." + File.separator + "result_test" + File.separator
+					+ suffix + fileName[fileName.length - 1]);
+			System.out.println("Save: " + r.getFileName());
+
 			r.save();
-			try{
-			r.saveAsPNG("png");
-			}catch(Exception e){System.out.println(e);}
+			try {
+				// r.saveAsPNG("png");
+			} catch (Exception e) {
+				System.out.println(e);
+			}
 		}
 	}
 
@@ -138,12 +152,16 @@ public class ResultReader {
 		int workers = col.size();
 		int resultsets = col.get(0).size();
 		for (int i = 0; i < resultsets; i++) {
+
 			Collection<ResultSet> currentResult = new LinkedList<ResultSet>();
 			for (int j = 0; j < workers; j++) {
-				try{
-					
-				currentResult.add(col.get(j).get(i));
-				}catch(Exception e){
+				try {
+					List<ResultSet> cur = col.get(j);
+					System.out.println(cur);
+					Collections.sort(cur, new ResultSetComparator());
+					System.out.println(cur);
+					currentResult.add(cur.get(i));
+				} catch (Exception e) {
 					System.out.println(e);
 				}
 			}
@@ -159,6 +177,7 @@ public class ResultReader {
 		ResultSet ret = new ResultSet();
 		Boolean first = true;
 		for (ResultSet res : col) {
+			
 			res.reset();
 			res.next();
 			if (first) {
@@ -172,6 +191,9 @@ public class ResultReader {
 				ret.setxAxis(res.getxAxis());
 				ret.setyAxis(res.getyAxis());
 				ret.addRow(res.getRow());
+				while (res.hasNext()) {
+					ret.addRow(res.next());
+				}
 				first = false;
 				continue;
 			} else {
@@ -195,6 +217,7 @@ public class ResultReader {
 			ret.getRow().set(i,
 					Double.valueOf(o * 1.0 / col.size()).longValue());
 		}
+		
 		ret.reset();
 		return ret;
 	}
@@ -211,28 +234,33 @@ public class ResultReader {
 		List<String> header = new LinkedList<String>(r1.getHeader());
 		r1.reset();
 		r2.reset();
-		r1.next();
-		r2.next();
-		List<Object> row = new LinkedList<Object>(r1.getRow());
-		for (int i = 1; i < r2.getHeader().size(); i++) {
-			String h = r2.getHeader().get(i);
-			if (!header.contains(h)) {
-				header.add(h);
-				row.add(r2.getRow().get(i));
-			} else {
-				
-				Long l1 = Long.valueOf(String.valueOf(row.get(header.indexOf(h))));
-				Long l2 = Long.valueOf(String.valueOf(r2.getRow().get(i)));
-				row.set(header.indexOf(h), l1 + l2);
-				
+		while (r1.hasNext() && r2.hasNext()) {
+			r1.next();
+			r2.next();
+			List<Object> row = new LinkedList<Object>(r1.getRow());
+			for (int i = 1; i < r2.getHeader().size(); i++) {
+				String h = r2.getHeader().get(i);
+				if (!header.contains(h)) {
+					header.add(h);
+					row.add(r2.getRow().get(i));
+				} else {
 
+					Long l1 = Long.valueOf(String.valueOf(row.get(header
+							.indexOf(h))));
+					Long l2 = Long.valueOf(String.valueOf(r2.getRow().get(i)));
+					row.set(header.indexOf(h), l1 + l2);
+
+				}
 			}
-		}
 
+//			r1.reset();
+//			r2.reset();
+			ret.addRow(row);
+		}
 		r1.reset();
 		r2.reset();
 		ret.setHeader(header);
-		ret.addRow(row);
+		
 		return ret;
 	}
 
@@ -241,7 +269,8 @@ public class ResultReader {
 		ResultSet ret = new ResultSet();
 		Boolean first = true;
 		for (ResultSet res : col) {
-			// res.next();
+			res.reset();
+			 res.next();
 			if (first) {
 				ret.setFileName(res.getFileName().replaceAll("Worker\\d+",
 						"Worker")
@@ -253,6 +282,9 @@ public class ResultReader {
 				ret.setxAxis(res.getxAxis());
 				ret.setyAxis(res.getyAxis());
 				ret.addRow(res.getRow());
+				while (res.hasNext()) {
+					ret.addRow(res.next());
+				}
 				first = false;
 				continue;
 			} else {
@@ -271,7 +303,7 @@ public class ResultReader {
 				ret.reset();
 				res.reset();
 			}
-			res.reset();
+			ret.reset();
 		}
 
 		return ret;
@@ -287,8 +319,10 @@ public class ResultReader {
 		res.setxAxis("Query");
 		res.setyAxis("count");
 		res.setTitle("Queries Per Second");
-		String worker=total.getFileName().toLowerCase().replaceAll(".*worker", "");
-		res.setFileName("Queries_Per_Second_"+(res.isUpdate()?"UPDATE":"SPARQL")+" Worker"+worker);
+		String worker = total.getFileName().toLowerCase()
+				.replaceAll(".*worker", "");
+		res.setFileName("Queries_Per_Second_"
+				+ (res.isUpdate() ? "UPDATE" : "SPARQL") + " Worker" + worker);
 		succ.reset();
 		total.reset();
 		while (succ.hasNext()) {
@@ -298,8 +332,11 @@ public class ResultReader {
 			// Connection
 			row.add(rowS.get(0));
 			for (int i = 1; i < rowS.size(); i++) {
-				row.add(Math.round(Double.valueOf(Integer.valueOf(String.valueOf(rowS.get(i))) * 1.0
-						/ (Integer.valueOf(String.valueOf(rowT.get(i))) * 1.0) / 1000)));
+				row.add(Math.round(Double.valueOf(Integer.valueOf(String
+						.valueOf(rowS.get(i)))
+						* 1.0
+						/ (Integer.valueOf(String.valueOf(rowT.get(i))) * 1.0)
+						/ 1000)));
 			}
 			res.addRow(row);
 		}
@@ -318,24 +355,24 @@ public class ResultReader {
 		res.setUpdate(succ.isUpdate());
 		res.setxAxis("Query");
 		res.setyAxis("count");
-		res.setTitle("Query Mixes Per "
-				+ timeLimit2 + "ms");
-		String worker=succ.getFileName().toLowerCase().replaceAll(".*worker", "");
-		res.setFileName("Queries_Mixes_Per_TimeLimit_"+(res.isUpdate()?"UPDATE":"SPARQL")+" Worker"+worker);
+		res.setTitle("Query Mixes Per " + timeLimit2 + "ms");
+		String worker = succ.getFileName().toLowerCase()
+				.replaceAll(".*worker", "");
+		res.setFileName("Queries_Mixes_Per_TimeLimit_"
+				+ (res.isUpdate() ? "UPDATE" : "SPARQL") + " Worker" + worker);
 		succ.reset();
-		while(succ.hasNext()) {
+		while (succ.hasNext()) {
 			List<Object> rowS = succ.next();
 			List<Object> row = new LinkedList<Object>();
 			// Connection
 			row.add(rowS.get(0));
-			Long value=0L;
+			Long value = 0L;
 			for (int i = 1; i < rowS.size(); i++) {
-				value+=Long.valueOf(String.valueOf(rowS.get(i)));
+				value += Long.valueOf(String.valueOf(rowS.get(i)));
 			}
 			row.add(value);
 			res.addRow(row);
 		}
-
 
 		return res;
 	}
@@ -346,8 +383,9 @@ public class ResultReader {
 
 	public static ResultSet readFile(File file) throws IOException {
 		ResultSet res = new ResultSet();
-		new File("results_test").mkdir();
-		res.setFileName("results_test"+File.separator+file.getName().replace(".csv", ""));
+		new File("result_test").mkdir();
+		res.setFileName("result_test" + File.separator
+				+ file.getName().replace(".csv", ""));
 		res.setTitle(file.getName().replace("_", " ").replace("-", " "));
 		res.setxAxis("Query");
 		res.setyAxis(file.getName().toLowerCase().contains("totaltime") ? "time in ms"
@@ -356,7 +394,8 @@ public class ResultReader {
 				: true);
 
 		// Get Prefixes
-		String[] split = file.getAbsolutePath().replace(File.separator, ";").split(";");
+		String[] split = file.getAbsolutePath().replace(File.separator, ";")
+				.split(";");
 		String[] prefixes = new String[2];
 		prefixes[0] = split[split.length - 3];
 		prefixes[1] = split[split.length - 2];
