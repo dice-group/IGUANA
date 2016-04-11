@@ -1,0 +1,25 @@
+*.class
+.classpath
+.project
+.settings
+target
+
+bin
+cache
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+#Idea files
+.idea/*
+*.iml
+*.log
+
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+deptree.txt
+
