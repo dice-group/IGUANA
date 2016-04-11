@@ -21,10 +21,8 @@
             <groupId>org.lexicon</groupId>
             <artifactId>jdbc4sparql</artifactId>
             <version>0.0.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jdbc4sparql-0.0.1.jar</systemPath>
-
         </dependency>
+
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-jdbc-driver-remote</artifactId>
@@ -137,24 +135,18 @@
             <groupId>it.unimi.dsi</groupId>
             <artifactId>dsiutils</artifactId>
             <version>1.0.10</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/dsiutils-1.0.10.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>de.uni_leipzig.aksw</groupId>
             <artifactId>feasible</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/feasible-1.0.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>it.unimi.dsi</groupId>
             <artifactId>fastutil</artifactId>
             <version>5.1.5</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/fastutil-5.1.5.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
@@ -179,162 +171,116 @@
             <groupId>prefuse</groupId>
             <artifactId>prefuse</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/prefuse-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>semiosys</groupId>
             <artifactId>semiosys</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/semiosys-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>sqljdbc</groupId>
             <artifactId>sqljdbc</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/sqljdbc-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>weka</groupId>
             <artifactId>weka</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/weka-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jung-algorithms</groupId>
             <artifactId>jung-algorithms</artifactId>
             <version>2.0.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jung-algorithms-2.0.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jung-api</groupId>
             <artifactId>jung-api</artifactId>
             <version>2.0.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jung-api-2.0.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jung-graph-impl</groupId>
             <artifactId>jung-graph-impl</artifactId>
             <version>2.0.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jung-graph-impl-2.0.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>javaml</groupId>
             <artifactId>javaml</artifactId>
             <version>0.1.5</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/javaml-0.1.5.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jtds</groupId>
             <artifactId>jtds</artifactId>
             <version>1.2.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jtds-1.2.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>Jama</groupId>
             <artifactId>Jama</artifactId>
             <version>1.0.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/Jama-1.0.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>IOWrapper</groupId>
             <artifactId>IOWrapper</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/IOWrapper-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>CW</groupId>
             <artifactId>CW</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/CW-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>cooccaccess</groupId>
             <artifactId>cooccaccess</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/cooccaccess-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>commons-math</groupId>
             <artifactId>commons-math</artifactId>
             <version>1.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/commons-math-1.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>colt</groupId>
             <artifactId>colt</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/colt-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>ajt</groupId>
             <artifactId>ajt</artifactId>
             <version>1.20</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/ajt-1.20.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>AffinityPropagationConsole</groupId>
             <artifactId>AffinityPropagationConsole</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/AffinityPropagationConsole-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>asv-toolbox_util_CommonFileChooser</groupId>
             <artifactId>asv-toolbox_util_CommonFileChooser</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/asv-toolbox_util_CommonFileChooser-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>algorithms</groupId>
             <artifactId>EdJoin</artifactId>
             <version>Plus</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/EdJoin-Plus.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>net.sf.javailp</groupId>
             <artifactId>javailp</artifactId>
             <version>1.2a</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/javailp-1.2a.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>lpsolve</groupId>
             <artifactId>lpsolve</artifactId>
             <version>55j</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/lpsolve55j.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>cugar</groupId>
             <artifactId>cugar</artifactId>
             <version>0.6.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/Cugar-0.6.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>LIMES</groupId>
             <artifactId>LIMES</artifactId>
             <version>0.6.3.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/LIMES-0.6.3.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.bio_gene.wookie</groupId>
@@ -374,13 +320,6 @@
         <!-- <artifactId>httpmime</artifactId> -->
         <!-- <version>4.2.3</version> -->
         <!-- </dependency> -->
-        <dependency>
-            <groupId>de.uni_leipzig.informatik</groupId>
-            <artifactId>swp13_sc</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/swp13_sc-0.0.1-SNAPSHOT.jar</systemPath>
-        </dependency>
 
         <dependency>
             <groupId>org.jfree</groupId>
@@ -430,158 +369,122 @@
 
         <!-- -->
         <dependency>
+            <groupId>de.uni_leipzig.informatik</groupId>
+            <artifactId>swp13_sc</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>annotations</groupId>
             <artifactId>annotations</artifactId>
             <version>7.0.3</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/annotations-7.0.3.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>conja</groupId>
             <artifactId>conja</artifactId>
             <version>1.0.6-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/conja-1.06-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jlibsvm</groupId>
             <artifactId>jlibsvm</artifactId>
             <version>0.91-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jlibsvm-0.91-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>JSAP</groupId>
             <artifactId>JSAP</artifactId>
             <version>2.0a-ds1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/JSAP-2.0a-ds1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jts</groupId>
             <artifactId>jts</artifactId>
             <version>1.13</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jts-1.13.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>lingpipe</groupId>
             <artifactId>lingpipe</artifactId>
             <version>4.1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/lingpipe-4.1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>ml</groupId>
             <artifactId>ml</artifactId>
             <version>0.911-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/ml-0.911-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>runutils</groupId>
             <artifactId>runutils</artifactId>
-            <version>0.91-20111226.060632-23</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/runutils-0.91-20111226.060632-23.jar</systemPath>
+            <version>0.91</version>
+<!--             <version>0.91-20111226.060632-23</version> -->
         </dependency>
         <dependency>
             <groupId>stats</groupId>
             <artifactId>stats</artifactId>
-            <version>0.93-20111226.060130-6</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/stats-0.93-20111226.060130-6.jar</systemPath>
+<!--             <version>0.93-20111226.060130-6</version> -->
+            <version>0.93</version>
         </dependency>
         <dependency>
             <groupId>symja</groupId>
             <artifactId>symja</artifactId>
             <version>2012-04-08</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/symja-2012-04-08.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>trees</groupId>
             <artifactId>trees</artifactId>
-            <version>1.023-20111226.060448-9</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/trees-1.023-20111226.060448-9.jar</systemPath>
+<!--             <version>1.023-20111226.060448-9</version> -->
+            <version>1.023</version>
         </dependency>
         <dependency>
             <groupId>java</groupId>
             <artifactId>java</artifactId>
             <version>json</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/java-json.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jmatharray</groupId>
             <artifactId>jmatharray</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jmatharray-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>simmetrics</groupId>
             <artifactId>simmetrics</artifactId>
             <version>1.6.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/simmetrics-1.6.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>SSJoinJava</groupId>
             <artifactId>SSJoinJava</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/SSJoinJava-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jgap</groupId>
             <artifactId>jgap</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jgap-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jgraph</groupId>
             <artifactId>jgraph</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jgraph-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>jgraphx</groupId>
             <artifactId>jgraphx</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jgraphx-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>LBJ2</groupId>
             <artifactId>LBJ2</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/LBJ2-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>LBJ2Library</groupId>
             <artifactId>LBJ2Library</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/LBJ2Library-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>LbjNerTagger</groupId>
             <artifactId>LbjNerTagger</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/LbjNerTagger-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>libsvm</groupId>
             <artifactId>libsvm</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/libsvm-1.0.jar</systemPath>
         </dependency>
         <!-- -->
 
@@ -651,6 +554,866 @@
             </resource>
         </resources>
         <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <version>2.5.2</version>
+            <executions>
+                <execution>
+                    <id>execution-1</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jdbc4sparql-0.0.1.jar</file>
+                        <groupId>org.lexicon</groupId>
+                        <artifactId>jdbc4sparql</artifactId>
+                        <version>0.0.1</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-2</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/dsiutils-1.0.10.jar</file>
+                        <groupId>it.unimi.dsi</groupId>
+                        <artifactId>dsiutils</artifactId>
+                        <version>1.0.10</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-3</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/feasible-1.0.jar</file>
+                        <groupId>de.uni_leipzig.aksw</groupId>
+                        <artifactId>feasible</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-4</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/fastutil-5.1.5.jar</file>
+                        <groupId>it.unimi.dsi</groupId>
+                        <artifactId>fastutil</artifactId>
+                        <version>5.1.5</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-5</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/prefuse-1.0.jar</file>
+                        <groupId>prefuse</groupId>
+                        <artifactId>prefuse</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-6</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/semiosys-1.0.jar</file>
+                        <groupId>semiosys</groupId>
+                        <artifactId>semiosys</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-7</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/sqljdbc-1.0.jar</file>
+                        <groupId>sqljdbc</groupId>
+                        <artifactId>sqljdbc</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-8</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/weka-1.0.jar</file>
+                        <groupId>weka</groupId>
+                        <artifactId>weka</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-9</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jung-algorithms-2.0.1.jar</file>
+                        <groupId>jung-algorithms</groupId>
+                        <artifactId>jung-algorithms</artifactId>
+                        <version>2.0.1</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-10</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jung-api-2.0.1.jar</file>
+                        <groupId>jung-api</groupId>
+                        <artifactId>jung-api</artifactId>
+                        <version>2.0.1</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-11</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jung-graph-impl-2.0.1.jar</file>
+                        <groupId>jung-graph-impl</groupId>
+                        <artifactId>jung-graph-impl</artifactId>
+                        <version>2.0.1</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-12</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/javaml-0.1.5.jar</file>
+                        <groupId>javaml</groupId>
+                        <artifactId>javaml</artifactId>
+                        <version>0.1.5</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-13</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jtds-1.2.2.jar</file>
+                        <groupId>jtds</groupId>
+                        <artifactId>jtds</artifactId>
+                        <version>1.2.2</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-14</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/Jama-1.0.2.jar</file>
+                        <groupId>Jama</groupId>
+                        <artifactId>Jama</artifactId>
+                        <version>1.0.2</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-15</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/IOWrapper-1.0.jar</file>
+                        <groupId>IOWrapper</groupId>
+                        <artifactId>IOWrapper</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-16</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/CW-1.0.jar</file>
+                        <groupId>CW</groupId>
+                        <artifactId>CW</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-17</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/cooccaccess-1.0.jar</file>
+                        <groupId>cooccaccess</groupId>
+                        <artifactId>cooccaccess</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-18</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/commons-math-1.2.jar</file>
+                        <groupId>commons-math</groupId>
+                        <artifactId>commons-math</artifactId>
+                        <version>1.2</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-19</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/colt-1.0.jar</file>
+                        <groupId>colt</groupId>
+                        <artifactId>colt</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-20</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/colt-1.0.jar</file>
+                        <groupId>colt</groupId>
+                        <artifactId>colt</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-21</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/ajt-1.20.jar</file>
+                        <groupId>ajt</groupId>
+                        <artifactId>ajt</artifactId>
+                        <version>1.20</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-22</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/AffinityPropagationConsole-1.0.jar</file>
+                        <groupId>AffinityPropagationConsole</groupId>
+                        <artifactId>AffinityPropagationConsole</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-23</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/asv-toolbox_util_CommonFileChooser-1.0.jar</file>
+                        <groupId>asv-toolbox_util_CommonFileChooser</groupId>
+                        <artifactId>asv-toolbox_util_CommonFileChooser</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-24</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/EdJoin-Plus.jar</file>
+                        <groupId>algorithms</groupId>
+                        <artifactId>EdJoin</artifactId>
+                        <version>Plus</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-25</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/javailp-1.2a.jar</file>
+                        <groupId>net.sf.javailp</groupId>
+                        <artifactId>javailp</artifactId>
+                        <version>1.2a</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-26</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/lpsolve55j.jar</file>
+                        <groupId>lpsolve</groupId>
+                        <artifactId>lpsolve</artifactId>
+                        <version>55j</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-27</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/Cugar-0.6.0.jar</file>
+                        <groupId>cugar</groupId>
+                        <artifactId>cugar</artifactId>
+                        <version>0.6.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-28</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/LIMES-0.6.3.2.jar</file>
+                        <groupId>LIMES</groupId>
+                        <artifactId>LIMES</artifactId>
+                        <version>0.6.3.2</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-29</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/swp13_sc-0.0.1-SNAPSHOT.jar</file>
+                        <groupId>de.uni_leipzig.informatik</groupId>
+                        <artifactId>swp13_sc</artifactId>
+                        <version>0.0.1-SNAPSHOT</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-30</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/annotations-7.0.3.jar</file>
+                        <groupId>annotations</groupId>
+                        <artifactId>annotations</artifactId>
+                        <version>7.0.3</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-31</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/conja-1.06-SNAPSHOT.jar</file>
+                        <groupId>conja</groupId>
+                        <artifactId>conja</artifactId>
+                        <version>1.0.6-SNAPSHOT</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-32</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jlibsvm-0.91-SNAPSHOT.jar</file>
+                        <groupId>jlibsvm</groupId>
+                        <artifactId>jlibsvm</artifactId>
+                        <version>0.91-SNAPSHOT</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-33</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/JSAP-2.0a-ds1.jar</file>
+                        <groupId>JSAP</groupId>
+                        <artifactId>JSAP</artifactId>
+                        <version>2.0a-ds1</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-34</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jts-1.13.jar</file>
+                        <groupId>jts</groupId>
+                        <artifactId>jts</artifactId>
+                        <version>1.13</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-35</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/lingpipe-4.1.0.jar</file>
+                        <groupId>lingpipe</groupId>
+                        <artifactId>lingpipe</artifactId>
+                        <version>4.1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-36</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/ml-0.911-SNAPSHOT.jar</file>
+                        <groupId>ml</groupId>
+                        <artifactId>ml</artifactId>
+                        <version>0.911-SNAPSHOT</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-37</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/runutils-0.91-20111226.060632-23.jar</file>
+                        <groupId>runutils</groupId>
+                        <artifactId>runutils</artifactId>
+                        <version>0.91</version>
+<!--                         <version>0.91-20111226.060632-23</version> -->
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-38</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/stats-0.93-20111226.060130-6.jar</file>
+                        <groupId>stats</groupId>
+                        <artifactId>stats</artifactId>
+                        <version>0.93</version>
+<!--                         <version>0.93-20111226.060130-6</version> -->
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-39</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/stats-0.93-20111226.060130-6.jar</file>
+                        <groupId>stats</groupId>
+                        <artifactId>stats</artifactId>
+                        <version>0.93-20111226.060130-6</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-40</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/stats-0.93-20111226.060130-6.jar</file>
+                        <groupId>stats</groupId>
+                        <artifactId>stats</artifactId>
+                        <version>0.93-20111226.060130-6</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-41</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/symja-2012-04-08.jar</file>
+                        <groupId>symja</groupId>
+                        <artifactId>symja</artifactId>
+                        <version>2012-04-08</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-42</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/trees-1.023-20111226.060448-9.jar</file>
+                        <groupId>trees</groupId>
+                        <artifactId>trees</artifactId>
+<!--                         <version>1.023-20111226.060448-9</version> -->
+                        <version>1.023</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-43</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/java-json.jar</file>
+                        <groupId>java</groupId>
+                        <artifactId>java</artifactId>
+                        <version>json</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-44</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jmatharray-1.0.jar</file>
+                        <groupId>jmatharray</groupId>
+                        <artifactId>jmatharray</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-45</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/simmetrics-1.6.2.jar</file>
+                        <groupId>simmetrics</groupId>
+                        <artifactId>simmetrics</artifactId>
+                        <version>1.6.2</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-46</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/SSJoinJava-1.0.jar</file>
+                        <groupId>SSJoinJava</groupId>
+                        <artifactId>SSJoinJava</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-47</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jgap-1.0.jar</file>
+                        <groupId>jgap</groupId>
+                        <artifactId>jgap</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-48</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jgraph-1.0.jar</file>
+                        <groupId>jgraph</groupId>
+                        <artifactId>jgraph</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-49</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/jgraphx-1.0.jar</file>
+                        <groupId>jgraphx</groupId>
+                        <artifactId>jgraphx</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-50</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/LBJ2-1.0.jar</file>
+                        <groupId>LBJ2</groupId>
+                        <artifactId>LBJ2</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-51</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/LBJ2Library-1.0.jar</file>
+                        <groupId>LBJ2Library</groupId>
+                        <artifactId>LBJ2Library</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-52</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/LbjNerTagger-1.0.jar</file>
+                        <groupId>LbjNerTagger</groupId>
+                        <artifactId>LbjNerTagger</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>execution-53</id>
+                    <phase>clean</phase>
+                    <configuration>
+                        <repositoryLayout>default</repositoryLayout>
+                        <file>${project.basedir}/src/main/resources/lib/libsvm-1.0.jar</file>
+                        <groupId>libsvm</groupId>
+                        <artifactId>libsvm</artifactId>
+                        <version>1.0</version>
+                        <packaging>jar</packaging>
+                        <generatePom>true</generatePom>
+                    </configuration>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+
             <!-- <plugin> -->
             <!-- <groupId>org.apache.maven.plugins</groupId> -->
             <!-- <artifactId>maven-dependency-plugin</artifactId> -->
@@ -697,7 +1460,8 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.3.1-SNAPSHOT</version>
+                <version>9.3.9.M0</version>
+<!--                 <version>9.3.1-SNAPSHOT</version> -->
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
