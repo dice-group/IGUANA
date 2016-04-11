@@ -8,7 +8,7 @@ bin
 cache
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.ear
 
