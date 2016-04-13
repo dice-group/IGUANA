@@ -8,8 +8,8 @@ import java.util.Random;
 
 import org.bio_gene.wookie.connection.Connection;
 
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.impl.ResourceImpl;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.impl.ResourceImpl;
 
 /**
  * Selector to choose a RandomInstance if there are some left

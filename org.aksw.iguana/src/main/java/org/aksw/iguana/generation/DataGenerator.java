@@ -1,6 +1,6 @@
 package org.aksw.iguana.generation;
 
-import com.hp.hpl.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.RDFNode;
 
 import java.util.Collection;
 import java.util.logging.Level;

@@ -11,9 +11,12 @@
         </license>
     </licenses>
     <properties>
+        <jena.version>3.0.1</jena.version>
+        <jsa.subversion>2-SNAPSHOT</jsa.subversion>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -26,8 +29,14 @@
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-jdbc-driver-remote</artifactId>
-            <version>1.1.2</version>
+            <version>${jena.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.aksw.jena-sparql-api</groupId>
+            <artifactId>jena-sparql-api-core</artifactId>
+            <version>${jena.version}-${jsa.subversion}</version>
+        </dependency>
+
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
@@ -73,22 +82,22 @@
             <artifactId>commons-email</artifactId>
             <version>1.3.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-core</artifactId>
-            <version>2.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-arq</artifactId>
-            <version>2.11.1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>httpclient</artifactId>
-                    <groupId>org.apache.httpcomponents</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.apache.jena</groupId> -->
+<!--             <artifactId>jena-core</artifactId> -->
+<!--             <version>2.11.1</version> -->
+<!--         </dependency> -->
+<!--         <dependency> -->
+<!--             <groupId>org.apache.jena</groupId> -->
+<!--             <artifactId>jena-arq</artifactId> -->
+<!--             <version>2.11.1</version> -->
+<!--             <exclusions> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>httpclient</artifactId> -->
+<!--                     <groupId>org.apache.httpcomponents</groupId> -->
+<!--                 </exclusion> -->
+<!--             </exclusions> -->
+<!--         </dependency> -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -356,11 +365,11 @@
             <artifactId>guava</artifactId>
             <version>11.0.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-iri</artifactId>
-            <version>1.0.1</version>
-        </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.apache.jena</groupId> -->
+<!--             <artifactId>jena-iri</artifactId> -->
+<!--             <version>1.0.1</version> -->
+<!--         </dependency> -->
         <dependency>
             <groupId>urbanophile</groupId>
             <artifactId>java-getopt</artifactId>
@@ -461,11 +470,11 @@
             <artifactId>jgraph</artifactId>
             <version>1.0</version>
         </dependency>
-        <dependency>
-            <groupId>jgraphx</groupId>
-            <artifactId>jgraphx</artifactId>
-            <version>1.0</version>
-        </dependency>
+<!--         <dependency> -->
+<!--             <groupId>jgraphx</groupId> -->
+<!--             <artifactId>jgraphx</artifactId> -->
+<!--             <version>1.0</version> -->
+<!--         </dependency> -->
         <dependency>
             <groupId>LBJ2</groupId>
             <artifactId>LBJ2</artifactId>
