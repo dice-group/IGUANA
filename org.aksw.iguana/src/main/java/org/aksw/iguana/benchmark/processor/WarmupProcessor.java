@@ -174,10 +174,10 @@ public class WarmupProcessor {
 			log.info("Warmup time is set to 0 minutes ... skipping warmup.");
 			return;
 		}
-		else if(time == null){
-			log.info("Warmup tag is not set ... skipping warmup.");
-			return;
-		}
+//		else if(time == null){
+//			log.info("Warmup tag is not set ... skipping warmup.");
+//			return;
+//		}
 		//Get all the quedries from the query file
 		Collection<String> queries = FileHandler.getQueriesInFile(queriesFile);
 		File f = null;
@@ -198,7 +198,8 @@ public class WarmupProcessor {
 			};
 		}
 		try{
-			t.stop(new TimeOutException());
+			if(!System.getProperty("java.version").startsWith("1.8"))
+				t.stop(new TimeOutException());
 		}catch(Exception e){
 			log.warning("WarmupThread needed to be stopped");
 //			e.printStackTrace();

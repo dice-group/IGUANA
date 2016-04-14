@@ -195,9 +195,11 @@ public class StressTestcase implements Testcase{
 			if(t.getName().matches("pool-[0-9]+-thread-[0-9]+")){			
 				//TODO change Stop Thread with something different
 				//Not cool as it's deprecated and in JAVA 8 throws a UnssuportedOPeration Execution
+				
 				try{
 					System.out.println(t.getName());
-					t.stop(new TimeOutException());
+					if(!System.getProperty("java.version").startsWith("1.8"))
+						t.stop(new TimeOutException());
 				}catch(Exception e){
 					log.warning("WarmupThread needed to be stopped");
 				}

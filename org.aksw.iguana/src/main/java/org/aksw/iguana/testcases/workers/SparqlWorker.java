@@ -243,7 +243,7 @@ public class SparqlWorker extends Worker implements Runnable {
             } catch (SQLException e1) {
                 return -2;
             }
-            time = Long.valueOf(this.con.selectTime(query)).intValue();
+            time = Long.valueOf(this.con.selectTime(query, 180000)).intValue();
         } catch (SQLException e) {
             return -1;
         }

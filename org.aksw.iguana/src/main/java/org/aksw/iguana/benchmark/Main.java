@@ -78,6 +78,7 @@ public class Main {
 				.setDriver("org.apache.jena.jdbc.remote.RemoteEndpointDriver");
 		ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=");
 
+
 	}
 
 }
