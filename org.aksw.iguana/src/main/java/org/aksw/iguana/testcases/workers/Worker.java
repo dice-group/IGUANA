@@ -187,7 +187,9 @@ public abstract class Worker {
 			catch(TimeOutException e){
 				break;
 			}
-			
+			catch(Exception e ){
+				time = -1;
+			}
 			if (time == -2) {
 				endSignal = true;
 				continue;
