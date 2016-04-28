@@ -1493,9 +1493,9 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <descriptors>
-                                <descriptor>dist.xml</descriptor>
-                            </descriptors>
+<!--                             <descriptors> -->
+<!--                                 <descriptor>dist.xml</descriptor> -->
+<!--                             </descriptors> -->
                         </configuration>
                     </execution>
                 </executions>
