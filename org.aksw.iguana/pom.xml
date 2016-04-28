@@ -173,7 +173,7 @@
         <!-- <artifactId>BorderFlow</artifactId> -->
         <!-- <version>0.4.0</version> -->
         <!-- <scope>system</scope> -->
-        <!-- <systemPath>${project.basedir}/src/main/resources/lib/BorderFlow-0.4.0.jar</systemPath> -->
+        <!-- <systemPath>${project.basedir}/lib/BorderFlow-0.4.0.jar</systemPath> -->
         <!-- </dependency> -->
 
         <dependency>
@@ -297,7 +297,7 @@
             <version>0.0.1-SNAPSHOT</version>
 <!--
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/connection-0.0.1-SNAPSHOT.jar</systemPath>
+            <systemPath>${project.basedir}/lib/connection-0.0.1-SNAPSHOT.jar</systemPath>
 -->
             <!-- <exclusions> -->
             <!-- <exclusion> -->
@@ -573,7 +573,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jdbc4sparql-0.0.1.jar</file>
+                        <file>${project.basedir}/lib/jdbc4sparql-0.0.1.jar</file>
                         <groupId>org.lexicon</groupId>
                         <artifactId>jdbc4sparql</artifactId>
                         <version>0.0.1</version>
@@ -589,7 +589,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/dsiutils-1.0.10.jar</file>
+                        <file>${project.basedir}/lib/dsiutils-1.0.10.jar</file>
                         <groupId>it.unimi.dsi</groupId>
                         <artifactId>dsiutils</artifactId>
                         <version>1.0.10</version>
@@ -605,7 +605,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/feasible-1.0.jar</file>
+                        <file>${project.basedir}/lib/feasible-1.0.jar</file>
                         <groupId>de.uni_leipzig.aksw</groupId>
                         <artifactId>feasible</artifactId>
                         <version>1.0</version>
@@ -621,7 +621,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/fastutil-5.1.5.jar</file>
+                        <file>${project.basedir}/lib/fastutil-5.1.5.jar</file>
                         <groupId>it.unimi.dsi</groupId>
                         <artifactId>fastutil</artifactId>
                         <version>5.1.5</version>
@@ -637,7 +637,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/prefuse-1.0.jar</file>
+                        <file>${project.basedir}/lib/prefuse-1.0.jar</file>
                         <groupId>prefuse</groupId>
                         <artifactId>prefuse</artifactId>
                         <version>1.0</version>
@@ -653,7 +653,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/semiosys-1.0.jar</file>
+                        <file>${project.basedir}/lib/semiosys-1.0.jar</file>
                         <groupId>semiosys</groupId>
                         <artifactId>semiosys</artifactId>
                         <version>1.0</version>
@@ -669,7 +669,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/sqljdbc-1.0.jar</file>
+                        <file>${project.basedir}/lib/sqljdbc-1.0.jar</file>
                         <groupId>sqljdbc</groupId>
                         <artifactId>sqljdbc</artifactId>
                         <version>1.0</version>
@@ -685,7 +685,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/weka-1.0.jar</file>
+                        <file>${project.basedir}/lib/weka-1.0.jar</file>
                         <groupId>weka</groupId>
                         <artifactId>weka</artifactId>
                         <version>1.0</version>
@@ -701,7 +701,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jung-algorithms-2.0.1.jar</file>
+                        <file>${project.basedir}/lib/jung-algorithms-2.0.1.jar</file>
                         <groupId>jung-algorithms</groupId>
                         <artifactId>jung-algorithms</artifactId>
                         <version>2.0.1</version>
@@ -717,7 +717,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jung-api-2.0.1.jar</file>
+                        <file>${project.basedir}/lib/jung-api-2.0.1.jar</file>
                         <groupId>jung-api</groupId>
                         <artifactId>jung-api</artifactId>
                         <version>2.0.1</version>
@@ -733,7 +733,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jung-graph-impl-2.0.1.jar</file>
+                        <file>${project.basedir}/lib/jung-graph-impl-2.0.1.jar</file>
                         <groupId>jung-graph-impl</groupId>
                         <artifactId>jung-graph-impl</artifactId>
                         <version>2.0.1</version>
@@ -749,7 +749,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/javaml-0.1.5.jar</file>
+                        <file>${project.basedir}/lib/javaml-0.1.5.jar</file>
                         <groupId>javaml</groupId>
                         <artifactId>javaml</artifactId>
                         <version>0.1.5</version>
@@ -765,7 +765,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jtds-1.2.2.jar</file>
+                        <file>${project.basedir}/lib/jtds-1.2.2.jar</file>
                         <groupId>jtds</groupId>
                         <artifactId>jtds</artifactId>
                         <version>1.2.2</version>
@@ -781,7 +781,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/Jama-1.0.2.jar</file>
+                        <file>${project.basedir}/lib/Jama-1.0.2.jar</file>
                         <groupId>Jama</groupId>
                         <artifactId>Jama</artifactId>
                         <version>1.0.2</version>
@@ -797,7 +797,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/IOWrapper-1.0.jar</file>
+                        <file>${project.basedir}/lib/IOWrapper-1.0.jar</file>
                         <groupId>IOWrapper</groupId>
                         <artifactId>IOWrapper</artifactId>
                         <version>1.0</version>
@@ -813,7 +813,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/CW-1.0.jar</file>
+                        <file>${project.basedir}/lib/CW-1.0.jar</file>
                         <groupId>CW</groupId>
                         <artifactId>CW</artifactId>
                         <version>1.0</version>
@@ -829,7 +829,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/cooccaccess-1.0.jar</file>
+                        <file>${project.basedir}/lib/cooccaccess-1.0.jar</file>
                         <groupId>cooccaccess</groupId>
                         <artifactId>cooccaccess</artifactId>
                         <version>1.0</version>
@@ -845,7 +845,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/commons-math-1.2.jar</file>
+                        <file>${project.basedir}/lib/commons-math-1.2.jar</file>
                         <groupId>commons-math</groupId>
                         <artifactId>commons-math</artifactId>
                         <version>1.2</version>
@@ -861,7 +861,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/colt-1.0.jar</file>
+                        <file>${project.basedir}/lib/colt-1.0.jar</file>
                         <groupId>colt</groupId>
                         <artifactId>colt</artifactId>
                         <version>1.0</version>
@@ -877,7 +877,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/colt-1.0.jar</file>
+                        <file>${project.basedir}/lib/colt-1.0.jar</file>
                         <groupId>colt</groupId>
                         <artifactId>colt</artifactId>
                         <version>1.0</version>
@@ -893,7 +893,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/ajt-1.20.jar</file>
+                        <file>${project.basedir}/lib/ajt-1.20.jar</file>
                         <groupId>ajt</groupId>
                         <artifactId>ajt</artifactId>
                         <version>1.20</version>
@@ -909,7 +909,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/AffinityPropagationConsole-1.0.jar</file>
+                        <file>${project.basedir}/lib/AffinityPropagationConsole-1.0.jar</file>
                         <groupId>AffinityPropagationConsole</groupId>
                         <artifactId>AffinityPropagationConsole</artifactId>
                         <version>1.0</version>
@@ -925,7 +925,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/asv-toolbox_util_CommonFileChooser-1.0.jar</file>
+                        <file>${project.basedir}/lib/asv-toolbox_util_CommonFileChooser-1.0.jar</file>
                         <groupId>asv-toolbox_util_CommonFileChooser</groupId>
                         <artifactId>asv-toolbox_util_CommonFileChooser</artifactId>
                         <version>1.0</version>
@@ -941,7 +941,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/EdJoin-Plus.jar</file>
+                        <file>${project.basedir}/lib/EdJoin-Plus.jar</file>
                         <groupId>algorithms</groupId>
                         <artifactId>EdJoin</artifactId>
                         <version>Plus</version>
@@ -957,7 +957,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/javailp-1.2a.jar</file>
+                        <file>${project.basedir}/lib/javailp-1.2a.jar</file>
                         <groupId>net.sf.javailp</groupId>
                         <artifactId>javailp</artifactId>
                         <version>1.2a</version>
@@ -973,7 +973,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/lpsolve55j.jar</file>
+                        <file>${project.basedir}/lib/lpsolve55j.jar</file>
                         <groupId>lpsolve</groupId>
                         <artifactId>lpsolve</artifactId>
                         <version>55j</version>
@@ -989,7 +989,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/Cugar-0.6.0.jar</file>
+                        <file>${project.basedir}/lib/Cugar-0.6.0.jar</file>
                         <groupId>cugar</groupId>
                         <artifactId>cugar</artifactId>
                         <version>0.6.0</version>
@@ -1005,7 +1005,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/LIMES-0.6.3.2.jar</file>
+                        <file>${project.basedir}/lib/LIMES-0.6.3.2.jar</file>
                         <groupId>LIMES</groupId>
                         <artifactId>LIMES</artifactId>
                         <version>0.6.3.2</version>
@@ -1021,7 +1021,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/swp13_sc-0.0.1-SNAPSHOT.jar</file>
+                        <file>${project.basedir}/lib/swp13_sc-0.0.1-SNAPSHOT.jar</file>
                         <groupId>de.uni_leipzig.informatik</groupId>
                         <artifactId>swp13_sc</artifactId>
                         <version>0.0.1-SNAPSHOT</version>
@@ -1037,7 +1037,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/annotations-7.0.3.jar</file>
+                        <file>${project.basedir}/lib/annotations-7.0.3.jar</file>
                         <groupId>annotations</groupId>
                         <artifactId>annotations</artifactId>
                         <version>7.0.3</version>
@@ -1053,7 +1053,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/conja-1.06-SNAPSHOT.jar</file>
+                        <file>${project.basedir}/lib/conja-1.06-SNAPSHOT.jar</file>
                         <groupId>conja</groupId>
                         <artifactId>conja</artifactId>
                         <version>1.0.6-SNAPSHOT</version>
@@ -1069,7 +1069,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jlibsvm-0.91-SNAPSHOT.jar</file>
+                        <file>${project.basedir}/lib/jlibsvm-0.91-SNAPSHOT.jar</file>
                         <groupId>jlibsvm</groupId>
                         <artifactId>jlibsvm</artifactId>
                         <version>0.91-SNAPSHOT</version>
@@ -1085,7 +1085,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/JSAP-2.0a-ds1.jar</file>
+                        <file>${project.basedir}/lib/JSAP-2.0a-ds1.jar</file>
                         <groupId>JSAP</groupId>
                         <artifactId>JSAP</artifactId>
                         <version>2.0a-ds1</version>
@@ -1101,7 +1101,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jts-1.13.jar</file>
+                        <file>${project.basedir}/lib/jts-1.13.jar</file>
                         <groupId>jts</groupId>
                         <artifactId>jts</artifactId>
                         <version>1.13</version>
@@ -1117,7 +1117,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/lingpipe-4.1.0.jar</file>
+                        <file>${project.basedir}/lib/lingpipe-4.1.0.jar</file>
                         <groupId>lingpipe</groupId>
                         <artifactId>lingpipe</artifactId>
                         <version>4.1.0</version>
@@ -1133,7 +1133,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/ml-0.911-SNAPSHOT.jar</file>
+                        <file>${project.basedir}/lib/ml-0.911-SNAPSHOT.jar</file>
                         <groupId>ml</groupId>
                         <artifactId>ml</artifactId>
                         <version>0.911-SNAPSHOT</version>
@@ -1149,7 +1149,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/runutils-0.91-20111226.060632-23.jar</file>
+                        <file>${project.basedir}/lib/runutils-0.91-20111226.060632-23.jar</file>
                         <groupId>runutils</groupId>
                         <artifactId>runutils</artifactId>
                         <version>0.91</version>
@@ -1166,7 +1166,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/stats-0.93-20111226.060130-6.jar</file>
+                        <file>${project.basedir}/lib/stats-0.93-20111226.060130-6.jar</file>
                         <groupId>stats</groupId>
                         <artifactId>stats</artifactId>
                         <version>0.93</version>
@@ -1183,7 +1183,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/stats-0.93-20111226.060130-6.jar</file>
+                        <file>${project.basedir}/lib/stats-0.93-20111226.060130-6.jar</file>
                         <groupId>stats</groupId>
                         <artifactId>stats</artifactId>
                         <version>0.93-20111226.060130-6</version>
@@ -1199,7 +1199,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/stats-0.93-20111226.060130-6.jar</file>
+                        <file>${project.basedir}/lib/stats-0.93-20111226.060130-6.jar</file>
                         <groupId>stats</groupId>
                         <artifactId>stats</artifactId>
                         <version>0.93-20111226.060130-6</version>
@@ -1215,7 +1215,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/symja-2012-04-08.jar</file>
+                        <file>${project.basedir}/lib/symja-2012-04-08.jar</file>
                         <groupId>symja</groupId>
                         <artifactId>symja</artifactId>
                         <version>2012-04-08</version>
@@ -1231,7 +1231,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/trees-1.023-20111226.060448-9.jar</file>
+                        <file>${project.basedir}/lib/trees-1.023-20111226.060448-9.jar</file>
                         <groupId>trees</groupId>
                         <artifactId>trees</artifactId>
 <!--                         <version>1.023-20111226.060448-9</version> -->
@@ -1248,7 +1248,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/java-json.jar</file>
+                        <file>${project.basedir}/lib/java-json.jar</file>
                         <groupId>java</groupId>
                         <artifactId>java</artifactId>
                         <version>json</version>
@@ -1264,7 +1264,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jmatharray-1.0.jar</file>
+                        <file>${project.basedir}/lib/jmatharray-1.0.jar</file>
                         <groupId>jmatharray</groupId>
                         <artifactId>jmatharray</artifactId>
                         <version>1.0</version>
@@ -1280,7 +1280,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/simmetrics-1.6.2.jar</file>
+                        <file>${project.basedir}/lib/simmetrics-1.6.2.jar</file>
                         <groupId>simmetrics</groupId>
                         <artifactId>simmetrics</artifactId>
                         <version>1.6.2</version>
@@ -1296,7 +1296,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/SSJoinJava-1.0.jar</file>
+                        <file>${project.basedir}/lib/SSJoinJava-1.0.jar</file>
                         <groupId>SSJoinJava</groupId>
                         <artifactId>SSJoinJava</artifactId>
                         <version>1.0</version>
@@ -1312,7 +1312,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jgap-1.0.jar</file>
+                        <file>${project.basedir}/lib/jgap-1.0.jar</file>
                         <groupId>jgap</groupId>
                         <artifactId>jgap</artifactId>
                         <version>1.0</version>
@@ -1328,7 +1328,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jgraph-1.0.jar</file>
+                        <file>${project.basedir}/lib/jgraph-1.0.jar</file>
                         <groupId>jgraph</groupId>
                         <artifactId>jgraph</artifactId>
                         <version>1.0</version>
@@ -1344,7 +1344,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/jgraphx-1.0.jar</file>
+                        <file>${project.basedir}/lib/jgraphx-1.0.jar</file>
                         <groupId>jgraphx</groupId>
                         <artifactId>jgraphx</artifactId>
                         <version>1.0</version>
@@ -1360,7 +1360,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/LBJ2-1.0.jar</file>
+                        <file>${project.basedir}/lib/LBJ2-1.0.jar</file>
                         <groupId>LBJ2</groupId>
                         <artifactId>LBJ2</artifactId>
                         <version>1.0</version>
@@ -1376,7 +1376,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/LBJ2Library-1.0.jar</file>
+                        <file>${project.basedir}/lib/LBJ2Library-1.0.jar</file>
                         <groupId>LBJ2Library</groupId>
                         <artifactId>LBJ2Library</artifactId>
                         <version>1.0</version>
@@ -1392,7 +1392,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/LbjNerTagger-1.0.jar</file>
+                        <file>${project.basedir}/lib/LbjNerTagger-1.0.jar</file>
                         <groupId>LbjNerTagger</groupId>
                         <artifactId>LbjNerTagger</artifactId>
                         <version>1.0</version>
@@ -1408,7 +1408,7 @@
                     <phase>clean</phase>
                     <configuration>
                         <repositoryLayout>default</repositoryLayout>
-                        <file>${project.basedir}/src/main/resources/lib/libsvm-1.0.jar</file>
+                        <file>${project.basedir}/lib/libsvm-1.0.jar</file>
                         <groupId>libsvm</groupId>
                         <artifactId>libsvm</artifactId>
                         <version>1.0</version>
