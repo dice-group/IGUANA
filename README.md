@@ -27,7 +27,7 @@ For futher discussion we have a google group and mailing list:
 
 [Forum](https://groups.google.com/d/forum/iguana-aksw)
 
-[Mailing-List](iguana-aksw@googlegroups.com)
+Mailing-List: iguana-aksw@googlegroups.com
 
 
 
