@@ -22,6 +22,13 @@ It should be...
 + ...understandable
 + ...well documented
 
+
+For futher discussion we have a google group and mailing list: 
+[Forum](https://groups.google.com/d/forum/iguana-aksw)
+[Mailing-List](iguana-aksw@googlegroups.com)
+
+
+
 ##TOC
 1. [Architecture](https://github.com/AKSW/IGUANA#architecture)
 	1. [User](https://github.com/AKSW/IGUANA#user)
