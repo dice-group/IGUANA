@@ -1,10 +1,10 @@
 package org.aksw.iguana.data;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
@@ -17,16 +17,14 @@ import java.util.logging.Logger;
 
 import org.aksw.iguana.utils.TripleStoreStatistics;
 import org.aksw.jena_sparql_api.utils.NodeUtils;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.GraphHandler;
-import org.bio_gene.wookie.utils.LogHandler;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.impl.LiteralImpl;
 import org.apache.jena.rdf.model.impl.PropertyImpl;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
+import org.bio_gene.wookie.connection.Connection;
+import org.bio_gene.wookie.utils.LogHandler;
 
 /**
  * The Class TripleStoreHandler.
