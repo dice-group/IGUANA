@@ -238,36 +238,49 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.3.9.M0</version>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>de.uni_leipzig.iguana.benchmark.Main</mainClass>
-                        </manifest>
-                    </archive>
+                    <attach>false</attach>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>make-my-jar-with-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <!-- <descriptors> -->
-                            <!-- <descriptor>dist.xml</descriptor> -->
-                            <!-- </descriptors> -->
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
+
+<!--             <plugin> -->
+<!--                 <groupId>org.apache.maven.plugins</groupId> -->
+<!--                 <artifactId>maven-assembly-plugin</artifactId> -->
+<!--                 <version>2.4</version> -->
+<!--                 <configuration> -->
+<!--                     <archive> -->
+<!--                         <manifest> -->
+<!--                             <addClasspath>true</addClasspath> -->
+<!--                             <mainClass>de.uni_leipzig.iguana.benchmark.Main</mainClass> -->
+<!--                         </manifest> -->
+<!--                     </archive> -->
+<!--                     <descriptorRefs> -->
+<!--                         <descriptorRef>jar-with-dependencies</descriptorRef> -->
+<!--                     </descriptorRefs> -->
+<!--                 </configuration> -->
+<!--                 <executions> -->
+<!--                     <execution> -->
+<!--                         <id>make-my-jar-with-dependencies</id> -->
+<!--                         <phase>package</phase> -->
+<!--                         <goals> -->
+<!--                             <goal>single</goal> -->
+<!--                         </goals> -->
+<!--                         <configuration> -->
+<!--                             <descriptors> -->
+<!--                                 <descriptor>dist.xml</descriptor> -->
+<!--                             </descriptors> -->
+<!--                         </configuration> -->
+<!--                     </execution> -->
+<!--                 </executions> -->
+<!--             </plugin> -->
         </plugins>
     </build>
 
