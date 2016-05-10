@@ -103,11 +103,11 @@ public class TestcaseProcessor {
      */
     @SuppressWarnings("unchecked")
     public static Boolean isOneTest(String testcase) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
-        log.info("Loading: " + testcase);
+        System.out.println("Loading: " + testcase);
         String testcaseWithoutID = testcase.substring(0,
                 testcase.lastIndexOf(CONCAT));
         Class<Testcase> t = (Class<Testcase>) Class
-                .forName(testcaseWithoutID);
+                .forName(testcaseWithoutID, true, TestcaseProcessor.class.getClassLoader());
 
         if(t == null) {
             throw new RuntimeException("Could not load class: " + testcase);
