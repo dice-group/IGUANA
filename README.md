@@ -45,7 +45,7 @@ Mailing-List: iguana-aksw@googlegroups.com
 
 ##Architecture
 ###User
-![USER Architecture of IGUANA](images/IGUANA_v0.3_Architecture.png)
+![USER Architecture of IGUANA](images/workflow.png)
 
 ###Developer
 ![DEVELOPER Architecture of IGUANA](images/IGUANADetArch.png)
