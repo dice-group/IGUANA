@@ -1,6 +1,6 @@
 #IGUANA
 
-![Logo of IGUANA](images/IGUANA_logo.png)
+<img src = "https://github.com/AKSW/IGUANA/raw/develop/images/IGUANA_logo.png" alt = "IGUANA Logo" width = "400" align = "center">
 
 
 ##What is it?
