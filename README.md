@@ -1,6 +1,6 @@
 #IGUANA
 
-![Logo of IGUANA](images/IGUANA_Logo.png)
+![Logo of IGUANA](images/IGUANA_logo.png)
 
 
 ##What is it?
