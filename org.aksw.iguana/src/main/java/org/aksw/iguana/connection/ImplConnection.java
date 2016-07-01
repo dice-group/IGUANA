@@ -30,7 +30,6 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.jena.jdbc.remote.statements.RemoteEndpointStatement;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.WebContent;
-import org.lexicon.jdbc4sparql.SPARQLConnection;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
@@ -225,13 +224,9 @@ public class ImplConnection implements Connection {
 		if (graphURI != null) {
 			update += " { GRAPH <" + graphURI + "> ";
 		}
-		// else if(((SPARQLConnection) this.con).getDefaultGraphs().size()>0){
-		// update += " { GRAPH <"+((SPARQLConnection)
-		// this.con).getDefaultGraphs().get(0)+"> ";
-		// }
+
 		update += GraphHandler.GraphToSPARQLString(input.getGraph());
-		if (graphURI != null
-				|| ((SPARQLConnection) this.con).getDefaultGraphs().size() > 0) {
+		if (graphURI != null) {
 			update += " }";
 		}
 		Long ret = this.update(update);
@@ -395,12 +390,7 @@ public class ImplConnection implements Connection {
 
 	@Override
 	public void setDefaultGraph(String graph) {
-		if (graph == null) {
-			((SPARQLConnection) this.con).setDefaultGraphs(null);
-		}
-		LinkedList<String> graphs = new LinkedList<String>();
-		graphs.add(graph);
-		((SPARQLConnection) this.con).setDefaultGraphs(graphs);
+		//not supported yet
 	}
 
 	@Override
