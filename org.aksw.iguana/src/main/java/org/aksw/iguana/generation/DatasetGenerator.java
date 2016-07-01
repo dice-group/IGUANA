@@ -2,7 +2,7 @@ package org.aksw.iguana.generation;
 
 import java.util.Properties;
 
-import org.bio_gene.wookie.connection.Connection;
+import org.aksw.iguana.connection.Connection;
 
 public interface DatasetGenerator {
 

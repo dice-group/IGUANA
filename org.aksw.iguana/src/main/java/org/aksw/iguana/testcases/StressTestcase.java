@@ -33,9 +33,9 @@ import org.aksw.iguana.utils.StringHandler;
 import org.aksw.iguana.utils.TimeOutException;
 import org.aksw.iguana.utils.comparator.LivedataComparator2;
 import org.aksw.iguana.utils.comparator.ResultSetComparator;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.connection.ConnectionFactory;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.connection.ConnectionFactory;
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.w3c.dom.Node;
 
 import weka.core.Debug.Random;

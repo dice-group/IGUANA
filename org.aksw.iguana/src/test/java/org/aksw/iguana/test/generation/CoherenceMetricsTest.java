@@ -1,6 +1,6 @@
 package org.aksw.iguana.test.generation;
 
-import org.bio_gene.wookie.connection.ConnectionFactory;
+import org.aksw.iguana.connection.ConnectionFactory;
 import org.junit.Test;
 
 public class CoherenceMetricsTest {

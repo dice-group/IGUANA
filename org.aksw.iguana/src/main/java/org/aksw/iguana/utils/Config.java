@@ -12,8 +12,8 @@ import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.bio_gene.wookie.utils.ConfigParser;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.parser.ConfigParser;
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

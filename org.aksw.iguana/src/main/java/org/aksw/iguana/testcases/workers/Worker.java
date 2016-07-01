@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.TimeOutException;
 import org.aksw.iguana.utils.comparator.UpdateSorting;
-import org.bio_gene.wookie.connection.Connection;
 
 public abstract class Worker {
 

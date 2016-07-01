@@ -3,8 +3,8 @@ package org.aksw.iguana.utils;
 import java.io.File;
 import java.nio.file.Paths;
 
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.connection.ConnectionFactory;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.connection.ConnectionFactory;
 
 public class FileUploader {
 

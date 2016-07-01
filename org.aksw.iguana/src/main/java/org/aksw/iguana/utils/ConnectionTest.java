@@ -8,9 +8,9 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.aksw.iguana.query.QueryHandler;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.connection.ConnectionFactory;
-import org.bio_gene.wookie.utils.ConfigParser;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.connection.ConnectionFactory;
+import org.aksw.iguana.utils.parser.ConfigParser;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 

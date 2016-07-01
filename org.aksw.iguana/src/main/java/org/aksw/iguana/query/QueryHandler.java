@@ -18,10 +18,9 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.utils.FileHandler;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
-
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;

@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 import org.aksw.iguana.data.Selector;
 import org.aksw.iguana.utils.FileHandler;
 import org.aksw.iguana.utils.TripleStoreStatistics;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 /**
  * Created by IntelliJ IDEA.

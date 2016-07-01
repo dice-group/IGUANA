@@ -6,10 +6,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.generation.DatasetGenerator;
 import org.aksw.iguana.utils.Config;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.logging.LogHandler;
+
 
 /**
  * Processor to generate smaller and bigger datasets

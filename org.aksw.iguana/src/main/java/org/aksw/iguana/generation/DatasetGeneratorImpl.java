@@ -13,8 +13,8 @@ import org.aksw.iguana.utils.Config;
 import org.aksw.iguana.utils.ExternalSort;
 import org.aksw.iguana.utils.FileHandler;
 import org.aksw.iguana.utils.comparator.TripleComparator;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 public class DatasetGeneratorImpl implements DatasetGenerator {
 

@@ -30,8 +30,8 @@ import net.sf.javailp.SolverFactoryLpSolve;
 import org.aksw.iguana.utils.FileHandler;
 import org.aksw.iguana.utils.TripleStoreStatistics;
 import org.aksw.iguana.utils.comparator.TripleComparator;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;

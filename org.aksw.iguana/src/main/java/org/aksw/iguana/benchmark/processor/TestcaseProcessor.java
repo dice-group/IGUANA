@@ -13,8 +13,8 @@ import org.aksw.iguana.utils.CalendarHandler;
 import org.aksw.iguana.utils.Config;
 import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.ShellProcessor;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.w3c.dom.Node;
 
 /**

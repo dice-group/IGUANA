@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import org.aksw.iguana.connection.Connection;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
-import org.bio_gene.wookie.connection.Connection;
 
 
 /**

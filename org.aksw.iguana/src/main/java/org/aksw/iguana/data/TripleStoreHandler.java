@@ -15,7 +15,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.utils.TripleStoreStatistics;
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.aksw.jena_sparql_api.utils.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -23,8 +25,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.impl.LiteralImpl;
 import org.apache.jena.rdf.model.impl.PropertyImpl;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
 
 /**
  * The Class TripleStoreHandler.

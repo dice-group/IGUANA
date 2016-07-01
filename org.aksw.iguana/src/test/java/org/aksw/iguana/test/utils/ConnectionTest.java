@@ -3,8 +3,8 @@ package org.aksw.iguana.test.utils;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.connection.ConnectionFactory;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.connection.ConnectionFactory;
 
 
 public class ConnectionTest {

@@ -14,8 +14,8 @@ import java.util.logging.Logger;
 import org.aksw.iguana.utils.FileHandler;
 import org.aksw.iguana.utils.FileUploader;
 import org.aksw.iguana.utils.TimeOutException;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 /**
  * Processor to warmup the current Connection

@@ -14,9 +14,9 @@ import java.util.logging.Level;
 
 import org.aksw.iguana.query.QueryHandler;
 import org.aksw.iguana.utils.FileHandler;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.connection.ConnectionFactory;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.connection.ConnectionFactory;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 public class SparqlWorker extends Worker implements Runnable {
 

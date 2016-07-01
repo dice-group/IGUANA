@@ -16,7 +16,7 @@ import org.aksw.iguana.utils.FileHandler;
 import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.ResultSetCollection;
 import org.aksw.iguana.utils.ZipUtils;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 /**
  * Processor to arrange, save and order all the results. 

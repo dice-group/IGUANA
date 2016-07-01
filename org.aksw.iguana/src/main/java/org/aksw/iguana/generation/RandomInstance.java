@@ -5,10 +5,9 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
-
+import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.utils.FileHandler;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
