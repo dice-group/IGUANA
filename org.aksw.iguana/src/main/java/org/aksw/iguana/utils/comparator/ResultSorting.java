@@ -35,16 +35,7 @@ public class ResultSorting{
 		}
 		catch(NumberFormatException e){
 			e.printStackTrace();
-//			//no Integer header
-//			LivedataComparator ldc = new LivedataComparator(LivedataComparator.INSERT_DELETE);
-//			for(int i=0;i<header.size();i++){
-//				newHeader.add(header.get(i));
-//			}
-////			ldc.sort(newHeader);
-//			Collections.sort(newHeader, ldc);
-//			for(String cell: header){
-//				mapping.put(header.indexOf(cell), newHeader.indexOf(cell));
-//			}
+			return header;
 		}
 		
 		

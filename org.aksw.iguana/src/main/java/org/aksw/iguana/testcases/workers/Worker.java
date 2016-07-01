@@ -28,6 +28,7 @@ public abstract class Worker {
 	protected Map<String, Integer> resultMap = new HashMap<String, Integer>();
 	protected Map<String, Integer> succMap = new HashMap<String, Integer>();
 	protected Map<String, Integer> failMap = new HashMap<String, Integer>();
+	protected Map<String, Integer> minmaxMap = new HashMap<String, Integer>();
 	protected Logger log;
 
 	private boolean endSignal;
@@ -36,6 +37,7 @@ public abstract class Worker {
 	protected String workerType = "";
 	private String[] prefixes;
 	private String conName;
+	
 //	private Thread currentThread;
 
 	public void setConName(String conName) {
@@ -67,6 +69,9 @@ public abstract class Worker {
 				"Failed_Queries_" + workerType + " Worker" + workerNr));
 		ret.add(getResultForMap(resultMap, "Queries Totaltime", "Query",
 				"Time in ms", "Queries_Totaltime_" + workerType + " Worker"
+						+ workerNr));
+		ret.add(getResultForMap(minmaxMap, "Queries Min and Max", "Query",
+				"Time in ms", "Queries_Min-and-Max_" + workerType + " Worker"
 						+ workerNr));
 		ret.add(getCalculated(CalcResult.QPS, succMap, timeLimit, resultMap, "Queries Per Second",
 				"Query", "Count", "Queries_Per_Second_" + workerType
@@ -222,7 +227,27 @@ public abstract class Worker {
 		} else {
 			inccMap(queryNr, succMap);
 		}
+		checkMinMaxAndPunt(queryNr, time);
 		resultMap.put(queryNr, oldTime + time);
+	}
+
+	private void checkMinMaxAndPunt(String queryNr, Integer time) {
+		if(minmaxMap.containsKey(queryNr+"_min")){
+			if(minmaxMap.get(queryNr+"_min")>time){
+				minmaxMap.put(queryNr+"_min", time);
+			}
+		}
+		else{
+			minmaxMap.put(queryNr+"_min", time);
+		}
+		if(minmaxMap.containsKey(queryNr+"_max")){
+			if(minmaxMap.get(queryNr+"_max")<time){
+				minmaxMap.put(queryNr+"_max", time);
+			}
+		}
+		else{
+			minmaxMap.put(queryNr+"_max", time);
+		}
 	}
 
 	protected Integer[] getIntervallLatency(Integer[] latencyAmount,
