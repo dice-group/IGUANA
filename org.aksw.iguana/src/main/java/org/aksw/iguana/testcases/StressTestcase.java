@@ -32,9 +32,10 @@ import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.StringHandler;
 import org.aksw.iguana.utils.TimeOutException;
 import org.aksw.iguana.utils.comparator.LivedataComparator2;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.connection.ConnectionFactory;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.comparator.ResultSetComparator;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.connection.ConnectionFactory;
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.w3c.dom.Node;
 
 import weka.core.Debug.Random;
@@ -129,10 +130,18 @@ public class StressTestcase implements Testcase{
 		makeResults();
 		//
 		saveResults();
+		//
+		cleanMaps();
+		
 		//Stop
 		log.info("StressTestcase finished");
 	}
 	
+	private void cleanMaps() {
+		sparqlWorkerPool.clear();
+		updateWorkerPool.clear();
+	}
+
 	protected void saveResults() {
 		for(ResultSet res : results){
 			String fileName = res.getFileName();
@@ -160,7 +169,17 @@ public class StressTestcase implements Testcase{
 	protected void waitTimeLimit(){
 		Calendar start = Calendar.getInstance();
 		log.info("Starting StressTestcase at: "+CalendarHandler.getFormattedTime(start));
-		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<timeLimit){}
+		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<timeLimit){
+//		System.out.println("timelimit: "+timeLimit);	
+		try {
+//				System.out.println("wait");
+				Thread.sleep(100);
+//				System.out.println((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())+" ms over");
+				//				System.out.println("stop");
+			} catch (InterruptedException e) {
+				LogHandler.writeStackTrace(log, e, Level.WARNING);
+			}
+		}
 		//Shutdown executor, no other workers can join now
 		executor.shutdown();
 		
@@ -176,14 +195,26 @@ public class StressTestcase implements Testcase{
 			if(t.getName().matches("pool-[0-9]+-thread-[0-9]+")){			
 				//TODO change Stop Thread with something different
 				//Not cool as it's deprecated and in JAVA 8 throws a UnssuportedOPeration Execution
+				
 				try{
-					t.stop(new TimeOutException());
+					System.out.println(t.getName());
+					if(!System.getProperty("java.version").startsWith("1.8"))
+						t.stop(new TimeOutException());
 				}catch(Exception e){
 					log.warning("WarmupThread needed to be stopped");
 				}
 			}
 		}
-		while(!executor.isTerminated()){}
+		while(!executor.isTerminated()){
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+//		sparqlWorkerPool.clear();
+//		updateWorkerPool.clear();
 		Calendar end = Calendar.getInstance();
 		log.info("StressTestcase ended at: "+CalendarHandler.getFormattedTime(end));
 		log.info("StressTestcase took "+CalendarHandler.getWellFormatDateDiff(start, end));
@@ -203,11 +234,13 @@ public class StressTestcase implements Testcase{
 //			log.info("Starting SPARQL Worker "+sparqlWorkerPool.get(i).getWorkerNr());
 //			new Thread(sparqlWorkerPool.get(i), "worker-"+i).start();
 			executor.submit(sparqlWorkerPool.get(i));
+			
 		}
 		for(Integer i : updateWorkerPool.keySet()){
 			log.info("Starting UPDATE Worker "+updateWorkerPool.get(i).getWorkerNr());
 			executor.execute(updateWorkerPool.get(i));
-//			updateWorkerPool.get(i).start();
+//			updateWorkerPool.put(i, null);
+			
 		}
 		log.info("All "+(sparqlWorkers+updateWorkers)+" workers have been started");
 
@@ -299,6 +332,7 @@ public class StressTestcase implements Testcase{
 		if(updateResults.size()>0)
 			results.addAll(getCalculatedResults(updateResults));
 		mergeCurrentResults(currResults, results);
+		
 	}
 	
 	public Collection<ResultSet> getCalculatedResults(List<List<ResultSet>> col){
@@ -357,8 +391,8 @@ public class StressTestcase implements Testcase{
 		}
 		ret.next();
 		for(int i=1;i<ret.getRow().size();i++){
-			Long o = (Long)ret.getRow().get(i);
-			ret.getRow().set(i, Double.valueOf(o*1.0/col.size()).longValue());
+			int o = (Integer)ret.getRow().get(i);
+			ret.getRow().set(i, Double.valueOf(o*1.0/col.size()).intValue());
 		}
 		ret.reset();
 		return ret;
@@ -383,8 +417,8 @@ public class StressTestcase implements Testcase{
 					row.add(r2.getRow().get(i));
 				}
 				else{
-					Long l1 = (Long)row.get(header.indexOf(h));
-					Long l2 = (Long)r2.getRow().get(i);
+					int l1 = (Integer)row.get(header.indexOf(h));
+					int l2 = (Integer)r2.getRow().get(i);
 					row.set(header.indexOf(h),l1+l2);
 				}
 		}
@@ -472,8 +506,16 @@ public class StressTestcase implements Testcase{
 	}
 	
 	protected void mergeCurrentResults(Collection<ResultSet> currentResults, Collection<ResultSet> results){
+		Comparator<ResultSet> cmp = new ResultSetComparator();
+		Collections.sort((List<ResultSet>)results, cmp);
+		Collections.sort((List<ResultSet>)currentResults, cmp);
 		Iterator<ResultSet> resIt1 = currentResults.iterator();
 		Iterator<ResultSet> resIt2 = results.iterator();
+		if(results.size()!=currentResults.size()){
+			log.severe("Result size differs!!! ");
+			log.severe("Old size : "+results.size());
+			log.severe("New size: "+currentResults.size());
+		}
 		while(resIt1.hasNext()){
 			ResultSet r1 = resIt1.next();
 			ResultSet r2 =  resIt2.next();

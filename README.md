@@ -1,6 +1,6 @@
 #IGUANA
 
-![Logo of IGUANA](images/IGUANA_Logo.png)
+<img src = "https://github.com/AKSW/IGUANA/raw/develop/images/IGUANA_logo.png" alt = "IGUANA Logo" width = "400" align = "center">
 
 
 ##What is it?
@@ -22,6 +22,15 @@ It should be...
 + ...understandable
 + ...well documented
 
+
+For futher discussion we have a google group and mailing list: 
+
+[Forum](https://groups.google.com/d/forum/iguana-aksw)
+
+Mailing-List: iguana-aksw@googlegroups.com
+
+
+
 ##TOC
 1. [Architecture](https://github.com/AKSW/IGUANA#architecture)
 	1. [User](https://github.com/AKSW/IGUANA#user)
@@ -36,7 +45,7 @@ It should be...
 
 ##Architecture
 ###User
-![USER Architecture of IGUANA](images/IGUANA_v0.3_Architecture.png)
+![USER Architecture of IGUANA](images/workflow.png)
 
 ###Developer
 ![DEVELOPER Architecture of IGUANA](images/IGUANADetArch.png)
@@ -64,6 +73,9 @@ Be aware that these needs small adjustement (for example changing the endpoints)
 
 ##Useful Tools
 
+BE AWARE THAT THESE TOOLS ARE NOT IN THE JAR FILE CURRENTLY! TO USE THEM DOWNLOAD THE SOURCE AND COMPILE IT YOURSELF
+THE TOOLS WILL BE AVAILABE IN THE NEXT RELEASE (1.0)
+
 IGUANA provides also some useful tools, like make a diff between two files. 
 
 ```
@@ -81,6 +93,14 @@ java -Xmx8g -cp "./lib/*" org.aksw.iguana.utils.Dumper http://dbpedia.org/sparql
 
 It will result in a file called dump.nt which has all Triples gained by the Query: `SELECT * {?s ?p ?o}`
 The second argument '10000' is needed, so it will not gain every Triple at once but in Blocks of 10000 (or whatever you whish).  
+
+
+If you diff two files and need the output to create changesets you  can use this command: 
+
+```
+java -Xmx8g -cp "./lib/*" org.aksw.iguana.utils.ChangesetDivider file_to_add.nt file_to_remove.nt 200
+```
+This will result in (max) 200 files to add and (max) 200 files to remove with the same no. of triples in each file.
 
 
 To recalculate your results use this:

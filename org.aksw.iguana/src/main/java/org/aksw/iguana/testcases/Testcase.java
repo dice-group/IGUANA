@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import org.aksw.iguana.utils.ResultSet;
-import org.bio_gene.wookie.connection.Connection;
+import org.aksw.iguana.connection.Connection;
 import org.w3c.dom.Node;
 
 /**

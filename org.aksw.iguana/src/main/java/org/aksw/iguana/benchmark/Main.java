@@ -7,7 +7,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.aksw.iguana.benchmark.processor.EmailProcessor;
 import org.aksw.iguana.benchmark.processor.ResultProcessor;
-import org.bio_gene.wookie.connection.ConnectionFactory;
+import org.aksw.iguana.connection.ConnectionFactory;
 import org.xml.sax.SAXException;
 
 /**
@@ -77,6 +77,7 @@ public class Main {
 		ConnectionFactory
 				.setDriver("org.apache.jena.jdbc.remote.RemoteEndpointDriver");
 		ConnectionFactory.setJDBCPrefix("jdbc:jena:remote:query=");
+
 
 	}
 

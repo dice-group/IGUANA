@@ -12,11 +12,11 @@ import org.aksw.iguana.benchmark.processor.DatasetGeneratorProcessor;
 import org.aksw.iguana.benchmark.processor.EmailProcessor;
 import org.aksw.iguana.benchmark.processor.ResultProcessor;
 import org.aksw.iguana.benchmark.processor.TestcaseProcessor;
+import org.aksw.iguana.connection.Connection;
+import org.aksw.iguana.connection.ConnectionFactory;
 import org.aksw.iguana.utils.CalendarHandler;
 import org.aksw.iguana.utils.Config;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.connection.ConnectionFactory;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.xml.sax.SAXException;
 
 
@@ -116,7 +116,14 @@ public class Benchmark {
 		//If DataGeneration should be used
 		if(Config.randomFunctionGen.equals("true")){
 			//Generated all the files
-			Config.randomFiles = DatasetGeneratorProcessor.getDatasetFiles(refCon, Config.randomHundredFile);
+			try {
+				Config.randomFiles = DatasetGeneratorProcessor.getDatasetFiles(refCon, Config.datasetGenClassName, Config.randomHundredFile, Config.datasetGenProperties);
+			} catch (InstantiationException | IllegalAccessException
+					| ClassNotFoundException e) {
+				log.severe("Couldn't generate datasets due to ");
+				LogHandler.writeStackTrace(log, e, Level.SEVERE);
+				Config.randomFiles = null;
+			}
 		}
 	}
 	

@@ -1,6 +1,6 @@
 package org.aksw.iguana.utils;
 
-import org.bio_gene.wookie.utils.CurlProcess;
+import org.aksw.iguana.utils.CurlProcess;
 
 public class ShellProcessor extends CurlProcess{
 	

@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.aksw.iguana.utils.FileHandler;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 
 /**

@@ -9,14 +9,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.aksw.iguana.connection.ConnectionFactory;
 import org.aksw.iguana.testcases.workers.UpdateWorker.UpdateStrategy;
 import org.aksw.iguana.testcases.workers.UpdateWorker.WorkerStrategy;
 import org.aksw.iguana.testcases.workers.Worker.LatencyStrategy;
 import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.StringHandler;
 import org.aksw.iguana.utils.comparator.LivedataComparator2;
-import org.bio_gene.wookie.connection.ConnectionFactory;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.w3c.dom.Node;
 
 public class FederatedStressTestcase extends StressTestcase{

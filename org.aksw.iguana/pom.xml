@@ -3,83 +3,77 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw</groupId>
 	<artifactId>iguana</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
+
+	<name>IGUANA</name>
+	<url>https://github.com/AKSW/iguana</url>
+
+	<issueManagement>
+		<url>https://github.com/AKSW/iguana/issues</url>
+		<system>GitHub Issue Management</system>
+	</issueManagement>
+
+	<organization>
+		<name>AKSW</name>
+		<url>https://aksw.org</url>
+	</organization>
+
 	<licenses>
 		<license>
 			<name>LGPL Licence</name>
 			<url>https://opensource.org/licenses/LGPL-3.0</url>
 		</license>
 	</licenses>
+
+
+	<developers>
+		<developer>
+			<name>Felix Konrads</name>
+			<!-- <url>http://aksw.org/???</url> -->
+			<roles>
+				<role>Lead developer</role>
+			</roles>
+			<organization>AKSW</organization>
+			<organizationUrl>http://aksw.org</organizationUrl>
+		</developer>
+		<developer>
+			<name>Axel Ngonga</name>
+			<url>http://aksw.org/AxelNgonga</url>
+			<roles>
+				<role>Supervisor</role>
+			</roles>
+			<organization>AKSW</organization>
+			<organizationUrl>http://aksw.org</organizationUrl>
+		</developer>
+		<developer>
+			<name>Claus Stadler</name>
+			<url>http://aksw.org/ClausStadler</url>
+			<roles>
+				<role>Contributor</role>
+				<role>Distribution Quality Controller</role>
+			</roles>
+			<organization>AKSW</organization>
+			<organizationUrl>http://aksw.org</organizationUrl>
+		</developer>
+	</developers>
+
+
 	<properties>
+		<jena.version>3.0.1</jena.version>
+		<jsa.subversion>2-SNAPSHOT</jsa.subversion>
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.lexicon</groupId>
-			<artifactId>jdbc4sparql</artifactId>
-			<version>0.0.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jdbc4sparql-0.0.1.jar</systemPath>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-core</artifactId>
+			<version>${jena.version}-${jsa.subversion}</version>
+		</dependency>
 
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-core</artifactId>
-			<version>2.11.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-arq</artifactId>
-			<version>2.11.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-jdbc-driver-remote</artifactId>
-			<version>1.1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.11.0</version>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xmlParserAPIs</artifactId>
-			<version>2.6.2</version>
-		</dependency>
-		<dependency>
-			<groupId>xpp3</groupId>
-			<artifactId>xpp3</artifactId>
-			<version>1.1.4c</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.stream</groupId>
-			<artifactId>stax-api</artifactId>
-			<version>1.0-2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.woodstox</groupId>
-			<artifactId>wstx-asl</artifactId>
-			<version>3.2.9</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<version>4.2.3</version>
-		</dependency>
 		<dependency>
 			<groupId>org.knowm.xchart</groupId>
 			<artifactId>xchart</artifactId>
@@ -90,561 +84,48 @@
 			<artifactId>commons-email</artifactId>
 			<version>1.3.1</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-core</artifactId>
-			<version>2.11.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-arq</artifactId>
-			<version>2.11.1</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>httpclient</artifactId>
-					<groupId>org.apache.httpcomponents</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging-api</artifactId>
-			<version>1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>4.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.stream</groupId>
-			<artifactId>stax-api</artifactId>
-			<version>1.0-2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.woodstox</groupId>
-			<artifactId>wstx-asl</artifactId>
-			<version>3.2.9</version>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.11.0</version>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xmlParserAPIs</artifactId>
-			<version>2.6.2</version>
-		</dependency>
-		<dependency>
-			<groupId>xpp3</groupId>
-			<artifactId>xpp3</artifactId>
-			<version>1.1.4c</version>
+			<groupId>org.aksw.simba.feasible</groupId>
+			<artifactId>feasible-core</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>transaction-api</artifactId>
-			<version>1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
-		</dependency>
-		<dependency>
-			<groupId>com.ibm.icu</groupId>
-			<artifactId>icu4j</artifactId>
-			<version>53.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore-nio</artifactId>
-			<version>4.1</version>
-		</dependency>
-		<dependency>
-			<groupId>it.unimi.dsi</groupId>
-			<artifactId>dsiutils</artifactId>
-			<version>1.0.10</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/dsiutils-1.0.10.jar</systemPath>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>weka-stable</artifactId>
+			<version>3.8.0</version>
 		</dependency>
 
 		<dependency>
-			<groupId>de.uni_leipzig.aksw</groupId>
-			<artifactId>feasible</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/feasible-1.0.jar</systemPath>
-		</dependency>
-
-		<dependency>
-			<groupId>it.unimi.dsi</groupId>
-			<artifactId>fastutil</artifactId>
-			<version>5.1.5</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/fastutil-5.1.5.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
-		</dependency>
-		<dependency>
-			<groupId>com.ibm.icu</groupId>
-			<artifactId>icu4j</artifactId>
-			<version>53.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.clapper</groupId>
-			<artifactId>javautil</artifactId>
-			<version>3.1.1</version>
-		</dependency>
-
-		<!-- <dependency> -->
-		<!-- <groupId>de.uni-leipzig.bf</groupId> -->
-		<!-- <artifactId>BorderFlow</artifactId> -->
-		<!-- <version>0.4.0</version> -->
-		<!-- <scope>system</scope> -->
-		<!-- <systemPath>${project.basedir}/src/main/resources/lib/BorderFlow-0.4.0.jar</systemPath> -->
-		<!-- </dependency> -->
-
-		<dependency>
-			<groupId>prefuse</groupId>
-			<artifactId>prefuse</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/prefuse-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>semiosys</groupId>
-			<artifactId>semiosys</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/semiosys-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>sqljdbc</groupId>
-			<artifactId>sqljdbc</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/sqljdbc-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>weka</groupId>
-			<artifactId>weka</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/weka-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jung-algorithms</groupId>
-			<artifactId>jung-algorithms</artifactId>
-			<version>2.0.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jung-algorithms-2.0.1.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jung-api</groupId>
-			<artifactId>jung-api</artifactId>
-			<version>2.0.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jung-api-2.0.1.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jung-graph-impl</groupId>
-			<artifactId>jung-graph-impl</artifactId>
-			<version>2.0.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jung-graph-impl-2.0.1.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>javaml</groupId>
-			<artifactId>javaml</artifactId>
-			<version>0.1.5</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/javaml-0.1.5.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jtds</groupId>
-			<artifactId>jtds</artifactId>
-			<version>1.2.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jtds-1.2.2.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>Jama</groupId>
-			<artifactId>Jama</artifactId>
-			<version>1.0.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/Jama-1.0.2.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>IOWrapper</groupId>
-			<artifactId>IOWrapper</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/IOWrapper-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>CW</groupId>
-			<artifactId>CW</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/CW-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>cooccaccess</groupId>
-			<artifactId>cooccaccess</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/cooccaccess-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>commons-math</groupId>
-			<artifactId>commons-math</artifactId>
-			<version>1.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/commons-math-1.2.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>colt</groupId>
-			<artifactId>colt</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/colt-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>ajt</groupId>
-			<artifactId>ajt</artifactId>
-			<version>1.20</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/ajt-1.20.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>AffinityPropagationConsole</groupId>
-			<artifactId>AffinityPropagationConsole</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/AffinityPropagationConsole-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>asv-toolbox_util_CommonFileChooser</groupId>
-			<artifactId>asv-toolbox_util_CommonFileChooser</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/asv-toolbox_util_CommonFileChooser-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>algorithms</groupId>
-			<artifactId>EdJoin</artifactId>
-			<version>Plus</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/EdJoin-Plus.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.javailp</groupId>
+			<groupId>net.sf</groupId>
 			<artifactId>javailp</artifactId>
 			<version>1.2a</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/javailp-1.2a.jar</systemPath>
 		</dependency>
-		<dependency>
-			<groupId>lpsolve</groupId>
-			<artifactId>lpsolve</artifactId>
-			<version>55j</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/lpsolve55j.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>cugar</groupId>
-			<artifactId>cugar</artifactId>
-			<version>0.6.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/Cugar-0.6.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>LIMES</groupId>
-			<artifactId>LIMES</artifactId>
-			<version>0.6.3.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/LIMES-0.6.3.2.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>org.bio_gene.wookie</groupId>
-			<artifactId>connection</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/connection-0.0.1-SNAPSHOT.jar</systemPath>
 
-			<!-- <exclusions> -->
-			<!-- <exclusion> -->
-			<!-- <artifactId>httpclient</artifactId> -->
-			<!-- <groupId>org.apache.httpcomponents</groupId> -->
-			<!-- </exclusion> -->
-			<!-- <exclusion> -->
-			<!-- <artifactId>httpcore</artifactId> -->
-			<!-- <groupId>org.apache.httpcomponents</groupId> -->
-			<!-- </exclusion> -->
-			<!-- <exclusion> -->
-			<!-- <artifactId>httpmime</artifactId> -->
-			<!-- <groupId>org.apache.httpcomponents</groupId> -->
-			<!-- </exclusion> -->
-			<!-- </exclusions> -->
-		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.httpcomponents</groupId> -->
-		<!-- <artifactId>httpclient</artifactId> -->
-		<!-- <version>4.2.3</version> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.httpcomponents</groupId> -->
-		<!-- <artifactId>httpcore</artifactId> -->
-		<!-- <version>4.2.2</version> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.httpcomponents</groupId> -->
-		<!-- <artifactId>httpmime</artifactId> -->
-		<!-- <version>4.2.3</version> -->
-		<!-- </dependency> -->
-		<dependency>
-			<groupId>de.uni_leipzig.informatik</groupId>
-			<artifactId>swp13_sc</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/swp13_sc-0.0.1-SNAPSHOT.jar</systemPath>
-		</dependency>
 
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>
-			<version>1.0.14</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.collections</groupId>
-			<artifactId>collections-generic</artifactId>
-			<version>4.01</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-cli</groupId>
-			<artifactId>commons-cli</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-			<version>3.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>11.0.2</version>
+			<version>1.0.19</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-iri</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>urbanophile</groupId>
-			<artifactId>java-getopt</artifactId>
-			<version>1.0.9</version>
-		</dependency>
-
-		<!-- -->
-		<dependency>
-			<groupId>annotations</groupId>
-			<artifactId>annotations</artifactId>
-			<version>7.0.3</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/annotations-7.0.3.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>conja</groupId>
-			<artifactId>conja</artifactId>
-			<version>1.0.6-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/conja-1.06-SNAPSHOT.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jlibsvm</groupId>
-			<artifactId>jlibsvm</artifactId>
-			<version>0.91-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jlibsvm-0.91-SNAPSHOT.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>JSAP</groupId>
-			<artifactId>JSAP</artifactId>
-			<version>2.0a-ds1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/JSAP-2.0a-ds1.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jts</groupId>
-			<artifactId>jts</artifactId>
-			<version>1.13</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jts-1.13.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>lingpipe</groupId>
-			<artifactId>lingpipe</artifactId>
-			<version>4.1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/lingpipe-4.1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>ml</groupId>
-			<artifactId>ml</artifactId>
-			<version>0.911-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/ml-0.911-SNAPSHOT.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>runutils</groupId>
-			<artifactId>runutils</artifactId>
-			<version>0.91-20111226.060632-23</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/runutils-0.91-20111226.060632-23.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>stats</groupId>
-			<artifactId>stats</artifactId>
-			<version>0.93-20111226.060130-6</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/stats-0.93-20111226.060130-6.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>symja</groupId>
-			<artifactId>symja</artifactId>
-			<version>2012-04-08</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/symja-2012-04-08.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>trees</groupId>
-			<artifactId>trees</artifactId>
-			<version>1.023-20111226.060448-9</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/trees-1.023-20111226.060448-9.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>java</groupId>
-			<artifactId>java</artifactId>
-			<version>json</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/java-json.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jmatharray</groupId>
-			<artifactId>jmatharray</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jmatharray-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>simmetrics</groupId>
-			<artifactId>simmetrics</artifactId>
-			<version>1.6.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/simmetrics-1.6.2.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>SSJoinJava</groupId>
-			<artifactId>SSJoinJava</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/SSJoinJava-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jgap</groupId>
-			<artifactId>jgap</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jgap-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jgraph</groupId>
-			<artifactId>jgraph</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jgraph-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>jgraphx</groupId>
-			<artifactId>jgraphx</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jgraphx-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>LBJ2</groupId>
-			<artifactId>LBJ2</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/LBJ2-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>LBJ2Library</groupId>
-			<artifactId>LBJ2Library</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/LBJ2Library-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>LbjNerTagger</groupId>
-			<artifactId>LbjNerTagger</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/LbjNerTagger-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>libsvm</groupId>
-			<artifactId>libsvm</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/libsvm-1.0.jar</systemPath>
-		</dependency>
-		<!-- -->
-
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.26</version>
+			<artifactId>jena-jdbc-driver-remote</artifactId>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-exec</artifactId>
-			<version>1.1</version>
+			<version>1.3</version>
 		</dependency>
-
 	</dependencies>
 	<repositories>
 		<!-- <repository> -->
@@ -668,102 +149,167 @@
 			<name>JBoss repository</name>
 			<url>https://repository.jboss.org/nexus/content/groups/public</url>
 		</repository>
-		<!-- <repository> -->
-		<!-- <id>repository.bio-gene</id> -->
-		<!-- <name>BioGene repository</name> -->
-		<!-- <url>http://maven.bio-gene.org/nexus/content/groups/public/</url> -->
-		<!-- </repository> -->
+		<repository>
+	<id>maven.aksw.internal</id>
+	<name>University Leipzig, AKSW Maven2 Repository</name>
+	<url>http://maven.aksw.org/archiva/repository/internal</url>
+		</repository>
+
+		<repository>
+			<id>maven.aksw.snapshots</id>
+			<name>University Leipzig, AKSW Maven2 Repository</name>
+			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+		</repository>
+
 	</repositories>
 	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<excludes>
-					<exclude>**/*.*</exclude>
-				</excludes>
-				<includes>
-					<include>examples/*</include>
-				</includes>
-				<filtering>false</filtering>
-			</resource>
-		</resources>
 		<plugins>
-			<!-- <plugin> -->
-			<!-- <groupId>org.apache.maven.plugins</groupId> -->
-			<!-- <artifactId>maven-dependency-plugin</artifactId> -->
-			<!-- <executions> -->
-			<!-- <execution> -->
-			<!-- <id>copy-dependencies</id> -->
-			<!-- <phase>prepare-package</phase> -->
-			<!-- <goals> -->
-			<!-- <goal>copy-dependencies</goal> -->
-			<!-- </goals> -->
-			<!-- <configuration> -->
-			<!-- <outputDirectory>${project.build.directory}/lib</outputDirectory> -->
-			<!-- <overWriteReleases>false</overWriteReleases> -->
-			<!-- <overWriteSnapshots>false</overWriteSnapshots> -->
-			<!-- <overWriteIfNewer>true</overWriteIfNewer> -->
-			<!-- </configuration> -->
-			<!-- </execution> -->
-			<!-- </executions> -->
-			<!-- </plugin> -->
-			<!-- <plugin> -->
-			<!-- <groupId>org.apache.maven.plugins</groupId> -->
-			<!-- <artifactId>maven-jar-plugin</artifactId> -->
-			<!-- <configuration> -->
-			<!-- <archive> -->
-			<!-- <manifest> -->
-			<!-- <addClasspath>true</addClasspath> -->
-			<!-- <classpathPrefix>lib/</classpathPrefix> -->
-			<!-- <mainClass>de.uni_leipzig.mosquito.benchmark.Benchmark</mainClass> -->
-			<!-- </manifest> -->
-			<!-- </archive> -->
-			<!-- </configuration> -->
-			<!-- </plugin> -->
+			<!-- That's a sledge hammer solution - but at least it works ... -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.2</version>
+				<configuration>
+					<arguments>-P!source-artifacts</arguments>
+					<useReleaseProfile>false</useReleaseProfile>
+					<releaseProfiles>release</releaseProfiles>
+					<goals>-Dmaven.test.skip=false deploy</goals>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.6</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+
+			<!-- Solution from http://stackoverflow.com/questions/4725668/how-to-deploy-snapshot-with-sources-and-javadoc -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.3.1-SNAPSHOT</version>
+				<version>9.3.9.M0</version>
 			</plugin>
+
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
 				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>de.uni_leipzig.iguana.benchmark.Main</mainClass>
-						</manifest>
-					</archive>
+					<attach>false</attach>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 				</configuration>
-				<executions>
-					<execution>
-						<id>make-my-jar-with-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<descriptors>
-								<descriptor>dist.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</execution>
-				</executions>
+			</plugin>
+
+			<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-assembly-plugin</artifactId>
+			<version>2.4</version>
+			<configuration>
+			<archive>
+			<manifest>
+			<addClasspath>true</addClasspath>
+			<mainClass>de.uni_leipzig.iguana.benchmark.Main</mainClass>
+			</manifest>
+			</archive>
+			<descriptorRefs>
+			<descriptorRef>jar-with-dependencies</descriptorRef>
+			</descriptorRefs>
+			</configuration>
+			<executions>
+			<execution>
+			<id>make-my-jar-with-dependencies</id>
+			<phase>package</phase>
+			<goals>
+			<goal>single</goal>
+			</goals>
+			<configuration>
+			<descriptors>
+			<descriptor>dist.xml</descriptor>
+			</descriptors>
+			</configuration>
+			</execution>
+			</executions>
 			</plugin>
 		</plugins>
 	</build>
-	<name>IGUANA</name>
-	<url>https://github.com/AKSW/iguana</url>
-	<issueManagement>
-		<url>https://github.com/AKSW/iguana/issues</url>
-	</issueManagement>
-	<organization>
-		<name>AKSW</name>
-		<url>https://aksw.org</url>
-	</organization>
+
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<keyname>AKSW</keyname>
+									<passphraseServerId>${gpg.keyname}</passphraseServerId>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+
+
+	<distributionManagement>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.aksw.snapshots</id>
+			<name>AKSW Snapshot Repository</name>
+			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>
-  

@@ -18,19 +18,18 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.utils.FileHandler;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
-
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QueryParseException;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.sparql.lang.SPARQLParser;
+import org.aksw.iguana.utils.logging.LogHandler;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryParseException;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.Syntax;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.sparql.lang.SPARQLParser;
 
 /**
  * Provides an handler which converts given query patterns into
@@ -359,7 +358,7 @@ public class QueryHandler {
 				pwfailed.close();
 				return 1;
 			}
-			com.hp.hpl.jena.query.ResultSet m = (com.hp.hpl.jena.query.ResultSet)getModelFromQuery(QueryFactory.create(q));
+			org.apache.jena.query.ResultSet m = (org.apache.jena.query.ResultSet)getModelFromQuery(QueryFactory.create(q));
 			
 			while(m.hasNext()){
 				QuerySolution qs = m.next();

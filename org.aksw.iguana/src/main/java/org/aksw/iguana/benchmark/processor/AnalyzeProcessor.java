@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.aksw.iguana.analyzer.Analyzer;
-import org.bio_gene.wookie.utils.LogHandler;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 /**
  * Processor for log clustering

@@ -15,10 +15,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bio_gene.wookie.utils.LogHandler;
-
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import org.aksw.iguana.utils.logging.LogHandler;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.riot.RDFLanguages;
 
 
 /**
@@ -80,7 +81,9 @@ public class FileHandler {
 				m.read(fis, null);
 				ntFile = file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf("."))+".nt";
 				new File(ntFile).createNewFile();
-				m.write(new FileOutputStream(ntFile), "N-TRIPLE");
+				FileOutputStream out = new FileOutputStream(ntFile);
+				m.write(out, "N-TRIPLE");
+				out.close();
 			}
 			FileInputStream fis2 = new FileInputStream(ntFile);
 			BufferedReader br = new BufferedReader(new InputStreamReader(fis2, Charset.forName("UTF-8")));
@@ -477,5 +480,38 @@ public class FileHandler {
 		return ret;
 	}
 	
+	public static File[] splitTempFile(String fileName,long numberOfTriples) throws IOException{
+		return splitTempFile(new File(fileName), numberOfTriples);
+	}
+	
+	public static File[] splitTempFile(File file, long numberOfTriples) throws IOException{
+		double divide = (FileHandler.getLineCount(file)*1.0)/numberOfTriples;
+		File[] ret = new File[(int) Math.ceil(divide)];
+		if(divide==1.0){
+			ret[0] = file;
+			return ret;
+		}
+		Model m = ModelFactory.createDefaultModel();
+		String absFile = file.getAbsolutePath();
+		String contentType = RDFLanguages.guessContentType(absFile).getContentType();
+		FileInputStream input = new FileInputStream(file);
+		m.read(input, null, FileExtensionToRDFContentTypeMapper.guessFileFormat(contentType));
+		StmtIterator stmtIt = m.listStatements();
+		for(int i=0; i<divide;i++){
+			File tmp = File.createTempFile(file.getName()+i, ".nt");
+			PrintWriter pw = new PrintWriter(tmp);
+			
+			Model tmpModel = ModelFactory.createDefaultModel();
+			
+			for(int j=0; j<numberOfTriples&&stmtIt.hasNext();j++){
+				tmpModel.add(stmtIt.next());
+			}
+			tmpModel.write(pw, "N-TRIPLE");
+			pw.close();
+			ret[i] =tmp ;
+		}
+		input.close();
+		return ret;
+	}
 	
 }

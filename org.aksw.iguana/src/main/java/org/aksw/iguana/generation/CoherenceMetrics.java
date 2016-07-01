@@ -21,12 +21,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.utils.PowerSetIterator;
-import org.bio_gene.wookie.connection.Connection;
-import org.bio_gene.wookie.utils.LogHandler;
-
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
+import org.aksw.iguana.utils.logging.LogHandler;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
 
 
 /**

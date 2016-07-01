@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 import org.aksw.iguana.utils.Config;
 import org.aksw.iguana.utils.EmailHandler;
 import org.aksw.iguana.utils.ZipUtils;
+import org.aksw.iguana.utils.logging.LogHandler;
 import org.apache.commons.mail.EmailException;
-import org.bio_gene.wookie.utils.LogHandler;
 
 /**
  * Processor to send Emails with attached results

@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.TimeOutException;
 import org.aksw.iguana.utils.comparator.UpdateSorting;
-import org.bio_gene.wookie.connection.Connection;
 
 public abstract class Worker {
 
@@ -25,9 +25,10 @@ public abstract class Worker {
 
 	protected int workerNr = 0;
 	protected long timeLimit;
-	protected Map<String, Long> resultMap = new HashMap<String, Long>();
-	protected Map<String, Long> succMap = new HashMap<String, Long>();
-	protected Map<String, Long> failMap = new HashMap<String, Long>();
+	protected Map<String, Integer> resultMap = new HashMap<String, Integer>();
+	protected Map<String, Integer> succMap = new HashMap<String, Integer>();
+	protected Map<String, Integer> failMap = new HashMap<String, Integer>();
+	protected Map<String, Integer> minmaxMap = new HashMap<String, Integer>();
 	protected Logger log;
 
 	private boolean endSignal;
@@ -36,6 +37,7 @@ public abstract class Worker {
 	protected String workerType = "";
 	private String[] prefixes;
 	private String conName;
+	
 //	private Thread currentThread;
 
 	public void setConName(String conName) {
@@ -68,6 +70,9 @@ public abstract class Worker {
 		ret.add(getResultForMap(resultMap, "Queries Totaltime", "Query",
 				"Time in ms", "Queries_Totaltime_" + workerType + " Worker"
 						+ workerNr));
+		ret.add(getResultForMap(minmaxMap, "Queries Min and Max", "Query",
+				"Time in ms", "Queries_Min-and-Max_" + workerType + " Worker"
+						+ workerNr));
 		ret.add(getCalculated(CalcResult.QPS, succMap, timeLimit, resultMap, "Queries Per Second",
 				"Query", "Count", "Queries_Per_Second_" + workerType
 						+ " Worker" + workerNr));
@@ -75,11 +80,18 @@ public abstract class Worker {
 				+ timeLimit + "ms", "Query", "Count",
 				"Queries_Mixes_Per_TimeLimit_" + workerType + " Worker"
 						+ workerNr));
+		cleanMaps();
 		return ret;
 	}
 
-	private ResultSet getCalculated(CalcResult type, Map<String, Long> map, long timeLimit,
-			Map<String, Long> map2,	String title, String xAxis, String yAxis, String fileName) {
+	private void cleanMaps() {
+		succMap.clear();
+		failMap.clear();
+		resultMap.clear();
+	}
+
+	private ResultSet getCalculated(CalcResult type, Map<String, Integer> map, long timeLimit,
+			Map<String, Integer> map2,	String title, String xAxis, String yAxis, String fileName) {
 		switch (type) {
 		case QMPTL:
 			return getResultForMap(getQMPTLMap(map, timeLimit), title, xAxis,
@@ -93,18 +105,18 @@ public abstract class Worker {
 		return null;
 	}
 
-	private Map<String, Long> getQPSMap(Map<String, Long> map, Map<String, Long> map2, long timeLimit2) {
-		Map<String, Long> ret = new HashMap<String, Long>();
+	private Map<String, Integer> getQPSMap(Map<String, Integer> map, Map<String, Integer> map2, long timeLimit2) {
+		Map<String, Integer> ret = new HashMap<String, Integer>();
 		for (String key : map.keySet()) {
 			ret.put(key, Math.round(Double
-					.valueOf(map.get(key)*1.0 / ((map2.get(key)*1.0)/1000))));
+					.valueOf(map.get(key)*1.0 / ((map2.get(key)*1.0)/1000)).intValue()));
 		}
 		return ret;
 	}
 
-	private Map<String, Long> getQMPTLMap(Map<String, Long> map, long timeLimit2) {
-		Map<String, Long> ret = new HashMap<String, Long>();
-		Long value = 0L;
+	private Map<String, Integer> getQMPTLMap(Map<String, Integer> map, long timeLimit2) {
+		Map<String, Integer> ret = new HashMap<String, Integer>();
+		Integer value = 0;
 		for (String key : map.keySet()) {
 			value += map.get(key);
 		}
@@ -112,7 +124,7 @@ public abstract class Worker {
 		return ret;
 	}
 
-	private ResultSet getResultForMap(Map<String, Long> map, String title,
+	private ResultSet getResultForMap(Map<String, Integer> map, String title,
 			String xAxis, String yAxis, String fileName) {
 		ResultSet res;
 		if(this.workerType.toLowerCase().equals("sparql"))
@@ -145,7 +157,7 @@ public abstract class Worker {
 		return res;
 	}
 
-	private List<String> getHeader(Map<String, Long> map) {
+	private List<String> getHeader(Map<String, Integer> map) {
 		List<String> header = new LinkedList<String>();
 		header.add("Connection");
 		for (String k : map.keySet()) {
@@ -173,15 +185,17 @@ public abstract class Worker {
 			if (query == null) {
 				continue;
 			}
-			Long time=-2L;
+			int time=-2;
 			try{
 				time = testQuery(query[0]);
 			}
 			catch(TimeOutException e){
 				break;
 			}
-			
-			if (time == -2L) {
+			catch(Exception e ){
+				time = -1;
+			}
+			if (time == -2) {
 				endSignal = true;
 				continue;
 			}
@@ -197,23 +211,43 @@ public abstract class Worker {
 
 	protected abstract String[] getNextQuery();
 
-	protected abstract Long testQuery(String string) throws TimeOutException;
+	protected abstract Integer testQuery(String string) throws TimeOutException;
 
-	protected void putResults(Long time, String queryNr) {
-		Long oldTime = 0L;
+	protected void putResults(Integer time, String queryNr) {
+		int oldTime = 0;
 		if (resultMap.containsKey(queryNr)) {
 			oldTime = resultMap.get(queryNr);
 		}
 		if (time < 0) {
 			log.warning("Query " + queryNr
-					+ " wasn't successfull. See logs for more inforamtion");
+					+ " wasn't successfull for connection "+conName+". See logs for more inforamtion");
 			log.warning("This will be saved as failed query");
-			time = 0L;
+			time = 0;
 			inccMap(queryNr, failMap);
 		} else {
 			inccMap(queryNr, succMap);
 		}
+		checkMinMaxAndPunt(queryNr, time);
 		resultMap.put(queryNr, oldTime + time);
+	}
+
+	private void checkMinMaxAndPunt(String queryNr, Integer time) {
+		if(minmaxMap.containsKey(queryNr+"_min")){
+			if(minmaxMap.get(queryNr+"_min")>time){
+				minmaxMap.put(queryNr+"_min", time);
+			}
+		}
+		else{
+			minmaxMap.put(queryNr+"_min", time);
+		}
+		if(minmaxMap.containsKey(queryNr+"_max")){
+			if(minmaxMap.get(queryNr+"_max")<time){
+				minmaxMap.put(queryNr+"_max", time);
+			}
+		}
+		else{
+			minmaxMap.put(queryNr+"_max", time);
+		}
 	}
 
 	protected Integer[] getIntervallLatency(Integer[] latencyAmount,
@@ -267,8 +301,8 @@ public abstract class Worker {
 		return 0;
 	}
 
-	private void inccMap(String queryNr, Map<String, Long> map) {
-		Long incc = 0L;
+	private void inccMap(String queryNr, Map<String, Integer> map) {
+		int incc = 0;
 		if (map.containsKey(queryNr)) {
 			incc = map.get(queryNr);
 		}

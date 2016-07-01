@@ -60,7 +60,8 @@ public class Merger {
 		if(!f.getName().contains("Totaltime")){
 			yAxis = "queries";
 		}
-		CategoryDataset dataset = new CSV(';','\n').readCategoryDataset(new FileReader(name));
+		FileReader reader = new FileReader(name);
+		CategoryDataset dataset = new CSV(';','\n').readCategoryDataset(reader);
 		JFreeChart ch = ChartFactory.createBarChart(f.getName().replace(".csv", "").replaceAll("(_|-)", " "), "#Query", yAxis, dataset, PlotOrientation.VERTICAL, true, false, false);
 		CategoryPlot plot = ch.getCategoryPlot();
 		BarRenderer bar = (BarRenderer)plot.getRenderer();
@@ -77,6 +78,7 @@ public class Merger {
 		int width = Math.max(dataset.getColumnCount()*50,900);
 		int height = 400;
 		ChartUtilities.saveChartAsPNG(new File(name.replace("csv","png")), ch, width, height);
+		reader.close();
 		System.out.println("Finished "+name);
 	}
 	
