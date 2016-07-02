@@ -88,6 +88,7 @@ public class SparqlWorker extends Worker implements Runnable {
 	private List<LatencyStrategy> latencyStrategy = new LinkedList<LatencyStrategy>();
 	private boolean first = true;
 	private boolean isPattern;
+	private Long execQueries=0l;
 
 	public SparqlWorker() {
 		super(SparqlWorker.class.getSimpleName());
@@ -276,6 +277,7 @@ public class SparqlWorker extends Worker implements Runnable {
 		} catch (SQLException e) {
 			return -1;
 		}
+		execQueries++;
 		return time;
 	}
 
@@ -317,6 +319,10 @@ public class SparqlWorker extends Worker implements Runnable {
 
 	public void setProps(Properties props) {
 		this.props = props;
+	}
+
+	public Long getExecQueries() {
+		return execQueries;
 	}
 
 }

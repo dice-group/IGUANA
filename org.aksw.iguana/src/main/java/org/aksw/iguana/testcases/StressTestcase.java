@@ -61,6 +61,7 @@ public class StressTestcase implements Testcase{
 	protected static final String CONNECTION_NAME = "connection-name";
 	private static final String IS_UPDATE_QUERY = "is-update-pattern";
 	private static final String QUERYMIX = "query-mix-file";
+	private static final String QUERYMIXNO = "no-of-query-mixes";
 
 
 	
@@ -108,6 +109,8 @@ public class StressTestcase implements Testcase{
 	protected Collection<ResultSet> currResults = new LinkedList<ResultSet>();
 	protected int limit=5000;
 	protected Boolean isPattern=true;
+	private int noOfQueriesInMixes;
+	private int queryMixNo=0;
 	
 	@Override
 	public void start() throws IOException {
@@ -127,7 +130,12 @@ public class StressTestcase implements Testcase{
 		//Start all Workers to begin their tests
 		startAllWorkers();
 		//wait time-limit
-		waitTimeLimit();
+		if(queryMixNo>0){
+			waitQueryMixes();
+		}
+		else{
+			waitTimeLimit();
+		}
 		//getResults
 		makeResults();
 		//
@@ -137,6 +145,13 @@ public class StressTestcase implements Testcase{
 		
 		//Stop
 		log.info("StressTestcase finished");
+	}
+	
+	private void waitQueryMixes(){
+		SparqlWorker w = sparqlWorkerPool.remove(0);
+		while((w.getExecQueries()/noOfQueriesInMixes)<queryMixNo){
+		}
+		
 	}
 	
 	private void cleanMaps() {
@@ -584,7 +599,18 @@ public class StressTestcase implements Testcase{
 			sparqlProps.put(LATENCYSTRATEGY+i, latStrat);
 			i++;
 		}
-		timeLimit=Long.valueOf(p.getProperty(TIMELIMIT));
+		try{		
+			queryMixNo=Integer.valueOf(p.getProperty(QUERYMIXNO));
+		}catch(Exception e){
+			queryMixNo=0;
+		}
+		try{
+			timeLimit=Long.valueOf(p.getProperty(TIMELIMIT));
+		}catch(Exception e){
+			if(queryMixNo==0){
+				timeLimit=3600000;
+			}
+		}
 		sparqlProps.put(TIMELIMIT, Long.valueOf(p.getProperty(TIMELIMIT)));
 		if(!this.isPattern){
 			sparqlProps.put(QUERIESPATH, queriesFilesPath);
