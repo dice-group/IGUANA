@@ -59,6 +59,8 @@ public class StressTestcase implements Testcase{
 	protected static final String LIMIT = "limit";
 	protected static final String IS_PATTERN = "is-pattern";
 	protected static final String CONNECTION_NAME = "connection-name";
+	private static final String IS_UPDATE_QUERY = "is-update-pattern";
+	private static final String QUERYMIX = "query-mix-file";
 
 
 	
@@ -269,6 +271,7 @@ public class StressTestcase implements Testcase{
 			worker.setTimeLimit(timeLimit);
 			worker.setPrefixes(this.prefixes);
 			worker.setConName(connectionName);
+			worker.setQueryMixFile(sparqlProps.getProperty(QUERYMIX));
 			worker.init();
 			sparqlWorkerPool.put(i, worker);
 		}
@@ -295,6 +298,10 @@ public class StressTestcase implements Testcase{
 			worker.setLatencyAmount(latencyAmount);
 			worker.setLatencyStrategy(latencyStrategy);
 			worker.setGraphURI(updateProps[i].getProperty(GRAPHURI));
+			if(Boolean.valueOf(updateProps[i].getProperty(IS_UPDATE_QUERY))){
+				//TODO
+				//generateUpdateFiles()
+			}
 			
 			worker.setLiveDataList((List<File>)updateProps[i].get(FILES));
 			UpdateFileHandler ufh = UpdateFileHandler.getUpdateFileHandler(updateProps[i].getProperty(CONNECTION_NAME));
@@ -304,6 +311,7 @@ public class StressTestcase implements Testcase{
 			worker.setUfh(ufh);
 			worker.setSparqlLoad((Boolean) updateProps[i].get(SPARQLLOAD));
 			worker.setTimeLimit(timeLimit);
+			worker.setQueryMixFile(updateProps[i].getProperty(QUERYMIX+i));
 			worker.setUpdateStrategy((UpdateStrategy) updateProps[i].get(UPDATESTRATEGY));
 			worker.setWorkerStrategy((WorkerStrategy) updateProps[i].get(WORKERSTRATEGY));
 //		    UpdateWorker.setLiveDataListAll(getFilesForUpdateWorker(updatePath, null, WorkerStrategy.NONE));
@@ -659,6 +667,7 @@ public class StressTestcase implements Testcase{
 	
 	
 	public List<File> getFilesForUpdateWorker(String path, LivedataComparator2.LinkingStrategy ls, WorkerStrategy ws){
+		//TODO generate Files for updates if IS_UPDATE_QUERIES is true
 		List<File> ret = new LinkedList<File>();
 		File[] files = getFileListForUpdateWorker(path, ws);
 		for(File f : files){

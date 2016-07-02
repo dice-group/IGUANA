@@ -96,6 +96,7 @@ public class UpdateWorker extends Worker implements Runnable{
 	private UpdateFileHandler ufh;
 	private List<File> liveDataList = new LinkedList<File>();
 	private long lastTime;
+	private boolean updateQueries;
 	
 	public enum UpdateStrategy{
 		VARIABLE, FIXED, NONE
@@ -222,11 +223,18 @@ public class UpdateWorker extends Worker implements Runnable{
 		String[] ret = new String[2];
 		//ret[0] = QueryFilePath
 		//ret[1] = QueryNr.
+		if (!queryMixFile.isEmpty()) {
+			if (!queryMix.hasNext())
+				queryMix = queryMixList.iterator();
+			index = Integer.valueOf(queryMix.next());
+
+		} 
 		if(index>= liveDataList.size()){
 			// no more files, exit thread
 			this.sendEndSignal();
 			return ret;
 		}
+		
 		File current;
 		if(workerStrategy.equals(WorkerStrategy.NEXT)){
 			current= liveDataList.remove(index);
@@ -269,6 +277,10 @@ public class UpdateWorker extends Worker implements Runnable{
 //		waitTime();
 		//executeQuery
 		//TODO change ret in ImplConnection
+		if(this.updateQueries){
+			return this.con.update(query).intValue();
+		}
+		
 		if(sparqlLoad){
 			int ret =  Long.valueOf(this.con.loadUpdate(query, graphURI)).intValue();
 			lastTime = ret;

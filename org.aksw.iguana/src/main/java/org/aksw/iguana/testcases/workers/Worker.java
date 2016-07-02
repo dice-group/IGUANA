@@ -1,17 +1,24 @@
 package org.aksw.iguana.testcases.workers;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.TimeOutException;
 import org.aksw.iguana.utils.comparator.UpdateSorting;
+import org.aksw.iguana.utils.logging.LogHandler;
 
 public abstract class Worker {
 
@@ -37,8 +44,11 @@ public abstract class Worker {
 	protected String workerType = "";
 	private String[] prefixes;
 	private String conName;
-	
-//	private Thread currentThread;
+	protected String queryMixFile;
+	protected List<String> queryMixList = new ArrayList<String>();
+	protected Iterator<String> queryMix;
+
+	// private Thread currentThread;
 
 	public void setConName(String conName) {
 		this.conName = conName;
@@ -73,12 +83,12 @@ public abstract class Worker {
 		ret.add(getResultForMap(minmaxMap, "Queries Min and Max", "Query",
 				"Time in ms", "Queries_Min-and-Max_" + workerType + " Worker"
 						+ workerNr));
-		ret.add(getCalculated(CalcResult.QPS, succMap, timeLimit, resultMap, "Queries Per Second",
-				"Query", "Count", "Queries_Per_Second_" + workerType
-						+ " Worker" + workerNr));
-		ret.add(getCalculated(CalcResult.QMPTL, succMap, timeLimit, null, "Query Mixes Per "
-				+ timeLimit + "ms", "Query", "Count",
-				"Queries_Mixes_Per_TimeLimit_" + workerType + " Worker"
+		ret.add(getCalculated(CalcResult.QPS, succMap, timeLimit, resultMap,
+				"Queries Per Second", "Query", "Count", "Queries_Per_Second_"
+						+ workerType + " Worker" + workerNr));
+		ret.add(getCalculated(CalcResult.QMPTL, succMap, timeLimit, null,
+				"Query Mixes Per " + timeLimit + "ms", "Query", "Count",
+				"No_of_Queries_Per_TimeLimit_" + workerType + " Worker"
 						+ workerNr));
 		cleanMaps();
 		return ret;
@@ -90,31 +100,35 @@ public abstract class Worker {
 		resultMap.clear();
 	}
 
-	private ResultSet getCalculated(CalcResult type, Map<String, Integer> map, long timeLimit,
-			Map<String, Integer> map2,	String title, String xAxis, String yAxis, String fileName) {
+	private ResultSet getCalculated(CalcResult type, Map<String, Integer> map,
+			long timeLimit, Map<String, Integer> map2, String title,
+			String xAxis, String yAxis, String fileName) {
 		switch (type) {
 		case QMPTL:
 			return getResultForMap(getQMPTLMap(map, timeLimit), title, xAxis,
 					yAxis, fileName);
 		case QPS:
-			return getResultForMap(getQPSMap(map, map2, timeLimit), title, xAxis,
-					yAxis, fileName);
+			return getResultForMap(getQPSMap(map, map2, timeLimit), title,
+					xAxis, yAxis, fileName);
 		default:
 			break;
 		}
 		return null;
 	}
 
-	private Map<String, Integer> getQPSMap(Map<String, Integer> map, Map<String, Integer> map2, long timeLimit2) {
+	private Map<String, Integer> getQPSMap(Map<String, Integer> map,
+			Map<String, Integer> map2, long timeLimit2) {
 		Map<String, Integer> ret = new HashMap<String, Integer>();
 		for (String key : map.keySet()) {
-			ret.put(key, Math.round(Double
-					.valueOf(map.get(key)*1.0 / ((map2.get(key)*1.0)/1000)).intValue()));
+			ret.put(key, Math.round(Double.valueOf(
+					map.get(key) * 1.0 / ((map2.get(key) * 1.0) / 1000))
+					.intValue()));
 		}
 		return ret;
 	}
 
-	private Map<String, Integer> getQMPTLMap(Map<String, Integer> map, long timeLimit2) {
+	private Map<String, Integer> getQMPTLMap(Map<String, Integer> map,
+			long timeLimit2) {
 		Map<String, Integer> ret = new HashMap<String, Integer>();
 		Integer value = 0;
 		for (String key : map.keySet()) {
@@ -127,9 +141,9 @@ public abstract class Worker {
 	private ResultSet getResultForMap(Map<String, Integer> map, String title,
 			String xAxis, String yAxis, String fileName) {
 		ResultSet res;
-		if(this.workerType.toLowerCase().equals("sparql"))
+		if (this.workerType.toLowerCase().equals("sparql"))
 			res = new ResultSet();
-		else 
+		else
 			res = new ResultSet(true);
 		res.setTitle(title);
 		res.setxAxis(xAxis);
@@ -175,8 +189,8 @@ public abstract class Worker {
 	}
 
 	public void start() {
-//		currentThread = Thread.currentThread();
-		
+		// currentThread = Thread.currentThread();
+
 		// Finally start the test
 		while (!endSignal) {
 			// GET NEXT QUERY
@@ -185,14 +199,12 @@ public abstract class Worker {
 			if (query == null) {
 				continue;
 			}
-			int time=-2;
-			try{
+			int time = -2;
+			try {
 				time = testQuery(query[0]);
-			}
-			catch(TimeOutException e){
+			} catch (TimeOutException e) {
 				break;
-			}
-			catch(Exception e ){
+			} catch (Exception e) {
 				time = -1;
 			}
 			if (time == -2) {
@@ -209,6 +221,24 @@ public abstract class Worker {
 		con.close();
 	}
 
+	public void setQueryMixFile(String queryMixFile) {
+		this.queryMixFile = queryMixFile;
+	}
+
+	// TODO
+	protected void readQueryMix() {
+		try (BufferedReader reader = new BufferedReader(new FileReader(
+				queryMixFile))) {
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				queryMixList.add(line);
+			}
+			queryMix = queryMixList.iterator();
+		} catch (IOException e) {
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+	}
+
 	protected abstract String[] getNextQuery();
 
 	protected abstract Integer testQuery(String string) throws TimeOutException;
@@ -220,7 +250,8 @@ public abstract class Worker {
 		}
 		if (time < 0) {
 			log.warning("Query " + queryNr
-					+ " wasn't successfull for connection "+conName+". See logs for more inforamtion");
+					+ " wasn't successfull for connection " + conName
+					+ ". See logs for more inforamtion");
 			log.warning("This will be saved as failed query");
 			time = 0;
 			inccMap(queryNr, failMap);
@@ -232,21 +263,19 @@ public abstract class Worker {
 	}
 
 	private void checkMinMaxAndPunt(String queryNr, Integer time) {
-		if(minmaxMap.containsKey(queryNr+"_min")){
-			if(minmaxMap.get(queryNr+"_min")>time){
-				minmaxMap.put(queryNr+"_min", time);
+		if (minmaxMap.containsKey(queryNr + "_min")) {
+			if (minmaxMap.get(queryNr + "_min") > time) {
+				minmaxMap.put(queryNr + "_min", time);
 			}
+		} else {
+			minmaxMap.put(queryNr + "_min", time);
 		}
-		else{
-			minmaxMap.put(queryNr+"_min", time);
-		}
-		if(minmaxMap.containsKey(queryNr+"_max")){
-			if(minmaxMap.get(queryNr+"_max")<time){
-				minmaxMap.put(queryNr+"_max", time);
+		if (minmaxMap.containsKey(queryNr + "_max")) {
+			if (minmaxMap.get(queryNr + "_max") < time) {
+				minmaxMap.put(queryNr + "_max", time);
 			}
-		}
-		else{
-			minmaxMap.put(queryNr+"_max", time);
+		} else {
+			minmaxMap.put(queryNr + "_max", time);
 		}
 	}
 
@@ -312,7 +341,7 @@ public abstract class Worker {
 	public void sendEndSignal() {
 		this.endSignal = true;
 		con.close();
-		
+
 	}
 
 }
