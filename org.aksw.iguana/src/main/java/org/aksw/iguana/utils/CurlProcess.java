@@ -60,40 +60,31 @@ public class CurlProcess {
 	}
 	
 	protected Boolean process(String command){
-//		File script;
-//		String suffix = ".sh";
-//		if(SystemUtils.IS_OS_WINDOWS){
-//			suffix = ".bat";
-//		}
-//		if((script= setData(command, suffix))==null){
-//			return false;
-//		}
-//		script.setExecutable(true);
-//		//starts and wait for the process
-//		ProcessBuilder pb = new ProcessBuilder("."+File.separator+script.getName());
-//		pb.directory(new File(script.getAbsolutePath().replace(
-//				script.getName(), File.separator)));
 		try {
 			   log.info(command);
 			   CommandLine cmdLine = CommandLine.parse(command);
 			   DefaultExecutor exec = new DefaultExecutor();
 			   int ret = exec.execute(cmdLine);
-//			   Process p = pb.start();
-//			   StreamGrabber error = new StreamGrabber(p.getErrorStream(), Level.SEVERE, log);
-//			   StreamGrabber info = new StreamGrabber(p.getInputStream(), Level.INFO, log);
-//			   error.start();
-//			   info.start();
-//			   int ret = p.waitFor();
+		} catch (IOException e) {
+			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+			return false;
+		}
+		return true;
+	}
+	
+	protected Boolean process(String command, String dir){
+		try {
+			   log.info(command);
+			   CommandLine cmdLine = CommandLine.parse(command);
+			   DefaultExecutor exec = new DefaultExecutor();
+			   exec.setWorkingDirectory(new File(dir));
+			   int ret = exec.execute(cmdLine);
 			   log.info("Return value of Process: "+ret);
-//			   p = null;
-//			   Runtime.getRuntime().gc();
 			  
 		} catch (IOException e) {
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			return false;
 		}
-		//deletes the script
-//		script.delete();
 		return true;
 	}
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.aksw.iguana.query.QueryHandler;
+import org.aksw.iguana.query.impl.QueryHandlerImpl;
 import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.connection.ConnectionFactory;
 import org.aksw.iguana.utils.parser.ConfigParser;
@@ -57,7 +57,7 @@ public class ConnectionTest {
 				System.out.println("ERROR Couldnt upload");
 			}
 			System.out.println("testing delete");
-			QueryHandler.ntToQuery("000001.removed.nt", false, "http://test.com");
+			QueryHandlerImpl.ntToQuery("000001.removed.nt", false, "http://test.com");
 			con.deleteFile("000001.removed.nt", "http://test.com");
 			res = con.select("SELECT * FROM <http://test.com> {?s ?p ?o}");
 			if(res.next()){

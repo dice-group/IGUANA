@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
-import org.aksw.iguana.query.QueryHandler;
+import org.aksw.iguana.query.impl.QueryHandlerImpl;
 import org.aksw.iguana.utils.FileHandler;
 import org.aksw.iguana.connection.Connection;
 import org.aksw.iguana.connection.ConnectionFactory;
@@ -151,7 +151,8 @@ public class SparqlWorker extends Worker implements Runnable {
 		}
 
 		initQueryList();
-		readQueryMix();
+		if(this.queryMixFile!=null)
+			readQueryMix();
 	}
 
 	public void setConnection(Connection con) {
@@ -188,7 +189,7 @@ public class SparqlWorker extends Worker implements Runnable {
 			try {
 				// queryStringList = QueryHandler.getFeasibleToList(queriesPath,
 				// log);
-				queryStringList = QueryHandler.getInstancesToList(queriesPath,
+				queryStringList = QueryHandlerImpl.getInstancesToList(queriesPath,
 						log);
 				if (queryStringList.isEmpty()) {
 					log.warning("There is no query to execute");
@@ -221,7 +222,7 @@ public class SparqlWorker extends Worker implements Runnable {
 
 	protected String[] getNextStringQuery() {
 
-		if (!queryMixFile.isEmpty()) {
+		if (queryMixFile != null && !queryMixFile.isEmpty()) {
 			if (!queryMix.hasNext())
 				queryMix = queryMixList.iterator();
 			index = Integer.valueOf(queryMix.next());
@@ -241,7 +242,7 @@ public class SparqlWorker extends Worker implements Runnable {
 		// ret[0] = Query
 		// ret[1] = QueryNr.
 
-		if (!queryMixFile.isEmpty()) {
+		if (queryMixFile != null && !queryMixFile.isEmpty()) {
 			if (!queryMix.hasNext())
 				queryMix = queryMixList.iterator();
 			index = Integer.valueOf(queryMix.next());

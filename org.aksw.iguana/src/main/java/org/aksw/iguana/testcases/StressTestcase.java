@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 import org.aksw.iguana.benchmark.Benchmark;
 import org.aksw.iguana.benchmark.processor.ResultProcessor;
 import org.aksw.iguana.query.QueryHandler;
+import org.aksw.iguana.query.QueryHandlerFactory;
+import org.aksw.iguana.query.impl.QueryHandlerImpl;
 import org.aksw.iguana.testcases.workers.SparqlWorker;
 import org.aksw.iguana.testcases.workers.UpdateFileHandler;
 import org.aksw.iguana.testcases.workers.UpdateWorker;
@@ -63,8 +65,6 @@ public class StressTestcase implements Testcase{
 	private static final String QUERYMIX = "query-mix-file";
 	private static final String QUERYMIXNO = "no-of-query-mixes";
 
-
-	
 
 	public static void main(String[] argc){
 		Random rand = new Random(2);
@@ -507,7 +507,8 @@ public class StressTestcase implements Testcase{
 		}
 		QueryHandler qh;
 		try {
-			qh = new QueryHandler(Benchmark.getReferenceConnection(), patternFileName);
+			//TODO exchange className over properties
+			qh = QueryHandlerFactory.createWithClassName("org.aksw.iguana.query.QueryHandlerImpl",Benchmark.getReferenceConnection(), patternFileName);
 			qh.setPath(path);
 			qh.setLimit(limit);
 			qh.init();

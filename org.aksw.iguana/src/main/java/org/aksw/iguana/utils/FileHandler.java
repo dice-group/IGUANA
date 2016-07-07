@@ -125,6 +125,7 @@ public class FileHandler {
 			br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
 			String line ="";
 			while((line=br.readLine()) != null){
+
 				if(!line.isEmpty() && !line.equals("\n")){
 					lines++;
 				}

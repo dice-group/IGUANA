@@ -34,7 +34,7 @@ public class ResultSorting{
 			}
 		}
 		catch(NumberFormatException e){
-			e.printStackTrace();
+			//e.printStackTrace();
 			return header;
 		}
 		

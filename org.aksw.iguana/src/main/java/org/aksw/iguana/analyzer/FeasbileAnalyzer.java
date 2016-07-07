@@ -10,7 +10,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.aksw.iguana.query.QueryHandler;
+import org.aksw.iguana.query.impl.QueryHandlerImpl;
 import org.aksw.simba.benchmark.Config;
 import org.aksw.simba.benchmark.Queries;
 import org.aksw.simba.benchmark.Similarity;
@@ -105,7 +105,7 @@ public class FeasbileAnalyzer implements Analyzer {
 	 * @throws IOException
 	 */
 	public void saveFeasibleToInstances(String input, String queriesFile) throws IOException{
-		List<String[]> qs = QueryHandler.getFeasibleToList(input, Logger.getGlobal());
+		List<String[]> qs = QueryHandlerImpl.getFeasibleToList(input, Logger.getGlobal());
 		PrintWriter pw = new PrintWriter(queriesFile);
 		for(int i=0; i<qs.size()-1;i++){
 			pw.println(qs.get(i)[0]);

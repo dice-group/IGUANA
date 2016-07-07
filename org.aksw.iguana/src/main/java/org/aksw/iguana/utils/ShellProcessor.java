@@ -26,6 +26,18 @@ public class ShellProcessor extends CurlProcess{
 		return ret;
 	}
 	
+	public static Boolean executeCommand(String command, String dir){
+		ShellProcessor sp = new ShellProcessor();
+	
+		Boolean ret = sp.process(command, dir);
+		try {
+			Thread.sleep(waitForIt);
+		} catch (InterruptedException e) {
+			return ret;
+		}
+		return ret;
+	}
+	
 	public static Boolean executeCommand(String command, Long wait){
 		ShellProcessor sp = new ShellProcessor();
 	

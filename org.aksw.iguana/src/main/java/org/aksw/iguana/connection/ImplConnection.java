@@ -33,6 +33,7 @@ import org.apache.jena.riot.WebContent;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -466,10 +467,12 @@ public class ImplConnection implements Connection {
 				break;
 			case Query.QueryTypeSelect:
 				org.apache.jena.query.ResultSet r = qexec.execSelect();
-				m = r.getResourceModel();
-				m.removeAll();
-				m.close();
-				m = null;
+				ResultSetFormatter.consume(r);
+//				m = r.getResourceModel();
+				
+//				m.removeAll();
+//				m.close();
+//				m = null;
 				r = null;
 				break;
 
