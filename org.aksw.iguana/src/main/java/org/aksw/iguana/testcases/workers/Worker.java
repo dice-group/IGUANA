@@ -38,7 +38,7 @@ public abstract class Worker {
 	protected Map<String, Integer> minmaxMap = new HashMap<String, Integer>();
 	protected Logger log;
 
-	private boolean endSignal;
+	protected boolean endSignal;
 
 	protected Connection con;
 	protected String workerType = "";
@@ -87,7 +87,7 @@ public abstract class Worker {
 				"Queries Per Second", "Query", "Count", "Queries_Per_Second_"
 						+ workerType + " Worker" + workerNr));
 		ret.add(getCalculated(CalcResult.QMPTL, succMap, timeLimit, null,
-				"Query Mixes Per " + timeLimit + "ms", "Query", "Count",
+				"No of Queries " + timeLimit + "ms", "Query", "Count",
 				"No_of_Queries_Per_TimeLimit_" + workerType + " Worker"
 						+ workerNr));
 		cleanMaps();
@@ -134,7 +134,7 @@ public abstract class Worker {
 		for (String key : map.keySet()) {
 			value += map.get(key);
 		}
-		ret.put("Mix", value);
+		ret.put("#Queries", value);
 		return ret;
 	}
 

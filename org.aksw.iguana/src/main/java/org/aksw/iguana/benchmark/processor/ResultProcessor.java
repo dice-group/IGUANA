@@ -159,7 +159,7 @@ public class ResultProcessor {
 				//Get the prefixes
 				String[] prefixes = res.getPrefixes();
 				//And make them to subfolders
-				String suffix="";
+				String suffix=key.split("&")[1]+File.separator;
 				for(String prefix : prefixes){
 					suffix+=prefix+File.separator;
 				}

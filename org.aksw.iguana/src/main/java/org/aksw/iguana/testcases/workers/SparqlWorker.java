@@ -120,28 +120,7 @@ public class SparqlWorker extends Worker implements Runnable {
 		initLogger();
 		this.workerNr = workerNr;
 		rand = new Random(workerNr);
-
-		// init File List
-		// int i=0;
-		// while(props.containsKey("LATENCYAMOUNT"+i)){
-		// //latencyAmount
-		// Integer[] intervall = new Integer[2];
-		// intervall = (Integer[])props.get("LATENCYAMOUNT"+i);
-		// LatencyStrategy latStrat =
-		// (LatencyStrategy)props.get("LATENCYSTRATEGY"+i);
-		// latencyAmount.add(getIntervallLatency(intervall, latStrat, rand));
-		// //LatencyStrategy
-		// latencyStrategy.add(latStrat);
-		// i++;
-		// }
-		// //queriesPath
-		// queriesPath=props.getProperty("QUERIESPATH");
-		// timeLimit=(Long)props.get("TIMELIMIT");
-		// Connection
-		// this.con =
-		// ConnectionFactory.createConnection(props.getProperty("CONNECTION"));
-		// this.con = (Connection) props.get("CONNECTION");
-
+		queryMixFile = props.getProperty("query-mix-file");
 		for (int i = 0; i < latencyAmount.size(); i++) {
 			Integer[] intervall = new Integer[2];
 			intervall = latencyAmount.get(i);
@@ -274,8 +253,10 @@ public class SparqlWorker extends Worker implements Runnable {
 			} catch (SQLException e1) {
 				return -2;
 			}
+//			System.out.println(workerNr+" "+query);
 			time = Long.valueOf(this.con.selectTime(query, 180000)).intValue();
 		} catch (SQLException e) {
+			execQueries++;
 			return -1;
 		}
 		execQueries++;

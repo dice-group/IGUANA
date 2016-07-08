@@ -223,7 +223,7 @@ public class UpdateWorker extends Worker implements Runnable{
 		String[] ret = new String[2];
 		//ret[0] = QueryFilePath
 		//ret[1] = QueryNr.
-		if (!queryMixFile.isEmpty()) {
+		if (queryMixFile !=null && !queryMixFile.isEmpty()) {
 			if (!queryMix.hasNext())
 				queryMix = queryMixList.iterator();
 			index = Integer.valueOf(queryMix.next());

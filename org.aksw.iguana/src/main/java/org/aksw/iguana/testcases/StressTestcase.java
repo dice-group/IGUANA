@@ -30,6 +30,7 @@ import org.aksw.iguana.testcases.workers.UpdateWorker.UpdateStrategy;
 import org.aksw.iguana.testcases.workers.UpdateWorker.WorkerStrategy;
 import org.aksw.iguana.testcases.workers.Worker.LatencyStrategy;
 import org.aksw.iguana.utils.CalendarHandler;
+import org.aksw.iguana.utils.FileHandler;
 import org.aksw.iguana.utils.ResultSet;
 import org.aksw.iguana.utils.StringHandler;
 import org.aksw.iguana.utils.TimeOutException;
@@ -111,6 +112,7 @@ public class StressTestcase implements Testcase{
 	protected Boolean isPattern=true;
 	private int noOfQueriesInMixes;
 	private int queryMixNo=0;
+	private String queryMixFile;
 	
 	@Override
 	public void start() throws IOException {
@@ -148,10 +150,22 @@ public class StressTestcase implements Testcase{
 	}
 	
 	private void waitQueryMixes(){
-		SparqlWorker w = sparqlWorkerPool.remove(0);
-		while((w.getExecQueries()/noOfQueriesInMixes)<queryMixNo){
-		}
+		SparqlWorker w = sparqlWorkerPool.get(0);
+		Calendar start = Calendar.getInstance();
+		Long a = start.getTimeInMillis();
 		
+		while((w.getExecQueries()/noOfQueriesInMixes)<queryMixNo){
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Long end = Calendar.getInstance().getTimeInMillis();
+		timeLimit = end-a;
+		log.info(queryMixNo+" Query Mixes took "+timeLimit+"ms to execute");
+		shutdown(start);
 	}
 	
 	private void cleanMaps() {
@@ -197,6 +211,10 @@ public class StressTestcase implements Testcase{
 				LogHandler.writeStackTrace(log, e, Level.WARNING);
 			}
 		}
+		shutdown(start);
+	}
+		
+	private void shutdown(Calendar start){
 		//Shutdown executor, no other workers can join now
 		executor.shutdown();
 		
@@ -269,7 +287,7 @@ public class StressTestcase implements Testcase{
 		for(int i=0;i<sparqlWorkers;i++){
 			SparqlWorker worker = new SparqlWorker();
 			worker.setWorkerNr(i);
-//			worker.setProps(sparqlProps);
+			worker.setProps(sparqlProps);
 			worker.setConnection((Connection) sparqlProps.get(CONNECTION));
 			int j=0;
 			List<LatencyStrategy> latencyStrategy=new LinkedList<LatencyStrategy>();
@@ -494,6 +512,12 @@ public class StressTestcase implements Testcase{
 	
 	protected void initPatterns(){
 		if(!isPattern){
+			if(queryMixFile==null){
+				noOfQueriesInMixes=Long.valueOf(FileHandler.getLineCount(queriesFilesPath)).intValue();
+			}
+			else{
+				noOfQueriesInMixes=Long.valueOf(FileHandler.getLineCount(queryMixFile)).intValue();
+			}
 			return;
 		}
 		String path = StressTestcase.class.getSimpleName()+"_"+StringHandler.stringToAlphanumeric(patternFileName);
@@ -501,6 +525,12 @@ public class StressTestcase implements Testcase{
 			return;
 		}
 		queriesFilesPath=path;
+		if(queryMixFile==null){
+			noOfQueriesInMixes=Long.valueOf(FileHandler.getLineCount(queriesFilesPath)).intValue();
+		}
+		else{
+			noOfQueriesInMixes=Long.valueOf(FileHandler.getLineCount(queryMixFile)).intValue();
+		}
 		if(new File(path).exists()){
 			log.info("Cached Query Results... using them");
 			return;
@@ -602,6 +632,9 @@ public class StressTestcase implements Testcase{
 		}
 		try{		
 			queryMixNo=Integer.valueOf(p.getProperty(QUERYMIXNO));
+			queryMixFile = p.getProperty(QUERYMIX);
+			if(queryMixFile !=null)
+				sparqlProps.put(QUERYMIX, queryMixFile);
 		}catch(Exception e){
 			queryMixNo=0;
 		}
@@ -612,7 +645,7 @@ public class StressTestcase implements Testcase{
 				timeLimit=3600000;
 			}
 		}
-		sparqlProps.put(TIMELIMIT, Long.valueOf(p.getProperty(TIMELIMIT)));
+		sparqlProps.put(TIMELIMIT, timeLimit);
 		if(!this.isPattern){
 			sparqlProps.put(QUERIESPATH, queriesFilesPath);
 		}
