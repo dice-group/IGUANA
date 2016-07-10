@@ -344,6 +344,7 @@ public class StressTestcase implements Testcase{
 			worker.setUfh(ufh);
 			worker.setSparqlLoad((Boolean) updateProps[i].get(SPARQLLOAD));
 			worker.setTimeLimit(timeLimit);
+			worker.setNoOfTriples(Long.valueOf(updateProps[i].getProperty("no-of-triples")));
 			worker.setQueryMixFile(updateProps[i].getProperty(QUERYMIX+i));
 			worker.setUpdateStrategy((UpdateStrategy) updateProps[i].get(UPDATESTRATEGY));
 			worker.setWorkerStrategy((WorkerStrategy) updateProps[i].get(WORKERSTRATEGY));
@@ -688,6 +689,11 @@ public class StressTestcase implements Testcase{
 			up.put(CONNECTION, ConnectionFactory.createConnection(database, connectionName));
 			up.put(CONNECTION_NAME, connectionName);
 			
+			try{
+				up.put("no-of-triples", p.getProperty("number-of-triples"));
+			}catch(Exception e){
+				up.put("no-of-triples", "-1l");
+			}
 			String workStr = p.getProperty(WORKERSTRATEGY+j);
 			WorkerStrategy ws;
 			if(workStr == null){

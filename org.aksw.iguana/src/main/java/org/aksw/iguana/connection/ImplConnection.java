@@ -135,11 +135,15 @@ public class ImplConnection implements Connection {
 				Long retTmp = deleteFileIntern(f, graphURI);
 				if (retTmp == -1) {
 					log.severe("Couldn't upload part: " + f.getName());
+					
 				} else {
 					ret += retTmp;
 				}
 				if (!isFile)
 					f.delete();
+			}
+			if(ret==0){
+				ret=-1l;
 			}
 		} catch (IOException e) {
 			log.severe("Couldn't upload file(s) due to: ");
@@ -281,17 +285,13 @@ public class ImplConnection implements Connection {
 
 	private Long updateIntern(String query, Boolean drop) {
 		long ret = -1;
-		if (!drop) {
 
-			return ret;
-
-		}
 		try {
 			// con.setAutoCommit(true);
 			// con.setTransactionIsolation(8);
 			// Statement stm = this.con.createStatement();
 			// int updated = stm.executeUpdate(query);
-
+//			System.out.println(query);
 			ret = ownUpdate(query);
 
 			// stm.close();

@@ -42,8 +42,8 @@ public abstract class Worker {
 
 	protected Connection con;
 	protected String workerType = "";
-	private String[] prefixes;
-	private String conName;
+	protected String[] prefixes;
+	protected String conName;
 	protected String queryMixFile;
 	protected List<String> queryMixList = new ArrayList<String>();
 	protected Iterator<String> queryMix;

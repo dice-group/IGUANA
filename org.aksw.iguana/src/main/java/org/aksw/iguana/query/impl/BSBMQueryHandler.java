@@ -11,7 +11,7 @@ public class BSBMQueryHandler extends AbstractQueryHandler{
 	@Override
 	public void init() throws IOException {
 		// TODO Write command
-		String command = "";
+		String command = "./watdiv -q ";
 		
 		//TODO Execute command 
 		ShellProcessor.executeCommand(command, this.pattern);

@@ -30,43 +30,7 @@ public class UpdateWorker extends Worker implements Runnable{
 		Connection con = ConnectionFactory.createImplConnection("localhost:9999/bigdata/sparql", "localhost:9999/bigdata/sparql",  -1);
 		
 		
-		Properties prop = new Properties();
-		//LATENCYAMOUNT
-		//LATENCYSTRATEGY
-		for(int i=0;i<4;i++){
-			Integer[] intervall = new Integer[2];
-			intervall[0] = 200;
-			if(i==0){
-				intervall[1] = 500;
-			}
-			prop.put("LATENCYAMOUNT"+i, intervall);
-			if(i>1)
-				prop.put("LATENCYSTRATEGY"+i, LatencyStrategy.FIXED);
-			else
-				prop.put("LATENCYSTRATEGY"+i, LatencyStrategy.VARIABLE);
-		}
-		//QUERIESPATH 
-		prop.put("FILES", new File("ld").listFiles());
-		
-		prop.put("UPDATESTRATEGY", UpdateStrategy.VARIABLE);
-		
-		prop.put("GRAPHURI", "http://dbpedia.org");
-		
-		prop.put("TIMELIMIT", "40000");
-		
-		//CONNECTION
-		prop.put("CONNECTION", con);
-		UpdateWorker worker = new UpdateWorker();
-		worker.setProps(prop);
-		worker.init(2);
-		ExecutorService es = Executors.newFixedThreadPool(1);
-		es.execute(worker);
-		es.shutdown();
-		Calendar start = Calendar.getInstance();
-		while((Calendar.getInstance().getTimeInMillis()-start.getTimeInMillis())<40000){}
-		worker.sendEndSignal();
-		while(!es.isTerminated()){}
-		System.out.println("End");
+		con.uploadFile("changeset/000000.added(1).nt", null);
 	}
 	
 	protected static final String DELETE_STRING="removed";
@@ -97,6 +61,7 @@ public class UpdateWorker extends Worker implements Runnable{
 	private List<File> liveDataList = new LinkedList<File>();
 	private long lastTime;
 	private boolean updateQueries;
+	private Long noCount;
 	
 	public enum UpdateStrategy{
 		VARIABLE, FIXED, NONE
@@ -261,6 +226,7 @@ public class UpdateWorker extends Worker implements Runnable{
 	
 	@Override
 	protected Integer testQuery(String query){
+		System.out.println(query);
 		try {
 			if(this.con.isClosed()){
 				lastTime =0;
@@ -277,6 +243,7 @@ public class UpdateWorker extends Worker implements Runnable{
 //		waitTime();
 		//executeQuery
 		//TODO change ret in ImplConnection
+		this.con.setTriplesToUpload(noCount);
 		if(this.updateQueries){
 			return this.con.update(query).intValue();
 		}
@@ -397,6 +364,11 @@ public class UpdateWorker extends Worker implements Runnable{
 
 	public void setLiveDataList(List<File> list) {
 		this.liveDataList  = list;
+	}
+
+
+	public void setNoOfTriples(Long count) {
+		this.noCount = count;
 	}
 
 
