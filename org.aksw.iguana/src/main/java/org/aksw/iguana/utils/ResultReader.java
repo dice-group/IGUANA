@@ -13,6 +13,7 @@ import org.aksw.iguana.utils.comparator.ResultSetComparator;
 
 public class ResultReader {
 
+	
     public static void main(String[] argc) throws IOException {
         if (argc.length < 1) {
             System.out.println("Usage: java -cp \"lib/*\" "

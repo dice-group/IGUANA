@@ -248,7 +248,7 @@ public abstract class Worker {
 		if (resultMap.containsKey(queryNr)) {
 			oldTime = resultMap.get(queryNr);
 		}
-		if (time < 0) {
+		if (time <= 0) {
 			log.warning("Query " + queryNr
 					+ " wasn't successfull for connection " + conName
 					+ ". See logs for more inforamtion");

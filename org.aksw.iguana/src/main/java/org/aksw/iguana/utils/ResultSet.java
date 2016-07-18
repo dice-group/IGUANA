@@ -286,13 +286,13 @@ public class ResultSet implements Iterator<List<Object>>, Serializable{
 		}
 		ResultSorting resSort = new ResultSorting();
 		UpdateSorting usSort = new UpdateSorting();
-		
+		List<String> header2 =null;
 		Boolean sort=true;
 		try {
 			if(!update)
-				header = resSort.produceMapping(header);
+				header2 = resSort.produceMapping(header);
 			else
-				header = usSort.produceMapping(header);
+				header2 = usSort.produceMapping(header);
 		} catch (Exception e) {
 			sort=false;
 		}
@@ -300,26 +300,27 @@ public class ResultSet implements Iterator<List<Object>>, Serializable{
 		f.createNewFile();
 		PrintWriter pw = new PrintWriter(fileName+".csv");
 		String head="";
-		for(String cell : header){
+		for(String cell : header2){
 			head+=cell+";";
 		}
-		if(!header.isEmpty()){
+		if(!header2.isEmpty()){
 			pw.write(head.substring(0, head.length()-1));
     		pw.println();
 		}
         for(List<Object> row : table){
         	String currentRow = "";
+        	List<Object> row2 = null;
         	try{
         	if(sort){
         		if(!update )
-        			row = resSort.sortRow(row);
+        			row2 = new LinkedList<Object>(resSort.sortRow(row));
         		else
-        			row = usSort.sortRow(row);
+        			row2 = new LinkedList<Object>(usSort.sortRow(row));
         	}
         	}catch(Exception e){
         		e.printStackTrace();
         	}
-        	for(Object cell : row){
+        	for(Object cell : row2){
         		currentRow += cell+";";
         	}
         	if(!row.isEmpty()){

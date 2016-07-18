@@ -29,7 +29,7 @@ public class ResultSorting{
 			}
 			Collections.sort(newIntHeader);
 			for(int j=1;j<header.size();j++){
-				mapping.put(j, newIntHeader.indexOf(Integer.valueOf(header.get(j))));
+				mapping.put(newIntHeader.indexOf(Integer.valueOf(header.get(j))),j);
 				newHeader.set(newIntHeader.indexOf(Integer.valueOf(header.get(j))), header.get(j));
 			}
 		}

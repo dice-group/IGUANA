@@ -567,9 +567,9 @@ public class StressTestcase implements Testcase{
 		Iterator<ResultSet> resIt1 = currentResults.iterator();
 		Iterator<ResultSet> resIt2 = results.iterator();
 		if(results.size()!=currentResults.size()){
-			log.severe("Result size differs!!! ");
-			log.severe("Old size : "+results.size());
-			log.severe("New size: "+currentResults.size());
+//			log.severe("Result size differs!!! ");
+//			log.severe("Old size : "+results.size());
+//			log.severe("New size: "+currentResults.size());
 		}
 		while(resIt1.hasNext()){
 			ResultSet r1 = resIt1.next();
