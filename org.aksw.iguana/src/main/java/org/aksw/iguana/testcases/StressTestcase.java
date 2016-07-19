@@ -189,7 +189,7 @@ public class StressTestcase implements Testcase{
 			res.setFileName(path+fileName);
 			try {
 				res.save();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				LogHandler.writeStackTrace(log, e, Level.SEVERE);
 			}
 			res.setFileName(fileName);
