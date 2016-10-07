@@ -258,11 +258,13 @@ public class QueryHandlerImpl implements QueryHandler{
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public void init() throws IOException {
-		if (new File(path).exists()) {
-			log.info("Path " + path + "already exists. Use cached Queries");
-			return;
-		}
-		new File(path).mkdir();
+//		if (new File(path).exists()) {
+//			log.info("Path " + path + "already exists. Use cached Queries");
+//			return;
+//		}
+		File dir = new File(path);
+		dir.delete();
+		dir.mkdir();
 		init(fileForQueries);
 	}
 

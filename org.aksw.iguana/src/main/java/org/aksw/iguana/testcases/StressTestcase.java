@@ -532,14 +532,14 @@ public class StressTestcase implements Testcase{
 		else{
 			noOfQueriesInMixes=Long.valueOf(FileHandler.getLineCount(queryMixFile)).intValue();
 		}
-		if(new File(path).exists()){
-			log.info("Cached Query Results... using them");
-			return;
-		}
+//		if(new File(path).exists()){
+//			log.info("Cached Query Results... using them");
+//			return;
+//		}
 		QueryHandler qh;
 		try {
 			//TODO exchange className over properties
-			qh = QueryHandlerFactory.createWithClassName("org.aksw.iguana.query.QueryHandlerImpl",Benchmark.getReferenceConnection(), patternFileName);
+			qh = QueryHandlerFactory.createWithClassName("org.aksw.iguana.query.impl.QueryHandlerImpl",Benchmark.getReferenceConnection(), patternFileName);
 			qh.setPath(path);
 			qh.setLimit(limit);
 			qh.init();

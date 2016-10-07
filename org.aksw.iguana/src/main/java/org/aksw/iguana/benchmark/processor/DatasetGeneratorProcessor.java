@@ -64,11 +64,11 @@ public class DatasetGeneratorProcessor {
 		new File("datasets" + File.separator).mkdir();
 		
 		for (int i = 0; i < Config.datasetPercantage.size(); i++) {
-			if (Config.datasetPercantage.get(i) == 1.0) {
-				log.info("Current Precantage is 100%. Add "+hundredFile+" to the returning files");
-				ret[i] = hundredFile;
-				continue;
-			}
+//			if (Config.datasetPercantage.get(i) == 1.0) {
+//				log.info("Current Precantage is 100%. Add "+hundredFile+" to the returning files");
+//				ret[i] = hundredFile;
+//				continue;
+//			}
 			//Get Percantage
 			Double per = Config.datasetPercantage.get(i) * 100.0;
 			//outputFile will be 

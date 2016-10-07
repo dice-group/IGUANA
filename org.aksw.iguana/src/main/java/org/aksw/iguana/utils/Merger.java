@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -83,53 +85,41 @@ public class Merger {
 	}
 	
 	public static void main(String[] args) throws IOException{
-		randomizeNamesAndSaveAsPNG("C:\\Users\\urFaust\\results_0\\", "C:\\Users\\urFaust\\Example Eval 2\\");
-//		qpsMerge();
-//		String filePath1=args[0];
-//		String filePath2=args[1];
-//		String outputPath=args[2];
-//		new File(outputPath).mkdirs();
-//		String con=args[3];
-//		
-//		for(File f : new File(filePath1).listFiles()){
-//			if(f.isDirectory()){
-//				continue;
-//			}
-//			if(!f.getName().endsWith(".csv"))
-//				continue;
-//			FileReader fr = new FileReader(f);
-//			BufferedReader br = new BufferedReader(fr);
-//
-//			FileReader fr2 = new FileReader(filePath2+File.separator+f.getName());
-//			BufferedReader br2 = new BufferedReader(fr2);
-//			PrintWriter pw = new PrintWriter(outputPath+File.separator+f.getName());
-//
-//			String line="", fLine="";
-//			while((line=br.readLine())!=null){
-//				if(line.split(";")[0].equals(con)){
-//					fLine=line;
-//					break;
-//				}
-//				pw.println(line);
-//				line="";
-//			}
-//			String line2="";
-//			if(!fLine.isEmpty()){
-//				while((line2=br2.readLine())!=null){
-//					if(line2.split(";")[0].equals(con)){
-//						//FOUND LINE!
-//						pw.println(line2);
-//						break;
-//					}
-//				}
-//			}
-//			br2.close();
-//			while((line=br.readLine())!=null){
-//				pw.println(line);
-//			}
-//			br.close();
-//			pw.close();
-//		}
+		String dir1="/home/minimal/results_16-16/tempResults_bv/org-aksw-iguana-testcases-StressTestcase/16/16";
+		String dir2="/home/minimal/results_16-16/results_f/org.aksw.iguana.testcases.StressTestcase1.0/0/16/16";
+		String output="results_0";
+		new File(output+File.separator+"calculated"+File.separator).mkdirs();
+		Collection<File> f = FileUtils.listFiles(new File(dir1), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+		
+		for(File f1 : f){
+			String name = f1.getName();
+			BufferedReader br1 = new BufferedReader(new FileReader(f1));
+			File f2=null;
+			BufferedReader br2=null;
+			PrintWriter pw = null;
+			if(f1.getAbsolutePath().contains("calculated")){
+				f2 = new File(dir2+File.separator+"calculated"+File.separator+name);
+				br2 = new BufferedReader(new FileReader(f2));
+				new File(output+File.separator+"calculated"+File.separator+name).createNewFile();
+				pw = new PrintWriter(output+File.separator+"calculated"+File.separator+name);
+
+			}
+			else{
+				f2 = new File(dir2+File.separator+name);
+				br2 = new BufferedReader(new FileReader(f2));
+				new File(output+File.separator+name).createNewFile();
+				pw = new PrintWriter(output+File.separator+name);
+				
+			}
+			pw.println(br1.readLine());
+			br2.readLine();
+			pw.println(br2.readLine());
+			pw.println(br1.readLine());
+			pw.println(br1.readLine());
+			pw.close();
+			br1.close();
+			br2.close();
+		}
 	}
 	
 	public static void qpsMerge() throws IOException{

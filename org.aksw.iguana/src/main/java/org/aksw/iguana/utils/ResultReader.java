@@ -396,9 +396,10 @@ public class ResultReader {
         // Get Prefixes
         String[] split = file.getAbsolutePath().replace(File.separator, ";")
                 .split(";");
-        String[] prefixes = new String[2];
-        prefixes[0] = split[split.length - 3];
-        prefixes[1] = split[split.length - 2];
+        String[] prefixes = new String[3];
+        prefixes[0] = split[split.length - 5];
+        prefixes[1] = split[split.length - 4];
+        prefixes[2] = split[split.length - 3];
         res.setPrefixes(prefixes);
         // Read File
         BufferedReader br = null;

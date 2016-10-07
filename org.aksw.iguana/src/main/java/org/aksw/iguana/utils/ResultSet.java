@@ -294,6 +294,7 @@ public class ResultSet implements Iterator<List<Object>>, Serializable{
 			else
 				header2 = usSort.produceMapping(header);
 		} catch (Exception e) {
+			header2 = header;
 			sort=false;
 		}
 		File f = new File(this.fileName+".csv");
@@ -309,7 +310,7 @@ public class ResultSet implements Iterator<List<Object>>, Serializable{
 		}
         for(List<Object> row : table){
         	String currentRow = "";
-        	List<Object> row2 = null;
+        	List<Object> row2 = row;
         	try{
         	if(sort){
         		if(!update )
@@ -318,6 +319,7 @@ public class ResultSet implements Iterator<List<Object>>, Serializable{
         			row2 = new LinkedList<Object>(usSort.sortRow(row));
         	}
         	}catch(Exception e){
+        		row2 = row;
         		e.printStackTrace();
         	}
         	for(Object cell : row2){

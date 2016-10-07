@@ -49,7 +49,7 @@ import org.apache.jena.update.UpdateRequest;
 public class ImplConnection implements Connection {
 
 	private java.sql.Connection con;
-	private int queryTimeout = 180000;
+	private int queryTimeout = 180;
 	private Logger log;
 	private String endpoint;
 	private String updateEndpoint;
