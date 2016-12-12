@@ -1,319 +1,285 @@
 <!DOCTYPE html>
-<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
-<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
-<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
-<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
-<head>
-
-	<!-- Basic Page Needs
-  ================================================== -->
-	<meta charset="utf-8">
-	<title>IGUANA - Benchmark Execution Framework</title>
-	<meta name="description" content="">
-	<meta name="author" content="">
-
-	<!-- Mobile Specific Metas
-  ================================================== -->
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-	<!-- CSS
-  ================================================== -->
-	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,700,600' rel='stylesheet' type='text/css'>
-	<link rel="stylesheet" href="stylesheets/base.css">
-	<link rel="stylesheet" href="stylesheets/skeleton.css">
-	<link rel="stylesheet" href="stylesheets/layout.css">
-	<link rel="stylesheet" href="stylesheets/layout.css">
-	<link rel="stylesheet" href="stylesheets/responsivemobilemenu.css">
-	<link rel="stylesheet" href="stylesheets/flexslider.css">
-	<link rel="stylesheet" href="stylesheets/prettyPhoto.css">
-	
-	<!-- JS
-  ================================================== -->
-	
-	<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-	<script type="text/javascript" src="javascripts/responsivemobilemenu.js"></script>
-	<script type="text/javascript" src="javascripts/jquery.flexslider.js"></script>
-	<script type="text/javascript" src="javascripts/jquery.testemonialslider.js"></script>
-	<script type="text/javascript" src="javascripts/jquery.easing.1.3.js"></script>
-	<script type="text/javascript" src="javascripts/jquery.prettyPhoto.js"></script>
-	<script type="text/javascript" src="javascripts/jquery.quicksand.js"></script> 
-	<script type="text/javascript" src="javascripts/script.js"></script> 
-	<!-- SMOOTH SCROLLING -->
-<script type="text/javascript" src="javascripts/smoothscroll.js"></script>
-
-
-	<!--[if lt IE 9]>
-		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
-
-	<!-- Favicons
-	================================================== -->
-	<link rel="shortcut icon" href="images/favicon.ico">
-	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
-	
-	<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-46811000-1', 'fabianbentz.de');
-  ga('send', 'pageview');
-
-</script>
-
-</head>
-<body>
-<!-- Primary Page Layout
-================================================== -->
-<div class="top">
-    <a href="#home"><img id="rotate" src="images/top.png" width="70" height="70" alt="top" /></a>
-</div>
-
-<header>
-<div class="container nav" id="home">
-      <div class="three columns logo center">
-      <img src="./images/logo.png" height="30px" width="120px" alt"">
-      </div>
-      <div class="thirteen columns navigation">
-        <nav>
-          <div class='rmm' data-menu-style = "minimal">
-            <ul>
-                <li><a href='#home'>HOME</a></li>
-                <li><a href='#service'>SERVICE</a></li>
-                <li><a href='#skills'>SKILLS</a></li>
-                <li><a href='#price'>PRICE</a></li>
-                <li><a href='#contact'>CONTACT</a></li> 
-            </ul>
-          </div>
-        </nav>
-      </div>
-     </div>
-</div>
-</header>
-
-<div class="slider" id="home">
-
-   <div class="container">
-<! SLIDESHOW >
-    <div class="flexslider">
-      <ul class="slides">
-           <li>
-            <div class="sixteen columns slide1">
-              <p class="center"><img class="scale-with-grid" src="images/logo.png" height="200px" width="500px" alt="logo big"></p>
-              <h1 class="white">IGUANA</h1>
-              <h3 class="white"><span>Benchmark Execution Framework</span></h3>
-             </div>
-          </li>
-<li>
-            <div class="sixteen columns slide1">
-              <p class="center"><img class="scale-with-grid" src="images/logo.png" height="200px" width="500px" alt="logo big"></p>
-              <h1 class="white">Current Realease</h1>
-              <h3 class="white"><span>https://github.com/AKSW/IGUANA/blob/master/release/iguana-0.3.0.2-distribution.zip</span></h3>
-             </div>
-          </li>
-                </ul>
-     </div>
-   </div>
-</div>
-
-<div class="service" id="service">
-    <div class="container">
-    
-        <div class="sixteen columns">
+<html class="no-js">
+    <head>
+        <!-- Basic Page Needs
+        ================================================== -->
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="icon" type="image/png" href="images/Iguana_new_logo6.png">
+        <title>Iguana - Intelligent Suite for SPARQL Benchmark</title>
+        <meta name="description" content="">
+        <meta name="keywords" content="SPARQL, SPARQL Benchmark, RDF, Triple Stores">
+        <meta name="author" content="">
+        <!-- Mobile Specific Metas
+        ================================================== -->
+        <meta name="format-detection" content="telephone=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         
-         <h2 class="white">Our Service</h2>
-         <hr class="white">
-         <p class="white center">IGUANA is a Benchmark execution Framework. IGUANA can test SPARQL Endpoints, as well as Federated SPARQL Systems with a Stress test, which means it can handle several users which request the endpoint with SPARQL Queries (ASK, CONSTRUCT, DESCRIBE, SELECT) while several update users will update (inserts and deletes) the triplestore.</br>
-IGUANA can also analyze log files and get queries to test out of it. You can define several benchmark suites which work seperated of each other. In each suite you can define several testcases.
-</br>
-IGUANA gives you also the oppertunity to write own testcases and log analyzer without changing the code itself. IGUANA can be configured over one single config file.</p>
-         
-         <div class="four columns alpha">
-         <img class="center circle scale-with-grid" id="rotate" src="./images/icons/flatdesign.svg">
-         <h4 class="white">JAVA Based & OpenSource</h4>
-         <p class="center white">IGUANA is JAVA based and therefore not binded to just one system. Also IGUANA is open source</p>
-         </br>
-         <p class="center"><a href="https://github.com/AKSW/IGUANA/tree/master" target="_blank"  class="btndow">Visit the Code</a></p>
-         </div>
-         
-         <div class="four columns alpha">
-         <img class="center circle scale-with-grid" id="rotate" src="./images/icons/customizable.svg">
-         <h4 class="white">Easy Configuration</h4>
-         <p class="center white">IGUANA is easy configurable due to one xml file. Nevertheless it is very mighty</p>
-         </br>
-         <p class="center"><a href="https://github.com/AKSW/IGUANA/tree/master/examples" target="_blank"  class="btndow">Examples</a></p>
-         </div>
-         
-         <div class="four columns alpha">
-         <img class="center circle scale-with-grid" id="rotate" src="./images/icons/portfolio.svg">
-         <h4 class="white">Releases</h4>
-         <p class="center white">You want to use IGUANA. Here you'll find the releases</p>
-         </br>
-         <p class="center"><a href="https://github.com/AKSW/IGUANA/tree/master/release" target="_blank"  class="btndow">Releases</a></p>
-         </div>
-         
-         <div class="four columns alpha omega">
-         <img class="center circle scale-with-grid" id="rotate" src="./images/icons/mail.svg">
-         <h4 class="white">Found a Bug?</h4>
-         <p class="center white">IGUANA is still in a beta version and bugs can occur. If you found one:</p>
-         </br>
-         <p class="center"><a href="https://github.com/AKSW/IGUANA/issues" target="_blank"  class="btndow">Bug Tracker</a></p>
-         </div>
+        <!-- Template CSS Files
+        ================================================== -->
+        <!-- Twitter Bootstrs CSS -->
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <!-- Ionicons Fonts Css -->
+        <link rel="stylesheet" href="css/ionicons.min.css">
+        <!-- animate css -->
+        <link rel="stylesheet" href="css/animate.css">
+        <!-- Hero area slider css-->
+        <link rel="stylesheet" href="css/slider.css">
+        <!-- owl craousel css -->
+        <link rel="stylesheet" href="css/owl.carousel.css">
+        <link rel="stylesheet" href="css/owl.theme.css">
+        <link rel="stylesheet" href="css/jquery.fancybox.css">
+        <!-- template main css file -->
+        <link rel="stylesheet" href="css/main.css">
+        <!-- responsive css -->
+        <link rel="stylesheet" href="css/responsive.css">
         
-        </div>
+        <!-- Template Javascript Files
+        ================================================== -->
+        <!-- modernizr js -->
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+        <!-- jquery -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <!-- owl carouserl js -->
+        <script src="js/owl.carousel.min.js"></script>
+        <!-- bootstrap js -->
+
+        <script src="js/bootstrap.min.js"></script>
+        <!-- wow js -->
+        <script src="js/wow.min.js"></script>
+        <!-- slider js -->
+        <script src="js/slider.js"></script>
+        <script src="js/jquery.fancybox.js"></script>
+        <!-- template main js -->
+        <script src="js/main.js"></script>
+    </head>
+    <body>
+        <!--
+        ==================================================
+        Header Section Start
+        ================================================== -->
+        <header id="top-bar" class="navbar-fixed-top animated-header">
+            <div class="container">
+                <div class="navbar-header">
+                    <!-- responsive nav button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    </button>
+                    <!-- /responsive nav button -->
+                    
+                    <!-- logo -->
+                    <div class="navbar-brand">
+                        <a href="index.html" >
+                            <img src="images/Iguana_new_logo6.png" width="10%" alt="">
+                        </a>
+                    </div>
+                    <!-- /logo -->
+                </div>
+                <!-- main menu -->
+                <nav class="collapse navbar-collapse navbar-right" role="navigation">
+                    <div class="main-menu">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <a href="index.html" >Home</a>
+                            </li>
+			    <li>
+                                <a href="about.html" >About</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Documentation <span class="caret"></span></a>
+                                <div class="dropdown-menu">
+                                    <ul>
+                                        <li><a href="javadoc/index.html">JavaDoc</a></li>
+                                        <li><a href="gettingstarted.html">Getting Started</a></li>
+                                       <li><a href="tutorials.html">Tutorials</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li><a href="download.html">Installation</a></li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Community <span class="caret"></span></a>
+                                <div class="dropdown-menu">
+                                    <ul>
+                                        <li><a href="community.html#github">Github</a></li>
+                                        <li><a href="community.html#publications">Publications</a></li>
+                                        <li><a href="community.html#mailinglist">Mailing List</a></li>
+					<li><a href="community.html#contact">Contact</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <!-- /main nav -->
+            </div>
+        </header>
         
-    </div>
-</div>
+        <!--
+        ==================================================
+        Slider Section Start
+        ================================================== -->
+        <section id="hero-area" >
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <div class="block wow fadeInUp" data-wow-delay=".3s">
+                            
+                            <!-- Slider -->
+                            <section class="cd-intro">
+                                <h1 class="wow fadeInUp animated cd-headline slide" data-wow-delay=".4s" >
+                                <span></span><br>
+                                <span class="cd-words-wrapper">
+                                    <b class="is-visible">IGUANA</b>
+                                </span>
+                                </h1>
+                                </section> <!-- cd-intro -->
+                                <!-- /.slider -->
+                                <h2 class="wow fadeInUp animated" data-wow-delay=".6s" >
+                                    An <u>I</u>nte<u>g</u>rated S<u>u</u>ite for benchm<u>a</u>rki<u>n</u>g SP<u>A</u>RQL.</br> 
+                                </h2>
+                              
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section><!--/#main-slider-->
+            <!--
+            ==================================================
+            Slider Section Start
+            ================================================== -->
+            <section id="about">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6">
+                            <div class="block wow fadeInLeft" data-wow-delay=".3s" data-wow-duration="500ms">
+                                <h2>
+                                ABOUT IGUANA
+                                </h2>
+                                <p>
+                                    Semantic Web is becoming more important and it's data is growing each day. Triple stores are the backbone here, managing these data.
+				    Hence it is very important that the triple store must scale on the data and can handle several users. 
+				    Current Benchmark approaches could not provide a realistic scenario on realistic data and could not be adjustet for your needs very easily.
+				    Further on it was impossible to compare results for different benchmarks. 
+				    
+                                </p>
+                                <p>
+                                    Iguana is an An <u>I</u>nte<u>g</u>rated S<u>u</u>ite for benchm<u>a</u>rki<u>n</u>g SP<u>A</u>RQL.</br>  which solves the issue. 
+				    It provides an enviroment which ...
+					<ul>
+					<li><h4>... is highly configurable</h4></li>
+					<li><h4>... provides a realistic scneario benchmark</h4></li>
+					<li><h4>... works on every dataset</h4></li>
+					<li><h4>... works on any SPARQL and SPARQL Update Queries</h4></li>
+					<li><h4>... is easily extendable</h4></li>
+					</ul>					
+                                </p>
+				
+					
+					 	
+					
+                            </div>
+                            
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <div class="block wow fadeInRight" data-wow-delay=".3s" data-wow-duration="500ms">
+                                <img src="images/Iguana_new_logo6.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
 
-<div class="skills" id="skills">
-    <div class="container">
-    
-        <div class="sixteen columns">
-        
-         <h2 class="white">IGUANAs Skills</h2>
-         <hr class="white">
-         <p class="white center">IGUANA can not only run benchmark on SPARQL Endpoints and run stresstest on them. IGUANA is also </p>
-         
-         
-         <ul id="skillbar">
-			    <h4>easy to use</h4>
-	            <li><span class="skillbar html"></span></li>
-	            <h4>easy to configure</h4>
-	            <li><span class="skillbar html"></span></li>
-	            <h4>easy to install</h4>
-	            <li><span class="skillbar html"></span></li>
-	            <h4>understandable</h4>
-	            <li><span class="skillbar java"></span></li>
-	            <h4>well documented</h4>
-	            <li><span class="skillbar java"></span></li>
-            </ul>
-         
-         </div>
-        
-    </div>
-</div>
-
-
-
-
-
-<div id="price">
-
-<div class="container">
-
-   <div class="sixteen columns intro">
-
-        <h2 class="white">Price</h2>
-         <hr class="white">
-         <p class="white center">One of the best parts of IGUANA
-</br>
-It's free. TOTALLY FREE. Also it's opensource.</p>
-         
-   </div>
-         
-          
-          
-
-  </div>
-</div>
-
-
-
-<div id="contactform">
-
-<div class="container">
-
-   <div class="sixteen columns">
-
-        <h2 class="white" >Get in Touch</h2>
-         <hr class="white" >
-         <p class="center white">Still have question? Simply ask us :) (Currently not working...sorry)</p>
-    
-    </div>
-         
-       <div class="two-thirds column form">
-                 <form action="#" id="commentForm" method="post" name="commentForm">
-                       <input class="required name" id="name" name="name" type="text" value="Name*" onFocus="if(this.value=='Name*') this.value=''"/>
-                       <input class="required email" id="email" name="email" type="text" value="Email*" onFocus="if(this.value=='Email*') this.value=''"/>
-                       <input class="phone" id="phone" name="phone" type="text" value="Phone" onFocus="if(this.value=='Phone') this.value=''"/>
-                       <input class="website" id="website" name="website" type="text" value="Website" onFocus="if(this.value=='Website') this.value=''"/>
-                       <textarea class="required message" name="message" onFocus="if(this.value=='Message*') this.value=''">Message*</textarea>
-                       <button class="btn">Send</button>
-                       <p class="white">Required fields are marked *</p>
-                  </form>
-       </div>
-       
-       <div class="one-third column omega coninfo">
-         <h4 class="left white">Contact Informations</h4>
-         <p class="white">IGUANA is provided by AKSW Research Group at Leipzig University</p>
-         <ul>
-          <li>AKSW Research Group</li>
-          <li>Augustusplatz 10</li>
-		<li><a href="http://aksw.org/Contact.html">How to find us</a></li>
-          <li>04103 Leipzig</li>
-          <li><a href="mailto:">mai12cpg@studserv.uni-leipzig.de</a></li>
-         </ul>
-         <h4 class="left white">Follow Us</h4>
-         <a class="social" href="https://plus.google.com/u/0/110125315806172714573" alt=""><img class="scale-with-grid" src="./images/icons/social/google.svg" alt=""></a>
-         <a class="social" href="https://twitter.com/akswgroup" alt=""><img class="scale-with-grid" src="./images/icons/social/twitter.svg" alt=""></a>
-         </div>
-   
-   </div>
-</div>
-
-
-
-<footer>
-  <div class="container">
-      <div class="sixteen columns copyright">
-          
-          <p class="white">Copyright 2013 <a href="http://www.fabianbentz.de">Fabian Bentz </a>all rights reserved</p>
-          
-      </div>
-  </div>
-</footer>
-
-         
-
-
-	
-
-<!-- End Document
-================================================== -->
-
-<script type="text/javascript">
-  $(window).load(function() {
-     $('.flexslider').flexslider({
-        animation: "slide"
-      });
-});
-</script>
-
-
-
-<!-- pretty photo 
-	<script>
-		$(document).ready(function(){
-			$("a[class^='prettyPhoto']").prettyPhoto({
-				social_tools: false,
-				theme: 'light_square'
-			});
-		});
-	</script>
-	-->
-	
-	<script type="text/javascript" charset="utf-8">
-		$(document).ready(function(){
-			$("a[rel^='prettyPhoto']").prettyPhoto({
-				social_tools: false,
-				theme: 'light_square'
-			});
-		});
-	</script>
-
-</body>
-</html>
+	<section id="about">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6">
+                            <div class="block wow fadeInLeft" data-wow-delay=".3s" data-wow-duration="500ms">
+                                <h2>
+                                VERSION 2.0!
+                                </h2>
+                                <p>
+                                    A completly new Version of Iguana is currently in development. 
+				    Find out what will be new and different 
+                                </p>
+                                <span class="wrapper_404">			    
+				<a href="version2.html" class="btn btn-dafault btn-home wow fadeInUp animated" data-wow-delay="1.1s">New Version</a>                           
+				</span> 
+                            </div>
+                            
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <div class="block wow fadeInRight" data-wow-delay=".3s" data-wow-duration="500ms">
+                                <img src="images/Iguana_new_logo6.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+		 <!-- /#about -->
+            <!--
+            ==================================================
+            Portfolio Section Start
+            ================================================== -->
+             <!-- /#feature -->
+                            
+            <!--
+            ==================================================
+            Call To Action Section Start
+            ================================================== -->
+            <section id="call-to-action">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="block">
+                                <h2 class="title wow fadeInDown" data-wow-delay=".3s" data-wow-duration="500ms">DOWNLOAD & INSTALLATION</h1>
+                                <p class="wow fadeInDown" data-wow-delay=".5s" data-wow-duration="500ms">If you need help getting started with Iguana visit <a href="gettingstarted.html">HERE</a><br></p>
+                                <a href="download.html" class="btn btn-default btn-contact wow fadeInDown" data-wow-delay=".7s" data-wow-duration="500ms">DOWNLOAD</a>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </section>
+            <!--
+            ==================================================
+            Footer Section Start
+            ================================================== -->
+            <footer id="footer">
+                <div class="container">
+                    <div class="col-md-8">
+                        <p class="copyright">Copyright: <span>2015</span> . Design and Developed by <a href="http://www.Themefisher.com">Themefisher</a></p>
+                    </div>
+                    <div class="col-md-4">
+                        <!-- Social Media -->
+                        <ul class="social">
+                            <li>
+                                <a href="http://wwww.fb.com/themefisher" class="Facebook">
+                                    <i class="ion-social-facebook"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="http://wwww.twitter.com/themefisher" class="Twitter">
+                                    <i class="ion-social-twitter"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="Linkedin">
+                                    <i class="ion-social-linkedin"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="http://wwww.fb.com/themefisher" class="Google Plus">
+                                    <i class="ion-social-googleplus"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </footer> <!-- /#footer -->
+                
+        </body>
+    </html>

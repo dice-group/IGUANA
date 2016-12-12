@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <!-- Basic Page Needs
+        ================================================== -->
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="icon" type="image/png" href="images/Iguana_new_logo6.png">
+        <title>Iguana - Intelligent Suite for SPARQL Benchmark</title>
+        <meta name="description" content="">
+        <meta name="keywords" content="SPARQL, SPARQL Benchmark, RDF, Triple Stores">
+        <meta name="author" content="">
+        <!-- Mobile Specific Metas
+        ================================================== -->
+        <meta name="format-detection" content="telephone=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <!-- Template CSS Files
+        ================================================== -->
+        <!-- Twitter Bootstrs CSS -->
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <!-- Ionicons Fonts Css -->
+        <link rel="stylesheet" href="css/ionicons.min.css">
+        <!-- animate css -->
+        <link rel="stylesheet" href="css/animate.css">
+        <!-- Hero area slider css-->
+        <link rel="stylesheet" href="css/slider.css">
+        <!-- owl craousel css -->
+        <link rel="stylesheet" href="css/owl.carousel.css">
+        <link rel="stylesheet" href="css/owl.theme.css">
+        <link rel="stylesheet" href="css/jquery.fancybox.css">
+        <!-- template main css file -->
+        <link rel="stylesheet" href="css/main.css">
+        <!-- responsive css -->
+        <link rel="stylesheet" href="css/responsive.css">
+        
+        <!-- Template Javascript Files
+        ================================================== -->
+        <!-- modernizr js -->
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+        <!-- jquery -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <!-- owl carouserl js -->
+        <script src="js/owl.carousel.min.js"></script>
+        <!-- bootstrap js -->
+
+        <script src="js/bootstrap.min.js"></script>
+        <!-- wow js -->
+        <script src="js/wow.min.js"></script>
+        <!-- slider js -->
+        <script src="js/slider.js"></script>
+        <script src="js/jquery.fancybox.js"></script>
+        <!-- template main js -->
+        <script src="js/main.js"></script>
+    </head>
+    <body>
+        <!--
+        ==================================================
+        Header Section Start
+        ================================================== -->
+        <header id="top-bar" class="navbar-fixed-top animated-header">
+            <div class="container">
+                <div class="navbar-header">
+                    <!-- responsive nav button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    </button>
+                    <!-- /responsive nav button -->
+                    
+                    <!-- logo -->
+                    <div class="navbar-brand">
+                        <a href="index.html" >
+                            <img src="images/Iguana_new_logo6.png" width="10%" alt="">
+                        </a>
+                    </div>
+                    <!-- /logo -->
+                </div>
+                <!-- main menu -->
+                <nav class="collapse navbar-collapse navbar-right" role="navigation">
+                    <div class="main-menu">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <a href="index.html" >Home</a>
+                            </li>
+ 			    <li>
+                                <a href="about.html" >About</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Documentation <span class="caret"></span></a>
+                                <div class="dropdown-menu">
+                                    <ul>
+                                        <li><a href="javadoc/index.html">JavaDoc</a></li>
+                                        <li><a href="gettingstarted.html">Getting Started</a></li>
+                                       <li><a href="tutorials.html">Tutorials</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li><a href="download.html">Installation</a></li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Community <span class="caret"></span></a>
+                                <div class="dropdown-menu">
+                                    <ul>
+                                        <li><a href="community.html#github">Github</a></li>
+                                        <li><a href="community.html#publications">Publications</a></li>
+                                        <li><a href="community.html#mailinglist">Mailing List</a></li>
+					<li><a href="community.html#contact">Contact</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <!-- /main nav -->
+            </div>
+        </header>
+        <!--
+        ==================================================
+        Global Page Section Start
+        ================================================== -->
+        <section class="global-page-header">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="block">
+                            <h2>How to execute DBPSB (Tutorial)</h2>
+                            <ol class="breadcrumb">
+                                <li>
+                                    <a href="index.html">
+                                        <i class="ion-ios-home"></i>
+                                        Home
+                                    </a>
+                                </li>
+                                <li class="active">Tutorials</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </section><!--/#Page header-->
+            <section id="blog-full-width">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <article class="wow fadeInDown" data-wow-delay=".3s" data-wow-duration="500ms">
+                                <div class="blog-content">
+                                    <p>
+					This tutorial describes how to execute the 2012 DBpedia SPARQL Benchmark. 
+                                    </p>
+                                    
+
+<div class="markdown-body">
+        <h1>
+<a id="user-content-choose-the-triplestores" class="anchor" href="#choose-the-triplestores" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Choose the triplestores</h1>
+
+<p>Choose the triplestores you want to test. In the original 4 triplestores were tested, but in this tutorial we simply choose the following triplestores:</p>
+
+<ul>
+<li><a href="https://github.com/openlink/virtuoso-opensource">Virtuoso</a></li>
+<li><a href="https://jena.apache.org/download/index.cgi">Fuseki</a></li>
+<li><a href="https://www.blazegraph.com/download/">Blazegraph</a></li>
+</ul>
+
+<p>All 3 triplestores are easily to install (please visit their sites to install each of them)</p>
+
+<h1>
+<a id="user-content-download-dbpsb-data" class="anchor" href="#download-dbpsb-data" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Download DBPSB Data</h1>
+
+<p>You can download all necessary data here: <a href="http://benchmark.dbpedia.org/">http://benchmark.dbpedia.org/</a> </p>
+
+<p>We will use the following files: </p>
+
+<ul>
+<li>Queries2012.txt (Be aware that we need to edit this file a little bit) </li>
+<li>benchmark_10.nt.bz2</li>
+<li>benchmark_100.nt.bz2</li>
+<li>benchmark_50.nt.bz2<br>
+</li>
+</ul>
+
+<p>Please download each and extract all of them. </p>
+
+<p>Further on you need to replace each <strong>%%var%%</strong> to <strong>%%v%%</strong>. This is very important!</p>
+
+<p>You should download warmup queries provided here (you could use other queries though, but do not use the Queries2012.txt file)</p>
+
+<ul>
+<li><a href="https://figshare.com/articles/Warmup_DBpedia/3205489">https://figshare.com/articles/Warmup_DBpedia/3205489</a></li>
+</ul>
+
+<p>Download the file, rename it to <strong>warmup.txt</strong></p>
+
+<h1>
+<a id="user-content-setup-the-triplestores" class="anchor" href="#setup-the-triplestores" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setup the triplestores</h1>
+
+<p>To setup RAM specific (and such) please visit the developer sites.</p>
+
+<p>What you need is to upload the dataset. Each of those 3 TS have implemented Bulk Load scripts to easily upload big datasets. </p>
+
+<ul>
+<li>For Virtuoso use the isql tool</li>
+<li>For Fuseki use the tdbloader</li>
+<li>Blazegraph describes it here: <a href="https://wiki.blazegraph.com/wiki/index.php/Bulk_Data_Load">https://wiki.blazegraph.com/wiki/index.php/Bulk_Data_Load</a>
+</li>
+</ul>
+
+<p>At first you should upload benchmark_10.nt to each triplestore. If each triplestore is filled with the data. you need to make a backup. </p>
+
+<p>Lets make a directory backup_10/ and in this directory for each triplestore a subdirectory with the name of the TS.
+and copy all the data (for example: virtuoso has a directory called db/) into the triplestore specific folder.
+Do this for each dataset.</p>
+
+<h2>
+<a id="user-content-virtuoso-backup" class="anchor" href="#virtuoso-backup" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Virtuoso backup</h2>
+
+<ol>
+<li>Start Virtuoso</li>
+<li>Start isql 1112 (change port if changed in configuration)</li>
+<li>execute following commands:
+commit();
+checkpoint();
+commit();
+checkpoint();</li>
+<li>close isql </li>
+<li>copy whole db folder (assuming you did not change the database folders in the configuration) into desired location.<br>
+</li>
+</ol>
+
+<h2>
+<a id="user-content-fuseki-backup" class="anchor" href="#fuseki-backup" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Fuseki backup</h2>
+
+<p>Assuming you initialized Fuseki with the Database DS, there will be a directory called DS in the fuseki installation path. Copy the whole folder into the desired location</p>
+
+<h2>
+<a id="user-content-blazegraph-backup" class="anchor" href="#blazegraph-backup" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Blazegraph backup</h2>
+
+<p>Simply copy the blazegraph.jnl file to the desired location. </p>
+
+<p>We should now have a directory structure like this:</p>
+
+<pre><code>backup_10 
+    fuseki
+        DS
+    virtuoso
+        db
+    blazegraph
+backup_50 
+    fuseki
+        DS
+    virtuoso
+        db
+    blazegraph
+backup_100
+    fuseki
+        DS
+    virtuoso
+        db
+    blazegraph
+</code></pre>
+
+<h1>
+<a id="user-content-create-the-configuration" class="anchor" href="#create-the-configuration" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Create the configuration</h1>
+
+<p>Lets start with the root xml:</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+
+&lt;/iguana&gt;
+</code></pre>
+
+<p>Now lets add our databases (assuming virtuoso runs on port 8890, fuseki on 3030 and blazegraph on 9999. 
+As the DBPSB Queries are query patterns, we will also add the Dbpedia to connections. 
+The query patterns has variables (%%var%% and so on) these must be filled with data. To avoid empty results as this can lead to faster results we will add real data into them. So we need a reference connection where we can get the data from. This will be the dbpedia online endpoint.</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;databases&gt;
+        &lt;database id="fuseki" type="impl"&gt;
+        &lt;endpoint uri="http://localhost:3030/ds/sparql" /&gt;
+    &lt;/database&gt;
+    &lt;database id="blazegraph" type="impl"&gt;
+        &lt;endpoint uri="http://localhost:9999/blazegraph/sparql" /&gt;
+    &lt;/database&gt;
+    &lt;database id="virtuoso" type="impl"&gt;
+        &lt;endpoint uri="http://localhost:8890/sparql" /&gt;
+    &lt;/database&gt;
+    &lt;database id="dbpedia" type="impl"&gt;
+    &lt;endpoint uri="http://dbpedia.org/sparql"/&gt;
+    &lt;/database&gt;
+    &lt;/databases&gt;
+&lt;/iguana&gt;
+</code></pre>
+
+<p>Now we will create our benchmark suite. This will configure the benchmark itself. </p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;databases&gt;
+        ...
+    &lt;/databases&gt;
+    &lt;suite&gt;
+
+    &lt;/suite&gt;
+&lt;/iguana&gt;
+</code></pre>
+
+<p>
+Now we need to decide which of the previously defined triple stores should be tested. Also we need to decide which of the defined triple stores should be the reference triple store. We gave each triple store an ID. we will use them now.</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;databases&gt;
+        ...
+    &lt;/databases&gt;
+    &lt;suite&gt;
+         &lt;test-db type="choose" reference="dbpedia" &gt;
+             &lt;db id="virtuoso"/&gt;
+             &lt;db id="fuseki"/&gt;
+             &lt;db id="blaezgraph"/&gt;
+         &lt;/test-db&gt;
+    &lt;/suite&gt;
+&lt;/iguana&gt;
+</code></pre>
+
+<p>Further on we need to provide the datasets (WARNING: We will use a pre and post testcase hook to put the correct dataset in the triplestore). We will only say which percantage (from 0 to 1.0) the dataset has.
+100% will be 1.0 ,  50% will be 0.5 and 10% will 0.1 . 
+Set generate to false, as we do not need to generate our data. </p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;databases&gt;
+        ...
+    &lt;/databases&gt;
+    &lt;suite&gt;
+         &lt;test-db type="choose" reference="dbpedia" &gt;
+             ...
+         &lt;/test-db&gt;
+         &lt;random-function generate="false"&gt;
+         &lt;percent value="1.0"/&gt;
+             &lt;percent value="0.5"/&gt;
+             &lt;percent value="0.1"/&gt;
+     &lt;/random-function&gt;
+    &lt;/suite&gt;
+&lt;/iguana&gt;
+</code></pre>
+
+<p>Did you upload the dataset into the named graph: "<a href="http://dbpedia.org">http://dbpedia.org</a>" ? Then you can add the following parameter.</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;databases&gt;
+        ...
+    &lt;/databases&gt;
+    &lt;suite&gt;
+         &lt;test-db type="choose" reference="dbpedia" &gt;
+             ...
+         &lt;/test-db&gt;
+         &lt;random-function generate="false"&gt;
+         ...
+     &lt;/random-function&gt;
+         &lt;graph-uri name="http://dbpedia.org" /&gt;
+    &lt;/suite&gt;
+&lt;/iguana&gt;
+</code></pre>
+
+<p>We want to provide a warmup with the previously downloaded warmup queries. The warmup should be 20 minutes.</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;databases&gt;
+        ...
+    &lt;/databases&gt;
+    &lt;suite&gt;
+         &lt;test-db type="choose" reference="dbpedia" &gt;
+             ...
+         &lt;/test-db&gt;
+         &lt;random-function generate="false"&gt;
+         ...
+     &lt;/random-function&gt;
+         &lt;graph-uri name="http://dbpedia.org" /&gt;
+         &lt;warmup time="20" file-name="warmup.txt" /&gt;
+    &lt;/suite&gt;
+&lt;/iguana&gt;
+</code></pre>
+
+<p>Now we need to add our testcase. The original DBpedia SPARQL Benchmark had one SPARQL user, zero update user and took one hour. Further on we will create two scripts pre.sh and post.sh while as pre.sh will take the following arguments: 
+the triple store ID and the dataset size.</p>
+
+<p>The time will be measured in ms, so we need for one hour 3600000ms. </p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;databases&gt;
+        ...
+    &lt;/databases&gt;
+    &lt;suite&gt;
+         &lt;test-db type="choose" reference="dbpedia" &gt;
+             ...
+         &lt;/test-db&gt;
+         &lt;random-function generate="false"&gt;
+         ...
+     &lt;/random-function&gt;
+         &lt;graph-uri name="http://dbpedia.org" /&gt;
+         &lt;warmup time="20" file-name="warmup.txt" /&gt;
+         &lt;testcases testcase-pre="./pre.sh %DBID% %PERCENT%" testcase-post="./post.sh"&gt;
+             &lt;testcase class="org.aksw.iguana.testcases.StressTestcase"&gt;
+                 &lt;property name="sparql-user" value="1" /&gt;
+                 &lt;property name="update-user" value="0" /&gt;
+                 &lt;property name="queries-path" value="Queries2012.txt" /&gt;
+                 &lt;property name="is-pattern" value="true" /&gt;
+                 &lt;property name="timelimit" value="3600000" /&gt;
+             &lt;/testcase&gt;
+        &lt;/testcases&gt;
+    &lt;/suite&gt;
+&lt;/iguana&gt;
+</code></pre>
+
+<h2>
+<a id="user-content-create-a-pre-and-post-testcase-hook" class="anchor" href="#create-a-pre-and-post-testcase-hook" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Create a pre and post testcase hook</h2>
+
+<p>We will do a little bit of scripting here, to stop each triplestore and start  the triplestore which is on the line to test, as well as feed the triplestore with the correct dataset backup. 
+This will not be explained, but provided. Still you may need to change the paths to the triplestores to execute the scripts. Pleas do not forget to chmod +x booth scripts.</p>
+
+<h3>
+<a id="user-content-presh" class="anchor" href="#presh" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>pre.sh</h3>
+
+<pre><code>./post.sh 
+if [ "$1" = "virtuoso" ]
+then
+    if [ "$2" = "1.0" ]
+    then
+        cp -r ./backup_100/virtuoso/db/* ./virtuoso/db/
+    elif [ "$2" = "0.5" ]
+    then
+        cp -r ./backup_50/virtuoso/db/* ./virtuoso/db/
+    elif [ "$2" = "0.1" ]
+    then
+        cp -r ./backup_10/virtuoso/db/* ./virtuoso/db/
+    fi
+    ./virtuoso/bin/virtuoso-t +configfile ~./virtuoso/virtuoso.ini
+elif [ "$1" = "fuseki" ]
+then
+    if [ "$2" = "1.0" ]
+    then
+        cp -r ./backup_100/fuseki/DS/* ./fuseki/DS/
+    elif [ "$2" = "0.5" ]
+    then
+        cp -r ./backup_50/fuseki/DS/* ./fuseki/DS/
+    elif [ "$2" = "0.1" ]
+    then
+        cp -r ./backup_10/fuseki/DS/* ./fuseki/DS/
+    fi
+    cd ./fuseki/
+    ./fuseki-server --update --loc=DS /ds &gt; fuseki.out 2&gt;&amp;1 &amp;
+    cd ..
+elif [ "$1" = "blazegraph" ]
+then
+    if [ "$2" = "1.0" ]
+    then
+        cp ./backup_100/blazegraph/blazegraph.jnl ./blazegraph/
+    elif [ "$2" = "0.5" ]
+    then
+        cp ./backup_50/blazegraph/blazegraph.jnl ./blazegraph/
+    elif [ "$2" = "0.1" ]
+    then
+        cp ./backup_10/blazegraph/blazegraph.jnl ./blazegraph/
+    fi
+    java -server -jar -Xmx16g ./blazegraph/blazegraph.jar &gt;  blazegraph.out 2&gt;&amp;1 &amp;
+</code></pre>
+
+<h3>
+<a id="user-content-postsh" class="anchor" href="#postsh" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>post.sh</h3>
+
+<pre><code>ps -ef | grep "virtuoso-t" | grep -v grep | awk '{print $2}' | xargs kill -9
+ps -ef | grep "fuseki" | grep -v grep | awk '{print $2}' | xargs kill -9
+ps -ef | grep "blazegraph" | grep -v grep | awk '{print $2}' | xargs kill -9
+</code></pre>
+
+<h3>
+<a id="user-content-the-whole-config" class="anchor" href="#the-whole-config" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The whole config</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;iguana xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;databases&gt;
+        &lt;database id="fuseki" type="impl"&gt;
+        &lt;endpoint uri="http://localhost:3030/ds/sparql" /&gt;
+    &lt;/database&gt;
+    &lt;database id="blazegraph" type="impl"&gt;
+        &lt;endpoint uri="http://localhost:9999/blazegraph/sparql" /&gt;
+    &lt;/database&gt;
+    &lt;database id="virtuoso" type="impl"&gt;
+        &lt;endpoint uri="http://localhost:8890/sparql" /&gt;
+    &lt;/database&gt;
+    &lt;database id="dbpedia" type="impl"&gt;
+    &lt;endpoint uri="http://dbpedia.org/sparql"/&gt;
+    &lt;/database&gt;
+    &lt;/databases&gt;
+    &lt;suite&gt;
+         &lt;test-db type="choose" reference="dbpedia" &gt;
+             &lt;db id="virtuoso"/&gt;
+             &lt;db id="fuseki"/&gt;
+             &lt;db id="blaezgraph"/&gt;
+         &lt;/test-db&gt;
+         &lt;random-function generate="false"&gt;
+         &lt;percent value="1.0"/&gt;
+             &lt;percent value="0.5"/&gt;
+             &lt;percent value="0.1"/&gt;
+     &lt;/random-function&gt;
+         &lt;graph-uri name="http://dbpedia.org" /&gt;
+         &lt;warmup time="20" file-name="warmup.txt" /&gt;
+         &lt;testcases testcase-pre="./pre.sh %DBID% %PERCENT%" testcase-post="./post.sh"&gt;
+             &lt;testcase class="org.aksw.iguana.testcases.StressTestcase"&gt;
+                 &lt;property name="sparql-user" value="1" /&gt;
+                 &lt;property name="update-user" value="0" /&gt;
+                 &lt;property name="queries-path" value="Queries2012.txt" /&gt;
+                 &lt;property name="is-pattern" value="true" /&gt;
+                 &lt;property name="timelimit" value="3600000" /&gt;
+             &lt;/testcase&gt;
+        &lt;/testcases&gt;
+    &lt;/suite&gt;
+&lt;/iguana&gt;
+</code></pre>
+
+<p>Save this as config.xml </p>
+
+<h1>
+<a id="user-content-run-iguana" class="anchor" href="#run-iguana" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Run Iguana</h1>
+
+<p>Simply run now: </p>
+
+<pre><code>java -cp "lib/*" org.aksw.iguana.benchmark.Main config.xml 
+</code></pre>
+
+      </div>
+
+                                </div>
+                                
+                            </article>
+                           
+                        </div>
+                        <div class="col-md-4">
+                            <div class="sidebar">
+                               
+                                    <div class="categories widget">
+                                        <h3 class="widget-head">Categories</h3>
+                                        <ul>
+                                            <li>
+                                                <a href="gettingstarted.html">Getting Started</a>
+                                            </li>
+                                            <li>
+                                                <a href="tutorials.html">Tutorials</a> 
+                                            </li>
+                                            <li>
+                                                <a href="javadoc/index.html">JavaDoc</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    
+                                 
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!--
+                    ==================================================
+                    Call To Action Section Start
+                    ================================================== -->
+                    <section id="call-to-action">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="block">
+                                <h2 class="title wow fadeInDown" data-wow-delay=".3s" data-wow-duration="500ms">DOWNLOAD & INSTALLATION</h1>
+                                <p class="wow fadeInDown" data-wow-delay=".5s" data-wow-duration="500ms">If you need help getting started with Iguana visit <a href="gettingstarted.html">HERE</a><br></p>
+                                <a href="download.html" class="btn btn-default btn-contact wow fadeInDown" data-wow-delay=".7s" data-wow-duration="500ms">DOWNLOAD</a>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </section>
+                    <!--
+                    ==================================================
+                    Footer Section Start
+                    ================================================== -->
+                    <footer id="footer">
+                        <div class="container">
+                            <div class="col-md-8">
+                                <p class="copyright">Copyright: <span>2015</span> by <a href="http://www.themefisher.com">themefisher</a></p>
+                            </div>
+                            <div class="col-md-4">
+                                <!-- Social Media -->
+                                <ul class="social">
+                                    <li>
+                                        <a href="#" class="Facebook">
+                                            <i class="ion-social-facebook"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="Twitter">
+                                            <i class="ion-social-twitter"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="Linkedin">
+                                            <i class="ion-social-linkedin"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="Google Plus">
+                                            <i class="ion-social-googleplus"></i>
+                                        </a>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </footer> <!-- /#footer -->
+                        
+                    </body>
+                </html>
+            </html>
