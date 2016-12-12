@@ -89,6 +89,8 @@ public class SparqlWorker extends Worker implements Runnable {
 	private boolean first = true;
 	private boolean isPattern;
 	private Long execQueries=0l;
+	private Integer queryMixNo;
+	private Integer noOfQueriesInMixes;
 
 	public SparqlWorker() {
 		super(SparqlWorker.class.getSimpleName());
@@ -121,6 +123,12 @@ public class SparqlWorker extends Worker implements Runnable {
 		this.workerNr = workerNr;
 		rand = new Random(workerNr);
 		queryMixFile = props.getProperty("query-mix-file");
+		
+		queryMixNo = (int) props.get("no-of-query-mixes");
+		noOfQueriesInMixes = (int) props.get("no-of-queries-in-mixes");
+		System.out.println(queryMixNo);
+		System.out.println(props);
+		
 		for (int i = 0; i < latencyAmount.size(); i++) {
 			Integer[] intervall = new Integer[2];
 			intervall = latencyAmount.get(i);
@@ -243,6 +251,9 @@ public class SparqlWorker extends Worker implements Runnable {
 
 	@Override
 	protected Integer testQuery(String query) {
+		if(queryMixNo != 0 && execQueries*1.0/noOfQueriesInMixes >= queryMixNo){
+			return -2;
+		}
 		waitTime();
 		int time = -1;
 		try {
@@ -259,6 +270,7 @@ public class SparqlWorker extends Worker implements Runnable {
 			execQueries++;
 			return -1;
 		}
+
 		execQueries++;
 		return time;
 	}

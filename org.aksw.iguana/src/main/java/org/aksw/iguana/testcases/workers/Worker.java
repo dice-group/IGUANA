@@ -37,6 +37,7 @@ public abstract class Worker {
 	protected Map<String, Integer> failMap = new HashMap<String, Integer>();
 	protected Map<String, Integer> minmaxMap = new HashMap<String, Integer>();
 	protected Logger log;
+	
 
 	protected boolean endSignal;
 
@@ -211,6 +212,7 @@ public abstract class Worker {
 				endSignal = true;
 				continue;
 			}
+			
 			if (query[1] != null && !query[1].equals("null") && !endSignal) {
 				log.finest(workerType + "Worker " + workerNr + ": Query "
 						+ query[1] + " took " + time + "ms");

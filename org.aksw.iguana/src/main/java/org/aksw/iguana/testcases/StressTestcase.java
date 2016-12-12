@@ -65,6 +65,7 @@ public class StressTestcase implements Testcase{
 	private static final String IS_UPDATE_QUERY = "is-update-pattern";
 	private static final String QUERYMIX = "query-mix-file";
 	private static final String QUERYMIXNO = "no-of-query-mixes";
+	private static final String NOOFQUERIESINMIXES = "no-of-queries-in-mixes";
 
 
 	public static void main(String[] argc){
@@ -154,7 +155,7 @@ public class StressTestcase implements Testcase{
 		Calendar start = Calendar.getInstance();
 		Long a = start.getTimeInMillis();
 		
-		while((w.getExecQueries()/noOfQueriesInMixes)<queryMixNo){
+		while((w.getExecQueries()*1.0/noOfQueriesInMixes)<queryMixNo){
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -287,6 +288,7 @@ public class StressTestcase implements Testcase{
 		for(int i=0;i<sparqlWorkers;i++){
 			SparqlWorker worker = new SparqlWorker();
 			worker.setWorkerNr(i);
+			sparqlProps.put(NOOFQUERIESINMIXES, noOfQueriesInMixes);
 			worker.setProps(sparqlProps);
 			worker.setConnection((Connection) sparqlProps.get(CONNECTION));
 			int j=0;
@@ -526,12 +528,7 @@ public class StressTestcase implements Testcase{
 			return;
 		}
 		queriesFilesPath=path;
-		if(queryMixFile==null){
-			noOfQueriesInMixes=Long.valueOf(FileHandler.getLineCount(queriesFilesPath)).intValue();
-		}
-		else{
-			noOfQueriesInMixes=Long.valueOf(FileHandler.getLineCount(queryMixFile)).intValue();
-		}
+
 //		if(new File(path).exists()){
 //			log.info("Cached Query Results... using them");
 //			return;
@@ -545,6 +542,12 @@ public class StressTestcase implements Testcase{
 			qh.init();
 		} catch (IOException e) {
 			LogHandler.writeStackTrace(log, e, Level.SEVERE);
+		}
+		if(queryMixFile==null || queryMixFile.isEmpty()){
+			noOfQueriesInMixes=Long.valueOf(FileHandler.getFileCountInDir(path)).intValue();
+		}
+		else{
+			noOfQueriesInMixes=Long.valueOf(FileHandler.getLineCount(queryMixFile)).intValue();
 		}
 		
 	}
@@ -639,6 +642,9 @@ public class StressTestcase implements Testcase{
 		}catch(Exception e){
 			queryMixNo=0;
 		}
+		sparqlProps.put(QUERYMIXNO, queryMixNo);
+		System.out.println(queryMixNo);
+		System.out.println(sparqlProps);
 		try{
 			timeLimit=Long.valueOf(p.getProperty(TIMELIMIT));
 		}catch(Exception e){
