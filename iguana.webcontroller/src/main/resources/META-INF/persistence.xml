@@ -24,8 +24,8 @@
       <!-- If you are running in a production environment, add a managed 
          data source, this example data source is just for development and testing! -->
       <!-- The datasource is deployed as WEB-INF/iguana.webcontroller2-ds.xml, you
-         can find it in the source at src/main/webapp/WEB-INF/iguana.webcontroller2-ds.xml -->
-      <jta-data-source>java:jboss/datasources/iguana.webcontroller2DS</jta-data-source>
+         can find it in the source at src/main/webapp/WEB-INF/iguana.webcontroller-ds.xml -->
+      <jta-data-source>java:jboss/datasources/iguana.webcontrollerDS</jta-data-source>
       <properties>
          <!-- Properties for Hibernate -->
          <property name="hibernate.hbm2ddl.auto" value="create-drop" />

@@ -1,0 +1,118 @@
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573122 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573321 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573385 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573390 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573547 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573683 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573684 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573685 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+
+sparql select ?forum ?title ?moderator ?first ?last 
+where {
+  ?post snvoc:id 1924146573696 .
+  ?post snvoc:replyOf* ?orig.
+  ?orig a snvoc:Post .
+  ?forum snvoc:containerOf ?orig .
+  ?forum snvoc:title ?title .
+  ?forum snvoc:hasModerator ?moderator .
+  optional { ?moderator snvoc:firstName ?first } .
+  optional { ?moderator snvoc:lastName ?last } .
+}
+;
+

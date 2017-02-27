@@ -1,0 +1,82 @@
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 1924146573316 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 1924146573688 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 1924146573711 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 1924146573722 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 1924146573729 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 2061585514162 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 2061585514163 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 2061585514900 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+
+sparql select ?creator ?p_firstname ?p_lastname
+where {
+  ?post snvoc:id 2061585514916 .
+  ?post snvoc:hasCreator ?creator .
+  optional { ?creator snvoc:firstName ?p_firstname } .
+  optional { ?creator snvoc:lastName ?p_lastname } .
+}
+;
+

@@ -1,0 +1,235 @@
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000015393162792113 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000015393162792113 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000021990232563085 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000021990232563085 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000015393162796217 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000015393162796217 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000028587302332260 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000028587302332260 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000028587302327417 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000028587302327417 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000028587302331516 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000028587302331516 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000032985348839545 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000032985348839545 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000030786325583145 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000030786325583145 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+
+sparql select ?liker ?first ?last #Q7
+       (?max_ldt - xsd:dateTime("1970-01-01T00:00:00.000+00:00")) * 1000 as ?max_ldate
+       (not exists {  sn:pers00000032985348841031 snvoc:knows ?liker} as ?is_new)
+       ?post ?content (?max_ldt - ?dt)/60 as ?lag
+where {
+  {{
+    select ?liker, (max(?ldt) as ?max_ldt)
+    where {
+  	?post snvoc:hasCreator sn:pers00000032985348841031 .
+  	{{ ?lk snvoc:hasPost ?post } union { ?lk snvoc:hasComment ?post }} .
+  	?liker snvoc:likes ?lk . ?lk snvoc:creationDate ?ldt .
+    }
+    group by ?liker
+    order by desc(?max_ldt)
+    limit 20
+  }} .
+  {{ ?lk1 snvoc:hasPost ?post } union { ?lk1 snvoc:hasComment ?post }} .
+  ?liker snvoc:likes ?lk1 . ?lk1 snvoc:creationDate ?max_ldt .
+  {{ ?post snvoc:content ?content } union {?post snvoc:imageFile ?content}} .
+  optional { ?liker  snvoc:firstName ?first } .
+  optional { ?liker snvoc:lastName ?last } .
+  ?post snvoc:creationDate ?dt .   
+}
+order by desc(?max_ldate) ?liker
+;
+

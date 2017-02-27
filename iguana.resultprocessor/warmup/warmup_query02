@@ -1,0 +1,307 @@
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P37D")) .
+            ?post snvoc:isLocatedIn dbpedia:Papua_New_Guinea
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P37D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Namibia
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000021990232560330 snvoc:knows ?fr.} union {sn:pers00000021990232560330 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000021990232560330)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Papua_New_Guinea}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Namibia}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P31D")) .
+            ?post snvoc:isLocatedIn dbpedia:Panama
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P31D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Papua_New_Guinea
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000028587302325639 snvoc:knows ?fr.} union {sn:pers00000028587302325639 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000028587302325639)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Panama}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Papua_New_Guinea}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2010-12-01T01:00:00.000+00:00"^^xsd:dateTime && ?date < "2010-12-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P31D")) .
+            ?post snvoc:isLocatedIn dbpedia:Honduras
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2010-12-01T01:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2010-12-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P31D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Norway
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000002199023258791 snvoc:knows ?fr.} union {sn:pers00000002199023258791 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000002199023258791)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Honduras}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Norway}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime && ?date < "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P30D")) .
+            ?post snvoc:isLocatedIn dbpedia:Norway
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P30D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Papua_New_Guinea
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000010995116285917 snvoc:knows ?fr.} union {sn:pers00000010995116285917 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000010995116285917)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Norway}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Papua_New_Guinea}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime && ?date < "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P31D")) .
+            ?post snvoc:isLocatedIn dbpedia:Namibia
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P31D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Angola
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000006597069767577 snvoc:knows ?fr.} union {sn:pers00000006597069767577 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000006597069767577)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Namibia}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Angola}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P28D")) .
+            ?post snvoc:isLocatedIn dbpedia:Libya
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P28D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Angola
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000006597069773807 snvoc:knows ?fr.} union {sn:pers00000006597069773807 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000006597069773807)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Libya}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Angola}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2011-05-01T02:00:00.000+00:00"^^xsd:dateTime && ?date < "2011-05-01T02:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P31D")) .
+            ?post snvoc:isLocatedIn dbpedia:Swaziland
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2011-05-01T02:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2011-05-01T02:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P31D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Libya
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000028587302327399 snvoc:knows ?fr.} union {sn:pers00000028587302327399 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000028587302327399)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Swaziland}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Libya}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P34D")) .
+            ?post snvoc:isLocatedIn dbpedia:Mauritius
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P34D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Libya
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000015393162790353 snvoc:knows ?fr.} union {sn:pers00000015393162790353 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000015393162790353)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Mauritius}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Libya}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+
+sparql select ?fr ?first ?last ?ct1 ?ct2 (?ct1 + ?ct2) as ?sum #Q3
+where { 
+    {select distinct ?fr ?first ?last
+        (((select count (*)
+        where {
+            ?post snvoc:hasCreator ?fr .
+            ?post snvoc:creationDate ?date .
+            filter (?date >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P28D")) .
+            ?post snvoc:isLocatedIn dbpedia:Jordan
+        }))
+        as ?ct1)
+        ((select count (*)
+        where {
+            ?post2 snvoc:hasCreator ?fr .
+            ?post2 snvoc:creationDate ?date2 .
+            filter (?date2 >= "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime && ?date2 < "2012-01-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P28D")) .
+            ?post2 snvoc:isLocatedIn dbpedia:Namibia
+        })
+        as ?ct2)
+     where {
+        {sn:pers00000010995116280785 snvoc:knows ?fr.} union {sn:pers00000010995116280785 snvoc:knows ?fr2. ?fr2 snvoc:knows ?fr. filter (?fr != sn:pers00000010995116280785)} .
+        optional { ?fr snvoc:firstName ?first } .
+	optional { ?fr snvoc:lastName ?last } .
+        ?fr snvoc:isLocatedIn ?city .
+	filter(!exists {?city snvoc:isPartOf dbpedia:Jordan}).
+	filter(!exists {?city snvoc:isPartOf dbpedia:Namibia}).
+     }
+    }.
+    filter (?ct1 > 0 && ?ct2 > 0) .
+}
+order by desc(?sum) ?fr
+limit 20
+;
+

@@ -1,0 +1,154 @@
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000000000000005246 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "BasketballPlayer" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000032985348841666 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "MilitaryUnit" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000002199023265614 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "Athlete" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000021990232559703 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "Criminal" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000026388279074065 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "GolfPlayer" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000019791209303710 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "GolfPlayer" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000000000000000401 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "BasketballPlayer" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000021990232560910 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "MilitaryUnit" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+
+sparql select ?exp ?first ?last group_concat(distinct ?tagname, ', ') as ?tags  #Q12
+              count (distinct ?reply) as ?cnt
+where {
+    sn:pers00000015393162792929 snvoc:knows ?exp .
+    optional { ?exp snvoc:firstName ?first } .
+    optional { ?exp snvoc:lastName ?last } .
+    ?reply snvoc:hasCreator ?exp . 
+    ?reply snvoc:replyOf  ?org_post . ?org_post a snvoc:Post .
+    ?org_post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?tag a ?type.
+    ?type rdfs:subClassOf* ?type1 . ?type1 rdfs:label "Criminal" .
+}
+group by ?exp ?first ?last
+order by desc(?cnt) ?exp
+limit 20
+;
+

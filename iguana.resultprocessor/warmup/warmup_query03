@@ -1,0 +1,154 @@
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000017592186047257 snvoc:knows ?fr .
+    filter (?date >= "2010-12-01T01:00:00.000+00:00"^^xsd:dateTime && ?date <= "2010-12-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P171D")) .
+    filter (!exists {
+        sn:pers00000017592186047257 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2010-12-01T01:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000010995116279510 snvoc:knows ?fr .
+    filter (?date >= "2012-03-01T01:00:00.000+00:00"^^xsd:dateTime && ?date <= "2012-03-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P39D")) .
+    filter (!exists {
+        sn:pers00000010995116279510 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2012-03-01T01:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000032985348839046 snvoc:knows ?fr .
+    filter (?date >= "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime && ?date <= "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P39D")) .
+    filter (!exists {
+        sn:pers00000032985348839046 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2011-02-01T01:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000004398046514236 snvoc:knows ?fr .
+    filter (?date >= "2012-08-01T02:00:00.000+00:00"^^xsd:dateTime && ?date <= "2012-08-01T02:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P82D")) .
+    filter (!exists {
+        sn:pers00000004398046514236 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2012-08-01T02:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000028587302330229 snvoc:knows ?fr .
+    filter (?date >= "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime && ?date <= "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P67D")) .
+    filter (!exists {
+        sn:pers00000028587302330229 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000032985348838007 snvoc:knows ?fr .
+    filter (?date >= "2012-03-01T01:00:00.000+00:00"^^xsd:dateTime && ?date <= "2012-03-01T01:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P30D")) .
+    filter (!exists {
+        sn:pers00000032985348838007 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2012-03-01T01:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000032985348841098 snvoc:knows ?fr .
+    filter (?date >= "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime && ?date <= "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P33D")) .
+    filter (!exists {
+        sn:pers00000032985348841098 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000010995116287048 snvoc:knows ?fr .
+    filter (?date >= "2011-04-01T02:00:00.000+00:00"^^xsd:dateTime && ?date <= "2011-04-01T02:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P41D")) .
+    filter (!exists {
+        sn:pers00000010995116287048 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2011-04-01T02:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
+sparql select ?tagname count (*) as ?cnt #Q4
+where {
+    ?post a snvoc:Post . ?post snvoc:hasCreator ?fr .
+    ?post snvoc:hasTag ?tag . ?tag foaf:name ?tagname .
+    ?post snvoc:creationDate ?date . sn:pers00000004398046512528 snvoc:knows ?fr .
+    filter (?date >= "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime && ?date <= "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime + xsd:duration("P48D")) .
+    filter (!exists {
+        sn:pers00000004398046512528 snvoc:knows ?fr2 . ?post2 snvoc:hasCreator ?fr2 .
+	?post2 a snvoc:Post . ?post2 snvoc:hasTag ?tag .
+        ?post2 snvoc:creationDate ?date2 .
+	filter (?date2 < "2011-09-01T02:00:00.000+00:00"^^xsd:dateTime)}) 
+    }
+group by ?tagname
+order by desc(?cnt) ?tagname
+limit 10
+;
+
