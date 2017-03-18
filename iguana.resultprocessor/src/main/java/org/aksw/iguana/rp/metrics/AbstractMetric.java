@@ -281,8 +281,7 @@ public abstract class AbstractMetric implements Metric{
 	 * @return
 	 */
 	protected String getSubjectFromExtraMeta(Properties recv){
-		String subject = ""
-				+ metaData.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
+		String subject = metaData.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
 		Properties extraMeta = getExtraMeta(recv);
 		if (!extraMeta.isEmpty()) {
 			subject += "/" + extraMeta.hashCode();

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.iguana.tp.tasks.impl;
+package org.aksw.iguana.tp.tasks.impl.stresstest;
 
 import java.io.IOException;
 import java.util.Properties;
