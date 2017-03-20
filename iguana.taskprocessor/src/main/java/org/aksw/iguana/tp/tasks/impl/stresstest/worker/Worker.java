@@ -1,5 +1,6 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -16,10 +17,11 @@ public interface Worker extends Runnable{
 	 * This should return the time in ms the query took to be executed and checked for results
 	 * If an error occured -1 should be returned
 	 * 
-	 * @param query
+	 * @param query The query which should be executed
+	 * @param queryID the ID of the query which should be executed
 	 * @return the time/ms the query took to executed, -1 if error happend
 	 */
-	public int getTimeForQueryMs(String query);
+	public long getTimeForQueryMs(String query, String queryID);
 	
 	/**
 	 * This method saves the next query in the queryStr StringBuilder and
@@ -27,8 +29,9 @@ public interface Worker extends Runnable{
 	 * 
 	 * @param queryStr The query should be stored in here!
 	 * @param queryID The queryID should be stored in here!
+	 * @throws IOException 
 	 */
-	public void getNextQuery(StringBuilder queryStr, StringBuilder queryID);
+	public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException;
 	
 	/**
 	 * This will initialize the worker.

@@ -18,7 +18,7 @@ public class Stresstest extends AbstractTask {
 	/**
 	 * 
 	 */
-	public Stresstest(Properties p) {
+	public Stresstest() {
 		
 	}
 	

@@ -1,5 +1,7 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -21,7 +23,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractWorker implements Worker {
 
-	private static final Logger LOGGER = LoggerFactory
+    	/**
+    	 * Logger which should be used
+    	 */
+	protected static final Logger LOGGER = LoggerFactory
 		.getLogger(AbstractWorker.class);
     
 	private boolean endSignal=false;
@@ -30,12 +35,26 @@ public abstract class AbstractWorker implements Worker {
 	private Collection<Properties> results = new LinkedList<Properties>();
 	private String taskID;
 	
-	private String workerType;
-	private int workerID;
+	/**
+	 * The worker Type. f.e. SPARQL or UPDATE or SQL or whatever
+	 */
+	protected String workerType;
+	/**
+	 * The unique ID of the worker, should be from 0 to n
+	 */
+	protected int workerID;
 	private Properties extra;
 
-	private LatencyStrategy latencyStrategy;
-	private int latencyBaseValue;
+	private int fixedLatency;
+
+	private int gaussianLatency;
+
+	private Random latencyRandomizer;
+
+	/**
+	 * List which contains all Files representing one query(Pattern)
+	 */
+	protected File[] queryFileList;
 	
 	
 	
@@ -45,27 +64,23 @@ public abstract class AbstractWorker implements Worker {
 	    this.taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
 	    this.workerID = (int) p.get(CONSTANTS.WORKER_ID_KEY);
 	    this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
+
+	    //workerID represents seed to be fair with different systems.
+	    latencyRandomizer = new Random(this.workerID);
+	    
+	    //set Query file list
+	    this.queryFileList = (File[]) p.get(CONSTANTS.QUERY_FILE_LIST);
+	    
 	    //Add latency Specs, add defaults
-	    this.latencyStrategy = LatencyStrategy.valueOf(p.getProperty(CONSTANTS.LATENCY_STRATEGY, "NONE"));
-	    this.latencyBaseValue = (int) p.getOrDefault(CONSTANTS.LATENCY_BASE_VALUE, 0);
+	    this.fixedLatency = (int) p.getOrDefault(CONSTANTS.FIXED_LATENCY, 0);
+	    this.gaussianLatency = (int) p.getOrDefault(CONSTANTS.GAUSSIAN_LATENCY, 0);
 	    LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
 	}
 	
 	@Override
 	public void waitTimeMs(){
-	    long wait=0;
-	    switch(latencyStrategy){
-	    case NONE:
-		return;
-	    case FIXED:
-		wait = this.latencyBaseValue;
-		break;
-	    case VARIABLE:
-		//workerID represents seed to be fair with different systems.
-		Random rand = new Random(this.workerID);
-		wait = Math.round((rand.nextGaussian()+1)*this.latencyBaseValue);
-		break;
-	    }
+	    long wait=this.fixedLatency;
+	    wait += Math.round((latencyRandomizer.nextGaussian()+1)*this.gaussianLatency);
 	    LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
 	    try {
 		Thread.sleep(wait);
@@ -92,12 +107,17 @@ public abstract class AbstractWorker implements Worker {
 			//Get next query
 			StringBuilder query = new StringBuilder();
 			StringBuilder queryID = new StringBuilder();
-			getNextQuery(query, queryID);
+			try{
+			    getNextQuery(query, queryID);
+			}catch(IOException e){
+			    LOGGER.error("Worker[{{}} : {{}}] : Something went terrible wrong in getting the next query. Worker will be shut down.", this.workerType, this.workerID);
+			    LOGGER.error("Error which occured:_", e);
+			    break;
+			}
 			//Simulate Network Delay (or whatever should be simulated)
 			waitTimeMs();
 			//benchmark query
-			int time = getTimeForQueryMs(query.toString());
-			LOGGER.debug("Executed Query with ID {{}} in {{}} ms", queryID, time);
+			long time = getTimeForQueryMs(query.toString(), queryID.toString());
 			//If endSignal was send during execution it should not be counted anymore.
 			if(!this.endSignal){
 				//create Properties store it in List

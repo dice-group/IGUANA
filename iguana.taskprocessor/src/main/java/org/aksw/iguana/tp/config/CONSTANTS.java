@@ -21,14 +21,32 @@ public class CONSTANTS {
     public static final String WORKER_TYPE_KEY = "workerType";
 
     /**
-     * The key to set/get the simulated Network Latency Strategy 
+     * The key to set/get the base value for the gaussian intervall 
+     * which will be used to randomly select a time to wait before each query
      */
-    public static final String LATENCY_STRATEGY = "latencyStrategy";
+    public static final String GAUSSIAN_LATENCY = "gaussianLatency";
 
     /**
-     * The key to set/get the base value corresponding to the latency strategy
+     * The key to set/get a fixed value to wait before each query
      */
-    public static final String LATENCY_BASE_VALUE = "latencyBaseValue";
+    public static final String FIXED_LATENCY = "fixedLatency";
+
+    /**
+     * The key to get/set the current sparql endpoint to test
+     */
+    public static final String SPARQL_CURRENT_ENDPOINT = "sparqlEndpoint";
+
+    /**
+     * The key to get/set the timeout for sparql queries
+     * 0 and less means no timeout,
+     * default is 180s
+     */
+    public static final String SPARQL_TIMEOUT = "sparqlTimeOut";
+
+    /**
+     * 
+     */
+    public static final String QUERY_FILE_LIST = "queryFileList";
 
 
 }
