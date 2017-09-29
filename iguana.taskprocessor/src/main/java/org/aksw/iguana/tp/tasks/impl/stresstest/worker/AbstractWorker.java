@@ -129,6 +129,7 @@ public abstract class AbstractWorker implements Worker {
 				//Add extra Meta Key, worker ID and worker Type
 				result.put(COMMON.EXTRA_META_KEY, this.extra);
 				results.add(result);
+				//TODO why not sending the result to the queue right now?
 			}
 		}
 		LOGGER.info("Stopping Worker[{{}} : {{}}].",this.workerType, this.workerID);
