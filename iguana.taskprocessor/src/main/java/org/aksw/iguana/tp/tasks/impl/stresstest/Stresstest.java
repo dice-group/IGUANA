@@ -39,5 +39,10 @@ public class Stresstest extends AbstractTask {
 		// TODO Execute each Worker in ThreadPool
 	}
 
+	public boolean isValid(Properties configuration) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 }

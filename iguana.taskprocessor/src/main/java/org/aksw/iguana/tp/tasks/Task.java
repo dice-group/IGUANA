@@ -28,6 +28,14 @@ public interface Task {
 	void sendResults(Properties data) throws IOException;
 
 	/**
+	 * Checks if the Task configuration is valid
+	 * and all the files are existing and valid
+	 * @param configuration the Task configuration
+	 * @return true if the configuration is valid, false otherwise
+	 */
+	boolean isValid(Properties configuration);
+	
+	/**
 	 * Will initialize the Task with a rabbitMQ host and queue to send the results to.
 	 * 
 	 * @param host

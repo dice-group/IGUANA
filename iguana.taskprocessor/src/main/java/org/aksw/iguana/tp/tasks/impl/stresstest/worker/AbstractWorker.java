@@ -57,6 +57,29 @@ public abstract class AbstractWorker implements Worker {
 	protected File[] queryFileList;
 	
 	
+	public AbstractWorker() {
+	}
+	
+	public AbstractWorker(String taskID, int workerID, String workerType, File[] queryFileList, Integer fixedLatency, Integer gaussianLatency) {
+		 //Add task and Worker Specs
+	    this.taskID = taskID;
+	    this.workerID = workerID;
+	    this.workerType = workerType;
+
+	    //workerID represents seed to be fair with different systems.
+	    latencyRandomizer = new Random(this.workerID);
+	    
+	    //set Query file list
+	    this.queryFileList = queryFileList;
+	    
+	    //Add latency Specs, add defaults
+	    if(fixedLatency != null)
+	    	this.fixedLatency = fixedLatency;
+	    if(gaussianLatency != null)
+	    	this.gaussianLatency = gaussianLatency;
+	    LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
+
+	}
 	
 	@Override
 	public void init(Properties p){
@@ -109,6 +132,10 @@ public abstract class AbstractWorker implements Worker {
 			StringBuilder queryID = new StringBuilder();
 			try{
 			    getNextQuery(query, queryID);
+			    //check if endsignal was triggered
+			    if(this.endSignal) {
+			    	break;
+			    }
 			}catch(IOException e){
 			    LOGGER.error("Worker[{{}} : {{}}] : Something went terrible wrong in getting the next query. Worker will be shut down.", this.workerType, this.workerID);
 			    LOGGER.error("Error which occured:_", e);
