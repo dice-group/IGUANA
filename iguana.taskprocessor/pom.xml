@@ -1,11 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.aksw</groupId>
-  <artifactId>iguana.taskprocessor</artifactId>
-  <version>2.0.0</version>
-  <name>Iguana Task Processor</name>
-  <description>Will implement the specific tasks end will execute one task specified by the Iguana core controller</description>
-<licenses>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.aksw</groupId>
+	<artifactId>iguana.taskprocessor</artifactId>
+	<version>2.0.0</version>
+	<name>Iguana Task Processor</name>
+	<description>Will implement the specific tasks end will execute one task specified by the Iguana core controller</description>
+	<licenses>
 		<license>
 			<name>LGPLv3 or later</name>
 			<url>http://www.gnu.org/licenses/lgpl.html</url>
@@ -31,7 +32,7 @@
 	</properties>
 
 
-  <organization>
+	<organization>
 		<name>AKSW Research Group</name>
 		<url>http://aksw.org</url>
 	</organization>
@@ -51,15 +52,20 @@
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
-			<version>3.2.0</version>
+			<version>3.4.0</version>
 		</dependency>
-		
+
 		<!-- JUnit -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple</artifactId>
+			<version>5.1.6</version>
 		</dependency>
 	</dependencies>
 </project>

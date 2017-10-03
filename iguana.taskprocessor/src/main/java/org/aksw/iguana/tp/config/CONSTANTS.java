@@ -44,9 +44,15 @@ public class CONSTANTS {
     public static final String SPARQL_TIMEOUT = "sparqlTimeOut";
 
     /**
-     * 
+     * The key to get the file name list for the sparql (resp. update) queries
      */
     public static final String QUERY_FILE_LIST = "queryFileList";
+
+    /**
+     * The key to get the update strategy
+     * default is NONE
+     */	
+	public static final Object STRESSTEST_UPDATE_STRATEGY = "updateStrategy";
 
 
 }

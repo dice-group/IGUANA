@@ -3,6 +3,8 @@
  */
 package org.aksw.iguana.tp.controller;
 
+import java.util.Properties;
+
 import org.aksw.iguana.commons.communicator.Communicator;
 import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -38,7 +40,8 @@ public class TaskController {
 	}
 	
 	/**
-	 * Will start the controlling
+	 * Will start the controlling, receiving of task properties, 
+	 * sending the {@link COMMON.TASK_FINISHED_MESSAGE} to the main controller 
 	 */
 	public void start(){		
 		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
@@ -56,5 +59,18 @@ public class TaskController {
 					+" consume queue "+COMMON.MC2TP_QUEUE_NAME+" and sender queue"+COMMON.TP2MC_QUEUE_NAME, e);
 			communicator.close();
 		}
+	}
+	
+	/**
+	 * start single task set in properties without RabbitMQ
+	 * 
+	 * @param p Task Properties
+ 	 */
+	public void startTask(Properties p) {
+		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
+
+		TaskManager tmanager = new TaskManager(host, COMMON.CORE2RP_QUEUE_NAME);
+		DefaultConsumer consumer = new DefaultConsumer(tmanager);
+		consumer.consume(p);
 	}
 }

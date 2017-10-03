@@ -31,11 +31,13 @@ public class SPARQLWorker extends AbstractWorker {
 	public SPARQLWorker() {
 	}
 
-	public SPARQLWorker(String service, long timeOut, String taskID, int workerID, String workerType,
+	public SPARQLWorker(String service, Long timeOut, String taskID, int workerID, String workerType,
 			File[] queryFileList, Integer fixedLatency, Integer gaussianLatency) {
 		super(taskID, workerID, workerType, queryFileList, fixedLatency, gaussianLatency);
 		this.service = service;
-		this.timeOut = timeOut;
+		this.timeOut = 180000;
+		if(timeOut != null)
+			this.timeOut = timeOut;
 
 		queryPatternChooser = new Random(this.workerID);
 		this.currentQueryID = queryPatternChooser.nextInt(this.queryFileList.length);
@@ -55,8 +57,8 @@ public class SPARQLWorker extends AbstractWorker {
 	@Override
 	public long getTimeForQueryMs(String query, String queryID) {
 		QueryExecution exec = QueryExecutionFactory.sparqlService(service, query);
-		// Set query timeout
-		exec.setTimeout(this.timeOut);
+		// Set query timeout				
+		exec.setTimeout(this.timeOut, this.timeOut);
 		try {
 			long start = System.currentTimeMillis();
 			// Execute Query

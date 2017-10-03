@@ -2,12 +2,12 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
-import java.util.Random;
-
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
-import org.aksw.iguana.tp.utils.FileUtils;
+import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateComparator;
+import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -28,17 +28,31 @@ public class UPDATEWorker extends AbstractWorker {
 	private String service;
 	private Long timeOut;
 	private int currentQueryID = 0;
+	private UpdateStrategy updateStrategy;
 
 	public UPDATEWorker() {
 	}
 
-	public UPDATEWorker(String service, long timeOut, String taskID, int workerID, String workerType,
-			File[] queryFileList, Integer fixedLatency, Integer gaussianLatency, String UpdateStrategy) {
+	public UPDATEWorker(String service, Long timeOut, String taskID, int workerID, String workerType,
+			File[] queryFileList, Integer fixedLatency, Integer gaussianLatency, String updateStrategy) {
 		super(taskID, workerID, workerType, queryFileList, fixedLatency, gaussianLatency);
 		this.service = service;
-		this.timeOut = timeOut;
-		// TODO get UpdateStrategy of properties, sort Files according to UpdateStrategyComparator
+		// set default timeout to 180s
+		this.timeOut = 180000L;
+		// if timeout is set, set timeout
+		if (timeOut != null)
+			this.timeOut = timeOut;
 
+		// set default updateStrategy to none
+		this.updateStrategy = UpdateStrategy.NONE;
+		// if updateStrategy is set, set updateStrategy
+		if (updateStrategy != null) {
+			this.updateStrategy = UpdateStrategy.valueOf(updateStrategy);
+		}
+		// sort updateFiles according to updateStrategy
+
+		UpdateComparator cmp = new UpdateComparator(this.updateStrategy);
+		Arrays.sort(this.queryFileList, cmp);
 	}
 
 	@Override
@@ -47,8 +61,12 @@ public class UPDATEWorker extends AbstractWorker {
 		super.init(p);
 		this.service = p.getProperty(CONSTANTS.SPARQL_CURRENT_ENDPOINT);
 		this.timeOut = (long) p.getOrDefault(CONSTANTS.SPARQL_TIMEOUT, 180000);
-		// TODO get UpdateStrategy of properties, sort Files according to UpdateStrategyComparator
-		
+
+		//use updateStrategy if set, otherwise use default: none
+		this.updateStrategy = UpdateStrategy.valueOf(p.getOrDefault(CONSTANTS.STRESSTEST_UPDATE_STRATEGY, "NONE").toString());
+		// sort updateFiles according to updateStrategy
+		UpdateComparator cmp = new UpdateComparator(this.updateStrategy);
+		Arrays.sort(this.queryFileList, cmp);
 	}
 
 	@Override

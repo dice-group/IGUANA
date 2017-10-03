@@ -42,6 +42,10 @@ public class DefaultConsumer extends AbstractConsumer{
 	@Override
 	public void consume(byte[] data) {
 		Properties p = RabbitMQUtils.getObject(data);
+		consume(p);
+	}
+
+	public void consume(Properties p) {
 		String className=p.getProperty(COMMON.CLASS_NAME);
 		Object[] constructorArgs=(Object[]) p.get(COMMON.CONSTRUCTOR_ARGS);
 		Class<?>[] constructorClasses=null;
@@ -56,7 +60,9 @@ public class DefaultConsumer extends AbstractConsumer{
 			parent.send(RabbitMQUtils.getData(COMMON.TASK_FINISHED_MESSAGE));
 		} catch (IOException | TimeoutException e) {
 			LOGGER.error("Could not start Task "+className, e);
+			parent.send(RabbitMQUtils.getData(COMMON.TASK_FINISHED_MESSAGE));
 		}
 	}
-
+	
+	
 }

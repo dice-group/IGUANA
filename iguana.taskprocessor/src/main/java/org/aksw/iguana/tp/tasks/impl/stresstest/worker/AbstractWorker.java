@@ -145,6 +145,7 @@ public abstract class AbstractWorker implements Worker {
 			waitTimeMs();
 			//benchmark query
 			long time = getTimeForQueryMs(query.toString(), queryID.toString());
+			this.executedQueries++;
 			//If endSignal was send during execution it should not be counted anymore.
 			if(!this.endSignal){
 				//create Properties store it in List
@@ -156,7 +157,6 @@ public abstract class AbstractWorker implements Worker {
 				//Add extra Meta Key, worker ID and worker Type
 				result.put(COMMON.EXTRA_META_KEY, this.extra);
 				results.add(result);
-				//TODO why not sending the result to the queue right now?
 			}
 		}
 		LOGGER.info("Stopping Worker[{{}} : {{}}].",this.workerType, this.workerID);
