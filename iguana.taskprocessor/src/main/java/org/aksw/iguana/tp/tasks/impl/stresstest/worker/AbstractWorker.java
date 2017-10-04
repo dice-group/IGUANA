@@ -2,6 +2,7 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -30,7 +31,7 @@ public abstract class AbstractWorker implements Worker {
 		.getLogger(AbstractWorker.class);
     
 	private boolean endSignal=false;
-	private long executedQueries;
+	protected long executedQueries;
 	
 	private Collection<Properties> results = new LinkedList<Properties>();
 	private String taskID;
@@ -55,22 +56,29 @@ public abstract class AbstractWorker implements Worker {
 	 * List which contains all Files representing one query(Pattern)
 	 */
 	protected File[] queryFileList;
-	
+
+	protected Long timeLimit;
+
+	protected long startTime;
+
+	private String queriesFileName;
+
 	
 	public AbstractWorker() {
 	}
 	
-	public AbstractWorker(String taskID, int workerID, String workerType, File[] queryFileList, Integer fixedLatency, Integer gaussianLatency) {
+	public AbstractWorker(String taskID, int workerID, String workerType, Long timeLimit, String queriesFileName, Integer fixedLatency, Integer gaussianLatency) {
 		 //Add task and Worker Specs
 	    this.taskID = taskID;
 	    this.workerID = workerID;
 	    this.workerType = workerType;
+	    this.timeLimit = timeLimit;
 
 	    //workerID represents seed to be fair with different systems.
 	    latencyRandomizer = new Random(this.workerID);
 	    
-	    //set Query file list
-	    this.queryFileList = queryFileList;
+	    //set Query file/folder Name
+	    this.queriesFileName = queriesFileName;
 	    
 	    //Add latency Specs, add defaults
 	    if(fixedLatency != null)
@@ -87,6 +95,8 @@ public abstract class AbstractWorker implements Worker {
 	    this.taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
 	    this.workerID = (int) p.get(CONSTANTS.WORKER_ID_KEY);
 	    this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
+		this.timeLimit = (Long) p.get(CONSTANTS.TIME_LIMIT);
+
 
 	    //workerID represents seed to be fair with different systems.
 	    latencyRandomizer = new Random(this.workerID);
@@ -124,6 +134,9 @@ public abstract class AbstractWorker implements Worker {
 	    	this.extra = new Properties();
 	    	this.extra.put(CONSTANTS.WORKER_ID_KEY, workerID);
 		this.extra.setProperty(CONSTANTS.WORKER_TYPE_KEY, workerType);
+		//For Update and Logging purpose get startTime of Worker
+		this.startTime = Calendar.getInstance().getTimeInMillis();
+		
 		LOGGER.info("Starting Worker[{{}} : {{}}].",this.workerType, this.workerID);
 		//Execute Queries as long as the Stresstest will need.
 		while(!this.endSignal){
@@ -185,5 +198,16 @@ public abstract class AbstractWorker implements Worker {
 	public void run(){
 		startWorker();
 	}
+	
+	public String getQueriesFileName() {
+		return this.queriesFileName;
+	}
+	
+	public void setQueriesList(File[] queries) {
+		this.queryFileList = queries;
+	}
 
+	public long getNoOfQueries() {
+		return this.queryFileList.length;
+	}
 }

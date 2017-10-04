@@ -31,16 +31,22 @@ public class SPARQLWorker extends AbstractWorker {
 	public SPARQLWorker() {
 	}
 
-	public SPARQLWorker(String service, Long timeOut, String taskID, int workerID, String workerType,
-			File[] queryFileList, Integer fixedLatency, Integer gaussianLatency) {
-		super(taskID, workerID, workerType, queryFileList, fixedLatency, gaussianLatency);
+	public SPARQLWorker(String taskID, String workerID, String workerType, String timeLimit, String service, String timeOut,
+			String queryFileName, String fixedLatency, String gaussianLatency) {
+		this(taskID, Integer.parseInt(workerID), workerType, Long.parseLong(timeLimit), service, Long.parseLong(timeOut),
+				queryFileName, Integer.parseInt(fixedLatency), Integer.parseInt(gaussianLatency));
+	}
+	
+	public SPARQLWorker(String taskID, int workerID, String workerType, Long timeLimit, String service, Long timeOut,
+			String queryFileName, Integer fixedLatency, Integer gaussianLatency) {
+		super(taskID, workerID, workerType, timeLimit, queryFileName, fixedLatency, gaussianLatency);
 		this.service = service;
 		this.timeOut = 180000;
 		if(timeOut != null)
 			this.timeOut = timeOut;
 
 		queryPatternChooser = new Random(this.workerID);
-		this.currentQueryID = queryPatternChooser.nextInt(this.queryFileList.length);
+		
 	}
 
 	@Override
@@ -49,9 +55,9 @@ public class SPARQLWorker extends AbstractWorker {
 		super.init(p);
 		this.service = p.getProperty(CONSTANTS.SPARQL_CURRENT_ENDPOINT);
 		this.timeOut = (long) p.getOrDefault(CONSTANTS.SPARQL_TIMEOUT, 180000);
-
+		
 		queryPatternChooser = new Random(this.workerID);
-		this.currentQueryID = queryPatternChooser.nextInt(this.queryFileList.length);
+		
 	}
 
 	@Override
@@ -95,4 +101,11 @@ public class SPARQLWorker extends AbstractWorker {
 		
 	}
 
+	@Override
+	public void setQueriesList(File[] queries) {
+		super.setQueriesList(queries);
+		this.currentQueryID = queryPatternChooser.nextInt(this.queryFileList.length);
+	}
+
+	
 }

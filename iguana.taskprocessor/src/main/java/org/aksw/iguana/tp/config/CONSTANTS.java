@@ -49,10 +49,18 @@ public class CONSTANTS {
     public static final String QUERY_FILE_LIST = "queryFileList";
 
     /**
-     * The key to get the update strategy
+     * The key to get the update strategy.
      * default is NONE
      */	
-	public static final Object STRESSTEST_UPDATE_STRATEGY = "updateStrategy";
+	public static final String STRESSTEST_UPDATE_STRATEGY = "updateStrategy";
+
+	/**
+	 * The key to get the timeLimit parameter. 
+	 * be aware that timeLimit can be null.
+	 */
+	public static final String TIME_LIMIT = "timeLimit";
+
+	public static final String STRESSTEST_UPDATE_TIMERSTRATEGY = "updateTimerStrategy";
 
 
 }

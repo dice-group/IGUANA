@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.Worker;
 import org.aksw.iguana.tp.utils.ServerMock;
 import org.junit.After;
@@ -47,8 +48,8 @@ public class UPDATEWorkerTest {
 
 	@Test
 	public void testTime() throws IOException {
-		Worker worker = new UPDATEWorker(host, null, "1", 1, "UPDATE",
-				new File[] { new File("src/test/resources/worker/sparql.sparql") }, 0, 0, "NONE");
+		Worker worker = new UPDATEWorker("1", 1, "UPDATE", null, host, null,
+				"", 0, 0, "NONE", null);
 		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "1");
 		assertTrue(time > 0);
@@ -56,8 +57,8 @@ public class UPDATEWorkerTest {
 
 	@Test
 	public void testTimeout() throws IOException {
-		Worker worker = new UPDATEWorker(host, 1l, "1", 1, "UPDATE",
-				new File[] { new File("src/test/resources/worker/sparql.sparql") }, 0, 0, "NONE");
+		Worker worker = new UPDATEWorker("1", 1, "UPDATE", null, host,  1l, 
+				"", 0, 0, "NONE",null);
 		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "1");
 		assertEquals(-1, time);
@@ -65,8 +66,9 @@ public class UPDATEWorkerTest {
 
 	@Test
 	public void testGetNextQuery() throws IOException {
-		Worker worker = new UPDATEWorker("http://dbpedia.org/sparql", 5l, "1", 1, "SPARQL",
-				new File[] { new File("src/test/resources/worker/sparql.sparql") }, 0, 0, "NONE");
+		Worker worker = new UPDATEWorker("1", 1, "UPDATE", null, "http://dbpedia.org/sparql", 5l,
+				"", 0, 0, "NONE", null);
+		((AbstractWorker) worker).setQueriesList(new File[] {new File("src/test/resources/worker/sparql.sparql") });
 		StringBuilder query = new StringBuilder();
 		StringBuilder queryID = new StringBuilder();
 		worker.getNextQuery(query, queryID);

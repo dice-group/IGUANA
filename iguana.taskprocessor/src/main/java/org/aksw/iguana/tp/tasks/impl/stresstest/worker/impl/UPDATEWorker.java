@@ -3,11 +3,13 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Properties;
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateComparator;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateStrategy;
+import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateTimer;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -29,13 +31,20 @@ public class UPDATEWorker extends AbstractWorker {
 	private Long timeOut;
 	private int currentQueryID = 0;
 	private UpdateStrategy updateStrategy;
+	private UpdateTimer updateTimer = new UpdateTimer();
 
 	public UPDATEWorker() {
 	}
 
-	public UPDATEWorker(String service, Long timeOut, String taskID, int workerID, String workerType,
-			File[] queryFileList, Integer fixedLatency, Integer gaussianLatency, String updateStrategy) {
-		super(taskID, workerID, workerType, queryFileList, fixedLatency, gaussianLatency);
+	public UPDATEWorker(String taskID, String workerID, String workerType, String timeLimit, String service, String timeOut,
+			String updateFolder, String fixedLatency, String gaussianLatency, String updateStrategy, String timerStrategy) {
+		this(taskID, Integer.parseInt(workerID), workerType, Long.parseLong(timeLimit), service, Long.parseLong(timeOut),
+				updateFolder, Integer.parseInt(fixedLatency), Integer.parseInt(gaussianLatency), updateStrategy, timerStrategy);
+	}
+	
+	public UPDATEWorker(String taskID, int workerID, String workerType, Long timeLimit, String service, Long timeOut,
+			String updateFolder, Integer fixedLatency, Integer gaussianLatency, String updateStrategy, String timerStrategy) {
+		super(taskID, workerID, workerType, timeLimit, updateFolder, fixedLatency, gaussianLatency);
 		this.service = service;
 		// set default timeout to 180s
 		this.timeOut = 180000L;
@@ -49,10 +58,8 @@ public class UPDATEWorker extends AbstractWorker {
 		if (updateStrategy != null) {
 			this.updateStrategy = UpdateStrategy.valueOf(updateStrategy);
 		}
-		// sort updateFiles according to updateStrategy
 
-		UpdateComparator cmp = new UpdateComparator(this.updateStrategy);
-		Arrays.sort(this.queryFileList, cmp);
+		setUpdateTimer(timerStrategy);
 	}
 
 	@Override
@@ -61,12 +68,46 @@ public class UPDATEWorker extends AbstractWorker {
 		super.init(p);
 		this.service = p.getProperty(CONSTANTS.SPARQL_CURRENT_ENDPOINT);
 		this.timeOut = (long) p.getOrDefault(CONSTANTS.SPARQL_TIMEOUT, 180000);
-
+		String timerStrategy = p.getProperty(CONSTANTS.STRESSTEST_UPDATE_TIMERSTRATEGY);
 		//use updateStrategy if set, otherwise use default: none
 		this.updateStrategy = UpdateStrategy.valueOf(p.getOrDefault(CONSTANTS.STRESSTEST_UPDATE_STRATEGY, "NONE").toString());
-		// sort updateFiles according to updateStrategy
-		UpdateComparator cmp = new UpdateComparator(this.updateStrategy);
-		Arrays.sort(this.queryFileList, cmp);
+		
+	
+		setUpdateTimer(timerStrategy);
+	}
+	
+	private void setUpdateTimer(String strategyStr) {
+		if(strategyStr == null)
+			return;
+		UpdateTimer.Strategy strategy = UpdateTimer.Strategy.valueOf(strategyStr);
+		switch(strategy) {
+		case FIXED:
+			this.updateTimer = new UpdateTimer();
+		case DISTRIBUTED:
+			if(timeLimit!=null) {
+				this.updateTimer = new UpdateTimer(this.queryFileList.length, this.timeLimit);
+			}
+			else {
+				LOGGER.warn("Worker[{{}} : {{}}]: DISTRIBUTED Updates can only be used with timeLimit!", workerType, workerID);
+			}
+		default:
+			break;
+		}
+		LOGGER.debug("Worker[{{}} : {{}}]: UpdateTimer was set to UpdateTimer:{{}}", workerType, workerID, updateTimer);
+	}
+	
+	@Override
+	public void waitTimeMs(){
+		long currentTime = Calendar.getInstance().getTimeInMillis();
+	   	long wait = this.updateTimer.calculateTime(currentTime - this.startTime, this.executedQueries);
+	    LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
+	    try {
+	    	Thread.sleep(wait);
+	    } catch (InterruptedException e) {
+	    	LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType, workerID, e);
+	    	LOGGER.error("", e);
+	    }
+	    super.waitTimeMs();
 	}
 
 	@Override
@@ -100,6 +141,7 @@ public class UPDATEWorker extends AbstractWorker {
 
 	@Override
 	public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
+		//TODO check if updateStrategy is NEXT
 		// If there is no more update send end signal, as their is nothing to do anymore
 		if (this.currentQueryID >= this.queryFileList.length) {
 			this.stopSending();
@@ -111,6 +153,14 @@ public class UPDATEWorker extends AbstractWorker {
 
 		queryStr.append(org.apache.commons.io.FileUtils.readFileToString(currentQueryFile, "UTF-8"));
 
+	}
+	
+	@Override
+	public void setQueriesList(File[] updateFiles) {
+		super.setQueriesList(updateFiles);
+		// sort updateFiles according to updateStrategy
+		UpdateComparator cmp = new UpdateComparator(this.updateStrategy);
+		Arrays.sort(this.queryFileList, cmp);
 	}
 
 }

@@ -8,7 +8,7 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 public class TestWorkerImpl extends AbstractWorker{
 
 	public TestWorkerImpl(String string, int i, String string2, File[] files, int j, int k) {
-		super(string, i, string2, files, j, k);
+		super(string, i, string2, null, "", j, k);
 	}
 
 	@Override

@@ -21,6 +21,11 @@ import org.aksw.iguana.commons.sender.impl.DefaultSender;
 public abstract class AbstractTask implements Task {
 
 	private ISender sender;
+	protected String taskID;
+	
+	public AbstractTask(String taskID) {
+		this.taskID = taskID;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.aksw.iguana.tp.tasks.Task#init()
@@ -33,6 +38,9 @@ public abstract class AbstractTask implements Task {
 		sender.init(host, queueName);
 	}
 
+	//TODO send start Task
+	
+	//TODO send end Task
 	
 	@Override
 	public void sendResults(Properties data) throws IOException{
