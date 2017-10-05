@@ -2,8 +2,7 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update;
 
 /**
  * 
- * Class to calculate the UPDATEWorker waiting time. 
- * This will calculate the time between two update queries to wait.
+ * Class to calculate time between two update queries. 
  * 
  * @author f.conrads
  *
@@ -28,7 +27,20 @@ public class UpdateTimer {
 	 *
 	 */
 	public enum Strategy {
-		NONE, FIXED, DISTRIBUTED
+		/**
+		 * updates will be executed immediately after another
+		 */
+		NONE, 
+		
+		/**
+		 * a fixed value in ms will be waited before the next update query
+		 */
+		FIXED, 
+		
+		/**
+		 * the updates will be equally distributed over the time limit of the task
+		 */
+		DISTRIBUTED
 	}
 
 	/** 

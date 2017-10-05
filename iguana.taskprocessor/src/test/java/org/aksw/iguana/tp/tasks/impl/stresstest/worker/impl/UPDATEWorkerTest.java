@@ -33,6 +33,9 @@ public class UPDATEWorkerTest {
 	private String host = "http://localhost:8023";
 
 
+	/**
+	 * @throws IOException
+	 */
 	public UPDATEWorkerTest() throws IOException {
 		mock = new ServerMock();
 		fastServer = new ContainerServer(mock);
@@ -40,33 +43,49 @@ public class UPDATEWorkerTest {
 		address1 = new InetSocketAddress(8023);
 	}
 
+	/**
+	 * Starts the Server Mock
+	 * @throws IOException
+	 */
 	@Before
 	public void startServer() throws IOException {
 		fastConnection.connect(address1);
 	}
 	
 
+	/**
+	 * tests a normal successful execution
+	 * @throws IOException
+	 */
 	@Test
 	public void testTime() throws IOException {
-		Worker worker = new UPDATEWorker("1", 1, "UPDATE", null, host, null,
+		Worker worker = new UPDATEWorker("1", 1, null, host, null,
 				"", 0, 0, "NONE", null);
 		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "1");
 		assertTrue(time > 0);
 	}
 
+	/**
+	 * Tests if the timeout works
+	 * @throws IOException
+	 */
 	@Test
 	public void testTimeout() throws IOException {
-		Worker worker = new UPDATEWorker("1", 1, "UPDATE", null, host,  1l, 
+		Worker worker = new UPDATEWorker("1", 1, null, host,  1l, 
 				"", 0, 0, "NONE",null);
 		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "1");
 		assertEquals(-1, time);
 	}
 
+	/**
+	 * Tests the getNextQuery method
+	 * @throws IOException
+	 */
 	@Test
 	public void testGetNextQuery() throws IOException {
-		Worker worker = new UPDATEWorker("1", 1, "UPDATE", null, "http://dbpedia.org/sparql", 5l,
+		Worker worker = new UPDATEWorker("1", 1, null, "http://dbpedia.org/sparql", 5l,
 				"", 0, 0, "NONE", null);
 		((AbstractWorker) worker).setQueriesList(new File[] {new File("src/test/resources/worker/sparql.sparql") });
 		StringBuilder query = new StringBuilder();
@@ -76,6 +95,10 @@ public class UPDATEWorkerTest {
 		assertEquals("sparql.sparql", queryID.toString());
 	}
 
+	/**
+	 * closes the Server Mock
+	 * @throws IOException
+	 */
 	@After
 	public void close() throws IOException {
 		fastConnection.close();

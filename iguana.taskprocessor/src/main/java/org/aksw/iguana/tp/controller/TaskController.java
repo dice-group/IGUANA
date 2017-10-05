@@ -31,6 +31,12 @@ public class TaskController {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(TaskController.class);
 	
+	/**
+	 * main method for standalone controlling.
+	 * If the TaskController should run standalone instead of in the core itself
+	 * 
+	 * @param argc
+	 */
 	public static void main(String[] argc){
 		if(argc.length==1){
 			Config.getInstance(argc[0]);

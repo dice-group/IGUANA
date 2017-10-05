@@ -89,6 +89,11 @@ public abstract class AbstractConsumer implements IConsumer {
 		}
 	}
 
+	/**
+	 * The method which gets the rabbitMQ bytes and can process them
+	 * 
+	 * @param data
+	 */
 	public abstract void consume(byte[] data);
 	
 	public void close(){

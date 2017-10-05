@@ -60,6 +60,9 @@ public class CONSTANTS {
 	 */
 	public static final String TIME_LIMIT = "timeLimit";
 
+	/**
+	 * The key to set the updateTimer Strategy in the stresstest
+	 */
 	public static final String STRESSTEST_UPDATE_TIMERSTRATEGY = "updateTimerStrategy";
 
 

@@ -20,7 +20,7 @@ import org.apache.jena.update.UpdateRequest;
 
 /**
  * 
- * A Worker using SPARQL 1.1 to create service request.
+ * A Worker using SPARQL Updates to create service request.
  * 
  * @author f.conrads
  *
@@ -33,24 +33,79 @@ public class UPDATEWorker extends AbstractWorker {
 	private UpdateStrategy updateStrategy;
 	private UpdateTimer updateTimer = new UpdateTimer();
 
+	/**
+	 * Default Constructor needs to use init method afterwards.
+	 */
 	public UPDATEWorker() {
 	}
 
-	public UPDATEWorker(String taskID, String workerID, String workerType, String timeLimit, String service, String timeOut,
-			String updateFolder, String fixedLatency, String gaussianLatency, String updateStrategy, String timerStrategy) {
-		this(taskID, Integer.parseInt(workerID), workerType, Long.parseLong(timeLimit), service, Long.parseLong(timeOut),
-				updateFolder, Integer.parseInt(fixedLatency), Integer.parseInt(gaussianLatency), updateStrategy, timerStrategy);
+	/**
+	 * Constructor using Strings no need for init method
+	 * 
+	 * @param taskID
+	 *            the taskID
+	 * @param workerID
+	 *            the workerID
+	 * @param timeLimitMS
+	 *            the timeLimit of the task (can be null)
+	 * @param service
+	 *            the endpoint url
+	 * @param timeOutMS
+	 *            the timeout in MS (can be null)
+	 * @param updateFolder
+	 *            the folder containing the updates
+	 * @param fixedLatency
+	 *            the fixed latency (can be null)
+	 * @param gaussianLatency
+	 *            the gaussian latency (can be null)
+	 * @param updateStrategy
+	 *            the UpdateStrategy
+	 * @param timerStrategy
+	 *            the UpdateTimer.Strategy
+	 */
+	public UPDATEWorker(String taskID, String workerID, String timeLimitMS, String service, String timeOutMS,
+			String updateFolder, String fixedLatency, String gaussianLatency, String updateStrategy,
+			String timerStrategy) {
+		this(taskID, Integer.parseInt(workerID), Long.getLong(timeLimitMS), service, Long.getLong(timeOutMS),
+				updateFolder, Integer.getInteger(fixedLatency), Integer.getInteger(gaussianLatency), updateStrategy,
+				timerStrategy);
+
 	}
-	
-	public UPDATEWorker(String taskID, int workerID, String workerType, Long timeLimit, String service, Long timeOut,
-			String updateFolder, Integer fixedLatency, Integer gaussianLatency, String updateStrategy, String timerStrategy) {
-		super(taskID, workerID, workerType, timeLimit, updateFolder, fixedLatency, gaussianLatency);
+
+	/**
+	 * Constructor. no need for init method
+	 * 
+	 * @param taskID
+	 *            the taskID
+	 * @param workerID
+	 *            the workerID
+	 * @param timeLimitMS
+	 *            the timeLimit of the task (can be null)
+	 * @param service
+	 *            the endpoint url
+	 * @param timeOutMS
+	 *            the timeout in MS (can be null)
+	 * @param updateFolder
+	 *            the folder containing the updates
+	 * @param fixedLatency
+	 *            the fixed latency (can be null)
+	 * @param gaussianLatency
+	 *            the gaussian latency (can be null)
+	 * @param updateStrategy
+	 *            the UpdateStrategy
+	 * @param timerStrategy
+	 *            the UpdateTimer.Strategy
+	 */
+	public UPDATEWorker(String taskID, int workerID, Long timeLimitMS, String service, Long timeOutMS,
+			String updateFolder, Integer fixedLatency, Integer gaussianLatency, String updateStrategy,
+			String timerStrategy) {
+		super(taskID, workerID, "UPDATE", timeLimitMS, updateFolder, fixedLatency, gaussianLatency);
 		this.service = service;
 		// set default timeout to 180s
 		this.timeOut = 180000L;
 		// if timeout is set, set timeout
-		if (timeOut != null)
-			this.timeOut = timeOut;
+		if (timeOutMS != null)
+			this.timeOut = timeOutMS;
 
 		// set default updateStrategy to none
 		this.updateStrategy = UpdateStrategy.NONE;
@@ -69,45 +124,26 @@ public class UPDATEWorker extends AbstractWorker {
 		this.service = p.getProperty(CONSTANTS.SPARQL_CURRENT_ENDPOINT);
 		this.timeOut = (long) p.getOrDefault(CONSTANTS.SPARQL_TIMEOUT, 180000);
 		String timerStrategy = p.getProperty(CONSTANTS.STRESSTEST_UPDATE_TIMERSTRATEGY);
-		//use updateStrategy if set, otherwise use default: none
-		this.updateStrategy = UpdateStrategy.valueOf(p.getOrDefault(CONSTANTS.STRESSTEST_UPDATE_STRATEGY, "NONE").toString());
-		
-	
+		// use updateStrategy if set, otherwise use default: none
+		this.updateStrategy = UpdateStrategy
+				.valueOf(p.getOrDefault(CONSTANTS.STRESSTEST_UPDATE_STRATEGY, "NONE").toString());
+
 		setUpdateTimer(timerStrategy);
 	}
-	
-	private void setUpdateTimer(String strategyStr) {
-		if(strategyStr == null)
-			return;
-		UpdateTimer.Strategy strategy = UpdateTimer.Strategy.valueOf(strategyStr);
-		switch(strategy) {
-		case FIXED:
-			this.updateTimer = new UpdateTimer();
-		case DISTRIBUTED:
-			if(timeLimit!=null) {
-				this.updateTimer = new UpdateTimer(this.queryFileList.length, this.timeLimit);
-			}
-			else {
-				LOGGER.warn("Worker[{{}} : {{}}]: DISTRIBUTED Updates can only be used with timeLimit!", workerType, workerID);
-			}
-		default:
-			break;
-		}
-		LOGGER.debug("Worker[{{}} : {{}}]: UpdateTimer was set to UpdateTimer:{{}}", workerType, workerID, updateTimer);
-	}
-	
+
 	@Override
-	public void waitTimeMs(){
+	public void waitTimeMs() {
 		long currentTime = Calendar.getInstance().getTimeInMillis();
-	   	long wait = this.updateTimer.calculateTime(currentTime - this.startTime, this.executedQueries);
-	    LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
-	    try {
-	    	Thread.sleep(wait);
-	    } catch (InterruptedException e) {
-	    	LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType, workerID, e);
-	    	LOGGER.error("", e);
-	    }
-	    super.waitTimeMs();
+		long wait = this.updateTimer.calculateTime(currentTime - this.startTime, this.executedQueries);
+		LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
+		try {
+			Thread.sleep(wait);
+		} catch (InterruptedException e) {
+			LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType,
+					workerID, e);
+			LOGGER.error("", e);
+		}
+		super.waitTimeMs();
 	}
 
 	@Override
@@ -141,7 +177,7 @@ public class UPDATEWorker extends AbstractWorker {
 
 	@Override
 	public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
-		//TODO check if updateStrategy is NEXT
+		// TODO check if updateStrategy is NEXT
 		// If there is no more update send end signal, as their is nothing to do anymore
 		if (this.currentQueryID >= this.queryFileList.length) {
 			this.stopSending();
@@ -154,13 +190,46 @@ public class UPDATEWorker extends AbstractWorker {
 		queryStr.append(org.apache.commons.io.FileUtils.readFileToString(currentQueryFile, "UTF-8"));
 
 	}
-	
+
 	@Override
 	public void setQueriesList(File[] updateFiles) {
 		super.setQueriesList(updateFiles);
 		// sort updateFiles according to updateStrategy
 		UpdateComparator cmp = new UpdateComparator(this.updateStrategy);
 		Arrays.sort(this.queryFileList, cmp);
+	}
+
+	/**
+	 * Sets Update Timer according to strategy 
+	 * 
+	 * @param strategyStr The String representation of a UpdateTimer.Strategy
+	 */
+	private void setUpdateTimer(String strategyStr) {
+		if (strategyStr == null)
+			return;
+		UpdateTimer.Strategy strategy = UpdateTimer.Strategy.valueOf(strategyStr);
+		switch (strategy) {
+		case FIXED:
+			this.updateTimer = new UpdateTimer();
+		case DISTRIBUTED:
+			if (timeLimit != null) {
+				this.updateTimer = new UpdateTimer(this.queryFileList.length, this.timeLimit);
+			} else {
+				LOGGER.warn("Worker[{{}} : {{}}]: DISTRIBUTED Updates can only be used with timeLimit!", workerType,
+						workerID);
+			}
+		default:
+			break;
+		}
+		LOGGER.debug("Worker[{{}} : {{}}]: UpdateTimer was set to UpdateTimer:{{}}", workerType, workerID, updateTimer);
+	}
+	
+	/**
+	 * Returns list of updates
+	 * @return
+	 */
+	public File[] getUpdateFiles() {
+		return this.queryFileList;
 	}
 
 }

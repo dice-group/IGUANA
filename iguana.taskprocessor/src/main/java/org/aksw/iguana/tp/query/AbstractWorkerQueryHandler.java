@@ -5,13 +5,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.Worker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker;
 
+/**
+ * 
+ * An abstract class to use if the QueryHandler should work with Workers. (e.g. in the Stresstest Task)
+ * 
+ * @author f.conrads
+ *
+ */
 public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 
 	/**
@@ -23,6 +29,10 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 	private HashSet<String> updateKeys = new HashSet<String>();
 	private Collection<Worker> workers; 
 	
+	/**
+	 * 
+	 * @param workers
+	 */
 	public AbstractWorkerQueryHandler(Collection<Worker> workers) {
 		this.workers = workers;
 		for(Worker worker : workers) {
@@ -51,8 +61,20 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 		}
 	}
 	
+	/**
+	 * This method will generate SPARQL Queries given a file with queries.
+	 * 
+	 * @param queryFileName The queries file
+	 * @return for each query in the file, a File representing the query
+	 */
 	protected abstract File[] generateSPARQL(String queryFileName) ;
-	
+
+	/**
+	 * This method will generate UPDATE Queries given a folder with files in which updates are stated.
+	 * 
+	 * @param updatePath The path to the updates
+	 * @return for each update, a File representing it.
+	 */
 	protected abstract File[] generateUPDATE(String updatePath) ;
 	
 }

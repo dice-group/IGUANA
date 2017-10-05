@@ -24,6 +24,8 @@ public class Communicator {
 	
 	/**
 	 * Creates Communicator with implementations of a consumer and a sender.
+	 * @param consumer 
+	 * @param sender 
 	 */
 	public Communicator(IConsumer consumer, ISender sender) {
 		this.consumer=consumer;

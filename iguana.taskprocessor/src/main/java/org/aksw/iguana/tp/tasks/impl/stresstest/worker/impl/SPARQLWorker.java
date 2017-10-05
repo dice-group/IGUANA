@@ -28,22 +28,68 @@ public class SPARQLWorker extends AbstractWorker {
 
 	private Random queryPatternChooser;
 
+	/**
+	 * The default Constructor.
+	 * init method needs to be called afterwards
+	 */
 	public SPARQLWorker() {
 	}
 
-	public SPARQLWorker(String taskID, String workerID, String workerType, String timeLimit, String service, String timeOut,
+	/**
+	 * Constructor using Strings no need for init method
+	 * 
+	 * @param taskID
+	 *            the taskID
+	 * @param workerID
+	 *            the workerID
+	 * @param timeLimitMS
+	 *            the timeLimit of the task (can be null)
+	 * @param service
+	 *            the endpoint url
+	 * @param timeOutMS
+	 *            the timeout in MS (can be null)
+	 * @param queryFileName  
+	 *            the file name of the queries (e.g. query patterns)
+	 * @param updateFolder
+	 *            the folder containing the updates
+	 * @param fixedLatency
+	 *            the fixed latency (can be null)
+	 * @param gaussianLatency the gaussian latency (can be null)
+	 */
+	public SPARQLWorker(String taskID, String workerID, String timeLimitMS, String service, String timeOutMS,
 			String queryFileName, String fixedLatency, String gaussianLatency) {
-		this(taskID, Integer.parseInt(workerID), workerType, Long.parseLong(timeLimit), service, Long.parseLong(timeOut),
-				queryFileName, Integer.parseInt(fixedLatency), Integer.parseInt(gaussianLatency));
+		this(taskID, Integer.parseInt(workerID),  Long.getLong(timeLimitMS), service, Long.getLong(timeOutMS),
+				queryFileName, Integer.getInteger(fixedLatency), Integer.getInteger(gaussianLatency));
 	}
 	
-	public SPARQLWorker(String taskID, int workerID, String workerType, Long timeLimit, String service, Long timeOut,
+	/**
+	 * Constructor using Strings no need for init method
+	 * 
+	 * @param taskID
+	 *            the taskID
+	 * @param workerID
+	 *            the workerID
+	 * @param timeLimitMS
+	 *            the timeLimit of the task (can be null)
+	 * @param service
+	 *            the endpoint url
+	 * @param timeOutMS
+	 *            the timeout in MS (can be null)
+	 * @param queryFileName 
+	 *            the file name of the queries (e.g. query patterns)
+	 * @param updateFolder
+	 *            the folder containing the updates
+	 * @param fixedLatency
+	 *            the fixed latency (can be null)
+	 * @param gaussianLatency the gaussian latency (can be null)
+	 */
+	public SPARQLWorker(String taskID, int workerID,  Long timeLimitMS, String service, Long timeOutMS,
 			String queryFileName, Integer fixedLatency, Integer gaussianLatency) {
-		super(taskID, workerID, workerType, timeLimit, queryFileName, fixedLatency, gaussianLatency);
+		super(taskID, workerID, "SPARQL", timeLimitMS, queryFileName, fixedLatency, gaussianLatency);
 		this.service = service;
 		this.timeOut = 180000;
-		if(timeOut != null)
-			this.timeOut = timeOut;
+		if(timeOutMS != null)
+			this.timeOut = timeOutMS;
 
 		queryPatternChooser = new Random(this.workerID);
 		

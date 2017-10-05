@@ -20,24 +20,35 @@ import org.junit.Test;
 public class SPARQLWorkerTest {
 
 	
-
+	/**
+	 * Tests a normal successful execution
+	 * @throws IOException
+	 */
 	@Test
 	public void testTime() throws IOException {
-		Worker worker = new SPARQLWorker("1", 1, "SPARQL", null, "http://dbpedia.org/sparql", null,  "",0,0);
+		Worker worker = new SPARQLWorker("1", 1, null, "http://dbpedia.org/sparql", null,  "",0,0);
 		assertTrue(worker.getTimeForQueryMs("select * {?s ?p ?o}", "1")>0);
 		
 	}
 	
+	/**
+	 * Tests if a timeOut occurs if it should
+	 * @throws IOException
+	 */
 	@Test
 	public void testTimeout() throws IOException {
-		Worker worker = new SPARQLWorker("1", 1, "SPARQL", null, "http://dbpedia.org/sparql", 5l,  "",0,0);
+		Worker worker = new SPARQLWorker("1", 1, null, "http://dbpedia.org/sparql", 5l,  "",0,0);
 		assertEquals(-1, worker.getTimeForQueryMs("select * {?s ?p ?o}", "1"));
 		
 	}
 	
+	/**
+	 * Tests the getNextQuery method
+	 * @throws IOException
+	 */
 	@Test 
 	public void testGetNextQuery() throws IOException {
-		Worker worker = new SPARQLWorker("1", 1, "SPARQL", null, "http://dbpedia.org/sparql", 5l,  
+		Worker worker = new SPARQLWorker("1", 1,  null, "http://dbpedia.org/sparql", 5l,  
 				"",0,0);
 		((AbstractWorker) worker).setQueriesList(new File[] {new File("src/test/resources/worker/sparql.sparql") });
 		StringBuilder query = new StringBuilder();

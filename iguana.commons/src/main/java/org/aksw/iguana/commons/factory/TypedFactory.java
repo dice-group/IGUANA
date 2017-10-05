@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Factory for a Type. 
- * Creates an Object from Constrctor and Constructor Arguments
+ * Creates an Object from Constructor and Constructor Arguments
  * 
  * @author f.conrads
+ * @param <T> The Type which should be created
  *
  */
 public class TypedFactory <T>{

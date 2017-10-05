@@ -56,6 +56,11 @@ public class UpdateComparatorTest {
 	}
 
 
+	/**
+	 * @param updateStrategy
+	 * @param fileNames
+	 * @param expectedSortation
+	 */
 	public UpdateComparatorTest(String updateStrategy, String[] fileNames, String[] expectedSortation) {
 		files = new LinkedList<File>();
 		expected = new LinkedList<File>();
@@ -68,6 +73,7 @@ public class UpdateComparatorTest {
 
 	/**
 	 * Tests if the sorting algorithm does what it should do
+	 * @throws IOException 
 	 */
 	@Test
 	public void testSorting() throws IOException {

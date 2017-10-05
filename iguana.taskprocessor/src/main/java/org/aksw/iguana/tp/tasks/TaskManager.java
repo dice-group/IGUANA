@@ -38,7 +38,7 @@ public class TaskManager {
 	}
 
 	/**
-	 * Will initalize the Task with the provided rabbitMQ host and queue name. 
+	 * Will initialize the Task with the provided rabbitMQ host and queue name. 
 	 * Then will start the Task
 	 * 
 	 * @throws IOException

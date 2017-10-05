@@ -35,6 +35,10 @@ public class DefaultConsumer extends AbstractConsumer{
 		this.tmanager= tmanager;
 	}
 
+	/**
+	 * Sets the parent communicator to send back flags 
+	 * @param parent
+	 */
 	public void setParent(Communicator parent){
 		this.parent = parent;
 	}
@@ -45,6 +49,11 @@ public class DefaultConsumer extends AbstractConsumer{
 		consume(p);
 	}
 
+	/**
+	 * Consumes a Properties object instead of a byte object
+	 *  
+	 * @param p
+	 */
 	public void consume(Properties p) {
 		String className=p.getProperty(COMMON.CLASS_NAME);
 		Object[] constructorArgs=(Object[]) p.get(COMMON.CONSTRUCTOR_ARGS);

@@ -63,10 +63,25 @@ public abstract class AbstractWorker implements Worker {
 
 	private String queriesFileName;
 
-	
+	/**
+	 * Default Constructor 
+	 * Init method needs to be called
+	 */
 	public AbstractWorker() {
 	}
 	
+	/**
+	 * Constructor.
+	 * No need for init method 
+	 * 
+	 * @param taskID the experiment task ID
+	 * @param workerID the worker ID
+	 * @param workerType The worker type (mostly for logging purpose)
+	 * @param timeLimit the timeLimit of the Stresstest (can be null)
+	 * @param queriesFileName the queries file name or update path 
+	 * @param fixedLatency the fixed latency to use (can be null)
+	 * @param gaussianLatency the gaussian distributed latency to use (can be null)
+	 */
 	public AbstractWorker(String taskID, int workerID, String workerType, Long timeLimit, String queriesFileName, Integer fixedLatency, Integer gaussianLatency) {
 		 //Add task and Worker Specs
 	    this.taskID = taskID;
@@ -199,14 +214,26 @@ public abstract class AbstractWorker implements Worker {
 		startWorker();
 	}
 	
+	/**
+	 * Returns the name of the queries file name/update path
+	 * @return file name/update path
+	 */
 	public String getQueriesFileName() {
 		return this.queriesFileName;
 	}
 	
+	/**
+	 * Sets the Query Instances repr. in Files.
+	 * @param queries File containing the query instances.
+	 */
 	public void setQueriesList(File[] queries) {
 		this.queryFileList = queries;
 	}
 
+	/**
+	 * The number of Queries in one mix 
+	 * @return
+	 */
 	public long getNoOfQueries() {
 		return this.queryFileList.length;
 	}

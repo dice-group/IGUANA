@@ -10,6 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * Simple Server Mock for Worker tests
+ * 
+ * @author f.conrads
+ *
+ */
 public class ServerMock implements Container  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerMock.class);

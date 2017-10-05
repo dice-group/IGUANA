@@ -42,6 +42,13 @@ public class UpdateTimerTest {
 	private long timeLimit;
 
 
+	/**
+	 * @param strategy
+	 * @param baseValue
+	 * @param timeExceeded
+	 * @param executedQueries
+	 * @param timeLimit
+	 */
 	public UpdateTimerTest(String strategy, long baseValue, long timeExceeded, long executedQueries, long timeLimit) {
 		this.strategy = UpdateTimer.Strategy.valueOf(strategy);
 		this.baseValue = baseValue;
@@ -52,6 +59,7 @@ public class UpdateTimerTest {
 
 	/**
 	 * Tests if the calculated time between two updates is correct
+	 * @throws IOException 
 	 */
 	@Test
 	public void testTime() throws IOException {

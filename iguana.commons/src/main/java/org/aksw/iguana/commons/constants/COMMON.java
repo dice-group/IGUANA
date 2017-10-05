@@ -1,5 +1,11 @@
 package org.aksw.iguana.commons.constants;
 
+/**
+ * Constants several modules need
+ * 
+ * @author f.conrads
+ *
+ */
 public class COMMON {
 
 	/*

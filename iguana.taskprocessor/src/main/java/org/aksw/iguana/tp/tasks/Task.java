@@ -16,10 +16,15 @@ import java.util.concurrent.TimeoutException;
 public interface Task {
 
 	/**
-	 * Will start the Task 
+	 * Will execute the Task 
+	 */
+	public void execute();
+
+	/**
+	 * Will start the Task (sending the rabbitMQ start flag)
 	 */
 	public void start();
-
+	
 	/**
 	 * Will send the results to the result processing.
 	 * @param data
@@ -44,4 +49,9 @@ public interface Task {
 	 * @throws TimeoutException
 	 */
 	void init(String host, String queueName) throws IOException, TimeoutException;
+	
+	/**
+	 * Will close the Task and post process everything (e.g. send the end flag to the rabbit mq queue)
+	 */
+	void close();
 }
