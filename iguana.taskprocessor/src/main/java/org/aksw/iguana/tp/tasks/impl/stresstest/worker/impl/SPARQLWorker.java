@@ -50,8 +50,6 @@ public class SPARQLWorker extends AbstractWorker {
 	 *            the timeout in MS (can be null)
 	 * @param queryFileName  
 	 *            the file name of the queries (e.g. query patterns)
-	 * @param updateFolder
-	 *            the folder containing the updates
 	 * @param fixedLatency
 	 *            the fixed latency (can be null)
 	 * @param gaussianLatency the gaussian latency (can be null)
@@ -77,8 +75,6 @@ public class SPARQLWorker extends AbstractWorker {
 	 *            the timeout in MS (can be null)
 	 * @param queryFileName 
 	 *            the file name of the queries (e.g. query patterns)
-	 * @param updateFolder
-	 *            the folder containing the updates
 	 * @param fixedLatency
 	 *            the fixed latency (can be null)
 	 * @param gaussianLatency the gaussian latency (can be null)

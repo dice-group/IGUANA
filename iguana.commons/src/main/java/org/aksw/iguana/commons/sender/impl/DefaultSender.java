@@ -56,7 +56,7 @@ public class DefaultSender implements ISender {
 	}
 
 	@Override
-	public void send(byte[] data) {
+	public void send(byte[] data) { 
 		try {
 			channel.basicPublish("", this.queueName, null, data);
 		} catch (IOException e) {

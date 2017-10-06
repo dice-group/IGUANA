@@ -28,7 +28,7 @@ public abstract class AbstractTask implements Task {
 	 * Properties to add task specific metaData before start and execute which then will be send to
 	 * the resultprocessor 
 	 */
-	protected Properties metaData;
+	protected Properties metaData = new Properties();
 	
 	/**
 	 * Creates an AbstractTask with the TaskID
@@ -47,7 +47,7 @@ public abstract class AbstractTask implements Task {
 		// initialize everything needed to send results to RP
 		ISender sender = new DefaultSender();
 		this.sender = sender;
-		sender.init(host, queueName);
+		this.sender.init(host, queueName);
 	}
 
 	@Override

@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Stresstest extends AbstractTask {
-
+ 
 	
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Stresstest.class);
@@ -49,6 +49,7 @@ public class Stresstest extends AbstractTask {
 	private long startTime;
 	private String qhClassName;
 	private String[] qhConstructorArgs;
+	private Long noOfWorkers=0l;
 
 	/**
 	 * 
@@ -78,6 +79,7 @@ public class Stresstest extends AbstractTask {
 		this.timeLimit = timeLimit;
 		this.noOfQueryMixes = noOfQueryMixes;
 
+		
 		this.qhClassName = queryHandler[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(queryHandler, 1, queryHandler.length);
 
@@ -86,9 +88,10 @@ public class Stresstest extends AbstractTask {
 		// create Workers
 		for (Object[] workerConfig : workerConfigurations) {
 			int workers = Integer.parseInt(workerConfig[0].toString());
+			noOfWorkers+=workers;
 			for (int j = 0; j < workers; j++) {
 				// set taskID, workerID, workerConfig
-				String[] config = new String[3 + workerConfig.length];
+				String[] config = new String[1 + workerConfig.length];
 				config[0] = taskID;
 				config[1] = workerID.toString();
 				workerID++;
@@ -96,12 +99,16 @@ public class Stresstest extends AbstractTask {
 				// sets null if timelimit is not defined otherwise the string repr. of the
 				// timelimit
 				config[2] = timeLimit == null ? null : timeLimit.toString();
-				for (int i = 3; i < workerConfig.length; i++) {
-
-					config[i + 1] = workerConfig[i].toString();
+				for (int i = 2; i < workerConfig.length; i++) {
+					if(workerConfig[i]==null) {
+						config[i+1] = null;
+					}
+					else {
+						config[i + 1] = workerConfig[i].toString();
+					}
 				}
 				;
-				this.workers.add(factory.create(config[1], config));
+				this.workers.add(factory.create(workerConfig[1].toString(), config));
 			}
 		}
 		addMetaData();
@@ -112,9 +119,11 @@ public class Stresstest extends AbstractTask {
 	 */
 	private void addMetaData() {
 		// TODO Future: add queries and update meta data
-		this.metaData.put("timeLimit", timeLimit);
-		this.metaData.put("noOfQueryMixes", noOfQueryMixes);
-		this.metaData.put("noOfWorkers", workers.size());
+		if(timeLimit!=null)
+			this.metaData.put("timeLimit", timeLimit);
+		if(noOfQueryMixes!=null)
+			this.metaData.put("noOfQueryMixes", noOfQueryMixes);
+		this.metaData.put("noOfWorkers", noOfWorkers);
 	}
 
 	@Override
@@ -138,14 +147,14 @@ public class Stresstest extends AbstractTask {
 	public void execute() {
 		LOGGER.info("Task with ID {{}} will be executed now", this.taskID);
 		// Execute each Worker in ThreadPool
-		ExecutorService executor = Executors.newFixedThreadPool(workers.size());
+		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkers.intValue());
 		this.startTime = Calendar.getInstance().getTimeInMillis();
 		for (Worker worker : workers) {
 			executor.submit(worker);
 		}
-		LOGGER.info("[TaskID: {{}}]All {{}} workers have been started", taskID, workers.size());
+		LOGGER.info("[TaskID: {{}}]All {{}} workers have been started", taskID, noOfWorkers);
 		// wait timeLimit or noOfQueries
-		while (isFinished()) {
+		while (!isFinished()) {
 			// check if worker has results yet
 			for (Worker worker : workers) {
 				// if so send all results buffered
@@ -191,6 +200,7 @@ public class Stresstest extends AbstractTask {
 			// use noOfQueries of SPARQLWorkers (as soon as a worker hit the noOfQueries, it
 			// will stop sending results
 			// UpdateWorker are allowed to execute all their updates
+			boolean endFlag=true;
 			for (Worker worker : workers) {
 				long queriesInMix = 0;
 				if (worker instanceof SPARQLWorker) {
@@ -199,14 +209,21 @@ public class Stresstest extends AbstractTask {
 
 						worker.stopSending();
 					}
+					else {
+						endFlag = false;
+					}
 				} else if (worker instanceof UPDATEWorker) {
 					queriesInMix = ((AbstractWorker) worker).getNoOfQueries();
 
 					if (worker.getExecutedQueries() / queriesInMix * 1.0 >= 1) {
 						worker.stopSending();
 					}
+					else {
+						endFlag = false;
+					}
 				}
 			}
+			return endFlag;
 		}
 		return timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime) <= 0;
 	}

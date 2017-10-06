@@ -53,9 +53,9 @@ public class QueryHandlerFactory extends TypedFactory<QueryHandler> {
 		Class<?>[] constructorClasses = new Class<?>[1+constructorClasses2.length];
 		constructorArgs[0] = workers;
 		constructorClasses[0] = workers.getClass();
-		for(int i=0;i<constructorArgs.length;i++) {
-			constructorArgs[i+1] = constructorArgs2[i];
-			constructorClasses[i+1] = constructorClasses2[i];
+		for(int i=1;i<constructorArgs.length;i++) {
+			constructorArgs[i] = constructorArgs2[i-1];
+			constructorClasses[i] = constructorClasses2[i-1];
 		}
 		
 		return create(className, constructorArgs, constructorClasses);

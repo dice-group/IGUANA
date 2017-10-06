@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,7 +61,7 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 	 * @param workers 
 	 * @param service the sparql endpoint to derive the variable instances
 	 */
-	public PatternQueryHandler(Collection<Worker> workers, String service) {
+	public PatternQueryHandler(LinkedList<Worker> workers, String service) {
 		super(workers);
 		this.service = service;
 	}
@@ -78,7 +77,7 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 	 * @param service the sparql endpoint to derive the variable instances
 	 * @param limit the resitriction of query instances per query pattern
 	 */
-	public PatternQueryHandler(Collection<Worker> workers, String service, Long limit) {
+	public PatternQueryHandler(LinkedList<Worker> workers, String service, Long limit) {
 		super(workers);
 		this.service = service;
 		this.limit = limit;

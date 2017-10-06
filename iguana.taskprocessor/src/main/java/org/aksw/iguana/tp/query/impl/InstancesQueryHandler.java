@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +35,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	 * 
 	 * @param workers Workers to consider queryFiles/updatePaths of
 	 */
-	public InstancesQueryHandler(Collection<Worker> workers) {
+	public InstancesQueryHandler(LinkedList<Worker> workers) {
 		super(workers);
 	}
 

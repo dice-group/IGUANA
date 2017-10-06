@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -76,7 +77,7 @@ public class PatternQueryHandlerTest {
 		for(String var : varNames) {
 			this.varNames.add(var);
 		}
-		handler = new PatternQueryHandler(new ArrayList<Worker>(), "http://dbpedia.org/sparql", 3l);
+		handler = new PatternQueryHandler(new LinkedList<Worker>(), "http://dbpedia.org/sparql", 3l);
 	}
 	
 	
