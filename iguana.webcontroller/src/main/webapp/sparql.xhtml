@@ -1,0 +1,33 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+    <h:head>
+        <title>Facelets Hello World</title>
+    </h:head>
+    <h:body>
+        <h:outputLabel value="Endpoint: "/>
+        <h:inputText id="endpoint" value="#{sparqlController.endpoint}">
+        	<f:validateRequired></f:validateRequired>
+        </h:inputText>
+        <h:message for="endpoint" style="color: red;" />
+        <p/>
+        <h:outputLabel value="Query: "/>
+        <h:inputText id="query" value="#{sparqlController.queryStr}">
+        	<f:validateRequired></f:validateRequired>
+        </h:inputText>
+        <h:message for="query" style="color: red;" />
+        <h:commandButton value="Search" action="sparqlController.query()" ajax="false"/>
+        <p/>
+        <hr/>
+        <p/>
+        <h:dataTable var="result"  value="#{sparqlController.results}" border="1">
+ 			<h:column>
+ 				<ui:repeat value="#{sparqlController.header}" var="val">
+        			<f:facet name="header">#{val}</f:facet>
+    			</ui:repeat>	
+    		</h:column>
+		</h:dataTable>
+    </h:body>
+</html>
