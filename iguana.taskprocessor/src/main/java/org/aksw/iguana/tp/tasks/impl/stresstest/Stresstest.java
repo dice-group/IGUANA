@@ -16,6 +16,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.aksw.iguana.tp.query.QueryHandler;
 import org.aksw.iguana.tp.query.QueryHandlerFactory;
+import org.aksw.iguana.tp.query.impl.InstancesQueryHandler;
 import org.aksw.iguana.tp.tasks.AbstractTask;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.Worker;
@@ -51,6 +52,13 @@ public class Stresstest extends AbstractTask {
 	private String[] qhConstructorArgs;
 	private Long noOfWorkers=0l;
 
+	private Long warmupTimeMS;
+	private String warmupQueries;
+	private String warmupUpdates;
+
+	private String service;
+	
+	
 	/**
 	 * 
 	 * The objects of the workerConfiguration has to be in the following order:<br/>
@@ -63,6 +71,7 @@ public class Stresstest extends AbstractTask {
 	 * 
 	 * @param taskID
 	 *            the current TaskID
+	 * @param service 
 	 * @param timeLimit
 	 *            can be safely null if noOfQueryMixes is set
 	 * @param noOfQueryMixes
@@ -72,17 +81,57 @@ public class Stresstest extends AbstractTask {
 	 * @param queryHandler
 	 *            the class name and constructor args of a Worker Based Query
 	 *            Handler
+	 * @param warmupTimeMS 
+	 * @param warmupQueries 
+	 * @param warmupUpdates 
 	 */
-	public Stresstest(String taskID, Long timeLimit, Long noOfQueryMixes, Object[][] workerConfigurations,
-			String[] queryHandler) {
+	public Stresstest(String taskID, String service, String timeLimit, String noOfQueryMixes, Object[][] workerConfigurations,
+			String[] queryHandler, String warmupTimeMS, String warmupQueries, String warmupUpdates) {
+		this(taskID, service, Long.getLong(timeLimit), Long.getLong(noOfQueryMixes), workerConfigurations, queryHandler,
+				Long.getLong(warmupTimeMS), warmupQueries, warmupUpdates);
+	
+	}
+	
+	/**
+	 * 
+	 * The objects of the workerConfiguration has to be in the following order:<br/>
+	 * <ol>
+	 * <li>number of workers to create with this config</li>
+	 * <li>class name of the worker, e.g.
+	 * org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker</li>
+	 * <li>all other constructor arguments the worker needs</li>
+	 * </ol>
+	 * 
+	 * @param taskID
+	 *            the current TaskID
+	 * @param service 
+	 * @param timeLimit
+	 *            can be safely null if noOfQueryMixes is set
+	 * @param noOfQueryMixes
+	 *            can be safely null if timeLimit is set
+	 * @param workerConfigurations
+	 *            configurations of the workers to create
+	 * @param queryHandler
+	 *            the class name and constructor args of a Worker Based Query
+	 *            Handler
+	 * @param warmupTimeMS 
+	 * @param warmupQueries 
+	 * @param warmupUpdates 
+	 */
+	public Stresstest(String taskID, String service, Long timeLimit, Long noOfQueryMixes, Object[][] workerConfigurations,
+			String[] queryHandler, Long warmupTimeMS, String warmupQueries, String warmupUpdates) {
 		super(taskID);
 		this.timeLimit = timeLimit;
 		this.noOfQueryMixes = noOfQueryMixes;
-
+		this.service = service;	
 		
 		this.qhClassName = queryHandler[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(queryHandler, 1, queryHandler.length);
 
+		this.warmupTimeMS = warmupTimeMS;
+		this.warmupQueries = warmupQueries;
+		this.warmupUpdates = warmupUpdates;
+		
 		WorkerFactory factory = new WorkerFactory();
 		Integer workerID = 0;
 		// create Workers
@@ -91,7 +140,7 @@ public class Stresstest extends AbstractTask {
 			noOfWorkers+=workers;
 			for (int j = 0; j < workers; j++) {
 				// set taskID, workerID, workerConfig
-				String[] config = new String[1 + workerConfig.length];
+				String[] config = new String[2 + workerConfig.length];
 				config[0] = taskID;
 				config[1] = workerID.toString();
 				workerID++;
@@ -99,12 +148,13 @@ public class Stresstest extends AbstractTask {
 				// sets null if timelimit is not defined otherwise the string repr. of the
 				// timelimit
 				config[2] = timeLimit == null ? null : timeLimit.toString();
+				config[3] = service;
 				for (int i = 2; i < workerConfig.length; i++) {
 					if(workerConfig[i]==null) {
-						config[i+1] = null;
+						config[i+2] = null;
 					}
 					else {
-						config[i + 1] = workerConfig[i].toString();
+						config[i + 2] = workerConfig[i].toString();
 					}
 				}
 				;
@@ -145,6 +195,8 @@ public class Stresstest extends AbstractTask {
 	 */
 	@Override
 	public void execute() {
+		warmup();
+		
 		LOGGER.info("Task with ID {{}} will be executed now", this.taskID);
 		// Execute each Worker in ThreadPool
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkers.intValue());
@@ -187,6 +239,50 @@ public class Stresstest extends AbstractTask {
 			LOGGER.error("[TaskID: {{}}] Could not shutdown Threads/Workers due to ...", taskID);
 			LOGGER.error("... Exception: ", e);
 		}
+	}
+	
+	private void warmup() {
+		if(warmupTimeMS==null||warmupTimeMS==0l) {
+			return;
+		}
+		LinkedList<Worker> warmupWorkers = new LinkedList<Worker>();
+		
+		if(warmupQueries!=null) {
+			SPARQLWorker sparql = new SPARQLWorker("-1", "1",  service, null, null, warmupQueries, null, null);
+			warmupWorkers.add(sparql);
+			LOGGER.debug("[TaskID: {{}}] Warmup uses one SPARQL worker.", taskID);
+		}
+		if(warmupUpdates!=null) {
+			UPDATEWorker update = new UPDATEWorker("-1", "2", service, null, null, warmupUpdates, null, null, null, null);
+			warmupWorkers.add(update);
+			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);
+		}	
+		if(warmupWorkers.size()==0) {
+			return;
+		}
+		QueryHandler iqh = new InstancesQueryHandler(warmupWorkers);
+		iqh.generateQueries();
+		LOGGER.info("[TaskID: {{}}] will start {{}}ms warmup now.", taskID, warmupTimeMS);
+		ExecutorService exec = Executors.newFixedThreadPool(2);
+		for(Worker worker : warmupWorkers) {
+			exec.submit(worker);
+		}
+		//wait as long as needed
+		long start = Calendar.getInstance().getTimeInMillis();
+		while((Calendar.getInstance().getTimeInMillis()-start) <= warmupTimeMS) {
+			try {
+				TimeUnit.MILLISECONDS.sleep(100);
+			}catch(Exception e) {
+				LOGGER.error("Could not warmup ");
+			}
+		}
+		exec.shutdown();
+		try {
+			exec.awaitTermination(5, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			LOGGER.warn("[TaskID: {{}}] Warmup. Could not await Termination of Workers.", taskID);
+		}
+		LOGGER.info("[TaskID: {{}}] Warmup finished.", taskID);
 	}
 
 	/**

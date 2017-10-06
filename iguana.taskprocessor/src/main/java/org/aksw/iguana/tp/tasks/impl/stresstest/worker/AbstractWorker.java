@@ -190,15 +190,19 @@ public abstract class AbstractWorker implements Worker {
 				result.setProperty(COMMON.QUERY_ID_KEY, queryID.toString());
 				//Add extra Meta Key, worker ID and worker Type
 				result.put(COMMON.EXTRA_META_KEY, this.extra);
-				results.add(result);
+				setResults(result);
 			}
 		}
 		LOGGER.info("Stopping Worker[{{}} : {{}}].",this.workerType, this.workerID);
 	}
 	
+	private synchronized void setResults(Properties result) {
+		results.add(result);
+	}
+	
 
 	@Override
-	public Collection<Properties> popQueryResults(){
+	public synchronized Collection<Properties>  popQueryResults(){
 		Collection<Properties> ret = this.results;
 		this.results = new LinkedList<Properties>();
 		return ret;
