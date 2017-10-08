@@ -68,7 +68,18 @@
 			<artifactId>jena-arq</artifactId>
 			<version>3.4.0</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces</artifactId>
+			<version>6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces.extensions</groupId>
+			<artifactId>all-themes</artifactId>
+			<version>1.0.8</version>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
 
 	<build>

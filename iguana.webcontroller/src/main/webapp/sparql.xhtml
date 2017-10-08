@@ -1,33 +1,74 @@
-<html lang="en"
-      xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets">
-    <h:head>
-        <title>Facelets Hello World</title>
-    </h:head>
-    <h:body>
-        <h:outputLabel value="Endpoint: "/>
-        <h:inputText id="endpoint" value="#{sparqlController.endpoint}">
-        	<f:validateRequired></f:validateRequired>
-        </h:inputText>
-        <h:message for="endpoint" style="color: red;" />
-        <p/>
-        <h:outputLabel value="Query: "/>
-        <h:inputText id="query" value="#{sparqlController.queryStr}">
-        	<f:validateRequired></f:validateRequired>
-        </h:inputText>
-        <h:message for="query" style="color: red;" />
-        <h:commandButton value="Search" action="sparqlController.query()" ajax="false"/>
-        <p/>
-        <hr/>
-        <p/>
-        <h:dataTable var="result"  value="#{sparqlController.results}" border="1">
- 			<h:column>
- 				<ui:repeat value="#{sparqlController.header}" var="val">
-        			<f:facet name="header">#{val}</f:facet>
-    			</ui:repeat>	
-    		</h:column>
-		</h:dataTable>
-    </h:body>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+<h:head>
+	<title>Facelets Hello World</title>
+</h:head>
+<h:body>
+	<h:form id="content">
+		<h:panelGrid columns="2" cellpadding="5">
+			<p:outputLabel for="endpoint" value="Endpoint:"
+				style="font-weight:bold" />
+			<p:inputTextarea id="endpoint" rows="1" cols="150"
+				value="#{sparqlController.endpoint}" />
+			<p:outputLabel for="query" value="Query:" style="font-weight:bold" />
+			<p:inputTextarea id="query" rows="10" cols="150"
+				value="#{sparqlController.queryStr}" />
+			<p:spacer />
+			<h:panelGrid columns="2" cellpadding="5">
+				<p:commandButton value="Search"
+					actionListener="#{sparqlController.query()}" update="@form"
+					icon="ui-icon-search">
+				</p:commandButton>
+
+				<p:commandButton value="Download" ajax="false"
+					onclick="PrimeFaces.monitorDownload(start, stop);"
+					icon="ui-icon-disk">
+					<p:fileDownload value="#{sparqlController.save()}" />
+				</p:commandButton>
+			</h:panelGrid>
+		</h:panelGrid>
+		<p />
+		<hr />
+		<p />
+		<p:messages id="messages" showDetail="true" autoUpdate="true"
+			closable="true" />
+
+		<c:if test="#{sparqlController.isTable()}">
+			<p:dataTable id="tbl" var="result"
+				value="#{sparqlController.results}" paginator="true" rows="20">
+
+				<p:columns value="#{sparqlController.header}" var="column"
+					columnIndexVar="colIndex">
+					<f:facet name="header">
+						<p:outputPanel>
+                                #{column}
+                            </p:outputPanel>
+					</f:facet>
+					<h:outputText value="#{result.get(colIndex)}" />
+					<br />
+				</p:columns>
+
+
+
+			</p:dataTable>
+		</c:if>
+		<c:if test="#{!sparqlController.isTable()}">
+			<h:outputText id="none_select_results"
+				value="#{sparqlController.resultAsText}" />
+		</c:if>
+	</h:form>
+	<script type="text/javascript">
+		function start() {
+			PF('statusDialog').show();
+		}
+
+		function stop() {
+			PF('statusDialog').hide();
+		}
+	</script>
+</h:body>
 </html>
