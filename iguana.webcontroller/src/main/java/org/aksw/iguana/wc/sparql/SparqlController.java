@@ -8,8 +8,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
@@ -17,6 +19,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Named;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -31,6 +34,8 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
+import org.primefaces.model.chart.BarChartModel;
+import org.primefaces.model.chart.ChartSeries;
 
 /**
  * 
@@ -57,6 +62,11 @@ public class SparqlController implements Serializable {
 	private Model m;
 	private boolean isCD=true;
 
+	private BarChartModel barModel = new BarChartModel();
+	private String barGroup; 
+	private String barSet;
+	private String barData;
+	
 	public SparqlController() {
 	}
 
@@ -211,5 +221,62 @@ public class SparqlController implements Serializable {
 	public void setSelect(boolean isSelect) {
 		this.isSelect = isSelect;
 	}
+	
+	public void initBar() {
+		barModel = new BarChartModel();
+		barModel.setLegendPosition("ne");
+		Set<String> groups = new HashSet<String>();
+		Set<String> sets = new HashSet<String>();
+		for(List<String> row : results) {
+			groups.add(row.get(header.indexOf(barGroup)));
+			sets.add(row.get(header.indexOf(barSet)));
+		}
+		for(String groupStr : groups) {
+			ChartSeries group = new ChartSeries();
+	        group.setLabel(groupStr);
+	        for(String set : sets) {
+	        	for(List<String> row : results) {
+	    			if(row.contains(set) && row.contains(groupStr)) {
+	    				//
+	    				Node node = NodeFactory.createLiteral(row.get(header.indexOf(barData)));
+	    				Object o =node.getLiteral().getValue().toString().substring(1, node.getLiteral().getValue().toString().lastIndexOf("\""));
+	    				group.set(set, Double.parseDouble(o.toString()));
+	    			}
+	    		}
+	        }
+			this.barModel.addSeries(group);
+		}
 
+	
+	}
+	
+	public BarChartModel asBar() {
+		return this.barModel;
+	}
+
+	public String getBarGroup() {
+		return barGroup;
+	}
+
+	public void setBarGroup(String barGroup) {
+		this.barGroup = barGroup;
+	}
+
+	public String getBarSet() {
+		return barSet;
+	}
+
+	public void setBarSet(String barSet) {
+		this.barSet = barSet;
+	}
+
+	public String getBarData() {
+		return barData;
+	}
+
+	public void setBarData(String barData) {
+		this.barData = barData;
+	}
+
+	
 }

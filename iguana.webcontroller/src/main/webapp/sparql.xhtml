@@ -34,32 +34,74 @@
 		<p />
 		<hr />
 		<p />
-		<p:messages id="messages" showDetail="true" autoUpdate="true"
-			closable="true" />
-
 		<c:if test="#{sparqlController.isTable()}">
-			<p:dataTable id="tbl" var="result"
-				value="#{sparqlController.results}" paginator="true" rows="20">
 
-				<p:columns value="#{sparqlController.header}" var="column"
-					columnIndexVar="colIndex">
-					<f:facet name="header">
-						<p:outputPanel>
+			<p:tabView>
+				<p:tab title="Table">
+					<p:messages id="messages" showDetail="true" autoUpdate="true"
+						closable="true" />
+
+					<p:dataTable id="tbl" var="result"
+						value="#{sparqlController.results}" paginator="true" rows="20">
+
+						<p:columns value="#{sparqlController.header}" var="column"
+							columnIndexVar="colIndex">
+							<f:facet name="header">
+								<p:outputPanel>
                                 #{column}
                             </p:outputPanel>
-					</f:facet>
-					<h:outputText value="#{result.get(colIndex)}" />
-					<br />
-				</p:columns>
+							</f:facet>
+							<h:outputText value="#{result.get(colIndex)}" />
+							<br />
+						</p:columns>
 
 
 
-			</p:dataTable>
+					</p:dataTable>
+
+				</p:tab>
+				<p:tab title="Graphs">
+					<h:panelGrid columns="7" cellpadding="5">
+						<p:outputLabel value="Group:" for="group" />
+						<p:selectOneMenu id="group" value="#{sparqlController.barGroup}"
+							style="width:125px">
+							<f:selectItem itemLabel="Select One" itemValue="" />
+							<f:selectItems value="#{sparqlController.header}" />
+						</p:selectOneMenu>
+						<p:outputLabel value="Set X:" for="set" />
+						<p:selectOneMenu id="set" value="#{sparqlController.barSet}"
+							style="width:125px">
+							<f:selectItem itemLabel="Select One" itemValue="" />
+							<f:selectItems value="#{sparqlController.header}" />
+						</p:selectOneMenu>
+						<p:outputLabel value="Set Y:" for="data" />
+						<p:selectOneMenu id="data" value="#{sparqlController.barData}"
+							style="width:125px">
+							<f:selectItem itemLabel="Select One" itemValue="" />
+							<f:selectItems value="#{sparqlController.header}" />
+						</p:selectOneMenu>
+						<p:commandButton value="Create BarChart"
+							actionListener="#{sparqlController.initBar()}" update="@form" />
+					</h:panelGrid>
+					<hr />
+					<p:chart type="bar" model="#{sparqlController.asBar()}"
+						legendPosition="ne" widgetVar="chart" />
+					<p:commandButton type="button" value="Export"
+						icon="ui-icon-extlink" onclick="exportChart()" />
+
+					<p:dialog widgetVar="dlg2" showEffect="fade" modal="true"
+						header="Chart as an Image" resizable="false">
+						<p:outputPanel id="output2" layout="block"
+							style="width:500px;height:300px" />
+					</p:dialog>
+				</p:tab>
+			</p:tabView>
 		</c:if>
 		<c:if test="#{!sparqlController.isTable()}">
 			<h:outputText id="none_select_results"
 				value="#{sparqlController.resultAsText}" />
 		</c:if>
+
 	</h:form>
 	<script type="text/javascript">
 		function start() {
@@ -68,6 +110,15 @@
 
 		function stop() {
 			PF('statusDialog').hide();
+		}
+	</script>
+	<script type="text/javascript">
+		function exportChart() {
+			//export image
+			$('#output2').empty().append(PF('chart').exportAsImage());
+
+			//show the dialog
+			PF('dlg2').show();
 		}
 	</script>
 </h:body>
