@@ -9,9 +9,13 @@
 	<ui:define name="contentD">
 
 		<h:form>
-			<p:poll interval="3" update="live" />
-			<p:chart id="live" type="line" model="#{liveController.model}"
-				style="width:1300px;height:600px" />
+			<h:panelGrid columns="2">
+				<p:outputLabel value="Task ID: "/>
+				<p:outputLabel value="#{liveController.taskID}" />
+				<p:poll interval="3" update="live" />
+				<p:chart id="live" type="bar" model="#{liveController.model}"
+					style="width:1300px;height:600px" />
+			</h:panelGrid>
 		</h:form>
 	</ui:define>
 </ui:composition>

@@ -77,12 +77,12 @@ public class GraphController implements Serializable {
 		model.setTitle("");
 		// init sets
 		Set<String> labels = new HashSet<String>();
-		Set<String> yData = new HashSet<String>();
+		Set<String> xData = new HashSet<String>();
 		List<String> header = sparqlController.getHeader();
 		// iterate trhough results to get all labels and yPoints
 		for (List<String> row : sparqlController.getResults()) {
 			labels.add(row.get(header.indexOf(label)));
-			yData.add(row.get(header.indexOf(y)));
+			xData.add(row.get(header.indexOf(x)));
 		}
 		// For all labels
 		for (String groupStr : labels) {
@@ -90,20 +90,20 @@ public class GraphController implements Serializable {
 			ChartSeries group = new ChartSeries();
 			group.setLabel(groupStr);
 			// for each ydata
-			for (String y : yData) {
+			for (String x : xData) {
 				// iterate trhough results to get x data
 				for (List<String> row : sparqlController.getResults()) {
-					if (row.contains(y) && row.contains(groupStr)) {
+					if (row.contains(x) && row.contains(groupStr)) {
 						// add y and x to series
-						Node node = NodeFactory.createLiteral(row.get(header.indexOf(x)));
+						Node node = NodeFactory.createLiteral(row.get(header.indexOf(y)));
 						Object o = node.getLiteral().getValue().toString().substring(1,
 								node.getLiteral().getValue().toString().lastIndexOf("\""));
 						Double value = Double.parseDouble(o.toString());
 						if (this.type.equals("line")) {
 
-							group.set(y, value.intValue());
+							group.set(x, value.intValue());
 						} else {
-							group.set(y, value);
+							group.set(x, value);
 						}
 						// point was found
 						break;
