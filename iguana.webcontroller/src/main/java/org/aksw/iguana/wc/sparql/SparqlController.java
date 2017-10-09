@@ -62,11 +62,6 @@ public class SparqlController implements Serializable {
 	private Model m;
 	private boolean isCD=true;
 
-	private BarChartModel barModel = new BarChartModel();
-	private String barGroup; 
-	private String barSet;
-	private String barData;
-	
 	public SparqlController() {
 	}
 
@@ -220,62 +215,6 @@ public class SparqlController implements Serializable {
 
 	public void setSelect(boolean isSelect) {
 		this.isSelect = isSelect;
-	}
-	
-	public void initBar() {
-		barModel = new BarChartModel();
-		barModel.setLegendPosition("ne");
-		Set<String> groups = new HashSet<String>();
-		Set<String> sets = new HashSet<String>();
-		for(List<String> row : results) {
-			groups.add(row.get(header.indexOf(barGroup)));
-			sets.add(row.get(header.indexOf(barSet)));
-		}
-		for(String groupStr : groups) {
-			ChartSeries group = new ChartSeries();
-	        group.setLabel(groupStr);
-	        for(String set : sets) {
-	        	for(List<String> row : results) {
-	    			if(row.contains(set) && row.contains(groupStr)) {
-	    				//
-	    				Node node = NodeFactory.createLiteral(row.get(header.indexOf(barData)));
-	    				Object o =node.getLiteral().getValue().toString().substring(1, node.getLiteral().getValue().toString().lastIndexOf("\""));
-	    				group.set(set, Double.parseDouble(o.toString()));
-	    			}
-	    		}
-	        }
-			this.barModel.addSeries(group);
-		}
-
-	
-	}
-	
-	public BarChartModel asBar() {
-		return this.barModel;
-	}
-
-	public String getBarGroup() {
-		return barGroup;
-	}
-
-	public void setBarGroup(String barGroup) {
-		this.barGroup = barGroup;
-	}
-
-	public String getBarSet() {
-		return barSet;
-	}
-
-	public void setBarSet(String barSet) {
-		this.barSet = barSet;
-	}
-
-	public String getBarData() {
-		return barData;
-	}
-
-	public void setBarData(String barData) {
-		this.barData = barData;
 	}
 
 	

@@ -1,0 +1,53 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+<h:head>
+	<title>Iguana Web Frontend</title>
+	<h:outputStylesheet name="css/animate.css" />
+	<h:outputStylesheet name="css/bootstrap.css" />
+	<h:outputStylesheet name="css/icomoon.css" />
+	<h:outputStylesheet name="css/style.css" />
+	<h:outputScript name="js/pdfmake.min.js" />
+	<h:outputScript name="js/vfs_fonts.js" />
+</h:head>
+<h:body>
+	<div id="container">
+		<h:panelGrid columns="1">
+			<div id="header">
+				<header id="fh5co-header" style="position: relative;">
+					<div class="container">
+						<!-- LOGO  -->
+						<img alt="Iguana Logo" id="logo" height="150px"
+							src="resources/images/iguana_logo.png" /><br />
+						<nav class="fh5co-main-nav">
+							<ul>
+								<li><a href="index.xhtml"><span>Home</span></a></li>
+								<li><a href="config.xhtml"><span>Config</span></a></li>
+								<li><a href="sparql.xhtml"><span>Results</span></a></li>
+								<li><a href="live.xhtml"><span>Live</span></a></li>
+								<li><a href="about.xhtml"><span>About</span></a></li>
+							</ul>
+						</nav>
+					</div>
+				</header>
+
+				<!-- Navbar -->
+
+
+			</div>
+			<p />
+			<hr/>
+			<p/>
+			<!-- actual content -->
+			<div id="contentD">
+				<ui:insert name="contentD">
+
+				</ui:insert>
+			</div>
+		</h:panelGrid>
+	</div>
+</h:body>
+</html>
