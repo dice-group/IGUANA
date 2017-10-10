@@ -26,6 +26,7 @@ script:
  - cd .. 
  - cd iguana.taskprocessor
  - mvn clean package -Dmaven.javadoc.skip=true -B
+ - cd ..
  - cd iguana.resultprocess 
  - mvn clean package -Dmaven.javadoc.skip=true -B
  - cd ..
