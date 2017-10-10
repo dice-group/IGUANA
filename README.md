@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/AKSW/IGUANA.svg?branch=develop)](https://travis-ci.org/AKSW/IGUANA)
+[![BCH compliance](https://bettercodehub.com/edge/badge/AKSW/IGUANA?branch=develop)](https://bettercodehub.com/)
 [![Project Stats](https://www.openhub.net/p/iguana-benchmark/widgets/project_thin_badge.gif)](https://www.openhub.net/p/iguana-benchmark)
 
 
