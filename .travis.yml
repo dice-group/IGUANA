@@ -27,7 +27,7 @@ script:
  - cd iguana.taskprocessor
  - mvn clean package -Dmaven.javadoc.skip=true -B
  - cd ..
- - cd iguana.resultprocess 
+ - cd iguana.resultprocessor
  - mvn clean package -Dmaven.javadoc.skip=true -B
  - cd ..
  - cd iguana.webcontroller 
