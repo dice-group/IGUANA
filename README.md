@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/AKSW/IGUANA.svg?branch=develop)](https://travis-ci.org/AKSW/IGUANA)
+[![Project Stats](https://www.openhub.net/p/iguana-benchmark/widgets/project_thin_badge.gif)](https://www.openhub.net/p/iguana-benchmark)
+
+
 #IGUANA
 
 <img src = "https://github.com/AKSW/IGUANA/raw/develop/images/IGUANA_logo.png" alt = "IGUANA Logo" width = "400" align = "center">
