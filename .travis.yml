@@ -1,0 +1,30 @@
+language: java
+
+branches:
+  only:
+   - develop
+
+sudo: enabled
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+      
+jdk:  
+ - oraclejdk8
+
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq maven rabbitmq
+ - sudo rabbitmq-server
+
+install: true 
+
+script:
+ - cd iguana.commons && mvn clean package install -Dmaven.javadoc.skip=true -B
+ - cd iguana.taskprocessor && mvn clean package -Dmaven.javadoc.skip=true -B
+ - cd iguana.resultprocess && mvn clean package -Dmaven.javadoc.skip=true -B
+ - cd iguana.webcontroller && mvn clean package -Dmaven.javadoc.skip=true -B
+ - cd iguana.datagenerator && mvn clean package -Dmaven.javadoc.skip=true -B
+ - cd iguana.corecontroller && mvn clean package -Dmaven.javadoc.skip=true -B
