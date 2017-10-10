@@ -9,86 +9,95 @@
 	<ui:define name="contentD">
 
 
-		<h:form id="content">
-<!-- 				<p:spacer width="25" /> -->
-				<p:wizard flowListener="#{executionController.onFlowProcess}">
-					<p:tab id="connections" title="Connections">
-						<p:panel header="Triplestore endpoints">
-							<p:messages />
-							<h:panelGrid columns="2" columnClasses="label, value">
-							<!-- TODO add connections until user goes further -->
-<!-- 								<p:outputLabel value="Service address: *" /> -->
-<!-- 								<p:inputText value="#{executionController.service}" -->
-<!-- 									required="true" label="Firstname" /> -->
+		<h:form id="form">
+			<h:panelGrid style=" margin: 0 auto;"  columns="2">
+				<p:spacer width="0" />
+				<center>
+					<p:wizard flowListener="#{executionController.onFlowProcess}">
+						<p:tab id="connections" title="Connections">
+							<p:panel header="Triplestore endpoints">
+								<p:messages id="messages" showDetail="true" autoUpdate="true"
+									closable="true" />
+								<h:panelGrid columns="3" cellpadding="20">
+									<h:panelGrid columns="2" columnClasses="label, value">
+										<p:outputLabel style="color: #000;" value="ID: *" />
+										<p:inputText value="#{executionController.name}"
+											required="false" label="id" />
 
-<!-- 								<p:outputLabel value="user: " /> -->
-<!-- 								<p:inputText value="#{userWizard.user.lastname}" required="true" -->
-<!-- 									label="Lastname" /> -->
-
-<!-- 								<p:outputLabel value="pwd: " /> -->
-<!-- 								<p:password value="#{userWizard.user.age}" /> -->
-
-							</h:panelGrid>
-						</p:panel>
-					</p:tab>
+										<p:outputLabel style="color: #000;"
+											value="SPARQL Service address: *" />
+										<p:inputText value="#{executionController.service}"
+											required="false" label="service" />
 
 
-					<p:tab id="confirm" title="Confirmation">
-						<p:panel header="Confirmation">
-							<h:panelGrid id="confirmation" columns="3"
-								columnClasses="grid,grid,grid">
-								<h:panelGrid columns="2" columnClasses="label, value">
-									<h:outputText value="Firstname: " />
-									<h:outputText value="#{userWizard.user.firstname}"
-										styleClass="outputLabel" />
+										<p:outputLabel style="color: #000;"
+											value="Update Service address: " />
+										<p:inputText value="#{executionController.updateService}"
+											required="false" label="Update endpoint" />
+										<p:outputLabel style="color: #000;visibility: hidden;"
+											value="user: " />
+										<p:inputText value="#{executionController.user}"
+											required="false" style="visibility: hidden;"
+											label="user for updates" />
+										<p:outputLabel style="color: #000;visibility: hidden;"
+											value="password: " />
+										<p:password style="visibility: hidden;"
+											value="#{executionController.pwd}" />
+										<br />
+										<br />
+										<br />
+										<p:commandButton value="add" icon="ui-icon-check"
+											actionListener="#{executionController.addConnection()}"
+											update="@form" />
+									</h:panelGrid>
+									<p:spacer width="25" />
+									<h:panelGrid columns="1">
+										<p:selectOneListbox id="basic" style="height: 200;width: 300;"
+											value="#{executionController.deleteConnection}">
+											<f:selectItems value="#{executionController.connections}"
+												var="connection" itemLabel="#{connection.service}"
+												itemValue="#{connection.name}" />
+										</p:selectOneListbox>
+										<p:commandButton value="Remove"
+											actionListener="#{executionController.remove()}"
+											update="@form" icon="ui-icon-trash" />
+									</h:panelGrid>
+								</h:panelGrid>
+							</p:panel>
+						</p:tab>
 
-									<h:outputText value="Lastname: " />
-									<h:outputText value="#{userWizard.user.lastname}"
-										styleClass="outputLabel" />
+						<p:tab id="datasets" title="Datasets and Generation">
+							<p:panel header="Datasets">
+								<h:panelGrid columns="3" columnClasses="grid,grid,grid">
 
-									<h:outputText value="Age: " />
-									<h:outputText value="#{userWizard.user.age}"
-										styleClass="outputLabel" />
 								</h:panelGrid>
 
-								<h:panelGrid columns="2" columnClasses="label, value">
-									<h:outputText value="Street: " />
-									<h:outputText value="#{userWizard.user.street}"
-										styleClass="outputLabel" />
+							</p:panel>
+						</p:tab>
+						<p:tab id="tasks" title="Tasks">
+							<p:panel header="Tasks">
+								<h:panelGrid columns="3" columnClasses="grid,grid,grid">
 
-									<h:outputText value="Postal: " />
-									<h:outputText value="#{userWizard.user.postalCode}"
-										styleClass="outputLabel" />
-
-									<h:outputText value="City: " />
-									<h:outputText value="#{userWizard.user.city}"
-										styleClass="outputLabel" />
 								</h:panelGrid>
 
-								<h:panelGrid columns="2" columnClasses="label, value">
-									<h:outputText value="Email: " />
-									<h:outputText value="#{userWizard.user.email}"
-										styleClass="outputLabel" />
+							</p:panel>
+						</p:tab>
 
-									<h:outputText value="Phone " />
-									<h:outputText value="#{userWizard.user.phone}"
-										styleClass="outputLabel" />
+						<p:tab id="confirm" title="Confirmation">
+							<p:panel header="Confirmation">
+								<h:panelGrid id="confirmation" columns="3"
+									columnClasses="grid,grid,grid">
 
-									<h:outputText value="Info: " />
-									<h:outputText value="#{userWizard.user.info}"
-										styleClass="outputLabel" />
-
-									<h:outputText />
-									<h:outputText />
 								</h:panelGrid>
-							</h:panelGrid>
 
-							<p:commandButton value="Submit"
-								actionListener="#{userWizard.save}" update="growl"
-								process="@this" />
-						</p:panel>
-					</p:tab>
-				</p:wizard>
+								<p:commandButton value="Submit"
+									actionListener="#{executionController.execute()}"
+									process="@this" />
+							</p:panel>
+						</p:tab>
+					</p:wizard>
+				</center>
+			</h:panelGrid>
 		</h:form>
 
 		<style type="text/css">

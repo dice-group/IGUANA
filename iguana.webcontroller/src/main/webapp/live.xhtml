@@ -10,11 +10,20 @@
 
 		<h:form>
 			<h:panelGrid columns="2">
-				<p:outputLabel value="Task ID: "/>
+				<p:outputLabel value="Task ID: " />
 				<p:outputLabel value="#{liveController.taskID}" />
-				<p:poll interval="3" update="live" />
-				<p:chart id="live" type="bar" model="#{liveController.model}"
-					style="width:1300px;height:600px" />
+				<p:spacer/>
+				<p:selectCheckboxMenu id="menu"
+					value="#{liveController.selectedQueries}" label="Select Queries to show" filter="true"
+					filterMatchMode="startsWith" panelStyle="width:400px">
+					<f:selectItems value="#{liveController.queries}" />
+				</p:selectCheckboxMenu>
+				<p:poll actionListener="#{liveController.calculateModels()}" interval="3" update="live" />
+				<h:panelGrid id="live" columns="3">
+					<p:chart id="qps" type="bar" model="#{liveController.modelQPS}" />
+					<p:chart id="qmpt" type="bar" model="#{liveController.modelQMPT}" />
+					<p:chart id="noq" type="bar" model="#{liveController.modelNOQ}" />
+				</h:panelGrid>
 			</h:panelGrid>
 		</h:form>
 	</ui:define>

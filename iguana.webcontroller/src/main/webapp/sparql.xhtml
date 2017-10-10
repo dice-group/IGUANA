@@ -19,7 +19,7 @@
 	<ui:define name="contentD">
 		<h:form id="content">
 
-			<h:panelGrid columns="3" cellpadding="5">
+			<h:panelGrid style=" margin: 0 auto;" columns="3" cellpadding="5">
 				<p:spacer width="25" />
 				<p:outputLabel for="endpoint" value="Endpoint:"
 					style="font-weight:bold" />
@@ -49,74 +49,77 @@
 			<p />
 			<c:if test="#{sparqlController.isTable()}">
 				<p:spacer width="25" />
-				<p:tabView id="tabview">
-					<p:tab title="Table">
-						<p:messages id="messages" showDetail="true" autoUpdate="true"
-							closable="true" />
+				<h:panelGrid  columns="2">
+				<p:spacer width="0"/>
+					<p:tabView  id="tabview">
+						<p:tab title="Table">
+							<p:messages id="messages" showDetail="true" autoUpdate="true"
+								closable="true" />
 
-						<p:dataTable id="tbl" var="result"
-							value="#{sparqlController.results}" paginator="true" rows="20">
+							<p:dataTable id="tbl" var="result"
+								value="#{sparqlController.results}" paginator="true" rows="20">
 
-							<p:columns value="#{sparqlController.header}" var="column"
-								columnIndexVar="colIndex">
-								<f:facet name="header">
-									<p:outputPanel>
+								<p:columns value="#{sparqlController.header}" var="column"
+									columnIndexVar="colIndex">
+									<f:facet name="header">
+										<p:outputPanel>
                                 #{column}
                             </p:outputPanel>
-								</f:facet>
-								<h:outputText value="#{result.get(colIndex)}" />
-								<br />
-							</p:columns>
+									</f:facet>
+									<h:outputText value="#{result.get(colIndex)}" />
+									<br />
+								</p:columns>
 
 
 
-						</p:dataTable>
+							</p:dataTable>
 
-					</p:tab>
-					<p:tab title="Graphs">
-						<h:panelGrid columns="16" cellpadding="20">
-							<p:outputLabel value="Group:" for="group" />
-							<p:spacer width="10" />
-							<p:selectOneMenu id="group" value="#{graphController.label}"
-								style="width:125px">
-								<f:selectItem itemLabel="Select One" itemValue="" />
-								<f:selectItems value="#{sparqlController.header}" />
-							</p:selectOneMenu>
-							<p:spacer width="25" />
-							<p:outputLabel value="Set X:" for="set" />
-							<p:spacer width="10" />
-							<p:selectOneMenu id="set" value="#{graphController.x}"
-								style="width:125px">
-								<f:selectItem itemLabel="Select One" itemValue="" />
-								<f:selectItems value="#{sparqlController.header}" />
-							</p:selectOneMenu>
-							<p:spacer width="25" />
-							<p:outputLabel value="Set Y:" for="data" />
-							<p:spacer width="10" />
-							<p:selectOneMenu id="data" value="#{graphController.y}"
-								style="width:125px">
-								<f:selectItem itemLabel="Select One" itemValue="" />
-								<f:selectItems value="#{sparqlController.header}" />
-							</p:selectOneMenu>
-							<p:spacer width="25" />
-							<p:outputLabel for="chartType" value="Chart Type:" />
-							<p:selectOneRadio id="chartType" value="#{graphController.type}">
-								<f:selectItem itemLabel="Bar" itemValue="bar" />
-								<f:selectItem itemLabel="Line" itemValue="line" />
-							</p:selectOneRadio>
-							<p:spacer width="25" />
-							<p:commandButton value="Create Chart"
-								actionListener="#{graphController.init()}" update="@form" />
-						</h:panelGrid>
-						<hr />
-						<p:chart type="#{graphController.type}"
-							model="#{graphController.getChart()}" legendPosition="ne"
-							widgetVar="chart" id="chart" />
-						<p:commandButton type="button" value="Export"
-							icon="ui-icon-extlink" onclick="exportChartInPDF()" />
+						</p:tab>
+						<p:tab title="Graphs">
+							<h:panelGrid columns="16" cellpadding="20">
+								<p:outputLabel value="Group:" for="group" />
+								<p:spacer width="10" />
+								<p:selectOneMenu id="group" value="#{graphController.label}"
+									style="width:125px">
+									<f:selectItem itemLabel="Select One" itemValue="" />
+									<f:selectItems value="#{sparqlController.header}" />
+								</p:selectOneMenu>
+								<p:spacer width="25" />
+								<p:outputLabel value="Set X:" for="set" />
+								<p:spacer width="10" />
+								<p:selectOneMenu id="set" value="#{graphController.x}"
+									style="width:125px">
+									<f:selectItem itemLabel="Select One" itemValue="" />
+									<f:selectItems value="#{sparqlController.header}" />
+								</p:selectOneMenu>
+								<p:spacer width="25" />
+								<p:outputLabel value="Set Y:" for="data" />
+								<p:spacer width="10" />
+								<p:selectOneMenu id="data" value="#{graphController.y}"
+									style="width:125px">
+									<f:selectItem itemLabel="Select One" itemValue="" />
+									<f:selectItems value="#{sparqlController.header}" />
+								</p:selectOneMenu>
+								<p:spacer width="25" />
+								<p:outputLabel for="chartType" value="Chart Type:" />
+								<p:selectOneRadio id="chartType" value="#{graphController.type}">
+									<f:selectItem itemLabel="Bar" itemValue="bar" />
+									<f:selectItem itemLabel="Line" itemValue="line" />
+								</p:selectOneRadio>
+								<p:spacer width="25" />
+								<p:commandButton value="Create Chart"
+									actionListener="#{graphController.init()}" update="@form" />
+							</h:panelGrid>
+							<hr />
+							<p:chart type="#{graphController.type}"
+								model="#{graphController.getChart()}" legendPosition="ne"
+								widgetVar="chart" id="chart" />
+							<p:commandButton type="button" value="Export"
+								icon="ui-icon-extlink" onclick="exportChartInPDF()" />
 
-					</p:tab>
-				</p:tabView>
+						</p:tab>
+					</p:tabView>
+				</h:panelGrid>
 			</c:if>
 			<c:if test="#{!sparqlController.isTable()}">
 				<p:spacer width="25" />

@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.consumer.AbstractConsumer;
 import org.aksw.iguana.commons.exceptions.IguanaException;
@@ -15,21 +16,21 @@ import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
 
 @ApplicationScoped
 @Named
-public class LiveResultsReceiver extends AbstractConsumer implements  Serializable{
+public class LiveResultsConsumer extends AbstractConsumer implements  Serializable{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1562390866780261640L;
-
+	protected String RP2SENDER_QUEUENAME="rp2senderQueue";
+	
 	@Inject
 	private LiveController liveController;
 
-//	@PostConstruct
-	@Override
-	public void init(String host, String queueName) throws IguanaException {
-		//TODO get host and queue
-		super.init(host, queueName);
+	@PostConstruct
+	public void init() throws IguanaException {
+		String host = Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
+		super.init(host, RP2SENDER_QUEUENAME);
 	}
 	
 	public void consume(byte[] data) {
@@ -39,7 +40,7 @@ public class LiveResultsReceiver extends AbstractConsumer implements  Serializab
 	
 	private void consume(Properties p) {
 		String queryID = p.get(COMMON.QUERY_ID_KEY).toString();
-		Integer queryTime = Long.valueOf(p.get(COMMON.RECEIVE_DATA_TIME).toString()).intValue();
+		Long queryTime = Long.valueOf(p.get(COMMON.RECEIVE_DATA_TIME).toString());
 		liveController.add(queryID, queryTime);
 		liveController.setTaskID(p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY));
 	}
