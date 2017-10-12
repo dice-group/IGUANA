@@ -52,6 +52,7 @@ public abstract class AbstractTask implements Task {
 
 	@Override
 	public void start() {
+		//TODO set datasetID, expID, suiteID, conID
 		Properties start = new Properties();
 		//set exp Task ID
 		start.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);

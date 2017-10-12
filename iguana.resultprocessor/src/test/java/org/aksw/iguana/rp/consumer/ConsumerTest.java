@@ -53,7 +53,7 @@ public class ConsumerTest {
 		//assertEquals(p)
 		assertEquals(ConsumerTest.p.getProperty("a"), "test");
 		System.out.println("test was successful.");
-
+		consume.close();
 	}
 
 	
@@ -99,6 +99,6 @@ public class ConsumerTest {
 		
 	}
 
-
+	
 
 }

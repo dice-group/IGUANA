@@ -43,6 +43,7 @@ public class StresstestTest {
 	private String[] queryHandler = new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" };
 	Object[][] workerConfigurations;
 	private String service;
+	private String updateService;
 
 	/**
 	 * @return Configurations to test
@@ -51,31 +52,31 @@ public class StresstestTest {
 	public static Collection<Object[]> data() {
 		List<Object[]> testConfigs = new ArrayList<Object[]>();
 
-		testConfigs.add(new Object[] { "test", host, 1000L, null,
+		testConfigs.add(new Object[] { "test", host, host, 1000L, null,
 				new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 				new Object[][] {
 						new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 								"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 
 		testConfigs.add(
-				new Object[] { "test", host, null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host, null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 		testConfigs.add(
-				new Object[] { "test", host, null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host,null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 		testConfigs.add(
-				new Object[] { "test", host, null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host,null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" },
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
 										 "1", "src/test/resources/worker/sparql.sparql", "0", "0" , null, null} } });
 		testConfigs.add(
-				new Object[] { "test", host, null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host, null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" , null, null} } });
@@ -85,13 +86,14 @@ public class StresstestTest {
 	/**
 	 * @param taskID
 	 * @param service 
+	 * @param updateService 
 	 * @param timeLimit
 	 * @param noOfQueryMixes
 	 * @param queryHandler
 	 * @param workerConfigurations
 	 * 
 	 */
-	public StresstestTest(String taskID, String service, Long timeLimit, Long noOfQueryMixes, String[] queryHandler,
+	public StresstestTest(String taskID, String service, String updateService, Long timeLimit, Long noOfQueryMixes, String[] queryHandler,
 			Object[][] workerConfigurations) {
 		this.taskID = taskID;
 		this.timeLimit = timeLimit;
@@ -99,6 +101,7 @@ public class StresstestTest {
 		this.queryHandler = queryHandler;
 		this.workerConfigurations = workerConfigurations;
 		this.service = service;
+		this.updateService = updateService;
 	}
 
 	/**
@@ -158,7 +161,7 @@ public class StresstestTest {
 	@Test
 	public void test() throws IguanaException, InterruptedException, IOException, TimeoutException {
 		// create Stresstest
-		Stresstest task = new Stresstest(taskID, service, timeLimit, noOfQueryMixes, workerConfigurations, queryHandler, null, null, null);
+		Stresstest task = new Stresstest(taskID, service, updateService, timeLimit, noOfQueryMixes, workerConfigurations, queryHandler, null, null, null);
 		// start Stresstest
 		task.init("localhost", COMMON.CORE2RP_QUEUE_NAME);
 		task.start();

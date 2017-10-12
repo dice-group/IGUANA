@@ -8,16 +8,24 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
 
+import org.aksw.iguana.commons.config.Config;
+import org.apache.commons.configuration.Configuration;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -57,12 +65,39 @@ public class SparqlController implements Serializable {
 	private List<String> header = new LinkedList<String>();
 	private List<List<String>> results = new LinkedList<List<String>>();
 
+	private Map<String, String> templates = new HashMap<String, String>();
+	private String template;
+	
 	private String resultAsText = "";
 	private boolean isSelect = true;
 	private Model m;
 	private boolean isCD=true;
 
 	public SparqlController() {
+	}
+	
+	@PostConstruct
+	public void init() {
+		URL url;
+		try {
+			url = FacesContext.getCurrentInstance().getExternalContext().getResource("templates.properties");
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		Configuration config = Config.getInstance("templates.properties");
+		Iterator<String> keys = config.getKeys("iguana.sparql.templates");
+		while(keys.hasNext()) {
+			String key = keys.next();
+			String name = key.substring(24, key.length());
+			String value = config.getString(key);
+			templates.put(name, value);
+		}
+	}
+	
+	public void setTemplate() {
+		this.queryStr=templates.get(template);
 	}
 
 	public String getQueryStr() {
@@ -215,6 +250,28 @@ public class SparqlController implements Serializable {
 
 	public void setSelect(boolean isSelect) {
 		this.isSelect = isSelect;
+	}
+
+	public Map<String, String> getTemplates() {
+		return templates;
+	}
+
+	public void setTemplates(Map<String, String> templates) {
+		this.templates = templates;
+	}
+
+	/**
+	 * @return the template
+	 */
+	public String getTemplate() {
+		return template;
+	}
+
+	/**
+	 * @param template the template to set
+	 */
+	public void setTemplate(String template) {
+		this.template = template;
 	}
 
 	

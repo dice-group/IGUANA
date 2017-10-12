@@ -44,6 +44,8 @@ public class MainControllerTest {
 	
 	@BeforeClass
 	public static void createController() throws InterruptedException, IOException, TimeoutException{
+		new File("results_test.nt").delete();
+		FileUtils.deleteDirectory(new File("result_storage"));
 		String fileName = "controller_test.properties";
 		send(fileName);
 		

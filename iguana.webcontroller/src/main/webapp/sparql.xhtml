@@ -26,6 +26,22 @@
 				<p:inputTextarea id="endpoint" rows="1" cols="150"
 					value="#{sparqlController.endpoint}" />
 				<p:spacer width="25" />
+				<p:spacer width="25" />
+				<hr/>
+				<p:spacer width="25" />
+				<p:outputLabel for="template" value="Templates:"
+					style="font-weight:bold" />
+
+				<h:panelGrid columns="3">
+					<p:selectOneMenu id="template" style="width:350;"
+						value="#{sparqlController.template}" label="Select Template"
+						update="@form">
+						<f:selectItems value="#{sparqlController.templates.keySet()}" />
+					</p:selectOneMenu>
+					<p:spacer width="5" />
+					<p:commandButton value="Set Template"  actionListener="#{sparqlController.setTemplate()}" update="@form"  icon="ui-icon-pin-s" />
+				</h:panelGrid>
+				<p:spacer width="25" />
 				<p:outputLabel for="query" value="Query:" style="font-weight:bold" />
 				<p:inputTextarea id="query" rows="10" cols="150"
 					value="#{sparqlController.queryStr}" />
@@ -49,9 +65,9 @@
 			<p />
 			<c:if test="#{sparqlController.isTable()}">
 				<p:spacer width="25" />
-				<h:panelGrid  columns="2">
-				<p:spacer width="0"/>
-					<p:tabView  id="tabview">
+				<h:panelGrid columns="2">
+					<p:spacer width="0" />
+					<p:tabView id="tabview">
 						<p:tab title="Table">
 							<p:messages id="messages" showDetail="true" autoUpdate="true"
 								closable="true" />

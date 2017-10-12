@@ -31,6 +31,7 @@ public abstract class AbstractConsumer implements IConsumer {
 	
 	protected String queueName;
 	protected String host;
+	protected DefaultConsumer consumer;
 	/**
 	 * Will initialize the rabbitMQ messaging from one module to another.
 	 * 
@@ -66,7 +67,7 @@ public abstract class AbstractConsumer implements IConsumer {
 			throw new IguanaException(e);
 		}
 		// Declaring the actual consuming.
-		Consumer consumer = new DefaultConsumer(channel) {
+		consumer = new DefaultConsumer(channel) {
 			@Override
 			public void handleDelivery(String consumerTag, Envelope envelope,
 					AMQP.BasicProperties properties, byte[] body)

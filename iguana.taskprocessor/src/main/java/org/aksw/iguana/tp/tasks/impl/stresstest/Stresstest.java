@@ -57,6 +57,8 @@ public class Stresstest extends AbstractTask {
 	private String warmupUpdates;
 
 	private String service;
+
+	private String updateService;
 	
 	
 	/**
@@ -72,6 +74,7 @@ public class Stresstest extends AbstractTask {
 	 * @param taskID
 	 *            the current TaskID
 	 * @param service 
+	 * @param updateService 
 	 * @param timeLimit
 	 *            can be safely null if noOfQueryMixes is set
 	 * @param noOfQueryMixes
@@ -85,9 +88,9 @@ public class Stresstest extends AbstractTask {
 	 * @param warmupQueries 
 	 * @param warmupUpdates 
 	 */
-	public Stresstest(String taskID, String service, String timeLimit, String noOfQueryMixes, Object[][] workerConfigurations,
+	public Stresstest(String taskID, String service, String updateService, String timeLimit, String noOfQueryMixes, Object[][] workerConfigurations,
 			String[] queryHandler, String warmupTimeMS, String warmupQueries, String warmupUpdates) {
-		this(taskID, service, Long.getLong(timeLimit), Long.getLong(noOfQueryMixes), workerConfigurations, queryHandler,
+		this(taskID, service, updateService, Long.getLong(timeLimit), Long.getLong(noOfQueryMixes), workerConfigurations, queryHandler,
 				Long.getLong(warmupTimeMS), warmupQueries, warmupUpdates);
 	
 	}
@@ -105,6 +108,7 @@ public class Stresstest extends AbstractTask {
 	 * @param taskID
 	 *            the current TaskID
 	 * @param service 
+	 * @param updateService 
 	 * @param timeLimit
 	 *            can be safely null if noOfQueryMixes is set
 	 * @param noOfQueryMixes
@@ -118,13 +122,13 @@ public class Stresstest extends AbstractTask {
 	 * @param warmupQueries 
 	 * @param warmupUpdates 
 	 */
-	public Stresstest(String taskID, String service, Long timeLimit, Long noOfQueryMixes, Object[][] workerConfigurations,
+	public Stresstest(String taskID, String service, String updateService, Long timeLimit, Long noOfQueryMixes, Object[][] workerConfigurations,
 			String[] queryHandler, Long warmupTimeMS, String warmupQueries, String warmupUpdates) {
 		super(taskID);
 		this.timeLimit = timeLimit;
 		this.noOfQueryMixes = noOfQueryMixes;
 		this.service = service;	
-		
+		this.updateService =  updateService==null?service:updateService;
 		this.qhClassName = queryHandler[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(queryHandler, 1, queryHandler.length);
 
@@ -148,7 +152,12 @@ public class Stresstest extends AbstractTask {
 				// sets null if timelimit is not defined otherwise the string repr. of the
 				// timelimit
 				config[2] = timeLimit == null ? null : timeLimit.toString();
-				config[3] = service;
+				if(workerConfig[1].equals(UPDATEWorker.class.getCanonicalName())) {
+					config[3] = updateService;
+				}
+				else {
+					config[3] = service;
+				}
 				for (int i = 2; i < workerConfig.length; i++) {
 					if(workerConfig[i]==null) {
 						config[i+2] = null;

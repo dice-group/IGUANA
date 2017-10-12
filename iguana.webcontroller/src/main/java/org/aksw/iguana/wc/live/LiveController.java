@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.primefaces.model.chart.BarChartModel;
 import org.primefaces.model.chart.ChartSeries;
 import org.primefaces.model.chart.HorizontalBarChartModel;
+import org.primefaces.model.chart.LegendPlacement;
 
 /**
  * Controller for the live results.
@@ -35,24 +37,44 @@ public class LiveController implements Serializable{
 	
 	private String[] selectedQueries = new String[0];
 	 
-	private HorizontalBarChartModel modelQPS = new HorizontalBarChartModel();
+	private BarChartModel modelQPS = new BarChartModel();
 	private BarChartModel modelQMPT = new BarChartModel();
-	private HorizontalBarChartModel modelNOQ = new HorizontalBarChartModel();
+	private BarChartModel modelNOQ = new BarChartModel();
 	
+	@Inject
+	private SingularConsumer consumer;
+
 	public void calculateModels() {
-		setModelQPS(new HorizontalBarChartModel());
+		consumer.consume();
+		Object[] obj  = consumer.getObj();
+		if(obj == null)
+			return;
+		this.taskID = obj[2].toString();
+		String queryIDRecv = obj[0].toString();
+		Long timeRecv = Long.parseLong(obj[1].toString());
+		add(queryIDRecv, timeRecv);
+		consumer.setObj(null);
+		setModelQPS(new BarChartModel());
 		setModelQMPT(new BarChartModel());
-		setModelNOQ(new HorizontalBarChartModel());
+		setModelNOQ(new BarChartModel());
+		modelQPS.setTitle("QPS");
+		modelQPS.createAxes();
+		modelQMPT.setTitle("QMPT");
+		modelQMPT.createAxes();
+		modelNOQ.setTitle("Numbers Of Queries");
+		modelNOQ.createAxes();
+		
+		
 		//TODO
 		ChartSeries qmpt = new ChartSeries();
 		ChartSeries qps = new ChartSeries();
 		ChartSeries noq = new ChartSeries();
 		long qmptValue = 0;
 		long time = 0;
-		for(String queryID : queryResults.keySet()) {
+		for(String queryID : selectedQueries) {
 			Long[] results = queryResults.get(queryID);
 			noq.set(queryID, results[1]);
-			qps.set(queryID, results[1]*1.0/(results[0]/1000));
+			qps.set(queryID, results[1]*1.0/(results[0]/1000.0));
 			qmptValue += results[1];
 			time += results[0];
 		}
@@ -91,7 +113,7 @@ public class LiveController implements Serializable{
 	/**
 	 * @return the modelQPS
 	 */
-	public HorizontalBarChartModel getModelQPS() {
+	public BarChartModel getModelQPS() {
 		return modelQPS;
 	}
 
@@ -99,7 +121,7 @@ public class LiveController implements Serializable{
 	/**
 	 * @param modelQPS the modelQPS to set
 	 */
-	public void setModelQPS(HorizontalBarChartModel modelQPS) {
+	public void setModelQPS(BarChartModel modelQPS) {
 		this.modelQPS = modelQPS;
 	}
 
@@ -123,16 +145,16 @@ public class LiveController implements Serializable{
 	/**
 	 * @return the modelNOQ
 	 */
-	public HorizontalBarChartModel getModelNOQ() {
+	public BarChartModel getModelNOQ() {
 		return modelNOQ;
 	}
 
 
 	/**
-	 * @param modelNOQ the modelNOQ to set
+	 * @param barChartModel the modelNOQ to set
 	 */
-	public void setModelNOQ(HorizontalBarChartModel modelNOQ) {
-		this.modelNOQ = modelNOQ;
+	public void setModelNOQ(BarChartModel barChartModel) {
+		this.modelNOQ = barChartModel;
 	}
 
 

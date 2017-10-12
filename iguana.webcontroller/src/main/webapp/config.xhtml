@@ -10,7 +10,8 @@
 
 
 		<h:form id="form">
-			<h:panelGrid style=" margin: 0 auto;"  columns="2">
+			<p:growl id="growl" showDetail="true" sticky="true" />
+			<h:panelGrid style=" margin: 0 auto;" columns="2">
 				<p:spacer width="0" />
 				<center>
 					<p:wizard flowListener="#{executionController.onFlowProcess}">
@@ -21,28 +22,32 @@
 								<h:panelGrid columns="3" cellpadding="20">
 									<h:panelGrid columns="2" columnClasses="label, value">
 										<p:outputLabel style="color: #000;" value="ID: *" />
-										<p:inputText value="#{executionController.name}"
+										<p:inputText
+											value="#{executionController.createConnection.name}"
 											required="false" label="id" />
 
 										<p:outputLabel style="color: #000;"
 											value="SPARQL Service address: *" />
-										<p:inputText value="#{executionController.service}"
+										<p:inputText
+											value="#{executionController.createConnection.service}"
 											required="false" label="service" />
 
 
 										<p:outputLabel style="color: #000;"
 											value="Update Service address: " />
-										<p:inputText value="#{executionController.updateService}"
+										<p:inputText
+											value="#{executionController.createConnection.updateService}"
 											required="false" label="Update endpoint" />
 										<p:outputLabel style="color: #000;visibility: hidden;"
 											value="user: " />
-										<p:inputText value="#{executionController.user}"
+										<p:inputText
+											value="#{executionController.createConnection.user}"
 											required="false" style="visibility: hidden;"
 											label="user for updates" />
 										<p:outputLabel style="color: #000;visibility: hidden;"
 											value="password: " />
 										<p:password style="visibility: hidden;"
-											value="#{executionController.pwd}" />
+											value="#{executionController.createConnection.pwd}" />
 										<br />
 										<br />
 										<br />
@@ -55,11 +60,12 @@
 										<p:selectOneListbox id="basic" style="height: 200;width: 300;"
 											value="#{executionController.deleteConnection}">
 											<f:selectItems value="#{executionController.connections}"
-												var="connection" itemLabel="#{connection.service}"
+												var="connection"
+												itemLabel="#{connection.name}:  #{connection.service}"
 												itemValue="#{connection.name}" />
 										</p:selectOneListbox>
 										<p:commandButton value="Remove"
-											actionListener="#{executionController.remove()}"
+											actionListener="#{executionController.removeConnection()}"
 											update="@form" icon="ui-icon-trash" />
 									</h:panelGrid>
 								</h:panelGrid>
@@ -68,16 +74,177 @@
 
 						<p:tab id="datasets" title="Datasets and Generation">
 							<p:panel header="Datasets">
-								<h:panelGrid columns="3" columnClasses="grid,grid,grid">
+								<p:messages id="messages2" showDetail="true" autoUpdate="true"
+									closable="true" />
+								<h:panelGrid columns="3" cellpadding="20">
+									<h:panelGrid columns="2" columnClasses="label, value">
+										<p:outputLabel style="color: #000;" value="ID: *" />
+										<p:inputText value="#{executionController.createDataset.name}"
+											required="false" label="id" />
 
+										<p:outputLabel style="color: #000;"
+											value="DatasetGenerator class name:" />
+										<p:inputText
+											value="#{executionController.createDataset.datasetGeneratorClassName}"
+											required="false" label="className" />
+
+
+										<p:outputLabel style="color: #000;"
+											value="Constructor Arguments: " />
+										<p:chips
+											value="#{executionController.createDataset.constructorArgs}"
+											required="false" label="constructorArgs" />
+										<br />
+										<br />
+										<br />
+										<p:commandButton value="add" icon="ui-icon-check"
+											actionListener="#{executionController.addDataset()}"
+											update="@form" />
+									</h:panelGrid>
+									<p:spacer width="25" />
+									<h:panelGrid columns="1">
+										<p:selectOneListbox id="datasetsList"
+											style="height: 200;width: 300;"
+											value="#{executionController.deleteDataset}">
+											<f:selectItems value="#{executionController.datasets}"
+												var="dataset" itemLabel="#{dataset.name}"
+												itemValue="#{dataset.name}" />
+										</p:selectOneListbox>
+										<p:commandButton value="Remove"
+											actionListener="#{executionController.removeDataset()}"
+											update="@form" icon="ui-icon-trash" />
+									</h:panelGrid>
 								</h:panelGrid>
 
 							</p:panel>
 						</p:tab>
 						<p:tab id="tasks" title="Tasks">
 							<p:panel header="Tasks">
-								<h:panelGrid columns="3" columnClasses="grid,grid,grid">
+								<p:messages id="messages3" showDetail="true" autoUpdate="true"
+									closable="true" />
+								<h:panelGrid columns="3" cellpadding="20">
+									<h:panelGrid columns="2" cellpadding="15">
+										<p:outputLabel style="color: #000;" value="Class: " />
+										<p:selectOneListbox value="#{executionController.className}"
+											style="width:450;">
+											<f:selectItems value="#{taskController.names}" var="task"
+												itemLabel="#{task[0]}" itemValue="#{task[1]}"
+												style="width:150;" />
+											<p:ajax update="@form"
+												listener="#{executionController.initTask()}" process="@this" />
+										</p:selectOneListbox>
 
+										<c:if
+											test="#{executionController.className.equals('org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest')}">
+											<p:spacer />
+											<hr />
+
+											<p:outputLabel style="color: #000;"
+												value="Constructor Arguments:" />
+											<br />
+											<p:selectBooleanButton id="typeST"
+												value="#{executionController.createTask.type}"
+												onLabel="Time Limit MS" offLabel="No. of Query Mixes" />
+											<p:spinner
+												value="#{executionController.createTask.typeValue}" />
+											<p:spacer height="25" />
+											<p:spacer />
+											<p:outputLabel value="Query Handler:" />
+											<p:selectOneListbox
+												value="#{executionController.createTask.qhClassName}"
+												style="width:250;">
+												<f:selectItems
+													value="#{executionController.createTask.queryHandlers}"
+													var="handler" itemLabel="#{handler[0]}"
+													itemValue="#{handler[1]}" style="width:450;" />
+											</p:selectOneListbox>
+											<p:spacer height="25" />
+											<p:spacer />
+											<p:outputLabel style="color: #000;" value="SPARQL Workers" />
+											<p:spacer />
+
+											<p:outputLabel value="No. of SPARQL Workers:" />
+											<p:spinner value="#{executionController.createTask.sparqls}">
+												<p:ajax update="@form" process="@this" />
+											</p:spinner>
+											<c:if test="#{executionController.createTask.sparqls>0}">
+
+												<p:outputLabel value="Configuration: " />
+											</c:if>
+											<c:if test="#{executionController.createTask.sparqls>0}">
+
+												<p:outputLabel
+													value="timeOutMS, queryFileName, fixedLatency, gaussianLatency" />
+											</c:if>
+											<p:spacer />
+											<p:repeat
+												value="#{executionController.createTask.sparqlWorkers}"
+												var="worker">
+												<h:panelGrid columns="2">
+													<p:outputLabel value="Configuration: " />
+													<p:chips value="#{worker}" />
+												</h:panelGrid>
+											</p:repeat>
+											<p:spacer height="25" />
+											<p:spacer />
+											<p:outputLabel style="color: #000;" value="UPDATE Workers" />
+											<p:spacer />
+											<p:outputLabel value="No. of Update Workers:" />
+											<p:spinner value="#{executionController.createTask.updates}">
+												<p:ajax update="@form" process="@this" />
+											</p:spinner>
+											<c:if test="#{executionController.createTask.updates>0}">
+												<p:outputLabel value="Configuration: " />
+											</c:if>
+											<c:if test="#{executionController.createTask.updates>0}">
+
+												<p:outputLabel
+													value="updateFolder, fixedLatency, gaussianLatency, updateStrategy, timerStrategy" />
+											</c:if>
+											<p:spacer />
+											<p:repeat
+												value="#{executionController.createTask.updateWorkers}"
+												var="worker">
+												<h:panelGrid columns="2">
+													<p:outputLabel value="Configuration: " />
+													<p:chips value="#{worker}" />
+												</h:panelGrid>
+											</p:repeat>
+											<p:spacer height="25" />
+											<p:spacer />
+
+											<p:outputLabel style="color: #000;" value="Warmup:" />
+											<p:spacer />
+											<p:outputLabel value="Warmup Queries:" />
+											<p:inputText
+												value="#{executionController.createTask.warmupQueries}" />
+											<p:outputLabel value="Warmup Updates:" />
+											<p:inputText
+												value="#{executionController.createTask.warmupUpdates}" />
+											<p:outputLabel value="Warmup Time (ms):" />
+											<p:spinner
+												value="#{executionController.createTask.warmupTime}" />
+										</c:if>
+										<p:spacer />
+										<br />
+
+										<p:commandButton value="add" icon="ui-icon-check"
+											actionListener="#{executionController.addTask()}"
+											update="@form" />
+									</h:panelGrid>
+									<p:spacer width="25" />
+									<h:panelGrid columns="1">
+										<p:selectOneListbox id="tasksList"
+											style="height: 400;width: 300;"
+											value="#{executionController.deleteTask}">
+											<f:selectItems value="#{executionController.tasks}"
+												var="task" itemLabel="#{task}"
+												itemValue="#{task.hashCode()}" />
+										</p:selectOneListbox>
+										<p:commandButton value="Remove"
+											actionListener="#{executionController.removeTask()}"
+											update="@form" icon="ui-icon-trash" />
+									</h:panelGrid>
 								</h:panelGrid>
 
 							</p:panel>
@@ -85,14 +252,68 @@
 
 						<p:tab id="confirm" title="Confirmation">
 							<p:panel header="Confirmation">
-								<h:panelGrid id="confirmation" columns="3"
-									columnClasses="grid,grid,grid">
-
+								<h:panelGrid id="confirmation" columns="5"
+									columnClasses="grid,grid,grid" cellpadding="15">
+									<h:panelGrid columns="2">
+										<h3>Connections</h3>
+										<p:spacer />
+										<p:repeat value="#{executionController.connections}"
+											var="connection">
+											<h:panelGrid columns="2">
+												<p:outputLabel value="Name: " />
+												<p:outputLabel style="font-weight: normal;"
+													value="#{connection.name}" />
+												<p:outputLabel value="SPARQL Service:  " />
+												<p:outputLabel style="font-weight: normal;"
+													value="#{connection.service}" />
+												<p:outputLabel value="Update Service: " />
+												<p:outputLabel style="font-weight: normal;"
+													value="#{connection.updateService}" />
+												<hr />
+											</h:panelGrid>
+										</p:repeat>
+									</h:panelGrid>
+									<p:spacer width="15" />
+									<h:panelGrid columns="2">
+										<h3>Datasets</h3>
+										<p:spacer />
+										<p:repeat value="#{executionController.datasets}"
+											var="dataset">
+											<h:panelGrid columns="2">
+												<p:outputLabel value="Name: " />
+												<p:outputLabel style="font-weight: normal;"
+													value="#{dataset.name}" />
+												<p:outputLabel value="DataGenerator Class Name:  " />
+												<p:outputLabel style="font-weight: normal;"
+													value="#{dataset.datasetGeneratorClassName}" />
+												<p:outputLabel value="Constructor Arguments: " />
+												<p:outputLabel style="font-weight: normal;"
+													value="#{dataset.constructorArgs}" />
+												<hr />
+											</h:panelGrid>
+										</p:repeat>
+									</h:panelGrid>
+									<p:spacer width="15" />
+									<h:panelGrid columns="2">
+										<h3>Tasks</h3>
+										<p:spacer />
+										<p:repeat value="#{executionController.tasks}" var="task">
+											<h:panelGrid columns="2">
+												<p:outputLabel value="Class Name:  " />
+												<p:outputLabel style="font-weight: normal;"
+													value="#{task.className}" />
+												<p:outputLabel value="Constructor Arguments: " />
+												<p:outputLabel style="font-weight: normal;"
+													value="#{task.constructorArgs}" />
+												<hr />
+											</h:panelGrid>
+										</p:repeat>
+									</h:panelGrid>
 								</h:panelGrid>
 
 								<p:commandButton value="Submit"
 									actionListener="#{executionController.execute()}"
-									process="@this" />
+									process="@this" update="growl" />
 							</p:panel>
 						</p:tab>
 					</p:wizard>

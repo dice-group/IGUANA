@@ -43,6 +43,9 @@ public class TypedFactory <T>{
 	 */
 	@SuppressWarnings("unchecked")
 	public T create(String className, Object[] constructorArgs){
+		if (constructorArgs == null) {
+			constructorArgs = new Object[0];
+		}
 		Class<String>[] stringClass = new Class[constructorArgs.length];
 		for(int i=0;i<stringClass.length;i++){
 			stringClass[i]=String.class;

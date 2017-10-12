@@ -6,24 +6,33 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	template="WEB-INF/templates/default.xhtml">
+	<h:head />
 	<ui:define name="contentD">
 
 		<h:form>
-			<h:panelGrid columns="2">
+			<h:panelGrid columns="4">
+				<p:spacer width="20" />
 				<p:outputLabel value="Task ID: " />
 				<p:outputLabel value="#{liveController.taskID}" />
-				<p:spacer/>
+				<p:spacer />
+				<p:spacer />
 				<p:selectCheckboxMenu id="menu"
-					value="#{liveController.selectedQueries}" label="Select Queries to show" filter="true"
+					value="#{liveController.selectedQueries}"
+					label="Select Queries to show" filter="true"
 					filterMatchMode="startsWith" panelStyle="width:400px">
 					<f:selectItems value="#{liveController.queries}" />
 				</p:selectCheckboxMenu>
-				<p:poll actionListener="#{liveController.calculateModels()}" interval="3" update="live" />
-				<h:panelGrid id="live" columns="3">
-					<p:chart id="qps" type="bar" model="#{liveController.modelQPS}" />
-					<p:chart id="qmpt" type="bar" model="#{liveController.modelQMPT}" />
-					<p:chart id="noq" type="bar" model="#{liveController.modelNOQ}" />
-				</h:panelGrid>
+				<p:poll listener="#{liveController.calculateModels}" interval="3"
+					update="@form" />
+				<p:spacer />
+				<p:spacer width="20" />
+				<p:chart id="qps" type="bar" widgetVar="chart1"
+					model="#{liveController.modelQPS}"  style="width:600;" />
+				<p:chart id="qmpt" type="bar" widgetVar="chart2"
+					model="#{liveController.modelQMPT}" style="width:300;" />
+				<p:chart id="noq" type="bar" widgetVar="chart3"
+					model="#{liveController.modelNOQ}" style="width:600;" />
+
 			</h:panelGrid>
 		</h:form>
 	</ui:define>
