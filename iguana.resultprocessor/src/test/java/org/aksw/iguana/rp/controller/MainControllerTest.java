@@ -199,6 +199,7 @@ public class MainControllerTest {
 		assertTrue(new File("results_test.nt").exists());
 		new File("results_test.nt").delete();
 		FileUtils.deleteDirectory(new File("result_storage"));
+		mc.close();
 	}
 	
 }

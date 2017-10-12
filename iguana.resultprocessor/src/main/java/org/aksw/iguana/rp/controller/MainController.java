@@ -31,6 +31,7 @@ public class MainController {
 			.getLogger(MainController.class);
 	private MetricManager globalMetricsManager;
 	private StorageManager storageManager;
+	private IConsumer consumer;
 	
 	public static void main(String[] argc){
 		MainController controller = new MainController();
@@ -67,7 +68,7 @@ public class MainController {
 		ExperimentManager emanager = new ExperimentManager(globalMetricsManager, storageManager);
 		
 		//start DefaultConsumer
-		IConsumer consumer = new DefaultConsumer(emanager);
+		consumer = new DefaultConsumer(emanager);
 		try {
 			LOGGER.info("Starting {}", consumer.getClass().getName());
 			//This will loop until user decides to exit.
@@ -79,6 +80,10 @@ public class MainController {
 			consumer.close();
 			return;
 		}
+	}
+	
+	public void close() {
+		this.consumer.close();
 	}
 
 }
