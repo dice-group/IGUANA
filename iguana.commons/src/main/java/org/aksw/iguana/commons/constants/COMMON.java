@@ -132,5 +132,9 @@ public class COMMON {
 	public static final String CONFIG_CONNECTIONS = "iguana.cc.connections";
 	
 	public static final String CONFIG_DATASETS = "iguana.cc.datasets";
+
+	public static final String RP2SENDER_QUEUENAME = "rp2senderQueue";
+	
+
 	
 }

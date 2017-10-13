@@ -1,5 +1,11 @@
 package org.aksw.iguana.rp.config;
 
+/**
+ * Result Processor specific constants
+ * 
+ * @author f.conrads
+ *
+ */
 public class CONSTANTS {
 
 	/*
@@ -25,16 +31,30 @@ public class CONSTANTS {
 	 */
 	public static final String STORAGES_KEY = "iguana.rp.storages";
 	
+	/**
+	 * 
+	 */
 	public static final String STORAGE_ENDPOINT = "storageEndpoint";
 
+	/**
+	 * 
+	 */
 	public static final String STORAGE_DIRECTORY = "storageDirectory";
 
+	/**
+	 * 
+	 */
 	public static final String STORAGE_FILE = "storageFile";
 
+	/**
+	 * 
+	 */
 	public static final String LENGTH_EXTRA_META_KEY = "lengthExtraMeta";
 
-	public static final String RP2SENDER_KEY = "rp2senderQueueName";
-	
 
+	/**
+	 * 
+	 */
+	public static final String RP2SENDER_KEY = "rp2senderQueueName";
 
 }

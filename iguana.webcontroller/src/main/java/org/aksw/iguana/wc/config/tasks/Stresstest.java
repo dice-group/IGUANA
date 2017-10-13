@@ -1,11 +1,18 @@
-package org.aksw.iguana.wc.config;
+package org.aksw.iguana.wc.config.tasks;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import org.aksw.iguana.wc.config.Task;
+import org.aksw.iguana.wc.config.tasks.worker.SPARQLWorkerConfig;
+import org.aksw.iguana.wc.config.tasks.worker.UPDATEWorkerConfig;
 
-public class Stresstest extends Task {
+/**
+ * The web config for the stresstest
+ * 
+ * @author f.conrads
+ *
+ */
+public class Stresstest extends AbstractTask {
 
 
 
@@ -19,16 +26,32 @@ public class Stresstest extends Task {
 	private String warmupQueries;
 	private String warmupUpdates;
 
-	private List<List<String>> sparqlWorkers = new LinkedList<List<String>>();
-	private List<List<String>> updateWorkers = new LinkedList<List<String>>();
+	private List<SPARQLWorkerConfig> sparqlWorkers = new LinkedList<SPARQLWorkerConfig>();
+	private List<UPDATEWorkerConfig> updateWorkers = new LinkedList<UPDATEWorkerConfig>();
+	
+	private List<String> timerStrategy = new LinkedList<String>();
+	private List<String> updateStrategy = new LinkedList<String>();
 
 	private int sparqls=0;
 	private int updates=0;
 
+	/**
+	 * initializes the Stresstest
+	 */
 	public Stresstest() {
 		queryHandlers.add(new String[] {"Instance Based Query Handler","org.aksw.iguana.tp.query.impl.InstancesQueryHandler"});
 		queryHandlers.add(new String[] {"Pattern Based Query Handler","org.aksw.iguana.tp.query.impl.PatternQueryHandler"});
 		className= "org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest";
+		
+		timerStrategy.add("NONE");
+		timerStrategy.add("FIXED");
+		timerStrategy.add("DISTRIBUTED");
+		
+		updateStrategy.add("NONE");
+		updateStrategy.add("ADD_REMOVE");
+		updateStrategy.add("REMOVE_ADD");
+		updateStrategy.add("ALL_ADDING_FIRST");
+		updateStrategy.add("ALL_REMOVING_FIRST");
 	}
 
 	@Override
@@ -37,11 +60,11 @@ public class Stresstest extends Task {
 		//String[] queryHandler, String warmupTimeMS, String warmupQueries, String warmupUpdates
 		Object[][] workerConfiguration = new Object[sparqls+updates][];
 		int i=0;
-		for(List<String> worker : sparqlWorkers) {
-			workerConfiguration[i++]= worker.toArray();
+		for(SPARQLWorkerConfig config : sparqlWorkers) {
+			workerConfiguration[i++]= config.asConstructorArgs();
 		}
-		for(List<String> worker : updateWorkers) {
-			workerConfiguration[i++]= worker.toArray();
+		for(UPDATEWorkerConfig config : updateWorkers) {
+			workerConfiguration[i++]= config.asConstructorArgs();
 		}
 		
 		constructorArgs = new Object[7];
@@ -112,10 +135,19 @@ public class Stresstest extends Task {
 			this.qhClassName = qhClassName;
 	}
 
+	/**
+	 * 
+	 * @return the available queryHandler names
+	 */
 	public List<String[]> getQueryHandlers() {
 		return queryHandlers;
 	}
 
+	/**
+	 * Sets the available queryHandler names
+	 * 
+	 * @param queryHandlers
+	 */
 	public void setQueryHandlers(List<String[]> queryHandlers) {
 		this.queryHandlers = queryHandlers;
 	}
@@ -168,7 +200,7 @@ public class Stresstest extends Task {
 	/**
 	 * @return the updateWorkers
 	 */
-	public List<List<String>> getUpdateWorkers() {
+	public List<UPDATEWorkerConfig> getUpdateWorkers() {
 		return updateWorkers;
 	}
 
@@ -176,14 +208,14 @@ public class Stresstest extends Task {
 	 * @param updateWorkers
 	 *            the updateWorkers to set
 	 */
-	public void setUpdateWorkers(List<List<String>> updateWorkers) {
+	public void setUpdateWorkers(List<UPDATEWorkerConfig> updateWorkers) {
 		this.updateWorkers = updateWorkers;
 	}
 
 	/**
 	 * @return the sparqlWorkers
 	 */
-	public List<List<String>> getSparqlWorkers() {
+	public List<SPARQLWorkerConfig> getSparqlWorkers() {
 		return sparqlWorkers;
 	}
 
@@ -191,7 +223,7 @@ public class Stresstest extends Task {
 	 * @param sparqlWorkers
 	 *            the sparqlWorkers to set
 	 */
-	public void setSparqlWorkers(List<List<String>> sparqlWorkers) {
+	public void setSparqlWorkers(List<SPARQLWorkerConfig> sparqlWorkers) {
 		this.sparqlWorkers = sparqlWorkers;
 	}
 
@@ -210,7 +242,7 @@ public class Stresstest extends Task {
 		int i;
 		if (sparqls > sparqlWorkers.size()) {
 			for (i = 0; i < sparqls - sparqlWorkers.size(); i++) {
-				sparqlWorkers.add(new LinkedList<String>());
+				sparqlWorkers.add(new SPARQLWorkerConfig());
 			}
 		}
 		else if(sparqls < sparqlWorkers.size()) {
@@ -236,7 +268,7 @@ public class Stresstest extends Task {
 		int i;
 		if (updates > updateWorkers.size()) {
 			for (i = 0; i < updates - updateWorkers.size(); i++) {
-				updateWorkers.add(new LinkedList<String>());
+				updateWorkers.add(new UPDATEWorkerConfig());
 			}
 		}
 		else if(updates < updateWorkers.size()) {
@@ -257,6 +289,34 @@ public class Stresstest extends Task {
 				ret.append("null, ");
 		}
 		return ret.toString();
+	}
+
+	/**
+	 * @return the timerStrategy
+	 */
+	public List<String> getTimerStrategy() {
+		return timerStrategy;
+	}
+
+	/**
+	 * @param timerStrategy the timerStrategy to set
+	 */
+	public void setTimerStrategy(List<String> timerStrategy) {
+		this.timerStrategy = timerStrategy;
+	}
+
+	/**
+	 * @return the updateStrategy
+	 */
+	public List<String> getUpdateStrategy() {
+		return updateStrategy;
+	}
+
+	/**
+	 * @param updateStrategy the updateStrategy to set
+	 */
+	public void setUpdateStrategy(List<String> updateStrategy) {
+		this.updateStrategy = updateStrategy;
 	}
 
 }

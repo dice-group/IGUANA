@@ -45,26 +45,38 @@ public class GraphController implements Serializable {
 
 	private String type = "bar";
 
+	/**
+	 * Initializes the Bar Model for the chart in the web view
+	 */
 	public void initBar() {
 		// init new bar model
 		model = new BarChartModel();
 		model.setLegendPosition("e");
 		model.setLegendPlacement(LegendPlacement.OUTSIDEGRID);
+		//init chart with bar model
 		initChart(model);
 	}
 
+	/**
+	 * Initializes the Line Model for the chart in the web view
+	 */
 	public void initLine() {
 		// init new bar model
 		model = new LineChartModel();
 		model.setLegendPosition("e");
 		model.setLegendPlacement(LegendPlacement.OUTSIDEGRID);
+		//set configurations
 		((LineChartModel) model).setShowPointLabels(true);
 		((LineChartModel) model).getAxes().put(AxisType.X, new CategoryAxis(""));
 		Axis yAxis = ((LineChartModel) model).getAxis(AxisType.Y);
 		yAxis.setLabel("");
+		//init chart with line model
 		initChart(model);
 	}
 
+	/**
+	 * init the model either as bar or line (which ever the type is)
+	 */
 	public void init() {
 		if (this.type.equals("bar")) {
 			initBar();
@@ -73,11 +85,16 @@ public class GraphController implements Serializable {
 		}
 	}
 
+	/**
+	 * Initializes the Chart model with values
+	 * @param model
+	 */
 	private void initChart(ChartModel model) {
 		model.setTitle("");
-		// init sets
+		// init the series data
 		Set<String> labels = new HashSet<String>();
 		Set<String> xData = new HashSet<String>();
+		//sets the header
 		List<String> header = sparqlController.getHeader();
 		// iterate trhough results to get all labels and yPoints
 		for (List<String> row : sparqlController.getResults()) {
@@ -119,38 +136,74 @@ public class GraphController implements Serializable {
 		}
 	}
 
+	/**
+	 * Gets the ChartModel 
+	 * @return
+	 */
 	public ChartModel getChart() {
 		return this.model;
 	}
 
+	/**
+	 * Gets the Label variable
+	 * @return
+	 */
 	public String getLabel() {
 		return label;
 	}
 
+	/**
+	 * Sets the Label variable
+	 * @param label
+	 */
 	public void setLabel(String label) {
 		this.label = label;
 	}
 
+	/**
+	 * Gets  the Y Data variable
+	 * @return
+	 */
 	public String getY() {
 		return this.y;
 	}
 
+	/**
+	 * Sets the Y Data variable
+	 * @param y
+	 */
 	public void setY(String y) {
 		this.y = y;
 	}
-
+	
+	/**
+	 * Gets the X Data variable
+	 * @return
+	 */
 	public String getX() {
 		return x;
 	}
-
+	
+	/**
+	 * Sets the X Data variable
+	 * @param x
+	 */
 	public void setX(String x) {
 		this.x = x;
 	}
 
+	/**
+	 * Gets the type of the chart (either bar or line)
+	 * @return
+	 */
 	public String getType() {
 		return type;
 	}
 
+	/**
+	 * Sets the type of the chart (either bar or line)
+	 * @param type
+	 */
 	public void setType(String type) {
 		this.type = type;
 	}

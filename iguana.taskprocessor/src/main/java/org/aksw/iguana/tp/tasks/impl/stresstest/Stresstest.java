@@ -153,7 +153,7 @@ public class Stresstest extends AbstractTask {
 				// timelimit
 				config[2] = timeLimit == null ? null : timeLimit.toString();
 				if(workerConfig[1].equals(UPDATEWorker.class.getCanonicalName())) {
-					config[3] = updateService;
+					config[3] = this.updateService;
 				}
 				else {
 					config[3] = service;

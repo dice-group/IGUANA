@@ -1,23 +1,13 @@
 package org.aksw.iguana.wc.sparql;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
@@ -27,7 +17,6 @@ import javax.inject.Named;
 import org.aksw.iguana.commons.config.Config;
 import org.apache.commons.configuration.Configuration;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -36,14 +25,10 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelReader;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
-import org.primefaces.model.chart.BarChartModel;
-import org.primefaces.model.chart.ChartSeries;
 
 /**
  * 
@@ -73,65 +58,94 @@ public class SparqlController implements Serializable {
 	private Model m;
 	private boolean isCD=true;
 
-	public SparqlController() {
-	}
-	
+
+	/**
+	 * Initialize the sparql controller (get template queries)
+	 */
 	@PostConstruct
 	public void init() {
-		URL url;
-		try {
-			url = FacesContext.getCurrentInstance().getExternalContext().getResource("templates.properties");
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
+
+		
+		//get config with template queries
 		Configuration config = Config.getInstance("templates.properties");
+		//iterate through each templates
 		Iterator<String> keys = config.getKeys("iguana.sparql.templates");
 		while(keys.hasNext()) {
+			//get the name and query(value)
 			String key = keys.next();
 			String name = key.substring(24, key.length());
 			String value = config.getString(key);
+			// add to templates
 			templates.put(name, value);
 		}
 	}
 	
+	/**
+	 * 
+	 */
 	public void setTemplate() {
 		this.queryStr=templates.get(template);
 	}
 
+	/**
+	 * @return
+	 */
 	public String getQueryStr() {
 		return queryStr;
 	}
 
+	/**
+	 * @param queryStr
+	 */
 	public void setQueryStr(String queryStr) {
 		this.queryStr = queryStr;
 	}
 
+	/**
+	 * @return
+	 */
 	public List<String> getHeader() {
 		return header;
 	}
 
+	/**
+	 * @param header
+	 */
 	public void setHeader(List<String> header) {
 		this.header = header;
 	}
 
+	/**
+	 * @return
+	 */
 	public List<List<String>> getResults() {
 		return results;
 	}
 
+	/**
+	 * @param results
+	 */
 	public void setResults(List<List<String>> results) {
 		this.results = results;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getEndpoint() {
 		return endpoint;
 	}
 
+	/**
+	 * @param endpoint
+	 */
 	public void setEndpoint(String endpoint) {
 		this.endpoint = endpoint;
 	}
 
+	/**
+	 * Queries the endpoint with the given query and sets the results 
+	 */
 	public void query() {
 		Query query = null;
 		try {
@@ -207,6 +221,11 @@ public class SparqlController implements Serializable {
 		}
 	}
 
+	/**
+	 * Save the table as an ntriple file or as a csv type file 
+	 * and returns the content as stream
+	 * @return
+	 */
 	public StreamedContent save() {
 		query();
 
@@ -236,26 +255,45 @@ public class SparqlController implements Serializable {
 
 	}
 
+	/**
+	 * @return
+	 */
 	public String getResultAsText() {
 		return resultAsText;
 	}
 
+	/**
+	 * @param resultAsText
+	 */
 	public void setResultAsText(String resultAsText) {
 		this.resultAsText = resultAsText;
 	}
 
+	/**
+	 * Checks if result is a table (true) or a boolean answer (false)
+	 * @return
+	 */
 	public boolean isTable() {
 		return isCD||isSelect;
 	}
 
+	/**
+	 * @param isSelect
+	 */
 	public void setSelect(boolean isSelect) {
 		this.isSelect = isSelect;
 	}
 
+	/**
+	 * @return
+	 */
 	public Map<String, String> getTemplates() {
 		return templates;
 	}
 
+	/**
+	 * @param templates
+	 */
 	public void setTemplates(Map<String, String> templates) {
 		this.templates = templates;
 	}

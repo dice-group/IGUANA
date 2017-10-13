@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
+import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.config.CONSTANTS;
 
 import com.rabbitmq.client.Channel;
@@ -23,7 +24,6 @@ import com.rabbitmq.client.ConnectionFactory;
  */
 public abstract class SenderStorage<T extends Object> implements Storage {
 
-	protected String RP2SENDER_QUEUENAME="rp2senderQueue";
 
 	protected String rabbitHost="localhost";
 	
@@ -53,7 +53,7 @@ public abstract class SenderStorage<T extends Object> implements Storage {
 	    Connection connection = factory.newConnection();
 	    Channel channel = connection.createChannel();
 	    
-	    channel.queueDeclare(RP2SENDER_QUEUENAME, false, false, false, null);
+	    channel.queueDeclare(COMMON.RP2SENDER_QUEUENAME, false, false, false, null);
 	    
 	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	      ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -63,7 +63,7 @@ public abstract class SenderStorage<T extends Object> implements Storage {
 	      bos.close();
 	      byte [] data = bos.toByteArray();
 	    
-	    channel.basicPublish("", RP2SENDER_QUEUENAME, null, data);
+	    channel.basicPublish("", COMMON.RP2SENDER_QUEUENAME, null, data);
 	}
 	
 	
@@ -71,7 +71,7 @@ public abstract class SenderStorage<T extends Object> implements Storage {
 	@Override
 	public Properties getStorageInfo() {
 		Properties p = new Properties();
-		p.setProperty(CONSTANTS.RP2SENDER_KEY, RP2SENDER_QUEUENAME);
+		p.setProperty(CONSTANTS.RP2SENDER_KEY, COMMON.RP2SENDER_QUEUENAME);
 		return p;
 	}
 

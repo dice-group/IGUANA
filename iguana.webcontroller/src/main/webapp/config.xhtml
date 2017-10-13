@@ -118,6 +118,7 @@
 
 							</p:panel>
 						</p:tab>
+
 						<p:tab id="tasks" title="Tasks">
 							<p:panel header="Tasks">
 								<p:messages id="messages3" showDetail="true" autoUpdate="true"
@@ -125,23 +126,26 @@
 								<h:panelGrid columns="3" cellpadding="20">
 									<h:panelGrid columns="2" cellpadding="15">
 										<p:outputLabel style="color: #000;" value="Class: " />
-										<p:selectOneListbox value="#{executionController.className}"
+										<p:selectOneMenu value="#{executionController.className}"
 											style="width:450;">
 											<f:selectItems value="#{taskController.names}" var="task"
 												itemLabel="#{task[0]}" itemValue="#{task[1]}"
 												style="width:150;" />
 											<p:ajax update="@form"
 												listener="#{executionController.initTask()}" process="@this" />
-										</p:selectOneListbox>
+										</p:selectOneMenu>
 
 										<c:if
 											test="#{executionController.className.equals('org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest')}">
-											<p:spacer />
-											<hr />
-
+											<p:separator />
+											<p:separator />
+											<p:separator />
+											<p:separator />
 											<p:outputLabel style="color: #000;"
 												value="Constructor Arguments:" />
 											<br />
+											<p:separator />
+											<p:separator />
 											<p:selectBooleanButton id="typeST"
 												value="#{executionController.createTask.type}"
 												onLabel="Time Limit MS" offLabel="No. of Query Mixes" />
@@ -149,70 +153,111 @@
 												value="#{executionController.createTask.typeValue}" />
 											<p:spacer height="25" />
 											<p:spacer />
-											<p:outputLabel value="Query Handler:" />
-											<p:selectOneListbox
+											<p:separator />
+											<p:separator />
+											<p:outputLabel style="color: #000;" value="Query Handler:" />
+											<p:selectOneMenu
 												value="#{executionController.createTask.qhClassName}"
 												style="width:250;">
 												<f:selectItems
 													value="#{executionController.createTask.queryHandlers}"
 													var="handler" itemLabel="#{handler[0]}"
 													itemValue="#{handler[1]}" style="width:450;" />
-											</p:selectOneListbox>
+											</p:selectOneMenu>
 											<p:spacer height="25" />
 											<p:spacer />
+											<p:separator />
+											<p:separator />
 											<p:outputLabel style="color: #000;" value="SPARQL Workers" />
 											<p:spacer />
 
-											<p:outputLabel value="No. of SPARQL Workers:" />
+											<p:outputLabel value="No. of SPARQL Configurations:" />
 											<p:spinner value="#{executionController.createTask.sparqls}">
 												<p:ajax update="@form" process="@this" />
 											</p:spinner>
 											<c:if test="#{executionController.createTask.sparqls>0}">
 
-												<p:outputLabel value="Configuration: " />
+												<p:outputLabel value="Configurations: " />
 											</c:if>
 											<c:if test="#{executionController.createTask.sparqls>0}">
-
-												<p:outputLabel
-													value="timeOutMS, queryFileName, fixedLatency, gaussianLatency" />
+												<p:dataTable resizableColumns="true" scrollable="true"
+													scrollWidth="50%" scrollHeight="150"
+													value="#{executionController.createTask.sparqlWorkers}"
+													var="config">
+													<p:column  headerText="No of Workers">
+														<p:spinner  value="#{config.workers}" />
+													</p:column>
+													<p:column headerText="Time Out (ms)">
+														<p:spinner value="#{config.timeOutMS}" />
+													</p:column>
+													<p:column headerText="Queries File Name">
+														<p:inputText value="#{config.queriesFileName}" />
+													</p:column>
+													<p:column headerText="Fixed Latency">
+														<p:spinner value="#{config.fixedLatency}" />
+													</p:column>
+													<p:column headerText="Gaussian Latency">
+														<p:spinner value="#{config.gaussianLatency}" />
+													</p:column>
+												</p:dataTable>
 											</c:if>
-											<p:spacer />
-											<p:repeat
-												value="#{executionController.createTask.sparqlWorkers}"
-												var="worker">
-												<h:panelGrid columns="2">
-													<p:outputLabel value="Configuration: " />
-													<p:chips value="#{worker}" />
-												</h:panelGrid>
-											</p:repeat>
+
 											<p:spacer height="25" />
 											<p:spacer />
+											<p:separator />
+											<p:separator />
 											<p:outputLabel style="color: #000;" value="UPDATE Workers" />
 											<p:spacer />
-											<p:outputLabel value="No. of Update Workers:" />
+
+											<p:outputLabel value="No. of Update Configurations:" />
 											<p:spinner value="#{executionController.createTask.updates}">
 												<p:ajax update="@form" process="@this" />
 											</p:spinner>
 											<c:if test="#{executionController.createTask.updates>0}">
-												<p:outputLabel value="Configuration: " />
+												<p:outputLabel value="Configurations: " />
 											</c:if>
 											<c:if test="#{executionController.createTask.updates>0}">
-
-												<p:outputLabel
-													value="updateFolder, fixedLatency, gaussianLatency, updateStrategy, timerStrategy" />
+												<p:dataTable scrollable="true" scrollWidth="50%"
+													scrollHeight="150" resizableColumns="true"
+													value="#{executionController.createTask.updateWorkers}"
+													var="config">
+													<p:column headerText="No of Workers">
+														<p:spinner  value="#{config.workers}" />
+													</p:column>
+													<p:column headerText="Time Out (ms)">
+														<p:spinner value="#{config.timeOutMS}" />
+													</p:column>
+													<p:column headerText="Update Path/File name">
+														<p:inputText value="#{config.updatePath}" />
+													</p:column>
+													<p:column headerText="Fixed Latency">
+														<p:spinner value="#{config.fixedLatency}" />
+													</p:column>
+													<p:column headerText="Gaussian Latency">
+														<p:spinner value="#{config.gaussianLatency}" />
+													</p:column>
+													<p:column headerText="Timer Strategy">
+														<p:selectOneMenu value="#{config.timerStrategy}">
+															<f:selectItems
+																value="#{executionController.createTask.timerStrategy}"
+																var="strategy" itemLabel="#{strategy}"
+																itemValue="#{strategy}" />
+														</p:selectOneMenu>
+													</p:column>
+													<p:column headerText="Update Strategy">
+														<p:selectOneMenu value="#{config.updateStrategy}">
+															<f:selectItems
+																value="#{executionController.createTask.updateStrategy}"
+																var="strategy" itemLabel="#{strategy}"
+																itemValue="#{strategy}" />
+														</p:selectOneMenu>
+													</p:column>
+												</p:dataTable>
 											</c:if>
-											<p:spacer />
-											<p:repeat
-												value="#{executionController.createTask.updateWorkers}"
-												var="worker">
-												<h:panelGrid columns="2">
-													<p:outputLabel value="Configuration: " />
-													<p:chips value="#{worker}" />
-												</h:panelGrid>
-											</p:repeat>
 											<p:spacer height="25" />
 											<p:spacer />
-
+											<p:separator />
+											<p:separator />
 											<p:outputLabel style="color: #000;" value="Warmup:" />
 											<p:spacer />
 											<p:outputLabel value="Warmup Queries:" />

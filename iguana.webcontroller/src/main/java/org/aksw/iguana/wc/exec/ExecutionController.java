@@ -1,30 +1,24 @@
 package org.aksw.iguana.wc.exec;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
 
 import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.commons.factory.TypedFactory;
 import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
 import org.aksw.iguana.commons.sender.ISender;
 import org.aksw.iguana.commons.sender.impl.DefaultSender;
 import org.aksw.iguana.wc.config.ConfigConverter;
 import org.aksw.iguana.wc.config.Connection;
 import org.aksw.iguana.wc.config.Dataset;
-import org.aksw.iguana.wc.config.Stresstest;
-import org.aksw.iguana.wc.config.Task;
+import org.aksw.iguana.wc.config.tasks.Stresstest;
+import org.aksw.iguana.wc.config.tasks.Task;
 import org.apache.commons.configuration.Configuration;
 import org.primefaces.event.FlowEvent;
 
@@ -60,15 +54,26 @@ public class ExecutionController implements Serializable {
 
 	private ISender sender = new DefaultSender();
 
+	/**
+	 * get config and sets the name for the rabbitmq host and the correct queue
+	 */
 	@PostConstruct
 	public void init() {
 		Configuration conf = Config.getInstance();
 		this.sender.init(conf.getString(COMMON.CONSUMER_HOST_KEY), COMMON.WC2MC_QUEUE);
 	}
 
+	/**
+	 * placeholder
+	 */
 	public void initTasks() {
 	}
 
+	/**
+	 * validates the next and previous step
+	 * @param event
+	 * @return
+	 */
 	public String onFlowProcess(FlowEvent event) {
 		if (this.connections.isEmpty() && event.getOldStep().equals("connections")) {
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR",
@@ -92,21 +97,33 @@ public class ExecutionController implements Serializable {
 
 	}
 
+	/**
+	 * Add the created Connection
+	 */
 	public void addConnection() {
 		this.connections.add(createConnection);
 		this.createConnection = new Connection();
 	}
 
+	/**
+	 * Add the created Dataset
+	 */
 	public void addDataset() {
 		this.datasets.add(createDataset);
 		this.createDataset = new Dataset();
 	}
 
+	/**
+	 * Add the created Task
+	 */
 	public void addTask() {
 		this.tasks.add(createTask);
 		this.createTask = new Stresstest();
 	}
 
+	/**
+	 * Remove selected Connection
+	 */
 	public void removeConnection() {
 		for (Connection con : connections) {
 			if (con.getName().equals(deleteConnection)) {
@@ -117,6 +134,9 @@ public class ExecutionController implements Serializable {
 		deleteConnection = null;
 	}
 
+	/**
+	 * Remove selected Dataset
+	 */
 	public void removeDataset() {
 		for (Dataset con : datasets) {
 			if (con.getName().equals(deleteDataset)) {
@@ -127,6 +147,9 @@ public class ExecutionController implements Serializable {
 		deleteDataset = null;
 	}
 
+	/**
+	 * Remove selected Task
+	 */
 	public void removeTask() {
 		for (Task task : tasks) {
 			if (task.hashCode() == deleteTask) {
@@ -167,38 +190,65 @@ public class ExecutionController implements Serializable {
 		this.createConnection = createConnection;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getDeleteConnection() {
 		return deleteConnection;
 	}
 
+	/**
+	 * @param deleteConnection
+	 */
 	public void setDeleteConnection(String deleteConnection) {
 		this.deleteConnection = deleteConnection;
 	}
 
+	/**
+	 * @return
+	 */
 	public List<Dataset> getDatasets() {
 		return datasets;
 	}
 
+	/**
+	 * @param datasets
+	 */
 	public void setDatasets(List<Dataset> datasets) {
 		this.datasets = datasets;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getDeleteDataset() {
 		return deleteDataset;
 	}
 
+	/**
+	 * @param deleteDataset
+	 */
 	public void setDeleteDataset(String deleteDataset) {
 		this.deleteDataset = deleteDataset;
 	}
 
+	/**
+	 * @return
+	 */
 	public Dataset getCreateDataset() {
 		return createDataset;
 	}
 
+	/**
+	 * @param createDataset
+	 */
 	public void setCreateDataset(Dataset createDataset) {
 		this.createDataset = createDataset;
 	}
 
+	/**
+	 * Send the generated config to the correct rabbitmq queue
+	 */
 	public void execute() {
 		Configuration conf = ConfigConverter.createIguanConfig(connections, datasets, tasks);
 		sender.send(RabbitMQUtils.getData(conf));
@@ -269,6 +319,9 @@ public class ExecutionController implements Serializable {
 		this.className = className;
 	}
 
+	/**
+	 * check if className is of Stresstest and sets the createTask to a new Stresstest object
+	 */
 	public void initTask() {
 		if(className.equals("org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest")) {
 			createTask = new Stresstest();

@@ -1,25 +1,29 @@
-package org.aksw.iguana.wc.config;
+package org.aksw.iguana.wc.config.tasks;
 
+/**
+ * The basic Task config
+ * 
+ * @author f.conrads
+ *
+ */
+public class AbstractTask implements Task {
 
-public class Task {
-	
 	protected String className;
 	protected Object[] constructorArgs;
-	
-	public String getJSFInject() {
-		return "";
-	}
-	
+
+	@Override
 	public String getClassName() {
 		return className;
 	}
-	
+
+	@Override
 	public void setClassName(String className) {
 		this.className = className;
 	}
 
+	@Override
 	public Object[] getConstructorArgs() {
-			return constructorArgs;
+		return constructorArgs;
 	}
-	
+
 }
