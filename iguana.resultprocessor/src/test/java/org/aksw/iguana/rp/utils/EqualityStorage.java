@@ -24,6 +24,7 @@ public class EqualityStorage implements Storage{
 
 	private Triple[][] goldenTriples;
 	private int run=0;
+	private boolean lastCheck=false;
 	
 	/**
 	 * 
@@ -34,8 +35,7 @@ public class EqualityStorage implements Storage{
 
 	@Override
 	public void addData(Properties meta, Triple[] data) {
-		assertTrue(tripleArrEqualence(data, goldenTriples[run]));
-		
+		lastCheck = tripleArrEqualence(data, goldenTriples[run]);
 		run++;
 	}
 	
@@ -80,6 +80,20 @@ public class EqualityStorage implements Storage{
 	@Override
 	public Properties getStorageInfo() {
 		return null;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isLastCheck() {
+		return lastCheck;
+	}
+
+	/**
+	 * @param lastCheck
+	 */
+	public void setLastCheck(boolean lastCheck) {
+		this.lastCheck = lastCheck;
 	}
 
 }

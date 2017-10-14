@@ -258,8 +258,18 @@ public class Stresstest extends AbstractTask {
 		if(warmupTimeMS==null||warmupTimeMS==0l) {
 			return;
 		}
+		LinkedList<Worker> warmupWorkers = initWarmupWorkers();
+		if(warmupWorkers.size()==0) {
+			return;
+		}
+		QueryHandler iqh = new InstancesQueryHandler(warmupWorkers);
+		iqh.generateQueries();
+		LOGGER.info("[TaskID: {{}}] will start {{}}ms warmup now.", taskID, warmupTimeMS);
+		executeWarmup(warmupWorkers);
+	}
+	
+	private LinkedList<Worker> initWarmupWorkers(){
 		LinkedList<Worker> warmupWorkers = new LinkedList<Worker>();
-		
 		if(warmupQueries!=null) {
 			SPARQLWorker sparql = new SPARQLWorker("-1", "1",  service, null, null, warmupQueries, null, null);
 			warmupWorkers.add(sparql);
@@ -270,12 +280,10 @@ public class Stresstest extends AbstractTask {
 			warmupWorkers.add(update);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);
 		}	
-		if(warmupWorkers.size()==0) {
-			return;
-		}
-		QueryHandler iqh = new InstancesQueryHandler(warmupWorkers);
-		iqh.generateQueries();
-		LOGGER.info("[TaskID: {{}}] will start {{}}ms warmup now.", taskID, warmupTimeMS);
+		return warmupWorkers;
+	}
+	
+	private void executeWarmup(List<Worker> warmupWorkers) {
 		ExecutorService exec = Executors.newFixedThreadPool(2);
 		for(Worker worker : warmupWorkers) {
 			exec.submit(worker);

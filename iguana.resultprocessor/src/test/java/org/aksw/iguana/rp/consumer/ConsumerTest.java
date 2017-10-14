@@ -30,18 +30,25 @@ public class ConsumerTest {
 	public void main() throws InstantiationException, IllegalAccessException, IOException, TimeoutException, IguanaException, InterruptedException{
 		Config.getInstance("controller_test.properties");
 		ConsumerTest ct = new ConsumerTest();
-		ct.send();
+		Properties p = new Properties();
+	    p.setProperty("a", "test");
+		ct.send(p);
 		Thread.sleep(2000);
-		ct.recv();
+		ExperimentManager em = new ExperimentManagerTest();
+		IConsumer consume = new DefaultConsumer(em);
+		ct.recv(consume);
+		assertEquals(ConsumerTest.p.getProperty("a"), "test");
+		System.out.println("test was successful.");
+		consume.close();
 	}
 	
 	
-	public void recv() throws InstantiationException, IllegalAccessException, IOException, TimeoutException, IguanaException, InterruptedException{
+	public void recv(IConsumer consume) throws InstantiationException, IllegalAccessException, IOException, TimeoutException, IguanaException, InterruptedException{
 		
 		
 		Config.getInstance("controller_test.properties");
-		ExperimentManager em = new ExperimentManagerTest();
-		IConsumer consume = new DefaultConsumer(em);
+		
+
 		String host = Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
 		String queueName = COMMON.CORE2RP_QUEUE_NAME;
 
@@ -51,21 +58,18 @@ public class ConsumerTest {
 		Thread.sleep(2000);
 //		System.out.println("waiting over");
 		//assertEquals(p)
-		assertEquals(ConsumerTest.p.getProperty("a"), "test");
-		System.out.println("test was successful.");
-		consume.close();
+		
 	}
 
 	
-	public void send() throws IOException, TimeoutException{
+	public void send(Properties p) throws IOException, TimeoutException{
 		ConnectionFactory factory = new ConnectionFactory();
 	    factory.setHost("localhost");
 	    Connection connection = factory.newConnection();
 	    Channel channel = connection.createChannel();
 	    
 	    channel.queueDeclare(COMMON.CORE2RP_QUEUE_NAME, false, false, false, null);
-	    Properties p = new Properties();
-	    p.setProperty("a", "test");
+	    
 	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	      ObjectOutputStream oos = new ObjectOutputStream(bos);
 	      oos.writeObject(p);

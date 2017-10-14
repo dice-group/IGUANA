@@ -39,7 +39,7 @@ public class TypedFactory <T>{
 	@SuppressWarnings("unchecked")
 	public T create(String className, Object[] constructorArgs){
 		Object[] constructorArgs2 = constructorArgs;
-		if (constructorArgs == null) {
+		if (constructorArgs2 == null) {
 			constructorArgs2 = new Object[0];
 		}
 		Class<String>[] stringClass = new Class[constructorArgs2.length];
@@ -67,6 +67,8 @@ public class TypedFactory <T>{
 	public T create(String className,
 			Object[] constructorArgs, Class<?>[] constructorClasses) {
 
+		Object[] constructorArgs2 = constructorArgs;
+		
 		if (className == null) {
 			return null;
 		}
@@ -80,8 +82,8 @@ public class TypedFactory <T>{
 			return null;
 		}
 			
-		Object[] constructorArgs2 = constructorArgs;
-		if (constructorArgs == null) {
+		
+		if (constructorArgs2 == null) {
 			constructorArgs2 = new Object[0];
 		}
 		if(constructorClasses==null){

@@ -3,6 +3,11 @@
  */
 package org.aksw.iguana.rp.metrics.impl;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 
 import org.aksw.iguana.commons.constants.COMMON;
@@ -11,6 +16,9 @@ import org.aksw.iguana.rp.metrics.Metric;
 import org.aksw.iguana.rp.storage.StorageManager;
 import org.aksw.iguana.rp.utils.EqualityStorage;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 /**
  * This will do a small test with every implemented Metric
@@ -18,127 +26,117 @@ import org.junit.Test;
  * @author f.conrads
  *
  */
+@RunWith(Parameterized.class)
 public class MetricTest {
 
-	@Test
-	public void test(){
-		Properties extra = new Properties();
-		extra.setProperty("a", "b");
-		Triple meta = new Triple("1/1/1/"+extra.hashCode(), "a", "b");
-		//
-		// NoQPHMetric
-		//
-		Metric m = new NoQPHMetric();
-		Triple[][] golden = new Triple[1][];
-		Triple[] triple = new Triple[1];
-		Double d = 4104.903078677;
-		triple[0] = new Triple("1/1/1", "noOfQueriesPerHour", d);
-		golden[0] = triple;
-		test(m, golden, new Properties());
-		
-		m = new NoQPHMetric();
-		triple = new Triple[2];
-		triple[1] = new Triple("1/1/1/"+extra.hashCode(), "noOfQueriesPerHour", d);
-		triple[0] = meta;
-		golden[0] = triple;
-		test(m, golden, extra);
-		
-		//
-		// QMPHMetric
-		//
-		m = new QMPHMetric();
-		triple = new Triple[1];
-		d = 2052.451539338;
-		triple[0] = new Triple("1/1/1", "queryMixes", d);
-		golden[0] = triple;
-		test(m, golden, new Properties());
-		
-		m = new QMPHMetric();
-		triple = new Triple[2];
-		d = 2052.451539338;
-		triple[0] = meta;
-		triple[1] = new Triple("1/1/1/"+extra.hashCode(), "queryMixes", d);
-		golden[0] = triple;
-		test(m, golden, extra);
+	private Properties extra;
+	//private Triple meta;
+	private Metric m;
+	private Triple[][] triples;
+	private boolean changeMeta;
 
-		//
-		// QPSMetric
-		//
-		m = new QPSMetric();
-		triple = new Triple[6];
-		triple[0] = new Triple("1/1/1", "qps#query", "1/1/1/1");
-		triple[4] = new Triple("1/1/1/1", "queryID", 1);
-		triple[3] = new Triple("1/1/1/1", "succeded", 1);
-		triple[2] = new Triple("1/1/1/1", "failed", 1);
-		triple[5] = new Triple("1/1/1/1", "totalTime", 877);
-		triple[1] = new Triple("1/1/1/1", "queriesPerSecond", 1.140250855);
-		golden[0] = triple;
-		test(m, golden, new Properties());
+	/**
+	 * @return Configurations to test
+	 */
+	@Parameters
+	public static Collection<Object[]> data() {
+		List<Object[]> testConfigs = new ArrayList<Object[]>();
+
+		testConfigs.add(new Object[] { new NoQPHMetric(), new Triple[][]{{new Triple("1/1/1", "noOfQueriesPerHour", 4104.903078677) }}, false});
+		testConfigs.add(new Object[] { new QMPHMetric(), new Triple[][]{{new Triple("1/1/1", "queryMixes", 2052.451539338) }}, false});
+		testConfigs.add(new Object[] { new QPSMetric(), new Triple[][]{{new Triple("1/1/1", "qps#query", "1/1/1/1"),
+			new Triple("1/1/1/1", "queriesPerSecond", 1.140250855),
+			new Triple("1/1/1/1", "failed", 1),
+			new Triple("1/1/1/1", "succeded", 1),
+			new Triple("1/1/1/1", "queryID", 1),
+			new Triple("1/1/1/1", "totalTime", 877)}}, false});
+		testConfigs.add(new Object[] { new EachQueryMetric(), new Triple[][]{{new Triple("1/1/1/1", "EQE", "1/1/1/1/1"), 
+			new Triple("1/1/1/1/1", "time", 777),
+			new Triple("1/1/1/1/1", "success", true),
+			new Triple("1/1/1/1/1", "queryID", 1),
+			new Triple("1/1/1/1/1", "run", 1)},
+			{
+			new Triple("1/1/1/1", "EQE", "1/1/1/1/2"),
+			new Triple("1/1/1/1/2", "time", 100),
+			new Triple("1/1/1/1/2", "success", false),
+			new Triple("1/1/1/1/2", "queryID", 1),
+			new Triple("1/1/1/1/2", "run", 2)
+			}}, true});
+			
+
+		return testConfigs;
+	}
+
+	
+	
+	public MetricTest(Metric m, Triple[][] triples, boolean changeMeta) {
 		
-		m = new QPSMetric();
-		triple = new Triple[7];
-		triple[0] = meta;
-		triple[1] = new Triple("1/1/1/"+extra.hashCode(), "qps#query", "1/1/1/"+extra.hashCode()+"/1");
-		triple[5] = new Triple("1/1/1/"+extra.hashCode()+"/1", "queryID", 1);
-		triple[4] = new Triple("1/1/1/"+extra.hashCode()+"/1", "succeded", 1);
-		triple[3] = new Triple("1/1/1/"+extra.hashCode()+"/1", "failed", 1);
-		triple[6] = new Triple("1/1/1/"+extra.hashCode()+"/1", "totalTime", 877);
-		triple[2] = new Triple("1/1/1/"+extra.hashCode()+"/1", "queriesPerSecond", 1.140250855);
-		golden[0] = triple;
-		test(m, golden, extra);
+		extra = new Properties();
+		extra.setProperty("a", "b");
+		//meta = new Triple("1/1/1/"+extra.hashCode(), "a", "b");
+		this.m = m;
+		this.triples = triples;
+		this.changeMeta = changeMeta;
+	}
+	
+	@Test
+	public void test() throws InstantiationException, IllegalAccessException{
+		Triple meta = new Triple("1/1/1/"+extra.hashCode(), "a", "b");
+		Triple[][] golden = new Triple[triples.length][];
 		
-		//
-		// EachQueryMetric
-		//
-		m = new EachQueryMetric();
-		golden = new Triple[2][];
-		triple = new Triple[5];
-		triple[0] = new Triple("1/1/1/1", "EQE", "1/1/1/1/1");
-		triple[4] = new Triple("1/1/1/1/1", "run", 1);
-		triple[1] = new Triple("1/1/1/1/1", "time", 777);
-		triple[2] = new Triple("1/1/1/1/1", "success", true);
-		triple[3] = new Triple("1/1/1/1/1", "queryID", 1);
-		golden[0] = triple;
-		Triple[] triple2 = new Triple[5];
-		triple2[0] = new Triple("1/1/1/1", "EQE", "1/1/1/1/2");
-		triple2[4] = new Triple("1/1/1/1/2", "run", 2);
-		triple2[1] = new Triple("1/1/1/1/2", "time", 100);
-		triple2[2] = new Triple("1/1/1/1/2", "success", false);
-		triple2[3] = new Triple("1/1/1/1/2", "queryID", 1);
-		golden[1] = triple2;
-		test(m, golden, new Properties());
+		for(int i=0;i<triples.length;i++) {
+			golden[i] = triples[i];
+		}
+		assertTrue(test(m, golden, new Properties()));
 		
-		meta = new Triple("1/1/1/"+extra.hashCode()+"/1", "a", "b");
-		m = new EachQueryMetric();
-		golden = new Triple[2][];
-		triple = new Triple[6];
-		triple[0] = meta;
-		triple[1] = new Triple("1/1/1/"+extra.hashCode()+"/1", "EQE", "1/1/1/"+extra.hashCode()+"/1/1");
-		triple[5] = new Triple("1/1/1/"+extra.hashCode()+"/1/1", "run", 1);
-		triple[2] = new Triple("1/1/1/"+extra.hashCode()+"/1/1", "time", 777);
-		triple[3] = new Triple("1/1/1/"+extra.hashCode()+"/1/1", "success", true);
-		triple[4] = new Triple("1/1/1/"+extra.hashCode()+"/1/1", "queryID", 1);
-		golden[0] = triple;
-		triple2 = new Triple[6];
-		triple2[0] = meta;
-		triple2[1] = new Triple("1/1/1/"+extra.hashCode()+"/1", "EQE", "1/1/1/"+extra.hashCode()+"/1/2");
-		triple2[5] = new Triple("1/1/1/"+extra.hashCode()+"/1/2", "run", 2);
-		triple2[2] = new Triple("1/1/1/"+extra.hashCode()+"/1/2", "time", 100);
-		triple2[3] = new Triple("1/1/1/"+extra.hashCode()+"/1/2", "success", false);
-		triple2[4] = new Triple("1/1/1/"+extra.hashCode()+"/1/2", "queryID", 1);
-		golden[1] = triple2;
-		test(m, golden, extra);
-		
-		
+		m = m.getClass().newInstance();
+		golden = new Triple[triples.length][];
+		if(this.changeMeta) {
+			meta = new Triple("1/1/1/"+extra.hashCode()+"/1", "a", "b");
+		}
+		for(int i=0;i<triples.length;i++) {
+			Triple[] triplesWithMeta = new Triple[triples[i].length+1];
+			triplesWithMeta[0] = meta;
+			Triple[] t = triples[i];
+			for(int j=0;j<t.length;j++) {
+				String subject = t[j].getSubject();
+				subject = subject.replaceFirst("1/1/1", "1/1/1/"+extra.hashCode());
+				t[j].setSubject(subject);
+				triplesWithMeta[j+1]= t[j];
+			}
+			golden[i] = triplesWithMeta;
+		}
+		assertTrue(test(m, golden, extra));
 	
 	}
 	
-	public void test(Metric metric, Triple[][] golden, Properties extraMeta){
+	public boolean test(Metric metric, Triple[][] golden, Properties extraMeta){
 
 		StorageManager smanager = new StorageManager();
-		smanager.addStorage(new EqualityStorage(golden));
+		EqualityStorage storage = new EqualityStorage(golden);
+		smanager.addStorage(storage);
 		metric.setStorageManager(smanager);
+	    metric.setMetaData(createMetaData());
+
+		metric.receiveData(createData(777, true, extraMeta));
+		metric.receiveData(createData(100, false, extraMeta));
 		
+		metric.close();
+		return storage.isLastCheck();
+
+	}
+	
+	private Properties createData(int time, boolean success, Properties extraMeta) {
+		Properties p = new Properties();
+		p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
+	    p.put(COMMON.RECEIVE_DATA_SUCCESS, success);
+	    p.put(COMMON.RECEIVE_DATA_TIME, time);
+	    p.put(COMMON.QUERY_ID_KEY, "1");
+	    p.put(COMMON.EXTRA_META_KEY, extraMeta);
+	    return p;
+	}
+	
+	private Properties createMetaData() {
 		Properties p = new Properties();
 		p.put(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
 	    p.setProperty(COMMON.EXPERIMENT_ID_KEY, "1/1");
@@ -148,26 +146,6 @@ public class MetricTest {
 	    p.put(COMMON.RECEIVE_DATA_START_KEY, "true");
 	    p.put(COMMON.EXTRA_META_KEY, new Properties());
 	    p.put(COMMON.NO_OF_QUERIES, 2);
-	    
-	    metric.setMetaData(p);
-	    
-	    p = new Properties();
-		p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
-	    p.put(COMMON.RECEIVE_DATA_SUCCESS, true);
-	    p.put(COMMON.RECEIVE_DATA_TIME, 777);
-	    p.put(COMMON.QUERY_ID_KEY, "1");
-	    p.put(COMMON.EXTRA_META_KEY, extraMeta);
-		
-		metric.receiveData(p);
-		
-		p = new Properties();
-		p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
-	    p.put(COMMON.RECEIVE_DATA_SUCCESS, false);
-	    p.put(COMMON.RECEIVE_DATA_TIME, 100);
-	    p.put(COMMON.QUERY_ID_KEY, "1");
-	    p.put(COMMON.EXTRA_META_KEY, extraMeta);
-		
-		metric.receiveData(p);
-		metric.close();
+	    return p;
 	}
 }

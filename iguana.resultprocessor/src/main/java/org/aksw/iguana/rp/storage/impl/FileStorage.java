@@ -60,36 +60,34 @@ public class FileStorage implements Storage {
 		this("results_storage");
 	}
 	
+	/**
+	 * @param rootDir
+	 */
 	public FileStorage(String rootDir){
 		this.rootDir=rootDir;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.aksw.iguana.rp.storage.Storage#addData(java.util.Properties, org.aksw.iguana.rp.data.Triple[])
-	 */
-	@Override
-	public void addData(Properties meta, Triple[] data) {
-		String taskID = meta.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
-
-		String[] strArr = taskToDir.get(taskID);
-		StringBuilder dir = new StringBuilder(strArr[0]);
+	
+	private StringBuilder createExtraHash(Integer index, Integer extraLength, Triple[] data) {
+		StringBuilder extraHash= new StringBuilder();
+		
+		for(;index<extraLength-1;index++){
+			extraHash.append(data[index].getPredicate().replace("/", "--").replace("\\","--")).append("-")
+				.append(data[index].getObject().toString().replace("/", "--").replace("\\","--")).append("_");
+		}
+		if(extraLength!=0){
+			extraHash.append(data[index].getPredicate().replace("/", "--").replace("\\","--")).append("-")
+				.append(data[index].getObject().toString().replace("/", "--").replace("\\","--"));
+		}
+		return extraHash;
+	}
+	
+	private File getFileForExtraHash(String taskID, StringBuilder dir, Properties meta, String extraHash) {
+		
 		dir.append(meta.get(COMMON.METRICS_PROPERTIES_KEY));
 
 		File dir1 = new File(dir.toString());
 		dir1.mkdirs();
 		
-		//extraHash node 
-		Integer extraLength = (Integer) meta.get(CONSTANTS.LENGTH_EXTRA_META_KEY);
-		StringBuilder extraHash= new StringBuilder();
-		int i=0;
-		for(;i<extraLength-1;i++){
-			extraHash.append(data[i].getPredicate().replace("/", "--").replace("\\","--")).append("-")
-				.append(data[i].getObject().toString().replace("/", "--").replace("\\","--")).append("_");
-		}
-		if(extraLength!=0){
-			extraHash.append(data[i].getPredicate().replace("/", "--").replace("\\","--")).append("-")
-				.append(data[i].getObject().toString().replace("/", "--").replace("\\","--"));
-		}
 		String fileName="";
 		if(extraHash.length()!=0){
 			fileName = extraHash.toString();
@@ -97,90 +95,118 @@ public class FileStorage implements Storage {
 			fileName = meta.get(COMMON.METRICS_PROPERTIES_KEY).toString();
 		}
 		File f = new File(dir.toString()+File.separator+fileName+SUFFIX);
+		return f;
+	}
+	
+	private void cachedFile(Integer index, String connID, File f, Integer extraLength, Triple[] data) {
+		//File exists;
+		//read header
+		List<String> header;
+		try(BufferedReader reader = new BufferedReader(
+				new FileReader(f))){
+			String[] headerArr = reader.readLine().split(SEPERATOR);
+			header = Arrays.asList(headerArr);
+		}catch(IOException e){
+			LOGGER.error("Could not open file "+f.getName(), e);
+			return;
+		}
+		//sort data
+		StringBuilder dataString = new StringBuilder();
+		dataString.append(connID).append(SEPERATOR);
+		
+		String[] ordered = new String[data.length-extraLength];
+		for(index=extraLength;index<data.length;index++){
+			Triple triple = data[index];
+			String key =  triple.getPredicate();
+			int j=header.indexOf(key)-1;
+			ordered[j] = triple.getObject().toString();
+		}
+		
+		for(index=0;index<ordered.length-1;index++){
+			dataString.append(ordered[index]).append(SEPERATOR);
+		}
+		if(ordered.length!=0)
+			dataString.append(ordered[index]);
+		
+		//add sorted Data
+		try(PrintWriter pw = new PrintWriter(new FileOutputStream(f, true))){
+			//add Data String
+			pw.println(dataString.toString());
+		}catch(IOException e){
+			LOGGER.error("Could not write to file "+f.getAbsolutePath(), e);
+			return;
+		}
+	}
+	
+	private void uncachedFile(Integer index, String connID, File f, Integer extraLength, String extraHash, Triple[] data) {
+		//create File
+		try {
+			f.createNewFile();
+		} catch (IOException e) {
+			LOGGER.error("Could not create file "+f.getAbsolutePath(), e);
+			return;
+		}
+	
+		//Create Header
+		StringBuilder headerString = new StringBuilder();
+		headerString.append("connectionID").append(SEPERATOR);	
+		
+		//Create Data String
+		StringBuilder dataString = new StringBuilder();
+		dataString.append(connID).append(SEPERATOR);
+		
+		for(index=extraLength;index<data.length-1;index++){
+			Triple triple = data[index];
+			//Add header to header 
+			headerString.append(triple.getPredicate()).append(SEPERATOR);
+			//Add result data to data string
+			dataString.append(triple.getObject()).append(SEPERATOR);
+		}
+		if(data.length!=0){
+			Triple triple = data[index];
+		
+			headerString.append(triple.getPredicate());
+			dataString.append(triple.getObject());
+		}
+		
+		try(PrintWriter pw = new PrintWriter(new FileOutputStream(f, true))){
+			//add Header String
+			pw.println(headerString.toString());
+			//add Data String
+			pw.println(dataString.toString());
+		}catch(IOException e){
+			LOGGER.error("Could not write to file "+f.getAbsolutePath(), e);
+			return;
+		}
+		taskFileExists.add(extraHash.toString());
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.iguana.rp.storage.Storage#addData(java.util.Properties, org.aksw.iguana.rp.data.Triple[])
+	 */
+	@Override
+	public void addData(Properties meta, Triple[] data) {
+		
+		String taskID = meta.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
+
+		String[] strArr = taskToDir.get(taskID);
+		StringBuilder dir = new StringBuilder(strArr[0]);
+		
+		//extraHash node 
+		Integer extraLength = (Integer) meta.get(CONSTANTS.LENGTH_EXTRA_META_KEY);
+		
+		Integer index = 0;
+		StringBuilder extraHash = createExtraHash(index, extraLength, data);
+		File f = getFileForExtraHash(taskID, dir, meta, extraHash.toString());
 		
 		String connID = strArr[1];
 		//taskFileExists.contains(extraHash.toString())
 		if(f.exists()){
-			//File exists;
-			//read header
-			List<String> header;
-			try(BufferedReader reader = new BufferedReader(
-					new FileReader(f))){
-				String[] headerArr = reader.readLine().split(SEPERATOR);
-				header = Arrays.asList(headerArr);
-			}catch(IOException e){
-				LOGGER.error("Could not open file "+f.getName(), e);
-				return;
-			}
-			//sort data
-			StringBuilder dataString = new StringBuilder();
-			dataString.append(connID).append(SEPERATOR);
-			
-			String[] ordered = new String[data.length-extraLength];
-			for(i=extraLength;i<data.length;i++){
-				Triple triple = data[i];
-				String key =  triple.getPredicate();
-				int j=header.indexOf(key)-1;
-				ordered[j] = triple.getObject().toString();
-			}
-			
-			for(i=0;i<ordered.length-1;i++){
-				dataString.append(ordered[i]).append(SEPERATOR);
-			}
-			if(ordered.length!=0)
-				dataString.append(ordered[i]);
-			
-			//add sorted Data
-			try(PrintWriter pw = new PrintWriter(new FileOutputStream(f, true))){
-				//add Data String
-				pw.println(dataString.toString());
-			}catch(IOException e){
-				LOGGER.error("Could not write to file "+f.getAbsolutePath(), e);
-				return;
-			}
+			cachedFile(index, connID, f, extraLength, data);
 		}
 		else{
 			//File does not exist yet
-			//create File
-			try {
-				f.createNewFile();
-			} catch (IOException e) {
-				LOGGER.error("Could not create file "+f.getAbsolutePath(), e);
-				return;
-			}
-		
-			//Create Header
-			StringBuilder headerString = new StringBuilder();
-			headerString.append("connectionID").append(SEPERATOR);	
-			
-			//Create Data String
-			StringBuilder dataString = new StringBuilder();
-			dataString.append(connID).append(SEPERATOR);
-			
-			for(i=extraLength;i<data.length-1;i++){
-				Triple triple = data[i];
-				//Add header to header 
-				headerString.append(triple.getPredicate()).append(SEPERATOR);
-				//Add result data to data string
-				dataString.append(triple.getObject()).append(SEPERATOR);
-			}
-			if(data.length!=0){
-				Triple triple = data[i];
-			
-				headerString.append(triple.getPredicate());
-				dataString.append(triple.getObject());
-			}
-			
-			try(PrintWriter pw = new PrintWriter(new FileOutputStream(f, true))){
-				//add Header String
-				pw.println(headerString.toString());
-				//add Data String
-				pw.println(dataString.toString());
-			}catch(IOException e){
-				LOGGER.error("Could not write to file "+f.getAbsolutePath(), e);
-				return;
-			}
-			taskFileExists.add(extraHash.toString());
+			uncachedFile(index, connID, f, extraLength, extraHash.toString(), data);
 		}
 	}
 
