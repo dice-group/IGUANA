@@ -29,10 +29,12 @@ public class MainController {
 	
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(MainController.class);
-	private MetricManager globalMetricsManager;
-	private StorageManager storageManager;
 	private IConsumer consumer;
 	
+	/**
+	 * will start the result processing loop
+	 * @param argc
+	 */
 	public static void main(String[] argc){
 		MainController controller = new MainController();
 		if(argc.length>0){
@@ -52,7 +54,7 @@ public class MainController {
 		//get storages from config
 		String[] storageNames = Config.getInstance().getStringArray(CONSTANTS.STORAGES_KEY);
 		//add storages to StoragesManager
-		storageManager = new StorageManager();
+		StorageManager storageManager = new StorageManager();
 		for(String s : storageNames){
 			storageManager.addStorage(StorageFactory.createStorage(s));
 		}
@@ -60,7 +62,7 @@ public class MainController {
 		//Get metrics from config
 		String[] metrics = Config.getInstance().getStringArray(CONSTANTS.METRICS_KEY);
 		//Add default metrics to MetricsManager
-		globalMetricsManager = new MetricManager();
+		MetricManager globalMetricsManager = new MetricManager();
 		for(String m : metrics){
 			globalMetricsManager.addMetric(MetricFactory.createMetric(m, storageManager));
 		}
@@ -82,6 +84,9 @@ public class MainController {
 		}
 	}
 	
+	/**
+	 * Will close the consumer of rabbitmq
+	 */
 	public void close() {
 		this.consumer.close();
 	}

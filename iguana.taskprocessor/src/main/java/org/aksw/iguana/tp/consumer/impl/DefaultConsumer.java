@@ -61,6 +61,7 @@ public class DefaultConsumer extends AbstractConsumer{
 		if(p.containsKey(COMMON.CONSTRUCTOR_ARGS_CLASSES)){
 			constructorClasses = (Class[]) p.get(COMMON.CONSTRUCTOR_ARGS_CLASSES);
 		}
+		
 			
 		TaskFactory factory = new TaskFactory();
 		tmanager.setTask(factory.create(className, constructorArgs, constructorClasses));

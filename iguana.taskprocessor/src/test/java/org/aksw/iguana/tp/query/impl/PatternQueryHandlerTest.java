@@ -27,6 +27,11 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class PatternQueryHandlerTest {
 
+	private String expectedQuery;
+	private String query;
+	private Set<String> varNames;
+	private PatternQueryHandler handler;
+	
 	/**
 	 * @return Configurations to test
 	 */
@@ -57,11 +62,6 @@ public class PatternQueryHandlerTest {
 		return testConfigs;
 	}
 
-
-	private String expectedQuery;
-	private String query;
-	private Set<String> varNames;
-	private PatternQueryHandler handler;
 
 	/**
 	 * Constructor for Unit Test

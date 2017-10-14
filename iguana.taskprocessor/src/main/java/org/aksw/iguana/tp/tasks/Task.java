@@ -54,4 +54,22 @@ public interface Task {
 	 * Will close the Task and post process everything (e.g. send the end flag to the rabbit mq queue)
 	 */
 	void close();
+
+	/**
+	 * Will add the Meta data for the start which then can be saved into the triple based storages
+	 */
+	void addMetaData();
+
+	/**
+	 * Sets all the IDs so the can be stored. 
+	 * following order
+	 * <ol>
+	 *  <li> suiteID</li>
+	 * <li> expID</li>
+	 * <li> datasetID</li>
+	 * <li> conID</li>
+	 * </ol>
+	 * @param ids 
+	 */
+	void setIDs(String[] ids);
 }

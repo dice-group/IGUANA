@@ -211,6 +211,7 @@ public class UPDATEWorker extends AbstractWorker {
 		switch (strategy) {
 		case FIXED:
 			this.updateTimer = new UpdateTimer();
+			break;
 		case DISTRIBUTED:
 			if (timeLimit != null) {
 				this.updateTimer = new UpdateTimer(this.queryFileList.length, this.timeLimit);
@@ -218,6 +219,7 @@ public class UPDATEWorker extends AbstractWorker {
 				LOGGER.warn("Worker[{{}} : {{}}]: DISTRIBUTED Updates can only be used with timeLimit!", workerType,
 						workerID);
 			}
+			break;
 		default:
 			break;
 		}

@@ -41,7 +41,7 @@ public class StresstestTest {
 	private Long timeLimit = null;
 	private Long noOfQueryMixes = 1l;
 	private String[] queryHandler = new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" };
-	Object[][] workerConfigurations;
+	private Object[][] workerConfigurations;
 	private String service;
 	private String updateService;
 
@@ -161,7 +161,7 @@ public class StresstestTest {
 	@Test
 	public void test() throws IguanaException, InterruptedException, IOException, TimeoutException {
 		// create Stresstest
-		Stresstest task = new Stresstest(taskID, service, updateService, timeLimit, noOfQueryMixes, workerConfigurations, queryHandler, null, null, null);
+		Stresstest task = new Stresstest(new String[] {"1","1/1","dataset1", "con1"}, taskID, service, updateService, timeLimit, noOfQueryMixes, workerConfigurations, queryHandler, null, null, null);
 		// start Stresstest
 		task.init("localhost", COMMON.CORE2RP_QUEUE_NAME);
 		task.start();

@@ -26,8 +26,6 @@ import org.simpleframework.transport.connect.SocketConnection;
 // @RunWith(Parameterized.class)
 public class UPDATEWorkerTest {
 
-	private ServerMock mock;
-	private ContainerServer fastServer;
 	private SocketConnection fastConnection;
 	private InetSocketAddress address1;
 	private String host = "http://localhost:8023";
@@ -37,8 +35,8 @@ public class UPDATEWorkerTest {
 	 * @throws IOException
 	 */
 	public UPDATEWorkerTest() throws IOException {
-		mock = new ServerMock();
-		fastServer = new ContainerServer(mock);
+		ServerMock mock = new ServerMock();
+		ContainerServer fastServer = new ContainerServer(mock);
 		fastConnection = new SocketConnection(fastServer);
 		address1 = new InetSocketAddress(8023);
 	}

@@ -15,12 +15,7 @@ public class DataManager {
 
 	private DataGenerator generator;
 
-	/**
-	 * 
-	 */
-	public DataManager() {
-	}
-	
+
 	/**
 	 * Will call the inner {@link DataGenerator} {@link DataGenerator#generateData} method
 	 * 

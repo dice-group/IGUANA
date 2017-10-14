@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EachQueryMetric extends AbstractMetric {
 
-	Map<String, Integer> queryRunMap = new HashMap<String, Integer>();
+	private Map<String, Integer> queryRunMap = new HashMap<String, Integer>();
 	
 	protected static Logger LOGGER = LoggerFactory
 			.getLogger(EachQueryMetric.class);

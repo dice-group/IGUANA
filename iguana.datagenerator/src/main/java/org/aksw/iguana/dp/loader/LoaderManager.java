@@ -15,12 +15,8 @@ import java.util.Map;
 public class LoaderManager {
 
 	private Map<String, Loader> idToLoader = new HashMap<String, Loader>();
-	
-	/**
-	 * 
-	 */
-	public LoaderManager() {
-	}
+
+
 
 	/**
 	 * Will add one Loader and assoc. it to the connectionID

@@ -20,6 +20,7 @@ import com.rabbitmq.client.ConnectionFactory;
  * Will send an Object to the rabbitMQ queue with the name "rp2senderQueue"
  * 
  * @author f.conrads
+ * @param <T> 
  *
  */
 public abstract class SenderStorage<T extends Object> implements Storage {
@@ -28,14 +29,18 @@ public abstract class SenderStorage<T extends Object> implements Storage {
 	protected String rabbitHost="localhost";
 	
 	/**
+	 * @param rabbitHost 
 	 * 
 	 */
 	public SenderStorage(String rabbitHost) {
 		this.rabbitHost=rabbitHost;
 	}
 	
+	/**
+	 * 
+	 */
 	public SenderStorage(){
-		
+		//empty 
 	}
 
 
@@ -45,6 +50,7 @@ public abstract class SenderStorage<T extends Object> implements Storage {
 	 */
 	@Override
 	public void commit() {
+		//commit should have no effect, as results are send immediately
 	}
 
 	protected void send(T obj) throws IOException, TimeoutException{

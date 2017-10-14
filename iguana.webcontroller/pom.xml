@@ -107,14 +107,14 @@
 				<artifactId>wildfly-maven-plugin</artifactId>
 				<version>1.1.0.Final</version>
 				<configuration>
-                    <port>9990</port>
-                </configuration>
+					<port>9990</port>
+				</configuration>
 			</plugin>
 			<plugin>
-                <groupId>org.jboss.as.plugins</groupId>
-                <artifactId>jboss-as-maven-plugin</artifactId>
-                <version>7.3.Final</version>
-            </plugin>
+				<groupId>org.jboss.as.plugins</groupId>
+				<artifactId>jboss-as-maven-plugin</artifactId>
+				<version>7.3.Final</version>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -143,8 +143,25 @@
 
 
 	</profiles>
-	
-	
+	<repositories>
+		<repository>
+			<id>Apache Repo Central</id>
+			<name>Apache Repository</name>
+			<url>http://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
+			<id>maven.aksw.internal</id>
+			<name>University Leipzig, AKSW Maven2 Repository</name>
+			<url>http://maven.aksw.org/archiva/repository/internal</url>
+		</repository>
+		<repository>
+			<id>maven.aksw.snapshots</id>
+			<name>University Leipzig, AKSW Maven2 Repository</name>
+			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+		</repository>
+	</repositories>
+
+
 	<description>Iguana Web Controller</description>
 	<issueManagement>
 		<system>GitHub Issue Management</system>

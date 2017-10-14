@@ -63,11 +63,6 @@ public class ExecutionController implements Serializable {
 		this.sender.init(conf.getString(COMMON.CONSUMER_HOST_KEY), COMMON.WC2MC_QUEUE);
 	}
 
-	/**
-	 * placeholder
-	 */
-	public void initTasks() {
-	}
 
 	/**
 	 * validates the next and previous step
@@ -323,7 +318,7 @@ public class ExecutionController implements Serializable {
 	 * check if className is of Stresstest and sets the createTask to a new Stresstest object
 	 */
 	public void initTask() {
-		if(className.equals("org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest")) {
+		if("org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest".equals(className)) {
 			createTask = new Stresstest();
 		}
 	}

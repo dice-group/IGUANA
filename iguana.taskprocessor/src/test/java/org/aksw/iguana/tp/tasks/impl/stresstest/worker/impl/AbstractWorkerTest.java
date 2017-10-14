@@ -3,7 +3,6 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -20,8 +19,6 @@ import org.junit.Test;
  */
 public class AbstractWorkerTest {
 
-
-
 	/**
 	 * Checks if failures are calculated correctly
 	 * 
@@ -30,8 +27,7 @@ public class AbstractWorkerTest {
 	@Test
 	public void checkFailure() throws InterruptedException {
 		// use 5 as workerID to produce failure in TestWorkerImpl
-		Worker abstractWorker = new TestWorkerImpl("exp1", 5, "TEST TYPE", new File[] { new File("a"), new File("b") },
-				0, 0);
+		Worker abstractWorker = new TestWorkerImpl("exp1", 5, "TEST TYPE", 0, 0);
 		Thread th = new Thread(abstractWorker);
 		th.start();
 		while (abstractWorker.getExecutedQueries() <= 10) {
@@ -53,7 +49,7 @@ public class AbstractWorkerTest {
 				assertEquals("TEST TYPE", extra.get(CONSTANTS.WORKER_TYPE_KEY));
 			}
 		}
-		
+
 		abstractWorker.stopSending();
 	}
 
@@ -64,8 +60,7 @@ public class AbstractWorkerTest {
 	 */
 	@Test
 	public void testSuccess() throws InterruptedException {
-		Worker abstractWorker = new TestWorkerImpl("exp1", 3, "TEST TYPE", new File[] { new File("a"), new File("b") },
-				0, 0);
+		Worker abstractWorker = new TestWorkerImpl("exp1", 3, "TEST TYPE", 0, 0);
 		Thread th = new Thread(abstractWorker);
 		th.start();
 		while (abstractWorker.getExecutedQueries() <= 10) {

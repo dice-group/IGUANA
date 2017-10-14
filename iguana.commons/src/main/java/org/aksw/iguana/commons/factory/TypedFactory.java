@@ -22,11 +22,6 @@ public class TypedFactory <T>{
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(TypedFactory.class);
 
-	/**
-	 * 
-	 */
-	public TypedFactory() {
-	}
 
 	/**
 	 * Will create a T Object from a Constructor Object created by the
@@ -43,14 +38,15 @@ public class TypedFactory <T>{
 	 */
 	@SuppressWarnings("unchecked")
 	public T create(String className, Object[] constructorArgs){
+		Object[] constructorArgs2 = constructorArgs;
 		if (constructorArgs == null) {
-			constructorArgs = new Object[0];
+			constructorArgs2 = new Object[0];
 		}
-		Class<String>[] stringClass = new Class[constructorArgs.length];
+		Class<String>[] stringClass = new Class[constructorArgs2.length];
 		for(int i=0;i<stringClass.length;i++){
 			stringClass[i]=String.class;
 		}
-		return create(className, constructorArgs, stringClass);
+		return create(className, constructorArgs2, stringClass);
 	}
 	
 	/**
@@ -83,12 +79,13 @@ public class TypedFactory <T>{
 					+ ")", e1);
 			return null;
 		}
-
+			
+		Object[] constructorArgs2 = constructorArgs;
 		if (constructorArgs == null) {
-			constructorArgs = new Object[0];
+			constructorArgs2 = new Object[0];
 		}
 		if(constructorClasses==null){
-			constructorClasses = new Class[constructorArgs.length];
+			constructorClasses = new Class[constructorArgs2.length];
 			for (int i = 0; i < constructorClasses.length; i++) {
 				constructorClasses[i] = String.class;
 			}
@@ -98,7 +95,7 @@ public class TypedFactory <T>{
 			Constructor<? extends T> constructor = clazz
 					.getConstructor(constructorClasses);
 
-			return constructor.newInstance(constructorArgs);
+			return constructor.newInstance(constructorArgs2);
 		} catch (InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {

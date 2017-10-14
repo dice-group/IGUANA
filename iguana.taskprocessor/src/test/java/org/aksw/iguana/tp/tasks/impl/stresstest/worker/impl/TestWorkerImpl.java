@@ -1,6 +1,5 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
@@ -22,7 +21,7 @@ public class TestWorkerImpl extends AbstractWorker{
 	 * @param j
 	 * @param k
 	 */
-	public TestWorkerImpl(String string, int i, String string2, File[] files, int j, int k) {
+	public TestWorkerImpl(String string, int i, String string2, int j, int k) {
 		super(string, i, string2, null, "", j, k);
 	}
 

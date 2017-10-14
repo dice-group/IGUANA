@@ -48,6 +48,19 @@
 			<version>1.3</version>
 		</dependency>
 	</dependencies>
+		<!-- DISTRIBUTION MANAGEMENT -->
+	<distributionManagement>
+		<repository>
+			<id>maven.aksw.internal</id>
+			<url>http://maven.aksw.org/archiva/repository/internal</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.aksw.snapshots</id>
+			<name>AKSW Snapshot Repository</name>
+			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
 	<organization>
 		<name>AKSW Research Group</name>
 		<url>http://aksw.org</url>

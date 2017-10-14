@@ -44,7 +44,7 @@ public abstract class AbstractWorker implements Worker {
 	 * The unique ID of the worker, should be from 0 to n
 	 */
 	protected int workerID;
-	private Properties extra;
+	protected Properties extra;
 
 	private int fixedLatency;
 

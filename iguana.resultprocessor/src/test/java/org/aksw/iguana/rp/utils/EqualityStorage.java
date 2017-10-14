@@ -62,19 +62,19 @@ public class EqualityStorage implements Storage{
 			return false;
 		Object o = expect.getObject();
 		Object oExp = expect.getObject(); 
-		if(!o.equals(oExp)){
-			return false;
-		}
-		return true;
+
+		return o.equals(oExp) ;
 	}
 	
 	// NOTHING TO DO IN THE FOLLOWING METHODS
 	@Override
 	public void addMetaData(Properties p) {
+		//explicity empty
 	}
 
 	@Override
 	public void commit() {
+		//explicity empty
 	}
 
 	@Override

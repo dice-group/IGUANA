@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.query.QueryHandler;
 import org.aksw.iguana.tp.query.QueryHandlerFactory;
 import org.aksw.iguana.tp.query.impl.InstancesQueryHandler;
@@ -57,8 +58,6 @@ public class Stresstest extends AbstractTask {
 	private String warmupUpdates;
 
 	private String service;
-
-	private String updateService;
 	
 	
 	/**
@@ -70,7 +69,8 @@ public class Stresstest extends AbstractTask {
 	 * org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker</li>
 	 * <li>all other constructor arguments the worker needs</li>
 	 * </ol>
-	 * 
+	 * @param ids 
+	 * 				the suiteid, expId, datasetID, conID
 	 * @param taskID
 	 *            the current TaskID
 	 * @param service 
@@ -88,9 +88,9 @@ public class Stresstest extends AbstractTask {
 	 * @param warmupQueries 
 	 * @param warmupUpdates 
 	 */
-	public Stresstest(String taskID, String service, String updateService, String timeLimit, String noOfQueryMixes, Object[][] workerConfigurations,
+	public Stresstest(String[] ids, String taskID, String service, String updateService, String timeLimit, String noOfQueryMixes, Object[][] workerConfigurations,
 			String[] queryHandler, String warmupTimeMS, String warmupQueries, String warmupUpdates) {
-		this(taskID, service, updateService, Long.getLong(timeLimit), Long.getLong(noOfQueryMixes), workerConfigurations, queryHandler,
+		this(ids, taskID, service, updateService, Long.getLong(timeLimit), Long.getLong(noOfQueryMixes), workerConfigurations, queryHandler,
 				Long.getLong(warmupTimeMS), warmupQueries, warmupUpdates);
 	
 	}
@@ -104,11 +104,12 @@ public class Stresstest extends AbstractTask {
 	 * org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker</li>
 	 * <li>all other constructor arguments the worker needs</li>
 	 * </ol>
-	 * 
+	 * @param ids 
+	 * 			the suiteid, expId, datasetID, conID
 	 * @param taskID
 	 *            the current TaskID
 	 * @param service 
-	 * @param updateService 
+	 * @param updateService2
 	 * @param timeLimit
 	 *            can be safely null if noOfQueryMixes is set
 	 * @param noOfQueryMixes
@@ -122,13 +123,13 @@ public class Stresstest extends AbstractTask {
 	 * @param warmupQueries 
 	 * @param warmupUpdates 
 	 */
-	public Stresstest(String taskID, String service, String updateService, Long timeLimit, Long noOfQueryMixes, Object[][] workerConfigurations,
+	public Stresstest(String[] ids, String taskID, String service, String updateService2, Long timeLimit, Long noOfQueryMixes, Object[][] workerConfigurations,
 			String[] queryHandler, Long warmupTimeMS, String warmupQueries, String warmupUpdates) {
-		super(taskID);
+		super(ids, taskID);
 		this.timeLimit = timeLimit;
 		this.noOfQueryMixes = noOfQueryMixes;
 		this.service = service;	
-		this.updateService =  updateService==null?service:updateService;
+		String updateService =  updateService2==null?service:updateService2;
 		this.qhClassName = queryHandler[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(queryHandler, 1, queryHandler.length);
 
@@ -153,7 +154,7 @@ public class Stresstest extends AbstractTask {
 				// timelimit
 				config[2] = timeLimit == null ? null : timeLimit.toString();
 				if(workerConfig[1].equals(UPDATEWorker.class.getCanonicalName())) {
-					config[3] = this.updateService;
+					config[3] = updateService;
 				}
 				else {
 					config[3] = service;
@@ -166,7 +167,6 @@ public class Stresstest extends AbstractTask {
 						config[i + 2] = workerConfig[i].toString();
 					}
 				}
-				;
 				this.workers.add(factory.create(workerConfig[1].toString(), config));
 			}
 		}
@@ -176,13 +176,17 @@ public class Stresstest extends AbstractTask {
 	/**
 	 * Add extra Meta Data
 	 */
-	private void addMetaData() {
+	@Override
+	public void addMetaData() {
+		super.addMetaData();
 		// TODO Future: add queries and update meta data
+		Properties extraMeta = new Properties();
 		if(timeLimit!=null)
-			this.metaData.put("timeLimit", timeLimit);
+			extraMeta.put("timeLimit", timeLimit);
 		if(noOfQueryMixes!=null)
-			this.metaData.put("noOfQueryMixes", noOfQueryMixes);
-		this.metaData.put("noOfWorkers", noOfWorkers);
+			extraMeta.put("noOfQueryMixes", noOfQueryMixes);
+		extraMeta.put("noOfWorkers", noOfWorkers);
+		this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
 	}
 
 	@Override

@@ -79,7 +79,7 @@ public class UpdateComparator implements Comparator<File> {
 			return number1.compareTo(number2);
 		case ADD_REMOVE:
 			//check if numbers are equal
-			if(number1 == number2) {
+			if(number1.equals(number2)) {
 				//checks alphabetically (added smaller than removed)
 				return fileName1[1].compareTo(fileName2[1]);
 			}

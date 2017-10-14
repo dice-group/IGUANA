@@ -22,6 +22,12 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class UpdateTimerTest {
 
+	private Strategy strategy;
+	private Long baseValue;
+	private long timeExceeded;
+	private long executedQueries;
+	private long timeLimit;
+	
 
 	/**
 	 * @return Configurations to test
@@ -35,12 +41,6 @@ public class UpdateTimerTest {
 		return testConfigs;
 	}
 	
-	private Strategy strategy;
-	private Long baseValue;
-	private long timeExceeded;
-	private long executedQueries;
-	private long timeLimit;
-
 
 	/**
 	 * @param strategy
@@ -76,6 +76,7 @@ public class UpdateTimerTest {
 			timer = new UpdateTimer(baseValue.intValue(), timeLimit);
 			long expected = (timeLimit-timeExceeded)/(baseValue-executedQueries);
 			assertEquals(expected, timer.calculateTime(timeExceeded, executedQueries));
+			break;
 		default:			
 		}
 	}
