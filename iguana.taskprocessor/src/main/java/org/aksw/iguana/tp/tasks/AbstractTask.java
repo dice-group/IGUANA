@@ -43,6 +43,8 @@ public abstract class AbstractTask implements Task {
 	 */
 	public AbstractTask(String[] ids, String taskID) {
 		this.taskID = taskID;
+		setIDs(ids);
+		
 	}
 	
 	@Override

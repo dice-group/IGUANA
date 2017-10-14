@@ -88,7 +88,7 @@ public class UpdateComparator implements Comparator<File> {
 
 		case REMOVE_ADD:
 			//check if numbers are equal
-			if(number1 == number2) {
+			if(number1.equals(number2)) {
 				//checks alphabetically reversed (removed smaller than added)
 				return fileName2[1].compareTo(fileName1[1]);
 			}
