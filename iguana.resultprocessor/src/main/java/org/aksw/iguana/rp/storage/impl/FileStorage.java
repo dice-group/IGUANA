@@ -67,9 +67,8 @@ public class FileStorage implements Storage {
 		this.rootDir=rootDir;
 	}
 	
-	private StringBuilder createExtraHash(Integer index, Integer extraLength, Triple[] data) {
-		StringBuilder extraHash= new StringBuilder();
-		
+	private int createExtraHash(StringBuilder extraHash, Integer extraLength, Triple[] data) {
+		int index=0;
 		for(;index<extraLength-1;index++){
 			extraHash.append(data[index].getPredicate().replace("/", "--").replace("\\","--")).append("-")
 				.append(data[index].getObject().toString().replace("/", "--").replace("\\","--")).append("_");
@@ -78,10 +77,10 @@ public class FileStorage implements Storage {
 			extraHash.append(data[index].getPredicate().replace("/", "--").replace("\\","--")).append("-")
 				.append(data[index].getObject().toString().replace("/", "--").replace("\\","--"));
 		}
-		return extraHash;
+		return index;
 	}
 	
-	private File getFileForExtraHash(String taskID, StringBuilder dir, Properties meta, String extraHash) {
+	private File getFileForExtraHash(StringBuilder dir, Properties meta, String extraHash) {
 		
 		dir.append(meta.get(COMMON.METRICS_PROPERTIES_KEY));
 
@@ -90,7 +89,7 @@ public class FileStorage implements Storage {
 		
 		String fileName="";
 		if(extraHash.length()!=0){
-			fileName = extraHash.toString();
+			fileName = extraHash;
 		}else{
 			fileName = meta.get(COMMON.METRICS_PROPERTIES_KEY).toString();
 		}
@@ -98,9 +97,10 @@ public class FileStorage implements Storage {
 		return f;
 	}
 	
-	private void cachedFile(Integer index, String connID, File f, Integer extraLength, Triple[] data) {
+	private void cachedFile(String connID, File f, Integer extraLength, Triple[] data) {
 		//File exists;
 		//read header
+		Integer index=0;
 		List<String> header;
 		try(BufferedReader reader = new BufferedReader(
 				new FileReader(f))){
@@ -138,8 +138,9 @@ public class FileStorage implements Storage {
 		}
 	}
 	
-	private void uncachedFile(Integer index, String connID, File f, Integer extraLength, String extraHash, Triple[] data) {
+	private void uncachedFile(String connID, File f, Integer extraLength, String extraHash, Triple[] data) {
 		//create File
+		Integer index = 0;
 		try {
 			f.createNewFile();
 		} catch (IOException e) {
@@ -178,7 +179,7 @@ public class FileStorage implements Storage {
 			LOGGER.error("Could not write to file "+f.getAbsolutePath(), e);
 			return;
 		}
-		taskFileExists.add(extraHash.toString());
+		taskFileExists.add(extraHash);
 	}
 
 	/* (non-Javadoc)
@@ -195,18 +196,18 @@ public class FileStorage implements Storage {
 		//extraHash node 
 		Integer extraLength = (Integer) meta.get(CONSTANTS.LENGTH_EXTRA_META_KEY);
 		
-		Integer index = 0;
-		StringBuilder extraHash = createExtraHash(index, extraLength, data);
-		File f = getFileForExtraHash(taskID, dir, meta, extraHash.toString());
+		StringBuilder extraHash = new StringBuilder();
+		createExtraHash(extraHash, extraLength, data);
+		File f = getFileForExtraHash(dir, meta, extraHash.toString());
 		
 		String connID = strArr[1];
 		//taskFileExists.contains(extraHash.toString())
 		if(f.exists()){
-			cachedFile(index, connID, f, extraLength, data);
+			cachedFile(connID, f, extraLength, data);
 		}
 		else{
 			//File does not exist yet
-			uncachedFile(index, connID, f, extraLength, extraHash.toString(), data);
+			uncachedFile(connID, f, extraLength, extraHash.toString(), data);
 		}
 	}
 

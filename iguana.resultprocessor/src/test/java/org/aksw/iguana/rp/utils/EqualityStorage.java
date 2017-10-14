@@ -5,7 +5,6 @@ package org.aksw.iguana.rp.utils;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertTrue;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.storage.Storage;
 
