@@ -17,12 +17,6 @@ public class TestConsumer extends AbstractConsumer {
 	private boolean success;
 	private long time;
 	
-	/**
-	 * @param taskID
-	 */
-	public TestConsumer() {
-		super();
-	}
 
 	@Override
 	public void consume(byte[] data) {
