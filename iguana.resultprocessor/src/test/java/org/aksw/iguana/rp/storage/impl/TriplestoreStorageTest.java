@@ -3,6 +3,8 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -43,9 +45,12 @@ public class TriplestoreStorageTest {
 "  <http://iguana-benchmark.eu/recource/a> <http://iguana-benchmark.eu/properties/b> \"c\" .\n"+
 "}";
 	
+	/**
+	 * @throws IOException
+	 */
 	@Test
 	public void metaTest() throws IOException{
-		fastServerContainer = new ServerMock(metaExp);
+		fastServerContainer = new ServerMock();
         fastServer = new ContainerServer(fastServerContainer);
         fastConnection = new SocketConnection(fastServer);
         SocketAddress address1 = new InetSocketAddress(FAST_SERVER_PORT);
@@ -64,13 +69,18 @@ public class TriplestoreStorageTest {
 	    p.put(COMMON.NO_OF_QUERIES, 2);
         store.addMetaData(p);
         
+        assertEquals(metaExp.trim(), fastServerContainer.getActualContent().trim());
+        
         fastConnection.close();
 	}
 
 	
+	/**
+	 * @throws IOException
+	 */
 	@Test
 	public void dataTest() throws IOException{
-		fastServerContainer = new ServerMock(dataExp);
+		fastServerContainer = new ServerMock();
         fastServer = new ContainerServer(fastServerContainer);
         fastConnection = new SocketConnection(fastServer);
         SocketAddress address1 = new InetSocketAddress(FAST_SERVER_PORT);
@@ -87,7 +97,7 @@ public class TriplestoreStorageTest {
 	    t[0] = new Triple("a", "b", "c");
 	    store.addData(p, t);
 	    store.commit();
-        
+        assertEquals(dataExp.trim(),fastServerContainer.getActualContent().trim());
         fastConnection.close();
 	}
 

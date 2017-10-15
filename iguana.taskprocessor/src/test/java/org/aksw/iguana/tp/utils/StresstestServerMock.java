@@ -28,7 +28,7 @@ public class StresstestServerMock implements Container  {
 		try {
 			content = request.getContent();
 			LOGGER.info(content);
-			TimeUnit.SECONDS.sleep(10);
+			TimeUnit.SECONDS.sleep(100);
 		} catch (IOException | InterruptedException e) {
 			 LOGGER.error("Got exception.", e);
 		}

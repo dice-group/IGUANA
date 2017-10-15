@@ -7,22 +7,18 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
-import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.storage.Storage;
+import org.aksw.iguana.rp.utils.DefaultReturnConsumer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 
 /**
  * Will check if the Properties will be sended via rabbitMQ
@@ -35,6 +31,7 @@ public class PropertiesSenderStorageTest {
 	private static Connection conn;
 	private static Channel recv;
 	protected static Properties props;
+	private static DefaultReturnConsumer consumer;
 
 	
 	@BeforeClass
@@ -45,32 +42,17 @@ public class PropertiesSenderStorageTest {
 		recv = conn.createChannel();
 		recv.queueDeclare("rp2senderQueue", false, false,
 				false, null);
-		Consumer consumer = new DefaultConsumer(recv) {
-
-			@Override
-			public void handleDelivery(String consumerTag, Envelope envelope,
-					AMQP.BasicProperties properties, byte[] body)
-					throws IOException {
-				Properties p = RabbitMQUtils.getObject(body);
-				check(p);
-			}
-		};
+		consumer = new DefaultReturnConsumer(recv);
 		recv.basicConsume("rp2senderQueue", true, consumer);
 	}
 	
-	public static void check(Properties p){
-		assertEquals(p.hashCode(), getProps());
-	}
 	
 	@AfterClass
 	public static void after() throws IOException, TimeoutException{
 		recv.close();
 		conn.close();
 	}
-	
-	public static int getProps(){
-		return props.hashCode();
-	}
+
 	
 	
 	@Test
@@ -85,6 +67,7 @@ public class PropertiesSenderStorageTest {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		assertEquals(p.hashCode(), consumer.getReceivedProps().hashCode());
 	}
 
 	
@@ -106,5 +89,6 @@ public class PropertiesSenderStorageTest {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		assertEquals(p2.hashCode(), consumer.getReceivedProps().hashCode());
 	}
 }

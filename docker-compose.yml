@@ -1,0 +1,42 @@
+version: '3'
+services:
+  # message bus
+  rabbit:
+    image: rabbitmq:management
+    container_name: rabbit
+    networks:
+     - iguana
+    ports:
+     - "8081:15672"
+     # Forwarding the port for testing
+     - "5672:5672"
+
+  web:
+    image: iguana/webcontroller
+    networks:
+     - iguana
+    ports: 
+     - "8085:8085"
+    environment:
+     - IP=0.0.0.0
+     - RABBIT_HOST=rabbit
+    depends_on:
+     - rabbit
+
+
+  result-processor:
+    image: iguana/resultprocessor:live
+    networks:
+     - iguana
+    ports: 
+     - "9999:9999"
+    environment:
+     - RABBIT_HOST=rabbit
+    depends_on:
+     - rabbit
+
+
+networks:
+  iguana:
+    external:
+      name: iguana

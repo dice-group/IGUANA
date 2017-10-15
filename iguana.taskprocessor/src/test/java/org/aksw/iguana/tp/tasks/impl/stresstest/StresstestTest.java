@@ -1,5 +1,8 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -52,31 +55,31 @@ public class StresstestTest {
 	public static Collection<Object[]> data() {
 		List<Object[]> testConfigs = new ArrayList<Object[]>();
 
-		testConfigs.add(new Object[] { "test", host, host, 1000L, null,
+		testConfigs.add(new Object[] { "test", host, host, 5000L, null,
 				new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 				new Object[][] {
 						new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 								"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 
 		testConfigs.add(
-				new Object[] { "test", host, host, null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host, null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 		testConfigs.add(
-				new Object[] { "test", host, host,null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host,null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 		testConfigs.add(
-				new Object[] { "test", host, host,null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host,null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" },
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
 										 "1", "src/test/resources/worker/sparql.sparql", "0", "0" , null, null} } });
 		testConfigs.add(
-				new Object[] { "test", host, host, null, 1L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host, null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" , null, null} } });
@@ -144,12 +147,6 @@ public class StresstestTest {
 		connection.close();
 	}
 
-	private void checkConsumer(String taskID) throws IguanaException, InterruptedException {
-		TestConsumer consumer = new TestConsumer(taskID);
-		consumer.init("localhost", COMMON.CORE2RP_QUEUE_NAME);
-		Thread.sleep(5000);
-		// consumer.close();
-	}
 
 	/**
 	 * @throws IguanaException
@@ -166,7 +163,13 @@ public class StresstestTest {
 		task.init("localhost", COMMON.CORE2RP_QUEUE_NAME);
 		task.start();
 		task.execute();
-		checkConsumer(taskID);
+		TestConsumer consumer = new TestConsumer();
+		consumer.init("localhost", COMMON.CORE2RP_QUEUE_NAME);
+		//wait so the consumer can receive the properties
+		Thread.sleep(5000);
+		assertEquals(taskID, consumer.getTaskID());
+		assertFalse(consumer.isSuccess());
+		assertEquals(-1, consumer.getTime());
 	}
 
 }

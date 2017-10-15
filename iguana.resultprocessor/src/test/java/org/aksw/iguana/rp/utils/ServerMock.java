@@ -9,18 +9,17 @@ import org.simpleframework.http.core.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertEquals;
-
+/**
+ * Server Mock representing a TS
+ * 
+ * @author f.conrads
+ *
+ */
 public class ServerMock implements Container  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerMock.class);
-	private String expectedContent;
-	
-    
-    
-	public ServerMock(String expectedContent) {
-		this.expectedContent = expectedContent;
-	}
+	private String actualContent;
+  
 
 	@Override
 	public void handle(Request request, Response resp) {
@@ -30,13 +29,27 @@ public class ServerMock implements Container  {
 		} catch (IOException e) {
 			 LOGGER.error("Got exception.", e);
 		}
-		assertEquals(expectedContent.trim(), content.trim());
+		this.actualContent=content;
 		resp.setCode(Status.OK.code);
 		try {
 			resp.getOutputStream().close();
 		} catch (IOException e) {
 			LOGGER.error("Could not close Response Output Stream");
 		}
+	}
+
+	/**
+	 * @return the actualContent
+	 */
+	public String getActualContent() {
+		return actualContent;
+	}
+
+	/**
+	 * @param actualContent the actualContent to set
+	 */
+	public void setActualContent(String actualContent) {
+		this.actualContent = actualContent;
 	}
 
 }
