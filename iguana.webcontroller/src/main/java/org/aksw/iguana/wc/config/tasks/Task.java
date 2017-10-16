@@ -29,6 +29,11 @@ public interface Task {
 	 */
 	public Object[] getConstructorArgs();
 
+	/**
+	 * Gets the sub configuration for the specific task
+	 * @param taskID
+	 * @return
+	 */
 	public Configuration getSubConfiguration(String taskID);
 	
 }

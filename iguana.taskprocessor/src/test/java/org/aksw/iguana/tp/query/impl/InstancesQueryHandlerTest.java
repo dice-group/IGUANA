@@ -59,8 +59,8 @@ public class InstancesQueryHandlerTest {
 	@Test
 	public void testWorkerInjection() {
 		LinkedList<Worker> workers =new LinkedList<Worker>();
-		UPDATEWorker  worker = new UPDATEWorker("1", 1, null, "",  null, 
-				"src/test/resources/queryhandler/updates/", 0, 0, "NONE",null);
+		UPDATEWorker  worker = new UPDATEWorker(new String[] {"1", "1", null, "",  null, 
+				"src/test/resources/queryhandler/updates/", "0", "0", "NONE","NONE"});
 		workers.add(worker);
 		InstancesQueryHandler handler = new InstancesQueryHandler(workers);
 		

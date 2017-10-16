@@ -27,96 +27,53 @@ import org.apache.jena.update.UpdateRequest;
  */
 public class UPDATEWorker extends AbstractWorker {
 
-	private String service;
-	private Long timeOut;
+
 	private int currentQueryID = 0;
 	private UpdateStrategy updateStrategy;
 	private UpdateTimer updateTimer = new UpdateTimer();
 
-	/**
-	 * Default Constructor needs to use init method afterwards.
-	 */
-	public UPDATEWorker() {
-	}
-
-	/**
-	 * Constructor using Strings no need for init method
-	 * 
-	 * @param taskID
-	 *            the taskID
-	 * @param workerID
-	 *            the workerID
-	 * @param timeLimitMS
-	 *            the timeLimit of the task (can be null)
-	 * @param service
-	 *            the endpoint url
-	 * @param timeOutMS
-	 *            the timeout in MS (can be null)
-	 * @param updateFolder
-	 *            the folder containing the updates
-	 * @param fixedLatency
-	 *            the fixed latency (can be null)
-	 * @param gaussianLatency
-	 *            the gaussian latency (can be null)
-	 * @param updateStrategy
-	 *            the UpdateStrategy
-	 * @param timerStrategy
-	 *            the UpdateTimer.Strategy
-	 */
-	public UPDATEWorker(String taskID, String workerID, String timeLimitMS, String service, String timeOutMS,
-			String updateFolder, String fixedLatency, String gaussianLatency, String updateStrategy,
-			String timerStrategy) {
-		this(taskID, Integer.parseInt(workerID), Long.getLong(timeLimitMS), service, Long.getLong(timeOutMS),
-				updateFolder, Integer.getInteger(fixedLatency), Integer.getInteger(gaussianLatency), updateStrategy,
-				timerStrategy);
-
-	}
-
+	
 	/**
 	 * Constructor. no need for init method
+	 * @param args 
 	 * 
-	 * @param taskID
-	 *            the taskID
-	 * @param workerID
-	 *            the workerID
-	 * @param timeLimitMS
-	 *            the timeLimit of the task (can be null)
-	 * @param service
-	 *            the endpoint url
-	 * @param timeOutMS
-	 *            the timeout in MS (can be null)
-	 * @param updateFolder
-	 *            the folder containing the updates
-	 * @param fixedLatency
-	 *            the fixed latency (can be null)
-	 * @param gaussianLatency
-	 *            the gaussian latency (can be null)
-	 * @param updateStrategy
-	 *            the UpdateStrategy
-	 * @param timerStrategy
-	 *            the UpdateTimer.Strategy
 	 */
-	public UPDATEWorker(String taskID, int workerID, Long timeLimitMS, String service, Long timeOutMS,
-			String updateFolder, Integer fixedLatency, Integer gaussianLatency, String updateStrategy,
-			String timerStrategy) {
-		super(taskID, workerID, "UPDATE", timeLimitMS, updateFolder, fixedLatency, gaussianLatency);
-		this.service = service;
-		// set default timeout to 180s
-		this.timeOut = 180000L;
-		// if timeout is set, set timeout
-		if (timeOutMS != null)
-			this.timeOut = timeOutMS;
+	public UPDATEWorker(String[] args) {
+//		super(taskID, workerID, "UPDATE", timeLimitMS, updateFolder, fixedLatency, gaussianLatency);
+		super(args, "UPDATE");
 
 		// set default updateStrategy to none
 		this.updateStrategy = UpdateStrategy.NONE;
 		// if updateStrategy is set, set updateStrategy
 		if (updateStrategy != null) {
-			this.updateStrategy = UpdateStrategy.valueOf(updateStrategy);
+			this.updateStrategy = UpdateStrategy.valueOf(args[9]);
 		}
 
-		setUpdateTimer(timerStrategy);
+		setUpdateTimer(args[8]);
 	}
 
+	/**
+	 * 
+	 */
+	public UPDATEWorker() {
+		//bla
+		super("UPDATEWorker");
+	}
+	
+	@Override
+	public void init(String[] args) {
+		super.init(args);
+
+		// set default updateStrategy to none
+		this.updateStrategy = UpdateStrategy.NONE;
+		// if updateStrategy is set, set updateStrategy
+		if (updateStrategy != null) {
+			this.updateStrategy = UpdateStrategy.valueOf(args[9]);
+		}
+
+		setUpdateTimer(args[8]);
+	}
+	
 	@Override
 	public void init(Properties p) {
 		// At first call init from AbstractWorker!

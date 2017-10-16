@@ -13,6 +13,7 @@ import java.util.Properties;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.utils.ServerMock;
+import org.junit.After;
 import org.junit.Test;
 import org.simpleframework.http.core.ContainerServer;
 import org.simpleframework.transport.connect.SocketConnection;
@@ -70,10 +71,16 @@ public class TriplestoreStorageTest {
         store.addMetaData(p);
         
         assertEquals(metaExp.trim(), fastServerContainer.getActualContent().trim());
-        
-        fastConnection.close();
 	}
 
+	/**
+	 * @throws IOException
+	 */
+	@After
+	public void close() throws IOException {
+		fastConnection.close();
+	}
+	
 	
 	/**
 	 * @throws IOException
@@ -98,7 +105,6 @@ public class TriplestoreStorageTest {
 	    store.addData(p, t);
 	    store.commit();
         assertEquals(dataExp.trim(),fastServerContainer.getActualContent().trim());
-        fastConnection.close();
 	}
 
 }

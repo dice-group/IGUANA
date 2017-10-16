@@ -117,7 +117,9 @@ public class Stresstest extends AbstractTask {
 						config[i + 2] = workerConfig[i];
 					}
 				}
-				this.workers.add(factory.create(workerConfig[1], config));
+				Worker worker = factory.create(workerConfig[1], new String[] {});
+				worker.init(config);
+				this.workers.add(worker);
 			}
 		}
 		addMetaData();
@@ -222,12 +224,12 @@ public class Stresstest extends AbstractTask {
 	private LinkedList<Worker> initWarmupWorkers(){
 		LinkedList<Worker> warmupWorkers = new LinkedList<Worker>();
 		if(warmupQueries!=null) {
-			SPARQLWorker sparql = new SPARQLWorker("-1", 1,  0L, service, null,  warmupQueries, null, null);
+			SPARQLWorker sparql = new SPARQLWorker(new String[] {"-1", "1",  "0L", service, null,  warmupQueries, null, null});
 			warmupWorkers.add(sparql);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one SPARQL worker.", taskID);
 		}
 		if(warmupUpdates!=null) {
-			UPDATEWorker update = new UPDATEWorker("-1", 2, 0L, service, null,  warmupUpdates, null,null, null, null);
+			UPDATEWorker update = new UPDATEWorker(new String[] {"-1", "2", "0L", service, null,  warmupUpdates, null,null, null, null});
 			warmupWorkers.add(update);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);
 		}	

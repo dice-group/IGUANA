@@ -14,8 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Abstract Worker which will implement the runnable, the main loop,
- * the time to wait before a query and will send the results to the ResultProcessor module <br/>
+ * The Abstract Worker which will implement the runnable, the main loop, the
+ * time to wait before a query and will send the results to the ResultProcessor
+ * module <br/>
  * so the Implemented Workers only need to implement which query to test next
  * and how to test this query.
  * 
@@ -24,18 +25,17 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractWorker implements Worker {
 
-    	/**
-    	 * Logger which should be used
-    	 */
-	protected static final Logger LOGGER = LoggerFactory
-		.getLogger(AbstractWorker.class);
-    
-	private boolean endSignal=false;
+	/**
+	 * Logger which should be used
+	 */
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractWorker.class);
+
+	private boolean endSignal = false;
 	protected long executedQueries;
-	
+
 	private Collection<Properties> results = new LinkedList<Properties>();
 	private String taskID;
-	
+
 	/**
 	 * The worker Type. f.e. SPARQL or UPDATE or SQL or whatever
 	 */
@@ -43,12 +43,12 @@ public abstract class AbstractWorker implements Worker {
 	/**
 	 * The unique ID of the worker, should be from 0 to n
 	 */
-	protected int workerID;
+	protected Integer workerID;
 	protected Properties extra;
 
-	private int fixedLatency;
+	private Integer fixedLatency=0;
 
-	private int gaussianLatency;
+	private Integer gaussianLatency=0;
 
 	private Random latencyRandomizer;
 
@@ -61,188 +61,205 @@ public abstract class AbstractWorker implements Worker {
 
 	protected long startTime;
 
-	private String queriesFileName;
+	protected String queriesFileName;
+
+	protected String service;
+
+	protected Long timeOut=180000L;
 
 	/**
-	 * Default Constructor 
-	 * Init method needs to be called
+	 * Needs to be called if init is used
+	 * @param workerType 
 	 */
-	public AbstractWorker() {
+	public AbstractWorker(String workerType) {
+		// needs
+		this.workerType=workerType;
 	}
-	
+
 	/**
-	 * Constructor.
-	 * No need for init method 
+	 * Default Constructor
 	 * 
-	 * @param taskID the experiment task ID
-	 * @param workerID the worker ID
-	 * @param workerType The worker type (mostly for logging purpose)
-	 * @param timeLimit the timeLimit of the Stresstest (can be null)
-	 * @param queriesFileName the queries file name or update path 
-	 * @param fixedLatency the fixed latency to use (can be null)
-	 * @param gaussianLatency the gaussian distributed latency to use (can be null)
+	 * @param args
+	 * @param workerType
 	 */
-	public AbstractWorker(String taskID, int workerID, String workerType, Long timeLimit, String queriesFileName, Integer fixedLatency, Integer gaussianLatency) {
-		 //Add task and Worker Specs
-	    this.taskID = taskID;
-	    this.workerID = workerID;
-	    this.workerType = workerType;
-	    this.timeLimit = timeLimit;
-
-	    //workerID represents seed to be fair with different systems.
-	    latencyRandomizer = new Random(this.workerID);
-	    
-	    //set Query file/folder Name
-	    this.queriesFileName = queriesFileName;
-	    
-	    //Add latency Specs, add defaults
-	    if(fixedLatency != null)
-	    	this.fixedLatency = fixedLatency;
-	    if(gaussianLatency != null)
-	    	this.gaussianLatency = gaussianLatency;
-	    LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
-
+	public AbstractWorker(String[] args, String workerType) {
+		this(workerType);
+		init(args);
 	}
-	
+
+
 	@Override
-	public void init(Properties p){
-	    //Add task and Worker Specs
-	    this.taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
-	    this.workerID = (int) p.get(CONSTANTS.WORKER_ID_KEY);
-	    this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
-		this.timeLimit = (Long) p.get(CONSTANTS.TIME_LIMIT);
+	public void init(String[] args) {
+		// Add task and Worker Specs
+		this.taskID = args[0];
+		this.workerID = Integer.parseInt(args[1]);
 
+		if(args[2]!=null)
+			this.timeLimit = Long.parseLong(args[2]);
+		this.service = args[3];
+		if(args[4]!=null)
+			this.timeOut = Long.parseLong(args[4]);
+		// workerID represents seed to be fair with different systems.
+		latencyRandomizer = new Random(this.workerID);
 
-	    //workerID represents seed to be fair with different systems.
-	    latencyRandomizer = new Random(this.workerID);
-	    
-	    //set Query file list
-	    this.queryFileList = (File[]) p.get(CONSTANTS.QUERY_FILE_LIST);
-	    
-	    //Add latency Specs, add defaults
-	    this.fixedLatency = (int) p.getOrDefault(CONSTANTS.FIXED_LATENCY, 0);
-	    this.gaussianLatency = (int) p.getOrDefault(CONSTANTS.GAUSSIAN_LATENCY, 0);
-	    LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
+		// set Query file/folder Name
+		this.queriesFileName = args[5];
+
+		// Add latency Specs, add defaults
+		if(args[6]!=null)
+			this.fixedLatency = Integer.parseInt(args[6]);
+		if(args[7]!=null)
+			this.gaussianLatency = Integer.parseInt(args[7]);
+		
+		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
+
 	}
-	
+
 	@Override
-	public void waitTimeMs(){
-	    long wait=this.fixedLatency;
-	    wait += Math.round((latencyRandomizer.nextGaussian()+1)*this.gaussianLatency);
-	    LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
-	    try {
-		Thread.sleep(wait);
-	    } catch (InterruptedException e) {
-		LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType, workerID, e);
-		LOGGER.error("", e);
-	    }
+	public void init(Properties p) {
+		// Add task and Worker Specs
+		this.taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
+		this.workerID = Integer.parseInt(p.getProperty(CONSTANTS.WORKER_ID_KEY));
+		this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
+		if(p.containsKey(CONSTANTS.TIME_LIMIT))
+			this.timeLimit = Long.parseLong(p.getProperty(CONSTANTS.TIME_LIMIT));
+
+		// workerID represents seed to be fair with different systems.
+		latencyRandomizer = new Random(this.workerID);
+
+		// set Query file/folder Name
+		this.queriesFileName = p.getProperty(CONSTANTS.QUERIES_FILE_NAME);
+
+		// Add latency Specs, add defaults
+		this.fixedLatency = (int) p.getOrDefault(CONSTANTS.FIXED_LATENCY, 0);
+		this.gaussianLatency = (int) p.getOrDefault(CONSTANTS.GAUSSIAN_LATENCY, 0);
+		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
 	}
-	
+
+	@Override
+	public void waitTimeMs() {
+		long wait = this.fixedLatency;
+		wait += Math.round((latencyRandomizer.nextGaussian() + 1) * this.gaussianLatency);
+		LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
+		try {
+			Thread.sleep(wait);
+		} catch (InterruptedException e) {
+			LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType,
+					workerID, e);
+			LOGGER.error("", e);
+		}
+	}
+
 	/**
-	 * This will start the worker. 
-	 * It will get the next query, wait as long as it should wait before executing the next query,
-	 * then it will test the query and send it if not aborted yet to the ResultProcessor Module
+	 * This will start the worker. It will get the next query, wait as long as it
+	 * should wait before executing the next query, then it will test the query and
+	 * send it if not aborted yet to the ResultProcessor Module
 	 *
 	 */
-	public void startWorker(){
-	    	//set extra meta key to send late
-	    	this.extra = new Properties();
-	    	this.extra.put(CONSTANTS.WORKER_ID_KEY, workerID);
+	public void startWorker() {
+		// set extra meta key to send late
+		this.extra = new Properties();
+		this.extra.put(CONSTANTS.WORKER_ID_KEY, workerID);
 		this.extra.setProperty(CONSTANTS.WORKER_TYPE_KEY, workerType);
-		//For Update and Logging purpose get startTime of Worker
+		// For Update and Logging purpose get startTime of Worker
 		this.startTime = Calendar.getInstance().getTimeInMillis();
-		
-		LOGGER.info("Starting Worker[{{}} : {{}}].",this.workerType, this.workerID);
-		//Execute Queries as long as the Stresstest will need.
-		while(!this.endSignal){
-			//Get next query
+
+		LOGGER.info("Starting Worker[{{}} : {{}}].", this.workerType, this.workerID);
+		// Execute Queries as long as the Stresstest will need.
+		while (!this.endSignal) {
+			// Get next query
 			StringBuilder query = new StringBuilder();
 			StringBuilder queryID = new StringBuilder();
-			try{
-			    getNextQuery(query, queryID);
-			    //check if endsignal was triggered
-			    if(this.endSignal) {
-			    	break;
-			    }
-			}catch(IOException e){
-			    LOGGER.error("Worker[{{}} : {{}}] : Something went terrible wrong in getting the next query. Worker will be shut down.", this.workerType, this.workerID);
-			    LOGGER.error("Error which occured:_", e);
-			    break;
+			try {
+				getNextQuery(query, queryID);
+				// check if endsignal was triggered
+				if (this.endSignal) {
+					break;
+				}
+			} catch (IOException e) {
+				LOGGER.error(
+						"Worker[{{}} : {{}}] : Something went terrible wrong in getting the next query. Worker will be shut down.",
+						this.workerType, this.workerID);
+				LOGGER.error("Error which occured:_", e);
+				break;
 			}
-			//Simulate Network Delay (or whatever should be simulated)
+			// Simulate Network Delay (or whatever should be simulated)
 			waitTimeMs();
-			//benchmark query
-			Long time=-1L;
+			// benchmark query
+			Long time = -1L;
 			try {
 				time = getTimeForQueryMs(query.toString(), queryID.toString());
-			}
-			catch(Exception e) {
-				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID, query.toString());
+			} catch (Exception e) {
+				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
+						query.toString());
 				time = -1L;
 			}
 			this.executedQueries++;
-			//If endSignal was send during execution it should not be counted anymore.
-			if(!this.endSignal){
-				//create Properties store it in List
+			// If endSignal was send during execution it should not be counted anymore.
+			if (!this.endSignal) {
+				// create Properties store it in List
 				Properties result = new Properties();
 				result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
 				result.put(COMMON.RECEIVE_DATA_TIME, time);
-				result.put(COMMON.RECEIVE_DATA_SUCCESS, time>=0);
+				result.put(COMMON.RECEIVE_DATA_SUCCESS, time >= 0);
 				result.setProperty(COMMON.QUERY_ID_KEY, queryID.toString());
-				//Add extra Meta Key, worker ID and worker Type
+				// Add extra Meta Key, worker ID and worker Type
 				result.put(COMMON.EXTRA_META_KEY, this.extra);
 				setResults(result);
 			}
 		}
-		LOGGER.info("Stopping Worker[{{}} : {{}}].",this.workerType, this.workerID);
+		LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
 	}
-	
+
 	private synchronized void setResults(Properties result) {
 		results.add(result);
 	}
-	
 
 	@Override
-	public synchronized Collection<Properties>  popQueryResults(){
+	public synchronized Collection<Properties> popQueryResults() {
 		Collection<Properties> ret = this.results;
 		this.results = new LinkedList<Properties>();
 		return ret;
 	}
-	
+
 	@Override
-	public long getExecutedQueries(){
+	public long getExecutedQueries() {
 		return this.executedQueries;
 	}
-	
+
 	@Override
-	public void stopSending(){
-		this.endSignal=true;
+	public void stopSending() {
+		this.endSignal = true;
 		LOGGER.debug("Worker[{{}} : {{}}] got stop signal.", workerType, workerID);
 	}
 
 	@Override
-	public void run(){
+	public void run() {
 		startWorker();
 	}
-	
+
 	/**
 	 * Returns the name of the queries file name/update path
+	 * 
 	 * @return file name/update path
 	 */
 	public String getQueriesFileName() {
 		return this.queriesFileName;
 	}
-	
+
 	/**
 	 * Sets the Query Instances repr. in Files.
-	 * @param queries File containing the query instances.
+	 * 
+	 * @param queries
+	 *            File containing the query instances.
 	 */
 	public void setQueriesList(File[] queries) {
 		this.queryFileList = queries;
 	}
 
 	/**
-	 * The number of Queries in one mix 
+	 * The number of Queries in one mix
+	 * 
 	 * @return
 	 */
 	public long getNoOfQueries() {

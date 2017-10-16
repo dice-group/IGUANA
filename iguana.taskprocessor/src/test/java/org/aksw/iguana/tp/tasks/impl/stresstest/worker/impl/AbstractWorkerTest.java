@@ -27,7 +27,7 @@ public class AbstractWorkerTest {
 	@Test
 	public void checkFailure() throws InterruptedException {
 		// use 5 as workerID to produce failure in TestWorkerImpl
-		Worker abstractWorker = new TestWorkerImpl("exp1", 5, "TEST TYPE", 0, 0);
+		Worker abstractWorker = new TestWorkerImpl("exp1", "5", "TEST TYPE", 0, 0);
 		Thread th = new Thread(abstractWorker);
 		th.start();
 		while (abstractWorker.getExecutedQueries() <= 10) {
@@ -60,7 +60,7 @@ public class AbstractWorkerTest {
 	 */
 	@Test
 	public void testSuccess() throws InterruptedException {
-		Worker abstractWorker = new TestWorkerImpl("exp1", 3, "TEST TYPE", 0, 0);
+		Worker abstractWorker = new TestWorkerImpl("exp1", "3", "TEST TYPE", 0,0);
 		Thread th = new Thread(abstractWorker);
 		th.start();
 		while (abstractWorker.getExecutedQueries() <= 10) {

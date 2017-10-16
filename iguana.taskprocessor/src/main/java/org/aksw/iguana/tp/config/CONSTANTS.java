@@ -65,5 +65,10 @@ public class CONSTANTS {
 	 */
 	public static final String STRESSTEST_UPDATE_TIMERSTRATEGY = "updateTimerStrategy";
 
+	/**
+	 * The key for the query folder name
+	 */
+	public static final String QUERIES_FILE_NAME = "queriesFile";
+
 
 }

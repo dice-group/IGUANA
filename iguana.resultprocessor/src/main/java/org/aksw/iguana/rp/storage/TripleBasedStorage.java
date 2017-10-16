@@ -113,14 +113,15 @@ public abstract class TripleBasedStorage implements Storage {
 		String connID = getID(p, COMMON.CONNECTION_ID_KEY);
 
 		// Actual triples to commit
-		addBlockUpdate(suiteID, expID, "experiment");
-		addBlockUpdate(expID, taskID, "task");
-		addBlockUpdate(expID, datasetID, "dataset");
+		addBlockUpdate(suiteID, expID, properties+"experiment");
 		addBlockUpdate(suiteID, "<" + suiteClassUri + ">", classUri);
+		addBlockUpdate(expID, taskID, properties+"task");
+		addBlockUpdate(expID, datasetID, properties+"dataset");
 		addBlockUpdate(expID, "<" + expClassUri + ">", classUri);
-		addBlockUpdate(taskID, connID, "connection");
-		addBlockUpdate(suiteID, "<" + taskClassUri + ">", classUri);
 		addBlockUpdateExtra(p, expID);
+		addBlockUpdate(taskID, connID, properties+"connection");
+		addBlockUpdate(taskID, "<" + taskClassUri + ">", classUri);
+		
 		// Commit Meta Data and clear updateBlock
 		commit();
 		blockSize = 0;
@@ -148,13 +149,13 @@ public abstract class TripleBasedStorage implements Storage {
 
 	private String getID(Properties p, String key) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(" <").append(resource).append(p.getProperty(key)).append("> ");
+		builder.append("<").append(resource).append(p.getProperty(key)).append(">");
 		return builder.toString();
 	}
 
 	private void addBlockUpdate(String subjectURI, String objectURI, String predicate) {
-		blockUpdate.append(subjectURI).append(" <").append(properties).append(predicate).append("> ").append(objectURI)
-				.append(".\n");
+		blockUpdate.append(subjectURI).append("  <").append(predicate).append(">  ").append(objectURI)
+				.append(" .\n");
 	}
 
 	@Override

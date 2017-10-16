@@ -60,31 +60,31 @@ public class StresstestTest {
 		testConfigs.add(new Object[] { "test", host, host, 5L, null,
 				new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 				new Object[][] {
-						new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
-								"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
+						new Object[] { new String[] {"1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
+								"1", "src/test/resources/worker/sparql.sparql", "0", "0" }} } });
 
 		testConfigs.add(
 				new Object[] { "test", host, host, null, 5L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
-								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
-										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
+								new Object[] { new String[] {"1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
+										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } }});
 		testConfigs.add(
 				new Object[] { "test", host, host,null, 5L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
-								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
-										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
+								new Object[] { new String[] {"2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
+										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } }} });
 		testConfigs.add(
 				new Object[] { "test", host, host,null, 5L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
-								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
-										"1", "src/test/resources/worker/sparql.sparql", "0", "0" },
-								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
-										 "1", "src/test/resources/worker/sparql.sparql", "0", "0" , "NONE", "NONE"} } });
+								new Object[] {new String[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
+										"1", "src/test/resources/worker/sparql.sparql", "0", "0" }},
+								new Object[] { new String[] {"2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
+										 "1", "src/test/resources/worker/sparql.sparql", "0", "0" , "NONE", "NONE"} } }});
 		testConfigs.add(
 				new Object[] { "test", host, host, null, 5L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
-								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
-										"1", "src/test/resources/worker/sparql.sparql", "0", "0" , "NONE", "NONE"} } });
+								new Object[] { new String[] {"1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
+										"1", "src/test/resources/worker/sparql.sparql", "0", "0" , "NONE", "NONE"} } }});
 		return testConfigs;
 	}
 

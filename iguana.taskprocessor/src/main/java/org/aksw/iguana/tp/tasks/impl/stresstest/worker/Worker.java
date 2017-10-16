@@ -67,4 +67,9 @@ public interface Worker extends Runnable{
 	 * @return list of Properties to send to RabbitMQ
 	 */
 	public Collection<Properties> popQueryResults();
+
+	/**
+	 * @param args
+	 */
+	void init(String[] args);
 }

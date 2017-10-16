@@ -4,6 +4,12 @@ import java.util.Iterator;
 
 import org.apache.commons.configuration.Configuration;
 
+/**
+ * a few methods to work with Configurations more easily
+ * 
+ * @author f.conrads
+ *
+ */
 public class ConfigUtils {
 
 	/**
@@ -28,7 +34,6 @@ public class ConfigUtils {
 	 * @param suffix
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static String[] getStringArrayWithSuffix(Configuration config, String suffix) {
 		Iterator<String> keySet = config.getKeys();
 		while(keySet.hasNext()) {

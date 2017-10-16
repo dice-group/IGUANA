@@ -96,7 +96,6 @@ public class TypedFactory <T>{
 		try {
 			Constructor<? extends T> constructor = clazz
 					.getConstructor(constructorClasses);
-
 			return constructor.newInstance(constructorArgs2);
 		} catch (InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException
