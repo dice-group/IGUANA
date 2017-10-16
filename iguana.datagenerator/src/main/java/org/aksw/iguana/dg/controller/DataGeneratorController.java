@@ -3,6 +3,8 @@
  */
 package org.aksw.iguana.dg.controller;
 
+import java.util.Properties;
+
 import org.aksw.iguana.commons.communicator.Communicator;
 import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -57,5 +59,13 @@ public class DataGeneratorController{
 					+" consume queue "+COMMON.MC2TP_QUEUE_NAME+" and sender queue"+COMMON.TP2MC_QUEUE_NAME, e);
 			communicator.close();
 		}
+	}
+	
+	public void start(Properties p) {
+		LoaderManager lmanager = new LoaderManager();
+		DataManager dmanager = new DataManager();
+	
+		DefaultConsumer consumer = new DefaultConsumer(dmanager, lmanager);
+		consumer.consume(p);
 	}
 }

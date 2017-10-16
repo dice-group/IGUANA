@@ -24,6 +24,8 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.Worker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.WorkerFactory;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker;
+import org.aksw.iguana.tp.utils.ConfigUtils;
+import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,87 +62,35 @@ public class Stresstest extends AbstractTask {
 	private String service;
 	
 	
-	/**
-	 * 
-	 * The objects of the workerConfiguration has to be in the following order:<br/>
-	 * <ol>
-	 * <li>number of workers to create with this config</li>
-	 * <li>class name of the worker, e.g.
-	 * org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker</li>
-	 * <li>all other constructor arguments the worker needs</li>
-	 * </ol>
-	 * @param ids 
-	 * 				the suiteid, expId, datasetID, conID
-	 * @param taskID
-	 *            the current TaskID
-	 * @param service 
-	 * @param updateService 
-	 * @param timeLimit
-	 *            can be safely null if noOfQueryMixes is set
-	 * @param noOfQueryMixes
-	 *            can be safely null if timeLimit is set
-	 * @param workerConfigurations
-	 *            configurations of the workers to create
-	 * @param queryHandler
-	 *            the class name and constructor args of a Worker Based Query
-	 *            Handler
-	 * @param warmupTimeMS 
-	 * @param warmupQueries 
-	 * @param warmupUpdates 
-	 */
-	public Stresstest(String[] ids, String taskID, String service, String updateService, String timeLimit, String noOfQueryMixes, Object[][] workerConfigurations,
-			String[] queryHandler, String warmupTimeMS, String warmupQueries, String warmupUpdates) {
-		this(ids, taskID, service, updateService, Long.getLong(timeLimit), Long.getLong(noOfQueryMixes), workerConfigurations, queryHandler,
-				Long.getLong(warmupTimeMS), warmupQueries, warmupUpdates);
-	
-	}
-	
-	/**
-	 * 
-	 * The objects of the workerConfiguration has to be in the following order:<br/>
-	 * <ol>
-	 * <li>number of workers to create with this config</li>
-	 * <li>class name of the worker, e.g.
-	 * org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker</li>
-	 * <li>all other constructor arguments the worker needs</li>
-	 * </ol>
-	 * @param ids 
-	 * 			the suiteid, expId, datasetID, conID
-	 * @param taskID
-	 *            the current TaskID
-	 * @param service 
-	 * @param updateService2
-	 * @param timeLimit
-	 *            can be safely null if noOfQueryMixes is set
-	 * @param noOfQueryMixes
-	 *            can be safely null if timeLimit is set
-	 * @param workerConfigurations
-	 *            configurations of the workers to create
-	 * @param queryHandler
-	 *            the class name and constructor args of a Worker Based Query
-	 *            Handler
-	 * @param warmupTimeMS 
-	 * @param warmupQueries 
-	 * @param warmupUpdates 
-	 */
-	public Stresstest(String[] ids, String taskID, String service, String updateService2, Long timeLimit, Long noOfQueryMixes, Object[][] workerConfigurations,
-			String[] queryHandler, Long warmupTimeMS, String warmupQueries, String warmupUpdates) {
-		super(ids, taskID);
-		this.timeLimit = timeLimit;
-		this.noOfQueryMixes = noOfQueryMixes;
-		this.service = service;	
-		String updateService =  updateService2==null?service:updateService2;
-		this.qhClassName = queryHandler[0];
-		this.qhConstructorArgs = Arrays.copyOfRange(queryHandler, 1, queryHandler.length);
 
-		this.warmupTimeMS = warmupTimeMS;
-		this.warmupQueries = warmupQueries;
-		this.warmupUpdates = warmupUpdates;
+	/**
+	 * @param ids
+	 * @param taskID
+	 * @param service
+	 * @param updateService
+	 * @param taskConfig
+	 */
+	public Stresstest(String[] ids, String taskID, String service, String updateService, Configuration taskConfig) {
+		
+		super(ids, taskID, service, updateService);
+		this.timeLimit = ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit");
+		this.noOfQueryMixes = ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes");;
+		
+		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
+		this.qhClassName = tmp[0];
+		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
+
+		this.warmupTimeMS = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupTimeMS");
+		this.warmupQueries = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupQueries");
+		this.warmupUpdates = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupUpdates");
 		
 		WorkerFactory factory = new WorkerFactory();
 		Integer workerID = 0;
 		// create Workers
-		for (Object[] workerConfig : workerConfigurations) {
+		String[] workerConfigs = ConfigUtils.getStringArrayWithSuffix(taskConfig, "workers");
+		
+		for (String configKey : workerConfigs) {
+			String[] workerConfig = taskConfig.getStringArray(configKey);
 			int workers = Integer.parseInt(workerConfig[0].toString());
 			noOfWorkers+=workers;
 			for (int j = 0; j < workers; j++) {
@@ -172,6 +122,7 @@ public class Stresstest extends AbstractTask {
 		}
 		addMetaData();
 	}
+	
 
 	/**
 	 * Add extra Meta Data

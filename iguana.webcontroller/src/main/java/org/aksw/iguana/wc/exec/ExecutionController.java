@@ -1,5 +1,8 @@
 package org.aksw.iguana.wc.exec;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +23,11 @@ import org.aksw.iguana.wc.config.Dataset;
 import org.aksw.iguana.wc.config.tasks.Stresstest;
 import org.aksw.iguana.wc.config.tasks.Task;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.primefaces.event.FlowEvent;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
 
 /**
  * Controller to add a Config convert the Configuration to a Properties Object
@@ -321,6 +328,17 @@ public class ExecutionController implements Serializable {
 		if("org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest".equals(className)) {
 			createTask = new Stresstest();
 		}
+	}
+	
+	public StreamedContent save() throws ConfigurationException {
+		Configuration conf = ConfigConverter.createIguanConfig(connections, datasets, tasks);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PropertiesConfiguration saveConf = new PropertiesConfiguration();
+		saveConf.copy(conf);
+		saveConf.save(baos);
+		byte[] data = baos.toByteArray();
+		InputStream stream = new ByteArrayInputStream(data);
+		return new DefaultStreamedContent(stream, "text/plain", "iguana.suite");
 	}
 
 }

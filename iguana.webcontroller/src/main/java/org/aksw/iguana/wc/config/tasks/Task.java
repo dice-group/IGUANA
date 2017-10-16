@@ -1,5 +1,7 @@
 package org.aksw.iguana.wc.config.tasks;
 
+import org.apache.commons.configuration.Configuration;
+
 /**
  * The basic Task config
  * 
@@ -26,5 +28,7 @@ public interface Task {
 	 * @return
 	 */
 	public Object[] getConstructorArgs();
+
+	public Configuration getSubConfiguration(String taskID);
 	
 }

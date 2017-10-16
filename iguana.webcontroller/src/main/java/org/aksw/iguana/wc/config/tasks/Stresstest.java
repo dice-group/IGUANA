@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.aksw.iguana.wc.config.tasks.worker.SPARQLWorkerConfig;
 import org.aksw.iguana.wc.config.tasks.worker.UPDATEWorkerConfig;
+import org.apache.commons.configuration.CompositeConfiguration;
+import org.apache.commons.configuration.Configuration;
 
 /**
  * The web config for the stresstest
@@ -317,6 +319,50 @@ public class Stresstest extends AbstractTask {
 	 */
 	public void setUpdateStrategy(List<String> updateStrategy) {
 		this.updateStrategy = updateStrategy;
+	}
+
+	@Override
+	public Configuration getSubConfiguration(String taskID) {
+		Configuration conf = new CompositeConfiguration();
+		
+		List<String> workersConstr = new LinkedList<String>();
+		int i=0;
+		for(SPARQLWorkerConfig config : sparqlWorkers) {
+			workersConstr.add("sparql"+i);
+			conf.addProperty("sparql"+i, config.asConstructorArgs());
+			i++;
+		}
+		i=0;
+		for(UPDATEWorkerConfig config : updateWorkers) {
+			workersConstr.add("update"+i);
+			conf.addProperty("update"+i, config.asConstructorArgs());
+			i++;
+		}
+		
+		
+		String[] constructor = new String[7] ;
+		if(type) {
+			conf.addProperty(taskID+"x.timeLimit",  typeValue);
+			constructor[0] = taskID+"x.timeLimit";
+		}
+		else{
+			conf.addProperty(taskID+"x.noOfQueryMixes",  typeValue);
+			constructor[1] = taskID+"x.noOfQueryMixes";
+		}
+		conf.addProperty(taskID+"x.queryHandler", new String[] {qhClassName});
+		constructor[2] = taskID+"x.queryHandler";
+		conf.addProperty(taskID+"x.workers", workersConstr.toArray());
+		constructor[3] = taskID+"x.workers";
+		conf.addProperty(taskID+"x.warmupTime", warmupTime);
+		constructor[4] = taskID+"x.warmupTime";
+		conf.addProperty(taskID+"x.warmupQueries", warmupQueries);
+		constructor[5] = taskID+"x.warmupQueries";
+		conf.addProperty(taskID+"x.warmupUpdates", warmupUpdates);
+		constructor[6] = taskID+"x.warmupUpdates";
+		
+		
+		conf.addProperty(taskID+".constructorArgs", constructor);
+		return conf;
 	}
 
 }

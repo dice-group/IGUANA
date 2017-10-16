@@ -23,6 +23,8 @@ public abstract class AbstractTask implements Task {
 
 	private ISender sender;
 	protected String taskID;
+	protected String service;
+	protected String updateService;
 
 	/**
 	 * Properties to add task specific metaData before start and execute which then
@@ -40,9 +42,13 @@ public abstract class AbstractTask implements Task {
 	 * 			  the IDs for the meta data
 	 * @param taskID
 	 *            the TaskID of the Task
+	 * @param service 
+	 * @param updateService 
 	 */
-	public AbstractTask(String[] ids, String taskID) {
+	public AbstractTask(String[] ids, String taskID, String service, String updateService) {
 		this.taskID = taskID;
+		this.service = service;
+		this.updateService = updateService==null?service:updateService;
 		setIDs(ids);
 		
 	}

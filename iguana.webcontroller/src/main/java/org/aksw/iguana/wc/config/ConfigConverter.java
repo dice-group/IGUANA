@@ -27,7 +27,7 @@ public class ConfigConverter {
 	public static Configuration createIguanConfig(List<Connection> connections, List<Dataset> datasets,
 			List<Task> tasks) {
 		//Create Config Object
-		Configuration conf = new CompositeConfiguration();
+		CompositeConfiguration conf = new CompositeConfiguration();
 
 		int index = 0;
 		List<String> objects = new LinkedList<String>();
@@ -57,8 +57,10 @@ public class ConfigConverter {
 			//set name of dataset 
 			conf.addProperty(datasetID + ".name", dataset.getName());
 			//set DataGenerator class name and constructor arguments
-			conf.addProperty(datasetID + ".dg.class", dataset.getDatasetGeneratorClassName());
-			conf.addProperty(datasetID + ".constructorArgs", dataset.getConstructorArgs());
+			if(dataset.getDatasetGeneratorClassName()!=null&&!dataset.getDatasetGeneratorClassName().isEmpty()) {
+				conf.addProperty(datasetID + ".dg.class", dataset.getDatasetGeneratorClassName());
+				conf.addProperty(datasetID + ".constructorArgs", dataset.getConstructorArgs());
+			}
 			objects.add(datasetID);
 			index++;
 		}
@@ -74,7 +76,7 @@ public class ConfigConverter {
 			//set class name of task
 			conf.addProperty(taskID + ".class", task.getClassName());
 			//set constructor arguments of class 
-			conf.addProperty(taskID + ".constructorArgs", task.getConstructorArgs());
+			conf.addConfiguration(task.getSubConfiguration(taskID));
 			objects.add(taskID);
 			index++;
 		}

@@ -6,7 +6,7 @@ package org.aksw.iguana.wc.config.tasks;
  * @author f.conrads
  *
  */
-public class AbstractTask implements Task {
+public abstract class AbstractTask implements Task {
 
 	protected String className;
 	protected Object[] constructorArgs;

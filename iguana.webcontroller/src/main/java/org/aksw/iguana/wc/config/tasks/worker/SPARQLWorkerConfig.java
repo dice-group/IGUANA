@@ -83,8 +83,8 @@ public class SPARQLWorkerConfig {
 		constructorArgs[1]="org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker";
 		constructorArgs[2]=timeOutMS+"";
 		constructorArgs[3]=queriesFileName;
-		constructorArgs[4]=fixedLatency==null?null:fixedLatency.toString();
-		constructorArgs[5]=gaussianLatency==null?null:gaussianLatency.toString();
+		constructorArgs[4]=fixedLatency==null?"0":fixedLatency.toString();
+		constructorArgs[5]=gaussianLatency==null?"0":gaussianLatency.toString();
 		return constructorArgs;
 	}
 	

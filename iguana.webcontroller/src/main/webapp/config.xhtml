@@ -132,7 +132,7 @@
 												itemLabel="#{task[0]}" itemValue="#{task[1]}"
 												style="width:150;" />
 											<p:ajax update="@form"
-												listener="#{executionController.initTask()}" process="@this" />
+												listener="#{executionController.initTask()}" process="@form" />
 										</p:selectOneMenu>
 
 										<c:if
@@ -173,7 +173,7 @@
 
 											<p:outputLabel value="No. of SPARQL Configurations:" />
 											<p:spinner value="#{executionController.createTask.sparqls}">
-												<p:ajax update="@form" process="@this" />
+												<p:ajax update="@form" process="@form" />
 											</p:spinner>
 											<c:if test="#{executionController.createTask.sparqls>0}">
 
@@ -184,8 +184,8 @@
 													scrollWidth="50%" scrollHeight="150"
 													value="#{executionController.createTask.sparqlWorkers}"
 													var="config">
-													<p:column  headerText="No of Workers">
-														<p:spinner  value="#{config.workers}" />
+													<p:column headerText="No of Workers">
+														<p:spinner value="#{config.workers}" />
 													</p:column>
 													<p:column headerText="Time Out (ms)">
 														<p:spinner value="#{config.timeOutMS}" />
@@ -201,7 +201,6 @@
 													</p:column>
 												</p:dataTable>
 											</c:if>
-
 											<p:spacer height="25" />
 											<p:spacer />
 											<p:separator />
@@ -211,7 +210,7 @@
 
 											<p:outputLabel value="No. of Update Configurations:" />
 											<p:spinner value="#{executionController.createTask.updates}">
-												<p:ajax update="@form" process="@this" />
+												<p:ajax update="@form" process="@form" />
 											</p:spinner>
 											<c:if test="#{executionController.createTask.updates>0}">
 												<p:outputLabel value="Configurations: " />
@@ -222,7 +221,7 @@
 													value="#{executionController.createTask.updateWorkers}"
 													var="config">
 													<p:column headerText="No of Workers">
-														<p:spinner  value="#{config.workers}" />
+														<p:spinner value="#{config.workers}" />
 													</p:column>
 													<p:column headerText="Time Out (ms)">
 														<p:spinner value="#{config.timeOutMS}" />
@@ -355,7 +354,11 @@
 										</p:repeat>
 									</h:panelGrid>
 								</h:panelGrid>
-
+								<p:commandButton value="Download" ajax="false"
+									onclick="PrimeFaces.monitorDownload(start, stop);"
+									icon="ui-icon-disk">
+									<p:fileDownload value="#{executionController.save()}" />
+								</p:commandButton>
 								<p:commandButton value="Submit"
 									actionListener="#{executionController.execute()}"
 									process="@this" update="growl" />

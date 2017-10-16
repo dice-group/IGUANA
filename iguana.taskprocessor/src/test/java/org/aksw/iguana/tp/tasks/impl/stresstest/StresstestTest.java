@@ -14,6 +14,8 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.exceptions.IguanaException;
 import org.aksw.iguana.tp.utils.StresstestServerMock;
 import org.aksw.iguana.tp.utils.TestConsumer;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -77,12 +79,12 @@ public class StresstestTest {
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" },
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
-										 "1", "src/test/resources/worker/sparql.sparql", "0", "0" , null, null} } });
+										 "1", "src/test/resources/worker/sparql.sparql", "0", "0" , "NONE", "NONE"} } });
 		testConfigs.add(
 				new Object[] { "test", host, host, null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
-										"1", "src/test/resources/worker/sparql.sparql", "0", "0" , null, null} } });
+										"1", "src/test/resources/worker/sparql.sparql", "0", "0" , "NONE", "NONE"} } });
 		return testConfigs;
 	}
 
@@ -158,7 +160,7 @@ public class StresstestTest {
 	@Test
 	public void test() throws IguanaException, InterruptedException, IOException, TimeoutException {
 		// create Stresstest
-		Stresstest task = new Stresstest(new String[] {"1","1/1","dataset1", "con1"}, taskID, service, updateService, timeLimit, noOfQueryMixes, workerConfigurations, queryHandler, null, null, null);
+		Stresstest task = new Stresstest(new String[] {"1","1/1","dataset1", "con1"}, taskID, service, updateService, getConfig(timeLimit, noOfQueryMixes, workerConfigurations, queryHandler));
 		// start Stresstest
 		task.init("localhost", COMMON.CORE2RP_QUEUE_NAME);
 		task.start();
@@ -172,4 +174,19 @@ public class StresstestTest {
 		assertEquals(-1, consumer.getTime());
 	}
 
+	private Configuration getConfig(Long timeLimit, Long noOfQueryMixes, Object[][] workerConfigurations, String[] queryHandler) {
+		Configuration ret = new PropertiesConfiguration();
+		ret.addProperty("t.timeLimit", timeLimit);
+		ret.addProperty("t.noOfQueryMixes", noOfQueryMixes);
+		ret.addProperty("t.queryHandler", queryHandler);
+		int i=0;
+		String[] workers = new String[workerConfigurations.length];
+		for(Object[] workerConfig : workerConfigurations) {
+			ret.addProperty("worker"+i, workerConfig);
+			workers[i] = "worker"+i++;
+		}
+		ret.addProperty("workers", workers);
+		return ret;
+	}
+	
 }

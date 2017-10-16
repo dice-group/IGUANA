@@ -55,7 +55,10 @@ public class DefaultConsumer extends AbstractConsumer{
 	@Override
 	public void consume(byte[] data) {
 		Properties p = RabbitMQUtils.getObject(data);
-
+		consume(p);
+	}
+		
+	public void consume(Properties p) {
 		String dgClassName=p.getProperty(COMMON.DATAGEN_CLASS_NAME);
 		Object[] dgConstructorArgs=(Object[]) p.get(COMMON.DATAGEN_CONSTRUCTOR_ARGS);
 		Class<?>[] dgConstructorClasses=null;
