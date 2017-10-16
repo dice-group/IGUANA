@@ -125,8 +125,6 @@ public class COMMON {
 
 	public static final String LOADER_CONSTRUCTOR_ARGS_CLASSES = "loader.constructorClasses";
 
-	public static final String WC2MC_QUEUE = "wc2mc";
-
 	public static final String CONFIG_TASKS = "iguana.cc.tasks";
 
 	public static final String CONFIG_CONNECTIONS = "iguana.cc.connections";
@@ -134,6 +132,8 @@ public class COMMON {
 	public static final String CONFIG_DATASETS = "iguana.cc.datasets";
 
 	public static final String RP2SENDER_QUEUENAME = "rp2senderQueue";
+
+	public static final String CONFIG2MC_QUEUE_NAME = "config2mc";
 	
 
 	

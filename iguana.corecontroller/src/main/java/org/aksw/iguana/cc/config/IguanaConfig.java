@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.config;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,10 +8,12 @@ import java.util.Properties;
 
 import org.aksw.iguana.cc.constants.CONSTANTS;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.commons.script.ScriptExecutor;
 import org.aksw.iguana.dg.controller.DataGeneratorController;
 import org.aksw.iguana.tp.controller.TaskController;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.exec.ExecuteException;
 
 /**
  * Gets the {@link org.apache.commons.configuration.Configuration} component and will generate
@@ -48,8 +51,10 @@ public class IguanaConfig {
 
 	/**
 	 * starts the config
+	 * @throws IOException 
+	 * @throws ExecuteException 
 	 */
-	public void start() {
+	public void start() throws ExecuteException, IOException {
 		TaskController controller = new TaskController();
 		DataGeneratorController dataController = new DataGeneratorController();
 		//get SuiteID
@@ -106,7 +111,12 @@ public class IguanaConfig {
 					taskProperties.put(COMMON.CONSTRUCTOR_ARGS, constructor);
 					taskProperties.put(COMMON.CONSTRUCTOR_ARGS_CLASSES, classes);
 					//start TP
+					String[] args = new String[] {datasetID, conID, taskID+""};
+					if(config.containsKey(CONSTANTS.PRE_SCRIPT_HOOK))
+						ScriptExecutor.exec(config.getString(CONSTANTS.PRE_SCRIPT_HOOK), args);
 					controller.startTask(taskProperties);
+					if(config.containsKey(CONSTANTS.POST_SCRIPT_HOOK))
+						ScriptExecutor.exec(config.getString(CONSTANTS.POST_SCRIPT_HOOK), args);
 				}
 			}
 		}

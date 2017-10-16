@@ -67,7 +67,7 @@ public class ExecutionController implements Serializable {
 	@PostConstruct
 	public void init() {
 		Configuration conf = Config.getInstance();
-		this.sender.init(conf.getString(COMMON.CONSUMER_HOST_KEY), COMMON.WC2MC_QUEUE);
+		this.sender.init(conf.getString(COMMON.CONSUMER_HOST_KEY), COMMON.CONFIG2MC_QUEUE_NAME);
 	}
 
 
@@ -330,6 +330,12 @@ public class ExecutionController implements Serializable {
 		}
 	}
 	
+	/**
+	 * Will save the config as file
+	 * 
+	 * @return
+	 * @throws ConfigurationException
+	 */
 	public StreamedContent save() throws ConfigurationException {
 		Configuration conf = ConfigConverter.createIguanConfig(connections, datasets, tasks);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -3,6 +3,7 @@
  */
 package org.aksw.iguana.cc.config;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,7 +38,12 @@ public class ConfigManager implements Runnable {
 			//pop the earliest config 
 			IguanaConfig config = configs.remove(0);
 			//start the config
-			config.start();
+			try {
+				config.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
