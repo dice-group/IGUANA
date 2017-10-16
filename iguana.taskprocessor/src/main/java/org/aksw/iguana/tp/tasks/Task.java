@@ -66,6 +66,7 @@ public interface Task {
 	 * <ol>
 	 *  <li> suiteID</li>
 	 * <li> expID</li>
+	 * <li> taskID</li>
 	 * <li> datasetID</li>
 	 * <li> conID</li>
 	 * </ol>

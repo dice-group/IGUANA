@@ -99,11 +99,8 @@ public class IguanaConfig {
 					List<Object> classes = new LinkedList<Object>();
 					constructor.add(ids);
 					classes.add(String[].class);
-					constructor.add(taskID);
-					classes.add(String.class);
-					constructor.add(service);
-					classes.add(String.class);
-					constructor.add(updateService);
+					constructor.add(new String[] {service, updateService});
+					classes.add(String[].class);
 					classes.add(String.class);
 					constructor.add(createTaskConfig(config, taskIDV));
 					classes.add(Configuration.class);

@@ -160,7 +160,7 @@ public class StresstestTest {
 	@Test
 	public void test() throws IguanaException, InterruptedException, IOException, TimeoutException {
 		// create Stresstest
-		Stresstest task = new Stresstest(new String[] {"1","1/1","dataset1", "con1"}, taskID, service, updateService, getConfig(timeLimit, noOfQueryMixes, workerConfigurations, queryHandler));
+		Stresstest task = new Stresstest(new String[] {"1","1/1",taskID,"dataset1", "con1"}, new String[] {service, updateService}, getConfig(timeLimit, noOfQueryMixes, workerConfigurations, queryHandler)) ;
 		// start Stresstest
 		task.init("localhost", COMMON.CORE2RP_QUEUE_NAME);
 		task.start();

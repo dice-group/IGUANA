@@ -66,13 +66,12 @@ public class Stresstest extends AbstractTask {
 	/**
 	 * @param ids
 	 * @param taskID
-	 * @param service
-	 * @param updateService
+	 * @param services
 	 * @param taskConfig
 	 */
-	public Stresstest(String[] ids, String taskID, String service, String updateService, Configuration taskConfig) {
+	public Stresstest(String[] ids, String[] services, Configuration taskConfig) {
 		
-		super(ids, taskID, service, updateService);
+		super(ids, services);
 		this.timeLimit = ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit");
 		this.noOfQueryMixes = ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes");
 		

@@ -40,15 +40,11 @@ public abstract class AbstractTask implements Task {
 	 * Creates an AbstractTask with the TaskID
 	 * @param ids 
 	 * 			  the IDs for the meta data
-	 * @param taskID
-	 *            the TaskID of the Task
-	 * @param service 
-	 * @param updateService 
+	 * @param services
 	 */
-	public AbstractTask(String[] ids, String taskID, String service, String updateService) {
-		this.taskID = taskID;
-		this.service = service;
-		this.updateService = updateService==null?service:updateService;
+	public AbstractTask(String[] ids, String[] services) {
+		this.service = services[0];
+		this.updateService = services[1]==null?service:services[1];
 		setIDs(ids);
 		
 	}
@@ -57,8 +53,9 @@ public abstract class AbstractTask implements Task {
 	public void setIDs(String[] ids) {
 		this.suiteID=ids[0];
 		this.expID=ids[1];
-		this.datasetID=ids[2];
-		this.conID=ids[3];
+		this.taskID=ids[2];
+		this.datasetID=ids[3];
+		this.conID=ids[4];
 	}
 
 	/*
