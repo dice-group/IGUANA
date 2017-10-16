@@ -14,8 +14,8 @@ public class TestConsumer extends AbstractConsumer {
 
 	
 	private String taskID;
-	private boolean success;
-	private long time;
+	private boolean success=false;
+	private long time=-1;
 	
 
 	@Override

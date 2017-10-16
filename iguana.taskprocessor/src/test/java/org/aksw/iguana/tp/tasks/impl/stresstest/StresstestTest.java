@@ -57,31 +57,31 @@ public class StresstestTest {
 	public static Collection<Object[]> data() {
 		List<Object[]> testConfigs = new ArrayList<Object[]>();
 
-		testConfigs.add(new Object[] { "test", host, host, 5000L, null,
+		testConfigs.add(new Object[] { "test", host, host, 5L, null,
 				new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 				new Object[][] {
 						new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 								"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 
 		testConfigs.add(
-				new Object[] { "test", host, host, null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host, null, 5L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 		testConfigs.add(
-				new Object[] { "test", host, host,null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host,null, 5L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" } } });
 		testConfigs.add(
-				new Object[] { "test", host, host,null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host,null, 5L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" },
 								new Object[] { "2", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
 										 "1", "src/test/resources/worker/sparql.sparql", "0", "0" , "NONE", "NONE"} } });
 		testConfigs.add(
-				new Object[] { "test", host, host, null, 5000L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
+				new Object[] { "test", host, host, null, 5L, new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" },
 						new Object[][] {
 								new Object[] { "1", "org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker",
 										"1", "src/test/resources/worker/sparql.sparql", "0", "0" , "NONE", "NONE"} } });
@@ -168,7 +168,7 @@ public class StresstestTest {
 		TestConsumer consumer = new TestConsumer();
 		consumer.init("localhost", COMMON.CORE2RP_QUEUE_NAME);
 		//wait so the consumer can receive the properties
-		Thread.sleep(5000);
+		Thread.sleep(10000);
 		assertEquals(taskID, consumer.getTaskID());
 		assertFalse(consumer.isSuccess());
 		assertEquals(-1, consumer.getTime());

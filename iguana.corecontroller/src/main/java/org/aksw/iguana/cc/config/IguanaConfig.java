@@ -83,7 +83,7 @@ public class IguanaConfig {
 				String conID=config.getString(conIDV+CONSTANTS.NAME_SUFFIX);
 				//get service and updateService!
 				String service=config.getString(conIDV+CONSTANTS.SERVICE_SUFFIX);
-				String updateService=config.getString(conIDV+CONSTANTS.UPDATE_SERVICE_SUFFIX);;
+				String updateService=config.getString(conIDV+CONSTANTS.UPDATE_SERVICE_SUFFIX);
 				for(String taskIDV : tasksIDV) {
 					taskID++;
 					Properties taskProperties = new Properties();

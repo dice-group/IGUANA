@@ -172,12 +172,13 @@ public abstract class AbstractWorker implements Worker {
 			//Simulate Network Delay (or whatever should be simulated)
 			waitTimeMs();
 			//benchmark query
-			long time=-1;
+			Long time=-1L;
 			try {
 				time = getTimeForQueryMs(query.toString(), queryID.toString());
 			}
 			catch(Exception e) {
 				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID, query.toString());
+				time = -1L;
 			}
 			this.executedQueries++;
 			//If endSignal was send during execution it should not be counted anymore.

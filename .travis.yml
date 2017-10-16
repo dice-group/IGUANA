@@ -37,4 +37,4 @@ script:
  - mvn clean package install -Dmaven.javadoc.skip=true
  - cd ..
  - cd iguana.corecontroller 
- - mvn clean package -Dmaven.javadoc.skip=true -B
+ - mvn clean package -Dmaven.javadoc.skip=true

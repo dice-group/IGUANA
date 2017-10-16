@@ -74,7 +74,7 @@ public class Stresstest extends AbstractTask {
 		
 		super(ids, taskID, service, updateService);
 		this.timeLimit = ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit");
-		this.noOfQueryMixes = ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes");;
+		this.noOfQueryMixes = ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes");
 		
 		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
 		this.qhClassName = tmp[0];
@@ -91,7 +91,7 @@ public class Stresstest extends AbstractTask {
 		
 		for (String configKey : workerConfigs) {
 			String[] workerConfig = taskConfig.getStringArray(configKey);
-			int workers = Integer.parseInt(workerConfig[0].toString());
+			int workers = Integer.parseInt(workerConfig[0]);
 			noOfWorkers+=workers;
 			for (int j = 0; j < workers; j++) {
 				// set taskID, workerID, workerConfig
@@ -114,10 +114,10 @@ public class Stresstest extends AbstractTask {
 						config[i+2] = null;
 					}
 					else {
-						config[i + 2] = workerConfig[i].toString();
+						config[i + 2] = workerConfig[i];
 					}
 				}
-				this.workers.add(factory.create(workerConfig[1].toString(), config));
+				this.workers.add(factory.create(workerConfig[1], config));
 			}
 		}
 		addMetaData();
