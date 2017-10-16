@@ -159,29 +159,9 @@ public class SparqlController implements Serializable {
 		results = new LinkedList<List<String>>();
 		header = new LinkedList<String>();
 		if (query.isSelectType()) {
-			ResultSet res = exec.execSelect();
-			header = res.getResultVars();
-			results = new LinkedList<List<String>>();
-			while (res.hasNext()) {
-				List<String> row = new LinkedList<String>();
-				QuerySolution solution = res.next();
-				for (String var : header) {
-					RDFNode node = solution.get(var);
-					if(node.isResource()) {
-						row.add("<"+node.toString()+">");
-					}
-					else {
-						row.add(node.asNode().toString(true));
-					}
-				}
-				results.add(row);
-			}
-			isCD=false;
-			isSelect = true;
+			execSelect(exec);
 		} else if (query.isAskType()) {
-			resultAsText = exec.execAsk() + "";
-			isSelect = false;
-			isCD=false;
+			execAsk(exec);
 		} else if (query.isDescribeType() || query.isConstructType()) {
 			try {
 				if(query.isDescribeType()) 
@@ -192,33 +172,70 @@ public class SparqlController implements Serializable {
 				FacesContext.getCurrentInstance().addMessage(null,
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error!", ""));
 			}
-			if (m == null) {
-				isSelect = false;
-				resultAsText = "No Results!";
-				return;
-			}
-			isSelect = false;
-			isCD = true;
-			header.add("s");
-			header.add("p");
-			header.add("o");
-			for (Statement stmt : m.listStatements().toList()) {
-				Triple triple = stmt.asTriple();
-				List<String> row = new LinkedList<String>();
-				
-				row.add("<"+triple.getSubject().toString(true)+">");
-				row.add("<"+triple.getPredicate().toString(true)+">");
-				Node node = triple.getObject();
+			execModel();
+		}
+	}
+
+	private void execModel() {
 		
-				if(node.isURI()) {
+		if (m == null) {
+			isSelect = false;
+			resultAsText = "No Results!";
+			return;
+		}
+		isSelect = false;
+		isCD = true;
+		header.add("s");
+		header.add("p");
+		header.add("o");
+		for (Statement stmt : m.listStatements().toList()) {
+			addStmtToResults(stmt);
+		}
+	}
+	
+	private void addStmtToResults(Statement stmt) {
+		Triple triple = stmt.asTriple();
+		List<String> row = new LinkedList<String>();
+		
+		row.add("<"+triple.getSubject().toString(true)+">");
+		row.add("<"+triple.getPredicate().toString(true)+">");
+		Node node = triple.getObject();
+
+		if(node.isURI()) {
+			row.add("<"+node.toString()+">");
+		}
+		else {
+			row.add(node.toString(true));
+		}
+		results.add(row);
+	}
+
+	private void execSelect(QueryExecution exec) {
+		ResultSet res = exec.execSelect();
+		header = res.getResultVars();
+		results = new LinkedList<List<String>>();
+		while (res.hasNext()) {
+			List<String> row = new LinkedList<String>();
+			QuerySolution solution = res.next();
+			for (String var : header) {
+				RDFNode node = solution.get(var);
+				if(node.isResource()) {
 					row.add("<"+node.toString()+">");
 				}
 				else {
-					row.add(node.toString(true));
+					row.add(node.asNode().toString(true));
 				}
-				results.add(row);
 			}
+			results.add(row);
 		}
+		isCD=false;
+		isSelect = true;
+	}
+
+	private void execAsk(QueryExecution exec) {
+		resultAsText = exec.execAsk() + "";
+		isSelect = false;
+		isCD=false;
 	}
 
 	/**
