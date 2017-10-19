@@ -1,0 +1,183 @@
+CONTENTS OF THIS FILE
+---------------------
+
+* Introduction
+* Requirements
+* Installation
+* Configuration
+* Links
+
+
+INTRODUCTION
+------------
+
+The Result Processing module of Iguana will be used 
+to save and calculate Metrics into several Storage Solutions.
+
+The provided Metrics are
+
+* Queries Per Second (QPS)
+* Query Mixes Per Hour (QMPH)
+* Number of Queries Per Hour (NoQPH)
+* Each Query Execution Time (EQE)
+
+The provided Storage Solutions are
+
+* Triple Store
+* NTriple File
+* File/Directory Structure
+
+For a full description, please visit the wiki
+
+Bugs can be submitted at https://github.com/AKSW/IGUANA/issues
+Please refer to the Module as following "[RP] your message"
+
+
+REQUIREMENTS
+------------
+
+Depending on your Installation you need either
+
+* Docker (http://docker.com)
+
+or
+
+* an unzip program of your choice
+* JRE 1.8 (http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
+
+or
+
+* git (https://git-scm.com/)
+* JDK 1.8 (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* Maven (https://maven.apache.org/)
+
+
+For communication with the Iguana Core and WebController Module you need to
+setup a rabbitMQ Server (www.rabbitmq.com/):
+
+For Ubuntu
+
+	user@host:~$ sudo apt-get install rabbitmq-server
+
+
+INSTALLATION
+------------
+
+There are 2 different options to install the Iguana ResultProcessing Module
+
+1. Docker
+
+   The Docker Container, has an integrated Blazegraph triple store to
+   save the results in. 
+   The Metrics which will be saved are the following (QPS, QMPH, EQE, NoQPH)
+   The triple store can be reached by http://localhost:9999/blazegraph/
+
+   Pull the Docker Image
+
+	user@host:~$ docker pull iguana/resultprocessor
+
+   Assuming your rabbitMQ Server runs on localhost
+
+	user@host:~$ docker run --net=host -d -e RABBIT_HOST=localhost iguana/resultprocessor:latest
+
+   or using the live mode
+ 
+	user@host:~$ docker run --net=host -d -e RABBIT_HOST=localhost iguana/resultprocessor:live
+
+2. Pull the git repository and build it yourself
+
+    Pull the repo
+	
+	user@host:~$ git pull https://github.com/AKSW/IGUANA.git
+
+	user@host:~$ cd IGUANA
+
+    Build the Module with Maven
+
+	user@host:~$ mvn clean package -DskipTests
+
+    Start the Module
+
+        user@host:~$ java -cp "target/lib/*" org.aksw.iguana.rp.controller.MainController iguana.properties
+
+    You can change the configuration in the iguana.properties file
+
+
+
+CONFIGURATION
+-------------
+
+You can set the rabbitMQ Host name, the metrics which should be calculated and saved
+as well as how and where to save the results
+
+Further on if you want to use the live viewing option of the web controller you have to add
+    
+    iguana.rp.useLive=true 
+
+to define which metrics should be used simply add the following line
+to your properites
+
+    iguana.rp.metrics=metric1, metric2, ...
+
+To define metric1, metric2 and so on simply add the following line
+
+    metric1.class=org.aksw.iguana.rp.metrics.impl.QMPHMetric
+
+
+The following classes refer to the following Metrics
+
+* QPS:	 org.aksw.iguana.rp.metrics.impl.QPSMetric
+  
+* QMPH:	 org.aksw.iguana.rp.metrics.impl.QMPHMetric  
+
+* NoQPH: org.aksw.iguana.rp.metrics.impl.NoQPHMetric
+
+* EQE:	 org.aksw.iguana.rp.metrics.impl.EachQueryMetric
+
+
+To define the storages which should be used, add the following line
+to your properties
+
+    iguana.rp.storages=storage1, storage2,...
+
+To define the Storage please add the following
+
+    storage1.class=org.aksw.iguana.rp.storage.impl.TriplestoreStorage
+    storage1.constructorArgs=http://localhost:9999/blazegraph/sparql, http://localhost:9999/blazegraph/sparql
+
+
+The following Classes refer to the following Storages
+
+* TriplestoreStorage:	org.aksw.iguana.rp.storage.impl.TriplestoreStorage
+	(You have to at least specify the endpoint and updateEndpoint of the triple store in the constructor arguments)
+
+* FileStorage:		org.aksw.iguana.rp.storage.impl.FileStorage
+	(optional: you can define the root directory of the stored CSV files)
+
+* NTFileStorage:	org.aksw.iguana.rp.storage.impl.NTFileStorage
+	(optional: you can specify the Ntriple file name)
+
+For Further Information to the constructor Arguments, 
+visit the JavaDoc: http://iguana-benchmark.eu/javadoc/index.html
+
+
+
+To define the rabbitMQ Host please add the following to the properties
+
+    iguana.consumer.host=localhost
+
+
+
+All three (iguana.rp.consumer, iguana.rp.metrics, iguana.rp.storages) 
+have to be stated in the properties file somehow.
+
+	
+
+LINKS
+-----
+
+* Project Site:	http://iguana-benchmark.eu
+
+* Github Site:	http://github.com/AKSW/IGUANA
+
+* Bug Tracker:	http://github.com/AKSW/IGUANA/issues

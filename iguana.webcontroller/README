@@ -1,0 +1,116 @@
+CONTENTS OF THIS FILE
+---------------------
+
+* Introduction
+* Requirements
+* Installation
+* Configuration
+* Links
+
+
+INTRODUCTION
+------------
+
+The Web Controlling module of Iguana will be used to provide
+a web frontend for the end user. It will provide a wizard to create an iguana configuration,
+a sparql result view (which can create bar and line charts out of results) and 
+a live view of current executed tasks
+
+
+For a full description, visit the github wiki
+
+Bugs can be submitted at https://github.com/AKSW/IGUANA/issues
+Please refer to the Module as following "[RP] your message"
+
+
+REQUIREMENTS
+------------
+
+Depending on your Installation you need either
+
+* Docker (http://docker.com)
+
+or
+
+* git (https://git-scm.com/)
+* JDK 1.8 (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* Maven (https://maven.apache.org/)
+* JBoss Wildfly AS
+
+
+For communication with the Iguana Core and WebController Module you need to
+setup a rabbitMQ Server (www.rabbitmq.com/):
+
+For Ubuntu
+
+	user@host:~$ sudo apt-get install rabbitmq-server
+
+
+INSTALLATION
+------------
+
+There are 2 different options to install the Iguana ResultProcessing Module
+
+1. Docker
+
+   The Docker Container, has an integrated Blazegraph triple store to
+   save the results in. 
+   The Metrics which will be saved are the following (QPS, QMPH, EQE, NoQPH)
+   The triple store can be reached by http://localhost:9999/blazegraph/
+
+   Pull the Docker Image
+
+	user@host:~$ docker pull iguana/resultprocessor
+
+   Assuming your rabbitMQ Server runs on localhost
+
+	user@host:~$ docker run --net=host -d -e RABBIT_HOST=localhost iguana/webcontroller
+
+
+2. Pull the git repository and build it yourself
+
+    Pull the repo
+	
+	user@host:~$ git pull https://github.com/AKSW/IGUANA.git
+
+	user@host:~$ cd IGUANA
+
+    Build the Module with Maven
+
+	user@host:~$ mvn clean package -DskipTests
+
+    Start the Module
+
+        user@host:~$ mvn wildfly:deploy
+
+    You can change the configuration in the src/main/resources/iguana.properties file
+
+
+
+CONFIGURATION
+-------------
+
+You can set the rabbitMQ Host name and the templates with sparql queries to use
+
+to define a template go into the directory src/main/resources and open the templatse.properties file
+add a template with
+
+	iguana.sparql.templates.YOUR_TEMPLATE_NAME=YOUR SPARQL QUERY
+
+
+To define the rabbitMQ Host please add the following to the properties
+
+    iguana.consumer.host=localhost
+
+
+
+LINKS
+-----
+
+* Project Site:	http://iguana-benchmark.eu
+
+* Github Site:	http://github.com/AKSW/IGUANA
+
+* Bug Tracker:	http://github.com/AKSW/IGUANA/issues
+
+* Github Wiki: 	http://github.com/AKSW/IGUANA/wiki

@@ -1,0 +1,8 @@
+exclude:
+- /iguana.webcontroller/src/main/webapp/resources/js/.*
+component_depth: 1
+languages:
+- java
+- javascript
+- script
+

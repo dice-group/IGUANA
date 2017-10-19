@@ -1,0 +1,46 @@
+CONTENTS OF THIS FILE
+---------------------
+
+* Introduction
+* Requirements
+* Installation
+* Configuration
+* Links
+
+
+INTRODUCTION
+------------
+
+The Commons module of Iguana will be used 
+to serve as methods and utils which all or several modules of Iguana needs
+
+Bugs can be submitted at https://github.com/AKSW/IGUANA/issues
+Please refer to the Module as following "[Commons] your message"
+
+
+REQUIREMENTS
+------------
+
+The Commons is not a standalone module. 
+
+
+INSTALLATION
+------------
+
+The Commons is not a standalone module. 
+
+
+CONFIGURATION
+-------------
+
+The Commons is not a standalone module. 
+
+
+LINKS
+-----
+
+* Project Site:	http://iguana-benchmark.eu
+
+* Github Site:	http://github.com/AKSW/IGUANA
+
+* Bug Tracker:	http://github.com/AKSW/IGUANA/issues
