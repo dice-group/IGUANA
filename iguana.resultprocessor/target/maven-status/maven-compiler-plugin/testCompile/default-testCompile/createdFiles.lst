@@ -1,0 +1,11 @@
+org/aksw/iguana/rp/storage/impl/NTFileStorageTest.class
+org/aksw/iguana/rp/consumer/ConsumerTest$ExperimentManagerTest.class
+org/aksw/iguana/rp/utils/DefaultReturnConsumer.class
+org/aksw/iguana/rp/controller/MainControllerTest.class
+org/aksw/iguana/rp/utils/EqualityStorage.class
+org/aksw/iguana/rp/utils/ServerMock.class
+org/aksw/iguana/rp/storage/impl/PropertiesSenderStorageTest.class
+org/aksw/iguana/rp/storage/impl/TriplestoreStorageTest.class
+org/aksw/iguana/rp/storage/impl/FileStorageTest.class
+org/aksw/iguana/rp/consumer/ConsumerTest.class
+org/aksw/iguana/rp/metrics/impl/MetricTest.class

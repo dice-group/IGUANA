@@ -1,0 +1,11 @@
+org/aksw/iguana/dg/generator/DataGeneratorFactory.class
+org/aksw/iguana/dp/loader/LoaderManager.class
+org/aksw/iguana/dp/loader/impl/ScriptLoader.class
+org/aksw/iguana/dg/controller/DataGeneratorController.class
+org/aksw/iguana/dp/loader/LoaderFactory.class
+org/aksw/iguana/dg/consumer/impl/DefaultConsumer.class
+org/aksw/iguana/dg/generator/DataGenerator.class
+org/aksw/iguana/dg/generator/AbstractDataGenerator.class
+org/aksw/iguana/dp/loader/AbstractLoader.class
+org/aksw/iguana/dg/generator/DataManager.class
+org/aksw/iguana/dp/loader/Loader.class

@@ -1,0 +1,13 @@
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/utils/ServerMock.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/utils/TestConsumer.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/query/impl/PatternQueryHandlerTest.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/tasks/impl/stresstest/worker/impl/TestWorkerImpl.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/tasks/impl/stresstest/StresstestTest.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/tasks/impl/stresstest/worker/impl/UPDATEWorkerTest.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/tasks/impl/stresstest/worker/impl/AbstractWorkerTest.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/tasks/impl/stresstest/worker/impl/SPARQLWorkerTest.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/utils/FileUtilsTest.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/utils/StresstestServerMock.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/tasks/impl/stresstest/worker/impl/update/UpdateTimerTest.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/tasks/impl/stresstest/worker/impl/update/UpdateComparatorTest.java
+/home/minimal/work/git/IGUANA/iguana.taskprocessor/src/test/java/org/aksw/iguana/tp/query/impl/InstancesQueryHandlerTest.java

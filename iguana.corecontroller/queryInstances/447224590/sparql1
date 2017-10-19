@@ -1,0 +1,1 @@
+SELECT * {?s <http://dbpedia.org/ontology/budget> ?c} LIMIT 100

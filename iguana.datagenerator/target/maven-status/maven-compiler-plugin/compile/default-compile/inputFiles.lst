@@ -1,0 +1,11 @@
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dp/loader/LoaderFactory.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dg/consumer/impl/DefaultConsumer.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dg/generator/DataManager.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dp/loader/Loader.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dp/loader/LoaderManager.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dg/generator/DataGeneratorFactory.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dg/generator/DataGenerator.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dp/loader/AbstractLoader.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dp/loader/impl/ScriptLoader.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dg/generator/AbstractDataGenerator.java
+/home/minimal/work/git/IGUANA/iguana.datagenerator/src/main/java/org/aksw/iguana/dg/controller/DataGeneratorController.java

@@ -1,0 +1,14 @@
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/sparql/GraphController.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/tasks/Stresstest.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/Dataset.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/live/LiveController.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/tasks/Task.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/tasks/worker/UPDATEWorkerConfig.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/tasks/AbstractTask.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/live/SingularConsumer.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/sparql/SparqlController.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/ConfigConverter.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/exec/ExecutionController.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/tasks/TaskController.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/Connection.java
+/home/minimal/work/git/IGUANA/iguana.webcontroller/src/main/java/org/aksw/iguana/wc/config/tasks/worker/SPARQLWorkerConfig.java
