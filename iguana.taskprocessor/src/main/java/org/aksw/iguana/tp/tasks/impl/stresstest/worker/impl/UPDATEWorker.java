@@ -104,7 +104,7 @@ public class UPDATEWorker extends AbstractWorker {
 	}
 
 	@Override
-	public long getTimeForQueryMs(String query, String queryID) {
+	public Long getTimeForQueryMs(String query, String queryID) {
 		UpdateRequest update = UpdateFactory.create(query);
 
 		// Set update timeout

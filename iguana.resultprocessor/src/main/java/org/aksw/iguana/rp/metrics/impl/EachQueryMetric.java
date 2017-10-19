@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EachQueryMetric extends AbstractMetric {
 
-	private Map<String, Integer> queryRunMap = new HashMap<String, Integer>();
+	private Map<String, Long> queryRunMap = new HashMap<String, Long>();
 	
 	protected static Logger LOGGER = LoggerFactory
 			.getLogger(EachQueryMetric.class);
@@ -34,7 +34,7 @@ public class EachQueryMetric extends AbstractMetric {
 	 * 
 	 */
 	public EachQueryMetric() {
-		super("Each Query Exection", "EQE",
+		super("Each Query Execution", "EQE",
 				"Will calculate every query execution time.");
 	}
 
@@ -56,13 +56,13 @@ public class EachQueryMetric extends AbstractMetric {
 		
 		LOGGER.debug(this.getShortName() + " has received " + p);
 
-		Integer time = (Integer) p.get(COMMON.RECEIVE_DATA_TIME);
+		Long time = (long) p.get(COMMON.RECEIVE_DATA_TIME);
 		Boolean success = (Boolean) p.get(COMMON.RECEIVE_DATA_SUCCESS);
 		String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
 		
 		subject += "/"+queryID;
 
-		int run=1;
+		long run=1;
 		if(queryRunMap.containsKey(subject)){
 			run = queryRunMap.get(subject)+1;
 		}

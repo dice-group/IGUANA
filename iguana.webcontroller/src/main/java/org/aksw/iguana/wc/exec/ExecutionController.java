@@ -24,6 +24,7 @@ import org.aksw.iguana.wc.config.tasks.Stresstest;
 import org.aksw.iguana.wc.config.tasks.Task;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
+import org.aksw.iguana.commons.config.ConfigurationUtils;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.primefaces.event.FlowEvent;
 import org.primefaces.model.DefaultStreamedContent;
@@ -252,10 +253,17 @@ public class ExecutionController implements Serializable {
 	 * Send the generated config to the correct rabbitmq queue
 	 */
 	public void execute() {
-		Configuration conf = ConfigConverter.createIguanConfig(connections, datasets, tasks);
-		sender.send(RabbitMQUtils.getData(conf));
-
 		FacesContext context = FacesContext.getCurrentInstance();
+		Configuration conf = ConfigConverter.createIguanConfig(connections, datasets, tasks);
+		try {
+			sender.send(RabbitMQUtils.getData(ConfigurationUtils.convertConfiguration(conf)));
+		} catch (ConfigurationException e) {
+			context.addMessage(null,
+					new FacesMessage("Error", "Configuration could not send to Core."));
+
+		}
+
+		
 
 		context.addMessage(null,
 				new FacesMessage("Successful", "Configuration was send to Core and will be executed."));

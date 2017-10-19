@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.commons.numbers.NumberUtils;
 import org.aksw.iguana.tp.query.QueryHandler;
 import org.aksw.iguana.tp.query.QueryHandlerFactory;
 import org.aksw.iguana.tp.query.impl.InstancesQueryHandler;
@@ -57,10 +58,7 @@ public class Stresstest extends AbstractTask {
 
 	private Long warmupTimeMS;
 	private String warmupQueries;
-	private String warmupUpdates;
-
-	private String service;
-	
+	private String warmupUpdates;	
 	
 
 	/**
@@ -69,17 +67,22 @@ public class Stresstest extends AbstractTask {
 	 * @param services
 	 * @param taskConfig
 	 */
-	public Stresstest(String[] ids, String[] services, Configuration taskConfig) {
+	public Stresstest(String[] ids, String[] services) {
 		
 		super(ids, services);
-		this.timeLimit = ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit");
-		this.noOfQueryMixes = ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes");
+		
+	}
+	
+	@Override
+	public void setConfiguration(Configuration taskConfig) {
+		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit"));
+		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));
 		
 		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
 		this.qhClassName = tmp[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
 
-		this.warmupTimeMS = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupTimeMS");
+		this.warmupTimeMS = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "warmupTime"));
 		this.warmupQueries = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupQueries");
 		this.warmupUpdates = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupUpdates");
 		
@@ -107,6 +110,7 @@ public class Stresstest extends AbstractTask {
 				}
 				else {
 					config[3] = service;
+					
 				}
 				for (int i = 2; i < workerConfig.length; i++) {
 					if(workerConfig[i]==null) {
@@ -150,7 +154,6 @@ public class Stresstest extends AbstractTask {
 		// add Worker
 		QueryHandler queryHandler = factory.createWorkerBasedQueryHandler(qhClassName, qhConstructorArgs, workers);
 		queryHandler.generateQueries();
-
 	}
 
 	/*

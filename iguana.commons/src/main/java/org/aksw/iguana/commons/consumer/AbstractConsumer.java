@@ -31,6 +31,7 @@ public abstract class AbstractConsumer implements IConsumer {
 	protected String queueName;
 	protected String host;
 	protected DefaultConsumer consumer;
+
 	/**
 	 * Will initialize the rabbitMQ messaging from one module to another.
 	 * 

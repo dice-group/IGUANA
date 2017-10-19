@@ -21,9 +21,10 @@
 					label="Select Queries to show" filter="true"
 					filterMatchMode="startsWith" panelStyle="width:400px">
 					<f:selectItems value="#{liveController.queries}" />
+					<p:ajax update="@form" process="@form" />
 				</p:selectCheckboxMenu>
 				<p:poll listener="#{liveController.calculateModels}" interval="3"
-					update="@form" />
+					update="@form" process="@form"/>
 				<p:spacer />
 				<p:spacer width="20" />
 				<p:chart id="qps" type="bar" widgetVar="chart1"

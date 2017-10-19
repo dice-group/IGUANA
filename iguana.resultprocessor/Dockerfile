@@ -13,7 +13,6 @@ RUN mkdir Blazegraph
 #Blazegraph download and start 
 ADD http://downloads.sourceforge.net/project/bigdata/bigdata/2.1.1/blazegraph.jar?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fbigdata%2Ffiles%2Fbigdata%2F2.1.1%2F&ts=1482070026&use_mirror=netix ./Blazegraph/blazegraph.jar
 
-
 #download IguanaRP
 COPY ./ IguanaRP/
 

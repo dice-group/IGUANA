@@ -10,6 +10,7 @@ import org.aksw.iguana.commons.consumer.AbstractConsumer;
 import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
 import org.aksw.iguana.tp.tasks.TaskFactory;
 import org.aksw.iguana.tp.tasks.TaskManager;
+import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class DefaultConsumer extends AbstractConsumer{
 	
 	private TaskManager tmanager;
 
-	private Communicator parent;
+	protected Communicator parent;
 
 	/**
 	 * Will set a TaskManager to add and start tasks with as soon as a message arrives
@@ -56,21 +57,22 @@ public class DefaultConsumer extends AbstractConsumer{
 	 */
 	public void consume(Properties p) {
 		String className=p.getProperty(COMMON.CLASS_NAME);
-		Object[] constructorArgs=(Object[]) p.get(COMMON.CONSTRUCTOR_ARGS);
+		Object[] constructorArgs= (Object[]) p.get(COMMON.CONSTRUCTOR_ARGS);
 		Class<?>[] constructorClasses=null;
 		if(p.containsKey(COMMON.CONSTRUCTOR_ARGS_CLASSES)){
-			constructorClasses = (Class[]) p.get(COMMON.CONSTRUCTOR_ARGS_CLASSES);
+			constructorClasses = (Class<?>[]) p.get(COMMON.CONSTRUCTOR_ARGS_CLASSES);
 		}
-		
+		Configuration taskConfig = (Configuration) p.get("taskConfig");
 			
 		TaskFactory factory = new TaskFactory();
 		tmanager.setTask(factory.create(className, constructorArgs, constructorClasses));
 		try {
+			tmanager.setTaskConfiguration(taskConfig);
 			tmanager.startTask();
-			parent.send(RabbitMQUtils.getData(COMMON.TASK_FINISHED_MESSAGE));
+//			parent.send(RabbitMQUtils.getData(COMMON.TASK_FINISHED_MESSAGE));
 		} catch (IOException | TimeoutException e) {
 			LOGGER.error("Could not start Task "+className, e);
-			parent.send(RabbitMQUtils.getData(COMMON.TASK_FINISHED_MESSAGE));
+//			parent.send(RabbitMQUtils.getData(COMMON.TASK_FINISHED_MESSAGE));
 		}
 	}
 	

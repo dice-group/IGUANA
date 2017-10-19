@@ -5,30 +5,8 @@ MODULE="";
 CONFIG="";
 RABBIT="";
 
-if [ "-D" -eq "$1"]; then
-  USE_DOCKER=1;
-  MODULE=$2;
-  if [ -n "$4" ]; then
-    CONFIG=$3;
-    RABBIT=$4;
-  else
-    RABBIT=$3;
-  fi
-  docker 
-elif [ "$1" -eq "--help" ]; then
-  help     
-else
-  MODULE=$1;
-  if [ -n "$3" ]; then
-    CONFIG=$2;
-    RABBIT=$3;
-  else
-    RABBIT=$2;
-  fi
-  undocker
-fi
 
-help(){
+help2(){
       echo "Usage: $(basename $0) [-D] [-c|-rp|-rpl|-cc|-web] [configuration file] RABBIT_HOST"
       echo ""
       echo "OPTIONS:"
@@ -42,7 +20,7 @@ help(){
       echo "    RABBIT_HOST only needs to be set if docker option is used"
 }
 
-undocker(){
+undockerH(){
   case $MODULE in
     -c)
       cd iguana.resultprocessor && java -cp "target/lib/*" org.aksw.iguana.rp.controller.MainController $CONFIG &
@@ -61,12 +39,13 @@ undocker(){
   esac
 }
 
-docker(){
+
+dockerH(){
   case $MODULE in
     -c)
       docker network create iguana
       docker-compose up -d
-      cd iguana.corecontroller && java -cp "target/lib/*" org.aksw.iguana.cc.controller.MainController 
+      cd iguana.corecontroller && mvn clean package && java -cp "target/lib/*" org.aksw.iguana.cc.controller.MainController 
       ;;
     -rp)
       docker pull iguana/resultprocessor:latest
@@ -80,5 +59,31 @@ docker(){
       docker pull iguana/webcontroller:latest
       docker run --net=host -d -e RABBIT_HOST=$RABBIT -e IP=127.0.0.1 iguana/webcontroller:latest
       ;;
+    *) echo "Unknown Argument occured"
+      ;;
   esac
 }
+
+
+if [ "-D" == $1 ]; then
+  USE_DOCKER=1;
+  MODULE=$2;
+  if [ -n "$4" ]; then
+    CONFIG=$3;
+    RABBIT=$4;
+  else
+    RABBIT=$3;
+  fi
+  dockerH;
+elif [ $1 == "--help" ]; then
+  help2  
+else
+  MODULE=$1;
+  if [ -n "$3" ]; then
+    CONFIG=$2;
+    RABBIT=$3;
+  else
+    RABBIT=$2;
+  fi
+  undockerH
+fi

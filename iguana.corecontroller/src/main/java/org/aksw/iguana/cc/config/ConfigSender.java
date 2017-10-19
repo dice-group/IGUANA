@@ -1,12 +1,11 @@
 package org.aksw.iguana.cc.config;
 
+import org.aksw.iguana.commons.config.ConfigurationUtils;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
 import org.aksw.iguana.commons.sender.ISender;
 import org.aksw.iguana.commons.sender.impl.DefaultSender;
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 
 /**
  * This class will load a Configuration and send it to the correct RabbitMQ Queue
@@ -28,10 +27,11 @@ public class ConfigSender {
 			System.out.println("\tconfig-file: the Iguana Config (see org.apache.commons.configuration.Configuration for more details)");
 		}
 		else {
-			Configuration config = new PropertiesConfiguration(args[1]);
 			ISender sender = new DefaultSender();
 			sender.init(args[0], COMMON.CONFIG2MC_QUEUE_NAME);
-			sender.send(RabbitMQUtils.getData(config));
+			sender.send(RabbitMQUtils.getData(ConfigurationUtils.convertConfiguration(args[1])));
+			System.out.println("Finished");
+			sender.close();
 		}
 	}
 

@@ -111,7 +111,10 @@ public class ExperimentManager {
 	private void content(Properties p){
 		String taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
 		LOGGER.debug("Got content for experiment task ID: {} ", taskID);
-		experiments.get(taskID).receiveData(p);
+		if(experiments.containsKey(taskID))
+			experiments.get(taskID).receiveData(p);
+		else
+			LOGGER.warn("Got content for experiment task ID: {} but task never start", taskID);
 	}
 	
 	/**

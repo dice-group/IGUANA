@@ -17,13 +17,12 @@ public class ConfigUtils {
 	 * @param suffix
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T getObjectWithSuffix(Configuration config, String suffix) {
+	public static String getObjectWithSuffix(Configuration config, String suffix) {
 		Iterator<String> keySet = config.getKeys();
 		while(keySet.hasNext()) {
 			String key = keySet.next();
 			if(key.endsWith(suffix)) {
-				return (T) config.getProperty(key);
+				return config.getProperty(key).toString();
 			}
 		}
 		return null;

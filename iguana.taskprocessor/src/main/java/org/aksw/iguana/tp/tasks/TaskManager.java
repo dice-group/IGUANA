@@ -6,6 +6,8 @@ package org.aksw.iguana.tp.tasks;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.configuration.Configuration;
+
 /**
  * Will manage the Tasks
  * 
@@ -47,6 +49,17 @@ public class TaskManager {
 	public void startTask() throws IOException, TimeoutException{
 		this.task.init(host, queueName);
 		this.task.start();
+		this.task.execute();
+		this.task.close();
+	}
+
+	/**
+	 * Set the actual task configuration to the current task
+	 * 
+	 * @param taskConfig
+	 */
+	public void setTaskConfiguration(Configuration taskConfig) {
+		this.task.setConfiguration(taskConfig);
 	}
 	
 }

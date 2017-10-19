@@ -50,7 +50,7 @@ public class SPARQLWorker extends AbstractWorker {
 	}
 
 	@Override
-	public long getTimeForQueryMs(String query, String queryID) {
+	public Long getTimeForQueryMs(String query, String queryID) {
 		QueryExecution exec = QueryExecutionFactory.sparqlService(service, query);
 		// Set query timeout				
 		exec.setTimeout(this.timeOut, this.timeOut);

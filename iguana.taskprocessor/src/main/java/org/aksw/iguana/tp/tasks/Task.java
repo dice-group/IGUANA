@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.configuration.Configuration;
+
 /**
  * A simple Task to execute
  * 
@@ -73,4 +75,11 @@ public interface Task {
 	 * @param ids 
 	 */
 	void setIDs(String[] ids);
+
+	/**
+	 * Sets the actual configuration of the task itself.
+	 * 
+	 * @param taskConfig
+	 */
+	void setConfiguration(Configuration taskConfig);
 }

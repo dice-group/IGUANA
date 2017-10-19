@@ -22,7 +22,7 @@ public abstract class AbstractMetric implements Metric{
 
 	protected StorageManager storageManager;
 	
-	protected Properties metaData;
+	protected Properties metaData = new Properties();
 	
 	protected Map<Properties, Properties> dataContainer = new HashMap<Properties, Properties>();
 	
@@ -326,14 +326,23 @@ public abstract class AbstractMetric implements Metric{
 		Properties tmp = getDataFromContainer(extra);
 		if(tmp!=null){
 			for(Object obj : results.keySet()){
-				Integer res = (Integer) tmp.get(obj.toString());
-				tmp.put(obj.toString(),res+(Integer)results.get(obj));
+				if(tmp.get(obj.toString()) instanceof Long) {
+					Long res = (long) tmp.get(obj.toString());
+					tmp.put(obj.toString(),res+(long)results.get(obj));
+				}
+				else if(tmp.get(obj.toString()) instanceof Integer) {
+					int res = (int) tmp.get(obj.toString());
+					tmp.put(obj.toString(),res+(int)results.get(obj));
+				}
 			}
 		}
 		else{
 			tmp = new Properties();
 			for(Object obj : results.keySet()){
-				tmp.put(obj.toString(),(Integer)results.get(obj));
+				if(results.get(obj) instanceof Long)
+					tmp.put(obj.toString(),(long)results.get(obj));
+				if(results.get(obj) instanceof Integer)
+					tmp.put(obj.toString(),(int)results.get(obj));
 			}
 		}
 		addDataToContainer(extra, tmp);

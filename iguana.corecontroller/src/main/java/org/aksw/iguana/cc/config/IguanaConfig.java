@@ -1,6 +1,11 @@
 package org.aksw.iguana.cc.config;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,7 +75,7 @@ public class IguanaConfig {
 		
 		//for each dataset
 		for(String datasetIDV : datasetsIDV) {
-			String datasetID=config.getString(datasetIDV+CONSTANTS.CLASS_SUFFIX);
+			String datasetID=config.getString(datasetIDV+CONSTANTS.NAME_SUFFIX);
 			String dataGenClass = config.getString(datasetIDV+CONSTANTS.DATA_GENERATOR_CLASS_NAME);
 			String[] dataGenConstructorArgs = config.getStringArray(datasetIDV+CONSTANTS.CONSTRUCTOR_ARGS);
 			expID++;
@@ -93,7 +98,7 @@ public class IguanaConfig {
 					taskID++;
 					Properties taskProperties = new Properties();
 					// set all meta data (connection infos etc. into one start meta properties)
-					String[] ids = new String[] {suiteID, expID.toString(), taskID.toString(), datasetID, conID};
+					String[] ids = new String[] {suiteID, suiteID+"/"+expID, suiteID+"/"+expID+"/"+taskID.toString(), datasetID, conID};
 					//add ids, taskID, service, updateService to constructor
 					List<Object> constructor = new LinkedList<Object>();
 					List<Object> classes = new LinkedList<Object>();
@@ -101,12 +106,11 @@ public class IguanaConfig {
 					classes.add(String[].class);
 					constructor.add(new String[] {service, updateService});
 					classes.add(String[].class);
-					classes.add(String.class);
-					constructor.add(createTaskConfig(config, taskIDV));
-					classes.add(Configuration.class);
+					Configuration taskConfig = createTaskConfig(config, taskIDV);
+					taskProperties.put("taskConfig", taskConfig);
 					taskProperties.put(COMMON.CLASS_NAME, config.getString(taskIDV+CONSTANTS.CLASS_SUFFIX));
-					taskProperties.put(COMMON.CONSTRUCTOR_ARGS, constructor);
-					taskProperties.put(COMMON.CONSTRUCTOR_ARGS_CLASSES, classes);
+					taskProperties.put(COMMON.CONSTRUCTOR_ARGS, constructor.toArray());
+					taskProperties.put(COMMON.CONSTRUCTOR_ARGS_CLASSES, classes.toArray(new Class[] {}));
 					//start TP
 					String[] args = new String[] {datasetID, conID, taskID+""};
 					if(config.containsKey(CONSTANTS.PRE_SCRIPT_HOOK))
@@ -123,18 +127,49 @@ public class IguanaConfig {
 		PropertiesConfiguration taskConfig = new PropertiesConfiguration();
 		String[] keys = global.getStringArray(taskIDV+CONSTANTS.CONSTRUCTOR_ARGS);
 		for(String key : keys) {
-			Iterator<String> keys2 = global.getKeys(key);
-			while(keys2.hasNext()) {
-				String key2 = keys2.next();
-				taskConfig.addProperty(key2, global.getProperty(key2));
-			}
+			addRecursive(taskConfig, global, key);
 		}
 		return taskConfig;
 	}
 	
+	private static void addRecursive(Configuration target, Configuration source, String key) {
+		Iterator<String> keys2 = source.getKeys(key);
+		while(keys2.hasNext()) {
+			String key2 = keys2.next();
+			target.addProperty(key2, source.getProperty(key2));
+			for(String tmpKey : source.getStringArray(key2)) {
+				if(source.containsKey(tmpKey)) {
+					addRecursive(target, source, tmpKey);
+				}
+			}
+		}
+	}
+	
 	private String generateSuiteID() {
-		// TODO Auto-generated method stub
-		return null;
+		File suiteIDFile = new File("suite.id");
+		String id="0";
+		try {
+			suiteIDFile.createNewFile();
+		} catch (IOException e1) {
+			return null;
+		}
+		try(BufferedReader reader = new BufferedReader(new FileReader(suiteIDFile))){
+			if((id=reader.readLine())==null) {
+				id="0";
+			}
+		} catch (IOException e) {
+			return null;
+		}
+		try(PrintWriter pw = new PrintWriter(suiteIDFile)){
+			Integer idInt = Integer.parseInt(id);
+			idInt++;
+			id = idInt.toString();
+			pw.println(id);
+		} catch (FileNotFoundException e) {
+			return null;
+		}
+		return id;
+		
 	}
 	
 }

@@ -1,0 +1,87 @@
+CONTENTS OF THIS FILE
+---------------------
+
+* Introduction
+* Requirements
+* Installation
+* Configuration
+* Links
+
+
+INTRODUCTION
+------------
+
+The Core module of Iguana will be used to execute data generation and the tasks. 
+It will run as standalone. You can send an Iguana Config to the MainController via RabbitMQ and the
+Core will execute the config.
+
+Please visit the github wiki on how to setup and send an Iguana Config
+Further on see the Task Controller and Data Generator Module for more Information.
+
+Bugs can be submitted at https://github.com/AKSW/IGUANA/issues
+Please refer to the Module as following "[CC] your message"
+
+
+REQUIREMENTS
+------------
+
+* git (https://git-scm.com/)
+* JDK 1.8 (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* Maven (https://maven.apache.org/)
+
+
+For communication with the Iguana Result Processor Module you need to
+setup a rabbitMQ Server (www.rabbitmq.com/):
+
+For Ubuntu
+
+	user@host:~$ sudo apt-get install rabbitmq-server
+
+
+INSTALLATION
+------------
+
+There is only one option at the moment to install the Iguana ResultProcessing Module
+
+1. Pull the git repository and build it yourself
+
+    Pull the repo
+	
+	user@host:~$ git pull https://github.com/AKSW/IGUANA.git
+
+	user@host:~$ cd IGUANA
+
+    Build the Module with Maven
+
+	user@host:~$ mvn clean package -DskipTests
+
+    Start the Module
+
+        user@host:~$ java -cp "target/lib/*" org.aksw.iguana.cc.controller.MainController iguana.properties
+
+    You can change the configuration in the iguana.properties file
+
+
+
+CONFIGURATION
+-------------
+
+You can set the rabbitMQ Host name.
+
+
+To define the rabbitMQ Host please add the following to the properties
+
+    iguana.consumer.host=localhost
+
+	
+
+LINKS
+-----
+
+* Project Site:	http://iguana-benchmark.eu
+
+* Github Site:	http://github.com/AKSW/IGUANA
+
+* Bug Tracker:	http://github.com/AKSW/IGUANA/issues
+
+* Wiki: http://github.com/AKSW/IGUANA/wiki

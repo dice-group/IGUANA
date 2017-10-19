@@ -11,6 +11,7 @@ import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.consumer.AbstractConsumer;
 import org.aksw.iguana.commons.exceptions.IguanaException;
+import org.aksw.iguana.commons.numbers.NumberUtils;
 import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
 
 /**
@@ -30,13 +31,14 @@ public class SingularConsumer extends AbstractConsumer {
 	 */
 	@PostConstruct
 	public void init()  {
+		
 		String host = Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
 		try {
 			super.init(host, COMMON.RP2SENDER_QUEUENAME);
 		} catch (IguanaException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} 
 	}
 	
 	
@@ -45,6 +47,7 @@ public class SingularConsumer extends AbstractConsumer {
 	 */
 	public void consume() {
 		try {
+			
 			channel.basicConsume(COMMON.RP2SENDER_QUEUENAME, true, consumer);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -59,11 +62,30 @@ public class SingularConsumer extends AbstractConsumer {
 	}
 	
 	private void consume(Properties p) {
-		//get queryID and queryTime
-		String queryID = p.get(COMMON.QUERY_ID_KEY).toString();
-		Long queryTime = Long.valueOf(p.get(COMMON.RECEIVE_DATA_TIME).toString());
-		//set the object 
-		this.setObj(new Object[] {queryID, queryTime, p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY)});
+		if(p==null) {
+			this.setObj(null);
+			return;
+		}
+		try {
+			//get queryID and queryTime
+			String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
+			if(queryID==null) {
+				this.setObj(null);
+				return;
+			}
+			Object o = p.get(COMMON.RECEIVE_DATA_TIME);
+			if(o==null) {
+				this.setObj(null);
+				return;
+			}
+			Long queryTime = NumberUtils.getLong(o.toString());
+			//set the object 
+			this.setObj(new Object[] {queryID, queryTime, p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY)});
+		}
+		catch(Exception e) {
+			this.setObj(null);
+			e.printStackTrace();
+		}
 	}
 
 	/**

@@ -27,7 +27,7 @@ The provided Storage Solutions are
 * NTriple File
 * File/Directory Structure
 
-For a full description, visit https://iguana-benchmark.eu/rp/index.html
+For a full description, please visit the wiki
 
 Bugs can be submitted at https://github.com/AKSW/IGUANA/issues
 Please refer to the Module as following "[RP] your message"
@@ -63,7 +63,7 @@ For Ubuntu
 INSTALLATION
 ------------
 
-There are 3 different options to install the Iguana ResultProcessing Module
+There are 2 different options to install the Iguana ResultProcessing Module
 
 1. Docker
 
@@ -78,23 +78,13 @@ There are 3 different options to install the Iguana ResultProcessing Module
 
    Assuming your rabbitMQ Server runs on localhost
 
-	user@host:~$ docker run --net=host -d -e RABBIT_HOST=localhost iguana/resultprocessor
+	user@host:~$ docker run --net=host -d -e RABBIT_HOST=localhost iguana/resultprocessor:latest
 
+   or using the live mode
+ 
+	user@host:~$ docker run --net=host -d -e RABBIT_HOST=localhost iguana/resultprocessor:live
 
-2. Download the Zip File from http://github.com/AKSW/IGUANA/tree/master/release/2.X.X/iguana-resultprocessor.zip
-
-    Unzip the File 
-	
-	user@host:~$ unzip iguana-resultprocessor.zip
-
-    Start the Result Processor
-	
-	user@host:~$ java -cp "lib/*" org.aksw.iguana.rp.controller.MainController iguana.properties
-
-    You can change the configuration in the iguana.properties file
-
-
-3. Pull the git repository and build it yourself
+2. Pull the git repository and build it yourself
 
     Pull the repo
 	
@@ -119,6 +109,10 @@ CONFIGURATION
 
 You can set the rabbitMQ Host name, the metrics which should be calculated and saved
 as well as how and where to save the results
+
+Further on if you want to use the live viewing option of the web controller you have to add
+    
+    iguana.rp.useLive=true 
 
 to define which metrics should be used simply add the following line
 to your properites
@@ -164,13 +158,13 @@ The following Classes refer to the following Storages
 	(optional: you can specify the Ntriple file name)
 
 For Further Information to the constructor Arguments, 
-visit the JavaDoc: http://iguana-benchmark.eu/javadoc/2.0.0/rp/index.html
+visit the JavaDoc: http://iguana-benchmark.eu/javadoc/index.html
 
 
 
 To define the rabbitMQ Host please add the following to the properties
 
-    iguana.rp.consumer.host=localhost
+    iguana.consumer.host=localhost
 
 
 

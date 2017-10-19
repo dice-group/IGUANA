@@ -39,7 +39,7 @@ public class SPARQLWorkerTest {
 //	@Test
 	public void testTimeout() throws IOException {
 		Worker worker = new SPARQLWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql", "1",  "","0","0"});
-		assertEquals(-1L, worker.getTimeForQueryMs("select * {?s ?p ?o}", "1"));
+		assertEquals(new Long(-1), worker.getTimeForQueryMs("select * {?s ?p ?o}", "1"));
 		
 	}
 	

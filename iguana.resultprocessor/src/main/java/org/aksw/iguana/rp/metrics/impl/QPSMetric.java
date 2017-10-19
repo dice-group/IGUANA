@@ -34,27 +34,27 @@ public class QPSMetric extends AbstractMetric {
 	public void receiveData(Properties p) {
 		//Save success and time of each query
 		LOGGER.debug(this.getShortName() + " has received " + p);
-		Integer time = (Integer) p.get(COMMON.RECEIVE_DATA_TIME);
-		Integer success = (Boolean) p.get(COMMON.RECEIVE_DATA_SUCCESS)?1:0;
-		Integer failure = success==1?0:1;
+		long time = (long) p.get(COMMON.RECEIVE_DATA_TIME);
+		long success = (Boolean) p.get(COMMON.RECEIVE_DATA_SUCCESS)?1:0;
+		long failure = success==1?0:1;
 		String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
 		
 		Properties extra = getExtraMeta(p);
 		
 		Properties tmp = getDataFromContainer(extra);
 		if(tmp!=null && tmp.containsKey(queryID)){
-			Integer[] oldArr = (Integer[])tmp.get(queryID);
+			long[] oldArr = (long[])tmp.get(queryID);
 			oldArr[0]+=time;
 			oldArr[1]+=success;
 			oldArr[2]+=failure;
 		}
 		else if(tmp!=null){
-			Integer[] resArr = {time, success, failure};
+			long[] resArr = {time, success, failure};
 			tmp.put(queryID, resArr);
 		}
 		else{
 			tmp = new Properties();
-			Integer[] resArr = {time, success, failure};
+			long[] resArr = new long[]{time, success, failure};
 			tmp.put(queryID, resArr);
 		}
 		addDataToContainer(extra, tmp);
@@ -67,7 +67,7 @@ public class QPSMetric extends AbstractMetric {
 		for(Properties key : dataContainer.keySet()){
 			Properties value = dataContainer.get(key);
 			for(Object queryID : value.keySet()){
-				Integer[] resArr = (Integer[]) value.get(queryID);
+				long[] resArr = (long[]) value.get(queryID);
 				Double qps = resArr[1]*1.0/(resArr[0]/1000.0);
 			
 				//create Triple of results and use subject as object node

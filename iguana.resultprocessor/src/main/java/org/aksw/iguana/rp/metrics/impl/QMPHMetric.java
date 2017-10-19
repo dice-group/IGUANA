@@ -31,12 +31,12 @@ public class QMPHMetric extends NoQPHMetric {
 	public void close() {
 
 		for(Properties key : dataContainer.keySet()){
-			Integer totalTime = (Integer) dataContainer.get(key).get(TOTAL_TIME);
+			Long totalTime = (long) dataContainer.get(key).get(TOTAL_TIME);
 			Integer success = (Integer) dataContainer.get(key).get(TOTAL_SUCCESS);
 			
 			double noOfQueriesPerHour = hourInMS*success*1.0/totalTime;
 			
-			int noOfQueryMixes = (int) this.metaData.get(COMMON.NO_OF_QUERIES);
+			Long noOfQueryMixes = new Long((int)key.get(COMMON.NO_OF_QUERIES));
 			Double qmph=noOfQueriesPerHour*1.0/noOfQueryMixes;
 			
 			Properties results = new Properties();

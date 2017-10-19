@@ -56,5 +56,10 @@ public class CONSTANTS {
 	 * 
 	 */
 	public static final String RP2SENDER_KEY = "rp2senderQueueName";
+	
+	/**
+	 * 
+	 */
+	public static final String USE_LIVE = "iguana.rp.useLive";
 
 }

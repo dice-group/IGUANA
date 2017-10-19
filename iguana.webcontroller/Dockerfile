@@ -13,10 +13,6 @@ RUN mkdir wildfly
 #wildfly download
 ADD http://download.jboss.org/wildfly/10.0.0.Final/wildfly-10.0.0.Final.tar.gz .
 RUN tar xvzf wildfly-10.0.0.Final.tar.gz
-#RUN mv -T wildfly-10.0.0.Final/ wildfly/
-#RUN chmod -R 755 wildfly
-#change 8080 port to something else (8085)
-#RUN sed -i -e \"s/jboss.http.port:8080/jboss.http.port:8085/g\" ./wildfly/standalone/configuration/standalone.xml
 
 
 #download IguanaWeb
