@@ -56,7 +56,7 @@ public class EachQueryMetric extends AbstractMetric {
 		
 		LOGGER.debug(this.getShortName() + " has received " + p);
 
-		Long time = (long) p.get(COMMON.RECEIVE_DATA_TIME);
+		long time = (long) p.get(COMMON.RECEIVE_DATA_TIME);
 		Boolean success = (Boolean) p.get(COMMON.RECEIVE_DATA_SUCCESS);
 		String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
 		

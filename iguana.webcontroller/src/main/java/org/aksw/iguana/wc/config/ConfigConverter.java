@@ -5,8 +5,9 @@ import java.util.List;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.wc.config.tasks.Task;
-import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationUtils;
+import org.apache.commons.configuration.PropertiesConfiguration;
 
 /**
  * Will convert the web configuration to a Configuration object which then can be send to the Iguana Core
@@ -27,7 +28,7 @@ public class ConfigConverter {
 	public static Configuration createIguanConfig(List<Connection> connections, List<Dataset> datasets,
 			List<Task> tasks) {
 		//Create Config Object
-		CompositeConfiguration conf = new CompositeConfiguration();
+		PropertiesConfiguration conf = new PropertiesConfiguration();
 
 		int index = 0;
 		List<String> objects = new LinkedList<String>();
@@ -76,7 +77,7 @@ public class ConfigConverter {
 			//set class name of task
 			conf.addProperty(taskID + ".class", task.getClassName());
 			//set constructor arguments of class 
-			conf.addConfiguration(task.getSubConfiguration(taskID));
+			ConfigurationUtils.append(task.getSubConfiguration(taskID), conf);
 			objects.add(taskID);
 			index++;
 		}

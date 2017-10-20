@@ -167,7 +167,12 @@ public class UPDATEWorker extends AbstractWorker {
 		UpdateTimer.Strategy strategy = UpdateTimer.Strategy.valueOf(strategyStr);
 		switch (strategy) {
 		case FIXED:
-			this.updateTimer = new UpdateTimer();
+			if (timeLimit != null) {
+				this.updateTimer = new UpdateTimer(this.queryFileList.length/this.timeLimit);
+			} else {
+				LOGGER.warn("Worker[{{}} : {{}}]: FIXED Updates can only be used with timeLimit!", workerType,
+						workerID);
+			}
 			break;
 		case DISTRIBUTED:
 			if (timeLimit != null) {

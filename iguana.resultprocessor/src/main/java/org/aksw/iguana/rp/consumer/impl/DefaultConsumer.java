@@ -32,7 +32,7 @@ public class DefaultConsumer extends AbstractConsumer {
 
 	public DefaultConsumer(ExperimentManager emanager) {
 		this.emanager = emanager;
-		if (Config.getInstance().getBoolean(CONSTANTS.USE_LIVE)) {
+		if (Config.getInstance().containsKey(CONSTANTS.USE_LIVE) && Config.getInstance().getBoolean(CONSTANTS.USE_LIVE)) {
 			liveSender = new DefaultSender();
 			liveSender.init(host, COMMON.RP2SENDER_QUEUENAME);
 			LOGGER.info("Using Live Modus with Queue Name {}", COMMON.RP2SENDER_QUEUENAME);
