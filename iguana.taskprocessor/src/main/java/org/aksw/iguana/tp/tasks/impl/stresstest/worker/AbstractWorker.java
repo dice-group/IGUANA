@@ -161,7 +161,8 @@ public abstract class AbstractWorker implements Worker {
 		this.extra = new Properties();
 		this.extra.put(CONSTANTS.WORKER_ID_KEY, workerID);
 		this.extra.setProperty(CONSTANTS.WORKER_TYPE_KEY, workerType);
-		this.extra.put(COMMON.NO_OF_QUERIES, this.queryFileList.length);
+		if(this.queryFileList!=null)
+			this.extra.put(COMMON.NO_OF_QUERIES, this.queryFileList.length);
 		// For Update and Logging purpose get startTime of Worker
 		this.startTime = Calendar.getInstance().getTimeInMillis();
 

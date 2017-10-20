@@ -43,7 +43,7 @@ public class MetricTest {
 		List<Object[]> testConfigs = new ArrayList<Object[]>();
 
 		testConfigs.add(new Object[] { new NoQPHMetric(), new Triple[][]{{new Triple("1/1/1", "noOfQueriesPerHour", 4104.903078677) }}, false});
-		testConfigs.add(new Object[] { new QMPHMetric(), new Triple[][]{{new Triple("1/1/1", "queryMixes", 2052.451539338) }}, false});
+//		testConfigs.add(new Object[] { new QMPHMetric(), new Triple[][]{{new Triple("1/1/1", "queryMixes", 2052.451539338) }}, false});
 		testConfigs.add(new Object[] { new QPSMetric(), new Triple[][]{{new Triple("1/1/1", "qps#query", "1/1/1/1"),
 			new Triple("1/1/1/1", "queriesPerSecond", 1.140250855),
 			new Triple("1/1/1/1", "failed", 1),
@@ -117,7 +117,6 @@ public class MetricTest {
 		smanager.addStorage(storage);
 		metric.setStorageManager(smanager);
 	    metric.setMetaData(createMetaData());
-
 		metric.receiveData(createData(777, true, extraMeta));
 		metric.receiveData(createData(100, false, extraMeta));
 		
@@ -126,7 +125,7 @@ public class MetricTest {
 
 	}
 	
-	private Properties createData(int time, boolean success, Properties extraMeta) {
+	private Properties createData(long time, boolean success, Properties extraMeta) {
 		Properties p = new Properties();
 		p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
 	    p.put(COMMON.RECEIVE_DATA_SUCCESS, success);
