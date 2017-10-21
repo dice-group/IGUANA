@@ -23,6 +23,7 @@ public class Stresstest extends AbstractTask {
 
 	private List<String[]> queryHandlers = new LinkedList<String[]>();
 	private String qhClassName;
+	private List<String> qhConstructor = new LinkedList<String>();
 
 	private Long warmupTime=0l;
 	private String warmupQueries;
@@ -73,13 +74,12 @@ public class Stresstest extends AbstractTask {
 		constructorArgs[0] = type?typeValue:null;
 		constructorArgs[1] = !type?typeValue:null;
 		constructorArgs[2] = workerConfiguration;
-		constructorArgs[3] = new String[] {qhClassName};
+		qhConstructor.add(0, qhClassName);
+		constructorArgs[3] = qhConstructor.toArray(new String[] {});
+		qhConstructor.remove(0);
 		constructorArgs[4] = warmupTime;
 		constructorArgs[5] = warmupQueries;
 		constructorArgs[6] = warmupUpdates;
-		
-		
-		
 		
 		return constructorArgs;
 
@@ -349,7 +349,9 @@ public class Stresstest extends AbstractTask {
 			conf.addProperty(taskID+"x.noOfQueryMixes",  typeValue);
 			constructor[1] = taskID+"x.noOfQueryMixes";
 		}
-		conf.addProperty(taskID+"x.queryHandler", new String[] {qhClassName});
+		qhConstructor.add(0, qhClassName);
+		conf.addProperty(taskID+"x.queryHandler", qhConstructor.toArray(new String[] {}));
+		qhConstructor.remove(0);
 		constructor[2] = taskID+"x.queryHandler";
 		conf.addProperty(taskID+"x.workers", workersConstr.toArray());
 		constructor[3] = taskID+"x.workers";
@@ -363,6 +365,20 @@ public class Stresstest extends AbstractTask {
 		
 		conf.addProperty(taskID+".constructorArgs", constructor);
 		return conf;
+	}
+
+	/**
+	 * @return the qhConstructor
+	 */
+	public List<String> getQhConstructor() {
+		return qhConstructor;
+	}
+
+	/**
+	 * @param qhConstructor the qhConstructor to set
+	 */
+	public void setQhConstructor(List<String> qhConstructor) {
+		this.qhConstructor = qhConstructor;
 	}
 
 }

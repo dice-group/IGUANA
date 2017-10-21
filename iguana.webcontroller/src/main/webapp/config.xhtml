@@ -38,15 +38,12 @@
 										<p:inputText
 											value="#{executionController.createConnection.updateService}"
 											required="false" label="Update endpoint" />
-										<p:outputLabel style="color: #000"
-											value="user: " />
+										<p:outputLabel style="color: #000" value="user: " />
 										<p:inputText
 											value="#{executionController.createConnection.user}"
-											required="false" 
-											label="user for updates" />
-										<p:outputLabel style="color: #000"
-											value="password: " />
-										<p:password 
+											required="false" label="user for updates" />
+										<p:outputLabel style="color: #000" value="password: " />
+										<p:password
 											value="#{executionController.createConnection.pwd}" />
 										<br />
 										<br />
@@ -164,6 +161,10 @@
 													var="handler" itemLabel="#{handler[0]}"
 													itemValue="#{handler[1]}" style="width:450;" />
 											</p:selectOneMenu>
+											<p:outputLabel value="QH Constructor Args:" />
+											<p:chips
+												value="#{executionController.createTask.qhConstructor}"
+												required="false" label="qhConstructorArgs" />
 											<p:spacer height="25" />
 											<p:spacer />
 											<p:separator />
@@ -291,6 +292,31 @@
 									</h:panelGrid>
 								</h:panelGrid>
 
+							</p:panel>
+						</p:tab>
+						<p:tab id="hooks" title="Script Hooks">
+							<p:panel header="Script Hooks">
+								<p:messages id="messages4" showDetail="true" autoUpdate="true"
+									closable="true" />
+								<h:panelGrid columns="3" cellpadding="20">
+									<p:spacer value="15" />
+									<p:outputLabel
+										value="Add a Script which will be executed before (resp. after) every Task." />
+									<p:spacer value="15" />
+									<p:spacer value="15" />
+									<p:outputLabel
+										value="The parameters will be: Dataset ID, Connection ID, Task ID." />
+									<p:spacer value="15" />
+									<p:spacer />
+									<p:separator />
+									<p:separator />
+									<p:spacer />
+									<p:outputLabel value="Pre Script Hook:" />
+									<p:inputText value="#{executionController.preScript}" />
+									<p:spacer />
+									<p:outputLabel value="Post Script Hook:" />
+									<p:inputText value="#{executionController.postScript}" />
+								</h:panelGrid>
 							</p:panel>
 						</p:tab>
 

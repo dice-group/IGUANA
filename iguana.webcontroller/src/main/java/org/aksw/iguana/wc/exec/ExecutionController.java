@@ -58,6 +58,10 @@ public class ExecutionController implements Serializable {
 	private Integer deleteTask;
 	private Stresstest createTask = new Stresstest();
 
+	private String preScript;
+	private String postScript;
+	
+	
 	private String className;
 
 	private ISender sender = new DefaultSender();
@@ -255,6 +259,8 @@ public class ExecutionController implements Serializable {
 	public void execute() {
 		FacesContext context = FacesContext.getCurrentInstance();
 		Configuration conf = ConfigConverter.createIguanConfig(connections, datasets, tasks);
+		addScripts(conf);
+		
 		try {
 			sender.send(RabbitMQUtils.getData(ConfigurationUtils.convertConfiguration(conf)));
 		} catch (ConfigurationException e) {
@@ -268,6 +274,14 @@ public class ExecutionController implements Serializable {
 		context.addMessage(null,
 				new FacesMessage("Successful", "Configuration was send to Core and will be executed."));
 	}
+
+	private void addScripts(Configuration conf) {
+		if(preScript!=null && !preScript.isEmpty())
+			conf.addProperty(COMMON.PRE_SCRIPT_HOOK, preScript);
+		if(postScript!=null && !postScript.isEmpty())
+			conf.addProperty(COMMON.POST_SCRIPT_HOOK, postScript);
+	}
+
 
 	/**
 	 * @return the tasks
@@ -346,6 +360,7 @@ public class ExecutionController implements Serializable {
 	 */
 	public StreamedContent save() throws ConfigurationException {
 		Configuration conf = ConfigConverter.createIguanConfig(connections, datasets, tasks);
+		addScripts(conf);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PropertiesConfiguration saveConf = new PropertiesConfiguration();
 		saveConf.copy(conf);
@@ -353,6 +368,38 @@ public class ExecutionController implements Serializable {
 		byte[] data = baos.toByteArray();
 		InputStream stream = new ByteArrayInputStream(data);
 		return new DefaultStreamedContent(stream, "text/plain", "iguana.suite");
+	}
+
+
+	/**
+	 * @return the preScript
+	 */
+	public String getPreScript() {
+		return preScript;
+	}
+
+
+	/**
+	 * @param preScript the preScript to set
+	 */
+	public void setPreScript(String preScript) {
+		this.preScript = preScript;
+	}
+
+
+	/**
+	 * @return the postScript
+	 */
+	public String getPostScript() {
+		return postScript;
+	}
+
+
+	/**
+	 * @param postScript the postScript to set
+	 */
+	public void setPostScript(String postScript) {
+		this.postScript = postScript;
 	}
 
 }

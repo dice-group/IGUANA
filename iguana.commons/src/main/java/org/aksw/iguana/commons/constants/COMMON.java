@@ -135,6 +135,7 @@ public class COMMON {
 
 	public static final String CONFIG2MC_QUEUE_NAME = "config2mc";
 	
-
+	public static final String PRE_SCRIPT_HOOK = "script.hook.pre";
+	public static final String POST_SCRIPT_HOOK = "script.hook.post";
 	
 }
