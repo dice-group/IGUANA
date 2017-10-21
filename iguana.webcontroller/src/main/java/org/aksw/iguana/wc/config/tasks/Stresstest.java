@@ -16,40 +16,41 @@ import org.apache.commons.configuration.Configuration;
  */
 public class Stresstest extends AbstractTask {
 
-
-
-	private boolean type=false;
-	private long typeValue=0;
+	private boolean type = false;
+	private long typeValue = 0;
 
 	private List<String[]> queryHandlers = new LinkedList<String[]>();
 	private String qhClassName;
 	private List<String> qhConstructor = new LinkedList<String>();
+	private List<String> qhConstructorTmp = new LinkedList<String>();
 
-	private Long warmupTime=0l;
+	private Long warmupTime = 0l;
 	private String warmupQueries;
 	private String warmupUpdates;
 
 	private List<SPARQLWorkerConfig> sparqlWorkers = new LinkedList<SPARQLWorkerConfig>();
 	private List<UPDATEWorkerConfig> updateWorkers = new LinkedList<UPDATEWorkerConfig>();
-	
+
 	private List<String> timerStrategy = new LinkedList<String>();
 	private List<String> updateStrategy = new LinkedList<String>();
 
-	private int sparqls=0;
-	private int updates=0;
+	private int sparqls = 0;
+	private int updates = 0;
 
 	/**
 	 * initializes the Stresstest
 	 */
 	public Stresstest() {
-		queryHandlers.add(new String[] {"Instance Based Query Handler","org.aksw.iguana.tp.query.impl.InstancesQueryHandler"});
-		queryHandlers.add(new String[] {"Pattern Based Query Handler","org.aksw.iguana.tp.query.impl.PatternQueryHandler"});
-		className= "org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest";
-		
+		queryHandlers.add(
+				new String[] { "Instance Based Query Handler", "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" });
+		queryHandlers.add(
+				new String[] { "Pattern Based Query Handler", "org.aksw.iguana.tp.query.impl.PatternQueryHandler" });
+		className = "org.aksw.iguana.tp.tasks.impl.stresstest.Stresstest";
+
 		timerStrategy.add("NONE");
 		timerStrategy.add("FIXED");
 		timerStrategy.add("DISTRIBUTED");
-		
+
 		updateStrategy.add("NONE");
 		updateStrategy.add("ADD_REMOVE");
 		updateStrategy.add("REMOVE_ADD");
@@ -59,28 +60,31 @@ public class Stresstest extends AbstractTask {
 
 	@Override
 	public Object[] getConstructorArgs() {
-		//String timeLimit, String noOfQueryMixes, Object[][] workerConfigurations,
-		//String[] queryHandler, String warmupTimeMS, String warmupQueries, String warmupUpdates
-		Object[][] workerConfiguration = new Object[sparqls+updates][];
-		int i=0;
-		for(SPARQLWorkerConfig config : sparqlWorkers) {
-			workerConfiguration[i++]= config.asConstructorArgs();
+		// String timeLimit, String noOfQueryMixes, Object[][] workerConfigurations,
+		// String[] queryHandler, String warmupTimeMS, String warmupQueries, String
+		// warmupUpdates
+		Object[][] workerConfiguration = new Object[sparqls + updates][];
+		int i = 0;
+		for (SPARQLWorkerConfig config : sparqlWorkers) {
+			workerConfiguration[i++] = config.asConstructorArgs();
 		}
-		for(UPDATEWorkerConfig config : updateWorkers) {
-			workerConfiguration[i++]= config.asConstructorArgs();
+		for (UPDATEWorkerConfig config : updateWorkers) {
+			workerConfiguration[i++] = config.asConstructorArgs();
 		}
-		
+
 		constructorArgs = new Object[7];
-		constructorArgs[0] = type?typeValue:null;
-		constructorArgs[1] = !type?typeValue:null;
+		constructorArgs[0] = type ? typeValue : null;
+		constructorArgs[1] = !type ? typeValue : null;
 		constructorArgs[2] = workerConfiguration;
-		qhConstructor.add(0, qhClassName);
-		constructorArgs[3] = qhConstructor.toArray(new String[] {});
-		qhConstructor.remove(0);
+		List<String> qhConstructorTmp = new LinkedList<String>();
+		qhConstructorTmp.add(0, qhClassName);
+		if (qhConstructor != null)
+			qhConstructorTmp.addAll(qhConstructor);
+		constructorArgs[3] = qhConstructorTmp.toArray(new String[] {});
 		constructorArgs[4] = warmupTime;
 		constructorArgs[5] = warmupQueries;
 		constructorArgs[6] = warmupUpdates;
-		
+
 		return constructorArgs;
 
 	}
@@ -134,7 +138,7 @@ public class Stresstest extends AbstractTask {
 	 *            the qhClassName to set
 	 */
 	public void setQhClassName(String qhClassName) {
-			this.qhClassName = qhClassName;
+		this.qhClassName = qhClassName;
 	}
 
 	/**
@@ -246,9 +250,8 @@ public class Stresstest extends AbstractTask {
 			for (i = 0; i < sparqls - sparqlWorkers.size(); i++) {
 				sparqlWorkers.add(new SPARQLWorkerConfig());
 			}
-		}
-		else if(sparqls < sparqlWorkers.size()) {
-			for (i = sparqlWorkers.size()-1; i >= sparqls; i--) {
+		} else if (sparqls < sparqlWorkers.size()) {
+			for (i = sparqlWorkers.size() - 1; i >= sparqls; i--) {
 				sparqlWorkers.remove(i);
 			}
 		}
@@ -272,20 +275,19 @@ public class Stresstest extends AbstractTask {
 			for (i = 0; i < updates - updateWorkers.size(); i++) {
 				updateWorkers.add(new UPDATEWorkerConfig());
 			}
-		}
-		else if(updates < updateWorkers.size()) {
-			for (i = updateWorkers.size()-1; i >= updates; i--) {
+		} else if (updates < updateWorkers.size()) {
+			for (i = updateWorkers.size() - 1; i >= updates; i--) {
 				updateWorkers.remove(i);
 			}
 		}
 		this.updates = updates;
 	}
-	
+
 	@Override
 	public String toString() {
-		StringBuilder ret = new StringBuilder(this.className+": ");
-		for(Object o : getConstructorArgs()) {
-			if(o!=null)
+		StringBuilder ret = new StringBuilder(this.className + ": ");
+		for (Object o : getConstructorArgs()) {
+			if (o != null)
 				ret.append(o.toString()).append(", ");
 			else
 				ret.append("null, ");
@@ -301,7 +303,8 @@ public class Stresstest extends AbstractTask {
 	}
 
 	/**
-	 * @param timerStrategy the timerStrategy to set
+	 * @param timerStrategy
+	 *            the timerStrategy to set
 	 */
 	public void setTimerStrategy(List<String> timerStrategy) {
 		this.timerStrategy = timerStrategy;
@@ -315,7 +318,8 @@ public class Stresstest extends AbstractTask {
 	}
 
 	/**
-	 * @param updateStrategy the updateStrategy to set
+	 * @param updateStrategy
+	 *            the updateStrategy to set
 	 */
 	public void setUpdateStrategy(List<String> updateStrategy) {
 		this.updateStrategy = updateStrategy;
@@ -324,46 +328,46 @@ public class Stresstest extends AbstractTask {
 	@Override
 	public Configuration getSubConfiguration(String taskID) {
 		Configuration conf = new CompositeConfiguration();
-		
+
 		List<String> workersConstr = new LinkedList<String>();
-		int i=0;
-		for(SPARQLWorkerConfig config : sparqlWorkers) {
-			workersConstr.add("sparql"+i);
-			conf.addProperty("sparql"+i, config.asConstructorArgs());
+		int i = 0;
+		for (SPARQLWorkerConfig config : sparqlWorkers) {
+			workersConstr.add("sparql" + i);
+			conf.addProperty("sparql" + i, config.asConstructorArgs());
 			i++;
 		}
-		i=0;
-		for(UPDATEWorkerConfig config : updateWorkers) {
-			workersConstr.add("update"+i);
-			conf.addProperty("update"+i, config.asConstructorArgs());
+		i = 0;
+		for (UPDATEWorkerConfig config : updateWorkers) {
+			workersConstr.add("update" + i);
+			conf.addProperty("update" + i, config.asConstructorArgs());
 			i++;
 		}
-		
-		
-		String[] constructor = new String[7] ;
-		if(type) {
-			conf.addProperty(taskID+"x.timeLimit",  typeValue);
-			constructor[0] = taskID+"x.timeLimit";
+
+		String[] constructor = new String[7];
+		if (type) {
+			conf.addProperty(taskID + "x.timeLimit", typeValue);
+			constructor[0] = taskID + "x.timeLimit";
+		} else {
+			conf.addProperty(taskID + "x.noOfQueryMixes", typeValue);
+			constructor[1] = taskID + "x.noOfQueryMixes";
 		}
-		else{
-			conf.addProperty(taskID+"x.noOfQueryMixes",  typeValue);
-			constructor[1] = taskID+"x.noOfQueryMixes";
-		}
-		qhConstructor.add(0, qhClassName);
-		conf.addProperty(taskID+"x.queryHandler", qhConstructor.toArray(new String[] {}));
-		qhConstructor.remove(0);
-		constructor[2] = taskID+"x.queryHandler";
-		conf.addProperty(taskID+"x.workers", workersConstr.toArray());
-		constructor[3] = taskID+"x.workers";
-		conf.addProperty(taskID+"x.warmupTime", warmupTime);
-		constructor[4] = taskID+"x.warmupTime";
-		conf.addProperty(taskID+"x.warmupQueries", warmupQueries);
-		constructor[5] = taskID+"x.warmupQueries";
-		conf.addProperty(taskID+"x.warmupUpdates", warmupUpdates);
-		constructor[6] = taskID+"x.warmupUpdates";
-		
-		
-		conf.addProperty(taskID+".constructorArgs", constructor);
+		List<String> qhConstructorTmp = new LinkedList<String>();
+		qhConstructorTmp.add(0, qhClassName);
+		if (qhConstructor != null)
+			qhConstructorTmp.addAll(qhConstructor);
+		conf.addProperty(taskID + "x.queryHandler", qhConstructorTmp.toArray(new String[] {}));
+		qhConstructorTmp.clear();
+		constructor[2] = taskID + "x.queryHandler";
+		conf.addProperty(taskID + "x.workers", workersConstr.toArray());
+		constructor[3] = taskID + "x.workers";
+		conf.addProperty(taskID + "x.warmupTime", warmupTime);
+		constructor[4] = taskID + "x.warmupTime";
+		conf.addProperty(taskID + "x.warmupQueries", warmupQueries);
+		constructor[5] = taskID + "x.warmupQueries";
+		conf.addProperty(taskID + "x.warmupUpdates", warmupUpdates);
+		constructor[6] = taskID + "x.warmupUpdates";
+
+		conf.addProperty(taskID + ".constructorArgs", constructor);
 		return conf;
 	}
 
@@ -375,7 +379,8 @@ public class Stresstest extends AbstractTask {
 	}
 
 	/**
-	 * @param qhConstructor the qhConstructor to set
+	 * @param qhConstructor
+	 *            the qhConstructor to set
 	 */
 	public void setQhConstructor(List<String> qhConstructor) {
 		this.qhConstructor = qhConstructor;
