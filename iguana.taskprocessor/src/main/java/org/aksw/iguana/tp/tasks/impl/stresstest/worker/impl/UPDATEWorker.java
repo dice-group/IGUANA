@@ -143,20 +143,20 @@ public class UPDATEWorker extends AbstractWorker {
 	}
 
 	private void setCredentials(UpdateProcessor exec) {
-		if (exec instanceof UpdateProcessRemote) {
-			if (user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
-				CredentialsProvider provider = new BasicCredentialsProvider();
+		if (exec instanceof UpdateProcessRemote && user != null && !user.isEmpty() && password != null
+				&& !password.isEmpty()) {
+			CredentialsProvider provider = new BasicCredentialsProvider();
 
-				provider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
-						new UsernamePasswordCredentials(user, password));
-				HttpContext httpContext = new BasicHttpContext();
-				httpContext.setAttribute(HttpClientContext.CREDS_PROVIDER, provider);
-				
-				((UpdateProcessRemote) exec).setHttpContext(httpContext);
-				HttpClient test = ((UpdateProcessRemote)exec).getClient();
-				System.out.println(test);
-			}
+			provider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
+					new UsernamePasswordCredentials(user, password));
+			HttpContext httpContext = new BasicHttpContext();
+			httpContext.setAttribute(HttpClientContext.CREDS_PROVIDER, provider);
+
+			((UpdateProcessRemote) exec).setHttpContext(httpContext);
+			HttpClient test = ((UpdateProcessRemote) exec).getClient();
+			System.out.println(test);
 		}
+
 	}
 
 	@Override

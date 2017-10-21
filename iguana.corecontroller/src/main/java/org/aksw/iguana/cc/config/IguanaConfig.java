@@ -94,7 +94,8 @@ public class IguanaConfig {
 				//get service and updateService!
 				String service=config.getString(conIDV+CONSTANTS.SERVICE_SUFFIX);
 				String updateService=config.getString(conIDV+CONSTANTS.UPDATE_SERVICE_SUFFIX);
-				String user=null, pwd=null;
+				String user=null;
+				String pwd=null;
 				if(config.containsKey(conIDV+CONSTANTS.SERVICE_USER) &&
 						config.containsKey(conIDV+CONSTANTS.SERVICE_PASSWORD)) {
 					user=config.getString(conIDV+CONSTANTS.SERVICE_USER);
