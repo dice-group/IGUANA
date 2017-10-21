@@ -120,11 +120,11 @@ public class IguanaConfig {
 					taskProperties.put(COMMON.CONSTRUCTOR_ARGS_CLASSES, classes.toArray(new Class[] {}));
 					//start TP
 					String[] args = new String[] {datasetID, conID, taskID+""};
-					if(config.containsKey(COMMON.PRE_SCRIPT_HOOK))
-						ScriptExecutor.exec(config.getString(COMMON.PRE_SCRIPT_HOOK), args);
+					if(config.containsKey(CONSTANTS.PRE_SCRIPT_HOOK))
+						ScriptExecutor.exec(config.getString(CONSTANTS.PRE_SCRIPT_HOOK), args);
 					controller.startTask(taskProperties);
-					if(config.containsKey(COMMON.POST_SCRIPT_HOOK))
-						ScriptExecutor.exec(config.getString(COMMON.POST_SCRIPT_HOOK), args);
+					if(config.containsKey(CONSTANTS.POST_SCRIPT_HOOK))
+						ScriptExecutor.exec(config.getString(CONSTANTS.POST_SCRIPT_HOOK), args);
 				}
 			}
 		}
