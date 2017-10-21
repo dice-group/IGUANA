@@ -76,11 +76,8 @@ public class Stresstest extends AbstractTask {
 		constructorArgs[0] = type ? typeValue : null;
 		constructorArgs[1] = !type ? typeValue : null;
 		constructorArgs[2] = workerConfiguration;
-		List<String> qhConstructorTmp = new LinkedList<String>();
-		qhConstructorTmp.add(0, qhClassName);
-		if (qhConstructor != null)
-			qhConstructorTmp.addAll(qhConstructor);
-		constructorArgs[3] = qhConstructorTmp.toArray(new String[] {});
+		
+		constructorArgs[3] = getQHConstructor();
 		constructorArgs[4] = warmupTime;
 		constructorArgs[5] = warmupQueries;
 		constructorArgs[6] = warmupUpdates;
@@ -89,6 +86,14 @@ public class Stresstest extends AbstractTask {
 
 	}
 
+	private String[] getQHConstructor() {
+		List<String> qhConstructorTmp = new LinkedList<String>();
+		qhConstructorTmp.add(0, qhClassName);
+		if (qhConstructorTmp != null)
+			qhConstructorTmp.addAll(qhConstructor);
+		return qhConstructorTmp.toArray(new String[] {});
+	}
+	
 	@Override
 	public void setClassName(String className) {
 		//
@@ -351,11 +356,7 @@ public class Stresstest extends AbstractTask {
 			conf.addProperty(taskID + "x.noOfQueryMixes", typeValue);
 			constructor[1] = taskID + "x.noOfQueryMixes";
 		}
-		List<String> qhConstructorTmp = new LinkedList<String>();
-		qhConstructorTmp.add(0, qhClassName);
-		if (qhConstructor != null)
-			qhConstructorTmp.addAll(qhConstructor);
-		conf.addProperty(taskID + "x.queryHandler", qhConstructorTmp.toArray(new String[] {}));
+		conf.addProperty(taskID + "x.queryHandler", getQHConstructor());
 		qhConstructorTmp.clear();
 		constructor[2] = taskID + "x.queryHandler";
 		conf.addProperty(taskID + "x.workers", workersConstr.toArray());
