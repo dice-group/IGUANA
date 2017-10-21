@@ -25,3 +25,9 @@ deptree.txt
 tmp_ser
 
 queryInstances
+iguana.commons/bin/
+iguana.corecontroller/bin/
+iguana.taskprocessor/bin/
+iguana.datagenerator/bin/
+iguana.webcontroller/bin/
+iguana.resultprocessor/bin/

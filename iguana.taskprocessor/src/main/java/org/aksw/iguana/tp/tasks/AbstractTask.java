@@ -25,6 +25,8 @@ public abstract class AbstractTask implements Task {
 	protected String taskID;
 	protected String service;
 	protected String updateService;
+	protected String user;
+	protected String password;
 
 	/**
 	 * Properties to add task specific metaData before start and execute which then
@@ -45,6 +47,8 @@ public abstract class AbstractTask implements Task {
 	public AbstractTask(String[] ids, String[] services) {
 		this.service = services[0];
 		this.updateService = services[1]==null?service:services[1];
+		this.user = services[2];
+		this.user = services[3];
 		setIDs(ids);
 		
 	}

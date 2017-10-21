@@ -41,6 +41,8 @@ public class ConfigConverter {
 			conf.addProperty(conID + ".name", con.getName());
 			conf.addProperty(conID + ".service", con.getService());
 			conf.addProperty(conID + ".update.service", con.getService());
+			conf.addProperty(conID + ".user", con.getUser());
+			conf.addProperty(conID + ".password", con.getPwd());
 			objects.add(conID);
 			index++;
 		}

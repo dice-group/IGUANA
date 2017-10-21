@@ -64,6 +64,9 @@ public abstract class AbstractWorker implements Worker {
 	protected String queriesFileName;
 
 	protected String service;
+	
+	protected String user;
+	protected String password;
 
 	protected Long timeOut=180000L;
 
@@ -97,19 +100,21 @@ public abstract class AbstractWorker implements Worker {
 		if(args[2]!=null)
 			this.timeLimit = Long.parseLong(args[2]);
 		this.service = args[3];
-		if(args[4]!=null)
-			this.timeOut = Long.parseLong(args[4]);
+		this.user=args[4];
+		this.password=args[5];
+		if(args[6]!=null)
+			this.timeOut = Long.parseLong(args[6]);
 		// workerID represents seed to be fair with different systems.
 		latencyRandomizer = new Random(this.workerID);
 
 		// set Query file/folder Name
-		this.queriesFileName = args[5];
+		this.queriesFileName = args[7];
 
 		// Add latency Specs, add defaults
 		if(args[6]!=null)
-			this.fixedLatency = Integer.parseInt(args[6]);
+			this.fixedLatency = Integer.parseInt(args[8]);
 		if(args[7]!=null)
-			this.gaussianLatency = Integer.parseInt(args[7]);
+			this.gaussianLatency = Integer.parseInt(args[9]);
 		
 		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
 

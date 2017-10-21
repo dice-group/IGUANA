@@ -97,7 +97,7 @@ public class Stresstest extends AbstractTask {
 			noOfWorkers+=workers;
 			for (int j = 0; j < workers; j++) {
 				// set taskID, workerID, workerConfig
-				String[] config = new String[2 + workerConfig.length];
+				String[] config = new String[4 + workerConfig.length];
 				config[0] = taskID;
 				config[1] = workerID.toString();
 				workerID++;
@@ -112,12 +112,15 @@ public class Stresstest extends AbstractTask {
 					config[3] = service;
 					
 				}
+				config[4] = user;
+				config[5] = password;
+				
 				for (int i = 2; i < workerConfig.length; i++) {
 					if(workerConfig[i]==null) {
-						config[i+2] = null;
+						config[i+4] = null;
 					}
 					else {
-						config[i + 2] = workerConfig[i];
+						config[i + 4] = workerConfig[i];
 					}
 				}
 				Worker worker = factory.create(workerConfig[1], new String[] {});

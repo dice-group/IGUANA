@@ -16,5 +16,7 @@ public class CONSTANTS {
 	public static final String NAME_SUFFIX = ".name";
 	public static final String SERVICE_SUFFIX = ".service";
 	public static final String UPDATE_SERVICE_SUFFIX = ".update.service";
+	public static final String SERVICE_USER = ".user";
+	public static final String SERVICE_PASSWORD = ".pwd";
 	
 }

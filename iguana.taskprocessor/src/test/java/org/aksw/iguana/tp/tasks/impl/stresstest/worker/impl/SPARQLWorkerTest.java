@@ -26,7 +26,7 @@ public class SPARQLWorkerTest {
 	 */
 	@Test
 	public void testTime() throws IOException {
-		Worker worker = new SPARQLWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql", null,  "","0","0"});
+		Worker worker = new SPARQLWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql",null,null, null,  "","0","0"});
 		assertTrue(worker.getTimeForQueryMs("select * {?s ?p ?o}", "1")>0);
 		
 	}
@@ -38,7 +38,7 @@ public class SPARQLWorkerTest {
 	 */
 //	@Test
 	public void testTimeout() throws IOException {
-		Worker worker = new SPARQLWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql", "1",  "","0","0"});
+		Worker worker = new SPARQLWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql",null,null, "1",  "","0","0"});
 		assertEquals(new Long(-1), worker.getTimeForQueryMs("select * {?s ?p ?o}", "1"));
 		
 	}
@@ -49,7 +49,7 @@ public class SPARQLWorkerTest {
 	 */
 	@Test 
 	public void testGetNextQuery() throws IOException {
-		Worker worker = new SPARQLWorker(new String[] {"1", "1",  null, "http://dbpedia.org/sparql", "5",  
+		Worker worker = new SPARQLWorker(new String[] {"1", "1",  null, "http://dbpedia.org/sparql", null,null, "5",  
 				"","0","0"});
 		((AbstractWorker) worker).setQueriesList(new File[] {new File("src/test/resources/worker/sparql.sparql") });
 		StringBuilder query = new StringBuilder();

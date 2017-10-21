@@ -57,7 +57,7 @@ public class UPDATEWorkerTest {
 	 */
 	@Test
 	public void testTime() throws IOException {
-		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, host, null,
+		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, host, null, null,  null,
 				"", "0", "0", "NONE", "NONE"});
 		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "1");
@@ -70,7 +70,7 @@ public class UPDATEWorkerTest {
 	 */
 	@Test
 	public void testTimeout() throws IOException {
-		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, host,  "1", 
+		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, host, null, null,   "1", 
 				"", "0", "0", "NONE","NONE"});
 		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "1");
@@ -83,7 +83,7 @@ public class UPDATEWorkerTest {
 	 */
 	@Test
 	public void testGetNextQuery() throws IOException {
-		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql", "5",
+		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql", null, null,  "5",
 				"", "0", "0", "NONE","NONE"});
 		((AbstractWorker) worker).setQueriesList(new File[] {new File("src/test/resources/worker/sparql.sparql") });
 		StringBuilder query = new StringBuilder();
@@ -93,6 +93,15 @@ public class UPDATEWorkerTest {
 		assertEquals("sparql.sparql", queryID.toString());
 	}
 
+//	@Test FIXME server mock cannot use credentials, must think about something
+	public void checkCredentials() {
+		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql-auth", "dba", "dba", null,
+				"", "0", "0", "NONE","NONE"});
+		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
+				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "2");
+		assertTrue(time > 0);
+	}
+	
 	/**
 	 * closes the Server Mock
 	 * @throws IOException

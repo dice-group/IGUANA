@@ -10,9 +10,18 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateComparator;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateStrategy;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateTimer;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.jena.sparql.modify.UpdateProcessRemote;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
@@ -27,39 +36,39 @@ import org.apache.jena.update.UpdateRequest;
  */
 public class UPDATEWorker extends AbstractWorker {
 
-
 	private int currentQueryID = 0;
 	private UpdateStrategy updateStrategy;
 	private UpdateTimer updateTimer = new UpdateTimer();
 
-	
 	/**
 	 * Constructor. no need for init method
-	 * @param args 
+	 * 
+	 * @param args
 	 * 
 	 */
 	public UPDATEWorker(String[] args) {
-//		super(taskID, workerID, "UPDATE", timeLimitMS, updateFolder, fixedLatency, gaussianLatency);
+		// super(taskID, workerID, "UPDATE", timeLimitMS, updateFolder, fixedLatency,
+		// gaussianLatency);
 		super(args, "UPDATE");
 
 		// set default updateStrategy to none
 		this.updateStrategy = UpdateStrategy.NONE;
 		// if updateStrategy is set, set updateStrategy
 		if (updateStrategy != null) {
-			this.updateStrategy = UpdateStrategy.valueOf(args[9]);
+			this.updateStrategy = UpdateStrategy.valueOf(args[11]);
 		}
 
-		setUpdateTimer(args[8]);
+		setUpdateTimer(args[10]);
 	}
 
 	/**
 	 * 
 	 */
 	public UPDATEWorker() {
-		//bla
+		// bla
 		super("UPDATEWorker");
 	}
-	
+
 	@Override
 	public void init(String[] args) {
 		super.init(args);
@@ -68,12 +77,12 @@ public class UPDATEWorker extends AbstractWorker {
 		this.updateStrategy = UpdateStrategy.NONE;
 		// if updateStrategy is set, set updateStrategy
 		if (updateStrategy != null) {
-			this.updateStrategy = UpdateStrategy.valueOf(args[9]);
+			this.updateStrategy = UpdateStrategy.valueOf(args[11]);
 		}
 
-		setUpdateTimer(args[8]);
+		setUpdateTimer(args[10]);
 	}
-	
+
 	@Override
 	public void init(Properties p) {
 		// At first call init from AbstractWorker!
@@ -114,6 +123,7 @@ public class UPDATEWorker extends AbstractWorker {
 
 		// create Update Processor and use timeout config
 		UpdateProcessor exec = UpdateExecutionFactory.createRemote(update, service, client);
+		setCredentials(exec);
 
 		try {
 			long start = System.currentTimeMillis();
@@ -130,6 +140,23 @@ public class UPDATEWorker extends AbstractWorker {
 		}
 		// Exception was thrown, return error
 		return -1L;
+	}
+
+	private void setCredentials(UpdateProcessor exec) {
+		if (exec instanceof UpdateProcessRemote) {
+			if (user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
+				CredentialsProvider provider = new BasicCredentialsProvider();
+
+				provider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
+						new UsernamePasswordCredentials(user, password));
+				HttpContext httpContext = new BasicHttpContext();
+				httpContext.setAttribute(HttpClientContext.CREDS_PROVIDER, provider);
+				
+				((UpdateProcessRemote) exec).setHttpContext(httpContext);
+				HttpClient test = ((UpdateProcessRemote)exec).getClient();
+				System.out.println(test);
+			}
+		}
 	}
 
 	@Override
@@ -157,9 +184,10 @@ public class UPDATEWorker extends AbstractWorker {
 	}
 
 	/**
-	 * Sets Update Timer according to strategy 
+	 * Sets Update Timer according to strategy
 	 * 
-	 * @param strategyStr The String representation of a UpdateTimer.Strategy
+	 * @param strategyStr
+	 *            The String representation of a UpdateTimer.Strategy
 	 */
 	private void setUpdateTimer(String strategyStr) {
 		if (strategyStr == null)
@@ -168,7 +196,7 @@ public class UPDATEWorker extends AbstractWorker {
 		switch (strategy) {
 		case FIXED:
 			if (timeLimit != null) {
-				this.updateTimer = new UpdateTimer(this.queryFileList.length/this.timeLimit);
+				this.updateTimer = new UpdateTimer(this.queryFileList.length / this.timeLimit);
 			} else {
 				LOGGER.warn("Worker[{{}} : {{}}]: FIXED Updates can only be used with timeLimit!", workerType,
 						workerID);
@@ -187,9 +215,10 @@ public class UPDATEWorker extends AbstractWorker {
 		}
 		LOGGER.debug("Worker[{{}} : {{}}]: UpdateTimer was set to UpdateTimer:{{}}", workerType, workerID, updateTimer);
 	}
-	
+
 	/**
 	 * Returns list of updates
+	 * 
 	 * @return
 	 */
 	public File[] getUpdateFiles() {

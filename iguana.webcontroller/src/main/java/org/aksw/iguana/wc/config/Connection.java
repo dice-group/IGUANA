@@ -15,8 +15,8 @@ public class Connection implements Serializable{
 	private String name;
 	private String updateService;
 	private String service;
-	private String user="";
-	private String pwd="";
+	private String user;
+	private String pwd;
 	
 	/**
 	 * Gets the service endpoint to test

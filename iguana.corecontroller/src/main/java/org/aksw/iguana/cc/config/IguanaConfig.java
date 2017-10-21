@@ -94,6 +94,12 @@ public class IguanaConfig {
 				//get service and updateService!
 				String service=config.getString(conIDV+CONSTANTS.SERVICE_SUFFIX);
 				String updateService=config.getString(conIDV+CONSTANTS.UPDATE_SERVICE_SUFFIX);
+				String user=null, pwd=null;
+				if(config.containsKey(conIDV+CONSTANTS.SERVICE_USER) &&
+						config.containsKey(conIDV+CONSTANTS.SERVICE_PASSWORD)) {
+					user=config.getString(conIDV+CONSTANTS.SERVICE_USER);
+					pwd=config.getString(conIDV+CONSTANTS.SERVICE_PASSWORD);
+				}
 				for(String taskIDV : tasksIDV) {
 					taskID++;
 					Properties taskProperties = new Properties();
@@ -104,7 +110,7 @@ public class IguanaConfig {
 					List<Object> classes = new LinkedList<Object>();
 					constructor.add(ids);
 					classes.add(String[].class);
-					constructor.add(new String[] {service, updateService});
+					constructor.add(new String[] {service, updateService, user, pwd});
 					classes.add(String[].class);
 					Configuration taskConfig = createTaskConfig(config, taskIDV);
 					taskProperties.put("taskConfig", taskConfig);
