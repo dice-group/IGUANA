@@ -65,6 +65,21 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 		super(workers);
 		this.service = service;
 	}
+
+	/**
+	 * 
+	 * The constructor for the pattern based QueryHandler. <br/>
+	 * <br/>
+	 * This will check all Workers if they are of type SPARQL or UPDATEWorker and gets their 
+	 * querysFile/updatePath to generate queries out of it.
+	 * 
+	 * @param workers 
+	 * @param service the sparql endpoint to derive the variable instances
+	 * @param limit the resitriction of query instances per query pattern as String 
+	 */
+	public PatternQueryHandler(LinkedList<Worker> workers, String service, String limit) {
+		this(workers, service, Long.parseLong(limit));
+	}
 	
 	/**
 	 * 
