@@ -54,6 +54,10 @@ public class LiveController implements Serializable{
 		if(obj == null)
 			return;
 		//get taskID to update
+		if(!taskID.equals(obj[2].toString())) {
+			//task changed.
+			queryResults = new HashMap<String, Long[]>();
+		}
 		this.taskID = obj[2].toString();
 		//get queryID and Time it took.
 		String queryIDRecv = obj[0].toString();
