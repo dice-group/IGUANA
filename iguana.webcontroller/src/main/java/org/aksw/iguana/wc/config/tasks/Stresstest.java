@@ -89,8 +89,12 @@ public class Stresstest extends AbstractTask {
 	private String[] getQHConstructor() {
 		List<String> qhConstructorTmp = new LinkedList<String>();
 		qhConstructorTmp.add(0, qhClassName);
-		if (qhConstructorTmp != null)
-			qhConstructorTmp.addAll(qhConstructor);
+		if (qhConstructor != null) {			
+			for(String str : qhConstructor) {
+				if(str!=null)
+					qhConstructorTmp.add(str);
+			}
+		}
 		return qhConstructorTmp.toArray(new String[] {});
 	}
 	
