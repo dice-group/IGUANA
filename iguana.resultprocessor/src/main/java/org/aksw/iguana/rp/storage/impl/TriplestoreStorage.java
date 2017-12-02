@@ -90,16 +90,18 @@ public class TriplestoreStorage extends TripleBasedStorage {
 		if(blockUpdate.length()==0){
 			return;
 		}
-		blockUpdate.insert(0, "INSERT DATA { ");
-		blockUpdate.append(" }");
+//		blockUpdate.insert(0, "INSERT DATA { ");
+//		blockUpdate.append(" }");
+		String update = "INSERT DATA {"+blockUpdate+"}";
 		//Create Update Request from block
-		blockRequest.add(blockUpdate.toString());
+		blockRequest.add(update);
+		
+		blockUpdate =  new StringBuilder();
 		//submit Block to Triple Store
 		UpdateProcessor processor = UpdateExecutionFactory
 				.createRemote(blockRequest, updateEndpoint, createHttpClient());
 		processor.execute();
 		blockRequest = new UpdateRequest();
-		blockUpdate =  new StringBuilder();
 	}
 
 	/* (non-Javadoc)
