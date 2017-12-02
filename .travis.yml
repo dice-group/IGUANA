@@ -16,7 +16,7 @@ jdk:
 
 before_install:
  - sudo apt-get update -qq
- - sudo apt-get install -f maven rabbitmq-server -qq
+ - sudo apt-get install -f maven rabbitmq-server
 
 install: true 
 
