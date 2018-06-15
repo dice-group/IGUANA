@@ -1,6 +1,6 @@
 [![GitLicense](https://gitlicense.com/badge/dice-group/IGUANA)](https://gitlicense.com/license/dice-group/IGUANA)
 [![Build Status](https://travis-ci.org/dice-group/IGUANA.svg?branch=develop)](https://travis-ci.org/dice-group/IGUANA)
-[![BCH compliance](https://bettercodehub.com/edge/badge/AKSW/IGUANA?branch=develop)](https://bettercodehub.com/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/AKSW/IGUANA?branch=master)](https://bettercodehub.com/)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9668460dd04c411fab8bf5ee9c161124)](https://www.codacy.com/app/TortugaAttack/IGUANA?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AKSW/IGUANA&amp;utm_campaign=Badge_Grade)
 [![Project Stats](https://www.openhub.net/p/iguana-benchmark/widgets/project_thin_badge.gif)](https://www.openhub.net/p/iguana-benchmark)
 
@@ -28,8 +28,8 @@ It provides an enviroment which ...
 + ... is easily extendable
 
 
-For futher Information visit
+For further Information visit
 
-[iguana-benchmark.eu](http://iguana-benchmark.eu)
+[iguana-benchmark.eu](http://iguana-benchmark.eu) (Currently not updated to v2)
 
 [Wiki](https://github.com/AKSW/IGUANA/wiki)
