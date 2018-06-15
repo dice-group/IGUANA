@@ -300,6 +300,9 @@ public class Stresstest extends AbstractTask {
 			}
 			return endFlag;
 		}
+//		System.out.println(""+(timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime)));
+//		System.out.println(workers.get(0).getExecutedQueries());
+//		LOGGER.error(""+(timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime)));
 		return timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime) <= 0;
 	}
 

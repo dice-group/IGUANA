@@ -84,6 +84,7 @@ public abstract class AbstractTask implements Task {
 
 	@Override
 	public void sendResults(Properties data) throws IOException {
+		data.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
 		this.sender.send(RabbitMQUtils.getData(data));
 	}
 
@@ -110,7 +111,7 @@ public abstract class AbstractTask implements Task {
 		metaData.setProperty(COMMON.SUITE_ID_KEY, this.suiteID);
 		metaData.setProperty(COMMON.DATASET_ID_KEY, this.datasetID);
 		metaData.setProperty(COMMON.CONNECTION_ID_KEY, this.conID);
-
+		this.metaData.put(COMMON.EXTRA_META_KEY, new Properties());
 	}
 
 
