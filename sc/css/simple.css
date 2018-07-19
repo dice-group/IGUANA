@@ -1,0 +1,90 @@
+
+.tablebtn {
+	width:85% !important;
+	left:10% !important;
+}
+
+select[multiple] {
+	width: 100%;
+}
+
+#table-wrapper {
+  position:relative;
+}
+#table-scroll {
+  height:400px;
+  overflow:auto;  
+  margin-top:20px;
+}
+#table-wrapper table {
+  width:100%;
+table-layout: auto;
+}
+#table-wrapper table thead th .text {
+  position:absolute;   
+  top:-20px;
+  z-index:2;
+  height:20px;
+  width:35%;
+}
+
+
+.itxt {
+	width: 50%;
+	position: relative;
+	left: 25%
+}
+
+table {
+	table-layout: fixed;
+}
+
+
+
+.fancytable {
+	border-bottom: 1px solid #ddd;
+	width: 85%;
+	float: left;
+	left: 10%;
+	border-collapse: collapse;
+}
+
+.fancytable td {
+	text-align: center;
+	width: 10em;
+	padding: 1em;
+}
+
+.fancytable th {
+	font-size: 1.5em;
+	text-align: center;
+	padding: 0.5em;
+	background-color: #79CDC0;
+	color: white;
+}
+
+
+.fancytable tr {
+	height: 1em;
+}
+
+.fancytable tr:nth-child(even) { /* added all even rows a #eee color  */
+	background-color: #eee;
+}
+
+.fancytable	table tr:nth-child(odd) {
+	/* added all odd rows a #fff color  */
+	background-color: #fff;
+}
+
+.fancytable.one {
+	margin-bottom: 3em;
+	border-collapse: collapse;
+}
+
+.fancytable td {
+	text-align: left;
+	width: 10em;
+	padding: 1em;
+}
+
