@@ -38,7 +38,7 @@
 
 <body>
   <section id="header" class="appear"></section>
-  <div class="navbar navbar-fixed-top" role="navigation" data-0="line-height:100px; height:100px; background-color:rgba(0,0,0,0.3);" data-300="line-height:60px; height:60px; background-color:rgba(0,0,0,1);">
+  <div id="nav" class="navbar navbar-fixed-top" role="navigation" data-0="line-height:100px; height:100px; background-color:rgba(0,0,0,0.3);" data-300="line-height:60px; height:60px; background-color:rgba(0,0,0,1);">
     <div class="container">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -231,7 +231,7 @@ Afterwards the score, the tables and charts will be generated which you can view
         		</button>-->
 		</div>
 <div class="col-md-8 col-md-offset-2">
-			<button type="button" class="btn btn-lg btn-info" onclick="downloadHTML()">
+			<button type="button" class="btn btn-lg btn-info" onclick="downloadHTML(results)">
           			<span class="glyphicon glyphicon-download"></span> Download HTML
         		</button>
 		</div>
@@ -688,15 +688,15 @@ chartData: '='
 
 
 
-function downloadHTML(){
+function downloadHTML(resultsVar){
 	var html = "<html class='js flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients no-cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache no-svg no-inlinesvg no-smil no-svgclippaths skrollr skrollr-desktop'>";
 	var head = "<head>"+document.head.innerHTML+"</head>";
-	var nav = document.getElementById("header").innerHTML;	
-	var footer = document.getElementById("footer").innerHTML;	
+	var nav = document.getElementById("nav").outerHTML;	
+	var footer = document.getElementById("footer").outerHTML;	
 	var results = "<div ng-app='sparql' ng-controller='sparqlController as sc'>"+document.getElementById("results").innerHTML+"</div>";
-
+	var angular = "var app = angular.module('sparql', ['chart.js']); app.directive('chart', function () {return {restrict: 'E',templateUrl: 'templates/chartTemplate.html',scope: {chartData: '='}};});app.directive('chartline', function () {return {restrict: 'E',templateUrl: 'templates/chartLine.html',scope: {chartData: '='}};});app.config(['ChartJsProvider', function (ChartJsProvider) {ChartJsProvider.setOptions({colors : [ getRandomColor(), getRandomColor(), getRandomColor(), getRandomColor(), getRandomColor(), getRandomColor(), getRandomColor()],responsive: true,legend: { display: true },scales: {yAxes: [{ticks: { beginAtZero: true} }]}}); ChartJsProvider.setOptions('line', {showLines: false});}]); Chart.defaults.global.colors=[ getRandomColor(), getRandomColor(), getRandomColor(), getRandomColor(), getRandomColor(), getRandomColor(), getRandomColor()]; app.controller('sparqlController', function($scope, $http, $location) {$scope.results="+resultsVar+"}); var chartData="+resultsVar+";";
 	var scripts = document.getElementById("scripts").innerHTML;
-	downloadFile("results_iguana.html", html+head+"<body>"+nav+results+scripts+footer+"</body></html>");
+	downloadFile("results_iguana.html", html+head+"<body>"+nav+results+scripts+"<script>"+angular+"<\/script>"+footer+"</body></html>");
 }
 
 function downloadFile(filename, text) {
