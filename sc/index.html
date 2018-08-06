@@ -587,6 +587,7 @@ chartData: '='
 							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/succeded> ?metric", [], "NoOfQueries");
 							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/queryMixes> ?metric", [], "QMPH");
 							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> ?metric", [], "NoQPH");
+							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/queriesPerSecond> ?metric", ["queryID"], "QPS");
 							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/failed> ?metric", ["queryID"], "Failed");
 							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/succeded> ?metric", ["queryID"], "Succeded");
 							$scope.getStats();
