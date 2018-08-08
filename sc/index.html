@@ -465,7 +465,7 @@ chartData: '='
 							}
 						console.log($scope.results);
 						}
-						$scope.getSingleMetric =function(metric, add, title){
+						$scope.getSingleMetric =function(metric, add, title, distinct){
 							//for taskUris : compareUris:
 							var addPro = "";							
 							for(a in add){
@@ -473,7 +473,7 @@ chartData: '='
 							}
 							for(task in $scope.compareUris) {
 								//SELECT 
-								$scope.sparqlSubmit("SELECT ?suiteID ?dataset ?connection "+addPro+" (SUM(DISTINCT ?metric) AS ?METRIC) {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" } GROUP BY ?suiteID ?dataset ?connection "+addPro, {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
+								$scope.sparqlSubmit("SELECT ?suiteID ?dataset ?connection "+addPro+" (SUM("+dist+" ?metric) AS ?METRIC) {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" } GROUP BY ?suiteID ?dataset ?connection "+addPro, {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
 									function($data){							
 										var resultData = [];	
 										
@@ -584,9 +584,9 @@ chartData: '='
 							//add row 
 						}
 						$scope.retrieveResults = function(){
-							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query .  ?query <http://iguana-benchmark.eu/properties/succeded> ?metric", [], "NoOfQueries");
-							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/queryMixes> ?metric", [], "QMPH");
-							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> ?metric", [], "NoQPH");
+							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query .  ?query <http://iguana-benchmark.eu/properties/succeded> ?metric", [], "NoOfQueries", "");
+							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/queryMixes> ?metric", [], "QMPH", "DISTINCT");
+							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> ?metric", [], "NoQPH", "DISTINCT");
 							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/queriesPerSecond> ?metric", ["queryID"], "QPS");
 							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/failed> ?metric", ["queryID"], "Failed");
 							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/succeded> ?metric", ["queryID"], "Succeded");
