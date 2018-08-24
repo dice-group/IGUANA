@@ -32,7 +32,7 @@ public class QueryHandlerFactory extends TypedFactory<QueryHandler> {
 			stringClass[i]=String.class;
 		}
 		
-		return createWorkerBasedQueryHandler(className, stringClass, stringClass, workers);
+		return createWorkerBasedQueryHandler(className, constructorArgs, stringClass, workers);
 	}
 	
 	/**
