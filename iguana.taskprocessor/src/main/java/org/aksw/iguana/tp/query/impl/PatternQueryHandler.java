@@ -103,7 +103,7 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 
 		File queryFile = new File(queryFileName);
 		List<File> ret = new LinkedList<File>();
-		String idPrefix = "string";
+		String idPrefix = "sparql";
 		// check if folder is cached
 		if (queryFile.exists()) {
 			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode());
