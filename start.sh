@@ -78,6 +78,7 @@ if [ "-D" == $1 ]; then
 elif [ $1 == "--help" ]; then
   help2  
 else
+  mvn clean install
   MODULE=$1;
   if [ -n "$3" ]; then
     CONFIG=$2;

@@ -137,5 +137,11 @@ public class COMMON {
 	
 	public static final String PRE_SCRIPT_HOOK = "script.hook.pre";
 	public static final String POST_SCRIPT_HOOK = "script.hook.post";
+
+	public static final Object QUERY_ID = "queryID";
+
+	public static final Object QUERY_STRING = "queryString";
+
+	public static final Object DOUBLE_RAW_RESULTS = "doubleRawResults";
 	
 }

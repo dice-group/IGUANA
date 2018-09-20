@@ -25,7 +25,7 @@ services:
 
 
   result-processor:
-    image: iguana/resultprocessor:latest
+    image: iguana/resultprocessor:live
     networks:
      - iguana
     ports: 
@@ -34,6 +34,7 @@ services:
      - RABBIT_HOST=rabbit
     depends_on:
      - rabbit
+     - web
 
 
 networks:
