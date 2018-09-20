@@ -39,6 +39,7 @@ public class DefaultConsumer extends AbstractConsumer {
 			PropertiesConfiguration config = new PropertiesConfiguration();
 			try {
 				config.load(new StringReader(dataStr));
+				System.out.println("Config received");
 			} catch (ConfigurationException e1) {
 				LOGGER.error("Could not read configuration. Must ignore it... Sorry :(", e1);
 

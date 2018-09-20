@@ -113,7 +113,7 @@ public class UPDATEWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Long getTimeForQueryMs(String query, String queryID) {
+	public Long[] getTimeForQueryMs(String query, String queryID) {
 		UpdateRequest update = UpdateFactory.create(query);
 
 		// Set update timeout
@@ -124,22 +124,23 @@ public class UPDATEWorker extends AbstractWorker {
 		// create Update Processor and use timeout config
 		UpdateProcessor exec = UpdateExecutionFactory.createRemote(update, service, client);
 		setCredentials(exec);
+			long start = System.currentTimeMillis();
 
 		try {
-			long start = System.currentTimeMillis();
 			// Execute Update
 			exec.execute();
 			long end = System.currentTimeMillis();
 			LOGGER.debug("Worker[{{}} : {{}}]: Update with ID {{}} took {{}}.", this.workerType, this.workerID, queryID,
 					end - start);
 			// Return time
-			return end - start;
+			return new Long[]{1L, end - start};
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following update\n{{}}\n due to", this.workerType,
 					this.workerID, query, e);
 		}
 		// Exception was thrown, return error
-		return -1L;
+		//return -1L;
+		return new Long[]{0L, System.currentTimeMillis()-start};
 	}
 
 	private void setCredentials(UpdateProcessor exec) {

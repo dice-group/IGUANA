@@ -77,7 +77,7 @@ public abstract class AbstractTask implements Task {
 
 	@Override
 	public void start() {
-
+		System.out.println("will start task");
 		// send to ResultProcessor
 		this.sender.send(RabbitMQUtils.getData(metaData));
 	}

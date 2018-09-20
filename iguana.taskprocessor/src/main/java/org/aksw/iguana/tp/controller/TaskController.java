@@ -74,7 +74,7 @@ public class TaskController {
  	 */
 	public void startTask(Properties p) {
 		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
-
+		System.out.println("start task");
 		TaskManager tmanager = new TaskManager(host, COMMON.CORE2RP_QUEUE_NAME);
 		DefaultConsumer consumer = new DefaultConsumer(tmanager);
 		consumer.consume(p);

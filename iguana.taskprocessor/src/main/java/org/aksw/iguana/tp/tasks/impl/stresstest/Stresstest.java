@@ -77,7 +77,7 @@ public class Stresstest extends AbstractTask {
 	public void setConfiguration(Configuration taskConfig) {
 		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit"));
 		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));
-		
+		System.out.println(noOfQueryMixes);
 		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
 		this.qhClassName = tmp[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
@@ -229,12 +229,12 @@ public class Stresstest extends AbstractTask {
 	private LinkedList<Worker> initWarmupWorkers(){
 		LinkedList<Worker> warmupWorkers = new LinkedList<Worker>();
 		if(warmupQueries!=null) {
-			SPARQLWorker sparql = new SPARQLWorker(new String[] {"-1", "1",  "0L", service, null,  warmupQueries, null, null});
+			SPARQLWorker sparql = new SPARQLWorker(new String[] {"-1", "1",  "0", service, null,  warmupQueries, null, null});
 			warmupWorkers.add(sparql);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one SPARQL worker.", taskID);
 		}
 		if(warmupUpdates!=null) {
-			UPDATEWorker update = new UPDATEWorker(new String[] {"-1", "2", "0L", service, null,  warmupUpdates, null,null, null, null});
+			UPDATEWorker update = new UPDATEWorker(new String[] {"-1", "2", "0", service, null,  warmupUpdates, null,null, null, null});
 			warmupWorkers.add(update);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);
 		}	
@@ -280,6 +280,7 @@ public class Stresstest extends AbstractTask {
 				long queriesInMix = 0;
 				if (worker instanceof SPARQLWorker) {
 					queriesInMix = ((AbstractWorker) worker).getNoOfQueries();
+					System.out.println(queriesInMix+" : "+noOfQueryMixes);
 					if (worker.getExecutedQueries() / queriesInMix * 1.0 >= noOfQueryMixes) {
 
 						worker.stopSending();

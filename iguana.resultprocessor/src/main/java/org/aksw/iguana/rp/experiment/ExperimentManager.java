@@ -70,7 +70,7 @@ public class ExperimentManager {
 		}
 		//Get the Experiment task ID 
 		String taskID =  p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
-		
+		System.out.println("test");
 		LOGGER.info("Got start flag for experiment task ID {}", taskID);
 		
 		MetricManager mmanager = new MetricManager();

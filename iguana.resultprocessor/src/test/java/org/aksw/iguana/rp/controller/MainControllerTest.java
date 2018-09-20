@@ -93,7 +93,7 @@ public class MainControllerTest {
 	    p = new Properties();
 	    p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
 	    p.put(COMMON.RECEIVE_DATA_SUCCESS, true);
-	    p.put(COMMON.RECEIVE_DATA_TIME, 1000);
+	    p.put(COMMON.RECEIVE_DATA_TIME, 1000l);
 	    p.put(COMMON.QUERY_ID_KEY, "1");
 	    p.put(COMMON.EXTRA_META_KEY, extraMeta1);
 	    send(channel, p);
@@ -121,7 +121,7 @@ public class MainControllerTest {
 	    p = new Properties();
 	    p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
 	    p.put(COMMON.RECEIVE_DATA_SUCCESS, true);
-	    p.put(COMMON.RECEIVE_DATA_TIME, 2000);
+	    p.put(COMMON.RECEIVE_DATA_TIME, 2000l);
 	    p.put(COMMON.QUERY_ID_KEY, "2");
 	    p.put(COMMON.EXTRA_META_KEY, extraMeta2);
 	    send(channel, p);
@@ -129,7 +129,7 @@ public class MainControllerTest {
 	    p = new Properties();
 	    p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
 	    p.put(COMMON.RECEIVE_DATA_SUCCESS, false);
-	    p.put(COMMON.RECEIVE_DATA_TIME, 500);
+	    p.put(COMMON.RECEIVE_DATA_TIME, 500l);
 	    p.put(COMMON.QUERY_ID_KEY, "2");
 	    p.put(COMMON.EXTRA_META_KEY, extraMeta1);
 	    send(channel, p);

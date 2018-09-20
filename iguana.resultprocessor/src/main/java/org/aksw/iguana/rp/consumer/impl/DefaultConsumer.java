@@ -44,6 +44,7 @@ public class DefaultConsumer extends AbstractConsumer {
 			System.out.println(data);
 		} else {
 			Properties p = RabbitMQUtils.getObject(data);
+			System.out.println(p);
 			if (p != null) {
 				emanager.receiveData(p);
 			}

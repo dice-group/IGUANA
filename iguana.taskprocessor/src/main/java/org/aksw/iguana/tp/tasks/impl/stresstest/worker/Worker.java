@@ -21,7 +21,7 @@ public interface Worker extends Runnable{
 	 * @param queryID the ID of the query which should be executed
 	 * @return the time/ms the query took to executed, -1 if error happend
 	 */
-	public Long getTimeForQueryMs(String query, String queryID);
+	public Long[] getTimeForQueryMs(String query, String queryID);
 	
 	/**
 	 * This method saves the next query in the queryStr StringBuilder and
