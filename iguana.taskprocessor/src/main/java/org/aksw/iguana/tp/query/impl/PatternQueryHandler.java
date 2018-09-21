@@ -100,10 +100,10 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 
 	@Override
 	protected File[] generateSPARQL(String queryFileName) {
-
+		System.out.println(service);
 		File queryFile = new File(queryFileName);
 		List<File> ret = new LinkedList<File>();
-		String idPrefix = "string";
+		String idPrefix = "sparql";
 		// check if folder is cached
 		if (queryFile.exists()) {
 			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode());
@@ -122,14 +122,18 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 						if(queryStr.isEmpty()) {
 							continue;
 						}
+						System.out.println("Query instanciation: "+queryStr);
+
 						LOGGER.debug("[QueryHandler: {{}}] Trying to instantiate: {{}}", this.getClass(), queryStr);
 						// create a File with an ID
 						File out = createFileWithID(outputFolder, idPrefix);
 						try (PrintWriter pw = new PrintWriter(out)) {
 							for (String query : getInstances(queryStr)) {
-								pw.print(query);
-								LOGGER.debug("[QueryHandler: {{}}] Completed instantiation: {{}}", this.getClass(), queryStr);
+								pw.println(query);
+								
+								//LOGGER.debug("[QueryHandler: {{}}] Completed instantiation: {{}}", this.getClass(), queryStr);
 							}
+							System.out.println("...done "+out);
 						}
 						ret.add(out);
 
@@ -139,7 +143,8 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 				}
 				LOGGER.info("[QueryHandler: {{}}] Finished instantiation of queries", this.getClass().getName());
 			}
-			return (File[]) ret.toArray();
+			File[] bla = new File[ret.size()];
+			return (File[]) ret.toArray(bla);
 		} else {
 			LOGGER.error("[QueryHandler: {{}}] Queries with file {{}} could not be instantiated due to missing file", this.getClass().getName(), queryFileName);
 		}
@@ -181,9 +186,11 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 		ParameterizedSparqlString pss = new ParameterizedSparqlString();
 		pss.setCommandText(command);
 		ResultSet exchange = getInstanceVars(pss, varNames);		
+		System.out.println("instaces retrieved");
 		// exchange vars in PSS
 		if(!exchange.hasNext()) {
 			//no solution
+			System.out.println("No solution");
 			LOGGER.warn("[QueryHandler: {{}}] Query has no solution, will use variables instead of var instances: {{}}", this.getClass().getName(), queryStr);
 			instances.add(command);
 		}
@@ -196,7 +203,8 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 			}
 			instances.add(pss.toString());
 		}
-		
+		System.out.println("Found instances "+instances);
+
 		return instances;
 	}
  
@@ -221,6 +229,7 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 		pssSelect.setNsPrefixes(pss.getNsPrefixMap());
 		pssSelect.append(" LIMIT ");
 		pssSelect.append(this.limit);
+		System.out.println(pssSelect);
 		return pssSelect.asQuery();
 	}
 
