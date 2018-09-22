@@ -139,7 +139,7 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 				}
 				LOGGER.info("[QueryHandler: {{}}] Finished instantiation of queries", this.getClass().getName());
 			}
-			return (File[]) ret.toArray();
+			return (File[]) ret.toArray(new File[0]);
 		} else {
 			LOGGER.error("[QueryHandler: {{}}] Queries with file {{}} could not be instantiated due to missing file", this.getClass().getName(), queryFileName);
 		}
