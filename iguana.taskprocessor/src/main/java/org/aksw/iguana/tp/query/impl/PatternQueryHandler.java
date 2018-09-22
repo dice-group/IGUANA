@@ -127,7 +127,7 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 						File out = createFileWithID(outputFolder, idPrefix);
 						try (PrintWriter pw = new PrintWriter(out)) {
 							for (String query : getInstances(queryStr)) {
-								pw.print(query);
+								pw.println(query);
 								LOGGER.debug("[QueryHandler: {{}}] Completed instantiation: {{}}", this.getClass(), queryStr);
 							}
 						}
