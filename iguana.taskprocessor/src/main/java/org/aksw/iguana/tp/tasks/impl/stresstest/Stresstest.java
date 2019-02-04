@@ -26,6 +26,7 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.WorkerFactory;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker;
 import org.aksw.iguana.tp.utils.ConfigUtils;
+import org.aksw.iguana.tp.utils.QueryStatistics;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +59,14 @@ public class Stresstest extends AbstractTask {
 
 	private Long warmupTimeMS;
 	private String warmupQueries;
-	private String warmupUpdates;	
-	
+	private String warmupUpdates;
+
+	private String queryStatsTriples;
+
+	protected String baseUri = "http://iguana-benchmark.eu";
+	private String iguanaResource = baseUri + "/recource/";
+	private String iguanaProperty = baseUri + "/properties/";
+		
 
 	/**
 	 * @param ids
@@ -145,6 +152,7 @@ public class Stresstest extends AbstractTask {
 		if(noOfQueryMixes!=null)
 			extraMeta.put("noOfQueryMixes", noOfQueryMixes);
 		extraMeta.put("noOfWorkers", noOfWorkers);
+		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, queryStatsTriples);
 		this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
 	}
 
@@ -157,6 +165,7 @@ public class Stresstest extends AbstractTask {
 		// add Worker
 		QueryHandler queryHandler = factory.createWorkerBasedQueryHandler(qhClassName, qhConstructorArgs, workers);
 		queryHandler.generateQueries();
+		queryStatsTriples = queryHandler.generateTripleStats(taskID, iguanaResource, iguanaProperty);
 	}
 
 	/*

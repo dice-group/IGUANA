@@ -143,5 +143,7 @@ public class COMMON {
 	public static final Object QUERY_STRING = "queryString";
 
 	public static final Object DOUBLE_RAW_RESULTS = "doubleRawResults";
+
+	public static final Object SIMPLE_TRIPLE_KEY = "cleanTripleText";
 	
 }

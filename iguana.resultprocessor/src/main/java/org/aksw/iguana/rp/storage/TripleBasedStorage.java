@@ -3,6 +3,7 @@
  */
 package org.aksw.iguana.rp.storage;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -34,6 +35,8 @@ public abstract class TripleBasedStorage implements Storage {
 	private String taskClassUri = baseUri + "/class/Task";
 
 	private String classUri = "http://www.w3.org/2000/01/rdf-schema#Class";
+	private String rdfsUri = "http://www.w3.org/2000/01/rdf-schema#";
+	private String xsdUri = "http://www.w3.org/2001/XMLSchema#";
 
 	/*
 	 * (non-Javadoc)
@@ -118,9 +121,16 @@ public abstract class TripleBasedStorage implements Storage {
 		addBlockUpdate(expID, taskID, properties+"task");
 		addBlockUpdate(expID, datasetID, properties+"dataset");
 		addBlockUpdate(expID, "<" + expClassUri + ">", classUri);
-		addBlockUpdateExtra(p, expID);
 		addBlockUpdate(taskID, connID, properties+"connection");
 		addBlockUpdate(taskID, "<" + taskClassUri + ">", classUri);
+		addBlockUpdateExtra(p, taskID);
+		addBlockUpdate(datasetID, p.getProperty(COMMON.DATASET_ID_KEY),  rdfsUri+"label");
+		if(p.containsKey(COMMON.SIMPLE_TRIPLE_KEY)) {
+			blockUpdate.append(p.get(COMMON.SIMPLE_TRIPLE_KEY));
+		}
+		
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		addBlockUpdate(taskID, timestamp+"^^<"+xsdUri+"dateTime>",rdfsUri+"startDate");
 		
 		// Commit Meta Data and clear updateBlock
 		commit();
@@ -128,10 +138,10 @@ public abstract class TripleBasedStorage implements Storage {
 		blockUpdate = new StringBuilder();
 	}
 
-	private void addBlockUpdateExtra(Properties p, String expID) {
+	private void addBlockUpdateExtra(Properties p, String taskID) {
 		Properties extra = (Properties) p.get(COMMON.EXTRA_META_KEY);
 		for (Object obj : extra.keySet()) {
-			blockUpdate.append(expID);
+			blockUpdate.append(taskID);
 			if (p.containsKey(COMMON.EXTRA_IS_RESOURCE_KEY)
 					&& ((Set<?>) p.get(COMMON.EXTRA_IS_RESOURCE_KEY)).contains(obj)) {
 				blockUpdate.append(" <").append(resource).append(obj.toString()).append("> ");
@@ -146,6 +156,7 @@ public abstract class TripleBasedStorage implements Storage {
 			}
 		}
 	}
+
 
 	private String getID(Properties p, String key) {
 		StringBuilder builder = new StringBuilder();
@@ -163,4 +174,12 @@ public abstract class TripleBasedStorage implements Storage {
 		return this.getClass().getSimpleName();
 	}
 
+	public void endTask(String taskID) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("<").append(resource).append(taskID).append(">");
+
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		addBlockUpdate(builder.toString(), timestamp+"^^<"+xsdUri+"dateTime>",rdfsUri+"endDate");
+	}
+	
 }

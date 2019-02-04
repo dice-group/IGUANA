@@ -61,6 +61,10 @@ public class PropertiesSenderStorage extends SenderStorage<Properties>{
 		}
 	}
 
+	@Override
+	public void endTask(String taskID) {
+	}
+
 
 
 

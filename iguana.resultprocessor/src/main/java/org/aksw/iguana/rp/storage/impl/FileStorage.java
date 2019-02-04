@@ -282,4 +282,6 @@ public class FileStorage implements Storage {
 		return this.getClass().getSimpleName();
 	}
 
+	public void endTask(String taskID) {}
+	
 }
