@@ -40,5 +40,7 @@ public interface Storage {
 	 * @return
 	 */
 	public Properties getStorageInfo();
+
+	public void endTask(String taskID);
 	
 }

@@ -95,5 +95,11 @@ public class StorageManager {
 			s.commit();
 		}
 	}
+
+	public void endTask(String taskID) {
+		for(Storage s: storages){
+			s.endTask(taskID);
+		}
+	}
 	
 }
