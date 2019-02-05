@@ -152,7 +152,6 @@ public class Stresstest extends AbstractTask {
 		if(noOfQueryMixes!=null)
 			extraMeta.put("noOfQueryMixes", noOfQueryMixes);
 		extraMeta.put("noOfWorkers", noOfWorkers);
-		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, queryStatsTriples);
 		this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
 	}
 
@@ -166,6 +165,8 @@ public class Stresstest extends AbstractTask {
 		QueryHandler queryHandler = factory.createWorkerBasedQueryHandler(qhClassName, qhConstructorArgs, workers);
 		queryHandler.generateQueries();
 		queryStatsTriples = queryHandler.generateTripleStats(taskID, iguanaResource, iguanaProperty);
+		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, queryStatsTriples);
+
 	}
 
 	/*

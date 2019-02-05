@@ -216,7 +216,11 @@ public abstract class AbstractWorker implements Worker {
 				Properties result = new Properties();
 				result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
 				result.put(COMMON.RECEIVE_DATA_TIME, time);
-				result.put(COMMON.RECEIVE_DATA_SUCCESS, resultTime[0] > 0);
+				result.put(COMMON.RECEIVE_DATA_SUCCESS, resultTime[0]);
+				if(resultTime.length>2) {
+					System.out.println("size: "+resultTime[2]);
+					result.put(COMMON.RECEIVE_DATA_SIZE, resultTime[2]);
+				}
 				result.setProperty(COMMON.QUERY_ID_KEY, queryID.toString());
 				// Add extra Meta Key, worker ID and worker Type
 				result.put(COMMON.EXTRA_META_KEY, this.extra);

@@ -27,7 +27,7 @@ public class SPARQLWorkerTest {
 	@Test
 	public void testTime() throws IOException {
 		Worker worker = new SPARQLWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql",null,null, null,  "","0","0"});
-		assertTrue(worker.getTimeForQueryMs("select * {?s ?p ?o}", "1")>0);
+		assertTrue(worker.getTimeForQueryMs("select * {?s ?p ?o}", "1")[0]>0);
 		
 	}
 	

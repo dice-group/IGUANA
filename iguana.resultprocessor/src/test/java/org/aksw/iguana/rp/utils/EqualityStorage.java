@@ -95,4 +95,10 @@ public class EqualityStorage implements Storage{
 		this.lastCheck = lastCheck;
 	}
 
+	@Override
+	public void endTask(String taskID) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

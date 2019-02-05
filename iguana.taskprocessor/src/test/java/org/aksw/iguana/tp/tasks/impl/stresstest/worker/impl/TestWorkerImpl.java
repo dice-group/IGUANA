@@ -41,11 +41,11 @@ public class TestWorkerImpl extends AbstractWorker{
 	}
 
 	@Override
-	public Long getTimeForQueryMs(String query, String queryID) {
+	public Long[] getTimeForQueryMs(String query, String queryID) {
 		if(this.workerID==5) {
-			return -1L;
+			return new Long[] {-1L};
 		}
-		return 1L;
+		return  new Long[] {1L};
 	}
 
 	@Override

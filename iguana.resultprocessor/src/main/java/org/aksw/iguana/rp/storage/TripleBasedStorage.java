@@ -124,13 +124,13 @@ public abstract class TripleBasedStorage implements Storage {
 		addBlockUpdate(taskID, connID, properties+"connection");
 		addBlockUpdate(taskID, "<" + taskClassUri + ">", classUri);
 		addBlockUpdateExtra(p, taskID);
-		addBlockUpdate(datasetID, p.getProperty(COMMON.DATASET_ID_KEY),  rdfsUri+"label");
+		addBlockUpdate(datasetID, "\""+p.getProperty(COMMON.DATASET_ID_KEY)+"\"",  rdfsUri+"label");
 		if(p.containsKey(COMMON.SIMPLE_TRIPLE_KEY)) {
 			blockUpdate.append(p.get(COMMON.SIMPLE_TRIPLE_KEY));
 		}
 		
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		addBlockUpdate(taskID, timestamp+"^^<"+xsdUri+"dateTime>",rdfsUri+"startDate");
+		addBlockUpdate(taskID, "\""+timestamp+"\"^^<"+xsdUri+"dateTime>",rdfsUri+"startDate");
 		
 		// Commit Meta Data and clear updateBlock
 		commit();
@@ -179,7 +179,7 @@ public abstract class TripleBasedStorage implements Storage {
 		builder.append("<").append(resource).append(taskID).append(">");
 
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		addBlockUpdate(builder.toString(), timestamp+"^^<"+xsdUri+"dateTime>",rdfsUri+"endDate");
+		addBlockUpdate(builder.toString(), "\""+timestamp+"\"^^<"+xsdUri+"dateTime>",rdfsUri+"endDate");
 	}
 	
 }

@@ -19,7 +19,7 @@ public class QueryStatistics {
 	public int offset=0;
 	public double size=0.0;
 	public int orderBy=0;
-	public int bgp=0;
+	public int triples=0;
 	
 	
 	public void getStatistics(String[] queries) {
@@ -50,12 +50,12 @@ public class QueryStatistics {
 			union+=visitor.union?1:0;
 			optional+=visitor.optional?1:0;
 			filter+=visitor.filter?1:0;
-			int bgps = visitor.bgps;
-			bgp += bgps;
-			if(bgps==1){oneBGP++;}
-			if(bgps==2){twoBGP++;}
-			if(bgps==3){threeBGP++;}
-			if(bgps>3){moreBGP++;}
+			int triples = visitor.bgps;
+			triples += triples;
+			if(triples==1){oneBGP++;}
+			if(triples==2){twoBGP++;}
+			if(triples==3){threeBGP++;}
+			if(triples>3){moreBGP++;}
 			
 		}
 	}

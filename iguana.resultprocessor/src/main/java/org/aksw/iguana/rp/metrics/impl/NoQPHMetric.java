@@ -45,7 +45,7 @@ public class NoQPHMetric extends AbstractMetric {
 	public void receiveData(Properties p) {
 		LOGGER.debug(this.getShortName()+" has received "+p);
 		long time = Long.parseLong(p.get(COMMON.RECEIVE_DATA_TIME).toString());
-		Integer success = (Boolean) p.get(COMMON.RECEIVE_DATA_SUCCESS)?1:0;	
+		Integer success = (long)p.get(COMMON.RECEIVE_DATA_SUCCESS)>0?1:0;	
 		
 		Properties results = new Properties();
 		results.put(TOTAL_TIME, time);

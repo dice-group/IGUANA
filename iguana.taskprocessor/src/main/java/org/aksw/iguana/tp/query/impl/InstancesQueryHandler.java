@@ -138,7 +138,8 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		StringBuilder builder = new StringBuilder();
 		QueryStatistics qs = new QueryStatistics();
 		String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
-
+		String xsdUri = "http://www.w3.org/2001/XMLSchema#";
+		
 		for (File queryFile : queryFiles) {
 			try {
 				String query = FileUtils.readLineAt(0, queryFile);
@@ -148,23 +149,23 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 				qs2.getStatistics(q);
 				//builder.append("<").append(taskID).append("> ").append(property).append("querySet> <").append(resource + queryFile.getName()).append("> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("aggregatins> \"").append(qs2.aggr).append("\" . \n");
+						.append("aggregatins> \"").append(qs2.aggr).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("filter> \"").append(qs2.filter).append("\" . \n");
+						.append("filter> \"").append(qs2.filter).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("groupBy> \"").append(qs2.groupBy).append("\" . \n");
+						.append("groupBy> \"").append(qs2.groupBy).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("having> \"").append(qs2.having).append("\" . \n");
+						.append("having> \"").append(qs2.having).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("bgps> \"").append(qs2.bgp).append("\" . \n");
+						.append("triples> \"").append(qs2.triples).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("offset> \"").append(qs2.offset).append("\" . \n");
+						.append("offset> \"").append(qs2.offset).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("optional> \"").append(qs2.optional).append("\" . \n");
+						.append("optional> \"").append(qs2.optional).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("orderBy> \"").append(qs2.orderBy).append("\" . \n");
+						.append("orderBy> \"").append(qs2.orderBy).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("union> \"").append(qs2.union).append("\" . \n");
+						.append("union> \"").append(qs2.union).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(rdfs)
 						.append("label> \"").append(query).append("\" .\n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(rdfs).append("ID> \"")

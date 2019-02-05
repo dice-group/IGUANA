@@ -57,9 +57,9 @@ public class EachQueryMetric extends AbstractMetric {
 		LOGGER.debug(this.getShortName() + " has received " + p);
 
 		long time = (long) p.get(COMMON.RECEIVE_DATA_TIME);
-		Boolean success = (Boolean) p.get(COMMON.RECEIVE_DATA_SUCCESS);
+		Boolean success = (Boolean) (((long) p.get(COMMON.RECEIVE_DATA_SUCCESS))>0?true:false);
 		String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
-		
+		long err = (long) p.get(COMMON.RECEIVE_DATA_SUCCESS);
 		subject += "/"+queryID;
 
 		long run=1;
@@ -72,12 +72,12 @@ public class EachQueryMetric extends AbstractMetric {
 		results.put("EQE", subject2);
 
 		//as triples
-		Triple[] triples = new Triple[4];
+		Triple[] triples = new Triple[5];
 		triples[0] = new Triple(subject2, "time", time);
 		triples[1] = new Triple(subject2, "success", success);
 		triples[2] = new Triple(subject2, "queryID", queryID);
 		triples[3] = new Triple(subject2, "run", run);
-
+		triples[4] = new Triple(subject2, "errorCode", err);
 
 		
 		Set<String> isRes = new HashSet<String>();
