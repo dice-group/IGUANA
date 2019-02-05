@@ -7,10 +7,6 @@ import org.apache.jena.sparql.syntax.ElementWalker;
 public class QueryStatistics {
 
 	public int aggr=0;
-	public int oneBGP=0;
-	public int twoBGP=0;
-	public int threeBGP=0;
-	public int moreBGP=0;
 	public int filter=0;
 	public int optional=0;
 	public int union=0;
@@ -35,27 +31,22 @@ public class QueryStatistics {
 	
 	public void getStatistics(Query q) {
 		if(q.isSelectType()) {
-
+			
 			size++;
 			offset+=q.hasOffset()?1:0;
 			aggr+=q.hasAggregators()?1:0;
 			groupBy+=q.hasGroupBy()?1:0;
 			having+=q.hasHaving()?1:0;
 			orderBy+=q.hasOrderBy()?1:0;
-			//TODO walk 
+
 			StatisticsVisitor visitor = new StatisticsVisitor();
 			visitor.setElementWhere(q.getQueryPattern());
-			
 			ElementWalker.walk(q.getQueryPattern(), visitor);
+			
 			union+=visitor.union?1:0;
 			optional+=visitor.optional?1:0;
 			filter+=visitor.filter?1:0;
-			int triples = visitor.bgps;
-			triples += triples;
-			if(triples==1){oneBGP++;}
-			if(triples==2){twoBGP++;}
-			if(triples==3){threeBGP++;}
-			if(triples>3){moreBGP++;}
+			triples += visitor.bgps;
 			
 		}
 	}

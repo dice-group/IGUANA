@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
+import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.storage.SenderStorage;
 import org.slf4j.Logger;
@@ -63,6 +64,14 @@ public class PropertiesSenderStorage extends SenderStorage<Properties>{
 
 	@Override
 	public void endTask(String taskID) {
+		Properties p = new Properties();
+		p.put(COMMON.RECEIVE_DATA_END_KEY, true);
+		p.put(COMMON.EXPERIMENT_TASK_ID_KEY, taskID);
+		try {
+			send(p);
+		} catch (IOException | TimeoutException e) {
+			LOGGER.error("Could not send End Flag "+p, e);
+		}
 	}
 
 

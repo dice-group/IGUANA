@@ -282,6 +282,13 @@ public class FileStorage implements Storage {
 		return this.getClass().getSimpleName();
 	}
 
-	public void endTask(String taskID) {}
+	/**
+	 * No need to end something here.
+	 */
+	@Override
+	public void endTask(String taskID) {
+		//Nothing todo
+	}
+	
 	
 }

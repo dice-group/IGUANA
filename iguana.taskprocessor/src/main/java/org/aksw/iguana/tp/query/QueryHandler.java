@@ -1,7 +1,5 @@
 package org.aksw.iguana.tp.query;
 
-import org.aksw.iguana.tp.utils.QueryStatistics;
-
 /**
  * The QueryHandler interface
  * <br/> 
