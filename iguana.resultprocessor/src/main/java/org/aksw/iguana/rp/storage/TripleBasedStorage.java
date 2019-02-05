@@ -125,6 +125,7 @@ public abstract class TripleBasedStorage implements Storage {
 		addBlockUpdate(taskID, "<" + taskClassUri + ">", classUri);
 		addBlockUpdateExtra(p, taskID);
 		addBlockUpdate(datasetID, "\""+p.getProperty(COMMON.DATASET_ID_KEY)+"\"",  rdfsUri+"label");
+		addBlockUpdate(connID, "\""+p.getProperty(COMMON.CONNECTION_ID_KEY)+"\"",  rdfsUri+"label");
 		if(p.containsKey(COMMON.SIMPLE_TRIPLE_KEY)) {
 			blockUpdate.append(p.get(COMMON.SIMPLE_TRIPLE_KEY));
 		}
