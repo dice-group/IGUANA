@@ -2,7 +2,6 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.Exception;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;

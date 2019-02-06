@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Random;
 
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
@@ -35,7 +37,22 @@ public class CLIWorker extends AbstractWorker {
 	public Long[] getTimeForQueryMs(String query, String queryID) {
 		long start = System.currentTimeMillis();
 		//use cli as service
-		String queryCLI = this.service.replace("$QUERY$", query).replace("$USER$", this.user).replace("$PASSWORD$", this.password) ;
+		String q="";
+		try {
+			q = URLEncoder.encode(query, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String queryCLI = this.service.replace("$QUERY$", query);
+		queryCLI = this.service.replace("$ENCODEDQUERY$", q);
+
+		if(this.user!=null) {
+			queryCLI = queryCLI.replace("$USER$", this.user);
+		}
+		if(this.password!=null) {
+			queryCLI = queryCLI.replace("$PASSWORD$", this.password) ;
+		}
 		//execute queryCLI and read response
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.command(new String[] {"bash", "-c", queryCLI});
@@ -49,15 +66,16 @@ public class CLIWorker extends AbstractWorker {
 					new InputStreamReader(process.getInputStream()));
 
 			String line;
-			long size = 0;
+			//-1 as the first line should be the header 
+			long size = -1;
 			while ((line = reader.readLine()) != null) {
 				output.append(line + "\n");
 				size++;
 			}
-
+			
 			int exitVal = process.waitFor();
 			if (exitVal == 0) {
-				System.out.println("[DEBUG] Query successfully executed size: "+output.length());
+				System.out.println("[DEBUG] Query successfully executed size: "+size);
 			} else {
 				return new Long[] { 0L, System.currentTimeMillis() - start };
 			}
