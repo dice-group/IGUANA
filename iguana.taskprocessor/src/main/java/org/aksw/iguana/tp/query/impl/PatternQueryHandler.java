@@ -99,11 +99,11 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 	}
 
 	@Override
-	protected File[] generateSPARQL(String queryFileName) {
+	protected File[] generateQueryPerLine(String queryFileName, String idPrefix) {
 		System.out.println(service);
 		File queryFile = new File(queryFileName);
 		List<File> ret = new LinkedList<File>();
-		String idPrefix = "sparql";
+//		String idPrefix = "sparql";
 		// check if folder is cached
 		if (queryFile.exists()) {
 			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode());

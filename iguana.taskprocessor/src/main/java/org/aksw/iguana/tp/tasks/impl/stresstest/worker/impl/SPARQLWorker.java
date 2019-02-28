@@ -17,6 +17,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.entity.ContentType;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.client.config.RequestConfig;
@@ -101,6 +104,7 @@ public class SPARQLWorker extends AbstractWorker {
 					return new Long[] { COMMON.WRONG_RESPONSE_CODE_VALUE, System.currentTimeMillis() - start };
 
 				}
+
 				executeAndTerminate(entity, res);
 				// check ResultSet.
 			} catch (java.net.SocketTimeoutException | ConnectTimeoutException e) {
@@ -123,7 +127,27 @@ public class SPARQLWorker extends AbstractWorker {
 			}
 
 			try {
-				long size = parseJson(res);
+				Header[] contentType = response.getHeaders("Content-Type");
+				long size = -1;
+				if (contentType.length >= 1) {
+					switch (contentType[0].getValue()) {
+					case "application/json":
+						size = parseJson(res);
+						break;
+					case "text/plain":
+						size = StringUtils.countMatches(res.get(), "\n");
+						break;
+					case "text/csv":
+						size = StringUtils.countMatches(res.get(), "\n") - 1;
+						break;
+					case "application/xml":
+					case "application/sparql-results+xml":
+						size = StringUtils.countMatches(res.get(), "<result>");
+						break;
+					default:
+						LOGGER.info("ContentType {} unkown", contentType[0].getValue());
+					}
+				}
 				return new Long[] { 1L, end - start, size };
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -156,7 +180,7 @@ public class SPARQLWorker extends AbstractWorker {
 						result.append(line).append("\n");
 						size += result.length();
 					}
-					System.out.println("[DEBUG] Size of Query: "+size);
+					System.out.println("[DEBUG] Size of Query: " + size);
 					res.set(result.toString());
 					result = new StringBuilder();
 				} catch (Exception e) {
