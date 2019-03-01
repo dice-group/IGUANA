@@ -639,6 +639,7 @@ chartData: '='
 										.then(
 												function successCallback(response) {
 													document.getElementById('progress').hidden=true;
+													console.log(response.data);
 													$callback(response.data);
 												},
 												function errorCallback(response) {
