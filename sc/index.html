@@ -616,8 +616,7 @@ chartData: '='
 							document.getElementById('progress').hidden=false;
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
 								$http({
-									method : 'GET',
-									crossDomain: true,
+									method: 'JSONP',
 									url : $scope.endpointForm.endpoint+'?query='
 													+ encodeURIComponent($query)
 										})
