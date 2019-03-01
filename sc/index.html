@@ -625,7 +625,11 @@ chartData: '='
 								//			'Accept': 'application/json'
 								//		}
 								//	},
-								$.get({
+								$.ajax({
+									dataType: "jsonp",
+									accepts: {
+        									json: 'application/json'
+   									 },
 									url : $scope.endpointForm.endpoint+'?query='
 													+ encodeURIComponent($query)
 										})
