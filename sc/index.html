@@ -625,7 +625,7 @@ chartData: '='
 								//			'Accept': 'application/json'
 								//		}
 								//	},
-								$.ajax({
+								 var jqxhr = $.ajax({
 									headers: { 
 										Accept : "application/sparql-results+json; charset=utf-8"
 									},
@@ -653,6 +653,7 @@ chartData: '='
 															+ response.statusText;
 													document.getElementById('progress').hidden=true;
 										});
+								console.log(jqxhr.getAllResponseHeaders());
 							
 							}
 							else if($scope.store==null){
