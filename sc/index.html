@@ -626,6 +626,9 @@ chartData: '='
 								//		}
 								//	},
 								$.ajax({
+									headers: { 
+										Accept : "application/sparql-results+json; charset=utf-8"
+									},
 									dataType: "jsonp",
 									accepts: {
         									json: 'application/sparql-results+json'
