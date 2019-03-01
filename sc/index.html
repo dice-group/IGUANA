@@ -633,7 +633,7 @@ chartData: '='
 													document.getElementById('progress').hidden=true;
 													$callback(response.data);
 												})
-												.failerrorCallback(response) {
+												.fail(function(response) {
 													console.log(response);
 													$scope.error = true;
 													$scope.errormsg = response.status
