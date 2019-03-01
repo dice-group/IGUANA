@@ -637,11 +637,16 @@ chartData: '='
 													+ encodeURIComponent($query)
 										})
 										.done(function(response) {
+									console.log("a");
+													console.log(response);
+									console.log(response.getResponseHeader());
 													document.getElementById('progress').hidden=true;
 													$callback(response.data);
 												})
 												.fail(function(response) {
 													console.log(response);
+																		console.log(response.getResponseHeader());
+
 													$scope.error = true;
 													$scope.errormsg = response.status
 															+ ": "
