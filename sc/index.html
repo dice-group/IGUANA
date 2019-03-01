@@ -473,7 +473,7 @@ chartData: '='
 							}
 							for(task in $scope.compareUris) {
 								//SELECT 
-								$scope.sparqlSubmit("SELECT ?suiteID ?dataset ?connection "+addPro+" (SUM("+distinct+" ?metric) AS ?METRIC) {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" } GROUP BY ?suiteID ?dataset ?connection "+addPro, {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
+								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection "+addPro+" (SUM("+distinct+" ?metric) AS ?METRIC) WHERE { SELECT   distinct ?suiteID ?dataset ?connection "+addPro+" ?metric {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" }} GROUP BY ?suiteID ?dataset ?connection "+addPro, {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
 									function($data){							
 										var resultData = [];	
 										
@@ -524,7 +524,8 @@ chartData: '='
 							}
 							for(task in $scope.compareUris) {
 								//SELECT 
-								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection "+addPro+" (SUM(DISTINCT ?metric) AS ?METRIC)  {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" } GROUP BY ?suiteID ?dataset ?connection "+addPro+" ORDER BY ?queryID", {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
+								//$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection "+addPro+" (SUM(DISTINCT ?metric) AS ?METRIC)  {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" } GROUP BY ?suiteID ?dataset ?connection "+addPro+" ORDER BY ?queryID", {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
+								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection "+addPro+" (SUM(DISTINCT ?metric) AS ?METRIC)   WHERE { SELECT   distinct ?suiteID ?dataset ?connection "+addPro+" ?metric { ?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> .  ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID.  ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset .  ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">.  <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection.  <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+"  }  } GROUP BY ?suiteID ?dataset ?connection "+addPro+"  ORDER BY ?queryID" " , {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
 									function($data){							
 										var resultData = [];	
 										var dataMulti=new Array($data.results.bindings.length);
@@ -590,6 +591,7 @@ chartData: '='
 							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/queriesPerSecond> ?metric", ["queryID"], "QPS");
 							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/failed> ?metric", ["queryID"], "Failed");
 							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/succeded> ?metric", ["queryID"], "Succeded");
+							$scope.getMultiMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query . ?query <http://iguana-benchmark.eu/properties/queryID> ?queryID . ?query <http://iguana-benchmark.eu/properties/resultSize> ?metric", ["queryID"], "ResultSize");
 							$scope.getStats();
 							$scope.getScore();
 
