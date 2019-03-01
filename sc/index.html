@@ -625,7 +625,7 @@ chartData: '='
 								//			'Accept': 'application/json'
 								//		}
 								//	},
-								$.ajax({
+								$.get({
 									url : $scope.endpointForm.endpoint+'?query='
 													+ encodeURIComponent($query)
 										})
