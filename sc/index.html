@@ -628,7 +628,7 @@ chartData: '='
 								$.ajax({
 									dataType: "jsonp",
 									accepts: {
-        									json: 'application/json'
+        									json: 'application/sparql-results+json'
    									 },
 									url : $scope.endpointForm.endpoint+'?query='
 													+ encodeURIComponent($query)
