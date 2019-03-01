@@ -131,7 +131,7 @@ public class SPARQLWorker extends AbstractWorker {
 				long size = -1;
 				if (contentType.length >= 1) {
 					switch (contentType[0].getValue()) {
-					case "application/json":
+					case "application/sparql-results+json":
 						size = parseJson(res);
 						break;
 					case "text/plain":
