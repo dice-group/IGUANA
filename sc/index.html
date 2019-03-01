@@ -109,11 +109,11 @@ Afterwards the score, the tables and charts will be generated which you can view
 
             <form role="form" class="contactForm" ng-submit="sparqlSubmit('SELECT * {?s <http://iguana-benchmark.eu/properties/connection> ?con}', {'vars':['s','con']}, endpointF)">
               <div class="form-group">
-                <label for="name">SPARQL Endpoint</label>
+                <label for="name">SPARQL Endpoint (please ensure JSON response, localhost is allowed)</label>
                 <input type="text" name="endpoint" ng-model="endpointForm.endpoint" class="form-control" id="endpoint" placeholder="http://your-endpoint.com/sparql" />
                 <div class="validation"></div>
               </div>
-              <div class="form-group">
+              <div class="form-group" hidden="true">
                 <label for="file">...or upload a File</label>
                 <input type="file" class="form-control ng-pristine ng-valid ng-touched" name="file" id="file"  placeholder="http://file-server.test/file.nt" />
                 <div class="validation"></div>
