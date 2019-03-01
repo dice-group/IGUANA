@@ -620,10 +620,10 @@ chartData: '='
 								var tmpUrl = $scope.endpointForm.endpoint
 								var tmpQuery = 'query='+ encodeURIComponent($query)
 								if(tmpUrl.indexOf('?')>-1){
-								 tmpUrl =tmpUrl+'?'+tmpQuery;	
+								 tmpUrl =tmpUrl+'&'+tmpQuery;	
 								}
 								else{
-								 tmpUrl =tmpUrl+'&'+tmpQuery;	
+								 tmpUrl =tmpUrl+'?'+tmpQuery;	
 								}
 								console.log(tmpUrl);
 								$http({
