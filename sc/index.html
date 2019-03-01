@@ -618,6 +618,14 @@ chartData: '='
 							document.getElementById('progress').hidden=false;
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
 								console.log($scope.endpointForm.endpoint+'?query='+ encodeURIComponent($query));
+								var tmpUrl = $scope.endpointForm.endpoint
+								var tmpQuery = 'query='+ encodeURIComponent($query)
+								if(tmpUrl.contains('?')){
+								 tmpUrl =tmpUrl+'&'+tmpQuery;	
+								}
+								else{
+								 tmpUrl =tmpUrl+'?'+tmpQuery;	
+								}
 								$http({
 									method: 'JSONP',
 									config: {
@@ -626,8 +634,7 @@ chartData: '='
 										}
 									},
 								 
-									url : $scope.endpointForm.endpoint+'?query='
-													+ encodeURIComponent($query)
+									url : tmpUrl
 										})
 										.then(
 												function successCallback(response) {
