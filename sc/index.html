@@ -616,22 +616,22 @@ chartData: '='
 							document.getElementById('progress').hidden=false;
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
 								console.log($scope.endpointForm.endpoint+'?query='+ encodeURIComponent($query));
-								$http({
-									method: 'JSONP',
-									config: {
-										headers: {
-											'Accept': 'application/json'
-										}
-									},
+								//$http({
+								//	method: 'JSONP',
+								//	config: {
+								//		headers: {
+								//			'Accept': 'application/json'
+								//		}
+								//	},
+								$.ajax({
 									url : $scope.endpointForm.endpoint+'?query='
 													+ encodeURIComponent($query)
 										})
-										.then(
-												function successCallback(response) {
+										.done(function(response) {
 													document.getElementById('progress').hidden=true;
 													$callback(response.data);
-												},
-												function errorCallback(response) {
+												})
+												.failerrorCallback(response) {
 													console.log(response);
 													$scope.error = true;
 													$scope.errormsg = response.status
