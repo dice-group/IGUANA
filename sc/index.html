@@ -617,15 +617,15 @@ chartData: '='
 							$scope.error = false;
 							document.getElementById('progress').hidden=false;
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
-								console.log($scope.endpointForm.endpoint+'?query='+ encodeURIComponent($query));
 								var tmpUrl = $scope.endpointForm.endpoint
 								var tmpQuery = 'query='+ encodeURIComponent($query)
-								if(tmpUrl.indexOf('?')==-1){
-								 tmpUrl =tmpUrl+'&'+tmpQuery;	
-								}
-								else{
+								if(tmpUrl.indexOf('?')>-1){
 								 tmpUrl =tmpUrl+'?'+tmpQuery;	
 								}
+								else{
+								 tmpUrl =tmpUrl+'&'+tmpQuery;	
+								}
+								console.log(tmpUrl);
 								$http({
 									method: 'JSONP',
 									config: {
