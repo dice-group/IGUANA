@@ -618,33 +618,23 @@ chartData: '='
 							document.getElementById('progress').hidden=false;
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
 								console.log($scope.endpointForm.endpoint+'?query='+ encodeURIComponent($query));
-								//$http({
-								//	method: 'JSONP',
-								//	config: {
-								//		headers: {
-								//			'Accept': 'application/json'
-								//		}
-								//	},
-								 $.ajax({
-									headers: { 
-										Accept : "application/sparql-results+json; charset=utf-8"
+								$http({
+									method: 'JSONP',
+									config: {
+										headers: {
+											'Accept': 'application/sparql-results+json'
+										}
 									},
-									dataType: "jsonp",
-									accepts: {
-        									json: 'application/sparql-results+json'
-   									 },
+								 
 									url : $scope.endpointForm.endpoint+'?query='
 													+ encodeURIComponent($query)
 										})
-										.then(function(response) {
-													console.log("a");
-													console.log(response);
+										.then(
+												function successCallback(response) {
 													document.getElementById('progress').hidden=true;
 													$callback(response.data);
-												})
-												.fail(function(response) {
-													console.log(response);
-													console.log(response.getAllResponseHeaders());
+												},
+												function errorCallback(response) {
 													$scope.error = true;
 													$scope.errormsg = response.status
 															+ ": "
