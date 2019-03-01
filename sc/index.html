@@ -615,6 +615,7 @@ chartData: '='
 							$scope.error = false;
 							document.getElementById('progress').hidden=false;
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
+								console.log($scope.endpointForm.endpoint+'?query='+ encodeURIComponent($query));
 								$http({
 									method: 'JSONP',
 									config: {
@@ -631,6 +632,7 @@ chartData: '='
 													$callback(response.data);
 												},
 												function errorCallback(response) {
+													console.log(response);
 													$scope.error = true;
 													$scope.errormsg = response.status
 															+ ": "
