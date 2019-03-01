@@ -620,7 +620,7 @@ chartData: '='
 								console.log($scope.endpointForm.endpoint+'?query='+ encodeURIComponent($query));
 								var tmpUrl = $scope.endpointForm.endpoint
 								var tmpQuery = 'query='+ encodeURIComponent($query)
-								if(tmpUrl.contains('?')){
+								if(tmpUrl.indexOf('?')==-1){
 								 tmpUrl =tmpUrl+'&'+tmpQuery;	
 								}
 								else{
