@@ -617,6 +617,11 @@ chartData: '='
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
 								$http({
 									method: 'JSONP',
+									config: {
+										headers: {
+											Accept: 'application/json'
+										}
+									},
 									url : $scope.endpointForm.endpoint+'?query='
 													+ encodeURIComponent($query)
 										})
