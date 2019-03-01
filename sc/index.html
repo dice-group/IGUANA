@@ -625,7 +625,7 @@ chartData: '='
 								//			'Accept': 'application/json'
 								//		}
 								//	},
-								 var jqxhr = $.ajax({
+								 $.ajax({
 									headers: { 
 										Accept : "application/sparql-results+json; charset=utf-8"
 									},
@@ -644,16 +644,14 @@ chartData: '='
 												})
 												.fail(function(response) {
 													console.log(response);
-
+													console.log(response.getAllResponseHeaders())'
 													$scope.error = true;
 													$scope.errormsg = response.status
 															+ ": "
 															+ response.statusText;
 													document.getElementById('progress').hidden=true;
 										});
-								        jqxhr.always(function(){
-            									console.log(jqxhr.getAllResponseHeaders());
-									 });
+								        
 							
 							}
 							else if($scope.store==null){
