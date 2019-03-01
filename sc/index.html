@@ -651,7 +651,9 @@ chartData: '='
 															+ response.statusText;
 													document.getElementById('progress').hidden=true;
 										});
-								console.log(jqxhr.getAllResponseHeaders());
+								        jqxhr.always(function(){
+            									console.log(jqxhr.getAllResponseHeaders());
+									 });
 							
 							}
 							else if($scope.store==null){
