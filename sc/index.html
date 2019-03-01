@@ -617,7 +617,7 @@ chartData: '='
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
 								$http({
 									method : 'GET',
-									
+									crossDomain: true,
 									url : $scope.endpointForm.endpoint+'?query='
 													+ encodeURIComponent($query)
 										})
