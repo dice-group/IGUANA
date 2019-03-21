@@ -151,37 +151,41 @@
                                     <h2 class="blogpost-title">
                                     Download & Installation
                                     </h2>
-                                    <p>To Download Iguana you have currently three options.
+                                    <p>To Download Iguana you have currently two options.
+					<li><a href="#release">Download the release files (jars)</a></li>					
 					<li><a href="#sourcecode">Download the Source Code</a></li>
-                                        <li><a href="#zip">Download the Zip File</a></li>
-                                        <li ><a style="color:#777;pointer-events: none;cursor: default;" disabled=true href="#docker">Download the Docker Image (In Progress)</a></li>
+                                        
+                                
                                     </p>
+				    <div id="release">
+				    <h3>Release Files</h3> 
+					<p>Core Controller</p>
+					<a href="" class="btn btn-dafault btn-details">Download</a>
+					<p/>					
+					<p>Result Processor</p>
+					<a href="" class="btn btn-dafault btn-details">Download</a>
+					<p/>	
+					<p>To execute the core controller use the following line. (The Core controller is a daemon process and the actual benchmark will be send later on)
+					<code>
+						~$ java -Xmx4g -jar iguana.corecontroller-VERSION.jar org.dice_group.iguana.cc.MainController &
+					</code>
+					<p>To execute the result processor use the following line. (The Result Processor is a daemon process)
+					<code>
+						~$ java -Xmx4g -jar iguana.resultprocessor-VERSION.jar org.dice_group.iguana.rp.MainController &
+					</code>
+                                     </div>
 				    <h3 id="sourcecode">Source Code</h3> 
 					<p>You can Download the Source Code by cloning the repository of GitHub with the following command:  </p>                                  
 					<code>
-						~$ git clone https://github.com/AKSW/IGUANA.git
+						~$ git clone -b master --single-branch https://github.com/AKSW/IGUANA.git
 					</code>
 					<p>Use maven to create the distribution</p>
 					<code>
 						~$ cd IGUANA </br>
-					 	~$ mvn clean package
+					 	~$ mvn clean package -Dmaven.test.skip=true
 					</code>
-				    <div id="zip">
-				    <h3>Zip File</h3> 
-					<p>The Zip File contains an already builded Iguana.</p>
-					<a href="https://github.com/AKSW/IGUANA/blob/develop/release/iguana-1.2.0R2-distribution.zip" class="btn btn-dafault btn-details">Download</a>
-					<p/>					
-					<p>Extract the Zip File </p> 
-					<code>
-						~$ unzip iguana-X.Y.Z-distribution.zip
-					</code>
-					<p>Execute with the following command (Assuming your default java version is 1.8 and you have already a configuration file called config.xml</p>
-					<code>
-						~$ java -Xmx4g -cp "lib/*" org.aksw.iguana.benchmark.Main config.xml
-					</code>
-                                     </div>
-			             <h3 id="docker">Docker</h3>
-				     <p>Coming soon</p>
+
+
                                 </div>
                             </article>
                             

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="no-js">
     <head>
-        <!-- Basic Page Needs
+     <!-- Basic Page Needs
         ================================================== -->
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -85,7 +85,7 @@
                             <li>
                                 <a href="index.html" >Home</a>
                             </li>
- 			    <li>
+			    <li>
                                 <a href="about.html" >About</a>
                             </li>
                             <li class="dropdown">
@@ -117,6 +117,7 @@
                 <!-- /main nav -->
             </div>
         </header>
+
         <!-- 
         ================================================== 
             Global Page Section Start
@@ -126,7 +127,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="block">
-                            <h2>About Iguana</h2>
+                            <h2>VERSION 2.0</h2>
                             <ol class="breadcrumb">
                                 <li>
                                     <a href="index.html">
@@ -134,33 +135,36 @@
                                         Home
                                     </a>
                                 </li>
-                                <li class="active">About</li>
+                                <li class="active">Version 2.0</li>
                             </ol>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </div>   
+        </section><!--/#Page header-->
+
 
         <!-- 
         ================================================== 
-            Features Section Start
+            New Section  Start
         ================================================== -->
-        <section class="company-description">
+        <section class="pages service-page">
             <div class="container">
-                <div class="row">
-                    <div class="col-md-6">
+                <div class="row" >
+                    <div class="col-md-12">
                         <div class="block">
-                            <h3 class="subtitle wow fadeInUp" data-wow-delay=".3s" data-wow-duration="500ms">Features</h3>
-                            <p  class="wow fadeInUp" data-wow-delay=".5s" data-wow-duration="500ms">
-                               <li><h4>It can execute SPARQL benchmarks</h4></li>
-				<li><h4>It can execute SPARQL as well as UPDATES</h4></li>
-				<li><h4>It can execute on real as well as synthetic data</h4></li>
-				<li><h4>It is extendable, to fit your needs</h4></li>
-				<li><h4>It is easy to configure, but has a lot of configurations</h4></li>                          
-			</p>
-                            
-                        </div>
+                            <h2 class="subtitle wow fadeInUp animated" data-wow-delay=".3s" data-wow-duration="500ms" >What is new?</h2>
+                            <p class="subtitle-des wow fadeInUp animated" data-wow-delay=".5s" data-wow-duration="500ms">
+					<li><h4>A Web Interface</h4></li>
+					<li><h4>A new better Workflow</h4></li>
+					<li><h4>More Lucid Code</h4></li>
+					<li><h4>More Lucid Structure</h4></li>
+					<li><h4>Easier to configure</h4></li>
+					<li><h4>More configurations</h4></li>
+					<li><h4>Easier to extend, test cases and Metrics</h4></li>
+					<li><h4>Different result sotrage solutions</h4></li>
+			    </p>                       
+			</div>
                     </div>
                 </div>
             </div>
@@ -169,47 +173,58 @@
 
         <!-- 
         ================================================== 
-            Overview Section Start
+            Workflow Section  Start
         ================================================== -->
-        <section class="company-description">
+        <section class="pages service-page">
             <div class="container">
-                <div class="row">
-                    <div class="col-md-6 wow fadeInLeft" data-wow-delay=".3s" >
-                        <img src="images/workflow.png" alt="" class="img-responsive">
-                    </div>
-                    <div class="col-md-6">
+                <div class="row" >
+                    <div class="col-md-6" data-wow-delay=".3s" data-wow-duration="500ms">
                         <div class="block">
-                            <h3 class="subtitle wow fadeInUp" data-wow-delay=".3s" data-wow-duration="500ms">Overview</h3>
-                            
-                        </div>
+                            <h2 class="subtitle wow fadeInUp animated" data-wow-delay=".3s" data-wow-duration="500ms" >New workflow</h2>
+                            <p class="subtitle-des wow fadeInUp animated" data-wow-delay=".5s" data-wow-duration="500ms">
+				Iguana 2.0 will use three independent modules, namely the core, the webcontroller and the result processor.
+				</p> 
+			    <h4 class="subtitle wow fadeInUp animated" data-wow-delay=".3s" data-wow-duration="500ms" >Core</h4>
+                            <p class="subtitle-des wow fadeInUp animated" data-wow-delay=".5s" data-wow-duration="500ms">
+				The core is the module which executes the benchmark and tests each query. It should be started on the evaluation server 
+				</p> 
+			<h4 class="subtitle wow fadeInUp animated" data-wow-delay=".3s" data-wow-duration="500ms" >Web Controller</h4>
+                            <p class="subtitle-des wow fadeInUp animated" data-wow-delay=".5s" data-wow-duration="500ms">
+				The web controller can be started locally on your laptop. It provides a web interface in which you can easily define  your configurations
+				view experiment results in beautiful charts and even view live results. 
+				</p> 
+			<h4 class="subtitle wow fadeInUp animated" data-wow-delay=".3s" data-wow-duration="500ms" >Result Processing</h4>
+                            <p class="subtitle-des wow fadeInUp animated" data-wow-delay=".5s" data-wow-duration="500ms">		
+				The result processor module will get all the results from the core. Each query execution time will be send to it.
+				It defines all the metrics it should save. Further on each Storage will be defined here. You can choose from storage into a triple store or 
+				to a file storage.
+				</p> 
+			<h4 class="subtitle wow fadeInUp animated" data-wow-delay=".3s" data-wow-duration="500ms" >Benefits</h4>
+                            <p class="subtitle-des wow fadeInUp animated" data-wow-delay=".5s" data-wow-duration="500ms">
+				This new workflow challenges the problems that the current Iguana uses way to much RAM on the evaluation server. 
+				As the Result Processing is now independent from the core it can be executed on a different Server, locally,... 
+				Further on it provides a way better possiblity to extend Iguana with new Metrics and to save each query execution time for complete analysation.
+			    </p>                        
+			</div>
                     </div>
+			<div class="col-md-6 col-sm-6">
+                            <div class="block wow fadeInRight" data-wow-delay=".3s" data-wow-duration="500ms">
+                                <img src="images/overview_version2.png" width="90%" alt="">
+                            </div>
+                        </div>
+					
+
                 </div>
             </div>
         </section>
 
+ 
+
+
+
         <!-- 
         ================================================== 
-            Stresstest Section Start
-        ================================================== -->
-        <section class="company-description">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 wow fadeInLeft" data-wow-delay=".3s" >
-                        <img src="images/stresstest.png" alt="" class="img-responsive">
-                    </div>
-                    <div class="col-md-6">
-                        <div class="block">
-                            <h3 class="subtitle wow fadeInUp" data-wow-delay=".3s" data-wow-duration="500ms">Stresstest</h3>
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!--
-        ==================================================
-        Call To Action Section Start
+            Call To Action Section Start
         ================================================== -->
         <section id="call-to-action">
                 <div class="container">
@@ -225,9 +240,11 @@
                     </div>
                 </div>
             </section>
-        <!--
-        ==================================================
-        Footer Section Start
+
+
+        <!-- 
+        ================================================== 
+            Footer Section Start
         ================================================== -->
         <footer id="footer">
             <div class="container">
@@ -262,6 +279,5 @@
                 </div>
             </div>
         </footer> <!-- /#footer -->
-        
     </body>
 </html>
