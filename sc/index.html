@@ -179,7 +179,48 @@ Afterwards the score, the tables and charts will be generated which you can view
             <h2 class="section-heading animated" data-animation="bounceInUp">Your Results</h2>
           </div>
         </div>
-      </div><div class="row">
+      </div>
+
+<!--
+Score Results
+ -->
+<div class="row">
+	<div class="col-md-12 ">
+		<div id="jumbotron" class="jumbotron">
+			<h4 class="section-heading animated" data-animation="bounceInUp">Score</h4>
+   			<div class="col-md-6 section-heading animated" data-animation="bounceInUp">
+				<div id="table-wrapper">
+ 					<div id="table-scroll">				
+						<table class="itxt fancytable"> 
+							<thead>
+ 	 							<tr>
+									<th>Task ID</th>
+       								<th>System</th>
+									<th>Dataset</th>
+       								<th>I_{ABS}</th>
+									<th>I_{REL}</th>
+   								</tr> 
+							</thead>
+							<tr ng-repeat="x in score">
+								<td style="font-weight: bold;">{{x.task}}</td>
+        						<td>{{x.system}}</td>
+								<td>{{x.dataset}}</td>
+								<td>{{x.abs}}</td>
+								<td>{{x.rel}}</td>
+    						</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>		
+</div>
+
+<!--
+Single Results
+ -->
+
+<div class="row">
         	<div class="col-md-12 ">
 			<div id="jumbotron" class="jumbotron">
 	
@@ -354,6 +395,7 @@ chartData: '='
 
 					$scope.fileLoaded=false;
 						$scope.results=[];
+						$scope.score=[];
 						$scope.endpointForm=[]
 						$scope.compareUris=[];
 						$scope.error = false;
@@ -582,10 +624,43 @@ chartData: '='
 							//add row 
 						}
 						$scope.getScore =function(){
+							var overall = {};
 							//for taskUris : compareUris:
-							//SELECT 
-							//add row 
+							for(task in $scope.compareUris) {
+								//SELECT 
+								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection (SUM(?metric) AS ?METRIC) WHERE { SELECT distinct ?suiteID ?dataset ?connection ?metric {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?d . ?d <http://www.w3.org/2000/01/rdf-schema#label> ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?c . ?c <http://www.w3.org/2000/01/rdf-schema#label> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . ?uuid <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> ?metric }} GROUP BY ?suiteID ?dataset ?connection ", {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
+									function($data){
+
+										for(resultI in $data.results.bindings){
+											var score = {};
+											var result = $data.results.bindings[resultI];
+											score.task = task;
+											score.dataset = result.dataset.value.toString();
+											score.system = result.connection.value.toString();
+											if(!(system in overall)){
+												var tmp = {system:{"count":0, "abs":0, "rel":0}};
+												overall.push(tmp);
+											}
+										//get abs score
+											score.abs = result.METRIC/3600;								
+										//get rel score
+											score.rel = 0;
+											if(result.METRIC >3600){
+												score.rel = 3600/result.METRIC;
+											}
+											overall[system].abs += score.abs;
+											overall[system].rel += score.rel;
+											overall[system].count++;
+											$scope.score.push(score);				
+										}
+									}
+								);
 						}
+						for(system in overall){
+							var tmp = {"system":overall[system].key, "task":"Overall", "dataset":"", "abs":overall[system].abs/overall[system].count,"rel":overall[system].rel/overall[system].count};
+							$scope.score.push(tmp);
+						}
+					}
 						$scope.retrieveResults = function(){
 							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query .  ?query <http://iguana-benchmark.eu/properties/succeded> ?metric", [], "NoOfQueries", " ");
 							$scope.getSingleMetric("?uuid <http://iguana-benchmark.eu/properties/queryMixes> ?metric", [], "QMPH", "DISTINCT");
@@ -615,6 +690,7 @@ chartData: '='
 						};
 						$scope.sparqlSubmit = function($query, $vars, $callback) {
 							$scope.error = false;
+
 							document.getElementById('progress').hidden=false;
 							if($scope.endpointForm.endpoint!=null && !($scope.endpointForm.endpoint=='')){
 								var tmpUrl = $scope.endpointForm.endpoint
@@ -626,29 +702,25 @@ chartData: '='
 								 tmpUrl =tmpUrl+'?'+tmpQuery;	
 								}
 								console.log(tmpUrl);
-								$http({
-									method: 'JSONP',
-									config: {
-										headers: {
-											'Accept': 'application/sparql-results+json'
-										}
-									},
-								 
-									url : tmpUrl
-										})
-										.then(
-												function successCallback(response) {
+								$.ajax({
+										url: tmpUrl,
+										type: 'GET',
+										//crossDomain: true,
+
+    xhrFields: { withCredentials: true }, 
+										success:		function (response) {
 													document.getElementById('progress').hidden=true;
 													console.log(response.data);
 													$callback(response.data);
 												},
-												function errorCallback(response) {
+										error: 	function (response) {
 													$scope.error = true;
 													$scope.errormsg = response.status
 															+ ": "
 															+ response.statusText;
 													document.getElementById('progress').hidden=true;
-										});
+										}
+								});
 								        
 							
 							}
