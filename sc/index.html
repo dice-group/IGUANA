@@ -207,7 +207,7 @@ Score Results
         						<td>{{x.system}}</td>
 								<td>{{x.dataset}}</td>
 								<td>{{x.abs}}</td>
-								<td>{{x.rel}}</td>
+								<td>{{x.rel.toFixed(2)}} %</td>
     						</tr>
 						</table>
 					</div>
@@ -518,15 +518,18 @@ chartData: '='
 							}
 							for(task in $scope.compareUris) {
 								//SELECT 
-								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection "+addPro+" (SUM("+distinct+" ?metric) AS ?METRIC) WHERE { SELECT   distinct ?suiteID ?dataset ?connection "+addPro+" ?metric {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" }} GROUP BY ?suiteID ?dataset ?connection "+addPro, {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
+								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID (<"+$scope.compareUris[task]+"> AS ?taskID) ?dataset ?connection "+addPro+" (SUM("+distinct+" ?metric) AS ?METRIC) WHERE { SELECT   distinct ?suiteID ?dataset ?connection "+addPro+" ?metric {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" }} GROUP BY ?suiteID ?dataset ?connection "+addPro, {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
 									function($data){							
 										var resultData = [];	
 										
+										if($data.results.bindings.length==0){
+										return;
+										}
 										var result = $data.results.bindings[0];
 										var dataset = result.dataset.value.toString().replace('http://iguana-benchmark.eu/recource/', '');
 
 										var connection = result.connection.value.toString().replace('http://iguana-benchmark.eu/recource/', '')+" - "+result.suiteID.value.toString().replace('http://iguana-benchmark.eu/recource/', '');
-										var t = title+" Task "+$scope.compareUris[task].toString().substring($scope.compareUris[task].lastIndexOf('/')+1).toString();
+										var t = title+" Task "+result.taskID.value.toString().substring(result.taskID.value.toString().lastIndexOf('/')+1).toString();
 										var taskDataset = {series:[], data:[]};
 										if($scope.uresults[t]!=null){
 											if( $scope.uresults[t][dataset]!=null){
@@ -570,18 +573,19 @@ chartData: '='
 							for(task in $scope.compareUris) {
 								//SELECT 
 								//$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection "+addPro+" (SUM(DISTINCT ?metric) AS ?METRIC)  {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+" } GROUP BY ?suiteID ?dataset ?connection "+addPro+" ORDER BY ?queryID", {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
-								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection "+addPro+" (SUM(DISTINCT ?metric) AS ?METRIC)   WHERE { SELECT   distinct ?suiteID ?dataset ?connection "+addPro+" ?metric { ?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> .  ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID.  ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset .  ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">.  <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection.  <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+"  }  } GROUP BY ?suiteID ?dataset ?connection "+addPro+"  ORDER BY ?queryID" , {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
+								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID (<"+$scope.compareUris[task]+"> AS ?taskID) ?dataset ?connection "+addPro+" (SUM(DISTINCT ?metric) AS ?METRIC)   WHERE { SELECT   distinct ?suiteID ?dataset ?connection "+addPro+" ?metric { ?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> .  ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID.  ?expID <http://iguana-benchmark.eu/properties/dataset>  ?dataset .  ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">.  <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?connection.  <"+$scope.compareUris[task]+"> ?p ?uuid . "+metric+"  }  } GROUP BY ?suiteID ?dataset ?connection "+addPro+"  ORDER BY ?queryID" , {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
 									function($data){							
 										var resultData = [];	
 										var dataMulti=new Array($data.results.bindings.length);
 										console.log($data.results.bindings.length);
+										var taskDataset ={"type":"", "data":[]};
 										for(resultI in $data.results.bindings){
 											var result = $data.results.bindings[resultI];
 											var dataset = result.dataset.value.toString().replace('http://iguana-benchmark.eu/recource/', '');
-
+									
 											var connection = result.connection.value.toString().replace('http://iguana-benchmark.eu/recource/', '')+" - "+result.suiteID.value.toString().replace('http://iguana-benchmark.eu/recource/', '');
-											var t = title+" Task "+$scope.compareUris[task].toString().substring($scope.compareUris[task].lastIndexOf('/')+1).toString();
-											var taskDataset = {series:[], data:[], labels:[]};
+											var t = title+" Task "+result.taskID.value.toString().substring(result.taskID.value.toString().lastIndexOf('/')+1).toString();
+											taskDataset = {series:[], data:[], labels:[]};
 											taskDataset.labels= new Array($data.results.bindings.length);
 											if($scope.uresults[t]!=null){
 												if( $scope.uresults[t][dataset]!=null){
@@ -628,35 +632,37 @@ chartData: '='
 							var overall = {};
 							//for taskUris : compareUris:
 							var finished=0;
-							for(task in $scope.compareUris) {
+							for(var task in $scope.compareUris) {
 								
 								//SELECT 
-								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID ?dataset ?connection (SUM(?metric) AS ?METRIC) WHERE { SELECT distinct ?suiteID ?dataset ?connection ?metric {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/dataset>  ?d . ?d <http://www.w3.org/2000/01/rdf-schema#label> ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?c . ?c <http://www.w3.org/2000/01/rdf-schema#label> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . ?uuid <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> ?metric }} GROUP BY ?suiteID ?dataset ?connection ", {'vars':["suiteID", "dataset","connection", "METRIC", $scope.compareUris[task]]},
+								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID (<"+$scope.compareUris[task]+"> AS ?taskID) ?time ?dataset ?connection (SUM(?metric) AS ?METRIC) WHERE { SELECT distinct ?suiteID ?time ?dataset ?connection ?metric {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/timeLimit> ?time  .?expID <http://iguana-benchmark.eu/properties/dataset>  ?d . ?d <http://www.w3.org/2000/01/rdf-schema#label> ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?c . ?c <http://www.w3.org/2000/01/rdf-schema#label> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . ?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query .  ?query <http://iguana-benchmark.eu/properties/succeded> ?metric }} GROUP BY ?suiteID ?dataset ?connection ?time", {'vars':["suiteID", "dataset","connection", "time", "METRIC", $scope.compareUris[task]]},
 									function($data){
-
-										for(resultI in $data.results.bindings){
+										if($data.results.bindings.length==0){
+										return;
+										}
+										
 											var score = {};
-											var result = $data.results.bindings[resultI];
-											score.task = $scope.compareUris[task];
+											var result = $data.results.bindings[0];
+											score.task = result.taskID.value.toString();
 											score.dataset = result.dataset.value.toString();
 											score.system = result.connection.value.toString();
 											if(!(score.system in overall)){
 												var tmp = {"count":0, "abs":0, "rel":0, "system":score.system};
 												overall[score.system] = tmp;
 											}
-											var val = parseFloat(result.METRIC.value);
+											var val = parseFloat(result.METRIC.value)*3600000/parseInt(result.time.value);
 										//get abs score
 											score.abs = val/3600.0;								
 										//get rel score
 											score.rel = 0;
 											if(val >3600){
-												score.rel = 1-3600.0/val;
+												score.rel = 100* (1-3600.0/val);
 											}
 											overall[score.system].abs += score.abs;
 											overall[score.system].rel += score.rel;
 											overall[score.system].count++;
 											$scope.score.push(score);				
-										}
+										
 										finished++;
 										if(finished==$scope.compareUris.length){
 											for(system in overall){
