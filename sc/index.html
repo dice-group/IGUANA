@@ -207,7 +207,7 @@ Score Results
         						<td>{{x.system}}</td>
 								<td>{{x.dataset}}</td>
 								<td>{{x.abs}}</td>
-								<td>{{x.rel.toFixed(2)}} %</td>
+								<td>{{x.rel==""?"":x.rel.toFixed(2)+"%"}}</td>
     						</tr>
 						</table>
 					</div>
@@ -635,8 +635,9 @@ chartData: '='
 							for(var task in $scope.compareUris) {
 								
 								//SELECT 
-								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID (<"+$scope.compareUris[task]+"> AS ?taskID) ?time ?dataset ?connection (SUM(?metric) AS ?METRIC) WHERE { SELECT distinct ?suiteID ?time ?dataset ?connection ?metric {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/timeLimit> ?time  .?expID <http://iguana-benchmark.eu/properties/dataset>  ?d . ?d <http://www.w3.org/2000/01/rdf-schema#label> ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?c . ?c <http://www.w3.org/2000/01/rdf-schema#label> ?connection. <"+$scope.compareUris[task]+"> ?p ?uuid . ?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query .  ?query <http://iguana-benchmark.eu/properties/succeded> ?metric }} GROUP BY ?suiteID ?dataset ?connection ?time", {'vars':["suiteID", "dataset","connection", "time", "METRIC", $scope.compareUris[task]]},
+								$scope.sparqlSubmit("SELECT DISTINCT ?suiteID (<"+$scope.compareUris[task]+"> AS ?taskID) ?time ?dataset ?connection ?timeLimit (SUM(?succeded) AS ?SUCCEDED) (SUM(?failed) AS ?FAILED) (AVG(?tt/(?succeded+?failed)) AS ?TT) ?noQueries WHERE { SELECT distinct ?suiteID ?time ?dataset ?connection ?timeLimit ?succeded ?failed ?tt ?noQueries {?suiteID <http://www.w3.org/2000/01/rdf-schema#Class>  <http://iguana-benchmark.eu/class/Suite> . ?suiteID <http://iguana-benchmark.eu/properties/experiment> ?expID. ?expID <http://iguana-benchmark.eu/properties/timeLimit> ?time  .?expID <http://iguana-benchmark.eu/properties/dataset>  ?d . ?d <http://www.w3.org/2000/01/rdf-schema#label> ?dataset . ?expID <http://iguana-benchmark.eu/properties/task> <"+$scope.compareUris[task]+">. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/connection> ?c . ?c <http://www.w3.org/2000/01/rdf-schema#label> ?connection. <"+$scope.compareUris[task]+"> <http://iguana-benchmark.eu/properties/timeLimit> ?timeLimit . <"+$scope.compareUris[task]+"> ?p ?uuid . ?uuid <http://iguana-benchmark.eu/properties/noOfQueries> ?noQueries . ?uuid <http://iguana-benchmark.eu/properties/qps#query> ?query .  ?query <http://iguana-benchmark.eu/properties/succeded> ?succeded . ?query <http://iguana-benchmark.eu/properties/failed> ?failed . ?query <http://iguana-benchmark.eu/properties/totalTime> ?tt  }} GROUP BY ?suiteID ?dataset ?connection ?time ?noQueries ?timeLimit", {'vars':["suiteID", "dataset","connection", "timeLimit", "time", "SUCCEDED", "FAILED", "TT", "noQueries", $scope.compareUris[task]]},
 									function($data){
+										//TODO for and sum with weight 
 										if($data.results.bindings.length==0){
 										return;
 										}
@@ -647,26 +648,31 @@ chartData: '='
 											score.dataset = result.dataset.value.toString();
 											score.system = result.connection.value.toString();
 											if(!(score.system in overall)){
-												var tmp = {"count":0, "abs":0, "rel":0, "system":score.system};
+												var tmp = {"count":0, "abs":0, "rel":"", "system":score.system};
 												overall[score.system] = tmp;
 											}
-											var val = parseFloat(result.METRIC.value)*3600000/parseInt(result.time.value);
-										//get abs score
-											score.abs = val/3600.0;								
+											
+										//get abs score 
+											//TODO 3600 to timeLimit/1000
+											score.abs = 1/parseFloat(result.TT.value)*(parseFloat(result.SUCCEDED.value)-parseFloat(result.FAILED.value))/(parseFloat(result.timeLimit.value)/1000);							
 										//get rel score
-											score.rel = 0;
-											if(val >3600){
-												score.rel = 100* (1-3600.0/val);
-											}
+											score.rel = "";
+											//if(val >3600){
+											//	score.rel = 100* (1-3600.0/val);
+											//}
 											overall[score.system].abs += score.abs;
-											overall[score.system].rel += score.rel;
+											//overall[score.system].rel += score.rel;
 											overall[score.system].count++;
 											$scope.score.push(score);				
 										
 										finished++;
 										if(finished==$scope.compareUris.length){
+											var sumScore = 0.0;
 											for(system in overall){
-												var tmp = {"system": overall[system].system, "task":"Overall", "dataset":"", "abs":overall[system].abs/overall[system].count,"rel":overall[system].rel/overall[system].count};
+												sumScore+=overall[system].abs;
+											}
+											for(system in overall){
+												var tmp = {"system": overall[system].system, "task":"Overall", "dataset":"", "abs":overall[system].abs/overall[system].count,"rel":100*overall[system].abs/sumScore};
 												$scope.score.push(tmp);
 											}
 											if(!$scope.$$phase) {
@@ -739,6 +745,7 @@ chartData: '='
 													$scope.errormsg = response.status
 															+ ": "
 															+ response.statusText;
+													console.log(response.responseText);
 													document.getElementById('progress').hidden=true;
 			});
  
