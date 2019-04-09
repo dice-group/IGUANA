@@ -13,6 +13,8 @@ import org.apache.jena.sparql.syntax.RecursiveElementVisitor;
 public class StatisticsVisitor extends RecursiveElementVisitor{
 
 	public boolean filter;
+	public boolean regexFilter=false;
+	public boolean cmpFilter=false;
 	public boolean union;
 	public boolean optional;
 	private boolean started;
@@ -43,7 +45,7 @@ public class StatisticsVisitor extends RecursiveElementVisitor{
 	
 	}
 	
-    public void startElement(ElementFilter el) {this.filter=true;} 
+    public void startElement(ElementFilter el) {this.filter=true;el.getExpr();} 
     public void startElement(ElementUnion el) {this.union=true;}
     public void startElement(ElementOptional el) {this.optional=true;}
 

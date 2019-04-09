@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.Worker;
+import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.CLIInputWorker;
+import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.CLIWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker;
 
@@ -36,7 +38,7 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 	public AbstractWorkerQueryHandler(Collection<Worker> workers) {
 		this.workers = workers;
 		for(Worker worker : workers) {
-			if(worker instanceof SPARQLWorker) {
+			if(worker instanceof SPARQLWorker || worker instanceof CLIWorker || worker instanceof CLIInputWorker) {
 				sparqlKeys.add(((SPARQLWorker)worker).getQueriesFileName());
 			}
 			else if(worker instanceof UPDATEWorker) {

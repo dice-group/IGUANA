@@ -149,7 +149,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 				qs2.getStatistics(q);
 				//builder.append("<").append(taskID).append("> ").append(property).append("querySet> <").append(resource + queryFile.getName()).append("> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
-						.append("aggregatins> \"").append(qs2.aggr).append("\"^^<").append(xsdUri).append("int> . \n");
+						.append("aggregations> \"").append(qs2.aggr).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
 						.append("filter> \"").append(qs2.filter).append("\"^^<").append(xsdUri).append("int> . \n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(property)
@@ -170,7 +170,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 						.append("label> \"").append(query).append("\" .\n");
 				builder.append("<").append(resource + queryFile.getName()).append("> <").append(rdfs).append("ID> \"")
 						.append(queryFile.getName().replace("sparql", "")).append("\" .\n");
-
+				//TODO query complexity
 			} catch (IOException e) {
 			}
 		}
