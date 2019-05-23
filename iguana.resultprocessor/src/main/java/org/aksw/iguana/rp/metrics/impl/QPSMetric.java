@@ -46,7 +46,7 @@ public class QPSMetric extends AbstractMetric {
 			size = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SIZE).toString());
 		}
 		String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
-		
+		int queryHash = Integer.parseInt(p.get(COMMON.QUERY_HASH).toString());
 		Properties extra = getExtraMeta(p);
 		
 		Properties tmp = getDataFromContainer(extra);
@@ -61,14 +61,15 @@ public class QPSMetric extends AbstractMetric {
 			oldArr[4]+=timeout;
 			oldArr[5]+=unknown;
 			oldArr[6]+=wrongCode;
+			oldArr[7]+=queryHash;
 		}
 		else if(tmp!=null){
-			long[] resArr = {time, success, failure, size, timeout, unknown, wrongCode};
+			long[] resArr = {time, success, failure, size, timeout, unknown, wrongCode,queryHash};
 			tmp.put(queryID, resArr);
 		}
 		else{
 			tmp = new Properties();
-			long[] resArr = new long[]{time, success, failure, size, timeout, unknown, wrongCode};
+			long[] resArr = new long[]{time, success, failure, size, timeout, unknown, wrongCode,queryHash};
 			tmp.put(queryID, resArr);
 		}
 		addDataToContainer(extra, tmp);
@@ -89,7 +90,7 @@ public class QPSMetric extends AbstractMetric {
 				Set<String> isRes = new HashSet<String>();
 				isRes.add(subject);
 				
-				Triple[] triples = new Triple[9];
+				Triple[] triples = new Triple[10];
 				//qps
 				triples[0] = new Triple(subject, "queriesPerSecond", qps);
 				//failed
@@ -97,8 +98,9 @@ public class QPSMetric extends AbstractMetric {
 				//succeded
 				triples[2] = new Triple(subject, "succeded", resArr[1]);
 				//queryID
-				triples[3] = new Triple(subject, "queryID", queryID.toString());
-				triples[3].setObjectResource(true);
+	
+				triples[3] = new Triple(subject, "id", queryID.toString());
+				triples[3].setObjectResource(false);
 				//totaltime
 				triples[4] = new Triple(subject, "totalTime", resArr[0]);
 				triples[5] = new Triple(subject, "resultSize", "?");
@@ -108,6 +110,9 @@ public class QPSMetric extends AbstractMetric {
 				triples[6] = new Triple(subject, "timeouts", resArr[4]);
 				triples[7] = new Triple(subject, "unknownExceptions", resArr[5]);
 				triples[8] = new Triple(subject, "wrongCodes", resArr[6]);
+				
+				triples[9] = new Triple(subject, "queryID", resArr[7]+"/"+queryID.toString());
+				triples[9].setObjectResource(true);
 				
 				Properties results = new Properties();
 				results.put("qps#query", subject);

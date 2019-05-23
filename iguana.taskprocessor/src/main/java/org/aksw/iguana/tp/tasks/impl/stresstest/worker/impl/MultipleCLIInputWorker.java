@@ -18,11 +18,12 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 
-public class CLIInputWorker extends AbstractWorker {
+public class MultipleCLIInputWorker extends AbstractWorker {
 
 	private int currentQueryID;
 	private Random queryPatternChooser;
 	private Process process;
+	protected Process[] processList = new Process[5];
 	private String queryFinished;
 	private BufferedReader reader;
 	private int currentProcess = 0;
@@ -32,11 +33,11 @@ public class CLIInputWorker extends AbstractWorker {
 	private ProcessBuilder processBuilder;
 	private String initFinished;
 
-	public CLIInputWorker() {
+	public MultipleCLIInputWorker() {
 		super("CLIInputWorker");
 	}
 
-	public CLIInputWorker(String[] args) {
+	public MultipleCLIInputWorker(String[] args) {
 		super(args, "CLIInputWorker");
 		queryPatternChooser = new Random(this.workerID);
 
@@ -63,10 +64,15 @@ public class CLIInputWorker extends AbstractWorker {
 				processBuilder.command(new String[] { "cmd.exe", "-c", this.service });
 			}
 			process = processBuilder.start();
-			
+			processList[0] = process;
 			output = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 			reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			readUntilStringOccurs(reader, initFinished);
+			for (int i = 1; i < processList.length; i++) {
+				processList[i] = processBuilder.start();
+				BufferedReader reader2 = new BufferedReader(new InputStreamReader(processList[i].getInputStream()));
+				readUntilStringOccurs(reader2, initFinished);
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -126,6 +132,7 @@ public class CLIInputWorker extends AbstractWorker {
 				} else if (this.endSignal) {
 					return new Long[] { 0L, System.currentTimeMillis() - start };
 				} else {
+					setNextProcess();
 					return new Long[] { 0L, System.currentTimeMillis() - start };
 				}
 			} finally {
@@ -135,8 +142,12 @@ public class CLIInputWorker extends AbstractWorker {
 			long end = System.currentTimeMillis();
 
 			if (end - start >= timeOut) {
+				setNextProcess();
 				return new Long[] { 0L, end - start };
 			} else if (failed.get()) {
+				if (!process.isAlive()) {
+					setNextProcess();
+				}
 				return new Long[] { 0L, end - start };
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
@@ -148,6 +159,39 @@ public class CLIInputWorker extends AbstractWorker {
 		return new Long[] { 0L, System.currentTimeMillis() - start };
 	}
 
+	private void setNextProcess() {
+		int oldProcess = currentProcess;
+		currentProcess = currentProcess == processList.length-1 ? 0 : currentProcess + 1;
+		// destroy old process;
+		process.destroyForcibly();
+		if(oldProcess==currentProcess) {
+			try {
+				process.waitFor();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		// create new one for old in list
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		executor.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					processList[oldProcess] = processBuilder.start();
+					BufferedReader reader2 = new BufferedReader(
+							new InputStreamReader(processList[oldProcess].getInputStream()));
+					readUntilStringOccurs(reader2, initFinished);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		executor.shutdown();
+		// get all from the next process
+		process = processList[currentProcess];
+		output = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+		reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+	}
 
 	protected String writableQuery(String query) {
 		return query;
@@ -179,6 +223,14 @@ public class CLIInputWorker extends AbstractWorker {
 	@Override
 	public void stopSending() {
 		super.stopSending();
-		process.destroyForcibly();
+		for (Process pr : processList) {
+			pr.destroyForcibly();
+			try {
+				pr.waitFor();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }

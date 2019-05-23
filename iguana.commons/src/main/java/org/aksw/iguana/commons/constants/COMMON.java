@@ -153,5 +153,7 @@ public class COMMON {
 	public static final Long SOCKET_TIMEOUT_VALUE = -1L;
 
 	public static final Long WRONG_RESPONSE_CODE_VALUE = -2L;
+
+	public static final String QUERY_HASH = "queryHash";
 	
 }

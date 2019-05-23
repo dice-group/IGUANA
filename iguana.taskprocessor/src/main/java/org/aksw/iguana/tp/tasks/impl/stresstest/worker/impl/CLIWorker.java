@@ -25,19 +25,18 @@ public class CLIWorker extends AbstractWorker {
 		queryPatternChooser = new Random(this.workerID);
 
 	}
-	
 
 	@Override
 	public void init(String args[]) {
 		super.init(args);
 		queryPatternChooser = new Random(this.workerID);
 	}
-	
+
 	@Override
 	public Long[] getTimeForQueryMs(String query, String queryID) {
 		long start = System.currentTimeMillis();
-		//use cli as service
-		String q="";
+		// use cli as service
+		String q = "";
 		try {
 			q = URLEncoder.encode(query, "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
@@ -45,49 +44,57 @@ public class CLIWorker extends AbstractWorker {
 			e1.printStackTrace();
 		}
 		String queryCLI = this.service.replace("$QUERY$", query);
-		queryCLI = this.service.replace("$ENCODEDQUERY$", q);
+		System.out.println(queryCLI);
+		queryCLI = queryCLI.replace("$ENCODEDQUERY$", q);
 
-		if(this.user!=null) {
+		if (this.user != null) {
 			queryCLI = queryCLI.replace("$USER$", this.user);
 		}
-		if(this.password!=null) {
-			queryCLI = queryCLI.replace("$PASSWORD$", this.password) ;
+		if (this.password != null) {
+			queryCLI = queryCLI.replace("$PASSWORD$", this.password);
 		}
-		//execute queryCLI and read response
-		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.command(new String[] {"bash", "-c", queryCLI});
+		// execute queryCLI and read response
+		ProcessBuilder processBuilder = new ProcessBuilder().redirectErrorStream(true);
+		processBuilder.command(new String[] { "bash", "-c", queryCLI });
 		try {
 
 			Process process = processBuilder.start();
 
 			StringBuilder output = new StringBuilder();
-
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(process.getInputStream()));
-
-			String line;
-			//-1 as the first line should be the header 
 			long size = -1;
-			while ((line = reader.readLine()) != null) {
-				output.append(line + "\n");
-				size++;
+
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+
+				String line;
+				// -1 as the first line should be the header
+				while ((line = reader.readLine()) != null) {
+
+					output.append(line + "\n");
+					size++;
+				}
+				System.out.println(output.substring(0, Math.min(1000, output.length())));
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
 			int exitVal = process.waitFor();
 			if (exitVal == 0) {
-				System.out.println("[DEBUG] Query successfully executed size: "+size);
+				System.out.println("[DEBUG] Query successfully executed size: " + size);
 			} else {
+				System.out.println("Exit Value: " + exitVal);
 				return new Long[] { 0L, System.currentTimeMillis() - start };
 			}
-			return new Long[] { 1L, System.currentTimeMillis() - start , size};
+			return new Long[] { 1L, System.currentTimeMillis() - start, size };
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		//ERROR
+		// ERROR
 		return new Long[] { 0L, System.currentTimeMillis() - start };
 	}
+
 	@Override
 	public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
 		// get next Query File and next random Query out of it.
@@ -102,7 +109,7 @@ public class CLIWorker extends AbstractWorker {
 		if (this.currentQueryID >= this.queryFileList.length) {
 			this.currentQueryID = 0;
 		}
-		
+
 	}
 
 	@Override

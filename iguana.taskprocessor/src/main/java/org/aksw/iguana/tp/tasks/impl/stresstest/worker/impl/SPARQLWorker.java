@@ -20,7 +20,9 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.ContentType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.client.config.RequestConfig;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -130,7 +132,8 @@ public class SPARQLWorker extends AbstractWorker {
 				Header[] contentType = response.getHeaders("Content-Type");
 				long size = -1;
 				if (contentType.length >= 1) {
-					switch (contentType[0].getValue()) {
+					String cType  = getContentTypeVal(contentType[0]);
+					switch (cType.trim().toLowerCase()) {
 					case "application/sparql-results+json":
 						size = parseJson(res);
 						break;
@@ -162,6 +165,30 @@ public class SPARQLWorker extends AbstractWorker {
 		// return -1L;
 		return new Long[] { COMMON.UNKNOWN_EXCEPTION_VALUE, System.currentTimeMillis() - start };
 
+	}
+
+	private String getContentTypeVal(Header header) {
+		System.out.println("[DEBUG] HEADER: "+header);
+		for(HeaderElement el : header.getElements()) {
+			NameValuePair cTypePair = el.getParameterByName("Content-Type");
+			System.out.println("[DEBUG] Pair: "+cTypePair);
+
+			if(cTypePair!=null && !cTypePair.getValue().isEmpty()) {
+				System.out.println("[DEBUG] VAL: "+cTypePair.getValue());
+				return cTypePair.getValue();
+			}
+		}
+		int index = header.toString().indexOf("Content-Type");
+		if(index>=0) {
+			String ret = header.toString().substring(index+"Content-Type".length()+1);
+			if(ret.contains(";")) {
+				System.out.println("[DEBUG] VAL: "+ret.substring(0, ret.indexOf(";")).trim());
+				return ret.substring(0, ret.indexOf(";")).trim();
+			}
+			System.out.println("[DEBUG] VAL: "+ret.trim());
+			return ret.trim();
+		}
+		return "application/sparql-results+json";
 	}
 
 	private void executeAndTerminate(HttpEntity entity, AtomicReference<String> res) throws InterruptedException {

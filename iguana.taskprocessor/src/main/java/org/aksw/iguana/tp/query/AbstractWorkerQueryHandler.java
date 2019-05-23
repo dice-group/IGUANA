@@ -38,8 +38,15 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 	public AbstractWorkerQueryHandler(Collection<Worker> workers) {
 		this.workers = workers;
 		for(Worker worker : workers) {
-			if(worker instanceof SPARQLWorker || worker instanceof CLIWorker || worker instanceof CLIInputWorker) {
+			if(worker instanceof SPARQLWorker) {
 				sparqlKeys.add(((SPARQLWorker)worker).getQueriesFileName());
+			}
+			else if(worker instanceof CLIWorker) {
+				sparqlKeys.add(((CLIWorker)worker).getQueriesFileName());
+			}
+			else if(worker instanceof CLIInputWorker){
+				sparqlKeys.add(((CLIInputWorker)worker).getQueriesFileName());
+
 			}
 			else if(worker instanceof UPDATEWorker) {
 				updateKeys.add(((UPDATEWorker)worker).getQueriesFileName());

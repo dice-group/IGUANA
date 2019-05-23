@@ -30,7 +30,7 @@ public abstract class AbstractWorker implements Worker {
 	 */
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractWorker.class);
 
-	private boolean endSignal = false;
+	protected boolean endSignal = false;
 	protected long executedQueries;
 
 	private Collection<Properties> results = new LinkedList<Properties>();
@@ -221,6 +221,7 @@ public abstract class AbstractWorker implements Worker {
 					System.out.println("size: "+resultTime[2]);
 					result.put(COMMON.RECEIVE_DATA_SIZE, resultTime[2]);
 				}
+				result.put(COMMON.QUERY_HASH, query.toString().hashCode());
 				result.setProperty(COMMON.QUERY_ID_KEY, queryID.toString());
 				// Add extra Meta Key, worker ID and worker Type
 				result.put(COMMON.EXTRA_META_KEY, this.extra);
