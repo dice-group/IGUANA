@@ -33,3 +33,101 @@ For further Information visit
 [iguana-benchmark.eu](http://iguana-benchmark.eu) (Currently not updated to v2)
 
 [Wiki](https://github.com/AKSW/IGUANA/wiki)
+
+
+# Getting Started
+
+# Prerequisites 
+
+You need to install Java 8 or greater and RabbitMQ Version 4.x.z or greater.
+In Ubuntu you can install these using the following commands
+
+```
+sudo apt-get install java
+sudo apt-get install rabbitmq
+```
+
+RabbitMQ will be automatically started after you installed it. 
+
+# Iguana Modules
+
+Iguana consists of two modules! 
+
+1. **corecontroller**: This will benchmark the systems 
+2. **resultprocessor**: This will calculate the Metrics and save the raw benchmark results 
+
+Further on you need to install and start the message brocker [RabbitMQ](https://www.rabbitmq.com/). It is needed for communication between the **corecontroller** and the **resultprocessor**. 
+
+## **corecontroller**
+
+The **corecontroller** will benchmark your system. It should be started on the same machine your Triple Store is started.
+It will be started as a daemon process in the background and you can send a benchmark configuration to this module (see [below](#run-your-benchmarks)).
+
+It will start the benchmark according to the benchmark configuration and will send data about each executed query to the **resultprocessor**. The data includes sent for each query includes:
+* the ID of the query
+* if it succeeded or failed
+* the time the execution took
+
+## **resultprocessor**
+
+The **resultprocessor** will be started as a daemon too. 
+Its behavior is widely configurable. 
+By default it stores its result in a ntriple file. But you may configure it, to write the results directly to a Triple Store. 
+On the processing side, it calculates various metrics.
+
+Per run metrics:
+* Query Mixes Per Hour (QMPH)
+* Number of Queries Per Hour (NoQPH)
+
+Per query metrics:
+* Queries Per Second (QPS)
+* Number of successful and failed queries
+* result size
+* sum of execution times
+* **Each Query Execution (EQE)?**
+
+You can change these in the **resultprocessor** configuration file.
+
+If you use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/iguana_basic.config), it will save QMPH, NoQPH and QPS to a file called `results_{{DATE_RP_STARTED}}.nt`
+
+
+# Setup Iguana
+
+## Download
+Please download the following files from the release available [here](https://github.com/dice-group/IGUANA/releases).
+
+* iguana.corecontroller-X.Y.Z.jar
+* iguana.resultprocessor-X.Y.Z.jar
+* core.properties
+* rp.properties
+* start-iguana.sh
+* send-config.sh
+
+## Start Daemons
+
+Use the start script 
+```
+./start-iguana.sh
+```
+Now the iguana daemons are running in the background.
+
+# Run Your Benchmarks
+
+## Create a Configuration
+
+You can use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/iguana_basic.config) we provide and modify it to your needs.
+For further information please visit our [configuration](https://github.com/dice-group/IGUANA/wiki/config) and [Stresstest](https://github.com/dice-group/IGUANA/wiki/stresstest) wiki pages. For a detailed, step-by-step instruction please attend our [tutorial](https://github.com/dice-group/IGUANA/wiki/Tutorial-DBPSB-2012#create-the-configuration).
+
+## Execute the Benchmark
+
+Make sure you:
+1. started Iguana 
+2. created your benchmark configuration 
+3. started and setup the Triple Store you want to bench. 
+
+Assuming your benchmark configuration is called `benchmark.config`, you can start your benchmark now with: 
+
+```
+./send-config.sh benchmark.config
+```
+It will send your configuration the **corecontroller** and start it.
