@@ -30,7 +30,7 @@ It provides an enviroment which ...
 
 For further Information visit
 
-[iguana-benchmark.eu](http://iguana-benchmark.eu) (Currently not updated to v2)
+[iguana-benchmark.eu](http://iguana-benchmark.eu) 
 
 [Wiki](https://github.com/AKSW/IGUANA/wiki)
 
