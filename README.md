@@ -84,7 +84,7 @@ Per query metrics:
 * Number of successful and failed queries
 * result size
 * sum of execution times
-* **Each Query Execution (EQE)?**
+* Each Query Execution (EQE)
 
 You can change these in the **resultprocessor** configuration file.
 
