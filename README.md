@@ -81,10 +81,13 @@ Per run metrics:
 
 Per query metrics:
 * Queries Per Second (QPS)
-* Number of successful and failed queries
-* result size
-* sum of execution times
+    * Number of successful and failed queries
+    * result size
+    * queries per second
+    * sum of execution times
 * Each Query Execution (EQE)
+    * time the query execution took
+    * if it was succesfull or not
 
 You can change these in the **resultprocessor** configuration file.
 
