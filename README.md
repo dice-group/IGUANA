@@ -97,7 +97,16 @@ If you use the [basic configuration](https://github.com/dice-group/IGUANA/blob/m
 # Setup Iguana
 
 ## Download
-Please download the following files from the release available [here](https://github.com/dice-group/IGUANA/releases).
+Please download the release zip **Iguana_Release.zip** from the newest release available [here](https://github.com/dice-group/IGUANA/releases):
+
+```
+wget https://github.com/dice-group/IGUANA/releases/download/v2.1.0d/Iguana_Release.zip
+unzip Iguana_Release.zip
+cd Iguana_Release/
+```
+
+
+It contains the following files:
 
 * iguana.corecontroller-X.Y.Z.jar
 * iguana.resultprocessor-X.Y.Z.jar
