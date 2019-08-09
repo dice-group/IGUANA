@@ -44,6 +44,7 @@ public class QMPHMetric extends NoQPHMetric {
 			sendTriples(results, key);
 			this.storageManager.commit();
 		}
+		super.close();
 	}
 
 }

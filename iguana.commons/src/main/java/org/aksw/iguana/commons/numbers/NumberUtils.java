@@ -14,7 +14,7 @@ public class NumberUtils {
 	 */
 	public static Long getLong(String nm) {
 		try {
-			Long ret = Long.valueOf(nm);
+			Long ret = Long.parseLong(nm);
 			return ret;
 		}catch(NumberFormatException e) {}
 		return null;

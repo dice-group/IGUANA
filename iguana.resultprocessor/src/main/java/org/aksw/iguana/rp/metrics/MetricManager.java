@@ -92,7 +92,8 @@ public class MetricManager {
 				
 			}catch(Exception e){
 				LOGGER.warn("Could not use metric "+m.getShortName()+", Cause: "+e);
-				remove.add(m);
+				//remove.add(m);
+				e.printStackTrace();
 			}
 		}
 		metrics.removeAll(remove);

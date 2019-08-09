@@ -347,4 +347,8 @@ public abstract class AbstractMetric implements Metric{
 		}
 		addDataToContainer(extra, tmp);
 	}
+	
+	public void close() {
+		this.dataContainer.clear();
+	}
 }

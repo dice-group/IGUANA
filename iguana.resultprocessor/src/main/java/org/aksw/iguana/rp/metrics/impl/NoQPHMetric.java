@@ -69,7 +69,7 @@ public class NoQPHMetric extends AbstractMetric {
 			results.put("noOfQueriesPerHour", noOfQueriesPerHour);
 			sendTriples(results, key);
 		}
-		
+		super.close();
 		
 	}
 		

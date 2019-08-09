@@ -171,7 +171,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(rdfs).append("ID> \"")
 						.append(queryFile.getName().replace("sparql", "")).append("\" .\n");
 				//TODO query complexity
-			} catch (IOException e) {
+			} catch (Exception e) {
 			}
 		}
 		// TODO add overall stats

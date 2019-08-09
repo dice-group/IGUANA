@@ -82,6 +82,7 @@ public class CorrectnessMetric extends AbstractMetric {
 		results.put("macroRecall", globalMeasure[1]/rawResults.size());
 		results.put("macroF1", globalMeasure[2]/rawResults.size());
 		sendTriples(subject, results, new HashSet<String>(), new Properties(),triples );
+		super.close();
 	}
 
 	private double[] calculateMeasure(double[] rawDoubleResults) {

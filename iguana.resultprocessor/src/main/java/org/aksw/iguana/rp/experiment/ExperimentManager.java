@@ -128,7 +128,7 @@ public class ExperimentManager {
 		LOGGER.info("Got end Flag for experiment task ID {}", taskID);
 		if(experiments.containsKey(taskID)){
 			experiments.get(taskID).close();
-			
+			experiments.remove(taskID);
 		}
 		else{
 			LOGGER.warn("Could not find Experiment Task with ID: {}.", taskID);

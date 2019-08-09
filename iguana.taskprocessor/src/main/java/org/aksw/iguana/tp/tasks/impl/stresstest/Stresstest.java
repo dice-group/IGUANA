@@ -81,9 +81,7 @@ public class Stresstest extends AbstractTask {
 	@Override
 	public void setConfiguration(Configuration taskConfig) {
 		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit"));
-		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));
-		System.out.println(noOfQueryMixes);
-		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
+		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
 		this.qhClassName = tmp[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
 
@@ -288,7 +286,7 @@ public class Stresstest extends AbstractTask {
 				long queriesInMix = 0;
 				if (worker instanceof SPARQLWorker) {
 					queriesInMix = ((AbstractWorker) worker).getNoOfQueries();
-					System.out.println(queriesInMix+" : "+noOfQueryMixes);
+					System.out.println("[DEBUG] No of query Mixes:" + worker.getExecutedQueries()+" : "+queriesInMix+" : "+noOfQueryMixes);
 					if (worker.getExecutedQueries() / queriesInMix * 1.0 >= noOfQueryMixes) {
 
 						worker.stopSending();

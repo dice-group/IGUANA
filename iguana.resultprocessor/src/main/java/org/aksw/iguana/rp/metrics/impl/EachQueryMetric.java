@@ -95,6 +95,7 @@ public class EachQueryMetric extends AbstractMetric {
 	@Override
 	public void close() {
 		// Nothing to do here, as each query was sent to the Storages yet.
+		super.close();
 	}
 
 }

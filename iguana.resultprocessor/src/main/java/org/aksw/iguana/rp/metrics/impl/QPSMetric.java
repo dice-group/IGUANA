@@ -119,6 +119,8 @@ public class QPSMetric extends AbstractMetric {
 				sendTriples(results, isRes, key, triples);
 			}
 		}
+		super.close();
+		
 	}
 
 }

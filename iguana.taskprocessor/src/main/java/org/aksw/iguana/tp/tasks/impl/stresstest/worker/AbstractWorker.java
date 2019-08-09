@@ -70,6 +70,8 @@ public abstract class AbstractWorker implements Worker {
 
 	protected Long timeOut=180000L;
 
+	private long noOfQueryMixes;
+
 	/**
 	 * Needs to be called if init is used
 	 * @param workerType 

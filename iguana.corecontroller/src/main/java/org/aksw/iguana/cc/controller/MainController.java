@@ -45,7 +45,7 @@ public class MainController {
 		ConfigManager cmanager = new ConfigManager();
 		DefaultConsumer consumer = new DefaultConsumer(cmanager);
 		Thread configThread = new Thread(cmanager);
-		configThread.start();
+		//configThread.start();
 		try {
 			consumer.init(host, COMMON.CONFIG2MC_QUEUE_NAME);
 		} catch (IguanaException e) {
