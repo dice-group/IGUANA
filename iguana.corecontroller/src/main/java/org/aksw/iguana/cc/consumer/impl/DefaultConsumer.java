@@ -37,8 +37,8 @@ public class DefaultConsumer extends AbstractConsumer {
 		} else {
 			String dataStr = RabbitMQUtils.getObject(data);
 			PropertiesConfiguration config = new PropertiesConfiguration();
-			try {
-				config.load(new StringReader(dataStr));
+			try(StringReader sreader = new StringReader(dataStr)) {
+				config.load(sreader);
 				System.out.println("Config received");
 			} catch (ConfigurationException e1) {
 				LOGGER.error("Could not read configuration. Must ignore it... Sorry :(", e1);

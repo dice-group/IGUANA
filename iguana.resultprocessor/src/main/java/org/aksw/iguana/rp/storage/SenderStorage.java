@@ -60,16 +60,17 @@ public abstract class SenderStorage<T extends Object> implements Storage {
 	    Channel channel = connection.createChannel();
 	    
 	    channel.queueDeclare(COMMON.RP2SENDER_QUEUENAME, false, false, false, null);
-	    
-	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	      ObjectOutputStream oos = new ObjectOutputStream(bos);
+	    byte [] data = null;
+	    try(ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	      ObjectOutputStream oos = new ObjectOutputStream(bos);){
 	      oos.writeObject(obj);
 	      oos.flush();
 	      oos.close();
 	      bos.close();
-	      byte [] data = bos.toByteArray();
-	    
-	    channel.basicPublish("", COMMON.RP2SENDER_QUEUENAME, null, data);
+	      data = bos.toByteArray();
+	    }
+	    if(data != null)
+	    	channel.basicPublish("", COMMON.RP2SENDER_QUEUENAME, null, data);
 	}
 	
 	

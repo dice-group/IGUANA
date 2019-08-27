@@ -54,6 +54,7 @@ public abstract class AbstractConsumer implements IConsumer {
 			channel = con.createChannel();
 		} catch (IOException e) {
 			LOGGER.error("Could not create a channel", e);
+			close();
 			throw new IguanaException(e);
 		}
 
@@ -62,6 +63,7 @@ public abstract class AbstractConsumer implements IConsumer {
 			channel.queueDeclare(queueName, false, false,
 					false, null);
 		} catch (IOException e) {
+			close();
 			LOGGER.error("Could not declare queue (name: "
 					+ queueName + ".", e);
 			throw new IguanaException(e);
@@ -86,6 +88,7 @@ public abstract class AbstractConsumer implements IConsumer {
 		} catch (IOException e) {
 			LOGGER.error("Could not consume (name: "
 					+ queueName + ".", e);
+			close();
 			throw new IguanaException(e);
 		}
 	}

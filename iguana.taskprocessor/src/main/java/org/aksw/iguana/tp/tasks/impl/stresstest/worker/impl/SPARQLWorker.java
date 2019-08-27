@@ -2,6 +2,7 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -100,8 +101,6 @@ public class SPARQLWorker extends AbstractWorker {
 				response = client.execute(request);
 				HttpEntity entity = response.getEntity();
 				int responseCode = response.getStatusLine().getStatusCode();
-				System.out.println("\nSending 'GET' request to URL : " + service);
-				System.out.println("Response Code : " + responseCode);
 				if (responseCode != 200) {
 					return new Long[] { COMMON.WRONG_RESPONSE_CODE_VALUE, System.currentTimeMillis() - start };
 
@@ -155,7 +154,6 @@ public class SPARQLWorker extends AbstractWorker {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			System.out.println("Size debug: -1");
 			return new Long[] { 1L, end - start };
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
@@ -225,7 +223,6 @@ public class SPARQLWorker extends AbstractWorker {
 		JSONParser parser = new JSONParser();
 		JSONObject json = (JSONObject) parser.parse(res.toString().trim());
 		long size = ((JSONArray) ((JSONObject) json.get("results")).get("bindings")).size();
-		System.out.println("Size debug: " + size);
 		res.set("");
 		return size;
 	}

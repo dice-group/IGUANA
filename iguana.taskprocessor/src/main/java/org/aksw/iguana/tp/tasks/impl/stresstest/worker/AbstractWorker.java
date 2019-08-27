@@ -181,9 +181,7 @@ public abstract class AbstractWorker implements Worker {
 			StringBuilder query = new StringBuilder();
 			StringBuilder queryID = new StringBuilder();
 			try {
-				System.out.println("D1");
 				getNextQuery(query, queryID);
-				System.out.println("D2");
 				// check if endsignal was triggered
 				if (this.endSignal) {
 					break;
@@ -201,16 +199,13 @@ public abstract class AbstractWorker implements Worker {
 			Long time = 0L;
 			Long[] resultTime = new Long[]{0L, 0L};
 			try {
-				System.out.println(queryID+": D3");
 				resultTime = getTimeForQueryMs(query.toString(), queryID.toString());
 				time = resultTime[1];
-				System.out.println("D4");
 			} catch (Exception e) {
 				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
 						query.toString());
 				time = -1L;
 			}
-			System.out.println("Query: "+queryID+" : "+time);
 			this.executedQueries++;
 			// If endSignal was send during execution it should not be counted anymore.
 			if (!this.endSignal) {
@@ -220,7 +215,6 @@ public abstract class AbstractWorker implements Worker {
 				result.put(COMMON.RECEIVE_DATA_TIME, time);
 				result.put(COMMON.RECEIVE_DATA_SUCCESS, resultTime[0]);
 				if(resultTime.length>2) {
-					System.out.println("size: "+resultTime[2]);
 					result.put(COMMON.RECEIVE_DATA_SIZE, resultTime[2]);
 				}
 				result.put(COMMON.QUERY_HASH, query.toString().hashCode());
@@ -229,9 +223,7 @@ public abstract class AbstractWorker implements Worker {
 				result.put(COMMON.EXTRA_META_KEY, this.extra);
 				setResults(result);
 			}
-			System.out.println("D5");
 		}
-		System.out.println("WTF");
 		LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
 	}
 

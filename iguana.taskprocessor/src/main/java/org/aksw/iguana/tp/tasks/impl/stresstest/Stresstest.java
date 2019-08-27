@@ -3,7 +3,9 @@
  */
 package org.aksw.iguana.tp.tasks.impl.stresstest;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -64,6 +66,8 @@ public class Stresstest extends AbstractTask {
 	protected String baseUri = "http://iguana-benchmark.eu";
 	private String iguanaResource = baseUri + "/recource/";
 	private String iguanaProperty = baseUri + "/properties/";
+
+	private PrintWriter debugWriter;
 		
 
 	/**
@@ -71,11 +75,12 @@ public class Stresstest extends AbstractTask {
 	 * @param taskID
 	 * @param services
 	 * @param taskConfig
+	 * @throws FileNotFoundException 
 	 */
-	public Stresstest(String[] ids, String[] services) {
+	public Stresstest(String[] ids, String[] services) throws FileNotFoundException {
 		
 		super(ids, services);
-		
+		debugWriter = new PrintWriter("core-debug.log");
 	}
 	
 	@Override
@@ -173,7 +178,6 @@ public class Stresstest extends AbstractTask {
 	@Override
 	public void execute() {
 		warmup();
-		
 		LOGGER.info("Task with ID {{}} will be executed now", this.taskID);
 		// Execute each Worker in ThreadPool
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkers.intValue());
@@ -199,7 +203,10 @@ public class Stresstest extends AbstractTask {
 					}
 				}
 			}
+			
 		}
+		debugWriter.println("Sending stop signal to workers");
+		debugWriter.flush();
 		// tell all workers to stop sending properties, thus the await termination will
 		// be safe with the results
 		for (Worker worker : workers) {
@@ -208,6 +215,9 @@ public class Stresstest extends AbstractTask {
 		// Wait 5seconds so the workers can stop themselves, otherwise they will be
 		// stopped
 		try {
+			debugWriter.println("Will shutdown now...");
+			debugWriter.flush();
+
 			LOGGER.info("[TaskID: {{}}] Will shutdown and await termination in 5s.", taskID);
 			executor.shutdown();
 			executor.awaitTermination(5, TimeUnit.SECONDS);
@@ -215,7 +225,23 @@ public class Stresstest extends AbstractTask {
 		} catch (InterruptedException e) {
 			LOGGER.error("[TaskID: {{}}] Could not shutdown Threads/Workers due to ...", taskID);
 			LOGGER.error("... Exception: ", e);
+			debugWriter.println(e);
+			debugWriter.flush();
+			try {
+				executor.shutdownNow();
+			}catch(Exception e1) {
+				debugWriter.println(e1);
+				debugWriter.flush();
+			}
+
 		}
+		
+	}
+	
+	@Override
+	public void close() {
+		super.close();
+		debugWriter.close();
 	}
 	
 	private void warmup() {
@@ -264,6 +290,7 @@ public class Stresstest extends AbstractTask {
 		exec.shutdown();
 		try {
 			exec.awaitTermination(5, TimeUnit.SECONDS);
+			
 		} catch (InterruptedException e) {
 			LOGGER.warn("[TaskID: {{}}] Warmup. Could not await Termination of Workers.", taskID);
 		}
@@ -277,7 +304,22 @@ public class Stresstest extends AbstractTask {
 	 * @return true if restriction occurs, false otherwise
 	 */
 	protected boolean isFinished() {
-		if (timeLimit == null) {
+		if (timeLimit !=null) {
+			try {
+				TimeUnit.MILLISECONDS.sleep(100);
+			}catch(Exception e) {
+				LOGGER.error("Could not warmup ");
+			}
+			long current = Calendar.getInstance().getTimeInMillis();
+			System.out.println(current +"  :  "+this.startTime+" : "+(current - this.startTime)+" : "+(timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime)));
+			if(timeLimit - (current - this.startTime) <= 0L) {
+				debugWriter.println("time is over. finished="+(timeLimit - (current - this.startTime) <= 0L));
+				debugWriter.flush();
+
+			}
+			return timeLimit - (current - this.startTime) <= 0L;
+		}
+		else if (noOfQueryMixes != null) {
 			// use noOfQueries of SPARQLWorkers (as soon as a worker hit the noOfQueries, it
 			// will stop sending results
 			// UpdateWorker are allowed to execute all their updates
@@ -307,10 +349,8 @@ public class Stresstest extends AbstractTask {
 			}
 			return endFlag;
 		}
-//		System.out.println(""+(timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime)));
-//		System.out.println(workers.get(0).getExecutedQueries());
-//		LOGGER.error(""+(timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime)));
-		return timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime) <= 0;
+		System.out.println("Timelimit and NoOfQueryMixes is both null. executing now");
+		return true;
 	}
 
 	@Override

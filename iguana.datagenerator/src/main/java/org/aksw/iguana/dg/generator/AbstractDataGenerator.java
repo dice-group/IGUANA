@@ -90,7 +90,8 @@ public abstract class AbstractDataGenerator  implements
 		Model send = ModelFactory.createDefaultModel();
 		int sendedSize=0;
 		//Read file line by line
-		try(BufferedReader reader = new BufferedReader(new FileReader(ntripleFile))){
+		try(FileReader fr = new FileReader(ntripleFile);
+				BufferedReader reader = new BufferedReader(fr)){
 			String triple="";
 			while(null!=(triple=reader.readLine())){
 				

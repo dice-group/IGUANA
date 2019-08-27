@@ -35,13 +35,14 @@ public class DefaultSender implements ISender {
 	    factory.setHost(host);
 	    this.queueName=queueName;
 	    
-	    try {
-			connection = factory.newConnection();
+	    try {connection = factory.newConnection();
 			channel = connection.createChannel();
 		    channel.queueDeclare(queueName, false, false, false, null);
 	    } catch (IOException | TimeoutException e) {
 			LOGGER.error("Could not initialize rabbitMQ connection and channel.", e);
+			close();
 		}
+	    
 	    
 	}
 
@@ -49,8 +50,12 @@ public class DefaultSender implements ISender {
 	public void close() {
 		try {
 			channel.close();
-			connection.close();
 		} catch (IOException | TimeoutException e) {
+			LOGGER.error("Could not close rabbitMQ connection and channel.", e);
+		}
+		try {
+			connection.close();
+		} catch (IOException  e) {
 			LOGGER.error("Could not close rabbitMQ connection and channel.", e);
 		}
 	}
