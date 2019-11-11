@@ -262,12 +262,12 @@ public class Stresstest extends AbstractTask {
 		LinkedList<Worker> warmupWorkers = new LinkedList<Worker>();
 		if(warmupQueries!=null || warmupQueries.isEmpty()) {
 			//TID WID, TL, SERVICE, USER, PWD, TimeOUT, q/u.txt, NL, NL
-			SPARQLWorker sparql = new SPARQLWorker(new String[] {"-1", "1",  warmupTimeMS.toString(), service, user, password,  warmupQueries, "0", "0"});
+			SPARQLWorker sparql = new SPARQLWorker(new String[] {"-1", "1",  warmupTimeMS.toString(), service, user, password,  "60000",warmupQueries, "0", "0"});
 			warmupWorkers.add(sparql);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one SPARQL worker.", taskID);
 		}
 		if(warmupUpdates!=null || warmupUpdates.isEmpty()) {
-			UPDATEWorker update = new UPDATEWorker(new String[] {"-1", "2", warmupTimeMS.toString(), updateService, user, password,  warmupUpdates, "0", "0", "NONE", "NONE"});
+			UPDATEWorker update = new UPDATEWorker(new String[] {"-1", "2", warmupTimeMS.toString(), updateService, user, password, "60000", warmupUpdates, "0", "0", "NONE", "NONE"});
 			warmupWorkers.add(update);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);
 		}	
