@@ -1,10 +1,21 @@
 package org.aksw.iguana.cc.controller;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Files;
+
 import org.aksw.iguana.cc.config.ConfigManager;
 import org.aksw.iguana.cc.consumer.impl.DefaultConsumer;
 import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.exceptions.IguanaException;
+import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +37,19 @@ public class MainController {
 	 * If the TaskController should run standalone instead of in the core itself
 	 * 
 	 * @param argc
+	 * @throws IOException 
 	 */
-	public static void main(String[] argc){
+	public static void main(String[] argc) throws IOException{
 		if(argc.length==1){
 			Config.getInstance(argc[0]);
 		}
 		MainController controller = new MainController();
-		controller.start();
+		if(argc.length>0) {
+			controller.start(argc[0]);
+		}
+		else {
+			controller.start();
+		}
 	}
 	
 	/**
@@ -53,5 +70,29 @@ public class MainController {
 					+" and consume queue "+COMMON.CONFIG2MC_QUEUE_NAME, e);
 			consumer.close();
 		}
+	}
+	
+	public void start(String configFile) throws IOException{		
+		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
+
+		ConfigManager cmanager = new ConfigManager();
+		PropertiesConfiguration config = new PropertiesConfiguration();
+		String configStr = FileUtils.readFileToString(new File(configFile));
+		System.out.println(configStr);
+		try(StringReader sreader = new StringReader(configStr)){
+			config.load(sreader);
+		} catch (ConfigurationException e1) {
+			LOGGER.error("Could not read configuration. Must ignore it... Sorry :(", e1);
+
+		} 
+		if (!config.isEmpty()) {
+			System.out.println("test");
+			cmanager.receiveData(config);
+		} else {
+
+			LOGGER.error("Empty configuration. Must ignore it... Sorry :(");
+
+		}
+
 	}
 }

@@ -150,7 +150,8 @@ public abstract class AbstractWorker implements Worker {
 		LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
 		try {
 			System.out.println("Wait: "+wait);
-			Thread.sleep(wait);
+			if(wait>0)	
+				Thread.sleep(wait);
 		} catch (InterruptedException e) {
 			LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType,
 					workerID, e);

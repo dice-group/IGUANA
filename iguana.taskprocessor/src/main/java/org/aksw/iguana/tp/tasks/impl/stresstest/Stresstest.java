@@ -180,13 +180,16 @@ public class Stresstest extends AbstractTask {
 		warmup();
 		LOGGER.info("Task with ID {{}} will be executed now", this.taskID);
 		// Execute each Worker in ThreadPool
+		System.out.println("[DEBUG] workers: "+noOfWorkers);
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkers.intValue());
 		this.startTime = Calendar.getInstance().getTimeInMillis();
+		System.out.println("[DEBUG] workers real: "+workers.size());
 		for (Worker worker : workers) {
-			executor.submit(worker);
+			executor.execute(worker);
 		}
 		LOGGER.info("[TaskID: {{}}]All {{}} workers have been started", taskID, noOfWorkers);
 		// wait timeLimit or noOfQueries
+		executor.shutdown();
 		while (!isFinished()) {
 			// check if worker has results yet
 			for (Worker worker : workers) {
@@ -219,7 +222,6 @@ public class Stresstest extends AbstractTask {
 			debugWriter.flush();
 
 			LOGGER.info("[TaskID: {{}}] Will shutdown and await termination in 5s.", taskID);
-			executor.shutdown();
 			executor.awaitTermination(5, TimeUnit.SECONDS);
 			LOGGER.info("[TaskID: {{}}] Task completed.");
 		} catch (InterruptedException e) {
@@ -260,13 +262,14 @@ public class Stresstest extends AbstractTask {
 	
 	private LinkedList<Worker> initWarmupWorkers(){
 		LinkedList<Worker> warmupWorkers = new LinkedList<Worker>();
-		if(warmupQueries!=null) {
-			SPARQLWorker sparql = new SPARQLWorker(new String[] {"-1", "1",  "0", service, null,  warmupQueries, null, null});
+		if(warmupQueries!=null || warmupQueries.isEmpty()) {
+			//TID WID, TL, SERVICE, USER, PWD, TimeOUT, q/u.txt, NL, NL
+			SPARQLWorker sparql = new SPARQLWorker(new String[] {"-1", "1",  warmupTimeMS.toString(), service, user, password,  warmupQueries, "0", "0"});
 			warmupWorkers.add(sparql);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one SPARQL worker.", taskID);
 		}
-		if(warmupUpdates!=null) {
-			UPDATEWorker update = new UPDATEWorker(new String[] {"-1", "2", "0", service, null,  warmupUpdates, null,null, null, null});
+		if(warmupUpdates!=null || warmupUpdates.isEmpty()) {
+			UPDATEWorker update = new UPDATEWorker(new String[] {"-1", "2", warmupTimeMS.toString(), updateService, user, password,  warmupUpdates, "0", "0", "NONE", "NONE"});
 			warmupWorkers.add(update);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);
 		}	
@@ -306,15 +309,15 @@ public class Stresstest extends AbstractTask {
 	protected boolean isFinished() {
 		if (timeLimit !=null) {
 			try {
-				TimeUnit.MILLISECONDS.sleep(100);
+				TimeUnit.MILLISECONDS.sleep(10);
+				
 			}catch(Exception e) {
 				LOGGER.error("Could not warmup ");
 			}
 			long current = Calendar.getInstance().getTimeInMillis();
-			System.out.println(current +"  :  "+this.startTime+" : "+(current - this.startTime)+" : "+(timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime)));
 			if(timeLimit - (current - this.startTime) <= 0L) {
-				debugWriter.println("time is over. finished="+(timeLimit - (current - this.startTime) <= 0L));
-				debugWriter.flush();
+				//debugWriter.println("time is over. finished="+(timeLimit - (current - this.startTime) <= 0L));
+				//debugWriter.flush();
 
 			}
 			return timeLimit - (current - this.startTime) <= 0L;

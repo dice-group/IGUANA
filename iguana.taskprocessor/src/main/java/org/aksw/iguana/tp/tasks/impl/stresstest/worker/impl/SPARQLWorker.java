@@ -73,10 +73,11 @@ public class SPARQLWorker extends AbstractWorker {
 
 	@Override
 	public Long[] getTimeForQueryMs(String query, String queryID) {
-		QueryExecution exec = QueryExecutionFactory.sparqlService(service, query);
+		// QueryExecution exec = QueryExecutionFactory.sparqlService(service, query);
 		// exec.setTimeout(this.timeOut);
 		// Set query timeout
-		exec.setTimeout(this.timeOut, TimeUnit.MILLISECONDS, this.timeOut, TimeUnit.MILLISECONDS);
+		// exec.setTimeout(this.timeOut, TimeUnit.MILLISECONDS, this.timeOut,
+		// TimeUnit.MILLISECONDS);
 		long start = System.currentTimeMillis();
 		final AtomicReference<String> res = new AtomicReference<String>("");
 
@@ -88,25 +89,40 @@ public class SPARQLWorker extends AbstractWorker {
 				addChar = "&";
 			}
 			String url = service + addChar + "query=" + qEncoded;
-			CloseableHttpClient client = HttpClients.createDefault();
-			CloseableHttpResponse response = null;
+			HttpGet request = new HttpGet(url);
+			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
+					.setConnectTimeout(timeOut.intValue()).build();
 
-			try {
-				HttpGet request = new HttpGet(url);
-				RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
-						.setConnectTimeout(timeOut.intValue()).build();
+			request.setConfig(requestConfig);
+			try (CloseableHttpClient client = HttpClients.createDefault();
+					CloseableHttpResponse response = client.execute(request);) {
 
-				request.setConfig(requestConfig);
-
-				response = client.execute(request);
 				HttpEntity entity = response.getEntity();
 				int responseCode = response.getStatusLine().getStatusCode();
 				if (responseCode != 200) {
 					return new Long[] { COMMON.WRONG_RESPONSE_CODE_VALUE, System.currentTimeMillis() - start };
 
 				}
+				Header[] contentType = response.getHeaders("Content-Type");
+				String cType = getContentTypeVal(contentType[0]);
 
-				executeAndTerminate(entity, res);
+				executeAndTerminate(entity, res, cType);
+
+				long end = System.currentTimeMillis();
+				if (this.timeOut < end - start) {
+					return new Long[] { 0L, System.currentTimeMillis() - start };
+				}
+				long size=0L;
+				if("application/sparql-results+json".equals(cType)) {
+					size = parseJson(res.get());
+				}
+				else {
+					size = StringUtils.countMatches(res.get(), "\n");
+				}
+				return new Long[] { 1L, end - start, size };
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
 				// check ResultSet.
 			} catch (java.net.SocketTimeoutException | ConnectTimeoutException e) {
 				System.out.println("Timeout occured for " + service + " - " + queryID);
@@ -116,45 +132,8 @@ public class SPARQLWorker extends AbstractWorker {
 			} catch (Exception e) {
 				System.out.println("Query could not be exceuted: " + e);
 				return new Long[] { COMMON.UNKNOWN_EXCEPTION_VALUE, System.currentTimeMillis() - start };
-			} finally {
-				if (response != null)
-					response.close();
-				client.close();
-
-			}
-			long end = System.currentTimeMillis();
-			if (this.timeOut < end - start) {
-				return new Long[] { 0L, System.currentTimeMillis() - start };
 			}
 
-			try {
-				Header[] contentType = response.getHeaders("Content-Type");
-				long size = -1;
-				if (contentType.length >= 1) {
-					String cType  = getContentTypeVal(contentType[0]);
-					switch (cType.trim().toLowerCase()) {
-					case "application/sparql-results+json":
-						size = parseJson(res);
-						break;
-					case "text/plain":
-						size = StringUtils.countMatches(res.get(), "\n");
-						break;
-					case "text/csv":
-						size = StringUtils.countMatches(res.get(), "\n") - 1;
-						break;
-					case "application/xml":
-					case "application/sparql-results+xml":
-						size = StringUtils.countMatches(res.get(), "<result>");
-						break;
-					default:
-						LOGGER.info("ContentType {} unkown", contentType[0].getValue());
-					}
-				}
-				return new Long[] { 1L, end - start, size };
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return new Long[] { 1L, end - start };
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
 					this.workerID, query, e);
@@ -166,48 +145,46 @@ public class SPARQLWorker extends AbstractWorker {
 	}
 
 	private String getContentTypeVal(Header header) {
-		System.out.println("[DEBUG] HEADER: "+header);
-		for(HeaderElement el : header.getElements()) {
+		System.out.println("[DEBUG] HEADER: " + header);
+		for (HeaderElement el : header.getElements()) {
 			NameValuePair cTypePair = el.getParameterByName("Content-Type");
-			System.out.println("[DEBUG] Pair: "+cTypePair);
+//			System.out.println("[DEBUG] Pair: " + cTypePair);
 
-			if(cTypePair!=null && !cTypePair.getValue().isEmpty()) {
-				System.out.println("[DEBUG] VAL: "+cTypePair.getValue());
+			if (cTypePair != null && !cTypePair.getValue().isEmpty()) {
+//				System.out.println("[DEBUG] VAL: " + cTypePair.getValue());
 				return cTypePair.getValue();
 			}
 		}
 		int index = header.toString().indexOf("Content-Type");
-		if(index>=0) {
-			String ret = header.toString().substring(index+"Content-Type".length()+1);
-			if(ret.contains(";")) {
-				System.out.println("[DEBUG] VAL: "+ret.substring(0, ret.indexOf(";")).trim());
+		if (index >= 0) {
+			String ret = header.toString().substring(index + "Content-Type".length() + 1);
+			if (ret.contains(";")) {
+//				System.out.println("[DEBUG] VAL: " + ret.substring(0, ret.indexOf(";")).trim());
 				return ret.substring(0, ret.indexOf(";")).trim();
 			}
-			System.out.println("[DEBUG] VAL: "+ret.trim());
+//			System.out.println("[DEBUG] VAL: " + ret.trim());
 			return ret.trim();
 		}
 		return "application/sparql-results+json";
 	}
 
-	private void executeAndTerminate(HttpEntity entity, AtomicReference<String> res) throws InterruptedException {
+	private void executeAndTerminate(HttpEntity entity, AtomicReference<String> res, String cType)
+			throws InterruptedException {
 		ExecutorService service2 = Executors.newSingleThreadExecutor();
 		// ResultSet res;
 		service2.execute(new Runnable() {
 			@Override
 			public void run() {
-
-				try (InputStream inputStream = entity.getContent();) {
-					BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+				try (InputStream inputStream = entity.getContent();
+						BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
 					StringBuilder result = new StringBuilder();
 					String line;
-					int size = 0;
 					while ((line = br.readLine()) != null) {
-						result.append(line).append("\n");
-						size += result.length();
+						result.append(line);
 					}
-					System.out.println("[DEBUG] Size of Query: " + size);
+					System.out.println("[DEBUG]: byte size: "+result.length());
 					res.set(result.toString());
-					result = new StringBuilder();
+					result = null;
 				} catch (Exception e) {
 					System.out.println("Query could not be exceuted: " + e);
 				}
@@ -215,15 +192,15 @@ public class SPARQLWorker extends AbstractWorker {
 		});
 
 		service2.shutdown();
-
+//
 		service2.awaitTermination(this.timeOut + 100, TimeUnit.MILLISECONDS);
 	}
 
-	private long parseJson(AtomicReference<String> res) throws ParseException {
+	private long parseJson(String res) throws ParseException {
 		JSONParser parser = new JSONParser();
 		JSONObject json = (JSONObject) parser.parse(res.toString().trim());
 		long size = ((JSONArray) ((JSONObject) json.get("results")).get("bindings")).size();
-		res.set("");
+		res = "";
 		return size;
 	}
 

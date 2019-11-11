@@ -35,7 +35,7 @@ public class DataGeneratorController{
 			Config.getInstance(argc[0]);
 		}
 		DataGeneratorController controller = new DataGeneratorController();
-		controller.start();
+		//controller.start();
 	}
 	
 	/**
