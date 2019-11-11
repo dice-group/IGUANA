@@ -260,14 +260,23 @@ public class Stresstest extends AbstractTask {
 	
 	private LinkedList<Worker> initWarmupWorkers(){
 		LinkedList<Worker> warmupWorkers = new LinkedList<Worker>();
+
 		if(warmupQueries!=null || warmupQueries.isEmpty()) {
 			//TID WID, TL, SERVICE, USER, PWD, TimeOUT, q/u.txt, NL, NL
+			System.out.println(warmupQueries);
 			SPARQLWorker sparql = new SPARQLWorker(new String[] {"-1", "1",  warmupTimeMS.toString(), service, user, password,  "60000",warmupQueries, "0", "0"});
 			warmupWorkers.add(sparql);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one SPARQL worker.", taskID);
 		}
 		if(warmupUpdates!=null || warmupUpdates.isEmpty()) {
-			UPDATEWorker update = new UPDATEWorker(new String[] {"-1", "2", warmupTimeMS.toString(), updateService, user, password, "60000", warmupUpdates, "0", "0", "NONE", "NONE"});
+			String[] updateConfig = new String[] {"-1", "2", warmupTimeMS.toString(), updateService, user, password, "60000", warmupUpdates, "0", "0", "NONE", "NONE"};
+			System.out.println("|updateConfig|: "+ updateConfig.length);
+			for(String u : updateConfig) {
+				System.out.print(u+" ");
+			}
+			System.out.println();
+//			System.out.println("UpdateConfig: "+List.of(updateConfig));
+			UPDATEWorker update = new UPDATEWorker(updateConfig);
 			warmupWorkers.add(update);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);
 		}	
@@ -281,20 +290,35 @@ public class Stresstest extends AbstractTask {
 		}
 		//wait as long as needed
 		long start = Calendar.getInstance().getTimeInMillis();
+		exec.shutdown();
 		while((Calendar.getInstance().getTimeInMillis()-start) <= warmupTimeMS) {
+			//clean up RAM
+			for(Worker worker: warmupWorkers) {
+				worker.popQueryResults();
+			}
 			try {
 				TimeUnit.MILLISECONDS.sleep(100);
 			}catch(Exception e) {
 				LOGGER.error("Could not warmup ");
 			}
 		}
-		exec.shutdown();
+		for(Worker worker : warmupWorkers) {
+			worker.stopSending();
+		}
 		try {
 			exec.awaitTermination(5, TimeUnit.SECONDS);
 			
 		} catch (InterruptedException e) {
 			LOGGER.warn("[TaskID: {{}}] Warmup. Could not await Termination of Workers.", taskID);
 		}
+		try {
+			exec.shutdownNow();
+		}catch(Exception e1) {
+			debugWriter.println(e1);
+			debugWriter.flush();
+		}
+		//clear up
+		warmupWorkers.clear();
 		LOGGER.info("[TaskID: {{}}] Warmup finished.", taskID);
 	}
 
