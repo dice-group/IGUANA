@@ -86,7 +86,8 @@ public class Stresstest extends AbstractTask {
 	@Override
 	public void setConfiguration(Configuration taskConfig) {
 		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit"));
-		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
+		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));
+		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
 		this.qhClassName = tmp[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
 
