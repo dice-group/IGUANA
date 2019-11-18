@@ -61,35 +61,8 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler {
 		}
 		for (Worker worker : workers) {
 			if (worker instanceof CLIInputFileWorker) {
-				File query_file = new File(((CLIInputFileWorker) worker).getQueriesFileName());
-				File dir = new File(((CLIInputFileWorker) worker).getDir());
-				try {
-					System.out.println("" +
-							"cd " + dir.getParent() + ";" +
-							"rm -r " + dir + "; " +
-							"mkdir -p " + dir + ";" +
-							"cd " + dir + ";" +
-							"split --numeric-suffixes -l 1 -a 3 " + query_file + " q");
-					Process process = Runtime.getRuntime().exec(new String[]{"bash", "-c", "" +
-							"cd " + dir.getParent() + ";" +
-							"rm -r " + dir + "; " +
-							"mkdir -p " + dir + ";" +
-							"cd " + dir + ";" +
-							"split --numeric-suffixes -l 1 -a 3 " + query_file + " q"
-					});
-					int i = process.waitFor();
-
-
-				} catch (IOException | InterruptedException e) {
-					e.printStackTrace();
-				}
-				String[] file_names = dir.list();
-				File[] files = new File[file_names.length];
-				for (int i = 0; i < file_names.length; i++) {
-					files[i] = new File(dir.getPath() + "/" + file_names[i]);
-				}
-				((AbstractWorker) worker).setQueriesList(files);
-				generateSPARQL(((CLIInputFileWorker) worker).getQueriesFileName());
+				File[] files1 = generateSPARQL(((CLIInputFileWorker) worker).getQueriesFileName());
+				((AbstractWorker) worker).setQueriesList(files1);
 			} else if (worker instanceof AbstractWorker) {
 				((AbstractWorker) worker).getQueriesFileName();
 				File[] queries = mapping.get(((AbstractWorker) worker).getQueriesFileName());
