@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.storage.Storage;
+import org.apache.jena.rdf.model.Model;
 
 /**
  * Class to help the Unit Metric Tests. </br>
@@ -101,4 +102,8 @@ public class EqualityStorage implements Storage{
 		
 	}
 
+	@Override
+	public Model getDataModel() {
+		return null;
+	}
 }

@@ -1,5 +1,10 @@
 package org.aksw.iguana.tp.query;
 
+import org.apache.jena.rdf.model.Model;
+
+import java.io.File;
+import java.util.Map;
+
 /**
  * The QueryHandler interface
  * <br/> 
@@ -11,10 +16,11 @@ package org.aksw.iguana.tp.query;
 public interface QueryHandler {
 
 	/**
-	 * This will generate the queries. 
+	 * This will generate the queries.
+	 * @return
 	 */
-	public void generateQueries();
+	public Map<String, File[]> generateQueries();
 
-	public String generateTripleStats(String taskID, String resource, String property);
+	public Model generateTripleStats(String taskID, String resource, String property);
 	
 }

@@ -63,7 +63,7 @@ public class RDF2CSV {
 		ResultSet res = qexec.execSelect();
 
 		while (res.hasNext()) {
-			StringBuilder line = new StringBuilder(taskID.replace("<http://iguana-benchmark.eu/recource/", "").replace(">", "")).append(";");
+			StringBuilder line = new StringBuilder(taskID.replace("<http://iguana-benchmark.eu/resource/", "").replace(">", "")).append(";");
 			QuerySolution sol = res.next();
 			for(Field f : fields) {
 				if(!f.getVar().isEmpty()) {
@@ -92,7 +92,7 @@ public class RDF2CSV {
 		if(rdfNode.isLiteral()) {
 			return rdfNode.asLiteral().getValue().toString();
 		}
-		return rdfNode.asResource().getURI().replace("http://iguana-benchmark.eu/recource/", "").replace("http://iguana-benchmark.eu/properties/", "");
+		return rdfNode.asResource().getURI().replace("http://iguana-benchmark.eu/resource/", "").replace("http://iguana-benchmark.eu/properties/", "");
 	}
 
 	private static Query createQuery(String taskID, Field[] fields) {

@@ -163,31 +163,38 @@ public class IguanaConfig {
 			}
 		}
 	}
-	
+
+	//TODO #93
 	private String generateSuiteID() {
-		File suiteIDFile = new File("suite.id");
-		String id="0";
-		try {
-			suiteIDFile.createNewFile();
-		} catch (IOException e1) {
-			return null;
-		}
-		try(BufferedReader reader = new BufferedReader(new FileReader(suiteIDFile))){
-			if((id=reader.readLine())==null) {
-				id="0";
-			}
-		} catch (IOException e) {
-			return null;
-		}
-		try(PrintWriter pw = new PrintWriter(suiteIDFile)){
-			Integer idInt = Integer.parseInt(id);
-			idInt++;
-			id = idInt.toString();
-			pw.println(id);
-		} catch (FileNotFoundException e) {
-			return null;
-		}
-		return id;
+		// Suite ID collision fix start
+		int currentTimeMillisHashCode = Math.abs(new Long(System.currentTimeMillis()).hashCode());
+		return String.valueOf(currentTimeMillisHashCode);
+		// Suite ID collision fix end
+
+
+//		File suiteIDFile = new File("suite.id");
+//		String id="0";
+//		try {
+//			suiteIDFile.createNewFile();
+//		} catch (IOException e1) {
+//			return null;
+//		}
+//		try(BufferedReader reader = new BufferedReader(new FileReader(suiteIDFile))){
+//			if((id=reader.readLine())==null) {
+//				id="0";
+//			}
+//		} catch (IOException e) {
+//			return null;
+//		}
+//		try(PrintWriter pw = new PrintWriter(suiteIDFile)){
+//			Integer idInt = Integer.parseInt(id);
+//			idInt++;
+//			id = idInt.toString();
+//			pw.println(id);
+//		} catch (FileNotFoundException e) {
+//			return null;
+//		}
+//		return id;
 		
 	}
 	

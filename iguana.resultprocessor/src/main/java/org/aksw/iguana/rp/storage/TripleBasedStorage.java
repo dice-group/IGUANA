@@ -3,16 +3,20 @@
  */
 package org.aksw.iguana.rp.storage;
 
+import java.io.*;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.data.Triple;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.datatypes.xsd.impl.XSDDateTimeType;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 
 /**
  * This Storage will save all the metric results as triples
@@ -23,10 +27,11 @@ import org.apache.jena.rdf.model.ModelFactory;
 public abstract class TripleBasedStorage implements Storage {
 
 	protected String baseUri = "http://iguana-benchmark.eu";
-	private String resource = baseUri + "/recource/";
+	private String resource = baseUri + "/resource/";
 	private String properties = baseUri + "/properties/";
 
 	protected StringBuilder blockUpdate = new StringBuilder();
+	protected Model metricResults = ModelFactory.createDefaultModel();
 	private int blockSize = 0;
 
 	protected int maxBlockSize = 50;
@@ -45,6 +50,22 @@ public abstract class TripleBasedStorage implements Storage {
 	 */
 	@Override
 	public void addData(Properties meta, Triple[] triples) {
+		//Graph based approach start
+		for(Triple t : triples)
+		{
+			Resource subject = metricResults.createResource(this.resource + t.getSubject());
+			Property predicate = ResourceFactory.createProperty(properties + t.getPredicate());
+			RDFNode object;
+			if (t.isObjectResource()) {
+				object = metricResults.createResource(this.resource + t.getObject());
+			} else {
+				object = metricResults.createTypedLiteral(t.getObject());
+			}
+			metricResults.add(subject, predicate, object);
+		}
+		//Graph based approach end
+
+		// Following is commented to implement graph based approach instead of StringBuilder based approach
 		// Add Data to Block, as soon as Block is big enough, commit
 		StringBuilder builder = new StringBuilder();
 		// Add Node to connect to
@@ -104,6 +125,11 @@ public abstract class TripleBasedStorage implements Storage {
 		// Add MetaData and commit.
 		// Make sure Updates are empty
 		commit();
+
+		//TODO REMOVE LATER, dummy to prevent outputting metadata
+		if(!p.containsKey("sdhfhjshdfjkhskdfk"))
+			return;
+
 		// Suite ID
 		String suiteID = getID(p, COMMON.SUITE_ID_KEY);
 		// Experiment ID
@@ -129,14 +155,62 @@ public abstract class TripleBasedStorage implements Storage {
 		if(p.containsKey(COMMON.SIMPLE_TRIPLE_KEY)) {
 			blockUpdate.append(p.get(COMMON.SIMPLE_TRIPLE_KEY));
 		}
-		
-		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+		Calendar cal = GregorianCalendar.getInstance();
+		Timestamp timestamp = new Timestamp(cal.getTimeInMillis());
 		addBlockUpdate(taskID, "\""+timestamp+"\"^^<"+xsdUri+"dateTime>",rdfsUri+"startDate");
-		
+
+		// Graph approach start
+		String suiteUrl = getUrlWithResourcePrefix(p, COMMON.SUITE_ID_KEY);
+		String expUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_ID_KEY);
+		String taskUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_ID_KEY);
+		String datasetUrl = getUrlWithResourcePrefix(p, COMMON.DATASET_ID_KEY);
+		String connUrl = getUrlWithResourcePrefix(p, COMMON.CONNECTION_ID_KEY);
+
+		metricResults.add(createStatement(suiteUrl, getUrlWithPropertyPrefix("experiment"), expUrl, true));
+		metricResults.add(createStatement(suiteUrl, classUri, suiteClassUri, true));
+		metricResults.add(createStatement(expUrl, getUrlWithPropertyPrefix("task"), taskUrl, true));
+		metricResults.add(createStatement(expUrl, getUrlWithPropertyPrefix("dataset"), datasetUrl, true));
+		metricResults.add(createStatement(expUrl, classUri, expClassUri, true));
+		metricResults.add(createStatement(taskUrl, getUrlWithPropertyPrefix("connection"), connUrl, true));
+		metricResults.add(createStatement(taskUrl, classUri, taskClassUri, true));
+		addExtraMetadata(p, taskUrl);
+		metricResults.add(metricResults.createResource(datasetUrl), RDFS.label, p.getProperty(COMMON.DATASET_ID_KEY));
+		metricResults.add(metricResults.createResource(connUrl), RDFS.label, p.getProperty(COMMON.CONNECTION_ID_KEY));
+
+		if(p.containsKey(COMMON.QUERY_STATS)) {
+			Model queryStats = (Model) p.get(COMMON.QUERY_STATS);
+			metricResults.add(queryStats);
+		}
+
+		metricResults.add(metricResults.add(metricResults.createResource(taskUrl),
+				ResourceFactory.createProperty(rdfsUri + "startDate"), metricResults.createTypedLiteral(cal)));
+		// Graph approach end
+
 		// Commit Meta Data and clear updateBlock
 		commit();
 		blockSize = 0;
 		blockUpdate = new StringBuilder();
+	}
+
+	private String getUrlWithResourcePrefix(Properties p, String key) {
+		return getUrlWithResourcePrefix(p.getProperty(key));
+	}
+
+	private String getUrlWithResourcePrefix(String suffix) {
+		return resource + suffix;
+	}
+
+	private String getUrlWithPropertyPrefix(String suffix) {
+		return properties + suffix;
+	}
+
+	private Statement createStatement(String subject, String predicate, String object, boolean isObjectUri)
+	{
+		if(isObjectUri)
+			return metricResults.createStatement(metricResults.createResource(subject), ResourceFactory.createProperty(predicate), metricResults.createResource(object));
+		else
+			return metricResults.createStatement(metricResults.createResource(subject), ResourceFactory.createProperty(predicate), object);
 	}
 
 	private void addBlockUpdateExtra(Properties p, String taskID) {
@@ -154,6 +228,25 @@ public abstract class TripleBasedStorage implements Storage {
 				blockUpdate.append(" <").append(resource).append(extra.get(obj)).append("> .\n");
 			} else {
 				blockUpdate.append("\"").append(extra.get(obj)).append("\"").append(" . \n");
+			}
+		}
+	}
+
+	private void addExtraMetadata(Properties p, String taskUrl) {
+		Properties extra = (Properties) p.get(COMMON.EXTRA_META_KEY);
+		for (Object obj : extra.keySet()) {
+			if (p.containsKey(COMMON.EXTRA_IS_RESOURCE_KEY) && ((Set<?>) p.get(COMMON.EXTRA_IS_RESOURCE_KEY)).contains(obj)) {
+				metricResults.add(createStatement(
+						taskUrl,
+						getUrlWithResourcePrefix(obj.toString()),
+						getUrlWithResourcePrefix(extra.get(obj).toString()),
+						true));
+			} else {
+				metricResults.add(createStatement(
+						taskUrl,
+						getUrlWithPropertyPrefix(obj.toString()),
+						extra.get(obj).toString(),
+						false));
 			}
 		}
 	}
@@ -182,5 +275,23 @@ public abstract class TripleBasedStorage implements Storage {
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		addBlockUpdate(builder.toString(), "\""+timestamp+"\"^^<"+xsdUri+"dateTime>",rdfsUri+"endDate");
 	}
-	
+
+	@Override
+	public Model getDataModel() {
+		return metricResults;
+	}
+
+	public static void main(String[] args) {
+		try(InputStream os = new FileInputStream("results_task_531624254-1-1.nt_end")) {
+			Model mm = ModelFactory.createDefaultModel();
+			RDFDataMgr.read(mm, os, Lang.NT);
+
+			List<Statement> allR = mm.listStatements(null, ResourceFactory.createProperty("http://iguana-benchmark.eu/properties/qps#query"), (RDFNode) null).toList();
+			System.out.println(allR.size());
+
+		} catch (IOException e) {
+			System.out.println("Could not read");
+		}
+
+	}
 }

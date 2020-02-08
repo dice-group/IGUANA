@@ -3,14 +3,8 @@
  */
 package org.aksw.iguana.tp.tasks.impl.stresstest;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +23,9 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker;
 import org.aksw.iguana.tp.utils.ConfigUtils;
 import org.apache.commons.configuration.Configuration;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +61,7 @@ public class Stresstest extends AbstractTask {
 
 
 	protected String baseUri = "http://iguana-benchmark.eu";
-	private String iguanaResource = baseUri + "/recource/";
+	private String iguanaResource = baseUri + "/resource/";
 	private String iguanaProperty = baseUri + "/properties/";
 
 	private PrintWriter debugWriter;
@@ -72,10 +69,8 @@ public class Stresstest extends AbstractTask {
 
 	/**
 	 * @param ids
-	 * @param taskID
 	 * @param services
-	 * @param taskConfig
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 */
 	public Stresstest(String[] ids, String[] services) throws FileNotFoundException {
 		
@@ -86,7 +81,8 @@ public class Stresstest extends AbstractTask {
 	@Override
 	public void setConfiguration(Configuration taskConfig) {
 		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit"));
-		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
+		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));
+		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
 		this.qhClassName = tmp[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
 
@@ -165,8 +161,13 @@ public class Stresstest extends AbstractTask {
 		// add Worker
 		QueryHandler queryHandler = factory.createWorkerBasedQueryHandler(qhClassName, qhConstructorArgs, workers);
 		queryHandler.generateQueries();
-		String queryStatsTriples = queryHandler.generateTripleStats(taskID, iguanaResource, iguanaProperty);
-		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, queryStatsTriples);
+
+		Model tripleStats = queryHandler.generateTripleStats(taskID, iguanaResource, iguanaProperty); //TODO #106
+		StringWriter sw = new StringWriter();
+		RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
+		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, sw.toString());
+		this.metaData.put(COMMON.QUERY_STATS, tripleStats);
+
 
 	}
 

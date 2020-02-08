@@ -55,7 +55,7 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 	}
 	
 	@Override
-	public void generateQueries() {
+	public Map<String, File[]> generateQueries() {
 		for(String sparqlKey : sparqlKeys) {
 			mapping.put(sparqlKey, generateSPARQL(sparqlKey));
 		}
@@ -68,6 +68,7 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 						mapping.get(((AbstractWorker)worker).getQueriesFileName()));
 			}
 		}
+		return mapping;
 	}
 	
 	/**

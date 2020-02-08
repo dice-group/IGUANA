@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.aksw.iguana.rp.data.Triple;
+import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

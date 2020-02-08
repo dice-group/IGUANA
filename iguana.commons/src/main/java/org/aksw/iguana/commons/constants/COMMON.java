@@ -146,6 +146,8 @@ public class COMMON {
 
 	public static final String SIMPLE_TRIPLE_KEY = "cleanTripleText";
 
+	public static final String QUERY_STATS = "queryStats";
+
 	public static final Object RECEIVE_DATA_SIZE = "resultSize";
 
 	public static final Long UNKNOWN_EXCEPTION_VALUE = 0L;
@@ -155,5 +157,7 @@ public class COMMON {
 	public static final Long WRONG_RESPONSE_CODE_VALUE = -2L;
 
 	public static final String QUERY_HASH = "queryHash";
-	
+
+	public static final String WORKER_ID = "workerID";
+
 }
