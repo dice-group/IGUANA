@@ -1,10 +1,9 @@
 package org.aksw.iguana.tp.utils;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Methods to work easier with Files.
@@ -85,6 +84,22 @@ public class FileUtils {
 
 			return line.toString();
 		} 
+	}
+
+	public static int getHashcodeFromFileContent(String filepath) {
+		int hashcode;
+		try {
+			String fileContents = readFile(filepath);
+			hashcode = Math.abs(fileContents.hashCode());
+		} catch (IOException e) {
+			hashcode = 0;
+		}
+		return hashcode;
+	}
+
+	public static String readFile(String path) throws IOException {
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, StandardCharsets.UTF_8);
 	}
 
 }

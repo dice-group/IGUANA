@@ -1,14 +1,14 @@
 package org.aksw.iguana.rp.metrics.impl;
 
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
-
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Queries Per Second Metric implementation
@@ -61,7 +61,6 @@ public class QPSMetric extends AbstractMetric {
 			oldArr[4]+=timeout;
 			oldArr[5]+=unknown;
 			oldArr[6]+=wrongCode;
-			oldArr[7]+=queryHash;
 		}
 		else if(tmp!=null){
 			long[] resArr = {time, success, failure, size, timeout, unknown, wrongCode,queryHash};
@@ -89,33 +88,29 @@ public class QPSMetric extends AbstractMetric {
 				String subject = getSubjectFromExtraMeta(key)+"/"+queryID;
 				Set<String> isRes = new HashSet<String>();
 				isRes.add(subject);
-				
-				Triple[] triples = new Triple[10];
+
+				Triple[] triples = new Triple[9];
 				//qps
 				triples[0] = new Triple(subject, "queriesPerSecond", qps);
 				//failed
 				triples[1] = new Triple(subject, "failed", resArr[2]);
 				//succeded
-				triples[2] = new Triple(subject, "succeded", resArr[1]);
-				//queryID
-	
-				triples[3] = new Triple(subject, "id", queryID.toString());
-				triples[3].setObjectResource(false);
+				triples[2] = new Triple(subject, "succeeded", resArr[1]);
+
 				//totaltime
-				triples[4] = new Triple(subject, "totalTime", resArr[0]);
-				triples[5] = new Triple(subject, "resultSize", "?");
+				triples[3] = new Triple(subject, "totalTime", resArr[0]);
+				triples[4] = new Triple(subject, "resultSize", "?");
 				if(resArr[3]!=-1) {
-					triples[5] = new Triple(subject, "resultSize", resArr[3]);
+					triples[4] = new Triple(subject, "resultSize", resArr[3]);
 				}
-				triples[6] = new Triple(subject, "timeouts", resArr[4]);
-				triples[7] = new Triple(subject, "unknownExceptions", resArr[5]);
-				triples[8] = new Triple(subject, "wrongCodes", resArr[6]);
-				
-				triples[9] = new Triple(subject, "queryID", resArr[7]+"/"+queryID.toString());
-				triples[9].setObjectResource(true);
+				triples[5] = new Triple(subject, "timeouts", resArr[4]);
+				triples[6] = new Triple(subject, "unknownExceptions", resArr[5]);
+				triples[7] = new Triple(subject, "wrongCodes", resArr[6]);
+
+				triples[8] = new Triple(subject, "queryID", resArr[7] + "/" + queryID.toString());
+				triples[8].setObjectResource(true);
 				
 				Properties results = new Properties();
-				results.put("qps#query", subject);
 				sendTriples(results, isRes, key, triples);
 			}
 		}

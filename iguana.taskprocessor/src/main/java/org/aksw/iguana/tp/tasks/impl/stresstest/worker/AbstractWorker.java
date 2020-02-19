@@ -1,17 +1,14 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Properties;
-import java.util.Random;
-
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * The Abstract Worker which will implement the runnable, the main loop, the
@@ -175,6 +172,8 @@ public abstract class AbstractWorker implements Worker {
 		// For Update and Logging purpose get startTime of Worker
 		this.startTime = Calendar.getInstance().getTimeInMillis();
 
+		int queryHash = FileUtils.getHashcodeFromFileContent(this.queriesFileName);
+
 		LOGGER.info("Starting Worker[{{}} : {{}}].", this.workerType, this.workerID);
 		// Execute Queries as long as the Stresstest will need.
 		while (!this.endSignal) {
@@ -218,7 +217,7 @@ public abstract class AbstractWorker implements Worker {
 				if(resultTime.length>2) {
 					result.put(COMMON.RECEIVE_DATA_SIZE, resultTime[2]);
 				}
-				result.put(COMMON.QUERY_HASH, query.toString().hashCode());
+				result.put(COMMON.QUERY_HASH, queryHash);
 				result.setProperty(COMMON.QUERY_ID_KEY, queryID.toString());
 				// Add extra Meta Key, worker ID and worker Type
 				result.put(COMMON.EXTRA_META_KEY, this.extra);

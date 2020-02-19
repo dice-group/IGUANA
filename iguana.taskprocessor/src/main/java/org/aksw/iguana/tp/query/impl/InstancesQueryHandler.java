@@ -1,14 +1,5 @@
 package org.aksw.iguana.tp.query.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.aksw.iguana.tp.query.AbstractWorkerQueryHandler;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.Worker;
 import org.aksw.iguana.tp.utils.FileUtils;
@@ -21,6 +12,11 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 
@@ -41,6 +37,8 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 
 	private File[] queryFiles;
 
+	private int hashcode;
+
 	/**
 	 * Default Constructor
 	 * 
@@ -54,6 +52,10 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	protected File[] generateSPARQL(String queryFileName) {
 		File[] queries = generateQueryPerLine(queryFileName, "sparql");
 		this.queryFiles = queries;
+
+		// Save hashcode of the file content for later use in generating stats
+		hashcode = FileUtils.getHashcodeFromFileContent(queryFileName);
+
 		return queries;
 	}
 
@@ -137,62 +139,10 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		return new File[] {};
 	}
 
-//	@Override
-//	public List<Statement> generateTripleStats(String taskID, String resource, String property) {
-//		StringBuilder builder = new StringBuilder();
-//		QueryStatistics qs = new QueryStatistics();
-//		String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
-//		String xsdUri = "http://www.w3.org/2001/XMLSchema#";
-//		//TODO #94
-//		for (File queryFile : queryFiles) {
-//			try {
-//				String query = FileUtils.readLineAt(0, queryFile);
-//				Query q = QueryFactory.create(query);
-//				qs.getStatistics(q);
-//				QueryStatistics qs2 = new QueryStatistics();
-//				qs2.getStatistics(q);
-//
-//                String subject = resource + Math.abs(query.hashCode()) + "/" + queryFile.getName();
-//
-//                //builder.append("<").append(taskID).append("> ").append(property).append("querySet> <").append(resource + queryFile.getName()).append("> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("aggregations> \"").append(qs2.aggr).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("filter> \"").append(qs2.filter).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("groupBy> \"").append(qs2.groupBy).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("having> \"").append(qs2.having).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("triples> \"").append(qs2.triples).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("offset> \"").append(qs2.offset).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("optional> \"").append(qs2.optional).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("orderBy> \"").append(qs2.orderBy).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(property)
-//						.append("union> \"").append(qs2.union).append("\"^^<").append(xsdUri).append("int> . \n");
-//				builder.append("<").append(subject).append("> <").append(rdfs)
-//						.append("label> \"").append(query.replace("\"","\\\"")).append("\" .\n");
-//				builder.append("<").append(subject).append("> <").append(rdfs).append("ID> \"")
-//						.append(queryFile.getName().replace("sparql", "")).append("\" .\n");
-//
-//
-//				//TODO query complexity
-//			} catch (Exception e) {
-//			}
-//		}
-//		// TODO add overall stats
-//		return builder.toString();
-//	}
-
 	@Override
 	public Model generateTripleStats(String taskID, String resource, String property) {
-//		StringBuilder builder = new StringBuilder();
 		QueryStatistics qs = new QueryStatistics();
 		String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
-//		String xsdUri = "http://www.w3.org/2001/XMLSchema#";
 		Model model = ModelFactory.createDefaultModel();
 
 		for (File queryFile : queryFiles) {
@@ -203,9 +153,8 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 				QueryStatistics qs2 = new QueryStatistics();
 				qs2.getStatistics(q);
 
-				String subject = resource + Math.abs(query.hashCode()) + "/" + queryFile.getName();
+				String subject = resource + hashcode + "/" + queryFile.getName();
 
-				//builder.append("<").append(taskID).append("> ").append(property).append("querySet> <").append(resource + queryFile.getName()).append("> . \n");
 				model.add(model.createResource(subject), ResourceFactory.createProperty(rdfs + "ID"), queryFile.getName().replace("sparql", ""));
 				model.add(model.createResource(subject), RDFS.label, query);
 				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "aggregations"), model.createTypedLiteral(qs2.aggr));
@@ -218,11 +167,11 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "orderBy"), model.createTypedLiteral(qs2.orderBy));
 				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "union"), model.createTypedLiteral(qs2.union));
 
-				//TODO query complexity
-			} catch (Exception e) {
+			} catch (IOException e) {
+				LOGGER.error("[QueryHandler: {{}}] Cannot read file {{}}", this.getClass().getName(),
+						queryFile.getName());
 			}
 		}
-		// TODO add overall stats
 		return model;
 	}
 

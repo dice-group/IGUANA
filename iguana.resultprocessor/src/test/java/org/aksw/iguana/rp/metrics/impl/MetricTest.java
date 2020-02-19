@@ -3,13 +3,6 @@
  */
 package org.aksw.iguana.rp.metrics.impl;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
-
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.metrics.Metric;
@@ -19,6 +12,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * This will do a small test with every implemented Metric
@@ -47,7 +47,7 @@ public class MetricTest {
 		testConfigs.add(new Object[] { new QPSMetric(), new Triple[][]{{new Triple("1/1/1", "qps#query", "1/1/1/1"),
 			new Triple("1/1/1/1", "queriesPerSecond", 1.140250855),
 			new Triple("1/1/1/1", "failed", 1),
-			new Triple("1/1/1/1", "succeded", 1),
+				new Triple("1/1/1/1", "succeeded", 1),
 			new Triple("1/1/1/1", "queryID", 1),
 			new Triple("1/1/1/1", "totalTime", 877)}}, false});
 		testConfigs.add(new Object[] { new EachQueryMetric(), new Triple[][]{{new Triple("1/1/1/1", "EQE", "1/1/1/1/1"), 
