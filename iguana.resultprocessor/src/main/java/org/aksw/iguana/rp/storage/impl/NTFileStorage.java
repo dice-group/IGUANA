@@ -3,17 +3,19 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
-import java.io.*;
-import java.util.Calendar;
-import java.util.Properties;
-
 import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Properties;
 
 /**
  * 
@@ -52,20 +54,9 @@ public class NTFileStorage extends TripleBasedStorage {
 	 */
 	@Override
 	public void commit() {
-		//Graph based approach start
-		try(OutputStream os = new FileOutputStream(file.toString() + "_end")) {
+        try (OutputStream os = new FileOutputStream(file.toString())) {
 			RDFDataMgr.write(os, metricResults, RDFFormat.NTRIPLES);
 		} catch (IOException e) {
-			LOGGER.error("Could not commit to NTFileStorage.", e);
-		}
-		//Graph based approach end
-
-		try(PrintWriter pw = new PrintWriter(
-				new FileOutputStream(file.toString(), true))){
-			pw.println(blockUpdate);
-			blockUpdate = new StringBuilder();
-			pw.flush();
-		} catch (FileNotFoundException e) {
 			LOGGER.error("Could not commit to NTFileStorage.", e);
 		}
 	}

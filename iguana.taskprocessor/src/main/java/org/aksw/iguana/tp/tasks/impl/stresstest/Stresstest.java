@@ -3,13 +3,6 @@
  */
 package org.aksw.iguana.tp.tasks.impl.stresstest;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.numbers.NumberUtils;
 import org.aksw.iguana.tp.query.QueryHandler;
@@ -28,6 +21,16 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Controller for the Stresstest. <br/>
@@ -162,7 +165,7 @@ public class Stresstest extends AbstractTask {
 		QueryHandler queryHandler = factory.createWorkerBasedQueryHandler(qhClassName, qhConstructorArgs, workers);
 		queryHandler.generateQueries();
 
-		Model tripleStats = queryHandler.generateTripleStats(taskID, iguanaResource, iguanaProperty); //TODO #106
+        Model tripleStats = queryHandler.generateTripleStats(taskID, iguanaResource, iguanaProperty);
 		StringWriter sw = new StringWriter();
 		RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
 		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, sw.toString());

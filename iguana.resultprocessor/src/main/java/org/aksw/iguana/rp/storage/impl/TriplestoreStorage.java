@@ -3,8 +3,6 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
-import java.util.Properties;
-
 import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.http.auth.AuthScope;
@@ -14,10 +12,15 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
+
+import java.io.StringWriter;
+import java.util.Properties;
 
 
 /**
@@ -60,43 +63,20 @@ public class TriplestoreStorage extends TripleBasedStorage {
 		this.updateEndpoint=updateEndpoint;
 	}
 	
-	public TriplestoreStorage(String endpoint, String updateEndpoint, String baseUri, String maxBlockSize){
-		this.endpoint=endpoint;
-		this.updateEndpoint=updateEndpoint;
-		if(baseUri!=null && !baseUri.isEmpty()){
-			this.baseUri=baseUri;
-		}
-		this.maxBlockSize=Integer.valueOf(maxBlockSize);
-	}
-
-
-	public TriplestoreStorage(String endpoint, String updateEndpoint, String user, String pwd, String baseUri, String maxBlockSize){
-		this.endpoint=endpoint;
-		this.updateEndpoint=updateEndpoint;
-		this.user=user;
-		this.pwd=pwd;
-		if(baseUri!=null && !baseUri.isEmpty()){
-			this.baseUri=baseUri;
-		}
-		this.maxBlockSize=Integer.valueOf(maxBlockSize);
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.aksw.iguana.rp.storage.Storage#commit()
 	 */
 	@Override
 	public void commit() {
-		//add INSERT {} to blockUpdate
-		if(blockUpdate.length()==0){
+		if (metricResults.size() == 0)
 			return;
-		}
-//		blockUpdate.insert(0, "INSERT DATA { ");
-//		blockUpdate.append(" }");
-		String update = "INSERT DATA {"+blockUpdate+"}";
+
+		StringWriter results = new StringWriter();
+		RDFDataMgr.write(results, metricResults, Lang.NT);
+		String update = "INSERT DATA {" + results.toString() + "}";
 		//Create Update Request from block
 		blockRequest.add(update);
-		
-		blockUpdate =  new StringBuilder();
+
 		//submit Block to Triple Store
 		UpdateProcessor processor = UpdateExecutionFactory
 				.createRemote(blockRequest, updateEndpoint, createHttpClient());
