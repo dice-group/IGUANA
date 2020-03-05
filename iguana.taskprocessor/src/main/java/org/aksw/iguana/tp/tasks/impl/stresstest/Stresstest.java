@@ -5,6 +5,7 @@ package org.aksw.iguana.tp.tasks.impl.stresstest;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.numbers.NumberUtils;
+import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.query.QueryHandler;
 import org.aksw.iguana.tp.query.QueryHandlerFactory;
 import org.aksw.iguana.tp.query.impl.InstancesQueryHandler;
@@ -16,6 +17,7 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker;
 import org.aksw.iguana.tp.utils.ConfigUtils;
 import org.apache.commons.configuration.Configuration;
+import org.apache.jena.ext.com.google.common.collect.ImmutableList;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
@@ -94,50 +96,103 @@ public class Stresstest extends AbstractTask {
 		this.warmupUpdates = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupUpdates");
 		
 		WorkerFactory factory = new WorkerFactory();
-		Integer workerID = 0;
+		int workerID = 0;
 		// create Workers
 		String[] workerConfigs = ConfigUtils.getStringArrayWithSuffix(taskConfig, "workers");
 		
+//		for (String configKey : workerConfigs) {
+//			String[] workerConfig = taskConfig.getStringArray(configKey);
+//			int workers = Integer.parseInt(workerConfig[0]);
+//			noOfWorkers+=workers;
+//			for (int j = 0; j < workers; j++) {
+//				// set taskID, workerID, workerConfig
+//				String[] config = new String[4 + workerConfig.length];
+//				config[0] = taskID;
+//				config[1] = Integer.toString(workerID);
+//				workerID++;
+//
+//				// sets null if timelimit is not defined otherwise the string repr. of the
+//				// timelimit
+//				config[2] = timeLimit == null ? null : timeLimit.toString();
+//				if(workerConfig[1].equals(UPDATEWorker.class.getCanonicalName())) {
+//					config[3] = updateService;
+//				}
+//				else {
+//					config[3] = service;
+//
+//				}
+//				config[4] = user;
+//				config[5] = password;
+//
+//				for (int i = 2; i < workerConfig.length; i++) {
+//					if(workerConfig[i]==null) {
+//						config[i+4] = null;
+//					}
+//					else {
+//						config[i + 4] = workerConfig[i];
+//					}
+//				}
+//				Worker worker = factory.create(workerConfig[1], new String[] {});
+//				worker.init(config);
+//				this.workers.add(worker);
+//			}
+//		}
+
+		// Property based init start
 		for (String configKey : workerConfigs) {
-			String[] workerConfig = taskConfig.getStringArray(configKey);
-			int workers = Integer.parseInt(workerConfig[0]);
+			Properties configProp = new Properties();
+
+			// Copy all data from worker config
+			List<String> workerConfigKeys = ImmutableList.copyOf(taskConfig.getKeys(configKey));
+			for(String workerConfigEntry : workerConfigKeys)
+			{
+				String cleanedKey = this.getActualKeyComponent(workerConfigEntry);
+				configProp.put(cleanedKey, taskConfig.getString(workerConfigEntry));
+			}
+
+			int workers = Integer.parseInt(configProp.getProperty(CONSTANTS.WORKER_SIZE));
+			String workerClass = configProp.getProperty(CONSTANTS.WORKER_CLASS);
 			noOfWorkers+=workers;
+
+			// Add some more common information
 			for (int j = 0; j < workers; j++) {
 				// set taskID, workerID, workerConfig
-				String[] config = new String[4 + workerConfig.length];
-				config[0] = taskID;
-				config[1] = workerID.toString();
+				configProp.put(COMMON.EXPERIMENT_TASK_ID_KEY, taskID);
+				configProp.put(CONSTANTS.WORKER_ID_KEY, Integer.toString(workerID));
 				workerID++;
 
-				// sets null if timelimit is not defined otherwise the string repr. of the
-				// timelimit
-				config[2] = timeLimit == null ? null : timeLimit.toString();
-				if(workerConfig[1].equals(UPDATEWorker.class.getCanonicalName())) {
-					config[3] = updateService;
+				if(timeLimit != null)
+					configProp.put(CONSTANTS.TIME_LIMIT, timeLimit.toString());
+
+				if(UPDATEWorker.class.getCanonicalName().equals(workerClass)) {
+					configProp.put(CONSTANTS.SERVICE_ENDPOINT, updateService);
+				} else {
+					configProp.put(CONSTANTS.SERVICE_ENDPOINT, service);
 				}
-				else {
-					config[3] = service;
-					
-				}
-				config[4] = user;
-				config[5] = password;
-				
-				for (int i = 2; i < workerConfig.length; i++) {
-					if(workerConfig[i]==null) {
-						config[i+4] = null;
-					}
-					else {
-						config[i + 4] = workerConfig[i];
-					}
-				}
-				Worker worker = factory.create(workerConfig[1], new String[] {});
-				worker.init(config);
+
+				if(user != null)
+					configProp.put(CONSTANTS.USERNAME, user);
+				if(password != null)
+					configProp.put(CONSTANTS.PASSWORD, password);
+
+				Worker worker = factory.create(workerClass, new String[] {});
+				worker.init(configProp);
 				this.workers.add(worker);
 			}
 		}
+		// Property based init end
+
 		addMetaData();
 	}
-	
+
+	private String getActualKeyComponent(String workerConfigEntry) {
+		int lastIndexOfDot = workerConfigEntry.lastIndexOf(".");
+		if(lastIndexOfDot == -1)
+			return workerConfigEntry;
+		else {
+			return workerConfigEntry.substring(lastIndexOfDot+1); //TODO validation
+		}
+	}
 
 	/**
 	 * Add extra Meta Data

@@ -1,40 +1,34 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import java.net.URLEncoder;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-//import org.json.*;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.entity.ContentType;
+import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
+import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.client.config.RequestConfig;
-import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
-import org.aksw.iguana.tp.utils.FileUtils;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import java.io.*;
+import java.net.URLEncoder;
+import java.util.Properties;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+//import org.json.*;
 
 /**
  * 
@@ -68,6 +62,12 @@ public class SPARQLWorker extends AbstractWorker {
 	@Override
 	public void init(String args[]) {
 		super.init(args);
+		queryPatternChooser = new Random(this.workerID);
+	}
+
+	@Override
+	public void init(Properties p) {
+		super.init(p);
 		queryPatternChooser = new Random(this.workerID);
 	}
 

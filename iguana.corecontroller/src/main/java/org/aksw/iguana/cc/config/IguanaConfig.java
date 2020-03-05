@@ -1,24 +1,18 @@
 package org.aksw.iguana.cc.config;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-
 import org.aksw.iguana.cc.constants.CONSTANTS;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.script.ScriptExecutor;
-import org.aksw.iguana.dg.controller.DataGeneratorController;
 import org.aksw.iguana.tp.controller.TaskController;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.exec.ExecuteException;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Gets the {@link org.apache.commons.configuration.Configuration} component and will generate
@@ -157,9 +151,10 @@ public class IguanaConfig {
 			String key2 = keys2.next();
 			target.addProperty(key2, source.getProperty(key2));
 			for(String tmpKey : source.getStringArray(key2)) {
-				if(source.containsKey(tmpKey)) {
-					addRecursive(target, source, tmpKey);
-				}
+//				if(source.containsKey(tmpKey)) {
+//					addRecursive(target, source, tmpKey);
+//				}
+				addRecursive(target, source, tmpKey);
 			}
 		}
 	}

@@ -124,9 +124,16 @@ public abstract class AbstractWorker implements Worker {
 		// Add task and Worker Specs
 		this.taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
 		this.workerID = Integer.parseInt(p.getProperty(CONSTANTS.WORKER_ID_KEY));
-		this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
+
+		if(this.workerType == null)
+			this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
+
 		if(p.containsKey(CONSTANTS.TIME_LIMIT))
 			this.timeLimit = Long.parseLong(p.getProperty(CONSTANTS.TIME_LIMIT));
+
+		this.service = p.getProperty(CONSTANTS.SERVICE_ENDPOINT);
+		this.user = p.getProperty(CONSTANTS.USERNAME);
+		this.password = p.getProperty(CONSTANTS.PASSWORD);
 
 		// workerID represents seed to be fair with different systems.
 		latencyRandomizer = new Random(this.workerID);
@@ -135,8 +142,14 @@ public abstract class AbstractWorker implements Worker {
 		this.queriesFileName = p.getProperty(CONSTANTS.QUERIES_FILE_NAME);
 
 		// Add latency Specs, add defaults
-		this.fixedLatency = (int) p.getOrDefault(CONSTANTS.FIXED_LATENCY, 0);
-		this.gaussianLatency = (int) p.getOrDefault(CONSTANTS.GAUSSIAN_LATENCY, 0);
+		String fixedLatencyVal = p.getProperty(CONSTANTS.FIXED_LATENCY);
+		if(fixedLatencyVal != null)
+			this.fixedLatency = Integer.parseInt(fixedLatencyVal);
+
+		String gaussianLatencyVal = p.getProperty(CONSTANTS.GAUSSIAN_LATENCY);
+		if(gaussianLatencyVal != null)
+			this.gaussianLatency = Integer.parseInt(gaussianLatencyVal);
+
 		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
 	}
 
