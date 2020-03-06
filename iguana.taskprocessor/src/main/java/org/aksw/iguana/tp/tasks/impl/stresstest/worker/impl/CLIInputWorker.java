@@ -42,8 +42,8 @@ public class CLIInputWorker extends AbstractWorker {
 	public void init(Properties p) {
 		super.init(p);
 		this.initFinished = p.getProperty(CONSTANTS.CLI_INIT_FINISHED);
-		this.queryFinished = p.getProperty(CONSTANTS.CLI_QUERY_FINISHED);;
-		this.error = p.getProperty(CONSTANTS.CLI_ERROR);;
+		this.queryFinished = p.getProperty(CONSTANTS.CLI_QUERY_FINISHED);
+		this.error = p.getProperty(CONSTANTS.CLI_ERROR);
 		this.setWorkerProperties();
 	}
 
@@ -146,7 +146,7 @@ public class CLIInputWorker extends AbstractWorker {
 			long end = System.currentTimeMillis();
 
 			if (end - start >= timeOut) {
-				return new Long[] { 0L, end - start };
+				return new Long[] { -1L, end - start };
 			} else if (failed.get()) {
 				return new Long[] { 0L, end - start };
 			}
