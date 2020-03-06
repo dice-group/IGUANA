@@ -85,20 +85,20 @@ public class Stresstest extends AbstractTask {
 	
 	@Override
 	public void setConfiguration(Configuration taskConfig) {
-		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit"));
-		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));
-		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
+		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.TIME_LIMIT));
+		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.NO_OF_QUERY_MIXES));
+		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, CONSTANTS.QUERY_HANDLER);
 		this.qhClassName = tmp[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
 
-		this.warmupTimeMS = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "warmupTime"));
-		this.warmupQueries = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupQueries");
-		this.warmupUpdates = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupUpdates");
+		this.warmupTimeMS = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_TIME));
+		this.warmupQueries = ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_QUERY_FILE);
+		this.warmupUpdates = ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_UPDATES);
 		
 		WorkerFactory factory = new WorkerFactory();
 		int workerID = 0;
 		// create Workers
-		String[] workerConfigs = ConfigUtils.getStringArrayWithSuffix(taskConfig, "workers");
+		String[] workerConfigs = ConfigUtils.getStringArrayWithSuffix(taskConfig, CONSTANTS.WORKER_CONFIG_KEYS);
 		
 //		for (String configKey : workerConfigs) {
 //			String[] workerConfig = taskConfig.getStringArray(configKey);
@@ -203,9 +203,9 @@ public class Stresstest extends AbstractTask {
 		// TODO Future: add queries and update meta data
 		Properties extraMeta = new Properties();
 		if(timeLimit!=null)
-			extraMeta.put("timeLimit", timeLimit);
+			extraMeta.put(CONSTANTS.TIME_LIMIT, timeLimit);
 		if(noOfQueryMixes!=null)
-			extraMeta.put("noOfQueryMixes", noOfQueryMixes);
+			extraMeta.put(CONSTANTS.NO_OF_QUERY_MIXES, noOfQueryMixes);
 		extraMeta.put("noOfWorkers", noOfWorkers);
 		this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
 	}

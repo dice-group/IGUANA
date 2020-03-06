@@ -41,7 +41,7 @@ public class CONSTANTS {
      * 0 and less means no timeout,
      * default is 180s
      */
-    public static final String SPARQL_TIMEOUT = "sparqlTimeOut";
+    public static final String SPARQL_TIMEOUT = "timeout";
 
     /**
      * The key to get the file name list for the sparql (resp. update) queries
@@ -68,11 +68,11 @@ public class CONSTANTS {
 	/**
 	 * The key for the query folder name
 	 */
-	public static final String QUERIES_FILE_NAME = "queriesFile";
+	public static final String QUERIES_FILE_NAME = "queryFile";
 
 	public static final String WORKER_CLASS = "workerClass";
 
-	public static final String WORKER_SIZE = "workerSize";
+	public static final String WORKER_SIZE = "numberOfWorkers";
 
 	public static final String SERVICE_ENDPOINT = "service";
 
@@ -84,6 +84,19 @@ public class CONSTANTS {
 
 	public static final String CLI_QUERY_FINISHED = "queryFinished";
 
-	public static final String CLI_ERROR = "error";
+	public static final String CLI_ERROR = "queryError";
+
+	public static final String NO_OF_QUERY_MIXES = "numberOfQueryMixes";
+
+	public static final String WARMUP_QUERY_FILE = "warmupQueryFile";
+
+	public static final String WARMUP_TIME = "warmupTime";
+
+	public static final String WARMUP_UPDATES = "warmupUpdates";
+
+	public static final String WORKER_CONFIG_KEYS = "workers";
+
+	public static final String QUERY_HANDLER = "queryHandler";
+
 
 }

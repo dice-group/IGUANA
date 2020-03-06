@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -44,14 +46,27 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 	}
 
 	@Override
+	public void init(Properties p) {
+		super.init(p);
+		this.initFinished = p.getProperty(CONSTANTS.CLI_INIT_FINISHED);
+		this.queryFinished = p.getProperty(CONSTANTS.CLI_QUERY_FINISHED);
+		this.error = p.getProperty(CONSTANTS.CLI_ERROR);
+		this.setWorkerProperties();
+	}
+
+	@Override
 	public void init(String args[]) {
 		super.init(args);
 		this.initFinished = args[10];
 		this.queryFinished = args[11];
 		this.error = args[12];
+		this.setWorkerProperties();
+	}
+
+	private void setWorkerProperties() {
 		queryPatternChooser = new Random(this.workerID);
 		// start cli input
-		System.out.println("Init CLIInputWorker " + args[11]);
+		System.out.println("Init CLIInputWorker " + this.queryFinished);
 
 		processBuilder = new ProcessBuilder();
 		processBuilder.redirectErrorStream(true);

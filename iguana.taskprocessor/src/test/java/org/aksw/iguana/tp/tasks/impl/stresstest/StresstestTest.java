@@ -14,6 +14,7 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.exceptions.IguanaException;
 //import org.aksw.iguana.tp.utils.StresstestServerMock;
 //import org.aksw.iguana.tp.utils.TestConsumer;
+import org.aksw.iguana.tp.config.CONSTANTS;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.AfterClass;
@@ -186,7 +187,7 @@ public class StresstestTest {
 			ret.addProperty("worker"+i, workerConfig);
 			workers[i] = "worker"+i++;
 		}
-		ret.addProperty("workers", workers);
+		ret.addProperty(CONSTANTS.WORKER_CONFIG_KEYS, workers);
 		return ret;
 	}
 	

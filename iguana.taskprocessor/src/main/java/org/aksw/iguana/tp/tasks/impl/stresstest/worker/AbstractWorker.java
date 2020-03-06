@@ -131,6 +131,9 @@ public abstract class AbstractWorker implements Worker {
 		if(p.containsKey(CONSTANTS.TIME_LIMIT))
 			this.timeLimit = Long.parseLong(p.getProperty(CONSTANTS.TIME_LIMIT));
 
+		if(p.containsKey(CONSTANTS.SPARQL_TIMEOUT))
+			this.timeOut = Long.parseLong(p.getProperty(CONSTANTS.SPARQL_TIMEOUT));
+
 		this.service = p.getProperty(CONSTANTS.SERVICE_ENDPOINT);
 		this.user = p.getProperty(CONSTANTS.USERNAME);
 		this.password = p.getProperty(CONSTANTS.PASSWORD);
@@ -142,13 +145,11 @@ public abstract class AbstractWorker implements Worker {
 		this.queriesFileName = p.getProperty(CONSTANTS.QUERIES_FILE_NAME);
 
 		// Add latency Specs, add defaults
-		String fixedLatencyVal = p.getProperty(CONSTANTS.FIXED_LATENCY);
-		if(fixedLatencyVal != null)
-			this.fixedLatency = Integer.parseInt(fixedLatencyVal);
+		if(p.containsKey(CONSTANTS.FIXED_LATENCY))
+			this.fixedLatency = Integer.parseInt(p.getProperty(CONSTANTS.FIXED_LATENCY));
 
-		String gaussianLatencyVal = p.getProperty(CONSTANTS.GAUSSIAN_LATENCY);
-		if(gaussianLatencyVal != null)
-			this.gaussianLatency = Integer.parseInt(gaussianLatencyVal);
+		if(p.containsKey(CONSTANTS.GAUSSIAN_LATENCY))
+			this.gaussianLatency = Integer.parseInt(p.getProperty(CONSTANTS.GAUSSIAN_LATENCY));
 
 		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
 	}
