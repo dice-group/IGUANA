@@ -3,8 +3,11 @@
  */
 package org.aksw.iguana.commons.script;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -31,14 +34,42 @@ public class ScriptExecutor {
 	 */
 	public static int exec(String file, String[] args) throws ExecuteException, IOException{
 		String fileName = new File(file).getAbsolutePath();
-		CommandLine cmd = new CommandLine(fileName);
-		for(String arg: args){
-			cmd.addArgument(arg);
+
+		String[] shellCommand = new String[1 + (args == null ? 0 : args.length)];
+		shellCommand[0] = fileName;
+
+		if(args != null)
+		{
+			System.arraycopy(args, 0, shellCommand, 1, args.length);
 		}
-		
-		Executor exec = new DefaultExecutor();
-		return exec.execute(cmd);
+
+		return execute(shellCommand);
 	}
-	
+
+	private static int execute(String[] args)
+	{
+		ProcessBuilder processBuilder = new ProcessBuilder().redirectErrorStream(true);
+		processBuilder.command(args);
+		int exitVal;
+		try {
+			Process process = processBuilder.start();
+
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(process.getInputStream()));
+
+			int character;
+			while ((character = reader.read()) != -1)
+			{
+				System.out.print((char)character);
+			}
+
+			exitVal = process.waitFor();
+
+		} catch (IOException | InterruptedException e) {
+			exitVal = -1;
+		}
+
+		return exitVal;
+	}
 
 }
