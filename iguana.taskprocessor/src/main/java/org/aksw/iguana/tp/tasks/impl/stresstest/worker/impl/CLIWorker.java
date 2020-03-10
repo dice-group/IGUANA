@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Properties;
 import java.util.Random;
 
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
@@ -29,6 +30,12 @@ public class CLIWorker extends AbstractWorker {
 	@Override
 	public void init(String args[]) {
 		super.init(args);
+		queryPatternChooser = new Random(this.workerID);
+	}
+
+	@Override
+	public void init(Properties p) {
+		super.init(p);
 		queryPatternChooser = new Random(this.workerID);
 	}
 

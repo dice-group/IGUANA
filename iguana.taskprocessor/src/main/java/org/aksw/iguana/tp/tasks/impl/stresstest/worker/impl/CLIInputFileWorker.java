@@ -1,8 +1,11 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
+import org.aksw.iguana.tp.config.CONSTANTS;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Properties;
 
 public class CLIInputFileWorker extends MultipleCLIInputWorker {
 
@@ -19,6 +22,16 @@ public class CLIInputFileWorker extends MultipleCLIInputWorker {
 		}
 		this.dir = args[i];
 
+	}
+
+	@Override
+	public void init(Properties p) {
+		super.init(p);
+		if(p.containsKey(CONSTANTS.NO_OF_PROCESSES))
+		{
+			processList = new Process[Integer.parseInt(p.getProperty(CONSTANTS.NO_OF_PROCESSES))];
+		}
+		this.dir = p.getProperty(CONSTANTS.DIRECTORY);
 	}
 	
 	@Override
