@@ -18,9 +18,16 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -39,6 +46,10 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class SPARQLWorker extends AbstractWorker {
 
+	private static final String XML_RESULT_ELEMENT_NAME = "result";
+	private static final String XML_RESULT_ROOT_ELEMENT_NAME = "results";
+	private static final String QUERY_RESULT_TYPE_JSON = "application/sparql-results+json";
+	private static final String QUERY_RESULT_TYPE_XML = "application/sparql-results+xml";
 	private int currentQueryID = 0;
 
 	private Random queryPatternChooser;
@@ -113,10 +124,11 @@ public class SPARQLWorker extends AbstractWorker {
 					return new Long[] { 0L, System.currentTimeMillis() - start };
 				}
 				long size=0L;
-				if("application/sparql-results+json".equals(cType)) {
+				if(QUERY_RESULT_TYPE_JSON.equals(cType)) {
 					size = parseJson(res.get());
-				}
-				else {
+				} else if(QUERY_RESULT_TYPE_XML.equals(cType)) {
+					size = getXmlResultSize(res.get());
+				} else {
 					size = StringUtils.countMatches(res.get(), "\n");
 				}
 				return new Long[] { 1L, end - start, size };
@@ -203,6 +215,27 @@ public class SPARQLWorker extends AbstractWorker {
 		res = "";
 		return size;
 	}
+
+	private long getXmlResultSize(String res) throws ParserConfigurationException, IOException, SAXException {
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+
+		ByteArrayInputStream input = new ByteArrayInputStream(res.getBytes(StandardCharsets.UTF_8));
+		Document doc = dBuilder.parse(input);
+		NodeList childNodes = doc.getDocumentElement().getElementsByTagName(XML_RESULT_ROOT_ELEMENT_NAME).item(0).getChildNodes();
+		
+		long size = 0;
+		for(int i = 0 ; i < childNodes.getLength() ; i++)
+		{
+			if(XML_RESULT_ELEMENT_NAME.equalsIgnoreCase(childNodes.item(i).getNodeName()))
+			{
+				size++;
+			}
+		}
+		return size;
+
+	}
+
 
 	@Override
 	public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
