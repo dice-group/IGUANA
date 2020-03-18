@@ -4,10 +4,7 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -104,6 +101,7 @@ public class SPARQLWorker extends AbstractWorker {
 			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
 					.setConnectTimeout(timeOut.intValue()).build();
 
+			request.setHeader(HttpHeaders.ACCEPT, QUERY_RESULT_TYPE_JSON);
 			request.setConfig(requestConfig);
 			try (CloseableHttpClient client = HttpClients.createDefault();
 					CloseableHttpResponse response = client.execute(request);) {
