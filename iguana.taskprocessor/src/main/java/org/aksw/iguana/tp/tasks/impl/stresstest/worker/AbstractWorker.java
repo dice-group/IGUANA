@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -54,9 +55,9 @@ public abstract class AbstractWorker implements Worker {
 	 */
 	protected File[] queryFileList;
 
-	protected Long timeLimit;
+	protected Double timeLimit;
 
-	protected long startTime;
+	protected double startTime;
 
 	protected String queriesFileName;
 
@@ -65,7 +66,7 @@ public abstract class AbstractWorker implements Worker {
 	protected String user;
 	protected String password;
 
-	protected Long timeOut=180000L;
+	protected Double timeOut=180000D;
 
 	private long noOfQueryMixes;
 
@@ -97,12 +98,12 @@ public abstract class AbstractWorker implements Worker {
 		this.workerID = Integer.parseInt(args[1]);
 
 		if(args[2]!=null)
-			this.timeLimit = Long.parseLong(args[2]);
+			this.timeLimit = Double.parseDouble(args[2]);
 		this.service = args[3];
 		this.user=args[4];
 		this.password=args[5];
 		if(args[6]!=null)
-			this.timeOut = Long.parseLong(args[6]);
+			this.timeOut = Double.parseDouble(args[6]);
 		// workerID represents seed to be fair with different systems.
 		latencyRandomizer = new Random(this.workerID);
 
@@ -129,10 +130,10 @@ public abstract class AbstractWorker implements Worker {
 			this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
 
 		if(p.containsKey(CONSTANTS.TIME_LIMIT))
-			this.timeLimit = Long.parseLong(p.getProperty(CONSTANTS.TIME_LIMIT));
+			this.timeLimit = Double.parseDouble(p.getProperty(CONSTANTS.TIME_LIMIT));
 
 		if(p.containsKey(CONSTANTS.SPARQL_TIMEOUT))
-			this.timeOut = Long.parseLong(p.getProperty(CONSTANTS.SPARQL_TIMEOUT));
+			this.timeOut = Double.parseDouble(p.getProperty(CONSTANTS.SPARQL_TIMEOUT));
 
 		this.service = p.getProperty(CONSTANTS.SERVICE_ENDPOINT);
 		this.user = p.getProperty(CONSTANTS.USERNAME);
@@ -156,13 +157,13 @@ public abstract class AbstractWorker implements Worker {
 
 	@Override
 	public void waitTimeMs() {
-		long wait = this.fixedLatency;
-		wait += Math.round((latencyRandomizer.nextGaussian() + 1) * this.gaussianLatency);
+		double wait = this.fixedLatency;
+		wait += (latencyRandomizer.nextGaussian() + 1) * this.gaussianLatency;
 		LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
 		try {
 			System.out.println("Wait: "+wait);
-			if(wait>0)	
-				Thread.sleep(wait);
+			if(wait>0)
+				Thread.sleep((long) wait);
 		} catch (InterruptedException e) {
 			LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType,
 					workerID, e);
@@ -184,7 +185,7 @@ public abstract class AbstractWorker implements Worker {
 		if(this.queryFileList!=null)
 			this.extra.put(COMMON.NO_OF_QUERIES, this.queryFileList.length);
 		// For Update and Logging purpose get startTime of Worker
-		this.startTime = Calendar.getInstance().getTimeInMillis();
+		this.startTime = Instant.now().getNano() / 1000000d;
 
 		int queryHash = FileUtils.getHashcodeFromFileContent(this.queriesFileName);
 
@@ -210,15 +211,16 @@ public abstract class AbstractWorker implements Worker {
 			// Simulate Network Delay (or whatever should be simulated)
 			waitTimeMs();
 			// benchmark query
-			Long time = 0L;
-			Long[] resultTime = new Long[]{0L, 0L};
+			Double time = 0D;
+			// TODO: do NOT use an array to to transport time AND size!!!
+			Object[] resultTime = new Double[]{0D, 0D};
 			try {
 				resultTime = getTimeForQueryMs(query.toString(), queryID.toString());
-				time = resultTime[1];
+				time = (double) resultTime[1];
 			} catch (Exception e) {
 				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
 						query.toString());
-				time = -1L;
+				time = -1D;
 			}
 			this.executedQueries++;
 			// If endSignal was send during execution it should not be counted anymore.

@@ -25,6 +25,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -80,13 +81,13 @@ public class SPARQLWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Long[] getTimeForQueryMs(String query, String queryID) {
+	public Object[] getTimeForQueryMs(String query, String queryID) {
 		// QueryExecution exec = QueryExecutionFactory.sparqlService(service, query);
 		// exec.setTimeout(this.timeOut);
 		// Set query timeout
 		// exec.setTimeout(this.timeOut, TimeUnit.MILLISECONDS, this.timeOut,
 		// TimeUnit.MILLISECONDS);
-		long start = System.currentTimeMillis();
+		double start = Instant.now().getNano() / 1000000d;
 		final AtomicReference<String> res = new AtomicReference<String>("");
 
 		try {
@@ -109,7 +110,7 @@ public class SPARQLWorker extends AbstractWorker {
 				HttpEntity entity = response.getEntity();
 				int responseCode = response.getStatusLine().getStatusCode();
 				if (responseCode != 200) {
-					return new Long[] { COMMON.WRONG_RESPONSE_CODE_VALUE, System.currentTimeMillis() - start };
+					return new Double[] { (double)COMMON.WRONG_RESPONSE_CODE_VALUE, Instant.now().getNano() / 1000000d - start };
 
 				}
 				Header[] contentType = response.getHeaders("Content-Type");
@@ -117,9 +118,9 @@ public class SPARQLWorker extends AbstractWorker {
 
 				executeAndTerminate(entity, res, cType);
 
-				long end = System.currentTimeMillis();
+				double end = Instant.now().getNano() / 1000000d;
 				if (this.timeOut < end - start) {
-					return new Long[] { 0L, System.currentTimeMillis() - start };
+					return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
 				}
 				long size=0L;
 				if(QUERY_RESULT_TYPE_JSON.equals(cType)) {
@@ -129,7 +130,7 @@ public class SPARQLWorker extends AbstractWorker {
 				} else {
 					size = StringUtils.countMatches(res.get(), "\n");
 				}
-				return new Long[] { 1L, end - start, size };
+				return new Object[] { 1D, end - start, size };
 //				} catch (Exception e) {
 //					e.printStackTrace();
 //				}
@@ -137,11 +138,11 @@ public class SPARQLWorker extends AbstractWorker {
 			} catch (java.net.SocketTimeoutException | ConnectTimeoutException e) {
 				System.out.println("Timeout occured for " + service + " - " + queryID);
 
-				return new Long[] { COMMON.SOCKET_TIMEOUT_VALUE, System.currentTimeMillis() - start };
+				return new Object[] { COMMON.SOCKET_TIMEOUT_VALUE, Instant.now().getNano() / 1000000d - start };
 
 			} catch (Exception e) {
 				System.out.println("Query could not be exceuted: " + e);
-				return new Long[] { COMMON.UNKNOWN_EXCEPTION_VALUE, System.currentTimeMillis() - start };
+				return new Object[] { COMMON.UNKNOWN_EXCEPTION_VALUE, Instant.now().getNano() / 1000000d - start };
 			}
 
 		} catch (Exception e) {
@@ -150,7 +151,7 @@ public class SPARQLWorker extends AbstractWorker {
 		}
 		// Exception was thrown, return error
 		// return -1L;
-		return new Long[] { COMMON.UNKNOWN_EXCEPTION_VALUE, System.currentTimeMillis() - start };
+		return new Object[] { COMMON.UNKNOWN_EXCEPTION_VALUE, Instant.now().getNano() / 1000000d - start };
 
 	}
 
@@ -203,7 +204,7 @@ public class SPARQLWorker extends AbstractWorker {
 
 		service2.shutdown();
 //
-		service2.awaitTermination(this.timeOut + 100, TimeUnit.MILLISECONDS);
+		service2.awaitTermination((long)(double)this.timeOut + 100, TimeUnit.MILLISECONDS);
 	}
 
 	private long parseJson(String res) throws ParseException {

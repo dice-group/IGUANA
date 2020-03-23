@@ -59,7 +59,7 @@ public class UPDATEWorkerTest {
 	public void testTime() throws IOException {
 		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, host, null, null,  null,
 				"", "0", "0", "NONE", "NONE"});
-		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
+		double time = (double)worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "1")[0];
 		assertTrue(time > 0);
 	}
@@ -72,7 +72,7 @@ public class UPDATEWorkerTest {
 	public void testTimeout() throws IOException {
 		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, host, null, null,   "1", 
 				"", "0", "0", "NONE","NONE"});
-		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
+		double time = (double)worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "1")[0];
 		assertEquals(-1, time);
 	}
@@ -97,7 +97,7 @@ public class UPDATEWorkerTest {
 	public void checkCredentials() {
 		Worker worker = new UPDATEWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql-auth", "dba", "dba", null,
 				"", "0", "0", "NONE","NONE"});
-		long time = worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
+		double time = (double) worker.getTimeForQueryMs("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
 				+ "INSERT DATA { <http://example/egbook3> dc:title  \"This is an example title\" }", "2")[0];
 		assertTrue(time > 0);
 	}

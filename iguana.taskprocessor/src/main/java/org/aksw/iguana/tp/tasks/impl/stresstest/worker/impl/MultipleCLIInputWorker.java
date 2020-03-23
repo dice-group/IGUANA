@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -119,8 +120,8 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Long[] getTimeForQueryMs(String query, String queryID) {
-		long start = System.currentTimeMillis();
+	public Object[] getTimeForQueryMs(String query, String queryID) {
+		double start = Instant.now().getNano() / 1000000d;
 		// execute queryCLI and read response
 		try {
 			AtomicLong size = new AtomicLong(-1);
@@ -145,33 +146,33 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new Long[] { 0L, System.currentTimeMillis() - start };
+					return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
 				} else {
 					setNextProcess();
-					return new Long[] { 0L, System.currentTimeMillis() - start };
+					return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
 				}
 			} finally {
 				executor.shutdown();
-				executor.awaitTermination(this.timeOut, TimeUnit.MILLISECONDS);
+				executor.awaitTermination((long) (double)this.timeOut, TimeUnit.MILLISECONDS);
 			}
-			long end = System.currentTimeMillis();
+			double end = Instant.now().getNano() / 1000000d;
 
 			if (end - start >= timeOut) {
 				setNextProcess();
-				return new Long[] { 0L, end - start };
+				return new Double[] { 0D, end - start };
 			} else if (failed.get()) {
 				if (!process.isAlive()) {
 					setNextProcess();
 				}
-				return new Long[] { 0L, end - start };
+				return new Double[] { 0D, end - start };
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
-			return new Long[] { 1L, end - start, size.get() };
+			return new Object[] { 1D, end - start, size.get() };
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Long[] { 0L, System.currentTimeMillis() - start };
+		return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
 	}
 
 	private void setNextProcess() {

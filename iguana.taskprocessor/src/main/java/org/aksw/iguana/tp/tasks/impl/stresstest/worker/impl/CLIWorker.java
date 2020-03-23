@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
 
@@ -40,8 +41,8 @@ public class CLIWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Long[] getTimeForQueryMs(String query, String queryID) {
-		long start = System.currentTimeMillis();
+	public Object[] getTimeForQueryMs(String query, String queryID) {
+		double start = Instant.now().getNano() / 1000000d;
 		// use cli as service
 		String q = "";
 		try {
@@ -88,9 +89,9 @@ public class CLIWorker extends AbstractWorker {
 				System.out.println("[DEBUG] Query successfully executed size: " + size);
 			} else {
 				System.out.println("Exit Value: " + exitVal);
-				return new Long[] { 0L, System.currentTimeMillis() - start };
+				return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
 			}
-			return new Long[] { 1L, System.currentTimeMillis() - start, size };
+			return new Object[] { 1D, Instant.now().getNano() / 1000000d - start, size };
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -99,7 +100,7 @@ public class CLIWorker extends AbstractWorker {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Long[] { 0L, System.currentTimeMillis() - start };
+		return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
 	}
 
 	@Override

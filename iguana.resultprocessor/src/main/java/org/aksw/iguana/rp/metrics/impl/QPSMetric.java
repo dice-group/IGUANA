@@ -34,11 +34,11 @@ public class QPSMetric extends AbstractMetric {
 	public void receiveData(Properties p) {
 		//Save success and time of each query
 		LOGGER.debug(this.getShortName() + " has received " + p);
-		long time = Long.parseLong(p.get(COMMON.RECEIVE_DATA_TIME).toString());
+		double time = Double.parseDouble(p.get(COMMON.RECEIVE_DATA_TIME).toString());
 		long tmpSuccess = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SUCCESS).toString());
 		long success = tmpSuccess>0?1:0;
 		long failure = success==1?0:1;
-		long timeout = tmpSuccess==COMMON.SOCKET_TIMEOUT_VALUE?1:0;
+		double timeout = tmpSuccess==COMMON.SOCKET_TIMEOUT_VALUE?1:0;
 		long unknown = tmpSuccess==COMMON.UNKNOWN_EXCEPTION_VALUE?1:0;
 		long wrongCode = tmpSuccess==COMMON.WRONG_RESPONSE_CODE_VALUE?1:0;
 		long size=-1;
@@ -63,12 +63,12 @@ public class QPSMetric extends AbstractMetric {
 			oldArr[6]+=wrongCode;
 		}
 		else if(tmp!=null){
-			long[] resArr = {time, success, failure, size, timeout, unknown, wrongCode,queryHash};
+			Object[] resArr = {time, success, failure, size, timeout, unknown, wrongCode,queryHash};
 			tmp.put(queryID, resArr);
 		}
 		else{
 			tmp = new Properties();
-			long[] resArr = new long[]{time, success, failure, size, timeout, unknown, wrongCode,queryHash};
+			Object[] resArr = new Object[]{time, success, failure, size, timeout, unknown, wrongCode,queryHash};
 			tmp.put(queryID, resArr);
 		}
 		addDataToContainer(extra, tmp);

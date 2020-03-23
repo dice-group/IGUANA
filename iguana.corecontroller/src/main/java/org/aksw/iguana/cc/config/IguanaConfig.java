@@ -9,6 +9,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.exec.ExecuteException;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -162,7 +163,7 @@ public class IguanaConfig {
 	//TODO #93
 	private String generateSuiteID() {
 		// Suite ID collision fix start
-		int currentTimeMillisHashCode = Math.abs(new Long(System.currentTimeMillis()).hashCode());
+		int currentTimeMillisHashCode = Math.abs(new Long(Instant.now().getNano()).hashCode());
 		return String.valueOf(currentTimeMillisHashCode);
 		// Suite ID collision fix end
 

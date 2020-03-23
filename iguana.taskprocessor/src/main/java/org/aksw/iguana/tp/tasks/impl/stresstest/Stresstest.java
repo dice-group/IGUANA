@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,15 +53,15 @@ public class Stresstest extends AbstractTask {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Stresstest.class);
 	
-	private Long timeLimit;
+	private Double timeLimit;
 	private Long noOfQueryMixes;
 	private List<Worker> workers = new LinkedList<Worker>();
-	private long startTime;
+	private double startTime;
 	private String qhClassName;
 	private String[] qhConstructorArgs;
-	private Long noOfWorkers=0l;
+	private Long noOfWorkers= 0L;
 
-	private Long warmupTimeMS;
+	private Double warmupTimeMS;
 	private String warmupQueries;
 	private String warmupUpdates;
 
@@ -85,13 +86,13 @@ public class Stresstest extends AbstractTask {
 	
 	@Override
 	public void setConfiguration(Configuration taskConfig) {
-		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.TIME_LIMIT));
+		this.timeLimit = NumberUtils.getDouble(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.TIME_LIMIT));
 		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.NO_OF_QUERY_MIXES));
 		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, CONSTANTS.QUERY_HANDLER);
 		this.qhClassName = tmp[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
 
-		this.warmupTimeMS = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_TIME));
+		this.warmupTimeMS = NumberUtils.getDouble(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_TIME));
 		this.warmupQueries = ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_QUERY_FILE);
 		this.warmupUpdates = ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_UPDATES);
 		
@@ -241,7 +242,7 @@ public class Stresstest extends AbstractTask {
 		// Execute each Worker in ThreadPool
 		System.out.println("[DEBUG] workers: "+noOfWorkers);
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkers.intValue());
-		this.startTime = Calendar.getInstance().getTimeInMillis();
+		this.startTime = Instant.now().getNano() / 1000000d;
 		System.out.println("[DEBUG] workers real: "+workers.size());
 		for (Worker worker : workers) {
 			executor.execute(worker);
@@ -350,9 +351,9 @@ public class Stresstest extends AbstractTask {
 			exec.submit(worker);
 		}
 		//wait as long as needed
-		long start = Calendar.getInstance().getTimeInMillis();
+		double start = Instant.now().getNano() / 1000000d;
 		exec.shutdown();
-		while((Calendar.getInstance().getTimeInMillis()-start) <= warmupTimeMS) {
+		while((Instant.now().getNano() / 1000000d - start) <= warmupTimeMS) {
 			//clean up RAM
 			for(Worker worker: warmupWorkers) {
 				worker.popQueryResults();
@@ -397,13 +398,13 @@ public class Stresstest extends AbstractTask {
 			}catch(Exception e) {
 				LOGGER.error("Could not warmup ");
 			}
-			long current = Calendar.getInstance().getTimeInMillis();
-			if(timeLimit - (current - this.startTime) <= 0L) {
+			double current = Instant.now().getNano() / 1000000d;
+			if(timeLimit - (current - this.startTime) <= 0D) {
 				//debugWriter.println("time is over. finished="+(timeLimit - (current - this.startTime) <= 0L));
 				//debugWriter.flush();
 
 			}
-			return timeLimit - (current - this.startTime) <= 0L;
+			return timeLimit - (current - this.startTime) <= 0D;
 		}
 		else if (noOfQueryMixes != null) {
 			// use noOfQueries of SPARQLWorkers (as soon as a worker hit the noOfQueries, it

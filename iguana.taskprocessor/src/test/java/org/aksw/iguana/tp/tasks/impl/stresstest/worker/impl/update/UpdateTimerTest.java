@@ -24,9 +24,9 @@ public class UpdateTimerTest {
 
 	private Strategy strategy;
 	private Long baseValue;
-	private long timeExceeded;
+	private double timeExceeded;
 	private long executedQueries;
-	private long timeLimit;
+	private double timeLimit;
 	
 
 	/**
@@ -74,7 +74,7 @@ public class UpdateTimerTest {
 			break;
 		case DISTRIBUTED:
 			timer = new UpdateTimer(baseValue.intValue(), timeLimit);
-			long expected = (timeLimit-timeExceeded)/(baseValue-executedQueries);
+			double expected = (timeLimit-timeExceeded)/(baseValue-executedQueries);
 			assertEquals(expected, timer.calculateTime(timeExceeded, executedQueries));
 			break;
 		default:			

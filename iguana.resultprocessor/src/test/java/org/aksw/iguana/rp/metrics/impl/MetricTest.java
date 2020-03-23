@@ -125,7 +125,7 @@ public class MetricTest {
 
 	}
 	
-	private Properties createData(long time, boolean success, Properties extraMeta) {
+	private Properties createData(double time, boolean success, Properties extraMeta) {
 		Properties p = new Properties();
 		p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
 	    p.put(COMMON.RECEIVE_DATA_SUCCESS, success);

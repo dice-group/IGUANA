@@ -19,14 +19,14 @@ public class CLIWorkerTest {
 	@Test
 	public void testTime() throws IOException {
 		Worker worker = new CLIWorker(new String[] {"1", "1", null, curl,null,null, null,  "","0","0"});
-		assertTrue(worker.getTimeForQueryMs("select * {?s ?p ?o} LIMIT 10", "10")[0]>0);
+		assertTrue((double)worker.getTimeForQueryMs("select * {?s ?p ?o} LIMIT 10", "10")[0]>0);
 		
 	}
 	
 	@Test
 	public void testInput() throws IOException {
 		Worker worker = new CLIInputWorker(new String[] {"1", "1", null, inputScript, null,null, null,  "","0","0", "test", "finished"});
-		assertTrue(worker.getTimeForQueryMs("select * {?s ?p ?o} LIMIT 10", "10")[0]>0);
+		assertTrue((double)worker.getTimeForQueryMs("select * {?s ?p ?o} LIMIT 10", "10")[0]>0);
 		
 	}
 }
