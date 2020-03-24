@@ -38,7 +38,7 @@ public class QPSMetric extends AbstractMetric {
 		long tmpSuccess = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SUCCESS).toString());
 		long success = tmpSuccess>0?1:0;
 		long failure = success==1?0:1;
-		double timeout = tmpSuccess==COMMON.SOCKET_TIMEOUT_VALUE?1:0;
+		long timeout = tmpSuccess==COMMON.SOCKET_TIMEOUT_VALUE?1:0;
 		long unknown = tmpSuccess==COMMON.UNKNOWN_EXCEPTION_VALUE?1:0;
 		long wrongCode = tmpSuccess==COMMON.WRONG_RESPONSE_CODE_VALUE?1:0;
 		long size=-1;
@@ -51,16 +51,16 @@ public class QPSMetric extends AbstractMetric {
 		
 		Properties tmp = getDataFromContainer(extra);
 		if(tmp!=null && tmp.containsKey(queryID)){
-			long[] oldArr = (long[])tmp.get(queryID);
-			oldArr[0]+=time;
-			oldArr[1]+=success;
-			oldArr[2]+=failure;
-			if(oldArr[3]<size) {
+			Object[] oldArr = (Object[]) tmp.get(queryID);
+			oldArr[0] = (double) oldArr[0] + time;
+			 oldArr[1] = (long) oldArr[1] + success;
+			 oldArr[2] = (long) oldArr[2] + failure;
+			if((long)oldArr[3]<size) {
 				oldArr[3]=size;
 			}
-			oldArr[4]+=timeout;
-			oldArr[5]+=unknown;
-			oldArr[6]+=wrongCode;
+			oldArr[4] = (long) oldArr[4] + timeout;
+			oldArr[5] = (long) oldArr[5] + unknown;
+			oldArr[6] = (long) oldArr[6] + wrongCode;
 		}
 		else if(tmp!=null){
 			Object[] resArr = {time, success, failure, size, timeout, unknown, wrongCode,queryHash};
@@ -81,8 +81,8 @@ public class QPSMetric extends AbstractMetric {
 		for(Properties key : dataContainer.keySet()){
 			Properties value = dataContainer.get(key);
 			for(Object queryID : value.keySet()){
-				long[] resArr = (long[]) value.get(queryID);
-				Double qps = resArr[1]*1.0/(resArr[0]/1000.0);
+				Object[] resArr = (Object[]) value.get(queryID);
+				Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
 			
 				//create Triple of results and use subject as object node
 				String subject = getSubjectFromExtraMeta(key)+"/"+queryID;
@@ -93,21 +93,21 @@ public class QPSMetric extends AbstractMetric {
 				//qps
 				triples[0] = new Triple(subject, "queriesPerSecond", qps);
 				//failed
-				triples[1] = new Triple(subject, "failed", resArr[2]);
+				triples[1] = new Triple(subject, "failed", (long)resArr[2]);
 				//succeded
-				triples[2] = new Triple(subject, "succeeded", resArr[1]);
+				triples[2] = new Triple(subject, "succeeded", (long)resArr[1]);
 
 				//totaltime
-				triples[3] = new Triple(subject, "totalTime", resArr[0]);
+				triples[3] = new Triple(subject, "totalTime", (double)resArr[0]);
 				triples[4] = new Triple(subject, "resultSize", "?");
-				if(resArr[3]!=-1) {
-					triples[4] = new Triple(subject, "resultSize", resArr[3]);
+				if((long)resArr[3]!=-1L) {
+					triples[4] = new Triple(subject, "resultSize", (long)resArr[3]);
 				}
-				triples[5] = new Triple(subject, "timeouts", resArr[4]);
-				triples[6] = new Triple(subject, "unknownExceptions", resArr[5]);
-				triples[7] = new Triple(subject, "wrongCodes", resArr[6]);
+				triples[5] = new Triple(subject, "timeouts", (long)resArr[4]);
+				triples[6] = new Triple(subject, "unknownExceptions", (long)resArr[5]);
+				triples[7] = new Triple(subject, "wrongCodes", (long)resArr[6]);
 
-				triples[8] = new Triple(subject, "queryID", resArr[7] + "/" + queryID.toString());
+				triples[8] = new Triple(subject, "queryID", (int)resArr[7] + "/" + queryID.toString());
 				triples[8].setObjectResource(true);
 				
 				Properties results = new Properties();

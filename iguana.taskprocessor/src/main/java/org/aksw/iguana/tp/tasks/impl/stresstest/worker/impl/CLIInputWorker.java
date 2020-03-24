@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
+
 public class CLIInputWorker extends AbstractWorker {
 
 	private int currentQueryID;
@@ -111,7 +113,7 @@ public class CLIInputWorker extends AbstractWorker {
 
 	@Override
 	public Object[] getTimeForQueryMs(String query, String queryID) {
-		double start = Instant.now().getNano() / 1000000d;
+		Instant start = Instant.now();
 		// execute queryCLI and read response
 		try {
 			AtomicLong size = new AtomicLong(-1);
@@ -136,29 +138,30 @@ public class CLIInputWorker extends AbstractWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
+					return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
 				} else {
-					return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
+					return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
 				}
 			} finally {
 				executor.shutdown();
 				executor.awaitTermination((long)(double)this.timeOut, TimeUnit.MILLISECONDS);
 			}
 			double end = Instant.now().getNano() / 1000000d;
+			double duration = durationInMilliseconds(start, Instant.now());
 
-			if (end - start >= timeOut) {
-				return new Double[] { -1D, end - start };
+			if (duration >= timeOut) {
+				return new Object[] { -1L, duration };
 			} else if (failed.get()) {
-				return new Double[] { 0D, end - start };
+				return new Object[] { 0L, duration };
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
 			// TODO: do NOT use an array to to transport time AND size!!!
-			return new Object[] { 1D, end - start, size.get() };
+			return new Object[] { 1L, duration, size.get() };
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
+		return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
 	}
 
 

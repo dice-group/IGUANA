@@ -163,7 +163,7 @@ public class IguanaConfig {
 	//TODO #93
 	private String generateSuiteID() {
 		// Suite ID collision fix start
-		int currentTimeMillisHashCode = Math.abs(new Long(Instant.now().getNano()).hashCode());
+		int currentTimeMillisHashCode = Math.abs(Long.valueOf(Instant.now().getEpochSecond()).hashCode());
 		return String.valueOf(currentTimeMillisHashCode);
 		// Suite ID collision fix end
 

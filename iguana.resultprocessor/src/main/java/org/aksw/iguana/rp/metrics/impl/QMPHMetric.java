@@ -36,7 +36,7 @@ public class QMPHMetric extends NoQPHMetric {
 			
 			double noOfQueriesPerHour = hourInMS*success*1.0/totalTime;
 			
-			Double noOfQueryMixes = (double) key.get(COMMON.NO_OF_QUERIES);
+			int noOfQueryMixes = (int) key.get(COMMON.NO_OF_QUERIES);
 			Double qmph=noOfQueriesPerHour*1.0/noOfQueryMixes;
 			
 			Properties results = new Properties();

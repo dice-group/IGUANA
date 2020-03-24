@@ -29,7 +29,7 @@ public class NumberUtils {
 	public static Double getDouble(String nm) {
 		try {
 			return Double.parseDouble(nm);
-		} catch (NumberFormatException ignored) {
+		} catch (NumberFormatException | NullPointerException ignored) {
 		}
 		return null;
 	}

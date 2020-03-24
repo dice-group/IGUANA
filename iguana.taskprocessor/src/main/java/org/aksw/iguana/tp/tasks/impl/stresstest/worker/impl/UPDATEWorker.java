@@ -28,6 +28,8 @@ import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
+
 /**
  * 
  * A Worker using SPARQL Updates to create service request.
@@ -100,8 +102,7 @@ public class UPDATEWorker extends AbstractWorker {
 
 	@Override
 	public void waitTimeMs() {
-		double currentTime = Instant.now().getNano() / 1000000d;
-		double wait = this.updateTimer.calculateTime(currentTime - this.startTime, this.executedQueries);
+		double wait = this.updateTimer.calculateTime(durationInMilliseconds(startTime, Instant.now()), this.executedQueries);
 		LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
 		try {
 			Thread.sleep((long)wait);
@@ -114,7 +115,7 @@ public class UPDATEWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Double[] getTimeForQueryMs(String query, String queryID) {
+	public Object[] getTimeForQueryMs(String query, String queryID) {
 		UpdateRequest update = UpdateFactory.create(query);
 
 		// Set update timeout
@@ -125,23 +126,23 @@ public class UPDATEWorker extends AbstractWorker {
 		// create Update Processor and use timeout config
 		UpdateProcessor exec = UpdateExecutionFactory.createRemote(update, service, client);
 		setCredentials(exec);
-			double start = Instant.now().getNano() / 1000000d;
+		Instant start = Instant.now();
 
 		try {
 			// Execute Update
 			exec.execute();
-			double end = Instant.now().getNano() / 1000000d;
+			double duration = durationInMilliseconds(start, Instant.now());
 			LOGGER.debug("Worker[{{}} : {{}}]: Update with ID {{}} took {{}}.", this.workerType, this.workerID, queryID,
-					end - start);
+					duration);
 			// Return time
-			return new Double[]{1D, end - start};
+			return new Object[]{1L, duration};
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following update\n{{}}\n due to", this.workerType,
 					this.workerID, query, e);
 		}
 		// Exception was thrown, return error
 		//return -1L;
-		return new Double[]{0D, Instant.now().getNano() / 1000000d-start};
+		return new Object[]{0L, durationInMilliseconds(start, Instant.now())};
 	}
 
 	private void setCredentials(UpdateProcessor exec) {

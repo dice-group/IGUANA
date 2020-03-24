@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+
 
 /**
  * The Abstract Worker which will implement the runnable, the main loop, the
@@ -17,7 +19,7 @@ import java.util.*;
  * module <br/>
  * so the Implemented Workers only need to implement which query to test next
  * and how to test this query.
- * 
+ *
  * @author f.conrads
  *
  */
@@ -57,12 +59,12 @@ public abstract class AbstractWorker implements Worker {
 
 	protected Double timeLimit;
 
-	protected double startTime;
+	protected Instant startTime;
 
 	protected String queriesFileName;
 
 	protected String service;
-	
+
 	protected String user;
 	protected String password;
 
@@ -72,7 +74,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * Needs to be called if init is used
-	 * @param workerType 
+	 * @param workerType
 	 */
 	public AbstractWorker(String workerType) {
 		// needs
@@ -81,7 +83,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * Default Constructor
-	 * 
+	 *
 	 * @param args
 	 * @param workerType
 	 */
@@ -115,7 +117,7 @@ public abstract class AbstractWorker implements Worker {
 			this.fixedLatency = Integer.parseInt(args[8]);
 		if(args[7]!=null)
 			this.gaussianLatency = Integer.parseInt(args[9]);
-		
+
 		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
 
 	}
@@ -185,7 +187,7 @@ public abstract class AbstractWorker implements Worker {
 		if(this.queryFileList!=null)
 			this.extra.put(COMMON.NO_OF_QUERIES, this.queryFileList.length);
 		// For Update and Logging purpose get startTime of Worker
-		this.startTime = Instant.now().getNano() / 1000000d;
+		this.startTime = Instant.now();
 
 		int queryHash = FileUtils.getHashcodeFromFileContent(this.queriesFileName);
 
@@ -213,7 +215,7 @@ public abstract class AbstractWorker implements Worker {
 			// benchmark query
 			Double time = 0D;
 			// TODO: do NOT use an array to to transport time AND size!!!
-			Object[] resultTime = new Double[]{0D, 0D};
+			Object[] resultTime = new Object[]{0L, 0D};
 			try {
 				resultTime = getTimeForQueryMs(query.toString(), queryID.toString());
 				time = (double) resultTime[1];
@@ -272,7 +274,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * Returns the name of the queries file name/update path
-	 * 
+	 *
 	 * @return file name/update path
 	 */
 	public String getQueriesFileName() {
@@ -281,7 +283,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * Sets the Query Instances repr. in Files.
-	 * 
+	 *
 	 * @param queries
 	 *            File containing the query instances.
 	 */
@@ -291,7 +293,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * The number of Queries in one mix
-	 * 
+	 *
 	 * @return
 	 */
 	public long getNoOfQueries() {

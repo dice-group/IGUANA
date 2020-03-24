@@ -35,6 +35,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
+
 /**
  * Controller for the Stresstest. <br/>
  * Will initialize the {@link SPARQLWorker}s and {@link UPDATEWorker}s and
@@ -56,7 +58,7 @@ public class Stresstest extends AbstractTask {
 	private Double timeLimit;
 	private Long noOfQueryMixes;
 	private List<Worker> workers = new LinkedList<Worker>();
-	private double startTime;
+	private Instant startTime;
 	private String qhClassName;
 	private String[] qhConstructorArgs;
 	private Long noOfWorkers= 0L;
@@ -242,7 +244,7 @@ public class Stresstest extends AbstractTask {
 		// Execute each Worker in ThreadPool
 		System.out.println("[DEBUG] workers: "+noOfWorkers);
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkers.intValue());
-		this.startTime = Instant.now().getNano() / 1000000d;
+		this.startTime = Instant.now();
 		System.out.println("[DEBUG] workers real: "+workers.size());
 		for (Worker worker : workers) {
 			executor.execute(worker);
@@ -351,9 +353,9 @@ public class Stresstest extends AbstractTask {
 			exec.submit(worker);
 		}
 		//wait as long as needed
-		double start = Instant.now().getNano() / 1000000d;
+		Instant start = Instant.now();
 		exec.shutdown();
-		while((Instant.now().getNano() / 1000000d - start) <= warmupTimeMS) {
+		while(durationInMilliseconds(start, Instant.now()) <= warmupTimeMS) {
 			//clean up RAM
 			for(Worker worker: warmupWorkers) {
 				worker.popQueryResults();
@@ -398,13 +400,9 @@ public class Stresstest extends AbstractTask {
 			}catch(Exception e) {
 				LOGGER.error("Could not warmup ");
 			}
-			double current = Instant.now().getNano() / 1000000d;
-			if(timeLimit - (current - this.startTime) <= 0D) {
-				//debugWriter.println("time is over. finished="+(timeLimit - (current - this.startTime) <= 0L));
-				//debugWriter.flush();
-
-			}
-			return timeLimit - (current - this.startTime) <= 0D;
+			Instant current = Instant.now();
+			double passed_time = timeLimit - durationInMilliseconds(this.startTime, current);
+			return passed_time <= 0D;
 		}
 		else if (noOfQueryMixes != null) {
 			// use noOfQueries of SPARQLWorkers (as soon as a worker hit the noOfQueries, it

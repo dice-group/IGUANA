@@ -21,6 +21,8 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
+
 public class MultipleCLIInputWorker extends AbstractWorker {
 
 	private int currentQueryID;
@@ -121,7 +123,7 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 
 	@Override
 	public Object[] getTimeForQueryMs(String query, String queryID) {
-		double start = Instant.now().getNano() / 1000000d;
+		Instant start = Instant.now();
 		// execute queryCLI and read response
 		try {
 			AtomicLong size = new AtomicLong(-1);
@@ -146,33 +148,33 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
+					return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
 				} else {
 					setNextProcess();
-					return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
+					return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
 				}
 			} finally {
 				executor.shutdown();
 				executor.awaitTermination((long) (double)this.timeOut, TimeUnit.MILLISECONDS);
 			}
-			double end = Instant.now().getNano() / 1000000d;
+			double duration = durationInMilliseconds(start, Instant.now());
 
-			if (end - start >= timeOut) {
+			if (duration >= timeOut) {
 				setNextProcess();
-				return new Double[] { 0D, end - start };
+				return new Object[] { 0L, duration };
 			} else if (failed.get()) {
 				if (!process.isAlive()) {
 					setNextProcess();
 				}
-				return new Double[] { 0D, end - start };
+				return new Object[] { 0L, duration };
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
-			return new Object[] { 1D, end - start, size.get() };
+			return new Object[] { 1L, duration, size.get() };
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
+		return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
 	}
 
 	private void setNextProcess() {

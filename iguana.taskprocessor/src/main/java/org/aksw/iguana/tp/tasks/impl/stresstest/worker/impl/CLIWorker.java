@@ -13,6 +13,8 @@ import java.util.Random;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
+
 public class CLIWorker extends AbstractWorker {
 
 	private int currentQueryID;
@@ -42,7 +44,7 @@ public class CLIWorker extends AbstractWorker {
 
 	@Override
 	public Object[] getTimeForQueryMs(String query, String queryID) {
-		double start = Instant.now().getNano() / 1000000d;
+		Instant start = Instant.now();
 		// use cli as service
 		String q = "";
 		try {
@@ -89,9 +91,9 @@ public class CLIWorker extends AbstractWorker {
 				System.out.println("[DEBUG] Query successfully executed size: " + size);
 			} else {
 				System.out.println("Exit Value: " + exitVal);
-				return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
+				return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
 			}
-			return new Object[] { 1D, Instant.now().getNano() / 1000000d - start, size };
+			return new Object[] { 1L, durationInMilliseconds(start, Instant.now()), size };
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -100,7 +102,7 @@ public class CLIWorker extends AbstractWorker {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Double[] { 0D, Instant.now().getNano() / 1000000d - start };
+		return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
 	}
 
 	@Override
