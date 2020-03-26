@@ -118,5 +118,10 @@ public class CONSTANTS {
 	 */
 	public static final String DIRECTORY = "directory";
 
+	/**
+	 * The key to specify return type of the result when querying a triple store {@link org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker}
+	 */
+	public static final String QUERY_RESPONSE_TYPE = "httpResponseType";
+
 
 }

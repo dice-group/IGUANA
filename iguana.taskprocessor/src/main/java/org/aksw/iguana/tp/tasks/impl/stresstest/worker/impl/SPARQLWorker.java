@@ -1,6 +1,7 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +53,7 @@ public class SPARQLWorker extends AbstractWorker {
 	private int currentQueryID = 0;
 
 	private Random queryPatternChooser;
+	private String responseType;
 
 	/**
 	 * @param args
@@ -79,6 +81,9 @@ public class SPARQLWorker extends AbstractWorker {
 	public void init(Properties p) {
 		super.init(p);
 		queryPatternChooser = new Random(this.workerID);
+
+		if(p.containsKey(CONSTANTS.QUERY_RESPONSE_TYPE))
+			this.responseType = p.getProperty(CONSTANTS.QUERY_RESPONSE_TYPE);
 	}
 
 	@Override
@@ -103,7 +108,9 @@ public class SPARQLWorker extends AbstractWorker {
 			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
 					.setConnectTimeout(timeOut.intValue()).build();
 
-			request.setHeader(HttpHeaders.ACCEPT, QUERY_RESULT_TYPE_JSON);
+			if(this.responseType != null)
+				request.setHeader(HttpHeaders.ACCEPT, this.responseType);
+
 			request.setConfig(requestConfig);
 			try (CloseableHttpClient client = HttpClients.createDefault();
 				 CloseableHttpResponse response = client.execute(request);) {
