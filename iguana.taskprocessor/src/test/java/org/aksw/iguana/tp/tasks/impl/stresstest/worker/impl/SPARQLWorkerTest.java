@@ -27,7 +27,7 @@ public class SPARQLWorkerTest {
 	@Test
 	public void testTime() throws IOException {
 		Worker worker = new SPARQLWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql",null,null, null,  "","0","0"});
-		assertTrue((double)worker.getTimeForQueryMs("select * {?s ?p ?o}", "1")[0]>0);
+		assertTrue((double)worker.executeQuery("select * {?s ?p ?o}", "1").getExecutionTime()>0);
 		
 	}
 	
@@ -39,7 +39,7 @@ public class SPARQLWorkerTest {
 //	@Test
 	public void testTimeout() throws IOException {
 		Worker worker = new SPARQLWorker(new String[] {"1", "1", null, "http://dbpedia.org/sparql",null,null, "1",  "","0","0"});
-		assertEquals(new Long(-1), worker.getTimeForQueryMs("select * {?s ?p ?o}", "1"));
+		assertEquals(new Long(-1), worker.executeQuery("select * {?s ?p ?o}", "1"));
 		
 	}
 	

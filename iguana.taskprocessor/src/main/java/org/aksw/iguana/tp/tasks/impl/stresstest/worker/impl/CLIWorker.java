@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
 
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 
@@ -43,7 +44,7 @@ public class CLIWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Object[] getTimeForQueryMs(String query, String queryID) {
+	public QueryExecutionStats executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		// use cli as service
 		String q = "";
@@ -91,18 +92,14 @@ public class CLIWorker extends AbstractWorker {
 				System.out.println("[DEBUG] Query successfully executed size: " + size);
 			} else {
 				System.out.println("Exit Value: " + exitVal);
-				return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
+				return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
 			}
-			return new Object[] { 1L, durationInMilliseconds(start, Instant.now()), size };
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			return new QueryExecutionStats( 1L, durationInMilliseconds(start, Instant.now()), size );
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
+		return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
 	}
 
 	@Override

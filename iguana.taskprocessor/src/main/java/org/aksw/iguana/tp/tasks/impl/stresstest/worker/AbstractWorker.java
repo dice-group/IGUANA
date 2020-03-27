@@ -2,13 +2,13 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
@@ -213,12 +213,11 @@ public abstract class AbstractWorker implements Worker {
 			// Simulate Network Delay (or whatever should be simulated)
 			waitTimeMs();
 			// benchmark query
-			Double time = 0D;
-			// TODO: do NOT use an array to to transport time AND size!!!
-			Object[] resultTime = new Object[]{0L, 0D};
+			double time = 0D;
+			QueryExecutionStats executionStats = new QueryExecutionStats();
 			try {
-				resultTime = getTimeForQueryMs(query.toString(), queryID.toString());
-				time = (double) resultTime[1];
+				executionStats = executeQuery(query.toString(), queryID.toString());
+				time = executionStats.getExecutionTime();
 			} catch (Exception e) {
 				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
 						query.toString());
@@ -231,10 +230,8 @@ public abstract class AbstractWorker implements Worker {
 				Properties result = new Properties();
 				result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
 				result.put(COMMON.RECEIVE_DATA_TIME, time);
-				result.put(COMMON.RECEIVE_DATA_SUCCESS, resultTime[0]);
-				if(resultTime.length>2) {
-					result.put(COMMON.RECEIVE_DATA_SIZE, resultTime[2]);
-				}
+				result.put(COMMON.RECEIVE_DATA_SUCCESS, executionStats.getResponseCode());
+				result.put(COMMON.RECEIVE_DATA_SIZE, executionStats.getResultSize());
 				result.put(COMMON.QUERY_HASH, queryHash);
 				result.setProperty(COMMON.QUERY_ID_KEY, queryID.toString());
 				// Add extra Meta Key, worker ID and worker Type

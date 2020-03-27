@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Properties;
 import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateComparator;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateStrategy;
@@ -115,7 +115,7 @@ public class UPDATEWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Object[] getTimeForQueryMs(String query, String queryID) {
+	public QueryExecutionStats executeQuery(String query, String queryID) {
 		UpdateRequest update = UpdateFactory.create(query);
 
 		// Set update timeout
@@ -135,14 +135,14 @@ public class UPDATEWorker extends AbstractWorker {
 			LOGGER.debug("Worker[{{}} : {{}}]: Update with ID {{}} took {{}}.", this.workerType, this.workerID, queryID,
 					duration);
 			// Return time
-			return new Object[]{1L, duration};
+			return new QueryExecutionStats(1L, duration);
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following update\n{{}}\n due to", this.workerType,
 					this.workerID, query, e);
 		}
 		// Exception was thrown, return error
 		//return -1L;
-		return new Object[]{0L, durationInMilliseconds(start, Instant.now())};
+		return new QueryExecutionStats(0L, durationInMilliseconds(start, Instant.now()));
 	}
 
 	private void setCredentials(UpdateProcessor exec) {

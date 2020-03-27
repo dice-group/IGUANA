@@ -102,44 +102,6 @@ public class Stresstest extends AbstractTask {
 		int workerID = 0;
 		// create Workers
 		String[] workerConfigs = ConfigUtils.getStringArrayWithSuffix(taskConfig, CONSTANTS.WORKER_CONFIG_KEYS);
-		
-//		for (String configKey : workerConfigs) {
-//			String[] workerConfig = taskConfig.getStringArray(configKey);
-//			int workers = Integer.parseInt(workerConfig[0]);
-//			noOfWorkers+=workers;
-//			for (int j = 0; j < workers; j++) {
-//				// set taskID, workerID, workerConfig
-//				String[] config = new String[4 + workerConfig.length];
-//				config[0] = taskID;
-//				config[1] = Integer.toString(workerID);
-//				workerID++;
-//
-//				// sets null if timelimit is not defined otherwise the string repr. of the
-//				// timelimit
-//				config[2] = timeLimit == null ? null : timeLimit.toString();
-//				if(workerConfig[1].equals(UPDATEWorker.class.getCanonicalName())) {
-//					config[3] = updateService;
-//				}
-//				else {
-//					config[3] = service;
-//
-//				}
-//				config[4] = user;
-//				config[5] = password;
-//
-//				for (int i = 2; i < workerConfig.length; i++) {
-//					if(workerConfig[i]==null) {
-//						config[i+4] = null;
-//					}
-//					else {
-//						config[i + 4] = workerConfig[i];
-//					}
-//				}
-//				Worker worker = factory.create(workerConfig[1], new String[] {});
-//				worker.init(config);
-//				this.workers.add(worker);
-//			}
-//		}
 
 		// Property based init start
 		for (String configKey : workerConfigs) {

@@ -2,6 +2,7 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -87,12 +88,7 @@ public class SPARQLWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Object[] getTimeForQueryMs(String query, String queryID) {
-		// QueryExecution exec = QueryExecutionFactory.sparqlService(service, query);
-		// exec.setTimeout(this.timeOut);
-		// Set query timeout
-		// exec.setTimeout(this.timeOut, TimeUnit.MILLISECONDS, this.timeOut,
-		// TimeUnit.MILLISECONDS);
+	public QueryExecutionStats executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		final AtomicReference<String> res = new AtomicReference<String>("");
 
@@ -118,7 +114,7 @@ public class SPARQLWorker extends AbstractWorker {
 				HttpEntity entity = response.getEntity();
 				int responseCode = response.getStatusLine().getStatusCode();
 				if (responseCode != 200) {
-					return new Object[]{COMMON.WRONG_RESPONSE_CODE_VALUE, durationInMilliseconds(start, Instant.now())};
+					return new QueryExecutionStats(COMMON.WRONG_RESPONSE_CODE_VALUE, durationInMilliseconds(start, Instant.now()));
 
 				}
 				Header[] contentType = response.getHeaders("Content-Type");
@@ -128,7 +124,7 @@ public class SPARQLWorker extends AbstractWorker {
 
 				double duration = durationInMilliseconds(start, Instant.now());
 				if (this.timeOut < duration) {
-					return new Object[]{0L, duration};
+					return new QueryExecutionStats(0L, duration);
 				}
 				long size = 0L;
 				if (QUERY_RESULT_TYPE_JSON.equals(cType)) {
@@ -138,28 +134,23 @@ public class SPARQLWorker extends AbstractWorker {
 				} else {
 					size = StringUtils.countMatches(res.get(), "\n");
 				}
-				return new Object[]{1L, duration, size};
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-				// check ResultSet.
+				return new QueryExecutionStats(1L, duration, size);
+
 			} catch (java.net.SocketTimeoutException | ConnectTimeoutException e) {
 				System.out.println("Timeout occured for " + service + " - " + queryID);
 
-				return new Object[]{COMMON.SOCKET_TIMEOUT_VALUE, durationInMilliseconds(start, Instant.now())};
+				return new QueryExecutionStats(COMMON.SOCKET_TIMEOUT_VALUE, durationInMilliseconds(start, Instant.now()));
 
 			} catch (Exception e) {
 				System.out.println("Query could not be exceuted: " + e);
-				return new Object[]{COMMON.UNKNOWN_EXCEPTION_VALUE, durationInMilliseconds(start, Instant.now())};
+				return new QueryExecutionStats(COMMON.UNKNOWN_EXCEPTION_VALUE, durationInMilliseconds(start, Instant.now()));
 			}
 
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
 					this.workerID, query, e);
 		}
-		// Exception was thrown, return error
-		// return -1L;
-		return new Object[]{COMMON.UNKNOWN_EXCEPTION_VALUE, durationInMilliseconds(start, Instant.now())};
+		return new QueryExecutionStats(COMMON.UNKNOWN_EXCEPTION_VALUE, durationInMilliseconds(start, Instant.now()));
 
 	}
 
@@ -169,10 +160,8 @@ public class SPARQLWorker extends AbstractWorker {
 		System.out.println("[DEBUG] HEADER: " + header);
 		for (HeaderElement el : header.getElements()) {
 			NameValuePair cTypePair = el.getParameterByName("Content-Type");
-//			System.out.println("[DEBUG] Pair: " + cTypePair);
 
 			if (cTypePair != null && !cTypePair.getValue().isEmpty()) {
-//				System.out.println("[DEBUG] VAL: " + cTypePair.getValue());
 				return cTypePair.getValue();
 			}
 		}
@@ -180,10 +169,8 @@ public class SPARQLWorker extends AbstractWorker {
 		if (index >= 0) {
 			String ret = header.toString().substring(index + "Content-Type".length() + 1);
 			if (ret.contains(";")) {
-//				System.out.println("[DEBUG] VAL: " + ret.substring(0, ret.indexOf(";")).trim());
 				return ret.substring(0, ret.indexOf(";")).trim();
 			}
-//			System.out.println("[DEBUG] VAL: " + ret.trim());
 			return ret.trim();
 		}
 		return "application/sparql-results+json";
@@ -192,7 +179,6 @@ public class SPARQLWorker extends AbstractWorker {
 	private void executeAndTerminate(HttpEntity entity, AtomicReference<String> res, String cType)
 			throws InterruptedException {
 		ExecutorService service2 = Executors.newSingleThreadExecutor();
-		// ResultSet res;
 		service2.execute(new Runnable() {
 			@Override
 			public void run() {
@@ -213,7 +199,6 @@ public class SPARQLWorker extends AbstractWorker {
 		});
 
 		service2.shutdown();
-//
 		service2.awaitTermination((long) (double) this.timeOut + 100, TimeUnit.MILLISECONDS);
 	}
 

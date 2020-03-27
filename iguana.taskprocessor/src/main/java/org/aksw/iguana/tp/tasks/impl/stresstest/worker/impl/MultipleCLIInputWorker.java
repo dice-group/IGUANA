@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
@@ -17,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -122,7 +122,7 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Object[] getTimeForQueryMs(String query, String queryID) {
+	public QueryExecutionStats executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		// execute queryCLI and read response
 		try {
@@ -148,10 +148,10 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
+					return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
 				} else {
 					setNextProcess();
-					return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
+					return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
 				}
 			} finally {
 				executor.shutdown();
@@ -161,20 +161,20 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 
 			if (duration >= timeOut) {
 				setNextProcess();
-				return new Object[] { 0L, duration };
+				return new QueryExecutionStats( 0L, duration );
 			} else if (failed.get()) {
 				if (!process.isAlive()) {
 					setNextProcess();
 				}
-				return new Object[] { 0L, duration };
+				return new QueryExecutionStats( 0L, duration );
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
-			return new Object[] { 1L, duration, size.get() };
+			return new QueryExecutionStats( 1L, duration, size.get() );
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
+		return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
 	}
 
 	private void setNextProcess() {

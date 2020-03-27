@@ -1,6 +1,7 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
 import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -112,7 +113,7 @@ public class CLIInputWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Object[] getTimeForQueryMs(String query, String queryID) {
+	public QueryExecutionStats executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		// execute queryCLI and read response
 		try {
@@ -138,9 +139,9 @@ public class CLIInputWorker extends AbstractWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
+					return new QueryExecutionStats ( 0L, durationInMilliseconds(start, Instant.now()) );
 				} else {
-					return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
+					return new QueryExecutionStats ( 0L, durationInMilliseconds(start, Instant.now()) );
 				}
 			} finally {
 				executor.shutdown();
@@ -150,18 +151,17 @@ public class CLIInputWorker extends AbstractWorker {
 			double duration = durationInMilliseconds(start, Instant.now());
 
 			if (duration >= timeOut) {
-				return new Object[] { -1L, duration };
+				return new QueryExecutionStats ( -1L, duration );
 			} else if (failed.get()) {
-				return new Object[] { 0L, duration };
+				return new QueryExecutionStats ( 0L, duration );
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
-			// TODO: do NOT use an array to to transport time AND size!!!
-			return new Object[] { 1L, duration, size.get() };
+			return new QueryExecutionStats ( 1L, duration, size.get() );
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Object[] { 0L, durationInMilliseconds(start, Instant.now()) };
+		return new QueryExecutionStats ( 0L, durationInMilliseconds(start, Instant.now()) );
 	}
 
 
