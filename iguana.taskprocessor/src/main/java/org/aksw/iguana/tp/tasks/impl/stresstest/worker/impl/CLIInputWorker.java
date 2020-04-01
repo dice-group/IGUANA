@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
-public class CLIInputWorker extends AbstractWorker {
+public class CLIInputWorker extends CLIBasedWorker {
 
 	private int currentQueryID;
 	private Random queryPatternChooser;

@@ -37,7 +37,7 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  * @author f.conrads
  *
  */
-public class UPDATEWorker extends AbstractWorker {
+public class UPDATEWorker extends HttpWorker {
 
 	private int currentQueryID = 0;
 	private UpdateStrategy updateStrategy;

@@ -16,7 +16,7 @@ import org.aksw.iguana.tp.utils.FileUtils;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
-public class CLIWorker extends AbstractWorker {
+public class CLIWorker extends CLIBasedWorker {
 
 	private int currentQueryID;
 	private Random queryPatternChooser;

@@ -23,7 +23,7 @@ import org.apache.commons.lang.SystemUtils;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
-public class MultipleCLIInputWorker extends AbstractWorker {
+public class MultipleCLIInputWorker extends CLIBasedWorker {
 
 	private int currentQueryID;
 	private Random queryPatternChooser;

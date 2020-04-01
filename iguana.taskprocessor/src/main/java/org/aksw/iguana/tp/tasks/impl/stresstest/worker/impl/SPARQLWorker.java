@@ -45,7 +45,7 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  *
  * @author f.conrads
  */
-public class SPARQLWorker extends AbstractWorker {
+public class SPARQLWorker extends HttpWorker {
 
 	private static final String XML_RESULT_ELEMENT_NAME = "result";
 	private static final String XML_RESULT_ROOT_ELEMENT_NAME = "results";
