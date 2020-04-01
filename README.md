@@ -46,7 +46,7 @@ In Ubuntu you can install these using the following commands
 
 ```
 sudo apt-get install java
-sudo apt-get install rabbitmq
+sudo apt-get install rabbitmq-server
 ```
 
 RabbitMQ will be automatically started after you installed it. 
