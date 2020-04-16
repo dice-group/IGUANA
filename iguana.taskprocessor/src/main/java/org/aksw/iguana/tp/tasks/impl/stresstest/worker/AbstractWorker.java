@@ -72,6 +72,8 @@ public abstract class AbstractWorker implements Worker {
 
 	private long noOfQueryMixes;
 
+	private int queryHash;
+
 	/**
 	 * Needs to be called if init is used
 	 * @param workerType
@@ -189,7 +191,7 @@ public abstract class AbstractWorker implements Worker {
 		// For Update and Logging purpose get startTime of Worker
 		this.startTime = Instant.now();
 
-		int queryHash = FileUtils.getHashcodeFromFileContent(this.queriesFileName);
+		this.queryHash = FileUtils.getHashcodeFromFileContent(this.queriesFileName);
 
 		LOGGER.info("Starting Worker[{{}} : {{}}].", this.workerType, this.workerID);
 		// Execute Queries as long as the Stresstest will need.
@@ -216,6 +218,7 @@ public abstract class AbstractWorker implements Worker {
 			double time = 0D;
 			QueryExecutionStats executionStats = new QueryExecutionStats();
 			try {
+//				executeQuery(query.toString(), queryID.toString());
 				executionStats = executeQuery(query.toString(), queryID.toString());
 				time = executionStats.getExecutionTime();
 			} catch (Exception e) {
@@ -240,6 +243,23 @@ public abstract class AbstractWorker implements Worker {
 			}
 		}
 		LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
+	}
+
+	protected synchronized void addResults(QueryExecutionStats results)
+	{
+		if (!this.endSignal) {
+			// create Properties store it in List
+			Properties result = new Properties();
+			result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
+			result.put(COMMON.RECEIVE_DATA_TIME, results.getExecutionTime());
+			result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
+			result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
+			result.put(COMMON.QUERY_HASH, queryHash);
+			result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
+			// Add extra Meta Key, worker ID and worker Type
+			result.put(COMMON.EXTRA_META_KEY, this.extra);
+			setResults(result);
+		}
 	}
 
 	private synchronized void setResults(Properties result) {

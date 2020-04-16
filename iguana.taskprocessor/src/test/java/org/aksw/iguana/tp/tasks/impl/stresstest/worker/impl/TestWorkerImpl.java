@@ -44,9 +44,9 @@ public class TestWorkerImpl extends AbstractWorker{
 	@Override
 	public QueryExecutionStats executeQuery(String query, String queryID) {
 		if(this.workerID==5) {
-			return new QueryExecutionStats(-1L, 0D);
+			return new QueryExecutionStats(queryID, -1L, 0D);
 		}
-		return new QueryExecutionStats(1L, 0D);
+		return new QueryExecutionStats(queryID, 1L, 0D);
 	}
 
 	@Override

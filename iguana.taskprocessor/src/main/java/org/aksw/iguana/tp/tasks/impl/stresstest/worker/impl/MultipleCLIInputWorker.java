@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.model.QueryExecutionStats;
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 
@@ -148,10 +147,10 @@ public class MultipleCLIInputWorker extends CLIBasedWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
+					return new QueryExecutionStats(queryID, 0L, durationInMilliseconds(start, Instant.now()) );
 				} else {
 					setNextProcess();
-					return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
+					return new QueryExecutionStats(queryID, 0L, durationInMilliseconds(start, Instant.now()) );
 				}
 			} finally {
 				executor.shutdown();
@@ -161,20 +160,20 @@ public class MultipleCLIInputWorker extends CLIBasedWorker {
 
 			if (duration >= timeOut) {
 				setNextProcess();
-				return new QueryExecutionStats( 0L, duration );
+				return new QueryExecutionStats(queryID, 0L, duration );
 			} else if (failed.get()) {
 				if (!process.isAlive()) {
 					setNextProcess();
 				}
-				return new QueryExecutionStats( 0L, duration );
+				return new QueryExecutionStats(queryID, 0L, duration );
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
-			return new QueryExecutionStats( 1L, duration, size.get() );
+			return new QueryExecutionStats(queryID, 1L, duration, size.get() );
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
+		return new QueryExecutionStats(queryID, 0L, durationInMilliseconds(start, Instant.now()) );
 	}
 
 	private void setNextProcess() {

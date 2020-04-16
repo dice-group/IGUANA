@@ -38,9 +38,9 @@ public class QPSMetric extends AbstractMetric {
 		long tmpSuccess = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SUCCESS).toString());
 		long success = tmpSuccess>0?1:0;
 		long failure = success==1?0:1;
-		long timeout = tmpSuccess==COMMON.SOCKET_TIMEOUT_VALUE?1:0;
-		long unknown = tmpSuccess==COMMON.UNKNOWN_EXCEPTION_VALUE?1:0;
-		long wrongCode = tmpSuccess==COMMON.WRONG_RESPONSE_CODE_VALUE?1:0;
+		long timeout = tmpSuccess==COMMON.QUERY_SOCKET_TIMEOUT?1:0;
+		long unknown = tmpSuccess==COMMON.QUERY_UNKNOWN_EXCEPTION?1:0;
+		long wrongCode = tmpSuccess==COMMON.QUERY_HTTP_FAILURE?1:0;
 		long size=-1;
 		if(p.containsKey(COMMON.RECEIVE_DATA_SIZE)) {
 			size = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SIZE).toString());

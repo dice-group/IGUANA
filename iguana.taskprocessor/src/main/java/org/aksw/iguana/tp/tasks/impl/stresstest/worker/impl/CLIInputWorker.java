@@ -2,7 +2,6 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.model.QueryExecutionStats;
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 
@@ -139,9 +138,9 @@ public class CLIInputWorker extends CLIBasedWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new QueryExecutionStats ( 0L, durationInMilliseconds(start, Instant.now()) );
+					return new QueryExecutionStats (queryID, 0L, durationInMilliseconds(start, Instant.now()) );
 				} else {
-					return new QueryExecutionStats ( 0L, durationInMilliseconds(start, Instant.now()) );
+					return new QueryExecutionStats (queryID, 0L, durationInMilliseconds(start, Instant.now()) );
 				}
 			} finally {
 				executor.shutdown();
@@ -151,17 +150,17 @@ public class CLIInputWorker extends CLIBasedWorker {
 			double duration = durationInMilliseconds(start, Instant.now());
 
 			if (duration >= timeOut) {
-				return new QueryExecutionStats ( -1L, duration );
+				return new QueryExecutionStats (queryID, -1L, duration );
 			} else if (failed.get()) {
-				return new QueryExecutionStats ( 0L, duration );
+				return new QueryExecutionStats (queryID, 0L, duration );
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
-			return new QueryExecutionStats ( 1L, duration, size.get() );
+			return new QueryExecutionStats (queryID, 1L, duration, size.get() );
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new QueryExecutionStats ( 0L, durationInMilliseconds(start, Instant.now()) );
+		return new QueryExecutionStats (queryID, 0L, durationInMilliseconds(start, Instant.now()) );
 	}
 
 

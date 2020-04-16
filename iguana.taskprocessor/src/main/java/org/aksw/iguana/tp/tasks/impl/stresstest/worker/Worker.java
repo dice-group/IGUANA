@@ -18,10 +18,9 @@ public interface Worker extends Runnable{
 	/**
 	 * This should return the time in ms the query took to be executed and checked for results
 	 * If an error occured -1 should be returned
-	 * 
-	 * @param query The query which should be executed
+	 *  @param query The query which should be executed
 	 * @param queryID the ID of the query which should be executed
-	 * @return the time/ms the query took to executed, -1 if error happend
+	 * @return
 	 */
 	public QueryExecutionStats executeQuery(String query, String queryID);
 	

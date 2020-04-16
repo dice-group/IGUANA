@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.model.QueryExecutionStats;
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateComparator;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateStrategy;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateTimer;
@@ -135,14 +134,14 @@ public class UPDATEWorker extends HttpWorker {
 			LOGGER.debug("Worker[{{}} : {{}}]: Update with ID {{}} took {{}}.", this.workerType, this.workerID, queryID,
 					duration);
 			// Return time
-			return new QueryExecutionStats(1L, duration);
+			return new QueryExecutionStats(queryID, 1L, duration);
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following update\n{{}}\n due to", this.workerType,
 					this.workerID, query, e);
 		}
 		// Exception was thrown, return error
 		//return -1L;
-		return new QueryExecutionStats(0L, durationInMilliseconds(start, Instant.now()));
+		return new QueryExecutionStats(queryID, 0L, durationInMilliseconds(start, Instant.now()));
 	}
 
 	private void setCredentials(UpdateProcessor exec) {

@@ -11,7 +11,6 @@ import java.util.Properties;
 import java.util.Random;
 
 import org.aksw.iguana.tp.model.QueryExecutionStats;
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
@@ -92,14 +91,14 @@ public class CLIWorker extends CLIBasedWorker {
 				System.out.println("[DEBUG] Query successfully executed size: " + size);
 			} else {
 				System.out.println("Exit Value: " + exitVal);
-				return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
+				return new QueryExecutionStats(queryID, 0L, durationInMilliseconds(start, Instant.now()) );
 			}
-			return new QueryExecutionStats( 1L, durationInMilliseconds(start, Instant.now()), size );
+			return new QueryExecutionStats(queryID, 1L, durationInMilliseconds(start, Instant.now()), size );
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new QueryExecutionStats( 0L, durationInMilliseconds(start, Instant.now()) );
+		return new QueryExecutionStats(queryID, 0L, durationInMilliseconds(start, Instant.now()) );
 	}
 
 	@Override

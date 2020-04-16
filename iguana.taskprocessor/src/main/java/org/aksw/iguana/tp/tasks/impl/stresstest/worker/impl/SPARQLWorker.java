@@ -3,7 +3,6 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.model.QueryExecutionStats;
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.*;
@@ -87,8 +86,8 @@ public class SPARQLWorker extends HttpWorker {
 			this.responseType = p.getProperty(CONSTANTS.QUERY_RESPONSE_TYPE);
 	}
 
-	@Override
-	public QueryExecutionStats executeQuery(String query, String queryID) {
+//	@Override
+	private QueryExecutionStats executeQueryOld(String query, String queryID) {
 		Instant start = Instant.now();
 		final AtomicReference<String> res = new AtomicReference<String>("");
 
@@ -108,52 +107,149 @@ public class SPARQLWorker extends HttpWorker {
 				request.setHeader(HttpHeaders.ACCEPT, this.responseType);
 
 			request.setConfig(requestConfig);
-			try (CloseableHttpClient client = HttpClients.createDefault();
-				 CloseableHttpResponse response = client.execute(request);) {
-
+			CloseableHttpClient client = HttpClients.createDefault();
+			CloseableHttpResponse response = client.execute(request);
+//			try (CloseableHttpClient client = HttpClients.createDefault();
+//				 CloseableHttpResponse response = client.execute(request);) {
+			try {
 				HttpEntity entity = response.getEntity();
 				int responseCode = response.getStatusLine().getStatusCode();
 				if (responseCode != 200) {
-					return new QueryExecutionStats(COMMON.WRONG_RESPONSE_CODE_VALUE, durationInMilliseconds(start, Instant.now()));
-
+					return new QueryExecutionStats(queryID, COMMON.QUERY_HTTP_FAILURE, durationInMilliseconds(start, Instant.now()));
+//					return;
 				}
 				Header[] contentType = response.getHeaders("Content-Type");
 				String cType = getContentTypeVal(contentType[0]);
+
+//				this.processResult(queryID, start, entity, cType);
 
 				executeAndTerminate(entity, res, cType);
 
 				double duration = durationInMilliseconds(start, Instant.now());
 				if (this.timeOut < duration) {
-					return new QueryExecutionStats(0L, duration);
+					return new QueryExecutionStats(queryID, 0L, duration);
+//					return;
 				}
 				long size = 0L;
 				if (QUERY_RESULT_TYPE_JSON.equals(cType)) {
-					size = parseJson(res.get());
+					size = getJsonResultSize(res.get());
 				} else if (QUERY_RESULT_TYPE_XML.equals(cType)) {
 					size = getXmlResultSize(res.get());
 				} else {
 					size = StringUtils.countMatches(res.get(), "\n");
 				}
-				return new QueryExecutionStats(1L, duration, size);
+				return new QueryExecutionStats(queryID, 1L, duration, size);
+//				return;
 
 			} catch (java.net.SocketTimeoutException | ConnectTimeoutException e) {
 				System.out.println("Timeout occured for " + service + " - " + queryID);
 
-				return new QueryExecutionStats(COMMON.SOCKET_TIMEOUT_VALUE, durationInMilliseconds(start, Instant.now()));
-
+				return new QueryExecutionStats(queryID, COMMON.QUERY_SOCKET_TIMEOUT, durationInMilliseconds(start, Instant.now()));
+//				return;
 			} catch (Exception e) {
 				System.out.println("Query could not be exceuted: " + e);
-				return new QueryExecutionStats(COMMON.UNKNOWN_EXCEPTION_VALUE, durationInMilliseconds(start, Instant.now()));
+				return new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()));
+//				return;
+			} finally {
+				response.close();
+				client.close();
 			}
 
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
 					this.workerID, query, e);
+			return new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()));
 		}
-		return new QueryExecutionStats(COMMON.UNKNOWN_EXCEPTION_VALUE, durationInMilliseconds(start, Instant.now()));
 
 	}
 
+	@Override
+	public QueryExecutionStats executeQuery(String query, String queryID) {
+		Instant start = Instant.now();
+
+		try {
+			String qEncoded = URLEncoder.encode(query);
+			String addChar = "?";
+			if (service.contains("?")) {
+				addChar = "&";
+			}
+			String url = service + addChar + "query=" + qEncoded;
+			HttpGet request = new HttpGet(url);
+			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
+					.setConnectTimeout(timeOut.intValue()).build();
+
+			if(this.responseType != null)
+				request.setHeader(HttpHeaders.ACCEPT, this.responseType);
+
+			request.setConfig(requestConfig);
+			CloseableHttpClient client = HttpClients.createDefault();
+			CloseableHttpResponse response = client.execute(request);
+
+			return this.processResponse(queryID, start, client, response);
+
+		} catch (Exception e) {
+			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
+					this.workerID, query, e);
+			return new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()));
+		}
+
+	}
+
+
+	private QueryExecutionStats processResponse(String queryId, Instant startTime, CloseableHttpClient client, CloseableHttpResponse response) {
+
+		// check if query execution took longer than timeout
+		// TODO this is not necessary if result parsing is not considered in calculating duration. If so, can be removed.
+		double duration = durationInMilliseconds(startTime, Instant.now());
+		System.out.println("duration: " + duration);
+		if (this.timeOut < duration) {
+//			super.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, duration));
+			return new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, duration);
+		}
+
+		int responseCode = response.getStatusLine().getStatusCode();
+		if (responseCode != 200) {
+//			super.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
+			return new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration);
+		}
+
+		HttpEntity httpResponse = response.getEntity();
+		Header[] contentTypeHeaders = response.getHeaders("Content-Type");
+		String contentType = getContentTypeVal(contentTypeHeaders[0]);
+
+		System.out.println("STATS " + queryId + " : " + httpResponse.getContentLength());
+
+		try (InputStream inputStream = httpResponse.getContent();
+			 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+			StringBuilder result = new StringBuilder();
+			String line;
+			while ((line = br.readLine()) != null) {
+				result.append(line);
+			}
+			System.out.println("[DEBUG]: byte size: " + result.length());
+
+			long resultSize;
+			if (QUERY_RESULT_TYPE_JSON.equals(contentType)) {
+				resultSize = getJsonResultSize(result.toString());
+			} else if (QUERY_RESULT_TYPE_XML.equals(contentType)) {
+				resultSize = getXmlResultSize(result.toString());
+			} else {
+				resultSize = StringUtils.countMatches(result.toString(), "\n");
+			}
+
+			response.close();
+			client.close();
+
+			//			super.addResults(new QueryExecutionStats(queryId, 1L, duration, resultSize));
+			return new QueryExecutionStats(queryId, 1L, duration, resultSize);
+
+
+		} catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
+			System.out.println("Query results could not be parsed: " + e);
+//			super.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_UNKNOWN_EXCEPTION, duration));
+			return new QueryExecutionStats(queryId, COMMON.QUERY_UNKNOWN_EXCEPTION, duration);
+		}
+	}
 
 
 	private String getContentTypeVal(Header header) {
@@ -202,7 +298,7 @@ public class SPARQLWorker extends HttpWorker {
 		service2.awaitTermination((long) (double) this.timeOut + 100, TimeUnit.MILLISECONDS);
 	}
 
-	private long parseJson(String res) throws ParseException {
+	private long getJsonResultSize(String res) throws ParseException {
 		JSONParser parser = new JSONParser();
 		JSONObject json = (JSONObject) parser.parse(res.toString().trim());
 		long size = ((JSONArray) ((JSONObject) json.get("results")).get("bindings")).size();
