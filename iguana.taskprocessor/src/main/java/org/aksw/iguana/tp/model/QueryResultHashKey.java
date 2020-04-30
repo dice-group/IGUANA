@@ -41,4 +41,12 @@ public class QueryResultHashKey {
     public int hashCode() {
         return Objects.hash(queryId, uniqueKey);
     }
+
+    @Override
+    public String toString() {
+        return "QueryResultHashKey{" +
+                "queryId='" + queryId + '\'' +
+                ", uniqueKey=" + uniqueKey +
+                '}';
+    }
 }

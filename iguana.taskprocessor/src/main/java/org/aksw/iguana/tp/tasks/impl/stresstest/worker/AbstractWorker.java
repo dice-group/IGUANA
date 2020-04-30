@@ -214,38 +214,20 @@ public abstract class AbstractWorker implements Worker {
 			}
 			// Simulate Network Delay (or whatever should be simulated)
 			waitTimeMs();
+
 			// benchmark query
-			double time = 0D;
-			QueryExecutionStats executionStats = new QueryExecutionStats();
 			try {
-//				executeQuery(query.toString(), queryID.toString());
-				executionStats = executeQuery(query.toString(), queryID.toString());
-				time = executionStats.getExecutionTime();
+				executeQuery(query.toString(), queryID.toString());
 			} catch (Exception e) {
 				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
 						query.toString());
-				time = -1D;
 			}
 			this.executedQueries++;
-			// If endSignal was send during execution it should not be counted anymore.
-			if (!this.endSignal) {
-				// create Properties store it in List
-				Properties result = new Properties();
-				result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-				result.put(COMMON.RECEIVE_DATA_TIME, time);
-				result.put(COMMON.RECEIVE_DATA_SUCCESS, executionStats.getResponseCode());
-				result.put(COMMON.RECEIVE_DATA_SIZE, executionStats.getResultSize());
-				result.put(COMMON.QUERY_HASH, queryHash);
-				result.setProperty(COMMON.QUERY_ID_KEY, queryID.toString());
-				// Add extra Meta Key, worker ID and worker Type
-				result.put(COMMON.EXTRA_META_KEY, this.extra);
-				setResults(result);
-			}
 		}
 		LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
 	}
 
-	protected synchronized void addResults(QueryExecutionStats results)
+	public synchronized void addResults(QueryExecutionStats results)
 	{
 		if (!this.endSignal) {
 			// create Properties store it in List

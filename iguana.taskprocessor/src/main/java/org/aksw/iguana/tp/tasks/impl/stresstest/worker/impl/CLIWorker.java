@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
 
+import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.utils.FileUtils;
 
@@ -43,7 +44,7 @@ public class CLIWorker extends CLIBasedWorker {
 	}
 
 	@Override
-	public QueryExecutionStats executeQuery(String query, String queryID) {
+	public void executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		// use cli as service
 		String q = "";
@@ -91,14 +92,16 @@ public class CLIWorker extends CLIBasedWorker {
 				System.out.println("[DEBUG] Query successfully executed size: " + size);
 			} else {
 				System.out.println("Exit Value: " + exitVal);
-				return new QueryExecutionStats(queryID, 0L, durationInMilliseconds(start, Instant.now()) );
+				super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
+				return;
 			}
-			return new QueryExecutionStats(queryID, 1L, durationInMilliseconds(start, Instant.now()), size );
+			super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_SUCCESS, durationInMilliseconds(start, Instant.now()), size ));
+			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new QueryExecutionStats(queryID, 0L, durationInMilliseconds(start, Instant.now()) );
+		super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
+import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.utils.FileUtils;
@@ -112,7 +113,7 @@ public class CLIInputWorker extends CLIBasedWorker {
 	}
 
 	@Override
-	public QueryExecutionStats executeQuery(String query, String queryID) {
+	public void executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		// execute queryCLI and read response
 		try {
@@ -138,9 +139,11 @@ public class CLIInputWorker extends CLIBasedWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new QueryExecutionStats (queryID, 0L, durationInMilliseconds(start, Instant.now()) );
+					super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
+					return;
 				} else {
-					return new QueryExecutionStats (queryID, 0L, durationInMilliseconds(start, Instant.now()) );
+					super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
+					return;
 				}
 			} finally {
 				executor.shutdown();
@@ -150,17 +153,20 @@ public class CLIInputWorker extends CLIBasedWorker {
 			double duration = durationInMilliseconds(start, Instant.now());
 
 			if (duration >= timeOut) {
-				return new QueryExecutionStats (queryID, -1L, duration );
+				super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_SOCKET_TIMEOUT, duration ));
+				return;
 			} else if (failed.get()) {
-				return new QueryExecutionStats (queryID, 0L, duration );
+				super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, duration ));
+				return;
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
-			return new QueryExecutionStats (queryID, 1L, duration, size.get() );
+			super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_SUCCESS, duration, size.get() ));
+			return;
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new QueryExecutionStats (queryID, 0L, durationInMilliseconds(start, Instant.now()) );
+		super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 	}
 
 
