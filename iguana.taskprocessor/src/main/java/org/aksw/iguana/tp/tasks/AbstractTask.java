@@ -11,6 +11,15 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
 import org.aksw.iguana.commons.sender.ISender;
 import org.aksw.iguana.commons.sender.impl.DefaultSender;
+import org.aksw.iguana.rp.controller.MainController;
+import org.aksw.iguana.rp.experiment.ExperimentManager;
+import org.aksw.iguana.rp.metrics.Metric;
+import org.aksw.iguana.rp.metrics.MetricManager;
+import org.aksw.iguana.rp.metrics.impl.NoQPHMetric;
+import org.aksw.iguana.rp.metrics.impl.QMPHMetric;
+import org.aksw.iguana.rp.metrics.impl.QPSMetric;
+import org.aksw.iguana.rp.storage.StorageManager;
+import org.aksw.iguana.rp.storage.impl.NTFileStorage;
 
 /**
  * Will implement the sender object to send the results to and the conversion
@@ -21,7 +30,9 @@ import org.aksw.iguana.commons.sender.impl.DefaultSender;
  */
 public abstract class AbstractTask implements Task {
 
-	private ISender sender;
+	private StorageManager smanager = new StorageManager();
+	private MetricManager mmanager = new MetricManager();
+	private ExperimentManager rpControl;
 	protected String taskID;
 	protected String service;
 	protected String updateService;
@@ -50,7 +61,14 @@ public abstract class AbstractTask implements Task {
 		this.user = services[2];
 		this.user = services[3];
 		setIDs(ids);
-		
+		smanager.addStorage(new NTFileStorage("results_task_"+taskID.replace("/", "-")+".nt"));
+		mmanager.addMetric(new QPSMetric());
+		mmanager.addMetric(new QMPHMetric());
+		mmanager.addMetric(new NoQPHMetric());
+		for(Metric m : mmanager.getMetrics()) {
+			m.setStorageManager(smanager);
+		}
+		rpControl = new ExperimentManager(mmanager, smanager);
 	}
 	
 	@Override
@@ -68,24 +86,20 @@ public abstract class AbstractTask implements Task {
 	 * @see org.aksw.iguana.tp.tasks.Task#init()
 	 */
 	@Override
-	public void init(String host, String queueName) throws IOException, TimeoutException {
-		// initialize everything needed to send results to RP
-		ISender sender = new DefaultSender();
-		this.sender = sender;
-		this.sender.init(host, queueName);
-	}
+	public void init(String host, String queueName) throws IOException, TimeoutException { }
 
 	@Override
 	public void start() {
 		System.out.println("will start task");
 		// send to ResultProcessor
-		this.sender.send(RabbitMQUtils.getData(metaData));
+		rpControl.receiveData(metaData);
+
 	}
 
 	@Override
 	public void sendResults(Properties data) throws IOException {
 		data.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-		this.sender.send(RabbitMQUtils.getData(data));
+		rpControl.receiveData(data);
 	}
 
 	@Override
@@ -96,7 +110,7 @@ public abstract class AbstractTask implements Task {
 		// set end flag
 		end.put(COMMON.RECEIVE_DATA_END_KEY, true);
 		// send to ResultProcessor
-		this.sender.send(RabbitMQUtils.getData(end));
+		rpControl.receiveData(end);
 	}
 
 	@Override

@@ -2,11 +2,13 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Properties;
+
+import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateComparator;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateStrategy;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update.UpdateTimer;
@@ -27,6 +29,8 @@ import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
+
 /**
  * 
  * A Worker using SPARQL Updates to create service request.
@@ -34,7 +38,7 @@ import org.apache.jena.update.UpdateRequest;
  * @author f.conrads
  *
  */
-public class UPDATEWorker extends AbstractWorker {
+public class UPDATEWorker extends HttpWorker {
 
 	private int currentQueryID = 0;
 	private UpdateStrategy updateStrategy;
@@ -47,8 +51,6 @@ public class UPDATEWorker extends AbstractWorker {
 	 * 
 	 */
 	public UPDATEWorker(String[] args) {
-		// super(taskID, workerID, "UPDATE", timeLimitMS, updateFolder, fixedLatency,
-		// gaussianLatency);
 		super(args, "UPDATE");
 
 		// set default updateStrategy to none
@@ -65,7 +67,6 @@ public class UPDATEWorker extends AbstractWorker {
 	 * 
 	 */
 	public UPDATEWorker() {
-		// bla
 		super("UPDATEWorker");
 	}
 
@@ -88,7 +89,7 @@ public class UPDATEWorker extends AbstractWorker {
 		// At first call init from AbstractWorker!
 		super.init(p);
 		this.service = p.getProperty(CONSTANTS.SPARQL_CURRENT_ENDPOINT);
-		this.timeOut = (long) p.getOrDefault(CONSTANTS.SPARQL_TIMEOUT, 180000);
+		this.timeOut = (double)p.getOrDefault(CONSTANTS.SPARQL_TIMEOUT, 180000D);
 		String timerStrategy = p.getProperty(CONSTANTS.STRESSTEST_UPDATE_TIMERSTRATEGY);
 		// use updateStrategy if set, otherwise use default: none
 		this.updateStrategy = UpdateStrategy
@@ -99,11 +100,10 @@ public class UPDATEWorker extends AbstractWorker {
 
 	@Override
 	public void waitTimeMs() {
-		long currentTime = Calendar.getInstance().getTimeInMillis();
-		long wait = this.updateTimer.calculateTime(currentTime - this.startTime, this.executedQueries);
+		double wait = this.updateTimer.calculateTime(durationInMilliseconds(startTime, Instant.now()), this.executedQueries);
 		LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
 		try {
-			Thread.sleep(wait);
+			Thread.sleep((long)wait);
 		} catch (InterruptedException e) {
 			LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType,
 					workerID, e);
@@ -113,7 +113,7 @@ public class UPDATEWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Long[] getTimeForQueryMs(String query, String queryID) {
+	public void executeQuery(String query, String queryID) {
 		UpdateRequest update = UpdateFactory.create(query);
 
 		// Set update timeout
@@ -124,23 +124,24 @@ public class UPDATEWorker extends AbstractWorker {
 		// create Update Processor and use timeout config
 		UpdateProcessor exec = UpdateExecutionFactory.createRemote(update, service, client);
 		setCredentials(exec);
-			long start = System.currentTimeMillis();
+		Instant start = Instant.now();
 
 		try {
 			// Execute Update
 			exec.execute();
-			long end = System.currentTimeMillis();
+			double duration = durationInMilliseconds(start, Instant.now());
 			LOGGER.debug("Worker[{{}} : {{}}]: Update with ID {{}} took {{}}.", this.workerType, this.workerID, queryID,
-					end - start);
+					duration);
 			// Return time
-			return new Long[]{1L, end - start};
+			super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_SUCCESS, duration));
+			return;
 		} catch (Exception e) {
 			LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following update\n{{}}\n due to", this.workerType,
 					this.workerID, query, e);
 		}
 		// Exception was thrown, return error
 		//return -1L;
-		return new Long[]{0L, System.currentTimeMillis()-start};
+		super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now())));
 	}
 
 	private void setCredentials(UpdateProcessor exec) {
@@ -205,7 +206,7 @@ public class UPDATEWorker extends AbstractWorker {
 			break;
 		case DISTRIBUTED:
 			if (timeLimit != null) {
-				this.updateTimer = new UpdateTimer(this.queryFileList.length, this.timeLimit);
+				this.updateTimer = new UpdateTimer(this.queryFileList.length, (double) this.timeLimit);
 			} else {
 				LOGGER.warn("Worker[{{}} : {{}}]: DISTRIBUTED Updates can only be used with timeLimit!", workerType,
 						workerID);

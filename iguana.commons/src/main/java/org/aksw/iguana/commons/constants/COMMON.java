@@ -146,14 +146,21 @@ public class COMMON {
 
 	public static final String SIMPLE_TRIPLE_KEY = "cleanTripleText";
 
+	public static final String QUERY_STATS = "queryStats";
+
 	public static final Object RECEIVE_DATA_SIZE = "resultSize";
 
-	public static final Long UNKNOWN_EXCEPTION_VALUE = 0L;
-
-	public static final Long SOCKET_TIMEOUT_VALUE = -1L;
-
-	public static final Long WRONG_RESPONSE_CODE_VALUE = -2L;
-
 	public static final String QUERY_HASH = "queryHash";
-	
+
+	public static final String WORKER_ID = "workerID";
+
+	/* Various status codes to denote the status of query execution and to prepare QueryExecutionStats object */
+	public static final Long QUERY_UNKNOWN_EXCEPTION = 0L;
+
+	public static final Long QUERY_SUCCESS = 1L;
+
+	public static final Long QUERY_SOCKET_TIMEOUT = -1L;
+
+	public static final Long QUERY_HTTP_FAILURE = -2L;
+
 }

@@ -3,21 +3,9 @@
  */
 package org.aksw.iguana.tp.tasks.impl.stresstest;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.numbers.NumberUtils;
+import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.query.QueryHandler;
 import org.aksw.iguana.tp.query.QueryHandlerFactory;
 import org.aksw.iguana.tp.query.impl.InstancesQueryHandler;
@@ -29,8 +17,25 @@ import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.SPARQLWorker;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.UPDATEWorker;
 import org.aksw.iguana.tp.utils.ConfigUtils;
 import org.apache.commons.configuration.Configuration;
+import org.apache.jena.ext.com.google.common.collect.ImmutableList;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
 /**
  * Controller for the Stresstest. <br/>
@@ -50,21 +55,21 @@ public class Stresstest extends AbstractTask {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Stresstest.class);
 	
-	private Long timeLimit;
+	private Double timeLimit;
 	private Long noOfQueryMixes;
 	private List<Worker> workers = new LinkedList<Worker>();
-	private long startTime;
+	private Instant startTime;
 	private String qhClassName;
 	private String[] qhConstructorArgs;
-	private Long noOfWorkers=0l;
+	private Long noOfWorkers= 0L;
 
-	private Long warmupTimeMS;
+	private Double warmupTimeMS;
 	private String warmupQueries;
 	private String warmupUpdates;
 
 
 	protected String baseUri = "http://iguana-benchmark.eu";
-	private String iguanaResource = baseUri + "/recource/";
+	private String iguanaResource = baseUri + "/resource/";
 	private String iguanaProperty = baseUri + "/properties/";
 
 	private PrintWriter debugWriter;
@@ -72,10 +77,8 @@ public class Stresstest extends AbstractTask {
 
 	/**
 	 * @param ids
-	 * @param taskID
 	 * @param services
-	 * @param taskConfig
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 */
 	public Stresstest(String[] ids, String[] services) throws FileNotFoundException {
 		
@@ -85,60 +88,76 @@ public class Stresstest extends AbstractTask {
 	
 	@Override
 	public void setConfiguration(Configuration taskConfig) {
-		this.timeLimit = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "timeLimit"));
-		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "noOfQueryMixes"));		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, "queryHandler");
+		this.timeLimit = NumberUtils.getDouble(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.TIME_LIMIT));
+		this.noOfQueryMixes = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.NO_OF_QUERY_MIXES));
+		String[] tmp = ConfigUtils.getStringArrayWithSuffix(taskConfig, CONSTANTS.QUERY_HANDLER);
 		this.qhClassName = tmp[0];
 		this.qhConstructorArgs = Arrays.copyOfRange(tmp, 1, tmp.length);
 
-		this.warmupTimeMS = NumberUtils.getLong(ConfigUtils.getObjectWithSuffix(taskConfig, "warmupTime"));
-		this.warmupQueries = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupQueries");
-		this.warmupUpdates = ConfigUtils.getObjectWithSuffix(taskConfig, "warmupUpdates");
+		this.warmupTimeMS = NumberUtils.getDouble(ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_TIME));
+		this.warmupQueries = ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_QUERY_FILE);
+		this.warmupUpdates = ConfigUtils.getObjectWithSuffix(taskConfig, CONSTANTS.WARMUP_UPDATES);
 		
 		WorkerFactory factory = new WorkerFactory();
-		Integer workerID = 0;
+		int workerID = 0;
 		// create Workers
-		String[] workerConfigs = ConfigUtils.getStringArrayWithSuffix(taskConfig, "workers");
-		
+		String[] workerConfigs = ConfigUtils.getStringArrayWithSuffix(taskConfig, CONSTANTS.WORKER_CONFIG_KEYS);
+
+		// Property based init start
 		for (String configKey : workerConfigs) {
-			String[] workerConfig = taskConfig.getStringArray(configKey);
-			int workers = Integer.parseInt(workerConfig[0]);
+			Properties configProp = new Properties();
+
+			// Copy all data from worker config
+			List<String> workerConfigKeys = ImmutableList.copyOf(taskConfig.getKeys(configKey));
+			for(String workerConfigEntry : workerConfigKeys)
+			{
+				String cleanedKey = this.getActualKeyComponent(workerConfigEntry);
+				configProp.put(cleanedKey, taskConfig.getString(workerConfigEntry));
+			}
+
+			int workers = Integer.parseInt(configProp.getProperty(CONSTANTS.WORKER_SIZE));
+			String workerClass = configProp.getProperty(CONSTANTS.WORKER_CLASS);
 			noOfWorkers+=workers;
+
+			// Add some more common information
 			for (int j = 0; j < workers; j++) {
 				// set taskID, workerID, workerConfig
-				String[] config = new String[4 + workerConfig.length];
-				config[0] = taskID;
-				config[1] = workerID.toString();
+				configProp.put(COMMON.EXPERIMENT_TASK_ID_KEY, taskID);
+				configProp.put(CONSTANTS.WORKER_ID_KEY, Integer.toString(workerID));
 				workerID++;
 
-				// sets null if timelimit is not defined otherwise the string repr. of the
-				// timelimit
-				config[2] = timeLimit == null ? null : timeLimit.toString();
-				if(workerConfig[1].equals(UPDATEWorker.class.getCanonicalName())) {
-					config[3] = updateService;
+				if(timeLimit != null)
+					configProp.put(CONSTANTS.TIME_LIMIT, timeLimit.toString());
+
+				if(UPDATEWorker.class.getCanonicalName().equals(workerClass)) {
+					configProp.put(CONSTANTS.SERVICE_ENDPOINT, updateService);
+				} else {
+					configProp.put(CONSTANTS.SERVICE_ENDPOINT, service);
 				}
-				else {
-					config[3] = service;
-					
-				}
-				config[4] = user;
-				config[5] = password;
-				
-				for (int i = 2; i < workerConfig.length; i++) {
-					if(workerConfig[i]==null) {
-						config[i+4] = null;
-					}
-					else {
-						config[i + 4] = workerConfig[i];
-					}
-				}
-				Worker worker = factory.create(workerConfig[1], new String[] {});
-				worker.init(config);
+
+				if(user != null)
+					configProp.put(CONSTANTS.USERNAME, user);
+				if(password != null)
+					configProp.put(CONSTANTS.PASSWORD, password);
+
+				Worker worker = factory.create(workerClass, new String[] {});
+				worker.init(configProp);
 				this.workers.add(worker);
 			}
 		}
+		// Property based init end
+
 		addMetaData();
 	}
-	
+
+	private String getActualKeyComponent(String workerConfigEntry) {
+		int lastIndexOfDot = workerConfigEntry.lastIndexOf(".");
+		if(lastIndexOfDot == -1)
+			return workerConfigEntry;
+		else {
+			return workerConfigEntry.substring(lastIndexOfDot+1); //TODO validation
+		}
+	}
 
 	/**
 	 * Add extra Meta Data
@@ -149,9 +168,9 @@ public class Stresstest extends AbstractTask {
 		// TODO Future: add queries and update meta data
 		Properties extraMeta = new Properties();
 		if(timeLimit!=null)
-			extraMeta.put("timeLimit", timeLimit);
+			extraMeta.put(CONSTANTS.TIME_LIMIT, timeLimit);
 		if(noOfQueryMixes!=null)
-			extraMeta.put("noOfQueryMixes", noOfQueryMixes);
+			extraMeta.put(CONSTANTS.NO_OF_QUERY_MIXES, noOfQueryMixes);
 		extraMeta.put("noOfWorkers", noOfWorkers);
 		this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
 	}
@@ -165,8 +184,13 @@ public class Stresstest extends AbstractTask {
 		// add Worker
 		QueryHandler queryHandler = factory.createWorkerBasedQueryHandler(qhClassName, qhConstructorArgs, workers);
 		queryHandler.generateQueries();
-		String queryStatsTriples = queryHandler.generateTripleStats(taskID, iguanaResource, iguanaProperty);
-		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, queryStatsTriples);
+
+        Model tripleStats = queryHandler.generateTripleStats(taskID, iguanaResource, iguanaProperty);
+		StringWriter sw = new StringWriter();
+		RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
+		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, sw.toString());
+		this.metaData.put(COMMON.QUERY_STATS, tripleStats);
+
 
 	}
 
@@ -180,13 +204,16 @@ public class Stresstest extends AbstractTask {
 		warmup();
 		LOGGER.info("Task with ID {{}} will be executed now", this.taskID);
 		// Execute each Worker in ThreadPool
+		System.out.println("[DEBUG] workers: "+noOfWorkers);
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkers.intValue());
-		this.startTime = Calendar.getInstance().getTimeInMillis();
+		this.startTime = Instant.now();
+		System.out.println("[DEBUG] workers real: "+workers.size());
 		for (Worker worker : workers) {
-			executor.submit(worker);
+			executor.execute(worker);
 		}
 		LOGGER.info("[TaskID: {{}}]All {{}} workers have been started", taskID, noOfWorkers);
 		// wait timeLimit or noOfQueries
+		executor.shutdown();
 		while (!isFinished()) {
 			// check if worker has results yet
 			for (Worker worker : workers) {
@@ -219,7 +246,6 @@ public class Stresstest extends AbstractTask {
 			debugWriter.flush();
 
 			LOGGER.info("[TaskID: {{}}] Will shutdown and await termination in 5s.", taskID);
-			executor.shutdown();
 			executor.awaitTermination(5, TimeUnit.SECONDS);
 			LOGGER.info("[TaskID: {{}}] Task completed.");
 		} catch (InterruptedException e) {
@@ -275,7 +301,6 @@ public class Stresstest extends AbstractTask {
 				System.out.print(u+" ");
 			}
 			System.out.println();
-//			System.out.println("UpdateConfig: "+List.of(updateConfig));
 			UPDATEWorker update = new UPDATEWorker(updateConfig);
 			warmupWorkers.add(update);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);
@@ -289,9 +314,9 @@ public class Stresstest extends AbstractTask {
 			exec.submit(worker);
 		}
 		//wait as long as needed
-		long start = Calendar.getInstance().getTimeInMillis();
+		Instant start = Instant.now();
 		exec.shutdown();
-		while((Calendar.getInstance().getTimeInMillis()-start) <= warmupTimeMS) {
+		while(durationInMilliseconds(start, Instant.now()) <= warmupTimeMS) {
 			//clean up RAM
 			for(Worker worker: warmupWorkers) {
 				worker.popQueryResults();
@@ -331,18 +356,14 @@ public class Stresstest extends AbstractTask {
 	protected boolean isFinished() {
 		if (timeLimit !=null) {
 			try {
-				TimeUnit.MILLISECONDS.sleep(100);
+				TimeUnit.MILLISECONDS.sleep(10);
+				
 			}catch(Exception e) {
 				LOGGER.error("Could not warmup ");
 			}
-			long current = Calendar.getInstance().getTimeInMillis();
-			System.out.println(current +"  :  "+this.startTime+" : "+(current - this.startTime)+" : "+(timeLimit - (Calendar.getInstance().getTimeInMillis() - this.startTime)));
-			if(timeLimit - (current - this.startTime) <= 0L) {
-				debugWriter.println("time is over. finished="+(timeLimit - (current - this.startTime) <= 0L));
-				debugWriter.flush();
-
-			}
-			return timeLimit - (current - this.startTime) <= 0L;
+			Instant current = Instant.now();
+			double passed_time = timeLimit - durationInMilliseconds(this.startTime, current);
+			return passed_time <= 0D;
 		}
 		else if (noOfQueryMixes != null) {
 			// use noOfQueries of SPARQLWorkers (as soon as a worker hit the noOfQueries, it

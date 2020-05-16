@@ -14,14 +14,14 @@ public interface Worker extends Runnable{
 
 	
 	/**
-	 * This should return the time in ms the query took to be executed and checked for results
-	 * If an error occured -1 should be returned
-	 * 
-	 * @param query The query which should be executed
+	 * This method executes a query and adds the results to the Result Processor for proper result and metric calculations.
+	 * Note: Some of the Worker implementations employ background threads to process the result of the query.
+	 * Due to this, this method does not return anything and each implementation of this method must also add the
+	 * results to Result Processor within this method. This can be done by calling AbstractWorker.addResults(QueryExecutionStats)
+	 *  @param query The query which should be executed
 	 * @param queryID the ID of the query which should be executed
-	 * @return the time/ms the query took to executed, -1 if error happend
 	 */
-	public Long[] getTimeForQueryMs(String query, String queryID);
+	public void executeQuery(String query, String queryID);
 	
 	/**
 	 * This method saves the next query in the queryStr StringBuilder and

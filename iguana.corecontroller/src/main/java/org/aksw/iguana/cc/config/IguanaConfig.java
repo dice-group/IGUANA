@@ -1,24 +1,19 @@
 package org.aksw.iguana.cc.config;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-
 import org.aksw.iguana.cc.constants.CONSTANTS;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.script.ScriptExecutor;
-import org.aksw.iguana.dg.controller.DataGeneratorController;
 import org.aksw.iguana.tp.controller.TaskController;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.exec.ExecuteException;
+
+import java.io.IOException;
+import java.time.Instant;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Gets the {@link org.apache.commons.configuration.Configuration} component and will generate
@@ -60,8 +55,9 @@ public class IguanaConfig {
 	 * @throws ExecuteException 
 	 */
 	public void start() throws ExecuteException, IOException {
+		System.out.println("Starting config");
 		TaskController controller = new TaskController();
-		DataGeneratorController dataController = new DataGeneratorController();
+		//DataGeneratorController dataController = new DataGeneratorController();
 		//get SuiteID
 		String suiteID = generateSuiteID();
 		//generate ExpID
@@ -72,21 +68,19 @@ public class IguanaConfig {
 		String[] connectionsIDV = config.getStringArray(COMMON.CONFIG_CONNECTIONS);
 		//get all tasks to use
 		String[] tasksIDV = config.getStringArray(COMMON.CONFIG_TASKS);
-		
+		System.out.println("Starting config");
+		System.out.println(config.getList(COMMON.CONFIG_DATASETS));
+		System.out.println(config.getList(COMMON.CONFIG_CONNECTIONS));
+		System.out.println(config.getList(COMMON.CONFIG_TASKS));
+
 		//for each dataset
 		for(String datasetIDV : datasetsIDV) {
+			System.out.println("Starting "+datasetIDV);
+
 			String datasetID=config.getString(datasetIDV+CONSTANTS.NAME_SUFFIX);
-			String dataGenClass = config.getString(datasetIDV+CONSTANTS.DATA_GENERATOR_CLASS_NAME);
-			String[] dataGenConstructorArgs = config.getStringArray(datasetIDV+CONSTANTS.CONSTRUCTOR_ARGS);
 			expID++;
-			Properties dataProperties = new Properties();
-			if(dataGenClass!=null) {
-				dataProperties.put(COMMON.DATAGEN_CLASS_NAME, dataGenClass);
-				if(dataGenConstructorArgs!=null)
-					dataProperties.put(COMMON.DATAGEN_CONSTRUCTOR_ARGS, dataGenConstructorArgs);
-				// start DG
-				dataController.start(dataProperties);
-			}
+			System.out.println("Starting config");
+
 			Integer taskID = 0;
 			for(String conIDV : connectionsIDV) {
 				//get connection name/ID
@@ -101,6 +95,8 @@ public class IguanaConfig {
 					user=config.getString(conIDV+CONSTANTS.SERVICE_USER);
 					pwd=config.getString(conIDV+CONSTANTS.SERVICE_PASSWORD);
 				}
+				System.out.println("Starting config");
+
 				for(String taskIDV : tasksIDV) {
 					taskID++;
 					Properties taskProperties = new Properties();
@@ -122,6 +118,7 @@ public class IguanaConfig {
 					String[] args = new String[] {datasetID, conID, taskID+""};
 					if(config.containsKey(CONSTANTS.PRE_SCRIPT_HOOK))
 						ScriptExecutor.exec(config.getString(CONSTANTS.PRE_SCRIPT_HOOK), args);
+					System.out.println("Starting tasks");
 					controller.startTask(taskProperties);
 					if(config.containsKey(CONSTANTS.POST_SCRIPT_HOOK))
 						ScriptExecutor.exec(config.getString(CONSTANTS.POST_SCRIPT_HOOK), args);
@@ -145,38 +142,14 @@ public class IguanaConfig {
 			String key2 = keys2.next();
 			target.addProperty(key2, source.getProperty(key2));
 			for(String tmpKey : source.getStringArray(key2)) {
-				if(source.containsKey(tmpKey)) {
-					addRecursive(target, source, tmpKey);
-				}
+				addRecursive(target, source, tmpKey);
 			}
 		}
 	}
 	
 	private String generateSuiteID() {
-		File suiteIDFile = new File("suite.id");
-		String id="0";
-		try {
-			suiteIDFile.createNewFile();
-		} catch (IOException e1) {
-			return null;
-		}
-		try(BufferedReader reader = new BufferedReader(new FileReader(suiteIDFile))){
-			if((id=reader.readLine())==null) {
-				id="0";
-			}
-		} catch (IOException e) {
-			return null;
-		}
-		try(PrintWriter pw = new PrintWriter(suiteIDFile)){
-			Integer idInt = Integer.parseInt(id);
-			idInt++;
-			id = idInt.toString();
-			pw.println(id);
-		} catch (FileNotFoundException e) {
-			return null;
-		}
-		return id;
-		
+		int currentTimeMillisHashCode = Math.abs(Long.valueOf(Instant.now().getEpochSecond()).hashCode());
+		return String.valueOf(currentTimeMillisHashCode);
 	}
 	
 }

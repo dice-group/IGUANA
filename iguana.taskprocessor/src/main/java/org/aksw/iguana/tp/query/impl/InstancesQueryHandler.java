@@ -1,22 +1,22 @@
 package org.aksw.iguana.tp.query.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.aksw.iguana.tp.query.AbstractWorkerQueryHandler;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.Worker;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.aksw.iguana.tp.utils.QueryStatistics;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 
@@ -37,6 +37,8 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 
 	private File[] queryFiles;
 
+	private int hashcode;
+
 	/**
 	 * Default Constructor
 	 * 
@@ -50,6 +52,10 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	protected File[] generateSPARQL(String queryFileName) {
 		File[] queries = generateQueryPerLine(queryFileName, "sparql");
 		this.queryFiles = queries;
+
+		// Save hashcode of the file content for later use in generating stats
+		hashcode = FileUtils.getHashcodeFromFileContent(queryFileName);
+
 		return queries;
 	}
 
@@ -58,7 +64,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		List<File> ret = new LinkedList<File>();
 		// check if folder is cached
 		if (queryFile.exists()) {
-			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode());
+			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode()); 
 			if (outputFolder.exists()) {
 				LOGGER.info(
 						"[QueryHandler: {{}}] queries were instantiated already, will use old instances. To generate them new remove the {{}} folder",
@@ -134,12 +140,11 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	}
 
 	@Override
-	public String generateTripleStats(String taskID, String resource, String property) {
-		StringBuilder builder = new StringBuilder();
+	public Model generateTripleStats(String taskID, String resource, String property) {
 		QueryStatistics qs = new QueryStatistics();
 		String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
-		String xsdUri = "http://www.w3.org/2001/XMLSchema#";
-		
+		Model model = ModelFactory.createDefaultModel();
+
 		for (File queryFile : queryFiles) {
 			try {
 				String query = FileUtils.readLineAt(0, queryFile);
@@ -147,35 +152,27 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 				qs.getStatistics(q);
 				QueryStatistics qs2 = new QueryStatistics();
 				qs2.getStatistics(q);
-				//builder.append("<").append(taskID).append("> ").append(property).append("querySet> <").append(resource + queryFile.getName()).append("> . \n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("aggregations> \"").append(qs2.aggr).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("filter> \"").append(qs2.filter).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("groupBy> \"").append(qs2.groupBy).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource  +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("having> \"").append(qs2.having).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource  +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("triples> \"").append(qs2.triples).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("offset> \"").append(qs2.offset).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("optional> \"").append(qs2.optional).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("orderBy> \"").append(qs2.orderBy).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(property)
-						.append("union> \"").append(qs2.union).append("\"^^<").append(xsdUri).append("int> . \n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(rdfs)
-						.append("label> \"").append(query.replace("\"","\\\"")).append("\" .\n");
-				builder.append("<").append(resource +query.hashCode() +"/" + queryFile.getName()).append("> <").append(rdfs).append("ID> \"")
-						.append(queryFile.getName().replace("sparql", "")).append("\" .\n");
-				//TODO query complexity
-			} catch (Exception e) {
+
+				String subject = resource + hashcode + "/" + queryFile.getName();
+
+				model.add(model.createResource(subject), ResourceFactory.createProperty(rdfs + "ID"), queryFile.getName().replace("sparql", ""));
+				model.add(model.createResource(subject), RDFS.label, query);
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "aggregations"), model.createTypedLiteral(qs2.aggr));
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "filter"), model.createTypedLiteral(qs2.filter));
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "groupBy"), model.createTypedLiteral(qs2.groupBy));
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "having"), model.createTypedLiteral(qs2.having));
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "triples"), model.createTypedLiteral(qs2.triples));
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "offset"), model.createTypedLiteral(qs2.offset));
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "optional"), model.createTypedLiteral(qs2.optional));
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "orderBy"), model.createTypedLiteral(qs2.orderBy));
+				model.add(model.createResource(subject), ResourceFactory.createProperty(property + "union"), model.createTypedLiteral(qs2.union));
+
+			} catch (IOException e) {
+				LOGGER.error("[QueryHandler: {{}}] Cannot read file {{}}", this.getClass().getName(),
+						queryFile.getName());
 			}
 		}
-		// TODO add overall stats
-		return builder.toString();
+		return model;
 	}
 
 }

@@ -10,8 +10,8 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.update;
 public class UpdateTimer {
 	
 	private Strategy strategy;
-	private long baseValue;
-	private Long timeLimit;
+	private double baseValue;
+	private Double timeLimit;
 	
 	
 	/**
@@ -56,7 +56,7 @@ public class UpdateTimer {
 	 * 
 	 * @param fixedValue the fixed time to wait between queries
 	 */
-	public UpdateTimer(long fixedValue) {
+	public UpdateTimer(double fixedValue) {
 		this.strategy=Strategy.FIXED;
 		this.baseValue=fixedValue;
 	}
@@ -67,7 +67,7 @@ public class UpdateTimer {
 	 * @param noOfUpdates the number of update queries
 	 * @param timeLimit the timeLimit of the task
 	 */
-	public UpdateTimer(int noOfUpdates, Long timeLimit) {
+	public UpdateTimer(int noOfUpdates, Double timeLimit) {
 		this.strategy=Strategy.DISTRIBUTED;
 		this.baseValue=noOfUpdates;
 		this.timeLimit = timeLimit;
@@ -81,7 +81,7 @@ public class UpdateTimer {
 	 * @param executedQueries currently number of executed Update Queries
 	 * @return  The time to wait
 	 */
-	public long calculateTime(long timeExceeded, long executedQueries) {
+	public double calculateTime(double timeExceeded, long executedQueries) {
 		switch(strategy) {
 		case FIXED:
 			return baseValue;

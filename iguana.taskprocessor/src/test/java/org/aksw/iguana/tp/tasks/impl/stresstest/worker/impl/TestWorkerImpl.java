@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
 
 /**
@@ -41,11 +42,12 @@ public class TestWorkerImpl extends AbstractWorker{
 	}
 
 	@Override
-	public Long[] getTimeForQueryMs(String query, String queryID) {
+	public void executeQuery(String query, String queryID) {
 		if(this.workerID==5) {
-			return new Long[] {-1L};
+			super.addResults(new QueryExecutionStats(queryID, -1L, 0D));
+			return;
 		}
-		return  new Long[] {1L};
+		super.addResults(new QueryExecutionStats(queryID, 1L, 0D));
 	}
 
 	@Override

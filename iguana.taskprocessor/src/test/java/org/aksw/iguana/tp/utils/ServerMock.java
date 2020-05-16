@@ -19,13 +19,7 @@ import org.slf4j.LoggerFactory;
 public class ServerMock implements Container  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerMock.class);
-//	private String expectesdContent;
-	
-    
-    
-//	public ServerMock(String expectedContent) {
-//		this.expectedContent = expectedContent;
-//	}
+
 
 	@Override
 	public void handle(Request request, Response resp) {

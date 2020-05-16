@@ -15,6 +15,7 @@ import org.aksw.iguana.rp.config.CONSTANTS;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.apache.jena.rdf.model.Model;
 
 /**
  * Will send an Object to the rabbitMQ queue with the name "rp2senderQueue"
@@ -82,4 +83,9 @@ public abstract class SenderStorage<T extends Object> implements Storage {
 		return p;
 	}
 
+
+	@Override
+	public Model getDataModel() {
+		return null;
+	}
 }

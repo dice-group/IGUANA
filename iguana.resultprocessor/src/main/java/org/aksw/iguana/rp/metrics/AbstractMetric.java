@@ -284,7 +284,7 @@ public abstract class AbstractMetric implements Metric{
 		String subject = metaData.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
 		Properties extraMeta = getExtraMeta(recv);
 		if (!extraMeta.isEmpty()) {
-			subject += "/" + extraMeta.hashCode();
+			subject += "/" + recv.get(COMMON.WORKER_ID);
 		}
 		return subject;
 	}
@@ -334,6 +334,10 @@ public abstract class AbstractMetric implements Metric{
 					int res = (int) tmp.get(obj.toString());
 					tmp.put(obj.toString(),res+(int)results.get(obj));
 				}
+				else if(tmp.get(obj.toString()) instanceof Double) {
+					double res = (double) tmp.get(obj.toString());
+					tmp.put(obj.toString(),res+(double)results.get(obj));
+				}
 			}
 		}
 		else{
@@ -341,6 +345,8 @@ public abstract class AbstractMetric implements Metric{
 			for(Object obj : results.keySet()){
 				if(results.get(obj) instanceof Long)
 					tmp.put(obj.toString(),(long)results.get(obj));
+				if(results.get(obj) instanceof Double)
+					tmp.put(obj.toString(),(double)results.get(obj));
 				if(results.get(obj) instanceof Integer)
 					tmp.put(obj.toString(),(int)results.get(obj));
 			}

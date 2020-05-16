@@ -12,7 +12,7 @@ public enum Field {
 	_connection("", "", " ?taskID <http://iguana-benchmark.eu/properties/connection> ?connection ."),
 	connection("Triplestore", "?connection", " ?taskID <http://iguana-benchmark.eu/properties/connection> ?connection ."),
 	//No_clients succeded	failed	totaltime	result size
-	succeded("succeded", "?succeded", " ?query <http://iguana-benchmark.eu/properties/succeded> ?succeded ."),
+	succeeded("succeeded", "?succeeded", " ?query <http://iguana-benchmark.eu/properties/succeeded> ?succeeded ."),
 	failed("failed", "?failed", " ?query <http://iguana-benchmark.eu/properties/failed> ?failed ."),
 	totaltime("totaltime", "?totaltime", " ?query <http://iguana-benchmark.eu/properties/totalTime> ?totaltime ."),
 	resultsize("resultsize", "?resultsize", " ?query <http://iguana-benchmark.eu/properties/resultSize> ?resultsize ."),

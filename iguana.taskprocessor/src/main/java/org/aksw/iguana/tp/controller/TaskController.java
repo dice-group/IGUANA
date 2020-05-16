@@ -3,7 +3,9 @@
  */
 package org.aksw.iguana.tp.controller;
 
+import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
 import org.aksw.iguana.commons.communicator.Communicator;
 import org.aksw.iguana.commons.config.Config;
@@ -12,7 +14,9 @@ import org.aksw.iguana.commons.exceptions.IguanaException;
 import org.aksw.iguana.commons.sender.ISender;
 import org.aksw.iguana.commons.sender.impl.DefaultSender;
 import org.aksw.iguana.tp.consumer.impl.DefaultConsumer;
+import org.aksw.iguana.tp.tasks.TaskFactory;
 import org.aksw.iguana.tp.tasks.TaskManager;
+import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +80,21 @@ public class TaskController {
 		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
 		System.out.println("start task");
 		TaskManager tmanager = new TaskManager(host, COMMON.CORE2RP_QUEUE_NAME);
-		DefaultConsumer consumer = new DefaultConsumer(tmanager);
-		consumer.consume(p);
+		String className=p.getProperty(COMMON.CLASS_NAME);
+		Object[] constructorArgs= (Object[]) p.get(COMMON.CONSTRUCTOR_ARGS);
+		Class<?>[] constructorClasses=null;
+		if(p.containsKey(COMMON.CONSTRUCTOR_ARGS_CLASSES)){
+			constructorClasses = (Class<?>[]) p.get(COMMON.CONSTRUCTOR_ARGS_CLASSES);
+		}
+		Configuration taskConfig = (Configuration) p.get("taskConfig");
+			
+		TaskFactory factory = new TaskFactory();
+		tmanager.setTask(factory.create(className, constructorArgs, constructorClasses));
+		try {
+			tmanager.setTaskConfiguration(taskConfig);
+			tmanager.startTask();
+		} catch (IOException | TimeoutException e) {
+			LOGGER.error("Could not start Task "+className, e);
+		}
 	}
 }

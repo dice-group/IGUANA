@@ -6,7 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.time.Instant;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,11 +15,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
+import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.utils.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 
-public class MultipleCLIInputWorker extends AbstractWorker {
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
+
+public class MultipleCLIInputWorker extends CLIBasedWorker {
 
 	private int currentQueryID;
 	private Random queryPatternChooser;
@@ -44,14 +49,27 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 	}
 
 	@Override
+	public void init(Properties p) {
+		super.init(p);
+		this.initFinished = p.getProperty(CONSTANTS.CLI_INIT_FINISHED);
+		this.queryFinished = p.getProperty(CONSTANTS.CLI_QUERY_FINISHED);
+		this.error = p.getProperty(CONSTANTS.CLI_ERROR);
+		this.setWorkerProperties();
+	}
+
+	@Override
 	public void init(String args[]) {
 		super.init(args);
 		this.initFinished = args[10];
 		this.queryFinished = args[11];
 		this.error = args[12];
+		this.setWorkerProperties();
+	}
+
+	private void setWorkerProperties() {
 		queryPatternChooser = new Random(this.workerID);
 		// start cli input
-		System.out.println("Init CLIInputWorker " + args[11]);
+		System.out.println("Init CLIInputWorker " + this.queryFinished);
 
 		processBuilder = new ProcessBuilder();
 		processBuilder.redirectErrorStream(true);
@@ -104,8 +122,8 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Long[] getTimeForQueryMs(String query, String queryID) {
-		long start = System.currentTimeMillis();
+	public void executeQuery(String query, String queryID) {
+		Instant start = Instant.now();
 		// execute queryCLI and read response
 		try {
 			AtomicLong size = new AtomicLong(-1);
@@ -130,33 +148,38 @@ public class MultipleCLIInputWorker extends AbstractWorker {
 					output.write(writableQuery(query) + "\n");
 					output.flush();
 				} else if (this.endSignal) {
-					return new Long[] { 0L, System.currentTimeMillis() - start };
+					super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
+					return;
 				} else {
 					setNextProcess();
-					return new Long[] { 0L, System.currentTimeMillis() - start };
+					super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
+					return;
 				}
 			} finally {
 				executor.shutdown();
-				executor.awaitTermination(this.timeOut, TimeUnit.MILLISECONDS);
+				executor.awaitTermination((long) (double)this.timeOut, TimeUnit.MILLISECONDS);
 			}
-			long end = System.currentTimeMillis();
+			double duration = durationInMilliseconds(start, Instant.now());
 
-			if (end - start >= timeOut) {
+			if (duration >= timeOut) {
 				setNextProcess();
-				return new Long[] { 0L, end - start };
+				super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, duration ));
+				return;
 			} else if (failed.get()) {
 				if (!process.isAlive()) {
 					setNextProcess();
 				}
-				return new Long[] { 0L, end - start };
+				super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, duration ));
+				return;
 			}
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
-			return new Long[] { 1L, end - start, size.get() };
+			super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_SUCCESS, duration, size.get() ));
+			return;
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Long[] { 0L, System.currentTimeMillis() - start };
+		super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 	}
 
 	private void setNextProcess() {

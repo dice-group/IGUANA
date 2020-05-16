@@ -50,12 +50,8 @@ public class DefaultSender implements ISender {
 	public void close() {
 		try {
 			channel.close();
-		} catch (IOException | TimeoutException e) {
-			LOGGER.error("Could not close rabbitMQ connection and channel.", e);
-		}
-		try {
 			connection.close();
-		} catch (IOException  e) {
+		} catch (IOException | TimeoutException e) {
 			LOGGER.error("Could not close rabbitMQ connection and channel.", e);
 		}
 	}

@@ -1,17 +1,17 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Properties;
-import java.util.Random;
-
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
+import org.aksw.iguana.tp.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.*;
+
 
 /**
  * The Abstract Worker which will implement the runnable, the main loop, the
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * module <br/>
  * so the Implemented Workers only need to implement which query to test next
  * and how to test this query.
- * 
+ *
  * @author f.conrads
  *
  */
@@ -57,24 +57,26 @@ public abstract class AbstractWorker implements Worker {
 	 */
 	protected File[] queryFileList;
 
-	protected Long timeLimit;
+	protected Double timeLimit;
 
-	protected long startTime;
+	protected Instant startTime;
 
 	protected String queriesFileName;
 
 	protected String service;
-	
+
 	protected String user;
 	protected String password;
 
-	protected Long timeOut=180000L;
+	protected Double timeOut=180000D;
 
 	private long noOfQueryMixes;
 
+	private int queryHash;
+
 	/**
 	 * Needs to be called if init is used
-	 * @param workerType 
+	 * @param workerType
 	 */
 	public AbstractWorker(String workerType) {
 		// needs
@@ -83,7 +85,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * Default Constructor
-	 * 
+	 *
 	 * @param args
 	 * @param workerType
 	 */
@@ -100,12 +102,12 @@ public abstract class AbstractWorker implements Worker {
 		this.workerID = Integer.parseInt(args[1]);
 
 		if(args[2]!=null)
-			this.timeLimit = Long.parseLong(args[2]);
+			this.timeLimit = Double.parseDouble(args[2]);
 		this.service = args[3];
 		this.user=args[4];
 		this.password=args[5];
 		if(args[6]!=null)
-			this.timeOut = Long.parseLong(args[6]);
+			this.timeOut = Double.parseDouble(args[6]);
 		// workerID represents seed to be fair with different systems.
 		latencyRandomizer = new Random(this.workerID);
 
@@ -117,7 +119,7 @@ public abstract class AbstractWorker implements Worker {
 			this.fixedLatency = Integer.parseInt(args[8]);
 		if(args[7]!=null)
 			this.gaussianLatency = Integer.parseInt(args[9]);
-		
+
 		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
 
 	}
@@ -127,9 +129,19 @@ public abstract class AbstractWorker implements Worker {
 		// Add task and Worker Specs
 		this.taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
 		this.workerID = Integer.parseInt(p.getProperty(CONSTANTS.WORKER_ID_KEY));
-		this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
+
+		if(this.workerType == null)
+			this.workerType = p.getProperty(CONSTANTS.WORKER_TYPE_KEY);
+
 		if(p.containsKey(CONSTANTS.TIME_LIMIT))
-			this.timeLimit = Long.parseLong(p.getProperty(CONSTANTS.TIME_LIMIT));
+			this.timeLimit = Double.parseDouble(p.getProperty(CONSTANTS.TIME_LIMIT));
+
+		if(p.containsKey(CONSTANTS.SPARQL_TIMEOUT))
+			this.timeOut = Double.parseDouble(p.getProperty(CONSTANTS.SPARQL_TIMEOUT));
+
+		this.service = p.getProperty(CONSTANTS.SERVICE_ENDPOINT);
+		this.user = p.getProperty(CONSTANTS.USERNAME);
+		this.password = p.getProperty(CONSTANTS.PASSWORD);
 
 		// workerID represents seed to be fair with different systems.
 		latencyRandomizer = new Random(this.workerID);
@@ -138,19 +150,24 @@ public abstract class AbstractWorker implements Worker {
 		this.queriesFileName = p.getProperty(CONSTANTS.QUERIES_FILE_NAME);
 
 		// Add latency Specs, add defaults
-		this.fixedLatency = (int) p.getOrDefault(CONSTANTS.FIXED_LATENCY, 0);
-		this.gaussianLatency = (int) p.getOrDefault(CONSTANTS.GAUSSIAN_LATENCY, 0);
+		if(p.containsKey(CONSTANTS.FIXED_LATENCY))
+			this.fixedLatency = Integer.parseInt(p.getProperty(CONSTANTS.FIXED_LATENCY));
+
+		if(p.containsKey(CONSTANTS.GAUSSIAN_LATENCY))
+			this.gaussianLatency = Integer.parseInt(p.getProperty(CONSTANTS.GAUSSIAN_LATENCY));
+
 		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
 	}
 
 	@Override
 	public void waitTimeMs() {
-		long wait = this.fixedLatency;
-		wait += Math.round((latencyRandomizer.nextGaussian() + 1) * this.gaussianLatency);
+		double wait = this.fixedLatency;
+		wait += (latencyRandomizer.nextGaussian() + 1) * this.gaussianLatency;
 		LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
 		try {
 			System.out.println("Wait: "+wait);
-			Thread.sleep(wait);
+			if(wait>0)
+				Thread.sleep((long) wait);
 		} catch (InterruptedException e) {
 			LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType,
 					workerID, e);
@@ -172,7 +189,9 @@ public abstract class AbstractWorker implements Worker {
 		if(this.queryFileList!=null)
 			this.extra.put(COMMON.NO_OF_QUERIES, this.queryFileList.length);
 		// For Update and Logging purpose get startTime of Worker
-		this.startTime = Calendar.getInstance().getTimeInMillis();
+		this.startTime = Instant.now();
+
+		this.queryHash = FileUtils.getHashcodeFromFileContent(this.queriesFileName);
 
 		LOGGER.info("Starting Worker[{{}} : {{}}].", this.workerType, this.workerID);
 		// Execute Queries as long as the Stresstest will need.
@@ -195,36 +214,34 @@ public abstract class AbstractWorker implements Worker {
 			}
 			// Simulate Network Delay (or whatever should be simulated)
 			waitTimeMs();
+
 			// benchmark query
-			Long time = 0L;
-			Long[] resultTime = new Long[]{0L, 0L};
 			try {
-				resultTime = getTimeForQueryMs(query.toString(), queryID.toString());
-				time = resultTime[1];
+				executeQuery(query.toString(), queryID.toString());
 			} catch (Exception e) {
 				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
 						query.toString());
-				time = -1L;
 			}
 			this.executedQueries++;
-			// If endSignal was send during execution it should not be counted anymore.
-			if (!this.endSignal) {
-				// create Properties store it in List
-				Properties result = new Properties();
-				result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-				result.put(COMMON.RECEIVE_DATA_TIME, time);
-				result.put(COMMON.RECEIVE_DATA_SUCCESS, resultTime[0]);
-				if(resultTime.length>2) {
-					result.put(COMMON.RECEIVE_DATA_SIZE, resultTime[2]);
-				}
-				result.put(COMMON.QUERY_HASH, query.toString().hashCode());
-				result.setProperty(COMMON.QUERY_ID_KEY, queryID.toString());
-				// Add extra Meta Key, worker ID and worker Type
-				result.put(COMMON.EXTRA_META_KEY, this.extra);
-				setResults(result);
-			}
 		}
 		LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
+	}
+
+	public synchronized void addResults(QueryExecutionStats results)
+	{
+		if (!this.endSignal) {
+			// create Properties store it in List
+			Properties result = new Properties();
+			result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
+			result.put(COMMON.RECEIVE_DATA_TIME, results.getExecutionTime());
+			result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
+			result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
+			result.put(COMMON.QUERY_HASH, queryHash);
+			result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
+			// Add extra Meta Key, worker ID and worker Type
+			result.put(COMMON.EXTRA_META_KEY, this.extra);
+			setResults(result);
+		}
 	}
 
 	private synchronized void setResults(Properties result) {
@@ -256,7 +273,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * Returns the name of the queries file name/update path
-	 * 
+	 *
 	 * @return file name/update path
 	 */
 	public String getQueriesFileName() {
@@ -265,7 +282,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * Sets the Query Instances repr. in Files.
-	 * 
+	 *
 	 * @param queries
 	 *            File containing the query instances.
 	 */
@@ -275,7 +292,7 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * The number of Queries in one mix
-	 * 
+	 *
 	 * @return
 	 */
 	public long getNoOfQueries() {

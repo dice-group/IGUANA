@@ -8,6 +8,7 @@ import java.util.concurrent.TimeoutException;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.storage.SenderStorage;
+import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +76,10 @@ public class PropertiesSenderStorage extends SenderStorage<Properties>{
 	}
 
 
+	@Override
+	public Model getDataModel() {
+		return null;
+	}
 
 
 }

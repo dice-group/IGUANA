@@ -3,6 +3,7 @@ package org.aksw.iguana.rp.storage;
 import java.util.Properties;
 
 import org.aksw.iguana.rp.data.Triple;
+import org.apache.jena.rdf.model.Model;
 
 /**
  * Interface for the Result Storages
@@ -42,5 +43,7 @@ public interface Storage {
 	public Properties getStorageInfo();
 
 	public void endTask(String taskID);
+
+	public Model getDataModel();
 	
 }

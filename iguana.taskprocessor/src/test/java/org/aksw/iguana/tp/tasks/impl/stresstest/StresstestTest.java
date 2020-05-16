@@ -14,6 +14,7 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.exceptions.IguanaException;
 //import org.aksw.iguana.tp.utils.StresstestServerMock;
 //import org.aksw.iguana.tp.utils.TestConsumer;
+import org.aksw.iguana.tp.config.CONSTANTS;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.AfterClass;
@@ -43,7 +44,7 @@ public class StresstestTest {
 	private static Connection connection;
 	private static Channel channel;
 	private String taskID = "test";
-	private Long timeLimit = null;
+	private Double timeLimit = null;
 	private Long noOfQueryMixes = 1l;
 	private String[] queryHandler = new String[] { "org.aksw.iguana.tp.query.impl.InstancesQueryHandler" };
 	private Object[][] workerConfigurations;
@@ -98,7 +99,7 @@ public class StresstestTest {
 	 * @param workerConfigurations
 	 * 
 	 */
-	public StresstestTest(String taskID, String service, String updateService, Long timeLimit, Long noOfQueryMixes, String[] queryHandler,
+	public StresstestTest(String taskID, String service, String updateService, Double timeLimit, Long noOfQueryMixes, String[] queryHandler,
 			Object[][] workerConfigurations) {
 		this.taskID = taskID;
 		this.timeLimit = timeLimit;
@@ -186,7 +187,7 @@ public class StresstestTest {
 			ret.addProperty("worker"+i, workerConfig);
 			workers[i] = "worker"+i++;
 		}
-		ret.addProperty("workers", workers);
+		ret.addProperty(CONSTANTS.WORKER_CONFIG_KEYS, workers);
 		return ret;
 	}
 	

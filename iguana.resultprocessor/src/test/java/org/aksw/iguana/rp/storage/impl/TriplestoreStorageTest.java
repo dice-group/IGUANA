@@ -32,18 +32,18 @@ public class TriplestoreStorageTest {
 	private SocketConnection fastConnection;
 
 	private String metaExp = "INSERT DATA {\n"+
-"  <http://iguana-benchmark.eu/recource/1> <http://iguana-benchmark.eu/properties/experiment> <http://iguana-benchmark.eu/recource/1/1> .\n"+
-"  <http://iguana-benchmark.eu/recource/1> <http://www.w3.org/2000/01/rdf-schema#Class> <http://iguana-benchmark.eu/class/Suite> .\n"+
-"  <http://iguana-benchmark.eu/recource/1/1> <http://iguana-benchmark.eu/properties/task> <http://iguana-benchmark.eu/recource/1/1/1> .\n"+
-"  <http://iguana-benchmark.eu/recource/1/1> <http://iguana-benchmark.eu/properties/dataset> <http://iguana-benchmark.eu/recource/dbpedia> .\n"+
-"  <http://iguana-benchmark.eu/recource/1/1> <http://www.w3.org/2000/01/rdf-schema#Class> <http://iguana-benchmark.eu/class/Experiment> .\n"+
-"  <http://iguana-benchmark.eu/recource/1/1/1> <http://iguana-benchmark.eu/properties/connection> <http://iguana-benchmark.eu/recource/virtuoso> .\n"+
-"  <http://iguana-benchmark.eu/recource/1/1/1> <http://www.w3.org/2000/01/rdf-schema#Class> <http://iguana-benchmark.eu/class/Task> .\n"+
+"  <http://iguana-benchmark.eu/resource/1> <http://iguana-benchmark.eu/properties/experiment> <http://iguana-benchmark.eu/resource/1/1> .\n"+
+"  <http://iguana-benchmark.eu/resource/1> <http://www.w3.org/2000/01/rdf-schema#Class> <http://iguana-benchmark.eu/class/Suite> .\n"+
+"  <http://iguana-benchmark.eu/resource/1/1> <http://iguana-benchmark.eu/properties/task> <http://iguana-benchmark.eu/resource/1/1/1> .\n"+
+"  <http://iguana-benchmark.eu/resource/1/1> <http://iguana-benchmark.eu/properties/dataset> <http://iguana-benchmark.eu/resource/dbpedia> .\n"+
+"  <http://iguana-benchmark.eu/resource/1/1> <http://www.w3.org/2000/01/rdf-schema#Class> <http://iguana-benchmark.eu/class/Experiment> .\n"+
+"  <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/connection> <http://iguana-benchmark.eu/resource/virtuoso> .\n"+
+"  <http://iguana-benchmark.eu/resource/1/1/1> <http://www.w3.org/2000/01/rdf-schema#Class> <http://iguana-benchmark.eu/class/Task> .\n"+
 "}";
 
 	private String dataExp = "INSERT DATA {\n"+
-"  <http://iguana-benchmark.eu/recource/1/1/1> <http://iguana-benchmark.eu/recource/testMetric> <http://iguana-benchmark.eu/recource/a> .\n"+
-"  <http://iguana-benchmark.eu/recource/a> <http://iguana-benchmark.eu/properties/b> \"c\" .\n"+
+"  <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/resource/testMetric> <http://iguana-benchmark.eu/resource/a> .\n"+
+"  <http://iguana-benchmark.eu/resource/a> <http://iguana-benchmark.eu/properties/b> \"c\" .\n"+
 "}";
 	
 	/**

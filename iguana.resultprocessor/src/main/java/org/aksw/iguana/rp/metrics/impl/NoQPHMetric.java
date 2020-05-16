@@ -44,7 +44,7 @@ public class NoQPHMetric extends AbstractMetric {
 	@Override
 	public void receiveData(Properties p) {
 		LOGGER.debug(this.getShortName()+" has received "+p);
-		long time = Long.parseLong(p.get(COMMON.RECEIVE_DATA_TIME).toString());
+		double time = Double.parseDouble(p.get(COMMON.RECEIVE_DATA_TIME).toString());
 		Integer success = (long)p.get(COMMON.RECEIVE_DATA_SUCCESS)>0?1:0;	
 		
 		Properties results = new Properties();
@@ -62,7 +62,7 @@ public class NoQPHMetric extends AbstractMetric {
 	public void close() {
  
 		for(Properties key : dataContainer.keySet()){
-			Long totalTime = (Long) dataContainer.get(key).get(TOTAL_TIME);
+			Double totalTime = (Double) dataContainer.get(key).get(TOTAL_TIME);
 			Integer success = (Integer) dataContainer.get(key).get(TOTAL_SUCCESS);
 			Double noOfQueriesPerHour = hourInMS*success*1.0/totalTime;
 			Properties results = new Properties();

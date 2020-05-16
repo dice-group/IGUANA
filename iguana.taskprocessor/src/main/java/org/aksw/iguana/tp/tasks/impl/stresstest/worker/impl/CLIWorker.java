@@ -6,12 +6,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.Instant;
+import java.util.Properties;
 import java.util.Random;
 
-import org.aksw.iguana.tp.tasks.impl.stresstest.worker.AbstractWorker;
+import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.utils.FileUtils;
 
-public class CLIWorker extends AbstractWorker {
+import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
+
+public class CLIWorker extends CLIBasedWorker {
 
 	private int currentQueryID;
 	private Random queryPatternChooser;
@@ -33,8 +38,14 @@ public class CLIWorker extends AbstractWorker {
 	}
 
 	@Override
-	public Long[] getTimeForQueryMs(String query, String queryID) {
-		long start = System.currentTimeMillis();
+	public void init(Properties p) {
+		super.init(p);
+		queryPatternChooser = new Random(this.workerID);
+	}
+
+	@Override
+	public void executeQuery(String query, String queryID) {
+		Instant start = Instant.now();
 		// use cli as service
 		String q = "";
 		try {
@@ -81,18 +92,16 @@ public class CLIWorker extends AbstractWorker {
 				System.out.println("[DEBUG] Query successfully executed size: " + size);
 			} else {
 				System.out.println("Exit Value: " + exitVal);
-				return new Long[] { 0L, System.currentTimeMillis() - start };
+				super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
+				return;
 			}
-			return new Long[] { 1L, System.currentTimeMillis() - start, size };
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_SUCCESS, durationInMilliseconds(start, Instant.now()), size ));
+			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// ERROR
-		return new Long[] { 0L, System.currentTimeMillis() - start };
+		super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 	}
 
 	@Override
