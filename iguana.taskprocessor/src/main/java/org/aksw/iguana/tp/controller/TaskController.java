@@ -93,10 +93,8 @@ public class TaskController {
 		try {
 			tmanager.setTaskConfiguration(taskConfig);
 			tmanager.startTask();
-//			parent.send(RabbitMQUtils.getData(COMMON.TASK_FINISHED_MESSAGE));
 		} catch (IOException | TimeoutException e) {
 			LOGGER.error("Could not start Task "+className, e);
-//			parent.send(RabbitMQUtils.getData(COMMON.TASK_FINISHED_MESSAGE));
 		}
 	}
 }

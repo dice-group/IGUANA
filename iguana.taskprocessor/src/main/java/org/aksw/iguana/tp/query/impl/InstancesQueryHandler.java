@@ -64,7 +64,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		List<File> ret = new LinkedList<File>();
 		// check if folder is cached
 		if (queryFile.exists()) {
-			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode()); //TODO #94
+			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode()); 
 			if (outputFolder.exists()) {
 				LOGGER.info(
 						"[QueryHandler: {{}}] queries were instantiated already, will use old instances. To generate them new remove the {{}} folder",

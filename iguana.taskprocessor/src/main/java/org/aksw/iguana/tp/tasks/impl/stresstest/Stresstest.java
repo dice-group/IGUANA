@@ -301,7 +301,6 @@ public class Stresstest extends AbstractTask {
 				System.out.print(u+" ");
 			}
 			System.out.println();
-//			System.out.println("UpdateConfig: "+List.of(updateConfig));
 			UPDATEWorker update = new UPDATEWorker(updateConfig);
 			warmupWorkers.add(update);
 			LOGGER.debug("[TaskID: {{}}] Warmup uses one UPDATE worker", taskID);

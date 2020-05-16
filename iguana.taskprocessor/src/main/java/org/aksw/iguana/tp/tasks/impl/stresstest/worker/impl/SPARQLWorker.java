@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
 
-//import org.json.*;
 
 /**
  * A Worker using SPARQL 1.1 to create service request.
@@ -65,7 +64,6 @@ public class SPARQLWorker extends HttpWorker {
 	 */
 	public SPARQLWorker() {
 		super("SPARQLWorker");
-		// bla
 	}
 
 	@Override

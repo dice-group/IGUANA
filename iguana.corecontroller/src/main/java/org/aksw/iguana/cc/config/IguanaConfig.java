@@ -78,17 +78,7 @@ public class IguanaConfig {
 			System.out.println("Starting "+datasetIDV);
 
 			String datasetID=config.getString(datasetIDV+CONSTANTS.NAME_SUFFIX);
-//			String dataGenClass = config.getString(datasetIDV+CONSTANTS.DATA_GENERATOR_CLASS_NAME);
-//			String[] dataGenConstructorArgs = config.getStringArray(datasetIDV+CONSTANTS.CONSTRUCTOR_ARGS);
 			expID++;
-//			Properties dataProperties = new Properties();
-//			if(dataGenClass!=null) {
-//				dataProperties.put(COMMON.DATAGEN_CLASS_NAME, dataGenClass);
-//				if(dataGenConstructorArgs!=null)
-//					dataProperties.put(COMMON.DATAGEN_CONSTRUCTOR_ARGS, dataGenConstructorArgs);
-//				// start DG
-//				//dataController.start(dataProperties);
-//			}
 			System.out.println("Starting config");
 
 			Integer taskID = 0;
@@ -152,46 +142,14 @@ public class IguanaConfig {
 			String key2 = keys2.next();
 			target.addProperty(key2, source.getProperty(key2));
 			for(String tmpKey : source.getStringArray(key2)) {
-//				if(source.containsKey(tmpKey)) {
-//					addRecursive(target, source, tmpKey);
-//				}
 				addRecursive(target, source, tmpKey);
 			}
 		}
 	}
-
-	//TODO #93
+	
 	private String generateSuiteID() {
-		// Suite ID collision fix start
 		int currentTimeMillisHashCode = Math.abs(Long.valueOf(Instant.now().getEpochSecond()).hashCode());
 		return String.valueOf(currentTimeMillisHashCode);
-		// Suite ID collision fix end
-
-
-//		File suiteIDFile = new File("suite.id");
-//		String id="0";
-//		try {
-//			suiteIDFile.createNewFile();
-//		} catch (IOException e1) {
-//			return null;
-//		}
-//		try(BufferedReader reader = new BufferedReader(new FileReader(suiteIDFile))){
-//			if((id=reader.readLine())==null) {
-//				id="0";
-//			}
-//		} catch (IOException e) {
-//			return null;
-//		}
-//		try(PrintWriter pw = new PrintWriter(suiteIDFile)){
-//			Integer idInt = Integer.parseInt(id);
-//			idInt++;
-//			id = idInt.toString();
-//			pw.println(id);
-//		} catch (FileNotFoundException e) {
-//			return null;
-//		}
-//		return id;
-		
 	}
 	
 }

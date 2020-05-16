@@ -30,7 +30,6 @@ import org.aksw.iguana.rp.storage.impl.NTFileStorage;
  */
 public abstract class AbstractTask implements Task {
 
-//	private ISender sender;
 	private StorageManager smanager = new StorageManager();
 	private MetricManager mmanager = new MetricManager();
 	private ExperimentManager rpControl;
@@ -87,18 +86,12 @@ public abstract class AbstractTask implements Task {
 	 * @see org.aksw.iguana.tp.tasks.Task#init()
 	 */
 	@Override
-	public void init(String host, String queueName) throws IOException, TimeoutException {
-		// initialize everything needed to send results to RP
-//		ISender sender = new DefaultSender();
-//		this.sender = sender;
-//		this.sender.init(host, queueName);
-	}
+	public void init(String host, String queueName) throws IOException, TimeoutException { }
 
 	@Override
 	public void start() {
 		System.out.println("will start task");
 		// send to ResultProcessor
-//		this.sender.send(RabbitMQUtils.getData(metaData));
 		rpControl.receiveData(metaData);
 
 	}
@@ -106,7 +99,6 @@ public abstract class AbstractTask implements Task {
 	@Override
 	public void sendResults(Properties data) throws IOException {
 		data.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-//		this.sender.send(RabbitMQUtils.getData(data));
 		rpControl.receiveData(data);
 	}
 
@@ -118,7 +110,6 @@ public abstract class AbstractTask implements Task {
 		// set end flag
 		end.put(COMMON.RECEIVE_DATA_END_KEY, true);
 		// send to ResultProcessor
-//		this.sender.send(RabbitMQUtils.getData(end));
 		rpControl.receiveData(end);
 	}
 

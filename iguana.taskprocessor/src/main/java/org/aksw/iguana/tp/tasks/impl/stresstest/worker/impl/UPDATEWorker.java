@@ -51,8 +51,6 @@ public class UPDATEWorker extends HttpWorker {
 	 * 
 	 */
 	public UPDATEWorker(String[] args) {
-		// super(taskID, workerID, "UPDATE", timeLimitMS, updateFolder, fixedLatency,
-		// gaussianLatency);
 		super(args, "UPDATE");
 
 		// set default updateStrategy to none
@@ -69,7 +67,6 @@ public class UPDATEWorker extends HttpWorker {
 	 * 
 	 */
 	public UPDATEWorker() {
-		// bla
 		super("UPDATEWorker");
 	}
 
