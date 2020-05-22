@@ -3,10 +3,12 @@ package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.model.QueryExecutionStats;
+import org.aksw.iguana.tp.utils.CLIProcessManager;
 import org.aksw.iguana.tp.utils.FileUtils;
-import org.apache.commons.lang.SystemUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
@@ -23,14 +25,9 @@ public class CLIInputWorker extends CLIBasedWorker {
 	private int currentQueryID;
 	private Random queryPatternChooser;
 	private Process process;
-	private String queryFinished;
-	private BufferedReader reader;
-	private int currentProcess = 0;
-	private BufferedWriter output;
-	private Boolean useFileToQuery = false;
-	private String error;
-	private ProcessBuilder processBuilder;
 	private String initFinished;
+	private String queryFinished;
+	private String error;
 
 	public CLIInputWorker() {
 		super("CLIInputWorker");
@@ -64,59 +61,22 @@ public class CLIInputWorker extends CLIBasedWorker {
 	{
 		queryPatternChooser = new Random(this.workerID);
 
-		// start cli input
+		// Create a CLI process, initialize it
 		System.out.println("Init CLIInputWorker " + this.queryFinished);
-		processBuilder = new ProcessBuilder();
-		processBuilder.redirectErrorStream(true);
+		this.process = CLIProcessManager.createProcess(this.service);
 		try {
-			if (SystemUtils.IS_OS_LINUX) {
-
-				processBuilder.command(new String[] { "bash", "-c", this.service });
-
-			} else if (SystemUtils.IS_OS_WINDOWS) {
-				processBuilder.command(new String[] { "cmd.exe", "-c", this.service });
-			}
-			process = processBuilder.start();
-
-			output = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-			reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			readUntilStringOccurs(reader, initFinished);
-
+			CLIProcessManager.countLinesUntilStringOccurs(process, this.initFinished, this.error); //Init
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-	}
-
-	private long readUntilStringOccurs(BufferedReader reader, String initFinished) throws IOException {
-		String line;
-		System.out.println("Will look for: " + initFinished + " or as error: " + error);
-		StringBuilder output = new StringBuilder();
-		long size = -1;
-		while ((line = reader.readLine()) != null) {
-			if (line.contains(error)) {
-				System.out.println("Found error");
-				System.out.println("Query finished with " + initFinished);
-
-				throw new IOException(line);
-			} else if (line.contains(initFinished)) {
-				System.out.println("Query finished with " + initFinished);
-				break;
-			}
-			if (output.length() < 1000) {
-				output.append(line).append("\n");
-			}
-			size++;
-		}
-		System.out.println(output.substring(0, Math.min(1000, output.length())));
-		return size;
 	}
 
 	@Override
 	public void executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
-		// execute queryCLI and read response
+
 		try {
+			// Create background thread that will watch the output of the process and prepare results
 			AtomicLong size = new AtomicLong(-1);
 			AtomicBoolean failed = new AtomicBoolean(false);
 			ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -126,18 +86,18 @@ public class CLIInputWorker extends CLIBasedWorker {
 				public void run() {
 					try {
 						System.out.println("Process Alive: " + process.isAlive());
-						System.out.println("Reader ready: " + reader.ready());
-						size.set(readUntilStringOccurs(reader, queryFinished));
+						System.out.println("Reader ready: " + CLIProcessManager.isReaderReady(process));
+						size.set(CLIProcessManager.countLinesUntilStringOccurs(process, queryFinished, error));
 					} catch (IOException e) {
 						failed.set(true);
 					}
 				}
 			});
-			BufferedWriter output = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+
+			// Execute the query on the process
 			try {
 				if (process.isAlive()) {
-					output.write(writableQuery(query) + "\n");
-					output.flush();
+					CLIProcessManager.executeCommand(process, writableQuery(query));
 				} else if (this.endSignal) {
 					super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 					return;
@@ -149,7 +109,9 @@ public class CLIInputWorker extends CLIBasedWorker {
 				executor.shutdown();
 				executor.awaitTermination((long)(double)this.timeOut, TimeUnit.MILLISECONDS);
 			}
-			double end = Instant.now().getNano() / 1000000d;
+
+			// At this point, query is executed and background thread has processed the results.
+			// Next, calculate time for benchmark.
 			double duration = durationInMilliseconds(start, Instant.now());
 
 			if (duration >= timeOut) {
@@ -159,14 +121,16 @@ public class CLIInputWorker extends CLIBasedWorker {
 				super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, duration ));
 				return;
 			}
+
+			// SUCCESS
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
 			super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_SUCCESS, duration, size.get() ));
 			return;
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
+			// ERROR
+			super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 		}
-		// ERROR
-		super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 	}
 
 
