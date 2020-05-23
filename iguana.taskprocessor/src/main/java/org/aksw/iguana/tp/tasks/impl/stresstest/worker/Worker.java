@@ -68,8 +68,4 @@ public interface Worker extends Runnable{
 	 */
 	public Collection<Properties> popQueryResults();
 
-	/**
-	 * @param args
-	 */
-	void init(String[] args);
 }

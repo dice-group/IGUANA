@@ -11,19 +11,7 @@ public class CLIInputPrefixWorker extends MultipleCLIInputWorker {
 	private String suffix;
 
 
-	@Override
-	public void init(String args[]) {
-		super.init(args);
-		int i=13;
-		if(args.length>15) {
-			i++;
-		}
-		this.prefix = args[i];
-		this.suffix = args[i+1];
-
-	}
-
-	@Override
+    @Override
 	public void init(Properties p) {
 		super.init(p);
 		this.prefix = p.getProperty(CONSTANTS.QUERY_PREFIX);

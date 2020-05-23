@@ -52,16 +52,6 @@ public class MultipleCLIInputWorker extends CLIBasedWorker {
 		this.setWorkerProperties();
 	}
 
-	@Override
-	public void init(String args[]) {
-		super.init(args);
-		this.initFinished = args[10];
-		this.queryFinished = args[11];
-		this.error = args[12];
-		this.numberOfProcesses = Integer.parseInt(args[13]);
-		this.setWorkerProperties();
-	}
-
 	private void setWorkerProperties() {
 		queryPatternChooser = new Random(this.workerID);
 		// start cli input

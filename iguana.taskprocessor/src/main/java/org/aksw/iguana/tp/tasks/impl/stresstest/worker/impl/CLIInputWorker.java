@@ -6,7 +6,6 @@ import org.aksw.iguana.tp.model.QueryExecutionStats;
 import org.aksw.iguana.tp.utils.CLIProcessManager;
 import org.aksw.iguana.tp.utils.FileUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
@@ -45,15 +44,6 @@ public class CLIInputWorker extends CLIBasedWorker {
 		this.initFinished = p.getProperty(CONSTANTS.CLI_INIT_FINISHED);
 		this.queryFinished = p.getProperty(CONSTANTS.CLI_QUERY_FINISHED);
 		this.error = p.getProperty(CONSTANTS.CLI_ERROR);
-		this.setWorkerProperties();
-	}
-
-	@Override
-	public void init(String args[]) {
-		super.init(args);
-		this.initFinished = args[10];
-		this.queryFinished = args[11];
-		this.error = args[12];
 		this.setWorkerProperties();
 	}
 

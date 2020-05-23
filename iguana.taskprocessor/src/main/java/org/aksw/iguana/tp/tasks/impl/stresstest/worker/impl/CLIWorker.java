@@ -32,12 +32,6 @@ public class CLIWorker extends CLIBasedWorker {
 	}
 
 	@Override
-	public void init(String args[]) {
-		super.init(args);
-		queryPatternChooser = new Random(this.workerID);
-	}
-
-	@Override
 	public void init(Properties p) {
 		super.init(p);
 		queryPatternChooser = new Random(this.workerID);

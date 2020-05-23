@@ -11,19 +11,8 @@ public class MultipleCLIInputFileWorker extends MultipleCLIInputWorker {
 
 
 	private String dir;
-	
-	@Override
-	public void init(String args[]) {
-		super.init(args);
-		int i=13;
-		if(args.length>13) {
-			i++;
-		}
-		this.dir = args[i];
 
-	}
-
-	@Override
+    @Override
 	public void init(Properties p) {
 		super.init(p);
 		this.dir = p.getProperty(CONSTANTS.DIRECTORY);
