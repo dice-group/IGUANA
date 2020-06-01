@@ -71,20 +71,6 @@ public class UPDATEWorker extends HttpWorker {
 	}
 
 	@Override
-	public void init(String[] args) {
-		super.init(args);
-
-		// set default updateStrategy to none
-		this.updateStrategy = UpdateStrategy.NONE;
-		// if updateStrategy is set, set updateStrategy
-		if (updateStrategy != null) {
-			this.updateStrategy = UpdateStrategy.valueOf(args[11]);
-		}
-
-		setUpdateTimer(args[10]);
-	}
-
-	@Override
 	public void init(Properties p) {
 		// At first call init from AbstractWorker!
 		super.init(p);

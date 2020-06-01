@@ -95,8 +95,7 @@ public abstract class AbstractWorker implements Worker {
 	}
 
 
-	@Override
-	public void init(String[] args) {
+	private void init(String[] args) {
 		// Add task and Worker Specs
 		this.taskID = args[0];
 		this.workerID = Integer.parseInt(args[1]);

@@ -103,7 +103,7 @@ public class CONSTANTS {
 
 	/**
 	 * The key to override number of processes in the
-	 * {@link org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.CLIInputPrefixWorker}
+	 * {@link org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl.MultipleCLIInputWorker}
 	 */
 	public static final String NO_OF_PROCESSES = "numberOfProcesses";
 

@@ -11,26 +11,10 @@ public class MultipleCLIInputFileWorker extends MultipleCLIInputWorker {
 
 
 	private String dir;
-	
-	@Override
-	public void init(String args[]) {
-		super.init(args);
-		int i=13;
-		if(args.length>13) {
-			processList = new Process[Integer.parseInt(args[13])];
-			i++;
-		}
-		this.dir = args[i];
 
-	}
-
-	@Override
+    @Override
 	public void init(Properties p) {
 		super.init(p);
-		if(p.containsKey(CONSTANTS.NO_OF_PROCESSES))
-		{
-			processList = new Process[Integer.parseInt(p.getProperty(CONSTANTS.NO_OF_PROCESSES))];
-		}
 		this.dir = p.getProperty(CONSTANTS.DIRECTORY);
 	}
 	

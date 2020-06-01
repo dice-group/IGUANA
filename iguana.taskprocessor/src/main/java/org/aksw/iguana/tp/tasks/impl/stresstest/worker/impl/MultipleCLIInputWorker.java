@@ -1,12 +1,9 @@
 package org.aksw.iguana.tp.tasks.impl.stresstest.worker.impl;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.time.Instant;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -18,8 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.tp.config.CONSTANTS;
 import org.aksw.iguana.tp.model.QueryExecutionStats;
+import org.aksw.iguana.tp.utils.CLIProcessManager;
 import org.aksw.iguana.tp.utils.FileUtils;
-import org.apache.commons.lang.SystemUtils;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
@@ -27,16 +24,13 @@ public class MultipleCLIInputWorker extends CLIBasedWorker {
 
 	private int currentQueryID;
 	private Random queryPatternChooser;
-	private Process process;
-	protected Process[] processList = new Process[5];
-	private String queryFinished;
-	private BufferedReader reader;
-	private int currentProcess = 0;
-	private BufferedWriter output;
-	private Boolean useFileToQuery = false;
-	private String error;
-	private ProcessBuilder processBuilder;
+	private Process currentProcess;
+	protected List<Process> processList;
+	private int currentProcessId = 0;
 	private String initFinished;
+	private String queryFinished;
+	private String error;
+	protected int numberOfProcesses;
 
 	public MultipleCLIInputWorker() {
 		super("CLIInputWorker");
@@ -54,15 +48,7 @@ public class MultipleCLIInputWorker extends CLIBasedWorker {
 		this.initFinished = p.getProperty(CONSTANTS.CLI_INIT_FINISHED);
 		this.queryFinished = p.getProperty(CONSTANTS.CLI_QUERY_FINISHED);
 		this.error = p.getProperty(CONSTANTS.CLI_ERROR);
-		this.setWorkerProperties();
-	}
-
-	@Override
-	public void init(String args[]) {
-		super.init(args);
-		this.initFinished = args[10];
-		this.queryFinished = args[11];
-		this.error = args[12];
+		this.numberOfProcesses = Integer.parseInt(p.getOrDefault(CONSTANTS.NO_OF_PROCESSES, new Integer(5)).toString());
 		this.setWorkerProperties();
 	}
 
@@ -71,61 +57,27 @@ public class MultipleCLIInputWorker extends CLIBasedWorker {
 		// start cli input
 		System.out.println("Init CLIInputWorker " + this.queryFinished);
 
-		processBuilder = new ProcessBuilder();
-		processBuilder.redirectErrorStream(true);
-		try {
-			if (SystemUtils.IS_OS_LINUX) {
+		// Create processes, set first process as current process
+		this.processList = CLIProcessManager.createProcesses(this.numberOfProcesses, this.service);
+		this.currentProcess = processList.get(0);
 
-				processBuilder.command(new String[] { "bash", "-c", this.service });
-
-			} else if (SystemUtils.IS_OS_WINDOWS) {
-				processBuilder.command(new String[] { "cmd.exe", "-c", this.service });
+		// Make sure that initialization is complete
+		for (Process value : processList) {
+			try {
+				CLIProcessManager.countLinesUntilStringOccurs(value, initFinished, error);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			process = processBuilder.start();
-			processList[0] = process;
-			output = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-			reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			readUntilStringOccurs(reader, initFinished);
-			for (int i = 1; i < processList.length; i++) {
-				processList[i] = processBuilder.start();
-				BufferedReader reader2 = new BufferedReader(new InputStreamReader(processList[i].getInputStream()));
-				readUntilStringOccurs(reader2, initFinished);
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
-	private long readUntilStringOccurs(BufferedReader reader, String initFinished) throws IOException {
-		String line;
-		System.out.println("Will look for: " + initFinished + " or as error: " + error);
-		StringBuilder output = new StringBuilder();
-		long size = -1;
-		while ((line = reader.readLine()) != null) {
-			if (line.contains(error)) {
-				System.out.println("Found error");
-				System.out.println("Query finished with " + initFinished);
-
-				throw new IOException(line);
-			} else if (line.contains(initFinished)) {
-				System.out.println("Query finished with " + initFinished);
-				break;
-			}
-			if (output.length() < 1000) {
-				output.append(line).append("\n");
-			}
-			size++;
-		}
-		System.out.println(output.substring(0, Math.min(1000, output.length())));
-		return size;
-	}
 
 	@Override
 	public void executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		// execute queryCLI and read response
 		try {
+			// Create background thread that will watch the output of the process and prepare results
 			AtomicLong size = new AtomicLong(-1);
 			AtomicBoolean failed = new AtomicBoolean(false);
 			ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -134,19 +86,19 @@ public class MultipleCLIInputWorker extends CLIBasedWorker {
 				@Override
 				public void run() {
 					try {
-						System.out.println("Process Alive: " + process.isAlive());
-						System.out.println("Reader ready: " + reader.ready());
-						size.set(readUntilStringOccurs(reader, queryFinished));
+						System.out.println("Process Alive: " + currentProcess.isAlive());
+						System.out.println("Reader ready: " + CLIProcessManager.isReaderReady(currentProcess));
+						size.set(CLIProcessManager.countLinesUntilStringOccurs(currentProcess, queryFinished, error));
 					} catch (IOException e) {
 						failed.set(true);
 					}
 				}
 			});
-			BufferedWriter output = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+
+			// Execute the query on the process
 			try {
-				if (process.isAlive()) {
-					output.write(writableQuery(query) + "\n");
-					output.flush();
+				if (currentProcess.isAlive()) {
+					CLIProcessManager.executeCommand(currentProcess, writableQuery(query));
 				} else if (this.endSignal) {
 					super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 					return;
@@ -159,61 +111,59 @@ public class MultipleCLIInputWorker extends CLIBasedWorker {
 				executor.shutdown();
 				executor.awaitTermination((long) (double)this.timeOut, TimeUnit.MILLISECONDS);
 			}
+
+			// At this point, query is executed and background thread has processed the results.
+			// Next, calculate time for benchmark.
 			double duration = durationInMilliseconds(start, Instant.now());
 
 			if (duration >= timeOut) {
 				setNextProcess();
-				super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, duration ));
+				super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_SOCKET_TIMEOUT, duration ));
 				return;
 			} else if (failed.get()) {
-				if (!process.isAlive()) {
+				if (!currentProcess.isAlive()) {
 					setNextProcess();
 				}
 				super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, duration ));
 				return;
 			}
+
+			// SUCCESS
 			System.out.println("[DEBUG] Query successfully executed size: " + size.get());
 			super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_SUCCESS, duration, size.get() ));
 			return;
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
+			// ERROR
+			super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 		}
-		// ERROR
-		super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 	}
 
 	private void setNextProcess() {
-		int oldProcess = currentProcess;
-		currentProcess = currentProcess == processList.length-1 ? 0 : currentProcess + 1;
-		// destroy old process;
-		process.destroyForcibly();
-		if(oldProcess==currentProcess) {
+		int oldProcessId = currentProcessId;
+		currentProcessId = currentProcessId == processList.size() -1 ? 0 : currentProcessId + 1;
+
+		// destroy old process
+		CLIProcessManager.destroyProcess(currentProcess);
+		if(oldProcessId== currentProcessId) {
 			try {
-				process.waitFor();
+				currentProcess.waitFor();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		// create new one for old in list
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-		executor.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					processList[oldProcess] = processBuilder.start();
-					BufferedReader reader2 = new BufferedReader(
-							new InputStreamReader(processList[oldProcess].getInputStream()));
-					readUntilStringOccurs(reader2, initFinished);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		executor.shutdown();
-		// get all from the next process
-		process = processList[currentProcess];
-		output = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-		reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+		// create and initialize new process to replace previously destroyed process
+		Process replacementProcess = CLIProcessManager.createProcess(this.service);
+		try {
+			CLIProcessManager.countLinesUntilStringOccurs(replacementProcess, initFinished, error); // Init
+			processList.set(oldProcessId, replacementProcess);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// finally, update current process
+		currentProcess = processList.get(currentProcessId);
 	}
 
 	protected String writableQuery(String query) {
