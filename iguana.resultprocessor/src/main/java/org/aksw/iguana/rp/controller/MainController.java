@@ -5,10 +5,7 @@ package org.aksw.iguana.rp.controller;
 
 import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.rp.config.CONSTANTS;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.consumer.IConsumer;
-import org.aksw.iguana.rp.consumer.impl.DefaultConsumer;
-import org.aksw.iguana.commons.exceptions.IguanaException;
 import org.aksw.iguana.rp.experiment.ExperimentManager;
 import org.aksw.iguana.rp.metrics.MetricFactory;
 import org.aksw.iguana.rp.metrics.MetricManager;
@@ -70,18 +67,19 @@ public class MainController {
 		ExperimentManager emanager = new ExperimentManager(globalMetricsManager, storageManager);
 		
 		//start DefaultConsumer
-		consumer = new DefaultConsumer(emanager);
-		try {
-			LOGGER.info("Starting {}", consumer.getClass().getName());
-			//This will loop until user decides to exit.
-			String host = Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
-			String queueName = COMMON.CORE2RP_QUEUE_NAME;
-			consumer.init(host, queueName); 
-		} catch (IguanaException e) {
-			LOGGER.error("Will terminate MainController...", e);
-			consumer.close();
-			return;
-		}
+		// TODO: this as rabbit based
+//		consumer = new DefaultConsumer(emanager);
+//		try {
+//			LOGGER.info("Starting {}", consumer.getClass().getName());
+//			//This will loop until user decides to exit.
+//			String host = Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
+//			String queueName = COMMON.CORE2RP_QUEUE_NAME;
+//			consumer.init(host, queueName);
+//		} catch (IguanaException e) {
+//			LOGGER.error("Will terminate MainController...", e);
+//			consumer.close();
+//			return;
+//		}
 	}
 	
 	/**

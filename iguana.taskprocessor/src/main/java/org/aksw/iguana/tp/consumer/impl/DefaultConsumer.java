@@ -7,10 +7,11 @@ import java.util.concurrent.TimeoutException;
 import org.aksw.iguana.commons.communicator.Communicator;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.consumer.AbstractConsumer;
-import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
+import org.aksw.iguana.commons.exceptions.IguanaException;
 import org.aksw.iguana.tp.tasks.TaskFactory;
 import org.aksw.iguana.tp.tasks.TaskManager;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +47,9 @@ public class DefaultConsumer extends AbstractConsumer{
 	
 	@Override
 	public void consume(byte[] data) {
-		Properties p = RabbitMQUtils.getObject(data);
-		consume(p);
+		throw new NotImplementedException("This was once done by Rabbit");
+//		Properties p = RabbitMQUtils.getObject(data);
+//		consume(p);
 	}
 
 	/**

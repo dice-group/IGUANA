@@ -8,10 +8,6 @@ import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
-import org.aksw.iguana.commons.sender.ISender;
-import org.aksw.iguana.commons.sender.impl.DefaultSender;
-import org.aksw.iguana.rp.controller.MainController;
 import org.aksw.iguana.rp.experiment.ExperimentManager;
 import org.aksw.iguana.rp.metrics.Metric;
 import org.aksw.iguana.rp.metrics.MetricManager;

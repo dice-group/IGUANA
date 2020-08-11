@@ -20,7 +20,7 @@ before_install:
  - sudo apt-get update
  - sudo apt-get install emacs25-common
  - sudo apt-get install esl-erlang=1:19.3.6
- - sudo apt-get install -f maven erlang-nox rabbitmq-server
+ - sudo apt-get install -f maven erlang-nox
 
 install: true 
 
@@ -34,11 +34,5 @@ script:
  - cd iguana.resultprocessor
  - mvn clean package -Dmaven.javadoc.skip=true -B
  - cd ..
- - cd iguana.webcontroller 
- - mvn clean package -Dmaven.javadoc.skip=true
- - cd ..
- - cd iguana.datagenerator 
- - mvn clean package install -Dmaven.javadoc.skip=true
- - cd ..
- - cd iguana.corecontroller 
+ - cd iguana.corecontroller
  - mvn clean package -Dmaven.javadoc.skip=true

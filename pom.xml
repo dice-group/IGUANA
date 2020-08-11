@@ -2,12 +2,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.aksw</groupId>
   <artifactId>iguana-parent</artifactId>
-  <version>2.1.0</version>
+  <version>3.0.0</version>
   <name>Iguana Parent </name>
   <packaging>pom</packaging>
   <modules>
   	<module>iguana.commons</module>
-  	<module>iguana.datagenerator</module>
   	<module>iguana.taskprocessor</module>
   	<module>iguana.corecontroller</module>
   	<module>iguana.resultprocessor</module>

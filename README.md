@@ -41,15 +41,12 @@ For further Information visit
 
 # Prerequisites 
 
-You need to install Java 8 or greater and RabbitMQ Version 4.x.z or greater.
+You need to install Java 11 or greater.
 In Ubuntu you can install these using the following commands
 
 ```
 sudo apt-get install java
-sudo apt-get install rabbitmq-server
 ```
-
-RabbitMQ will be automatically started after you installed it. 
 
 # Iguana Modules
 
@@ -57,8 +54,6 @@ Iguana consists of two modules!
 
 1. **corecontroller**: This will benchmark the systems 
 2. **resultprocessor**: This will calculate the Metrics and save the raw benchmark results 
-
-Further on you need to install and start the message brocker [RabbitMQ](https://www.rabbitmq.com/). It is needed for communication between the **corecontroller** and the **resultprocessor**. 
 
 ## **corecontroller**
 

@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.consumer.AbstractConsumer;
-import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
+import org.apache.commons.lang.NotImplementedException;
 
 /**
  * @author f.conrads
@@ -20,10 +20,11 @@ public class TestConsumer extends AbstractConsumer {
 
 	@Override
 	public void consume(byte[] data) {
-		Properties recv = RabbitMQUtils.getObject(data);
-		setTaskID(recv.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY));
-		success = (boolean) recv.get(COMMON.RECEIVE_DATA_SUCCESS);
-		time = (long) recv.get(COMMON.RECEIVE_DATA_TIME);
+		throw new NotImplementedException("This was once done by Rabbit.");
+//		Properties recv = RabbitMQUtils.getObject(data);
+//		setTaskID(recv.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY));
+//		success = (boolean) recv.get(COMMON.RECEIVE_DATA_SUCCESS);
+//		time = (long) recv.get(COMMON.RECEIVE_DATA_TIME);
 	}
 
 	/**

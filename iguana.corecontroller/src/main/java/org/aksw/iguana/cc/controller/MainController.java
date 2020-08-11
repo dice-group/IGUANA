@@ -1,18 +1,12 @@
 package org.aksw.iguana.cc.controller;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Files;
 
 import org.aksw.iguana.cc.config.ConfigManager;
-import org.aksw.iguana.cc.consumer.impl.DefaultConsumer;
 import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.commons.exceptions.IguanaException;
-import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -40,38 +34,14 @@ public class MainController {
 	 * @throws IOException 
 	 */
 	public static void main(String[] argc) throws IOException{
-		if(argc.length==1){
-			Config.getInstance(argc[0]);
+		if(argc.length != 1){
+			LOGGER.error("Please provide the path to an IGUANA suite file as single argument.");
 		}
+		Config.getInstance(argc[0]);
 		MainController controller = new MainController();
-		if(argc.length>0) {
-			controller.start(argc[0]);
-		}
-		else {
-			controller.start();
-		}
+		controller.start(argc[0]);
 	}
-	
-	/**
-	 * Will start the controlling, receiving of task properties, 
-	 * sending the {@link COMMON.TASK_FINISHED_MESSAGE} to the main controller 
-	 */
-	public void start(){		
-		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
 
-		ConfigManager cmanager = new ConfigManager();
-		DefaultConsumer consumer = new DefaultConsumer(cmanager);
-		Thread configThread = new Thread(cmanager);
-		//configThread.start();
-		try {
-			consumer.init(host, COMMON.CONFIG2MC_QUEUE_NAME);
-		} catch (IguanaException e) {
-			LOGGER.error("Could not initalize and start communicator with Host "+host
-					+" and consume queue "+COMMON.CONFIG2MC_QUEUE_NAME, e);
-			consumer.close();
-		}
-	}
-	
 	public void start(String configFile) throws IOException{		
 		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
 

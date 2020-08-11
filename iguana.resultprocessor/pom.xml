@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw</groupId>
 	<artifactId>iguana.resultprocessor</artifactId>
-	<version>2.1.1</version>
+	<version>3.0.0</version>
 	<name>Iguana ResultProcessor</name>
 	<description>Processing, aggregating and store results from Iguanas core.</description>
 	<licenses>
@@ -32,12 +32,6 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.rabbitmq</groupId>
-			<artifactId>amqp-client</artifactId>
-			<version>4.8.0</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-iri</artifactId>
@@ -72,7 +66,7 @@
 		<dependency>
 			<groupId>org.aksw</groupId>
 			<artifactId>iguana.commons</artifactId>
-			<version>2.1.0</version>
+			<version>3.0.0</version>
 		</dependency>
 	</dependencies>
 

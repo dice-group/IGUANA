@@ -12,11 +12,11 @@ import org.aksw.iguana.commons.config.Config;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.exceptions.IguanaException;
 import org.aksw.iguana.commons.sender.ISender;
-import org.aksw.iguana.commons.sender.impl.DefaultSender;
 import org.aksw.iguana.tp.consumer.impl.DefaultConsumer;
 import org.aksw.iguana.tp.tasks.TaskFactory;
 import org.aksw.iguana.tp.tasks.TaskManager;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,22 +53,23 @@ public class TaskController {
 	 * Will start the controlling, receiving of task properties, 
 	 * sending the {@link COMMON.TASK_FINISHED_MESSAGE} to the main controller 
 	 */
-	public void start(){		
-		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
-
-		TaskManager tmanager = new TaskManager(host, COMMON.CORE2RP_QUEUE_NAME);
-		DefaultConsumer consumer = new DefaultConsumer(tmanager);
-		ISender sender = new DefaultSender();
-		
-		Communicator communicator = new Communicator(consumer, sender);
-		consumer.setParent(communicator);
-		try {
-			communicator.init(host, COMMON.MC2TP_QUEUE_NAME, COMMON.TP2MC_QUEUE_NAME);
-		} catch (IguanaException e) {
-			LOGGER.error("Could not initalize and start communicator with Host "+host
-					+" consume queue "+COMMON.MC2TP_QUEUE_NAME+" and sender queue"+COMMON.TP2MC_QUEUE_NAME, e);
-			communicator.close();
-		}
+	public void start(){
+		throw new NotImplementedException("This was once done by Rabbit.");
+//		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
+//
+//		TaskManager tmanager = new TaskManager(host, COMMON.CORE2RP_QUEUE_NAME);
+//		DefaultConsumer consumer = new DefaultConsumer(tmanager);
+//		ISender sender = new DefaultSender();
+//
+//		Communicator communicator = new Communicator(consumer, sender);
+//		consumer.setParent(communicator);
+//		try {
+//			communicator.init(host, COMMON.MC2TP_QUEUE_NAME, COMMON.TP2MC_QUEUE_NAME);
+//		} catch (IguanaException e) {
+//			LOGGER.error("Could not initalize and start communicator with Host "+host
+//					+" consume queue "+COMMON.MC2TP_QUEUE_NAME+" and sender queue"+COMMON.TP2MC_QUEUE_NAME, e);
+//			communicator.close();
+//		}
 	}
 	
 	/**
