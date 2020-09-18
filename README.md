@@ -7,7 +7,7 @@
 
 # IGUANA
 
-<img src = "https://github.com/AKSW/IGUANA/raw/develop/images/IGUANA_logo.png" alt = "IGUANA Logo" width = "400" align = "center">
+<img src = "https://github.com/dice-group/IGUANA/raw/master/images/IGUANA_logo.png" alt = "IGUANA Logo" width = "400" align = "center">
 
 ## Youtube Tutorials:
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/WlajBxEtCNI/0.jpg)](https://www.youtube.com/watch?v=WlajBxEtCNI&list=PLXLLzxwVkWOd1m27TZ01F843McnmlrqJy)
