@@ -91,21 +91,21 @@
     <owl:Class rdf:about="&iont;metric/QPS">
 	<rdfs:label>QPS Metric</rdfs:label>
 	<rdfs:comment xml:lang="en">Queries Per Second Metric. Annotates a Task or Worker if they use this metric.</rdfs:comment>
-	<rdf:subClassOf rdf:resource="&iont;Metric" />
+        <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
 
     
     <owl:Class rdf:about="&iont;metric/QMPH">
 	<rdfs:label>QMPH Metric</rdfs:label>
 	<rdfs:comment xml:lang="en">Query Mixes Per Hour. Annotates a Task or Worker if they use this metric.</rdfs:comment>
-        <rdf:subClassOf rdf:resource="&iont;Metric" />
+        <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
 
     
     <owl:Class rdf:about="&iont;metric/NoQPH">
 	<rdfs:label>NoQPH Metric</rdfs:label>
 	<rdfs:comment xml:lang="en">Number of Queries Per Hour. Annotates a Task or Worker if they use this metric.</rdfs:comment>    
-        <rdf:subClassOf rdf:resource="&iont;Metric" />
+        <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
 
     
@@ -160,11 +160,12 @@
     <rdfs:range rdf:resource="&iont;Worker"/>
   </owl:ObjectProperty>  
 
+
   <owl:ObjectProperty rdf:about="&iprop;metric">
         <rdfs:label>metric</rdfs:label>
 	<rdfs:comment xml:lang="en">Annotates a Task or Worker with a Metric. The Metric itself is provided using the Property, this just annotates the task/worker to provide these results.</rdfs:comment>
-    <rdfs:domain rdf:resource="&iont;Worker"/>
-    <rdfs:domain rdf:resource="&iont;Task"/>
+    	<rdfs:domain rdf:resource="&iont;Worker"/>
+    	<rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:range rdf:resource="&iont;Metric"/>
   </owl:ObjectProperty>  
   
@@ -369,7 +370,7 @@
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
   </owl:DatatypeProperty> 
  
-  <owl:DatatypeProperty rdf:about="&rdfs;QMPH">
+  <owl:DatatypeProperty rdf:about="&iprop;QMPH">
       	<rdfs:label>QMPH</rdfs:label>
 	<rdfs:comment xml:lang="en">The query mixes per hour value</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Worker"/>
@@ -377,7 +378,7 @@
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
   </owl:DatatypeProperty>     
   
-  <owl:DatatypeProperty rdf:about="&rdfs;NoQPH">
+  <owl:DatatypeProperty rdf:about="&iprop;NoQPH">
       	<rdfs:label>NoQPH</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of queries per hour value</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Worker"/>
@@ -385,7 +386,7 @@
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
   </owl:DatatypeProperty>     
   
-  <owl:DatatypeProperty rdf:about="&rdfs;AvgQPS">
+  <owl:DatatypeProperty rdf:about="&iprop;AvgQPS">
       	<rdfs:label>AvgQPS</rdfs:label>
 	<rdfs:comment xml:lang="en">The average queries per second value</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Worker"/>
@@ -394,7 +395,7 @@
   </owl:DatatypeProperty>
   
     
-  <owl:DatatypeProperty rdf:about="&rdfs;NoQ">
+  <owl:DatatypeProperty rdf:about="&iprop;NoQ">
       	<rdfs:label>NoQ</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of successfully executed queries value</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Worker"/>
