@@ -1,8 +1,9 @@
 package org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.lang.ResultProcessor;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.lang.SPARQLResultProcessor;
+import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
+
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
@@ -29,7 +30,7 @@ public abstract class HttpWorker extends AbstractWorker {
 
     private ExecutorService resultProcessorService = Executors.newFixedThreadPool(5);
     private ConcurrentMap<QueryResultHashKey, Long> processedResults = new ConcurrentHashMap<>();
-    protected ResultProcessor resultProcessor = new SPARQLResultProcessor();
+    protected LanguageProcessor resultProcessor = new SPARQLLanguageProcessor();
 
     public static final String XML_RESULT_ELEMENT_NAME = "result";
     public static final String XML_RESULT_ROOT_ELEMENT_NAME = "results";

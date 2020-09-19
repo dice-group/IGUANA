@@ -26,7 +26,7 @@
     xmlns:iont="http://iguana-benchmark.eu/class/"
     >
     
-<owl:Ontology rdf:about="https://dice-research.org/ontologies/iguana/3.0.0/iguana.owl">
+<owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/3.0.0/iguana.owl">
         <rdfs:label xml:lang="en">Iguana results Ontologie</rdfs:label>
         <owl:versionInfo>3.0.0</owl:versionInfo>
         <dcterms:created>2020/09/18</dcterms:created>

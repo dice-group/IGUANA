@@ -1,12 +1,17 @@
 package org.aksw.iguana.cc.query.impl;
 
+import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.aksw.iguana.cc.lang.QueryWrapper;
+import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.cc.query.AbstractWorkerQueryHandler;
 import org.aksw.iguana.cc.tasks.impl.stresstest.worker.Worker;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.cc.utils.QueryStatistics;
+import org.aksw.iguana.commons.factory.TypedFactory;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.apache.jena.atlas.io.IO;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.*;
@@ -38,6 +43,9 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 
 	private File[] queryFiles;
 
+	protected LanguageProcessor langProcessor = new SPARQLLanguageProcessor();
+
+
 	private int hashcode;
 
 	/**
@@ -47,6 +55,11 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	 */
 	public InstancesQueryHandler(List<Worker> workers) {
 		super(workers);
+	}
+
+	public InstancesQueryHandler(List<Worker> workers, String lang) {
+		super(workers);
+		langProcessor = new TypedFactory<LanguageProcessor>().create(lang, new HashMap<Object, Object>());
 	}
 
 	@Override
@@ -142,42 +155,17 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 
 	@Override
 	public Model generateTripleStats(String taskID) {
-		QueryStatistics qs = new QueryStatistics();
-
-		Model model = ModelFactory.createDefaultModel();
-
-
+		List<QueryWrapper> queries = new ArrayList<QueryWrapper>();
 		for (File queryFile : queryFiles) {
 			try {
 				String query = FileUtils.readLineAt(0, queryFile);
-				Query q = QueryFactory.create(query);
-				qs.getStatistics(q);
-				QueryStatistics qs2 = new QueryStatistics();
-				qs2.getStatistics(q);
-
-				Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + hashcode + "/" + queryFile.getName());
-				model.add(subject, RDF.type , Vocab.queryClass);
-				model.add(subject, Vocab.rdfsID, queryFile.getName().replace("sparql", ""));
-				model.add(subject, RDFS.label, query);
-				model.add(subject, Vocab.aggrProperty, model.createTypedLiteral(qs2.aggr));
-				model.add(subject, Vocab.filterProperty, model.createTypedLiteral(qs2.filter));
-				model.add(subject, Vocab.groupByProperty, model.createTypedLiteral(qs2.groupBy));
-				model.add(subject, Vocab.havingProperty, model.createTypedLiteral(qs2.having));
-				model.add(subject, Vocab.triplesProperty, model.createTypedLiteral(qs2.triples));
-				model.add(subject, Vocab.offsetProperty, model.createTypedLiteral(qs2.offset));
-				model.add(subject, Vocab.optionalProperty, model.createTypedLiteral(qs2.optional));
-				model.add(subject, Vocab.orderByProperty, model.createTypedLiteral(qs2.orderBy));
-				model.add(subject, Vocab.unionProperty, model.createTypedLiteral(qs2.union));
-
-			} catch (IOException e) {
+				queries.add(new QueryWrapper(query, queryFile.getName()));
+			}catch(IOException e){
 				LOGGER.error("[QueryHandler: {{}}] Cannot read file {{}}", this.getClass().getName(),
 						queryFile.getName());
 			}
-			catch(Exception e){
-				LOGGER.error("Query statistics could not be created. Not using SPARQL? Will not attach them to results.", e);
-			}
 		}
-		return model;
+		return langProcessor.generateTripleStats(queries, hashcode+"", taskID);
 	}
 
 }

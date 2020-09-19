@@ -1,5 +1,6 @@
 package org.aksw.iguana.rp.metrics.impl;
 
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
 import org.apache.jena.rdf.model.*;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
+@Shorthand("NoQ")
 public class NoQMetric extends AbstractMetric {
 
     protected static final Object TOTAL_TIME = "totalTime";

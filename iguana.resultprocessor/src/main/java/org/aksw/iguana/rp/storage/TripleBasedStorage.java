@@ -4,7 +4,6 @@
 package org.aksw.iguana.rp.storage;
 
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.data.Triple;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
@@ -23,9 +22,9 @@ import java.util.Set;
  */
 public abstract class TripleBasedStorage implements Storage {
 
-	protected String baseUri = CONSTANTS.BASE_URI;
-	private String resource = CONSTANTS.RES_BASE_URI;
-	private String properties = CONSTANTS.PROP_BASE_URI;
+	protected String baseUri = COMMON.BASE_URI;
+	private String resource = COMMON.RES_BASE_URI;
+	private String properties = COMMON.PROP_BASE_URI;
 
 
 	protected Model metricResults = ModelFactory.createDefaultModel();

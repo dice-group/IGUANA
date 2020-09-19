@@ -1,8 +1,8 @@
 package org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.lang.ResultProcessor;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
@@ -37,7 +37,7 @@ public class HttpGetWorker extends HttpWorker {
     public HttpGetWorker(String taskID, Connection connection, String queriesFile, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType, Integer workerID) {
         super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType==null?"HttpGetWorker":workerType, workerID);
         if(language!=null){
-            resultProcessor = new TypedFactory< ResultProcessor>().create(language, new HashMap<Object, Object>());
+            resultProcessor = new TypedFactory<LanguageProcessor>().create(language, new HashMap<Object, Object>());
         }
         if(parameterName!=null){
             parameter = parameterName;
@@ -55,7 +55,7 @@ public class HttpGetWorker extends HttpWorker {
         Instant start = Instant.now();
 
         try {
-            String qEncoded = URLEncoder.encode(query);
+            String qEncoded = URLEncoder.encode(query, "UTF-8");
             String addChar = "?";
             if (con.getEndpoint().contains("?")) {
                 addChar = "&";

@@ -1,13 +1,26 @@
-package org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.lang;
+package org.aksw.iguana.cc.lang.impl;
 
+import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.HttpWorker;
+import org.aksw.iguana.cc.utils.QueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
+import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,21 +36,47 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
-/**
- * The ResultProcessor for the SPARQL language, will count the result size correctly if sparql-results+json or sparql-results+xml
- * otherwise will simply count lines.
- */
 @Shorthand("lang.SPARQL")
-public class SPARQLResultProcessor implements ResultProcessor {
+public class SPARQLLanguageProcessor implements LanguageProcessor {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SPARQLResultProcessor.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(SPARQLLanguageProcessor.class);
 
     public static final String XML_RESULT_ELEMENT_NAME = "result";
     public static final String XML_RESULT_ROOT_ELEMENT_NAME = "results";
     public static final String QUERY_RESULT_TYPE_JSON = "application/sparql-results+json";
     public static final String QUERY_RESULT_TYPE_XML = "application/sparql-results+xml";
 
+
+    @Override
+    public Model generateTripleStats(List<QueryWrapper> queries, String resourcePrefix, String taskID) {
+        Model model = ModelFactory.createDefaultModel();
+        for(QueryWrapper wrappedQuery : queries) {
+            try {
+                Query q = QueryFactory.create(wrappedQuery.getQuery().toString());
+                QueryStatistics qs2 = new QueryStatistics();
+                qs2.getStatistics(q);
+
+                Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + "/" + wrappedQuery.getId());
+                model.add(subject, RDF.type, Vocab.queryClass);
+                model.add(subject, Vocab.rdfsID, wrappedQuery.getId().replace("sparql", ""));
+                model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
+                model.add(subject, Vocab.aggrProperty, model.createTypedLiteral(qs2.aggr));
+                model.add(subject, Vocab.filterProperty, model.createTypedLiteral(qs2.filter));
+                model.add(subject, Vocab.groupByProperty, model.createTypedLiteral(qs2.groupBy));
+                model.add(subject, Vocab.havingProperty, model.createTypedLiteral(qs2.having));
+                model.add(subject, Vocab.triplesProperty, model.createTypedLiteral(qs2.triples));
+                model.add(subject, Vocab.offsetProperty, model.createTypedLiteral(qs2.offset));
+                model.add(subject, Vocab.optionalProperty, model.createTypedLiteral(qs2.optional));
+                model.add(subject, Vocab.orderByProperty, model.createTypedLiteral(qs2.orderBy));
+                model.add(subject, Vocab.unionProperty, model.createTypedLiteral(qs2.union));
+            }catch(Exception e){
+                LOGGER.error("Query statistics could not be created. Not using SPARQL? Will not attach them to results.", e);
+            }
+        }
+        return model;
+    }
 
     public static String getContentTypeVal(Header header) {
         for (HeaderElement el : header.getElements()) {

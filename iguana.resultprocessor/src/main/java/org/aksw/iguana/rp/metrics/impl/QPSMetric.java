@@ -148,7 +148,11 @@ public class QPSMetric extends AbstractMetric {
 			Object[] currentResults = (Object[])map.get(queryID);
 			Object[] newResults = new Object[currentResults.length];
 			for(int i=0;i<currentResults.length;i++){
-				if(currentResults[i] instanceof Long){
+				if(i==3){
+					//Result Size doesn't make sense to sum up
+					newResults[i]=resArr[i];
+				}
+				else if(currentResults[i] instanceof Long){
 					newResults[i] = ((Number)currentResults[i]).longValue()+((Number)resArr[i]).longValue();
 				}
 				else if(currentResults[i] instanceof Integer) {

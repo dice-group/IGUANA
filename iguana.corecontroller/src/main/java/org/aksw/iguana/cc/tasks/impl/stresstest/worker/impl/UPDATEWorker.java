@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.lang.SPARQLResultProcessor;
+import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -46,7 +46,7 @@ public class UPDATEWorker extends HttpWorker {
 
 	public UPDATEWorker(String taskID, Connection connection, String queriesFile,@Nullable String timerStrategy, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
 		super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, "UPDATEWorker", workerID);
-		resultProcessor = new SPARQLResultProcessor();
+		resultProcessor = new SPARQLLanguageProcessor();
 		setUpdateTimer(timerStrategy);
 	}
 
