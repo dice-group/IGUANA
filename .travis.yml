@@ -6,11 +6,6 @@ branches:
 
 sudo: enabled
 
-addons:
-  apt:
-    packages:
-      - oracle-java11-installer
-      
 jdk:  
  - oraclejdk11
 
