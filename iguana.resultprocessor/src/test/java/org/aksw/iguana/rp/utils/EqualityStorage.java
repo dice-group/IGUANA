@@ -38,7 +38,12 @@ public class EqualityStorage implements Storage{
 		lastCheck = tripleArrEqualence(data, goldenTriples[run]);
 		run++;
 	}
-	
+
+	@Override
+	public void addData(Model data) {
+
+	}
+
 	private boolean tripleArrEqualence(Triple[] triples, Triple[] expects){
 		if(triples.length!=expects.length){
 			return false;

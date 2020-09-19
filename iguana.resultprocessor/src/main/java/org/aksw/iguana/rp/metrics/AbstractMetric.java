@@ -6,10 +6,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.data.Triple;
+import org.aksw.iguana.rp.data.TripleFactory;
 import org.aksw.iguana.rp.storage.StorageManager;
+import org.aksw.iguana.rp.vocab.Vocab;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 
 /**
  * Abstract Metric class which implements the method sendData 
@@ -20,7 +26,7 @@ import org.aksw.iguana.rp.storage.StorageManager;
  */
 public abstract class AbstractMetric implements Metric{
 
-	protected StorageManager storageManager;
+	protected StorageManager storageManager = StorageManager.getInstance();
 	
 	protected Properties metaData = new Properties();
 	
@@ -353,8 +359,66 @@ public abstract class AbstractMetric implements Metric{
 		}
 		addDataToContainer(extra, tmp);
 	}
-	
+
+
+	protected Statement getConnectingStatement(Resource subject) {
+		return ResourceFactory.createStatement(getTaskResource(), Vocab.workerResult, subject);
+	}
+
+	public Resource getTaskResource(){
+		String subject = metaData.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
+		return ResourceFactory.createResource(COMMON.RES_BASE_URI+subject);
+	}
+
+	public Resource getSubject(Properties recv){
+		String id = this.getSubjectFromExtraMeta(recv);
+		return ResourceFactory.createResource(COMMON.RES_BASE_URI+id);
+	}
+
+	public Property getMetricProperty(){
+		return ResourceFactory.createProperty(COMMON.PROP_BASE_URI+shortName);
+	}
+
+	public void sendData(Model m){
+		this.storageManager.addData(m);
+	}
+
 	public void close() {
+		//Add metric description and worker class
+		Model m = ModelFactory.createDefaultModel();
+		String label = this.getClass().getCanonicalName();
+		if(this.getClass().isAnnotationPresent(Shorthand.class)){
+			label = getClass().getAnnotation(Shorthand.class).value();
+		}
+		Literal labelRes = ResourceFactory.createPlainLiteral(label);
+		Literal commentRes = ResourceFactory.createPlainLiteral(this.description);
+		Resource classRes = ResourceFactory.createResource(COMMON.CLASS_BASE_URI+"metric/"+label);
+		Resource metricRes = ResourceFactory.createResource(COMMON.RES_BASE_URI+this.getShortName());
+		Resource metricClass = ResourceFactory.createResource(COMMON.CLASS_BASE_URI+this.getShortName());
+
+		m.add(metricRes, RDFS.label, this.getName());
+		m.add(metricRes, RDFS.comment, commentRes);
+		//adding type iguana:metric
+		m.add(metricRes, RDF.type, Vocab.metricClass);
+		//adding type iguana:metric/SPECIFIC_METRIC_CLASS
+		m.add(metricRes, RDF.type, metricClass);
+
+		for(Properties key : dataContainer.keySet()) {
+
+			Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI+getSubjectFromExtraMeta(key));
+			m.add(subject,
+					RDF.type,
+					Vocab.workerClass);
+			for(Object k : key.keySet()) {
+				m.add(subject, ResourceFactory.createProperty(COMMON.PROP_BASE_URI+k), ResourceFactory.createTypedLiteral(key.get(k)));
+			}
+			m.add(subject, Vocab.worker2metric, metricRes);
+		}
+		m.add(getTaskResource(), Vocab.worker2metric, metricRes);
+
+		this.storageManager.addData(m);
+		this.storageManager.commit();
+
 		this.dataContainer.clear();
 	}
 }

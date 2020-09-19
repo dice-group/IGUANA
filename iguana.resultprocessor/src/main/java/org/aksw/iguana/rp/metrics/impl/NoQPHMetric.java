@@ -5,8 +5,10 @@ package org.aksw.iguana.rp.metrics.impl;
 
 import java.util.Properties;
 
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
+import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author f.conrads
  *
  */
+@Shorthand("NoQPH")
 public class NoQPHMetric extends AbstractMetric {
 
 	protected static final Object TOTAL_TIME = "totalTime";
@@ -60,19 +63,28 @@ public class NoQPHMetric extends AbstractMetric {
 	 */
 	@Override
 	public void close() {
- 
+		callbackClose();
+		super.close();
+		
+	}
+
+	protected void callbackClose() {
+		Model m = ModelFactory.createDefaultModel();
+		Property property = getMetricProperty();
+		Double sum = 0.0;
 		for(Properties key : dataContainer.keySet()){
 			Double totalTime = (Double) dataContainer.get(key).get(TOTAL_TIME);
 			Integer success = (Integer) dataContainer.get(key).get(TOTAL_SUCCESS);
 			Double noOfQueriesPerHour = hourInMS*success*1.0/totalTime;
-			Properties results = new Properties();
-			results.put("noOfQueriesPerHour", noOfQueriesPerHour);
-			sendTriples(results, key);
+			sum+=noOfQueriesPerHour;
+			Resource subject = getSubject(key);
+			m.add(getConnectingStatement(subject));
+			m.add(subject, property, ResourceFactory.createTypedLiteral(noOfQueriesPerHour));
 		}
-		super.close();
-		
+		m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sum));
+		sendData(m);
 	}
-		
 
 
-}
+
+	}

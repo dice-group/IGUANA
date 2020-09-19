@@ -3,11 +3,14 @@
  */
 package org.aksw.iguana.cc.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.configuration.Configuration;
 
 /**
  * Manages an incoming Configuration and starts the corresponding {@link org.aksw.iguana.cc.config.IguanaConfig} 
@@ -15,52 +18,39 @@ import org.apache.commons.configuration.Configuration;
  * @author f.conrads
  *
  */
-public class ConfigManager implements Runnable {
+public class ConfigManager {
 
-	private List<IguanaConfig> configs = new LinkedList<IguanaConfig>();
-	
-	/**
-	 * Will receive a {@link org.apache.commons.configuration.Configuration} and add a new IguanConfig to the Queue
-	 * @param configuration
-	 */
-	public void receiveData(Configuration configuration) {
-		IguanaConfig newConfig = new IguanaConfig();
-		newConfig.setConfig(configuration);
-		configs.add(newConfig);
-		startConfig();
-	}
-	
-	/**
-	 * Start the next Config
-	 */
-	public void startConfig() {
-		if(!configs.isEmpty()) {
-			//pop the earliest config 
-			IguanaConfig config = configs.remove(0);
-			//start the config
-			try {
-				config.start();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
+	private Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 
 	/**
-	 * Endless loop.
-	 * Will execute All available {@link org.aksw.iguana.cc.config.IguanaConfig} after each other. 
-	 */
-	public void startConfigs() {
-		//FIXME
-		while(true) {
-			startConfig();
+	 * Will receive a JSON or YAML configuration and executes the configuration as an Iguana Suite
+     * @param configuration
+     * @param validate checks if error should be thrown if it validates the configuration given the iguana-schema.json schema
+     */
+	public void receiveData(File configuration, Boolean validate) throws IOException {
+
+		IguanaConfig newConfig = IguanaConfigFactory.parse(configuration, validate);
+		if(newConfig==null){
+			return;
 		}
+		startConfig(newConfig);
 	}
-	
-	@Override
-	public void run() {
-		startConfigs();
+
+
+
+	/**
+	 * Starts the Config
+	 */
+	public void startConfig(IguanaConfig config) {
+		try {
+			config.start();
+		} catch (IOException e) {
+			LOGGER.error("Could not start config due to an IO Exception", e);
+		}
+
 	}
+
+
 
 }

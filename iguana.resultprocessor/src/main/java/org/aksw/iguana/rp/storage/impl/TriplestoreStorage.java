@@ -3,6 +3,7 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.http.auth.AuthScope;
@@ -29,6 +30,7 @@ import java.util.Properties;
  * @author f.conrads
  *
  */
+@Shorthand("TriplestoreStorage")
 public class TriplestoreStorage extends TripleBasedStorage {
 	
 	private UpdateRequest blockRequest = UpdateFactory.create();

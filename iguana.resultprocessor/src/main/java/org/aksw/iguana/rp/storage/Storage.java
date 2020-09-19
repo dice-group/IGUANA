@@ -19,7 +19,14 @@ public interface Storage {
 	 * @param data the actual data to add
 	 */
 	public void addData(Properties meta, Triple[] data);
-	
+
+	/**
+	 * Add Triples as they are
+	 * @param data
+	 */
+	public void addData(Model data);
+
+
 	/**
 	 * Add meta data from the experiment task
 	 * for example: Query ID and Query text, ExperimentID, WorkerID,...

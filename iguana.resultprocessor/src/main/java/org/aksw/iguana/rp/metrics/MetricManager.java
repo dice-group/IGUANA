@@ -3,10 +3,7 @@
  */
 package org.aksw.iguana.rp.metrics;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +21,17 @@ public class MetricManager {
 			.getLogger(MetricManager.class);
 	
 	private Set<Metric> metrics = new HashSet<Metric>();
-	
-	/**
+
+	private static MetricManager instance;
+
+    public synchronized static MetricManager getInstance() {
+		if (instance == null) {
+			instance = new MetricManager();
+		}
+		return instance;
+    }
+
+    /**
 	 * WIll add a metric to the manager
 	 * @param metric
 	 */
@@ -60,7 +66,7 @@ public class MetricManager {
 			try{
 				m.receiveData(p);
 			}catch(Exception e){
-				LOGGER.warn("Could not use metric "+m.getShortName()+", Cause: "+e);
+				LOGGER.warn("Could not use metric {}, Cause: {}",m.getShortName(),e);
 				remove.add(m);
 			}
 		}
@@ -91,12 +97,14 @@ public class MetricManager {
 				m.getStorageManager().commit();
 				
 			}catch(Exception e){
-				LOGGER.warn("Could not use metric "+m.getShortName()+", Cause: "+e);
-				//remove.add(m);
-				e.printStackTrace();
+				LOGGER.error("Could not use metric "+m.getShortName()+".  Cause: {}",e);
+
 			}
 		}
 		metrics.removeAll(remove);
 	}
-	
+
+    public void addMetrics(List<Metric> metrics) {
+		this.metrics.addAll(metrics);
+    }
 }

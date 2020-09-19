@@ -9,30 +9,15 @@ sudo: enabled
 addons:
   apt:
     packages:
-      - oracle-java8-installer
+      - oracle-java11-installer
       
 jdk:  
- - oraclejdk8
+ - oraclejdk11
 
 before_install:
- - wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
- - sudo dpkg -i erlang-solutions_1.0_all.deb
  - sudo apt-get update
- - sudo apt-get install emacs25-common
- - sudo apt-get install esl-erlang=1:19.3.6
- - sudo apt-get install -f maven erlang-nox
 
 install: true 
 
 script:
- - cd iguana.commons
  - mvn clean package install -Dmaven.javadoc.skip=true -B
- - cd .. 
- - cd iguana.taskprocessor
- - mvn clean package install -Dmaven.javadoc.skip=true
- - cd ..
- - cd iguana.resultprocessor
- - mvn clean package -Dmaven.javadoc.skip=true -B
- - cd ..
- - cd iguana.corecontroller
- - mvn clean package -Dmaven.javadoc.skip=true

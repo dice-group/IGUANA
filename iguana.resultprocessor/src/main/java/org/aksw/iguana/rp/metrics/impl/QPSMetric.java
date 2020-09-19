@@ -1,14 +1,16 @@
 package org.aksw.iguana.rp.metrics.impl;
 
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Queries Per Second Metric implementation
@@ -16,9 +18,20 @@ import java.util.Set;
  * @author f.conrads
  *
  */
+@Shorthand("QPS")
 public class QPSMetric extends AbstractMetric {
 
 	protected static Logger LOGGER = LoggerFactory.getLogger(QPSMetric.class);
+
+	private static Property queryProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"query");
+	private static Property failProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"failed");
+	private static Property succededProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"succeded");
+	private static Property ttProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"totalTime");
+	private static Property resultSize = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"resultSize");
+	private static Property timeOuts = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"timeOuts");
+	private static Property unknownException = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"unknownException");
+	private static Property wrongCodes = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"wrongCodes");
+	private static Property queryID = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryID");
 
 	protected long hourInMS = 3600000;
 	
@@ -28,6 +41,10 @@ public class QPSMetric extends AbstractMetric {
 				"QPS",
 				"Will calculate for each query the amount of how many times the query could be executed succesfully in one second."
 				+ "Further on it will save the totaltime of each query, the failure and the success");
+	}
+
+	public QPSMetric(String name, String shortName, String description) {
+		super(name, shortName, description);
 	}
 
 	@Override
@@ -77,45 +94,76 @@ public class QPSMetric extends AbstractMetric {
 
 	@Override
 	public void close() {
-		//for each query/extra put {qID:amount} to properties
-		for(Properties key : dataContainer.keySet()){
-			Properties value = dataContainer.get(key);
-			for(Object queryID : value.keySet()){
-				Object[] resArr = (Object[]) value.get(queryID);
-				Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
-			
-				//create Triple of results and use subject as object node
-				String subject = getSubjectFromExtraMeta(key)+"/"+queryID;
-				Set<String> isRes = new HashSet<String>();
-				isRes.add(subject);
-
-				Triple[] triples = new Triple[9];
-				//qps
-				triples[0] = new Triple(subject, "queriesPerSecond", qps);
-				//failed
-				triples[1] = new Triple(subject, "failed", (long)resArr[2]);
-				//succeded
-				triples[2] = new Triple(subject, "succeeded", (long)resArr[1]);
-
-				//totaltime
-				triples[3] = new Triple(subject, "totalTime", (double)resArr[0]);
-				triples[4] = new Triple(subject, "resultSize", "?");
-				if((long)resArr[3]!=-1L) {
-					triples[4] = new Triple(subject, "resultSize", (long)resArr[3]);
-				}
-				triples[5] = new Triple(subject, "timeouts", (long)resArr[4]);
-				triples[6] = new Triple(subject, "unknownExceptions", (long)resArr[5]);
-				triples[7] = new Triple(subject, "wrongCodes", (long)resArr[6]);
-
-				triples[8] = new Triple(subject, "queryID", (int)resArr[7] + "/" + queryID.toString());
-				triples[8].setObjectResource(true);
-				
-				Properties results = new Properties();
-				sendTriples(results, isRes, key, triples);
-			}
-		}
+		qpsClose();
 		super.close();
 		
+	}
+
+	protected void qpsClose() {
+		//for each query/extra put {qID:amount} to properties
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		Model m = ModelFactory.createDefaultModel();
+
+		for(Properties key : dataContainer.keySet()){
+			Properties value = dataContainer.get(key);
+			Resource subjectParent = getSubject(key);
+			m.add(getConnectingStatement(subjectParent));
+			addToModel(value, subjectParent, m, map);
+		}
+		Resource subjectParent = getTaskResource();
+		addToModel( map, subjectParent, m, null);
+		sendData(m);
+	}
+
+	private void addToModel(Map<Object, Object> value, Resource subjectParent, Model m, Map<Object, Object> map){
+		Property qpsProperty = getMetricProperty();
+
+		for(Object queryID : value.keySet()){
+			Object[] resArr = (Object[]) value.get(queryID);
+			if(map!=null)
+				mergeResults(map, queryID, resArr);
+			Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
+			Resource query = ResourceFactory.createResource(subjectParent.getURI()+"/"+queryID);
+			m.add(subjectParent, queryProperty, query);
+			m.add(query, qpsProperty, ResourceFactory.createTypedLiteral(qps));
+			m.add(query, ttProperty, ResourceFactory.createTypedLiteral((double)resArr[0]));
+			m.add(query, succededProperty, ResourceFactory.createTypedLiteral((long)resArr[1]));
+			m.add(query, failProperty, ResourceFactory.createTypedLiteral((long)resArr[2]));
+			if((long)resArr[3]!=-1L) {
+				m.add(query, resultSize, ResourceFactory.createTypedLiteral((long)resArr[3]));
+			}
+			else{
+				m.add(query, resultSize, ResourceFactory.createTypedLiteral("?"));
+			}
+			m.add(query, timeOuts, ResourceFactory.createTypedLiteral((long)resArr[4]));
+			m.add(query, unknownException, ResourceFactory.createTypedLiteral((long)resArr[5]));
+			m.add(query, wrongCodes, ResourceFactory.createTypedLiteral((long)resArr[6]));
+			m.add(query, QPSMetric.queryID, ResourceFactory.createResource(COMMON.RES_BASE_URI+(int)resArr[7]+ "/" + queryID.toString()));
+			m.add(query, RDF.type, ResourceFactory.createResource(COMMON.CLASS_BASE_URI+"ExecutedQuery"));
+		}
+	}
+
+	private void mergeResults(Map<Object, Object> map, Object queryID, Object[] resArr) {
+		if(map.containsKey(queryID)){
+			Object[] currentResults = (Object[])map.get(queryID);
+			Object[] newResults = new Object[currentResults.length];
+			for(int i=0;i<currentResults.length;i++){
+				if(currentResults[i] instanceof Long){
+					newResults[i] = ((Number)currentResults[i]).longValue()+((Number)resArr[i]).longValue();
+				}
+				else if(currentResults[i] instanceof Integer) {
+					newResults[i] = ((Number)currentResults[i]).intValue()+((Number)resArr[i]).intValue();
+				}
+				else{
+					//assume Double
+					newResults[i] = ((Number)currentResults[i]).doubleValue()+((Number)resArr[i]).doubleValue();
+				}
+			}
+			map.put(queryID, newResults);
+		}
+		else{
+			map.put(queryID, resArr);
+		}
 	}
 
 }

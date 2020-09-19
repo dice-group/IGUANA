@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
@@ -23,6 +24,8 @@ import org.slf4j.LoggerFactory;
  * @author f.conrads
  *
  */
+@Deprecated
+@Shorthand("EachQuery")
 public class EachQueryMetric extends AbstractMetric {
 
 	private Map<String, Long> queryRunMap = new HashMap<String, Long>();
@@ -49,10 +52,7 @@ public class EachQueryMetric extends AbstractMetric {
 		// properties
 		
 		String subject = getSubjectFromExtraMeta(p);
-//		Properties extraMeta = getExtraMeta(p);
-//		if (!extraMeta.isEmpty()) {
-//			subject += "/" + extraMeta.hashCode();
-//		}
+
 		
 		LOGGER.debug(this.getShortName() + " has received " + p);
 

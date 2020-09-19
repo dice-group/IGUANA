@@ -5,10 +5,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
 
+@Deprecated
+@Shorthand("Correctness")
 public class CorrectnessMetric extends AbstractMetric {
 
 	private static final int TP_RESULTS = 0;

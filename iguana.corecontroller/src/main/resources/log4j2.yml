@@ -1,0 +1,50 @@
+Configuration:
+  status: info
+  name: iguana
+  properties:
+    property:
+      name: filename
+      value: iguana.log
+  thresholdFilter:
+    level: debug
+  appenders:
+    Console:
+      name: STDOUT
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "%highlight{%d [%t] %p [%c] - <%m>%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=green bold, TRACE=blue}"
+        disableAnsi: false
+    File:
+      name: File
+      fileName: ${filename}
+      PatternLayout:
+        Pattern: "%d [%t] %p [%c] - <%m>%n"
+      Filters:
+        ThresholdFilter:
+          level: warn
+
+  Loggers:
+    logger:
+      - name: org.apache.http.client.protocol
+        level: error
+        additivity: true
+        AppenderRef:
+          - ref: STDOUT
+          - ref: File
+      - name: org.apache.http.impl
+        level: error
+        additivity: true
+        AppenderRef:
+          - ref: STDOUT
+          - ref: File
+      - name: org.apache.jena.riot
+        level: error
+        additivity: true
+        AppenderRef:
+          - ref: STDOUT
+          - ref: File
+    Root:
+      level: info
+      AppenderRef:
+        - ref: STDOUT
+        - ref: File

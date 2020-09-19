@@ -3,6 +3,7 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.jena.riot.RDFDataMgr;
@@ -24,6 +25,7 @@ import java.util.Properties;
  * @author f.conrads
  *
  */
+@Shorthand("NTFileStorage")
 public class NTFileStorage extends TripleBasedStorage {
 
 	private static final Logger LOGGER = LoggerFactory

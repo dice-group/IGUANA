@@ -2,14 +2,9 @@ package org.aksw.iguana.cc.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 
 import org.aksw.iguana.cc.config.ConfigManager;
-import org.aksw.iguana.commons.config.Config;
-import org.aksw.iguana.commons.constants.COMMON;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.io.FileUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,33 +29,30 @@ public class MainController {
 	 * @throws IOException 
 	 */
 	public static void main(String[] argc) throws IOException{
-		if(argc.length != 1){
-			LOGGER.error("Please provide the path to an IGUANA suite file as single argument.");
+		if(argc.length != 1 && argc.length !=2){
+			System.out.println("java -jar iguana.jar [--ignore-schema] suite.yml \n\tsuite.yml - The suite containing the benchmark configuration\n\t--ignore-schema - Will not validate configuration using the internal json schema\n");
+			return;
 		}
-		Config.getInstance(argc[0]);
+
 		MainController controller = new MainController();
-		controller.start(argc[0]);
+		String config =argc[0];
+		Boolean validate = true;
+		if(argc.length==2){
+			if(argc[0].equals("--ignore-schema")){
+				validate=false;
+			}
+			config = argc[1];
+		}
+		controller.start(config, validate);
 	}
 
-	public void start(String configFile) throws IOException{		
-		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
-
+	public void start(String configFile, Boolean validate) throws IOException{
 		ConfigManager cmanager = new ConfigManager();
-		PropertiesConfiguration config = new PropertiesConfiguration();
-		String configStr = FileUtils.readFileToString(new File(configFile));
-		System.out.println(configStr);
-		try(StringReader sreader = new StringReader(configStr)){
-			config.load(sreader);
-		} catch (ConfigurationException e1) {
-			LOGGER.error("Could not read configuration. Must ignore it... Sorry :(", e1);
-
-		} 
-		if (!config.isEmpty()) {
-			System.out.println("test");
-			cmanager.receiveData(config);
+		File f = new File(configFile);
+		if (f.length()!=0) {
+			cmanager.receiveData(f, validate);
 		} else {
-
-			LOGGER.error("Empty configuration. Must ignore it... Sorry :(");
+			LOGGER.error("Empty configuration.");
 
 		}
 

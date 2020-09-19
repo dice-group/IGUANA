@@ -22,10 +22,6 @@ CONFIGURATION
 -------------
 
 
-Further on if you want to use the live viewing option of the web controller you have to add
-
-    iguana.rp.useLive=true
-
 to define which metrics should be used simply add the following line
 to your properites
 

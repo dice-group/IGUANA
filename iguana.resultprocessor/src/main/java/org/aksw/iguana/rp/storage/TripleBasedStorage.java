@@ -4,8 +4,10 @@
 package org.aksw.iguana.rp.storage;
 
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.data.Triple;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
 import java.util.Calendar;
@@ -21,17 +23,21 @@ import java.util.Set;
  */
 public abstract class TripleBasedStorage implements Storage {
 
-	protected String baseUri = "http://iguana-benchmark.eu";
-	private String resource = baseUri + "/resource/";
-	private String properties = baseUri + "/properties/";
+	protected String baseUri = CONSTANTS.BASE_URI;
+	private String resource = CONSTANTS.RES_BASE_URI;
+	private String properties = CONSTANTS.PROP_BASE_URI;
+
 
 	protected Model metricResults = ModelFactory.createDefaultModel();
 
 	private String suiteClassUri = baseUri + "/class/Suite";
 	private String expClassUri = baseUri + "/class/Experiment";
 	private String taskClassUri = baseUri + "/class/Task";
+	private String conClassUri = baseUri + "/class/Connection";
+	private String datasetClassUri = baseUri + "/class/Dataset";
 
-	private String classUri = "http://www.w3.org/2000/01/rdf-schema#Class";
+
+	private String classUri = RDF.type.getURI();
 	private String rdfsUri = "http://www.w3.org/2000/01/rdf-schema#";
 	private String xsdUri = "http://www.w3.org/2001/XMLSchema#";
 
@@ -77,6 +83,8 @@ public abstract class TripleBasedStorage implements Storage {
 		String taskUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_ID_KEY);
 		String datasetUrl = getUrlWithResourcePrefix(p, COMMON.DATASET_ID_KEY);
 		String connUrl = getUrlWithResourcePrefix(p, COMMON.CONNECTION_ID_KEY);
+		String actualTaskID = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_CLASS_ID_KEY);
+
 
 		metricResults.add(createStatement(suiteUrl, getUrlWithPropertyPrefix("experiment"), expUrl, true));
 		metricResults.add(createStatement(suiteUrl, classUri, suiteClassUri, true));
@@ -84,11 +92,15 @@ public abstract class TripleBasedStorage implements Storage {
 		metricResults.add(createStatement(expUrl, getUrlWithPropertyPrefix("dataset"), datasetUrl, true));
 		metricResults.add(createStatement(expUrl, classUri, expClassUri, true));
 		metricResults.add(createStatement(taskUrl, getUrlWithPropertyPrefix("connection"), connUrl, true));
+		metricResults.add(createStatement(connUrl, classUri, conClassUri, true));
+		metricResults.add(createStatement(datasetUrl, classUri, datasetClassUri, true));
 		metricResults.add(createStatement(taskUrl, classUri, taskClassUri, true));
+		metricResults.add(createStatement(taskUrl, classUri, actualTaskID, true));
+
 		addExtraMetadata(p, taskUrl);
 		metricResults.add(metricResults.createResource(datasetUrl), RDFS.label, p.getProperty(COMMON.DATASET_ID_KEY));
 		metricResults.add(metricResults.createResource(connUrl), RDFS.label, p.getProperty(COMMON.CONNECTION_ID_KEY));
-
+		//TODO retrieve Metrics
 		if(p.containsKey(COMMON.QUERY_STATS)) {
 			Model queryStats = (Model) p.get(COMMON.QUERY_STATS);
 			metricResults.add(queryStats);
@@ -148,6 +160,10 @@ public abstract class TripleBasedStorage implements Storage {
 		String taskUrl = getUrlWithResourcePrefix(taskID);
 		metricResults.add(metricResults.add(metricResults.createResource(taskUrl),
 				ResourceFactory.createProperty(rdfsUri + "endDate"), metricResults.createTypedLiteral(cal)));
+	}
+
+	public void addData(Model data){
+		metricResults.add(data);
 	}
 
 	@Override

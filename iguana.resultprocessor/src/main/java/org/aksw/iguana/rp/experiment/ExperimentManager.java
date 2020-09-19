@@ -3,10 +3,8 @@ package org.aksw.iguana.rp.experiment;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.metrics.MetricFactory;
 import org.aksw.iguana.rp.metrics.MetricManager;
 import org.aksw.iguana.rp.storage.StorageManager;
 import org.slf4j.Logger;
@@ -14,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The ExperimentManager manages the incoming properties from the 
- * {@link org.aksw.iguana.rp.consumer.Consumer} and sort them to the correct experiments
+ * tasks and sort them to the correct experiments
  * One Experiment is simply a {@link org.aksw.iguana.rp.metrics.MetricManager}
  * 
  * @author f.conrads
@@ -28,10 +26,20 @@ public class ExperimentManager {
 	private MetricManager globalMetricManager;
 
 	private StorageManager storageManager;
-	
+
+	private static ExperimentManager instance;
+
+	public synchronized static ExperimentManager getInstance(){
+		if (instance == null) {
+			instance = new ExperimentManager(MetricManager.getInstance(), StorageManager.getInstance());
+		}
+		return instance;
+	}
+
+
 	/**
 	 * Initialize the ExperimentManager with the global {@link org.aksw.iguana.rp.metrics.MetricManager}
-	 * @param globalManager
+	 * @param globalMetricManager
 	 */
 	public ExperimentManager(MetricManager globalMetricManager, StorageManager storageManager){
 		this.globalMetricManager = globalMetricManager;
@@ -70,34 +78,13 @@ public class ExperimentManager {
 		}
 		//Get the Experiment task ID 
 		String taskID =  p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
-		System.out.println("test");
 		LOGGER.info("Got start flag for experiment task ID {}", taskID);
-		
-		MetricManager mmanager = new MetricManager();
-		//If property contains metrics add all to the experiment MetricManager
-		if(p.containsKey(COMMON.METRICS_PROPERTIES_KEY)){
-			Object o = p.get(COMMON.METRICS_PROPERTIES_KEY);
-			if(o instanceof Set<?>){
-				for(Object metric : (Set<?>) o){
-					mmanager.addMetric(MetricFactory.createMetric(metric.toString(), storageManager));
-				}
-			}
-			else{
-				LOGGER.warn("Metrics in received properties are not instance of Set<?>. Tip: Use Set<String>.");
-				LOGGER.info("Will only use global Metrics");
-			}
-		}
-		else{
-			//Otherwise
-			//Copy all metrics from global Manager into experiment manager
-			mmanager = MetricFactory.createManager(globalMetricManager);
-		}
-		
+
 		
 		//Add metricManager to experiments
-		experiments.put(taskID, mmanager);
-		
-		mmanager.addMetaData(p);
+		experiments.put(taskID, globalMetricManager);
+
+		globalMetricManager.addMetaData(p);
 		//check all the properties. (Queries, Results, Workers) and add them to the Storages
 		storageManager.addMetaData(p);
 		LOGGER.info("Will start experiment task with ID {} now.", taskID);
