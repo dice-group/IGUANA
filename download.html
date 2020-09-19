@@ -85,21 +85,16 @@
                             <li>
                                 <a href="index.html" >Home</a>
                             </li>
- 			    <li>
-                                <a href="about.html" >About</a>
-                            </li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Documentation <span class="caret"></span></a>
                                 <div class="dropdown-menu">
                                     <ul>
                                         <li><a href="javadoc/index.html">JavaDoc</a></li>
-                                        <li><a href="gettingstarted.html">Getting Started</a></li>
-                                       <li><a href="tutorials.html">Tutorials</a></li>
+                                        <li><a href="https://github.com/dice-group/IGUANA/wiki">Wiki</a></li>
                                     </ul>
                                 </div>
                             </li>
                             <li><a href="download.html">Installation</a></li>
-			    <li><a href="evaluation.html">Evaluations</a></li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Community <span class="caret"></span></a>
                                 <div class="dropdown-menu">
@@ -151,39 +146,34 @@
                                     <h2 class="blogpost-title">
                                     Download & Installation
                                     </h2>
-                                    <p>To Download Iguana you have currently two options.
-					<li><a href="#release">Download the release files (jars)</a></li>					
-					<li><a href="#sourcecode">Download the Source Code</a></li>
-                                        
-                                
-                                    </p>
+                                    
 				    <div id="release">
+				    <p>To Download Iguana download the release zip file here 
+                                    </p>
+                                    <a href="https://github.com/dice-group/IGUANA/releases" class="btn btn-dafault btn-details">Download</a>
 				    <h3>Release Files</h3> 
-					<p>Core Controller</p>
-					<a href="" class="btn btn-dafault btn-details">Download</a>
-					<p/>					
-					<p>Result Processor</p>
+					<p>The release files zip contains the iguana jar file, a start script and an example benchmark suite yaml file. 
+					 To adjust the configuration to your needs and create the benchmark you want have a look at our Wiki to create your configuration at.
+					</p>
+					<a href="https://github.com/dice-group/IGUANA/wiki" class="btn btn-dafault btn-details">Wiki</a>.	
+					<p>
+					The same example benchmark suite configuration can also be found at 
+					</p>
+					<a href="https://github.com/dice-group/IGUANA/blob/master/example-suite.yml" class="btn btn-dafault btn-details">Example Suite</a>.	
+					
 					<a href="" class="btn btn-dafault btn-details">Download</a>
 					<p/>	
-					<p>To execute the core controller use the following line. (The Core controller is a daemon process and the actual benchmark will be send later on)
+					<p>To execute your benchmark use either the start script </p>
 					<code>
-						~$ java -Xmx4g -jar iguana.corecontroller-VERSION.jar org.dice_group.iguana.cc.MainController &
+						~$ ./start iguana.yml &
 					</code>
-					<p>To execute the result processor use the following line. (The Result Processor is a daemon process)
+					<p>or</p> 
 					<code>
-						~$ java -Xmx4g -jar iguana.resultprocessor-VERSION.jar org.dice_group.iguana.rp.MainController &
+						~$ java -jar iguana.corecontroller-3.0.0.jar iguana.yml
 					</code>
+					
                                      </div>
-				    <h3 id="sourcecode">Source Code</h3> 
-					<p>You can Download the Source Code by cloning the repository of GitHub with the following command:  </p>                                  
-					<code>
-						~$ git clone -b master --single-branch https://github.com/AKSW/IGUANA.git
-					</code>
-					<p>Use maven to create the distribution</p>
-					<code>
-						~$ cd IGUANA </br>
-					 	~$ mvn clean package -Dmaven.test.skip=true
-					</code>
+				    
 
 
                                 </div>
@@ -197,11 +187,9 @@
                                         <h3 class="widget-head">Getting Started</h3>
                                         <ul>
                                             <li>
-                                                <a href="gettingstarted.html">Getting Started</a>
+                                                <a href="https://github.com/dice-group/IGUANA/wiki">Wiki</a>
                                             </li>
-                                            <li>
-                                                <a href="tutorials.html">Tutorials</a> 
-                                            </li>
+                                            
                                             <li>
                                                 <a href="javadoc/index.html">JavaDoc</a>
                                             </li>
@@ -224,7 +212,7 @@
                         <div class="col-md-12">
                             <div class="block">
                                 <h2 class="title wow fadeInDown" data-wow-delay=".3s" data-wow-duration="500ms">DOWNLOAD & INSTALLATION</h1>
-                                <p class="wow fadeInDown" data-wow-delay=".5s" data-wow-duration="500ms">If you need help getting started with Iguana visit <a href="gettingstarted.html">HERE</a><br></p>
+                                <p class="wow fadeInDown" data-wow-delay=".5s" data-wow-duration="500ms">If you need help getting started with Iguana visit <a href="https://github.com/dice-group/IGUANA/wiki">HERE</a><br></p>
                                 <a href="download.html" class="btn btn-default btn-contact wow fadeInDown" data-wow-delay=".7s" data-wow-duration="500ms">DOWNLOAD</a>
                             </div>
                         </div>
