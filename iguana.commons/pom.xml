@@ -80,6 +80,11 @@
 			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<version>0.9.9-RC1</version>
@@ -89,12 +94,12 @@
 	<distributionManagement>
 		<repository>
 			<id>maven.aksw.internal</id>
-			<url>http://maven.aksw.org/archiva/repository/internal</url>
+			<url>https://maven.aksw.org/archiva/repository/internal</url>
 		</repository>
 		<snapshotRepository>
 			<id>maven.aksw.snapshots</id>
 			<name>AKSW Snapshot Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -112,6 +117,9 @@
 					<compilerArgs>
 						<arg>-parameters</arg>
 					</compilerArgs>
+					<excludes>
+						<exclude>**/log4j2.yml</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>

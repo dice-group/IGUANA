@@ -1,5 +1,6 @@
 package org.aksw.iguana.commons.factory;
 
+import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.ParameterNames;
 import org.aksw.iguana.commons.annotation.Shorthand;
 
@@ -13,6 +14,11 @@ public class AnnotatedFactorizedObject extends FactorizedObject {
     @ParameterNames(names={"a","b","c"})
     public AnnotatedFactorizedObject(String a, String b, String c) {
         this.setArgs(new String[] {a, b, c});
+    }
+
+    @ParameterNames(names={"a","b"})
+    public AnnotatedFactorizedObject(String a, @Nullable String b) {
+        this.setArgs(new String[] {a, b==null?"wasNull":b});
     }
 
     public AnnotatedFactorizedObject() {

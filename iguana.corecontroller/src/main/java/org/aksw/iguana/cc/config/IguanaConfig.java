@@ -76,13 +76,13 @@ public class IguanaConfig {
 					String[] args = new String[] {dataset.getName(), con.getName(), taskID+""};
 					if(preScriptHook!=null){
 						LOGGER.info("Executing preScriptHook");
-						ScriptExecutor.exec(preScriptHook, args);
+						ScriptExecutor.execSafe(preScriptHook, args);
 					}
 					LOGGER.info("Executing Task [{}: {}, {}, {}]", taskID, dataset.getName(), con.getName(), task.getClassName());
 					controller.startTask(new String[]{suiteID, suiteID+"/"+expID.toString(), suiteID+"/"+expID.toString()+"/"+taskID.toString()}, dataset.getName(), con, task);
 					if(postScriptHook!=null){
 						LOGGER.info("Executing postScriptHook");
-						ScriptExecutor.exec(postScriptHook, args);
+						ScriptExecutor.execSafe(postScriptHook, args);
 					}
 				}
 			}

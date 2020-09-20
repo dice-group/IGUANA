@@ -135,6 +135,9 @@ public class TypedFactory <T>{
 	 */
 	public T create(String className, Map<Object, Object> map){
 		Class<? extends T> clazz;
+		if(className==null){
+			return null;
+		}
 		try {
 			clazz = (Class<? extends T>) ClassLoader
 					.getSystemClassLoader().loadClass(getClassName(className));
@@ -178,6 +181,7 @@ public class TypedFactory <T>{
 			} catch (InstantiationException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException
 					|  SecurityException e) {
+				//As we check that the COnstructor fits this shouldn't be thrown at all. Something very bad happend
 				LOGGER.error("Could not initialize class " + clazz.getName()
 						+ " with constructor.", e);
 				return null;
@@ -263,6 +267,7 @@ public class TypedFactory <T>{
 			} catch (InstantiationException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException
 					|  SecurityException e) {
+				//As we check that the Constructor fits this shouldn't be thrown at all. Something very bad happend
 				LOGGER.error("Could not initialize class " + clazz.getName()
 						+ " with constructor.", e);
 				return null;

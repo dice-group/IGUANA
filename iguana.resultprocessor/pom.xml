@@ -57,11 +57,7 @@
 			<artifactId>jena-core</artifactId>
 			<version>${jena.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.simpleframework</groupId>
-			<artifactId>simple</artifactId>
-			<version>5.1.6</version>
-		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -169,17 +165,17 @@
 		<repository>
 			<id>Apache Repo Central</id>
 			<name>Apache Repository</name>
-			<url>http://repo.maven.apache.org/maven2</url>
+			<url>https://repo.maven.apache.org/maven2</url>
 		</repository>
 		<repository>
 			<id>maven.aksw.internal</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/internal</url>
+			<url>https://maven.aksw.org/archiva/repository/internal</url>
 		</repository>
 		<repository>
 			<id>maven.aksw.snapshots</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 		</repository>
 	</repositories>
 

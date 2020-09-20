@@ -79,13 +79,13 @@ public class Stresstest extends AbstractTask {
 	}
 
 	//@ParameterNames(names={"workers", "queryHandler", "noOfQueryMixesPerHour"})
-	public Stresstest(ArrayList workers, LinkedHashMap queryHandler, Integer noOfQueryMixesPerHour) throws FileNotFoundException {
-		this(workers, queryHandler, null, noOfQueryMixesPerHour);
+	public Stresstest(ArrayList workers, LinkedHashMap queryHandler, Integer noOfQueryMixes) throws FileNotFoundException {
+		this(workers, queryHandler, null, noOfQueryMixes);
 	}
 
 	//@ParameterNames(names={"workers", "queryHandler", "warmup", "noOfQueryMixesPerHour"})
-	public Stresstest(ArrayList workers, LinkedHashMap queryHandler, LinkedHashMap warmup, Integer noOfQueryMixesPerHour) throws FileNotFoundException {
-		this.noOfQueryMixes=noOfQueryMixesPerHour.longValue();
+	public Stresstest(ArrayList workers, LinkedHashMap queryHandler, LinkedHashMap warmup, Integer noOfQueryMixes) throws FileNotFoundException {
+		this.noOfQueryMixes=noOfQueryMixes.longValue();
 		this.workerConfig = workers;
 		this.qhConfig = queryHandler;
 		this.warmupConfig = warmup;
@@ -203,7 +203,7 @@ public class Stresstest extends AbstractTask {
 
 			LOGGER.info("[TaskID: {{}}] Will shutdown and await termination in 5s.", taskID);
 			executor.awaitTermination(5, TimeUnit.SECONDS);
-			LOGGER.info("[TaskID: {{}}] Task completed.");
+			LOGGER.info("[TaskID: {{}}] Task completed.", taskID);
 		} catch (InterruptedException e) {
 			LOGGER.error("[TaskID: {{}}] Could not shutdown Threads/Workers due to ...", taskID);
 			LOGGER.error("... Exception: ", e);

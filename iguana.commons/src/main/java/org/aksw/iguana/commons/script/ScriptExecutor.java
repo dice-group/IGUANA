@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import org.apache.commons.exec.ExecuteException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to execute Shell Scripts
@@ -16,6 +18,8 @@ import org.apache.commons.exec.ExecuteException;
  *
  */
 public class ScriptExecutor {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ScriptExecutor.class);
 
 	/**
 	 * Will execute the given file with the provided arguments
@@ -41,6 +45,35 @@ public class ScriptExecutor {
 		return execute(shellCommand);
 	}
 
+	/**Checks if file contains arguments itself
+	 *
+	 * @param file
+	 * @param args
+	 * @return
+	 * @throws ExecuteException
+	 * @throws IOException
+	 */
+	public static int execSafe(String file, String[] args) throws ExecuteException, IOException{
+		String actualScript = file;
+		String[] args2 = args;
+		if(file.contains(" ")){
+
+			String[] providedArguments = file.split("\\s+");
+			args2 = new String[providedArguments.length-1+args.length];
+			actualScript=providedArguments[0];
+			int i=1;
+			for(i=1;i<providedArguments.length;i++){
+				args2[i-1]=providedArguments[i];
+			}
+			for(int j=0;j<args.length;j++){
+				args2[j+i-1]=args[j];
+			}
+
+		}
+
+		return exec(actualScript, args2);
+	}
+
 	private static int execute(String[] args)
 	{
 		ProcessBuilder processBuilder = new ProcessBuilder().redirectErrorStream(true);
@@ -52,16 +85,21 @@ public class ScriptExecutor {
 			BufferedReader reader = new BufferedReader(
 					new InputStreamReader(process.getInputStream()));
 
+			StringBuilder out = new StringBuilder();
 			int character;
-			while ((character = reader.read()) != -1)
+			while (process.isAlive()&&(character = reader.read()) != -1)
 			{
-				System.out.print((char)character);
+
+				out.append((char)character);
 			}
+			LOGGER.debug(out.toString());
 
 			exitVal = process.waitFor();
 
 		} catch (IOException | InterruptedException e) {
+			LOGGER.error("Script had thrown an error. ", e);
 			exitVal = -1;
+
 		}
 
 		return exitVal;
