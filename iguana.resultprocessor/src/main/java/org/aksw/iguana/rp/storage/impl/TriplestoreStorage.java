@@ -86,16 +86,7 @@ public class TriplestoreStorage extends TripleBasedStorage {
 		blockRequest = new UpdateRequest();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.aksw.iguana.rp.storage.Storage#getStorageInfo()
-	 */
-	@Override
-	public Properties getStorageInfo() {
-		//Only sets the endpoint to use for result viewing
-		Properties ret = new Properties();
-		ret.setProperty(CONSTANTS.STORAGE_ENDPOINT, endpoint);
-		return ret;
-	}
+
 
 	private HttpClient createHttpClient(){
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();

@@ -76,8 +76,6 @@ public class COMMON {
 
 	public static final String EXTRA_IS_RESOURCE_KEY = "setIsResource";
 
-	public static final String QUERY_ID = "queryID";
-
 	public static final String QUERY_STRING = "queryString";
 
 	public static final String DOUBLE_RAW_RESULTS = "doubleRawResults";
@@ -109,4 +107,5 @@ public class COMMON {
 	public static final String RES_BASE_URI = BASE_URI+"/resource/";
 	public static final String PROP_BASE_URI = BASE_URI+"/properties/";
 	public static final String CLASS_BASE_URI = BASE_URI+"/class/";
+    public static final String PENALTY = "penalty";
 }

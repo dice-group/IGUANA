@@ -1,16 +1,12 @@
 package org.aksw.iguana.rp.metrics;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+
 
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.config.CONSTANTS;
-import org.aksw.iguana.rp.data.Triple;
-import org.aksw.iguana.rp.data.TripleFactory;
 import org.aksw.iguana.rp.storage.StorageManager;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.jena.rdf.model.*;
@@ -81,15 +77,7 @@ public abstract class AbstractMetric implements Metric{
 		return this.shortName;
 	}
 	
-	/**
-	 * Will send the properties to the storageManager (thus to all the defined storages)
-	 * 
-	 * @param p
-	 */
-	protected void sendData(Properties p, Triple[] triples){
-		this.storageManager.addData(p, triples);
-	}
-	
+
 	/**
 	 * Will add the Meta Data to the Metric
 	 */
@@ -97,22 +85,7 @@ public abstract class AbstractMetric implements Metric{
 	public void setMetaData(Properties metaData){
 		this.metaData = metaData;
 	}
-	
-	/**
-	 * Get a light Meta Properties. </br>
-	 * 
-	 * setting METRICS_KEY: getShortName()</br>
-	 * setting EXPERIMENT_TASK_ID_KEY : taskID</br>
-	 * 
-	 * @return
-	 */
-	protected Properties getLightweightMeta(){
-		//Create a lightweight meta properties for the correct association
-		Properties meta = new Properties();
-		meta.setProperty(COMMON.METRICS_PROPERTIES_KEY, getShortName());
-		meta.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, metaData.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY));
-		return meta;
-	}
+
 	
 	/**
 	 * Will return the Properties Object with the associated key: EXTRA_META_KEY</br>
@@ -127,159 +100,7 @@ public abstract class AbstractMetric implements Metric{
 		return recv;
 	}
 	
-	/**
-	 * Will create {@link org.aksw.iguana.rp.data.Triple} Objects 
-	 * with the following structure </br>
-	 * subjectNode recv.key_1 recv.value_1</br>
-	 * subjectNode recv.key_2 recv.value_2</br>
-	 * ...
-	 *  
-	 * @param subjectNode
-	 * @param recv
-	 * @return
-	 */
-	protected Triple[] getExtraMeta(String subjectNode, Properties recv){
-		Properties meta = getExtraMeta(recv);
-		Triple[] triples = new Triple[meta.size()];
-		int i=0;
-		for(Object key : meta.keySet()){
-			Triple t = new Triple();
-			t.setSubject(subjectNode);
-			t.setPredicate(key.toString());
-			t.setObject(meta.get(key));
-			triples[i]=t;
-			i++;
-		}
-		return triples;
-	}
-	
-	/**
-	 * 
-	 * Will call the storageManager sendData method with the Lightweight Meta and the following created triples</br>
-	 * The subject node will be calculated by an empty {@link java.util.Properties} Object and the {@link #getSubjectFromExtraMeta}</br></br>
-	 * For each key:value pair: subject results.key results.value</br></br>
-	 *
-	 * @param results
-	 */
-	protected void sendTriples(Properties results){
-		//set Subject Node, hash out of task ID and if not empty the extra properties
-		String subject = getSubjectFromExtraMeta(new Properties());
-		sendTriples(subject, results, new HashSet<String>(), new Properties());
-	}
-	
-	/**
-	 * 
-	 * Will call the storageManager sendData method with the Lightweight Meta and the following created triples</br>
-	 * The subject node will be calculated by the recv Object and the {@link #getSubjectFromExtraMeta}</br></br>
-	 * For each key:value pair: subject results.key results.value</br></br>
-	 * The getExtraMeta() method will be called, with the recv Property and the subject node
-	 * Thus the following triples will be added:</br>
-	 * For each key:value pair: subject recv.key recv.value 
-	 * 
-	 * @param results
-	 * @param recv
-	 */
-	protected void sendTriples(Properties results, Properties recv){
-		//set Subject Node, hash out of task ID and if not empty the extra properties
-		String subject = getSubjectFromExtraMeta(recv);
-		sendTriples(subject, results, new HashSet<String>(), recv);
-	}
 
-	/**
-	 * 
-	 * Will call the storageManager sendData method with the Lightweight Meta and the following created triples</br>
-	 * The triples add will be simply added</br>
-	 * The subject node will be calculated from the recv Object wiht the {@link #getSubjectFromExtraMeta} Method</br></br>
-	 * For each key:value pair: subject results.key results.value</br>
-	 * Be aware that the Set isResource will set if the key/value will be handled as resources.
-	 * If the key (value) is in the set it will be handled as a resource</br></br>
-	 * The getExtraMeta() method will be called, with the recv Property and the subject node
-	 * Thus the following triples will be added:</br>
-	 * For each key:value pair: subject recv.key recv.value 
-	 * 
-	 * @param results
-	 * @param isResource
-	 * @param recv
-	 * @param add
-	 */
-	protected void sendTriples(Properties results, Set<String> isResource, Properties recv, Triple[] add){
-		//set Subject Node, hash out of task ID and if not empty the extra properties
-		String subject = getSubjectFromExtraMeta(recv);
-		sendTriples(subject, results, isResource, recv, add);
-	}
-	
-	/**
-	 *
-	 * Will call the storageManager sendData method with the Lightweight Meta and the following created triples</br>
-	 * The subject node will be the subject for every following triple</br></br>
-	 * For each key:value pair: subject results.key results.value</br>
-	 * Be aware that the Set isResource will set if the key/value will be handled as resources.
-	 * If the key (value) is in the set it will be handled as a resource</br></br>
-	 * The getExtraMeta() method will be called, with the recv Property and the subject node
-	 * Thus the following triples will be added:</br>
-	 * For each key:value pair: subject recv.key recv.value 
-	 *
-	 * @param subject
-	 * @param results
-	 * @param isResource
-	 * @param recv
-	 */
-	protected void sendTriples(String subject, Properties results, Set<String> isResource, Properties recv){
-		sendTriples(subject, results, isResource, recv, new Triple[0]);
-	}
-	
-	/**
-	 * 
-	 * Will call the storageManager sendData method with the Lightweight Meta and the following created triples</br>
-	 * The triples add will be simply added</br>
-	 * The subject node will be the subject for every following triple</br></br>
-	 * For each key:value pair: subject results.key results.value</br>
-	 * Be aware that the Set isResource will set if the key/value will be handled as resources.
-	 * If the key (value) is in the set it will be handled as a resource</br></br>
-	 * The getExtraMeta() method will be called, with the recv Property and the subject node
-	 * Thus the following triples will be added:</br>
-	 * For each key:value pair: subject recv.key recv.value 
-	 * 
-	 * @param subject
-	 * @param results
-	 * @param isResource
-	 * @param recv
-	 * @param add
-	 */
-	protected void sendTriples(String subject, Properties results, Set<String> isResource, Properties recv, Triple[] add){
-		
-		//get Extra Meta 
-		Triple[] extraTriples = getExtraMeta(subject, recv);
-		Properties lw = getLightweightMeta();
-		lw.put(CONSTANTS.LENGTH_EXTRA_META_KEY, extraTriples.length);
-		Triple[] triples = new Triple[extraTriples.length+results.size()+add.length];
-		int i=0;
-		for(;i<extraTriples.length;i++){
-			triples[i] = extraTriples[i];
-		}
-		
-		//Add Result
-		for(Object obj : results.keySet()){
-			Triple resultT = new Triple();
-			resultT.setSubject(subject);
-			resultT.setPredicate(obj.toString());
-			resultT.setObject(results.get(obj));
-			if(isResource.contains(obj.toString())){
-				resultT.setPredicateResource(true);
-			}
-			if(isResource.contains(results.get(obj).toString())){
-				resultT.setObjectResource(true);
-			}
-			triples[i] = resultT;
-			i++;
-		}
-		for(int j=0;i<triples.length;i++){
-			triples[i] = add[j];
-			j++;
-		}
-		
-		sendData(lw, triples);
-	}
 	
 	/**
 	 * Will create a subject node string from the recv object (ExperimentTaskID and extraMeta Hash)
@@ -361,6 +182,12 @@ public abstract class AbstractMetric implements Metric{
 	}
 
 
+	/**
+	 * Creates a Statement connecting a the subject to the Task Resource using the iprop:workerResult property as follows
+	 * ires:Task1 iprop:workerResult subject
+	 * @param subject
+	 * @return
+	 */
 	protected Statement getConnectingStatement(Resource subject) {
 		return ResourceFactory.createStatement(getTaskResource(), Vocab.workerResult, subject);
 	}
@@ -394,14 +221,15 @@ public abstract class AbstractMetric implements Metric{
 		Literal commentRes = ResourceFactory.createPlainLiteral(this.description);
 		Resource classRes = ResourceFactory.createResource(COMMON.CLASS_BASE_URI+"metric/"+label);
 		Resource metricRes = ResourceFactory.createResource(COMMON.RES_BASE_URI+this.getShortName());
-		Resource metricClass = ResourceFactory.createResource(COMMON.CLASS_BASE_URI+this.getShortName());
+		//Resource metricClass = ResourceFactory.createResource(COMMON.CLASS_BASE_URI+this.getShortName());
 
 		m.add(metricRes, RDFS.label, this.getName());
 		m.add(metricRes, RDFS.comment, commentRes);
 		//adding type iguana:metric
 		m.add(metricRes, RDF.type, Vocab.metricClass);
 		//adding type iguana:metric/SPECIFIC_METRIC_CLASS
-		m.add(metricRes, RDF.type, metricClass);
+		m.add(metricRes, RDF.type, classRes);
+		m.add(metricRes, RDFS.label, labelRes);
 
 		for(Properties key : dataContainer.keySet()) {
 

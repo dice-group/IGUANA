@@ -4,7 +4,6 @@
 package org.aksw.iguana.rp.storage;
 
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.data.Triple;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -40,34 +39,7 @@ public abstract class TripleBasedStorage implements Storage {
 	private String rdfsUri = "http://www.w3.org/2000/01/rdf-schema#";
 	private String xsdUri = "http://www.w3.org/2001/XMLSchema#";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.aksw.iguana.rp.storage.Storage#addData(java.util.Properties)
-	 */
-	@Override
-	public void addData(Properties meta, Triple[] triples) {
 
-		String taskIdUri = getUrlWithResourcePrefix(meta, COMMON.EXPERIMENT_TASK_ID_KEY);
-		Resource taskIdNode = metricResults.createResource(taskIdUri);
-		String workerResultUri = getUrlWithPropertyPrefix("workerResult");
-
-		for(Triple t : triples)
-		{
-			Resource subject = metricResults.createResource(this.resource + t.getSubject());
-			Property predicate = ResourceFactory.createProperty(properties + t.getPredicate());
-			RDFNode object;
-			if (t.isObjectResource()) {
-				object = metricResults.createResource(this.resource + t.getObject());
-			} else {
-				object = metricResults.createTypedLiteral(t.getObject());
-			}
-			metricResults.add(subject, predicate, object);
-
-			// Adding the triple to connect the task with executed query's result
-			metricResults.add(taskIdNode, ResourceFactory.createProperty(workerResultUri), subject);
-		}
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -99,7 +71,7 @@ public abstract class TripleBasedStorage implements Storage {
 		addExtraMetadata(p, taskUrl);
 		metricResults.add(metricResults.createResource(datasetUrl), RDFS.label, p.getProperty(COMMON.DATASET_ID_KEY));
 		metricResults.add(metricResults.createResource(connUrl), RDFS.label, p.getProperty(COMMON.CONNECTION_ID_KEY));
-		//TODO retrieve Metrics
+
 		if(p.containsKey(COMMON.QUERY_STATS)) {
 			Model queryStats = (Model) p.get(COMMON.QUERY_STATS);
 			metricResults.add(queryStats);
@@ -165,9 +137,5 @@ public abstract class TripleBasedStorage implements Storage {
 		metricResults.add(data);
 	}
 
-	@Override
-	public Model getDataModel() {
-		return metricResults;
-	}
 
 }

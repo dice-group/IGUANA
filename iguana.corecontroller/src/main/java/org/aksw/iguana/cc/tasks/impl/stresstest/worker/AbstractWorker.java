@@ -72,8 +72,6 @@ public abstract class AbstractWorker implements Worker {
 
 	protected Double timeOut=180000D;
 
-	private long noOfQueryMixes;
-
 	private int queryHash;
 
 	public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
@@ -160,7 +158,7 @@ public abstract class AbstractWorker implements Worker {
 				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
 						query.toString());
 			}
-			this.executedQueries++;
+			//this.executedQueries++;
 		}
 		LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
 	}
@@ -176,9 +174,12 @@ public abstract class AbstractWorker implements Worker {
 			result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
 			result.put(COMMON.QUERY_HASH, queryHash);
 			result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
+			result.put(COMMON.PENALTY, this.timeOut);
 			// Add extra Meta Key, worker ID and worker Type
 			result.put(COMMON.EXTRA_META_KEY, this.extra);
 			setResults(result);
+			executedQueries++;
+
 		}
 	}
 
@@ -203,6 +204,12 @@ public abstract class AbstractWorker implements Worker {
 		this.endSignal = true;
 		LOGGER.debug("Worker[{{}} : {{}}] got stop signal.", workerType, workerID);
 	}
+
+	@Override
+	public boolean isTerminated(){
+		return this.endSignal;
+	}
+
 
 	@Override
 	public void run() {

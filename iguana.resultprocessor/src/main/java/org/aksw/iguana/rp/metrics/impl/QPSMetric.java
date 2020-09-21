@@ -2,8 +2,6 @@ package org.aksw.iguana.rp.metrics.impl;
 
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.config.CONSTANTS;
-import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
@@ -25,7 +23,7 @@ public class QPSMetric extends AbstractMetric {
 
 	private static Property queryProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"query");
 	private static Property failProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"failed");
-	private static Property succededProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"succeded");
+	private static Property succeededProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"succeeded");
 	private static Property ttProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"totalTime");
 	private static Property resultSize = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"resultSize");
 	private static Property timeOuts = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"timeOuts");
@@ -35,14 +33,15 @@ public class QPSMetric extends AbstractMetric {
 	private static Property queryID = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryID");
 
 	protected long hourInMS = 3600000;
-	protected Integer penalty = 180000;
-	
+	protected Integer penalty = null;
+	private boolean noPenalty= false;
+
 	public QPSMetric() {
 		super(
 				"Queries Per Second",
 				"QPS",
 				"Will calculate for each query the amount of how many times the query could be executed succesfully in one second."
-				+ "Further on it will save the totaltime of each query, the failure and the success");
+				+ " Further on it will save the totaltime of each query, the failure and the success");
 	}
 
 	public QPSMetric(Integer penalty) {
@@ -50,7 +49,7 @@ public class QPSMetric extends AbstractMetric {
 				"Queries Per Second",
 				"QPS",
 				"Will calculate for each query the amount of how many times the query could be executed succesfully in one second."
-						+ "Further on it will save the totaltime of each query, the failure and the success");
+						+ " Further on it will save the totaltime of each query, the failure and the success");
 		this.penalty = penalty;
 	}
 
@@ -69,10 +68,28 @@ public class QPSMetric extends AbstractMetric {
 		long timeout = tmpSuccess==COMMON.QUERY_SOCKET_TIMEOUT?1:0;
 		long unknown = tmpSuccess==COMMON.QUERY_UNKNOWN_EXCEPTION?1:0;
 		long wrongCode = tmpSuccess==COMMON.QUERY_HTTP_FAILURE?1:0;
+		Double penalty=null;
+		try {
+			if(p.containsKey(COMMON.PENALTY)) {
+				penalty = Double.parseDouble(p.get(COMMON.PENALTY).toString());
+			}
+		}catch(Exception e){
+			LOGGER.warn("Penalty could not be set. Error: {}", e);
+		}
 		long size=-1;
 		double penalizedTime=time;
 		if(failure==1){
-			penalizedTime=penalty;
+			if(this.penalty!=null) {
+				penalizedTime = this.penalty;
+			}
+			else if(penalty!=null){
+				//use task provided penalty
+				penalizedTime = penalty;
+			}
+			else{
+				LOGGER.error("Penalty was neither set in Task nor Config. penaltyQPS will show not be included.");
+				this.noPenalty=true;
+			}
 		}
 		if(p.containsKey(COMMON.RECEIVE_DATA_SIZE)) {
 			size = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SIZE).toString());
@@ -93,7 +110,7 @@ public class QPSMetric extends AbstractMetric {
 			oldArr[4] = (long) oldArr[4] + timeout;
 			oldArr[5] = (long) oldArr[5] + unknown;
 			oldArr[6] = (long) oldArr[6] + wrongCode;
-			oldArr[7] = (int) oldArr[7] + penalizedTime;
+			oldArr[7] = (double) oldArr[7] + penalizedTime;
 		}
 		else if(tmp!=null){
 			Object[] resArr = {time, success, failure, size, timeout, unknown, wrongCode, penalizedTime, queryHash};
@@ -145,7 +162,7 @@ public class QPSMetric extends AbstractMetric {
 			m.add(subjectParent, queryProperty, query);
 			m.add(query, qpsProperty, ResourceFactory.createTypedLiteral(qps));
 			m.add(query, ttProperty, ResourceFactory.createTypedLiteral((double)resArr[0]));
-			m.add(query, succededProperty, ResourceFactory.createTypedLiteral((long)resArr[1]));
+			m.add(query, succeededProperty, ResourceFactory.createTypedLiteral((long)resArr[1]));
 			m.add(query, failProperty, ResourceFactory.createTypedLiteral((long)resArr[2]));
 			if((long)resArr[3]!=-1L) {
 				m.add(query, resultSize, ResourceFactory.createTypedLiteral((long)resArr[3]));
@@ -156,7 +173,9 @@ public class QPSMetric extends AbstractMetric {
 			m.add(query, timeOuts, ResourceFactory.createTypedLiteral((long)resArr[4]));
 			m.add(query, unknownException, ResourceFactory.createTypedLiteral((long)resArr[5]));
 			m.add(query, wrongCodes, ResourceFactory.createTypedLiteral((long)resArr[6]));
-			m.add(query, penalizedQPSProperty, ResourceFactory.createTypedLiteral(pqps));
+			if(!noPenalty) {
+				m.add(query, penalizedQPSProperty, ResourceFactory.createTypedLiteral(pqps));
+			}
 			m.add(query, QPSMetric.queryID, ResourceFactory.createResource(COMMON.RES_BASE_URI+(int)resArr[8]+ "/" + queryID.toString()));
 			m.add(query, RDF.type, ResourceFactory.createResource(COMMON.CLASS_BASE_URI+"ExecutedQuery"));
 		}
@@ -167,8 +186,8 @@ public class QPSMetric extends AbstractMetric {
 			Object[] currentResults = (Object[])map.get(queryID);
 			Object[] newResults = new Object[currentResults.length];
 			for(int i=0;i<currentResults.length;i++){
-				if(i==3){
-					//Result Size doesn't make sense to sum up
+				if(i==3 || i==8){
+					//Result Size & query Hash doesn't make sense to sum up
 					newResults[i]=resArr[i];
 				}
 				else if(currentResults[i] instanceof Long){

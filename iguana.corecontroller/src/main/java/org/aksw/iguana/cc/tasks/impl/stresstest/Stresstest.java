@@ -4,6 +4,7 @@
 package org.aksw.iguana.cc.tasks.impl.stresstest;
 
 import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.HttpWorker;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.config.CONSTANTS;
@@ -176,17 +177,7 @@ public class Stresstest extends AbstractTask {
 			// check if worker has results yet
 			for (Worker worker : workers) {
 				// if so send all results buffered
-				for (Properties results : worker.popQueryResults()) {
-					try {
-						// send results via RabbitMQ
-						LOGGER.debug("[TaskID: {{}}] Send results", taskID);
-						this.sendResults(results);
-						LOGGER.debug("[TaskID: {{}}] results could be send", taskID);
-					} catch (IOException e) {
-						LOGGER.error("[TaskID: {{}}] Could not send results due to exc.",taskID, e);
-						LOGGER.error("[TaskID: {{}}] Results: {{}}", taskID, results);
-					}
-				}
+				sendWorkerResult(worker);
 			}
 			
 		}
@@ -216,6 +207,21 @@ public class Stresstest extends AbstractTask {
 		}
 		
 	}
+
+	private void sendWorkerResult(Worker worker){
+		for (Properties results : worker.popQueryResults()) {
+			try {
+				// send results via RabbitMQ
+				LOGGER.debug("[TaskID: {{}}] Send results", taskID);
+				this.sendResults(results);
+				LOGGER.debug("[TaskID: {{}}] results could be send", taskID);
+			} catch (IOException e) {
+				LOGGER.error("[TaskID: {{}}] Could not send results due to exc.",taskID, e);
+				LOGGER.error("[TaskID: {{}}] Results: {{}}", taskID, results);
+			}
+		}
+	}
+
 	
 	@Override
 	public void close() {
@@ -317,20 +323,29 @@ public class Stresstest extends AbstractTask {
 			boolean endFlag=true;
 			for (Worker worker : workers) {
 				long queriesInMix = 0;
-				if (worker instanceof SPARQLWorker) {
+				if (worker instanceof UPDATEWorker) {
 					queriesInMix = ((AbstractWorker) worker).getNoOfQueries();
-					LOGGER.debug("No of query Mixes: {} , queriesInMix+", worker.getExecutedQueries(),noOfQueryMixes);
-					if (worker.getExecutedQueries() / queriesInMix * 1.0 >= noOfQueryMixes) {
 
+					if (worker.getExecutedQueries() / (queriesInMix * 1.0) >= 1) {
+						if(!worker.isTerminated()) {
+							//if the worker was not already terminated, send last results, as tehy will not be sended afterwards
+							sendWorkerResult(worker);
+						}
 						worker.stopSending();
 					}
 					else {
 						endFlag = false;
 					}
-				} else if (worker instanceof UPDATEWorker) {
+				}
+				else if (worker instanceof AbstractWorker) {
 					queriesInMix = ((AbstractWorker) worker).getNoOfQueries();
-
-					if (worker.getExecutedQueries() / queriesInMix * 1.0 >= 1) {
+					LOGGER.debug("No of query Mixes: {} , queriesInMix {}", worker.getExecutedQueries(),noOfQueryMixes);
+					//Check for each worker, if the
+					if (worker.getExecutedQueries() / (queriesInMix * 1.0) >= noOfQueryMixes.doubleValue()) {
+						if(!worker.isTerminated()) {
+							//if the worker was not already terminated, send last results, as tehy will not be sended afterwards
+							sendWorkerResult(worker);
+						}
 						worker.stopSending();
 					}
 					else {
@@ -340,7 +355,7 @@ public class Stresstest extends AbstractTask {
 			}
 			return endFlag;
 		}
-		LOGGER.warn("Timelimit and NoOfQueryMixes is both null. executing now");
+		LOGGER.error("Neither time limit nor NoOfQueryMixes is set. executing task now");
 		return true;
 	}
 

@@ -330,7 +330,7 @@
 
   <owl:DatatypeProperty rdf:about="&iprop;penalizedQPS">
       	<rdfs:label>penalizedQPS</rdfs:label>
-	<rdfs:comment xml:lang="en">The queries per second value where failed queries are rated using a penalty (default is 3 min, the default timeOut for a Worker).</rdfs:comment>
+	<rdfs:comment xml:lang="en">The queries per second value where failed queries are rated using a penalty (default is the timeOut of a Task).</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
   </owl:DatatypeProperty>
@@ -342,7 +342,7 @@
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
   </owl:DatatypeProperty>   
 
-  <owl:DatatypeProperty rdf:about="&iprop;succeded">
+  <owl:DatatypeProperty rdf:about="&iprop;succeeded">
       	<rdfs:label>succeeded</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of succeeded executions of the ExecutedQuery.</rdfs:comment>    
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>

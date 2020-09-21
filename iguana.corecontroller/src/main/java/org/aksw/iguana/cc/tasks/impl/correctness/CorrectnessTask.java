@@ -51,7 +51,7 @@ public class CorrectnessTask extends AbstractTask {
 			JSONObject query = (JSONObject) queryObj;
 			String queryID = query.get("id").toString();
 			String queryString = query.get("query").toString();
-			data.put(COMMON.QUERY_ID, queryID);
+			data.put(COMMON.QUERY_ID_KEY, queryID);
 			data.put(COMMON.QUERY_STRING, queryString);
 
 			JSONObject results = (JSONObject) query.get("results");

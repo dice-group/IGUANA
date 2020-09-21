@@ -63,4 +63,5 @@ public interface Worker extends Runnable{
 	 */
 	public Collection<Properties> popQueryResults();
 
+	boolean isTerminated();
 }

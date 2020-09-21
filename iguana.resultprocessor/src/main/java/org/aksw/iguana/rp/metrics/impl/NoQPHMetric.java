@@ -81,6 +81,7 @@ public class NoQPHMetric extends AbstractMetric {
 			m.add(getConnectingStatement(subject));
 			m.add(subject, property, ResourceFactory.createTypedLiteral(noOfQueriesPerHour));
 		}
+
 		m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sum));
 		sendData(m);
 	}

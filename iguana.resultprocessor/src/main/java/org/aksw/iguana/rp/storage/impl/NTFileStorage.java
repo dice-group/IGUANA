@@ -63,16 +63,7 @@ public class NTFileStorage extends TripleBasedStorage {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.aksw.iguana.rp.storage.Storage#getStorageInfo()
-	 */
-	@Override
-	public Properties getStorageInfo() {
-		File f = new File(file.toString());
-		Properties ret = new Properties();
-		ret.setProperty(CONSTANTS.STORAGE_FILE,f.getAbsolutePath());
-		return ret;
-	}
+
 	
 	@Override
 	public String toString(){
