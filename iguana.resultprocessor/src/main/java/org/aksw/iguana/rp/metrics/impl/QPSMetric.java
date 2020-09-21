@@ -31,9 +31,11 @@ public class QPSMetric extends AbstractMetric {
 	private static Property timeOuts = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"timeOuts");
 	private static Property unknownException = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"unknownException");
 	private static Property wrongCodes = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"wrongCodes");
+	private static Property penalizedQPSProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"penalizedQPS");
 	private static Property queryID = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryID");
 
 	protected long hourInMS = 3600000;
+	protected Integer penalty = 180000;
 	
 	public QPSMetric() {
 		super(
@@ -41,6 +43,15 @@ public class QPSMetric extends AbstractMetric {
 				"QPS",
 				"Will calculate for each query the amount of how many times the query could be executed succesfully in one second."
 				+ "Further on it will save the totaltime of each query, the failure and the success");
+	}
+
+	public QPSMetric(Integer penalty) {
+		super(
+				"Queries Per Second",
+				"QPS",
+				"Will calculate for each query the amount of how many times the query could be executed succesfully in one second."
+						+ "Further on it will save the totaltime of each query, the failure and the success");
+		this.penalty = penalty;
 	}
 
 	public QPSMetric(String name, String shortName, String description) {
@@ -59,6 +70,10 @@ public class QPSMetric extends AbstractMetric {
 		long unknown = tmpSuccess==COMMON.QUERY_UNKNOWN_EXCEPTION?1:0;
 		long wrongCode = tmpSuccess==COMMON.QUERY_HTTP_FAILURE?1:0;
 		long size=-1;
+		double penalizedTime=time;
+		if(failure==1){
+			penalizedTime=penalty;
+		}
 		if(p.containsKey(COMMON.RECEIVE_DATA_SIZE)) {
 			size = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SIZE).toString());
 		}
@@ -78,14 +93,15 @@ public class QPSMetric extends AbstractMetric {
 			oldArr[4] = (long) oldArr[4] + timeout;
 			oldArr[5] = (long) oldArr[5] + unknown;
 			oldArr[6] = (long) oldArr[6] + wrongCode;
+			oldArr[7] = (int) oldArr[7] + penalizedTime;
 		}
 		else if(tmp!=null){
-			Object[] resArr = {time, success, failure, size, timeout, unknown, wrongCode,queryHash};
+			Object[] resArr = {time, success, failure, size, timeout, unknown, wrongCode, penalizedTime, queryHash};
 			tmp.put(queryID, resArr);
 		}
 		else{
 			tmp = new Properties();
-			Object[] resArr = new Object[]{time, success, failure, size, timeout, unknown, wrongCode,queryHash};
+			Object[] resArr = new Object[]{time, success, failure, size, timeout, unknown, wrongCode,penalizedTime,queryHash};
 			tmp.put(queryID, resArr);
 		}
 		addDataToContainer(extra, tmp);
@@ -123,6 +139,8 @@ public class QPSMetric extends AbstractMetric {
 			if(map!=null)
 				mergeResults(map, queryID, resArr);
 			Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
+			Double pqps = (long)resArr[1]*1.0/((double)resArr[7]/1000.0);
+
 			Resource query = ResourceFactory.createResource(subjectParent.getURI()+"/"+queryID);
 			m.add(subjectParent, queryProperty, query);
 			m.add(query, qpsProperty, ResourceFactory.createTypedLiteral(qps));
@@ -138,7 +156,8 @@ public class QPSMetric extends AbstractMetric {
 			m.add(query, timeOuts, ResourceFactory.createTypedLiteral((long)resArr[4]));
 			m.add(query, unknownException, ResourceFactory.createTypedLiteral((long)resArr[5]));
 			m.add(query, wrongCodes, ResourceFactory.createTypedLiteral((long)resArr[6]));
-			m.add(query, QPSMetric.queryID, ResourceFactory.createResource(COMMON.RES_BASE_URI+(int)resArr[7]+ "/" + queryID.toString()));
+			m.add(query, penalizedQPSProperty, ResourceFactory.createTypedLiteral(pqps));
+			m.add(query, QPSMetric.queryID, ResourceFactory.createResource(COMMON.RES_BASE_URI+(int)resArr[8]+ "/" + queryID.toString()));
 			m.add(query, RDF.type, ResourceFactory.createResource(COMMON.CLASS_BASE_URI+"ExecutedQuery"));
 		}
 	}

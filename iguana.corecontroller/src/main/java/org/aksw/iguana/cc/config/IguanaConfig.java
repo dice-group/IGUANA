@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Gets the {@link org.apache.commons.configuration.Configuration} component and will generate
@@ -104,9 +106,18 @@ public class IguanaConfig {
 			metrics.add(config);
 			config = new MetricConfig();
 			config.setClassName("QPS");
+			Map<Object, Object> configMap = new HashMap<Object, Object>();
+			configMap.put("failPenalty", 180000);
+			config.setConfiguration(configMap);
 			metrics.add(config);
 			config = new MetricConfig();
 			config.setClassName("NoQPH");
+			metrics.add(config);
+			config = new MetricConfig();
+			config.setClassName("AvgQPS");
+			metrics.add(config);
+			config = new MetricConfig();
+			config.setClassName("NoQ");
 			metrics.add(config);
 
 		}
