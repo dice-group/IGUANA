@@ -2,7 +2,9 @@ package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Connection {
+import java.io.Serializable;
+
+public class Connection implements Serializable {
 
     @JsonProperty(required = true)
     private String name;

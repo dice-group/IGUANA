@@ -2,10 +2,11 @@ package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Task {
+public class Task implements Serializable {
 
     @JsonProperty(required = true)
     private Map configuration = new HashMap();

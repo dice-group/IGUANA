@@ -8,6 +8,7 @@ import org.aksw.iguana.rp.controller.RPController;
 import org.aksw.iguana.rp.metrics.Metric;
 import org.aksw.iguana.rp.storage.Storage;
 import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,16 +76,29 @@ public class IguanaConfig {
 			for(Connection con : connections){
 				for(Task task : tasks) {
 					taskID++;
-					String[] args = new String[] {dataset.getName(), con.getName(), taskID+""};
+					String[] args = new String[] {};
 					if(preScriptHook!=null){
 						LOGGER.info("Executing preScriptHook");
-						ScriptExecutor.execSafe(preScriptHook, args);
+						String execScript = preScriptHook.replace("{{dataset.name}}", dataset.getName())
+								.replace("{{connection}}", con.getName())
+								.replace("{{taskID}}", taskID+"");
+						if(dataset.getFile()!=null){
+							execScript = execScript.replace("{{dataset.file}}", dataset.getFile());
+						}
+
+						ScriptExecutor.execSafe(execScript, args);
 					}
 					LOGGER.info("Executing Task [{}: {}, {}, {}]", taskID, dataset.getName(), con.getName(), task.getClassName());
-					controller.startTask(new String[]{suiteID, suiteID+"/"+expID.toString(), suiteID+"/"+expID.toString()+"/"+taskID.toString()}, dataset.getName(), con, task);
+					controller.startTask(new String[]{suiteID, suiteID+"/"+expID.toString(), suiteID+"/"+expID.toString()+"/"+taskID.toString()}, dataset.getName(), SerializationUtils.clone(con), SerializationUtils.clone(task));
 					if(postScriptHook!=null){
 						LOGGER.info("Executing postScriptHook");
-						ScriptExecutor.execSafe(postScriptHook, args);
+						String execScript = postScriptHook.replace("{{dataset.name}}", dataset.getName())
+								.replace("{{connection}}", con.getName())
+								.replace("{{taskID}}", taskID+"");
+						if(dataset.getFile()!=null){
+							execScript = execScript.replace("{{dataset.file}}", dataset.getFile());
+						}
+						ScriptExecutor.execSafe(execScript, args);
 					}
 				}
 			}

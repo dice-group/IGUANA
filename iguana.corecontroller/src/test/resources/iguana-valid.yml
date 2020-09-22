@@ -28,7 +28,7 @@ tasks:
       workers:
         - threads: 16
           className: "SPARQLWorker"
-          queries: "queries_easy.txt"
+          queriesFile: "queries_easy.txt"
           timeOut: 180000
         - threads: 4
           className: "SPARQLWorker"
