@@ -3,14 +3,14 @@
  */
 package org.aksw.iguana.rp.metrics.impl;
 
-import java.util.Properties;
-
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
 import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Properties;
 
 /**
  * 

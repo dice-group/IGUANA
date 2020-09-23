@@ -1,13 +1,13 @@
 package org.aksw.iguana.rp.metrics.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
 import org.apache.jena.rdf.model.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * provides a metric to measure F1, recall and precision if provided tp,fp,fn.

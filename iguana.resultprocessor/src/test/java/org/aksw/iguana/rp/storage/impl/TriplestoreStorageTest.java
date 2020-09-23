@@ -3,13 +3,6 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.Properties;
-
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.utils.ServerMock;
 import org.apache.jena.rdf.model.Model;
@@ -19,6 +12,13 @@ import org.junit.After;
 import org.junit.Test;
 import org.simpleframework.http.core.ContainerServer;
 import org.simpleframework.transport.connect.SocketConnection;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Will test if the TriplestoreStorage sends the correct INSERT command to a Mock Server

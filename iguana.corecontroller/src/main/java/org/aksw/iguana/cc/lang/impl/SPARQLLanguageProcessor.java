@@ -2,7 +2,6 @@ package org.aksw.iguana.cc.lang.impl;
 
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.HttpWorker;
 import org.aksw.iguana.cc.utils.QueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -62,15 +61,15 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
                 model.add(subject, RDF.type, Vocab.queryClass);
                 model.add(subject, Vocab.rdfsID, wrappedQuery.getId().replace("sparql", ""));
                 model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
-                model.add(subject, Vocab.aggrProperty, model.createTypedLiteral(qs2.aggr));
-                model.add(subject, Vocab.filterProperty, model.createTypedLiteral(qs2.filter));
-                model.add(subject, Vocab.groupByProperty, model.createTypedLiteral(qs2.groupBy));
-                model.add(subject, Vocab.havingProperty, model.createTypedLiteral(qs2.having));
+                model.add(subject, Vocab.aggrProperty, model.createTypedLiteral(qs2.aggr==1));
+                model.add(subject, Vocab.filterProperty, model.createTypedLiteral(qs2.filter==1));
+                model.add(subject, Vocab.groupByProperty, model.createTypedLiteral(qs2.groupBy==1));
+                model.add(subject, Vocab.havingProperty, model.createTypedLiteral(qs2.having==1));
                 model.add(subject, Vocab.triplesProperty, model.createTypedLiteral(qs2.triples));
-                model.add(subject, Vocab.offsetProperty, model.createTypedLiteral(qs2.offset));
-                model.add(subject, Vocab.optionalProperty, model.createTypedLiteral(qs2.optional));
-                model.add(subject, Vocab.orderByProperty, model.createTypedLiteral(qs2.orderBy));
-                model.add(subject, Vocab.unionProperty, model.createTypedLiteral(qs2.union));
+                model.add(subject, Vocab.offsetProperty, model.createTypedLiteral(qs2.offset==1));
+                model.add(subject, Vocab.optionalProperty, model.createTypedLiteral(qs2.optional==1));
+                model.add(subject, Vocab.orderByProperty, model.createTypedLiteral(qs2.orderBy==1));
+                model.add(subject, Vocab.unionProperty, model.createTypedLiteral(qs2.union==1));
             }catch(Exception e){
                 LOGGER.error("Query statistics could not be created. Not using SPARQL? Will not attach them to results.", e);
             }
@@ -132,12 +131,13 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
             StringBuilder result = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
-                result.append(line);
+                //br.readline will remove \n (add it for no Content-Type mode)
+                result.append(line).append("\n");
             }
             long resultSize;
-            if (HttpWorker.QUERY_RESULT_TYPE_JSON.equals(contentType)) {
+            if (QUERY_RESULT_TYPE_JSON.equals(contentType)) {
                 resultSize = getJsonResultSize(result.toString());
-            } else if (HttpWorker.QUERY_RESULT_TYPE_XML.equals(contentType)) {
+            } else if (QUERY_RESULT_TYPE_XML.equals(contentType)) {
                 resultSize = getXmlResultSize(result.toString());
             } else {
                 resultSize = StringUtils.countMatches(result.toString(), "\n");

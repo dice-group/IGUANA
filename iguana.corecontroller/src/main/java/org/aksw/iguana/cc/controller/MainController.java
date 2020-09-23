@@ -1,12 +1,11 @@
 package org.aksw.iguana.cc.controller;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.aksw.iguana.cc.config.ConfigManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * The main controller for the core. 

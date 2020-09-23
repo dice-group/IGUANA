@@ -1,10 +1,10 @@
 package org.aksw.iguana.rp.storage;
 
-import java.util.*;
-
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 
 /**

@@ -1,14 +1,14 @@
 package org.aksw.iguana.rp.experiment;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.MetricManager;
 import org.aksw.iguana.rp.storage.StorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * The ExperimentManager manages the incoming properties from the 

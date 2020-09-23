@@ -2,11 +2,11 @@ package org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
+import org.aksw.iguana.cc.model.QueryExecutionStats;
+import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.update.UpdateTimer;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.update.UpdateTimer;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;

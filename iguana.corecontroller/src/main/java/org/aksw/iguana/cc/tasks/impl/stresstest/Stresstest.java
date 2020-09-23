@@ -3,11 +3,8 @@
  */
 package org.aksw.iguana.cc.tasks.impl.stresstest;
 
-import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.HttpWorker;
-import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.config.CONSTANTS;
+import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.query.QueryHandler;
 import org.aksw.iguana.cc.query.QueryHandlerFactory;
 import org.aksw.iguana.cc.query.impl.InstancesQueryHandler;
@@ -17,6 +14,8 @@ import org.aksw.iguana.cc.tasks.impl.stresstest.worker.Worker;
 import org.aksw.iguana.cc.tasks.impl.stresstest.worker.WorkerFactory;
 import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.SPARQLWorker;
 import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.UPDATEWorker;
+import org.aksw.iguana.commons.annotation.Shorthand;
+import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;

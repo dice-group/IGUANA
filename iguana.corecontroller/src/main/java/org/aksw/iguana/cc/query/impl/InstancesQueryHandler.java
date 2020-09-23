@@ -7,21 +7,17 @@ import org.aksw.iguana.cc.query.AbstractWorkerQueryHandler;
 import org.aksw.iguana.cc.tasks.impl.stresstest.worker.Worker;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.cc.utils.QueryStatistics;
-import org.aksw.iguana.commons.factory.TypedFactory;
-import org.aksw.iguana.rp.vocab.Vocab;
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.commons.constants.COMMON;
-import org.apache.jena.atlas.io.IO;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.rdf.model.*;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
+import org.aksw.iguana.commons.factory.TypedFactory;
+import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 

@@ -3,23 +3,21 @@ package org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
-
-import org.aksw.iguana.commons.annotation.Nullable;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.model.QueryResultHashKey;
 import org.aksw.iguana.cc.tasks.impl.stresstest.worker.AbstractWorker;
+import org.aksw.iguana.commons.annotation.Nullable;
+import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
-
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.concurrent.*;
 

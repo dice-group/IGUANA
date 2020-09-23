@@ -1,11 +1,11 @@
 package org.aksw.iguana.cc.tasks.impl.stresstest.worker;
 
-import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.commons.annotation.Nullable;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.config.CONSTANTS;
+import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.utils.FileUtils;
+import org.aksw.iguana.commons.annotation.Nullable;
+import org.aksw.iguana.commons.constants.COMMON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

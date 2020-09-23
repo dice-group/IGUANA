@@ -3,17 +3,17 @@
  */
 package org.aksw.iguana.cc.controller;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
-
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.config.elements.Task;
 import org.aksw.iguana.cc.tasks.TaskFactory;
 import org.aksw.iguana.cc.tasks.TaskManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 
 /**

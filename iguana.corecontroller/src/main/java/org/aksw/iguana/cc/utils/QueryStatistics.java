@@ -1,7 +1,6 @@
 package org.aksw.iguana.cc.utils;
 
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.syntax.ElementWalker;
 
 public class QueryStatistics {
@@ -17,17 +16,7 @@ public class QueryStatistics {
 	public int orderBy=0;
 	public int triples=0;
 	
-	
-	public void getStatistics(String[] queries) {
-		
-			for(String query : queries) {
-					Query q = QueryFactory.create(query);
-					getStatistics(q);
 
-			}
-
-
-	}
 	
 	public void getStatistics(Query q) {
 		if(q.isSelectType()) {

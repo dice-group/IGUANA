@@ -1,11 +1,11 @@
 package org.aksw.iguana.rp.metrics.impl;
 
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.rp.config.CONSTANTS;
 import org.apache.jena.rdf.model.*;
-import org.apache.jena.vocabulary.RDF;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 @Shorthand("AvgQPS")
 public class AvgQPSMetric extends QPSMetric {

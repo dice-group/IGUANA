@@ -4,19 +4,16 @@
 package org.aksw.iguana.rp.storage.impl;
 
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
-import java.util.Properties;
 
 /**
  * 

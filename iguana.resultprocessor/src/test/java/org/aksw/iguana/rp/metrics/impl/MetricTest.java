@@ -16,8 +16,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -103,11 +101,6 @@ public class MetricTest {
 		metric.receiveData(createData(100, "sparql2", "1125",null,-2L, extraMeta));
 		
 		metric.close();
-		try {
-			storage.getActualModel().write(new FileWriter("test.nt"), "N-TRIPLE");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		return new Model[]{storage.getExpectedModel(), storage.getActualModel()};
 
 	}

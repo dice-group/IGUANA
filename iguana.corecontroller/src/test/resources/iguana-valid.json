@@ -1,79 +1,87 @@
 {
   "datasets": [
-  { "name": "DatasetName",
-    "file": "src/test/resources/dataset.txt"
-  }, {"name": "Dataset2"}
-  ],
-"connections": [
-  {
-    "name": "Virtuoso7",
-    "user": "dba",
-    "password": "dba",
-    "endpoint": "http://localhost:8890/sparql"
-  },{
-    "name": "Virtuoso6",
-    "user": "dba",
-    "password": "dba",
-    "endpoint": "http://localhost:8891/sparql"
-  },{
-    "name": "Blazegraph",
-    "endpoint": "http://localhost:9999/blazegraph/sparql"
-  },
-  {
-    "name": "Fuseki",
-    "user": "test",
-    "endpoint": "http://127.0.0.1:3030/ds/sparql",
-    "updateEndpoint": "http://localhost:3030/ds/update"
-  }
-],
-"tasks": [
-  {
-    "className": "Stresstest",
-    "configuration": {
-      "timeLimit": 360000,
-      "queryHandler": {
-        "className": "InstancesQueryHandler"
-      },
-      "workers": [
-        {
-      "threads": 16,
-      "className": "SPARQLWorker",
-      "queriesFile": "queries_easy.txt",
-      "timeOut": 180000
-        },
-        {
-          "threads": 4,
-          "className": "SPARQLWorker",
-          "queriesFile": "queries_complex.txt",
-          "fixedLatency": 100,
-          "gaussianLatency": 50,
-          "parameterName": "query",
-          "responseType": "application/sparql-results+json"
-        }
-      ]
+    {
+      "name": "DatasetName",
+      "file": "src/test/resources/dataset.txt"
+    },
+    {
+      "name": "Dataset2"
     }
-  }
-],
-"preScriptHook": "./triplestores/{{connection}}/start.sh {{dataset.file}} {{dataset.name}} {{taskID}}",
-"postScriptHook": "./triplestores/{{connection}}/stop.sh",
-
-"metrics": [
-  {
-    "className": "QMPH"
-  },{
-    "className": "QPS"
-  },{
-   "className": "NoQPH"
-  },{
-   "className": "AvgQPS"
-  },{
-    "className": "NoQ"
-  }
-],
-"storages": [
-  {
-    "className": "NTFileStorage"
-  }
+  ],
+  "connections": [
+    {
+      "name": "Virtuoso7",
+      "user": "dba",
+      "password": "dba",
+      "endpoint": "http://localhost:8890/sparql"
+    },
+    {
+      "name": "Virtuoso6",
+      "user": "dba",
+      "password": "dba",
+      "endpoint": "http://localhost:8891/sparql"
+    },
+    {
+      "name": "Blazegraph",
+      "endpoint": "http://localhost:9999/blazegraph/sparql"
+    },
+    {
+      "name": "Fuseki",
+      "user": "test",
+      "endpoint": "http://127.0.0.1:3030/ds/sparql",
+      "updateEndpoint": "http://localhost:3030/ds/update"
+    }
+  ],
+  "tasks": [
+    {
+      "className": "Stresstest",
+      "configuration": {
+        "timeLimit": 360000,
+        "queryHandler": {
+          "className": "InstancesQueryHandler"
+        },
+        "workers": [
+          {
+            "threads": 16,
+            "className": "SPARQLWorker",
+            "queriesFile": "queries_easy.txt",
+            "timeOut": 180000
+          },
+          {
+            "threads": 4,
+            "className": "SPARQLWorker",
+            "queriesFile": "queries_complex.txt",
+            "fixedLatency": 100,
+            "gaussianLatency": 50,
+            "parameterName": "query",
+            "responseType": "application/sparql-results+json"
+          }
+        ]
+      }
+    }
+  ],
+  "preScriptHook": "./triplestores/{{connection}}/start.sh {{dataset.file}} {{dataset.name}} {{taskID}}",
+  "postScriptHook": "./triplestores/{{connection}}/stop.sh",
+  "metrics": [
+    {
+      "className": "QMPH"
+    },
+    {
+      "className": "QPS"
+    },
+    {
+      "className": "NoQPH"
+    },
+    {
+      "className": "AvgQPS"
+    },
+    {
+      "className": "NoQ"
+    }
+  ],
+  "storages": [
+    {
+      "className": "NTFileStorage"
+    }
   ]
-
-  }
+}

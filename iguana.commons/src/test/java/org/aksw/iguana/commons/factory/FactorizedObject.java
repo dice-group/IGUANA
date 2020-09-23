@@ -1,7 +1,6 @@
 package org.aksw.iguana.commons.factory;
 
 import org.aksw.iguana.commons.annotation.Nullable;
-import org.aksw.iguana.commons.annotation.ParameterNames;
 
 public class FactorizedObject {
 

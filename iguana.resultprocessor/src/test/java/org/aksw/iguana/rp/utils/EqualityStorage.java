@@ -3,11 +3,11 @@
  */
 package org.aksw.iguana.rp.utils;
 
-import java.util.Properties;
-
 import org.aksw.iguana.rp.storage.Storage;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+
+import java.util.Properties;
 
 /**
  * Class to help the Unit Metric Tests. </br>

@@ -1,5 +1,4 @@
 package org.aksw.iguana.commons.utils;
-import java.io.IOException;
 
 import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
@@ -7,6 +6,8 @@ import org.simpleframework.http.Status;
 import org.simpleframework.http.core.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * Server Mock representing a TS

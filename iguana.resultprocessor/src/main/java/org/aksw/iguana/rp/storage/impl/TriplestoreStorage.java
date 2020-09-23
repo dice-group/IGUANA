@@ -4,7 +4,6 @@
 package org.aksw.iguana.rp.storage.impl;
 
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.rp.config.CONSTANTS;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -21,7 +20,6 @@ import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
 import java.io.StringWriter;
-import java.util.Properties;
 
 
 /**

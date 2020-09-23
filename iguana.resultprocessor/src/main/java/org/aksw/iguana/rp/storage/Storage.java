@@ -1,8 +1,8 @@
 package org.aksw.iguana.rp.storage;
 
-import java.util.Properties;
-
 import org.apache.jena.rdf.model.Model;
+
+import java.util.Properties;
 
 /**
  * Interface for the Result Storages

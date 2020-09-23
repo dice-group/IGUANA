@@ -1,10 +1,5 @@
 package org.aksw.iguana.rp.metrics;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.storage.StorageManager;
@@ -12,6 +7,10 @@ import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Abstract Metric class which implements the method sendData 
