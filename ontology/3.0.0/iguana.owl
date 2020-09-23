@@ -189,7 +189,7 @@
 
   <owl:DatatypeProperty rdf:about="&iprop;timeLimit">
   	<rdfs:label>timeLimit</rdfs:label>
-	<rdfs:comment xml:lang="en">Time Limit after the Stresstest ends.</rdfs:comment>
+	<rdfs:comment xml:lang="en">Time Limit after the Stresstest ends in milliseconds.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Stresstest"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
   </owl:DatatypeProperty>
@@ -246,30 +246,30 @@
   
   <owl:DatatypeProperty rdf:about="&iprop;optional">
       	<rdfs:label>optional</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of occurrences of OPTIONAL in a Query.</rdfs:comment>
+	<rdfs:comment xml:lang="en">Tells if the the query contains an OPTIONAL element</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
   
   <owl:DatatypeProperty rdf:about="&iprop;union">
       	<rdfs:label>union</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of occurrences of UNION in a Query.</rdfs:comment>  
+	<rdfs:comment xml:lang="en">Tells if the the query contains a UNION element</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
 
   <owl:DatatypeProperty rdf:about="&iprop;orderBy">
       	<rdfs:label>orderBy</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of occurrences of ORDER BY in a Query.</rdfs:comment>  
+	<rdfs:comment xml:lang="en">Tells if the the query contains an ORDER BY element</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
   
   <owl:DatatypeProperty rdf:about="&iprop;offset">
       	<rdfs:label>offset</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of occurrences of OFFSET in a Query.</rdfs:comment>  
+	<rdfs:comment xml:lang="en">Tells if the the query contains an OFFSET element</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
   
   <owl:DatatypeProperty rdf:about="&iprop;triples">
@@ -281,30 +281,30 @@
   
   <owl:DatatypeProperty rdf:about="&iprop;having">
       	<rdfs:label>optional</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of occurrences of HAVING in a Query.</rdfs:comment>  
+	<rdfs:comment xml:lang="en">Tells if the the query contains a HAVING element</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
   
   <owl:DatatypeProperty rdf:about="&iprop;filter">
         <rdfs:label>filter</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of occurrences of FILTER in a Query.</rdfs:comment>
+	<rdfs:comment xml:lang="en">Tells if the the query contains a FILTER element</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
 
   <owl:DatatypeProperty rdf:about="&iprop;aggregations">
       	<rdfs:label>aggregations</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of aggregation in a Query.</rdfs:comment>  
+	<rdfs:comment xml:lang="en">Tells if the the query contains an AGGREGATION element</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
 
   <owl:DatatypeProperty rdf:about="&iprop;groupBy">
       	<rdfs:label>groupBy</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of occurrences of GROUP BY in a Query.</rdfs:comment>  
+	<rdfs:comment xml:lang="en">Tells if the the query contains a GROUP BY element</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
   
   <owl:DatatypeProperty rdf:about="&rdfs;ID">
@@ -316,23 +316,23 @@
   
   <owl:DatatypeProperty rdf:about="&iprop;totalTime">
       	<rdfs:label>totalTime</rdfs:label>
-	<rdfs:comment xml:lang="en">The summed up execution time of all executions of the ExecutedQuery.</rdfs:comment>  
+	<rdfs:comment xml:lang="en">The summed up execution time of all executions of the ExecutedQuery in milliseconds.</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>   
   
   <owl:DatatypeProperty rdf:about="&iprop;QPS">
       	<rdfs:label>QPS</rdfs:label>
 	<rdfs:comment xml:lang="en">The queries per second value.</rdfs:comment>    
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>
 
   <owl:DatatypeProperty rdf:about="&iprop;penalizedQPS">
       	<rdfs:label>penalizedQPS</rdfs:label>
 	<rdfs:comment xml:lang="en">The queries per second value where failed queries are rated using a penalty (default is the timeOut of a Task).</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>
 
   <owl:DatatypeProperty rdf:about="&iprop;failed">
@@ -382,7 +382,7 @@
 	<rdfs:comment xml:lang="en">The query mixes per hour value</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:domain rdf:resource="&iont;Task"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>     
   
   <owl:DatatypeProperty rdf:about="&iprop;NoQPH">
@@ -390,7 +390,7 @@
 	<rdfs:comment xml:lang="en">The number of queries per hour value.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:domain rdf:resource="&iont;Task"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>     
   
   <owl:DatatypeProperty rdf:about="&iprop;AvgQPS">
@@ -398,7 +398,7 @@
 	<rdfs:comment xml:lang="en">The average number of queries answered successfully per second value.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:domain rdf:resource="&iont;Task"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>
   
     
