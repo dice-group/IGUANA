@@ -6,7 +6,6 @@ import org.apache.jena.query.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,55 +89,7 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 		this.limit = limit;
 	}
 
-	@Override
-	protected File[] generateQueryPerLine(String queryFileName, String idPrefix) {
-		File queryFile = new File(queryFileName);
-		List<File> ret = new LinkedList<File>();
-		// check if folder is cached
-		if (queryFile.exists()) {
-			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode());
-			if (outputFolder.exists()) {
-				LOGGER.info("[QueryHandler: {{}}] queries were instantiated already, will use old instances. To generate them new remove the {{}} folder", this.getClass().getName(), OUTPUT_ROOT_FOLDER+queryFileName.hashCode());
-				// is cached use caching
-				return outputFolder.listFiles();
-			} else {
-				LOGGER.info("[QueryHandler: {{}}] Queries will now be instantiated", this.getClass().getName());
-				// create directorys
-				outputFolder.mkdirs();
-				try (BufferedReader reader = new BufferedReader(new FileReader(queryFileName))) {
-					String queryStr;
-					// iterate over all queries
-					while ((queryStr = reader.readLine()) != null) {
-						if(queryStr.isEmpty()) {
-							continue;
-						}
 
-						LOGGER.debug("[QueryHandler: {{}}] Trying to instantiate: {{}}", this.getClass(), queryStr);
-						// create a File with an ID
-						File out = createFileWithID(outputFolder, idPrefix);
-						try (PrintWriter pw = new PrintWriter(out)) {
-							for (String query : getInstances(queryStr)) {
-								pw.println(query);
-								//LOGGER.debug("[QueryHandler: {{}}] Completed instantiation: {{}}", this.getClass(), queryStr);
-
-							}
-						}
-						ret.add(out);
-
-					}
-				} catch (IOException e) {
-					LOGGER.error("[QueryHandler: {{}}] could not write instances to folder {{}}", this.getClass().getName(), outputFolder.getAbsolutePath());
-				}
-				LOGGER.info("[QueryHandler: {{}}] Finished instantiation of queries", this.getClass().getName());
-			}
-
-			File[] bla = new File[ret.size()];
-			return (File[]) ret.toArray(bla);
-		} else {
-			LOGGER.error("[QueryHandler: {{}}] Queries with file {{}} could not be instantiated due to missing file", this.getClass().getName(), queryFileName);
-		}
-		return new File[] {};
-	}
 	
 	protected String replaceVars(String queryStr, Set<String> varNames) {
 		String command = queryStr;
@@ -153,6 +104,7 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 		return command;
 	}
 
+	@Override
 	protected Set<String> getInstances(String queryStr) {
 		Set<String> instances = new HashSet<String>();
 
@@ -203,6 +155,9 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 	}
 	
 	protected Query convertToSelect(ParameterizedSparqlString pss, Set<String> varNames) {
+		if(varNames.isEmpty()){
+			return pss.asQuery();
+		}
 		Query queryCpy = pss.asQuery();
 		queryCpy.getQueryPattern();
 

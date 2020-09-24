@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.query.impl;
 
+import com.google.common.collect.Sets;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
@@ -14,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 
@@ -31,7 +29,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InstancesQueryHandler.class);
 
-	protected static final String OUTPUT_ROOT_FOLDER = "queryInstances" + File.separator;
+	protected  String outputFolder = "queryInstances";
 
 	protected HashMap<String, Integer> type2IDcounter = new HashMap<String, Integer>();
 
@@ -42,7 +40,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	protected LanguageProcessor langProcessor = new SPARQLLanguageProcessor();
 
 
-	private int hashcode;
+	protected int hashcode;
 
 	/**
 	 * Default Constructor
@@ -59,12 +57,13 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	}
 
 	@Override
-	protected File[] generateSPARQL(String queryFileName) {
-		File[] queries = generateQueryPerLine(queryFileName, "sparql");
-		this.queryFiles = queries;
-
+	protected File[] generateQueries(String queryFileName) {
 		// Save hashcode of the file content for later use in generating stats
 		hashcode = FileUtils.getHashcodeFromFileContent(queryFileName);
+
+		File[] queries = generateQueryPerLine(queryFileName, langProcessor.getQueryPrefix());
+		this.queryFiles = queries;
+
 
 		return queries;
 	}
@@ -74,11 +73,10 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		List<File> ret = new LinkedList<File>();
 		// check if folder is cached
 		if (queryFile.exists()) {
-			File outputFolder = new File(OUTPUT_ROOT_FOLDER + queryFileName.hashCode()); 
+			File outputFolder = new File(this.outputFolder + File.separator + hashcode);
 			if (outputFolder.exists()) {
-				LOGGER.warn(
-						"[QueryHandler: {{}}] queries were instantiated already, will use old instances. To generate them new remove the {{}} folder",
-						this.getClass().getName(), OUTPUT_ROOT_FOLDER + queryFileName.hashCode());
+				LOGGER.warn("[QueryHandler: {{}}] queries were instantiated already, will use old instances. To generate them new remove the {{}} folder",
+						this.getClass().getName(), this.outputFolder + File.separator + hashcode);
 				// is cached use caching
 				return outputFolder.listFiles();
 			} else {
@@ -92,9 +90,12 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 						if (queryStr.isEmpty()) {
 							continue;
 						}
+						//create file with id and write query to it
 						File out = createFileWithID(outputFolder, idPrefix);
 						try (PrintWriter pw = new PrintWriter(out)) {
-							pw.print(queryStr);
+							for (String query : getInstances(queryStr)) {
+								pw.println(query);
+							}
 						}
 						ret.add(out);
 
@@ -113,7 +114,12 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		return new File[] {};
 	}
 
-	protected File createFileWithID(File rootFolder, String idPrefix) throws IOException {
+	protected Set<String> getInstances(String queryStr) {
+		return Sets.newHashSet(queryStr);
+	}
+
+
+		protected File createFileWithID(File rootFolder, String idPrefix) throws IOException {
 		// create a File with an ID
 		int id = 0;
 		if (type2IDcounter.containsKey(idPrefix)) {
@@ -164,4 +170,11 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		return langProcessor.generateTripleStats(queries, hashcode+"", taskID);
 	}
 
+	public String getOutputFolder() {
+		return outputFolder;
+	}
+
+	public void setOutputFolder(String outputFolder) {
+		this.outputFolder = outputFolder;
+	}
 }

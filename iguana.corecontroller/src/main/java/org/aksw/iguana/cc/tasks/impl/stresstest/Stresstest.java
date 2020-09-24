@@ -50,7 +50,6 @@ public class Stresstest extends AbstractTask {
 	private List<Worker> workers = new LinkedList<Worker>();
 	private Instant startTime;
 	private String qhClassName;
-	private String[] qhConstructorArgs;
 	private Long noOfWorkers= 0L;
 
 	private Double warmupTimeMS;
@@ -58,19 +57,14 @@ public class Stresstest extends AbstractTask {
 	private String warmupUpdates;
 
 
-	protected String baseUri = "http://iguana-benchmark.eu";
-	private String iguanaResource = baseUri + "/resource/";
-	private String iguanaProperty = baseUri + "/properties/";
 
 	private HashMap<Object, Object> qhConfig;
 
 
-	//@ParameterNames(names={"timeLimit", "workers", "queryHandler"})
 	public Stresstest(Integer timeLimit, ArrayList workers, LinkedHashMap queryHandler) throws FileNotFoundException {
 		this(timeLimit, workers, queryHandler, null);
 	}
 
-	//@ParameterNames(names={"timeLimit", "workers", "queryHandler", "warmup"})
 	public Stresstest(Integer timeLimit, ArrayList workers, LinkedHashMap queryHandler, LinkedHashMap warmup) throws FileNotFoundException {
 		this.timeLimit=timeLimit.doubleValue();
 		this.workerConfig = workers;
@@ -78,12 +72,10 @@ public class Stresstest extends AbstractTask {
 		this.warmupConfig = warmup;
 	}
 
-	//@ParameterNames(names={"workers", "queryHandler", "noOfQueryMixesPerHour"})
 	public Stresstest(ArrayList workers, LinkedHashMap queryHandler, Integer noOfQueryMixes) throws FileNotFoundException {
 		this(workers, queryHandler, null, noOfQueryMixes);
 	}
 
-	//@ParameterNames(names={"workers", "queryHandler", "warmup", "noOfQueryMixesPerHour"})
 	public Stresstest(ArrayList workers, LinkedHashMap queryHandler, LinkedHashMap warmup, Integer noOfQueryMixes) throws FileNotFoundException {
 		this.noOfQueryMixes=noOfQueryMixes.longValue();
 		this.workerConfig = workers;
@@ -143,7 +135,7 @@ public class Stresstest extends AbstractTask {
 		// create from construct args and class
 		QueryHandlerFactory factory = new QueryHandlerFactory();
 		QueryHandler queryHandler = factory.create(qhClassName, qhConfig);
-		queryHandler.generateQueries();
+		queryHandler.generate();
 
         Model tripleStats = queryHandler.generateTripleStats(taskID);
 		StringWriter sw = new StringWriter();
@@ -237,7 +229,7 @@ public class Stresstest extends AbstractTask {
 			return;
 		}
 		QueryHandler iqh = new InstancesQueryHandler(warmupWorkers);
-		iqh.generateQueries();
+		iqh.generate();
 		LOGGER.info("[TaskID: {{}}] will start {{}}ms warmup now.", taskID, warmupTimeMS);
 		executeWarmup(warmupWorkers);
 	}

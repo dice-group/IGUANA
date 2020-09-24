@@ -47,6 +47,10 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
     public static final String QUERY_RESULT_TYPE_JSON = "application/sparql-results+json";
     public static final String QUERY_RESULT_TYPE_XML = "application/sparql-results+xml";
 
+    @Override
+    public String getQueryPrefix() {
+        return "sparql";
+    }
 
     @Override
     public Model generateTripleStats(List<QueryWrapper> queries, String resourcePrefix, String taskID) {

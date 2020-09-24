@@ -11,6 +11,8 @@ import java.util.List;
 
 public interface LanguageProcessor {
 
+    public String getQueryPrefix();
+
     /**
      * Method to generate Triple Statistics for provided queries
      *
