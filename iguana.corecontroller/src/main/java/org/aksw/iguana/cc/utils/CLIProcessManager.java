@@ -8,10 +8,18 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * CLI Utils class
+ */
 public class CLIProcessManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CLIProcessManager.class);
 
+    /**
+     * Creates a process
+     * @param command
+     * @return
+     */
     public static Process createProcess(String command) {
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.redirectErrorStream(true);
@@ -34,15 +42,31 @@ public class CLIProcessManager {
         return process;
     }
 
+    /**
+     * Destroys a process forcibly
+     * @param process
+     */
     public static void destroyProcess(Process process) {
         process.destroyForcibly();
     }
 
+    /**
+     * Short handler for destroyProcess and createProcess
+     * @param process
+     * @param command
+     * @return
+     */
     public static Process destroyAndCreateNewProcess(Process process, String command) {
         destroyProcess(process);
         return createProcess(command);
     }
 
+    /**
+     * Create n processes of the same command
+     * @param n the amount of processes created
+     * @param command the command to create the process with
+     * @return
+     */
     public static List<Process> createProcesses(int n, String command) {
         List<Process> processList = new ArrayList<>(5);
         for (int i = 0; i < n; i++) {
@@ -52,6 +76,14 @@ public class CLIProcessManager {
         return processList;
     }
 
+    /**
+     * Count and returns the no. of lines of one process until a certain string appears,
+     * @param process
+     * @param successString the string of the process after the no of line should be returned
+     * @param errorString the error string, will throw an IOException if this appeared.
+     * @return
+     * @throws IOException
+     */
     public static long countLinesUntilStringOccurs(Process process, String successString, String errorString) throws IOException {
         String line;
         LOGGER.debug("Will look for: {} or as error: {}",successString, errorString);
@@ -93,6 +125,12 @@ public class CLIProcessManager {
         output.flush();
     }
 
+    /**
+     * Checks if the process input stream is ready to be read.
+     * @param process
+     * @return
+     * @throws IOException
+     */
     public static boolean isReaderReady(Process process) throws IOException {
         return new BufferedReader(new InputStreamReader(process.getInputStream())).ready();
     }

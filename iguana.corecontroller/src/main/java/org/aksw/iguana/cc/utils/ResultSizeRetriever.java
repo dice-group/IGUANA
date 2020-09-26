@@ -8,6 +8,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
 
+/**
+ * Util class to retrieve the resultsize of a queryfile and an sparql endpoint.
+ */
 public class ResultSizeRetriever {
 
 	public static void main(String[] args) {

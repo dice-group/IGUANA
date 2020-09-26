@@ -2,12 +2,6 @@ package org.aksw.iguana.cc.lang;
 
 import com.google.common.collect.Lists;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
-import org.apache.http.HttpStatus;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.message.BasicStatusLine;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -18,7 +12,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -68,20 +61,7 @@ public class SPARQLLanguageProcessorTest {
             "</sparql>";
 
 
-    public CloseableHttpResponse buildMockResponse(String data, String contentType) throws FileNotFoundException, UnsupportedEncodingException {
-        ProtocolVersion protocolVersion = new ProtocolVersion("HTTP", 1, 1);
-        String reasonPhrase = "OK";
-        StatusLine statusline = new BasicStatusLine(protocolVersion, HttpStatus.SC_OK, reasonPhrase);
-        MockCloseableHttpResponse mockResponse = new MockCloseableHttpResponse(statusline);
-        BasicHttpEntity entity = new BasicHttpEntity();
-        mockResponse.setHeader("Content-Type", contentType);
-        //entity.setContentType(contentType);
-        URL url = Thread.currentThread().getContextClassLoader().getResource("response.txt");
-        InputStream instream = new ByteArrayInputStream(data.getBytes());
-        entity.setContent(instream);
-        mockResponse.setEntity(entity);
-        return mockResponse;
-    }
+
 
     @Test
     public void checkJSON() throws ParseException {
@@ -126,9 +106,9 @@ public class SPARQLLanguageProcessorTest {
     @Test
     public void checkResultSize() throws IOException, ParserConfigurationException, SAXException, ParseException {
         SPARQLLanguageProcessor languageProcessor = new SPARQLLanguageProcessor();
-        assertEquals(3, languageProcessor.getResultSize(buildMockResponse(jsonResult, SPARQLLanguageProcessor.QUERY_RESULT_TYPE_JSON)).longValue());
-        assertEquals(2, languageProcessor.getResultSize(buildMockResponse(xmlResult, SPARQLLanguageProcessor.QUERY_RESULT_TYPE_XML)).longValue());
-        assertEquals(4, languageProcessor.getResultSize(buildMockResponse("a\na\na\nb", "text/plain")).longValue());
+        assertEquals(3, languageProcessor.getResultSize(MockCloseableHttpResponse.buildMockResponse(jsonResult, SPARQLLanguageProcessor.QUERY_RESULT_TYPE_JSON)).longValue());
+        assertEquals(2, languageProcessor.getResultSize(MockCloseableHttpResponse.buildMockResponse(xmlResult, SPARQLLanguageProcessor.QUERY_RESULT_TYPE_XML)).longValue());
+        assertEquals(4, languageProcessor.getResultSize(MockCloseableHttpResponse.buildMockResponse("a\na\na\nb", "text/plain")).longValue());
     }
 
 

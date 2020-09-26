@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Gets the {@link org.apache.commons.configuration.Configuration} component and will generate
+ * Gets either a JSON or YAML configuration file using a json schema and will generate
  * a SuiteID and ExperimentIDs as well as TaskIDs for it.</br>
- * Afterwards it will execute a DataGenerator if specified and starts the taskProcessor with all specified tasks
+ * Afterwards it will start the taskProcessor with all specified tasks
  * <br/><br/>
  * The following order holds
  * <ol>
@@ -30,6 +30,9 @@ import java.util.Map;
  *  <li>For each Connection</li>
  *  <li>For each Task</li>
  * </ol>
+ *
+ * Further on executes the pre and post script hooks, before and after a class.
+ * Following values will be exchanged in the script string {{Connection}} {{Dataset.name}} {{Dataset.file}} {{taskID}}
  * 
  * 
  * @author f.conrads
@@ -109,19 +112,21 @@ public class IguanaConfig {
 
 	private void initResultProcessor() {
 		//If storage or metric is empty use default
-		if(this.storages.isEmpty()){
+		if(this.storages== null || this.storages.isEmpty()){
+			storages = new ArrayList<>();
 			StorageConfig config = new StorageConfig();
 			config.setClassName("NTFileStorage");
 			storages.add(config);
 		}
-		if(this.metrics.isEmpty()){
+		if(this.metrics == null || this.metrics.isEmpty()){
+			metrics = new ArrayList<>();
 			MetricConfig config = new MetricConfig();
 			config.setClassName("QMPH");
 			metrics.add(config);
 			config = new MetricConfig();
 			config.setClassName("QPS");
 			Map<Object, Object> configMap = new HashMap<Object, Object>();
-			configMap.put("failPenalty", 180000);
+			configMap.put("penalty", 180000);
 			config.setConfiguration(configMap);
 			metrics.add(config);
 			config = new MetricConfig();

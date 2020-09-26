@@ -7,6 +7,9 @@ import org.aksw.iguana.rp.metrics.Metric;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Metric Config class
+ */
 public class MetricConfig {
 
     @JsonProperty(required = true)

@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
+/**
+ * Counts the number of all successfully executed queries
+ */
 @Shorthand("NoQ")
 public class NoQMetric extends AbstractMetric {
 

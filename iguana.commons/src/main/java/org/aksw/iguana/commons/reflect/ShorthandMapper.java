@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Maps the shorthand to the class names at the beginning of it's initialization.
+ * Thus it has to be done once.
+ *
+ */
 public class ShorthandMapper {
 
     public Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -29,6 +34,10 @@ public class ShorthandMapper {
         this("");
     }
 
+    /**
+     * create mapping, but only searches in packages with the prefix
+     * @param prefix
+     */
     public ShorthandMapper(String prefix){
         Reflections reflections = new Reflections(prefix);
         Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Shorthand.class);

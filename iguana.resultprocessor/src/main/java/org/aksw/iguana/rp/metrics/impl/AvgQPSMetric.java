@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Calculates the average queries per second
+ */
 @Shorthand("AvgQPS")
 public class AvgQPSMetric extends QPSMetric {
     public AvgQPSMetric() {

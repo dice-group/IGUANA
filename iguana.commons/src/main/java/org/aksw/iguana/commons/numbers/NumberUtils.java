@@ -1,6 +1,8 @@
 package org.aksw.iguana.commons.numbers;
 
 /**
+ * Utils class for everything with numbers
+ *
  * @author f.conrads
  *
  */

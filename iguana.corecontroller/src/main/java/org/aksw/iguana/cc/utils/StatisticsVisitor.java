@@ -3,6 +3,9 @@ package org.aksw.iguana.cc.utils;
 import org.apache.jena.sparql.syntax.*;
 
 
+/**
+ * Simple visitor to check if simple statistics of a SPARQL Query appeared.
+ */
 public class StatisticsVisitor extends RecursiveElementVisitor{
 
 	public boolean filter;

@@ -12,12 +12,35 @@
       },
       "required": ["endpoint"]
     },
+    "warmup" : {
+      "type": "object",
+      "properties": {
+        "timeLimit": {
+          "type": "integer"
+        },
+        "queryHandler": {
+          "$ref": "#/definitions/genericClassObject"
+        },
+        "workers": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/AbstractWorker"
+              }
+            ]
+          }
+        }
+      },
+        "required": ["workers","timeLimit"]
+      },
     "stresstest": {
       "type": "object",
       "properties": {
         "timeLimit": { "type": "integer" },
         "noOfQueryMixes": {"type": "integer"},
         "queryHandler": {"$ref" : "#/definitions/genericClassObject" },
+        "warmup" : {"$ref" :  "#/definitions/warmup"},
         "workers": {
           "type": "array",
           "items": {
@@ -43,7 +66,7 @@
       "if": {
         "properties": {
           "className" : {
-            "oneOf": [ {"const": "SPARQLWorker"},{"const": "org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.SPARQLWorker"}]
+            "oneOf": [ {"const": "SPARQLWorker"},{"const": "org.aksw.iguana.cc.worker.impl.SPARQLWorker"}]
           }
         }
       },
@@ -89,7 +112,7 @@
       "if": {
         "properties": {
           "className" : {
-            "oneOf": [{"const": "UPDATEWorker"},{"const": "org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.UPDATEWorker"}]
+            "oneOf": [{"const": "UPDATEWorker"},{"const": "org.aksw.iguana.cc.worker.impl.UPDATEWorker"}]
           }
         }
       },
@@ -112,7 +135,7 @@
       },
         {"if": {"properties": {
           "className" : {
-            "oneOf": [{"const": "MultipleCLIInputWorker"}, {"const": "org.aksw.iguana.cc.task.impl.stresstest.worker.impl.MultipleCLIInputWorker"}]
+            "oneOf": [{"const": "MultipleCLIInputWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.MultipleCLIInputWorker"}]
           }
         }},
         "then":
@@ -137,7 +160,7 @@
       "if": {
         "properties": {
           "className" : {
-            "oneOf": [{"const": "CLIInputWorker"}, {"const": "org.aksw.iguana.cc.task.impl.stresstest.worker.impl.CLIInputWorker"}]
+            "oneOf": [{"const": "CLIInputWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.CLIInputWorker"}]
           }
         }
       },
@@ -162,7 +185,7 @@
       "if": {
         "properties": {
           "className" : {
-            "oneOf": [{"const": "CLIPrefixWorker"}, {"const": "org.aksw.iguana.cc.task.impl.stresstest.worker.impl.CLIPrefixWorker"}]
+            "oneOf": [{"const": "CLIPrefixWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.CLIPrefixWorker"}]
           }
         }
       },
@@ -222,7 +245,7 @@
         {"if": {
           "properties": {
             "className" : {
-              "oneOf": [{"const": "MultipleCLIInputFileWorker"}, {"const": "org.aksw.iguana.cc.task.impl.stresstest.worker.impl.MultipleCLIInputFileWorker"}]
+              "oneOf": [{"const": "MultipleCLIInputFileWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.MultipleCLIInputFileWorker"}]
             }
           }
         },
@@ -278,7 +301,7 @@
           "if": {
             "properties": {
               "className": {
-                "oneOf": [{"const": "CLIInputFileWorker"}, {"const": "org.aksw.iguana.cc.task.impl.stresstest.worker.impl.CLIInputFileWorker"}]
+                "oneOf": [{"const": "CLIInputFileWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.CLIInputFileWorker"}]
               }
             }
           },

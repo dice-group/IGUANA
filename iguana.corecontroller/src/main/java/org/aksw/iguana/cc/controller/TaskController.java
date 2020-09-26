@@ -17,10 +17,9 @@ import java.util.concurrent.TimeoutException;
 
 
 /**
- * Task Controlling, will start communication between core controller and result processor
- * will start consumer for cc and a sender for cc as well as rp.  
- * Will recv a cc message, creates and starts the task,  will send the results to rp and 
- * after finishing the task will send a task finished flag back to cc.
+ * Task Controlling, will start the actual benchmark tasks and its {@link org.aksw.iguana.cc.tasks.TaskManager}
+ *
+ *
  * 
  * @author f.conrads
  *

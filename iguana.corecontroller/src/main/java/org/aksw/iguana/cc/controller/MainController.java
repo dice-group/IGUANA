@@ -45,6 +45,13 @@ public class MainController {
 		controller.start(config, validate);
 	}
 
+	/**
+	 * Starts a configuration using the config file an states if Iguana should validate it using a json-schema
+	 *
+	 * @param configFile the Iguana config file
+	 * @param validate should the config file be validated using a json-schema
+	 * @throws IOException
+	 */
 	public void start(String configFile, Boolean validate) throws IOException{
 		ConfigManager cmanager = new ConfigManager();
 		File f = new File(configFile);

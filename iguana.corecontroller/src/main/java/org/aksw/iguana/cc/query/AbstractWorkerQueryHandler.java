@@ -1,8 +1,8 @@
 package org.aksw.iguana.cc.query;
 
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.AbstractWorker;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.Worker;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.UPDATEWorker;
+import org.aksw.iguana.cc.worker.AbstractWorker;
+import org.aksw.iguana.cc.worker.Worker;
+import org.aksw.iguana.cc.worker.impl.UPDATEWorker;
 
 import java.io.File;
 import java.util.Collection;

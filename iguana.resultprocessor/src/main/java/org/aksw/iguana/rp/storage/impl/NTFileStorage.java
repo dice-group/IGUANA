@@ -17,7 +17,7 @@ import java.util.Calendar;
 
 /**
  * 
- * Will save results as NTriple File
+ * Will save results as NTriple File either using the provided name or the a generated one.
  * 
  * @author f.conrads
  *
@@ -31,7 +31,7 @@ public class NTFileStorage extends TripleBasedStorage {
 	private StringBuilder file;
 	
 	/**
-	 * 
+	 * Uses a generated file called results_{DD}-{MM}-{YYYY}_{HH}-{mm}.nt
 	 */
 	public NTFileStorage() {
 		Calendar now = Calendar.getInstance();
@@ -44,6 +44,10 @@ public class NTFileStorage extends TripleBasedStorage {
 			.append(now.get(Calendar.MINUTE)).append(".nt");
 	}
 
+	/**
+	 * Uses the provided filename
+	 * @param fileName
+	 */
 	public NTFileStorage(String fileName){
 		this.file = new StringBuilder(fileName);
 	}
@@ -65,6 +69,10 @@ public class NTFileStorage extends TripleBasedStorage {
 	@Override
 	public String toString(){
 		return this.getClass().getSimpleName();
+	}
+
+	public String getFileName(){
+		return this.file.toString();
 	}
 
 }

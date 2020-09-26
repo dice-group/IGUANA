@@ -5,6 +5,9 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
+/**
+ * RDF Vocabulary Classes and Properties
+ */
 public class Vocab {
 
     private static String rdfs = "http://www.w3.org/2000/01/rdf-schema#";

@@ -129,12 +129,17 @@ public abstract class TripleBasedStorage implements Storage {
 		return this.getClass().getSimpleName();
 	}
 
+	/**
+	 * Ends the task and adds a rdfs:endDate triple with the current time
+	 * @param taskID
+	 */
 	public void endTask(String taskID) {
 		Calendar cal = GregorianCalendar.getInstance();
 		String taskUrl = getUrlWithResourcePrefix(taskID);
 		metricResults.add(metricResults.add(metricResults.createResource(taskUrl),
 				ResourceFactory.createProperty(rdfsUri + "endDate"), metricResults.createTypedLiteral(cal)));
 	}
+
 
 	public void addData(Model data){
 		metricResults.add(data);

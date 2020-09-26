@@ -2,6 +2,11 @@ package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The Dataset config class.
+ *
+ * Will set the name and if it was set in the config file the fileName
+ */
 public class Dataset {
     @JsonProperty(required = true)
     private String name;

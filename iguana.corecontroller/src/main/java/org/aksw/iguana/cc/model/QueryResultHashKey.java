@@ -2,6 +2,9 @@ package org.aksw.iguana.cc.model;
 
 import java.util.Objects;
 
+/**
+ * Creates a Result Hash key for a query, thus a result size only has to be checked once and it will be cached using this key
+ */
 public class QueryResultHashKey {
 
     private String queryId;

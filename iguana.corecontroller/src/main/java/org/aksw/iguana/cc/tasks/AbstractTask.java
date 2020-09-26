@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- *
+ * Abstract Task to help create a Task.
+ * Will do the background work
  * 
  * @author f.conrads
  *
@@ -57,6 +58,7 @@ public abstract class AbstractTask implements Task {
 		this.datasetID=dataset;
 		this.conID=con.getName();
 		this.con=con;
+
 	}
 
 	@Override

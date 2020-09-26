@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.config;
 
 /**
- * Constants used only by TaskProcessor
+ * Constants used only by the Core controller
  * 
  * @author f.conrads
  *

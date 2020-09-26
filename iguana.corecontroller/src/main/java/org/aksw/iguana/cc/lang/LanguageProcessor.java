@@ -9,9 +9,16 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Language Processor tells how to handle Http responses as well as how to analyze queries and generate stats.
+ */
 public interface LanguageProcessor {
 
-    public String getQueryPrefix();
+    /**
+     * Returns the prefix used for the queries (e.g. sparql, query or document)
+     * @return
+     */
+    String getQueryPrefix();
 
     /**
      * Method to generate Triple Statistics for provided queries
@@ -20,7 +27,7 @@ public interface LanguageProcessor {
      * @param taskID
      * @return Model with the triples to add to the results
      */
-    public Model generateTripleStats(List<QueryWrapper> queries, String resourcePrefix, String taskID);
+    Model generateTripleStats(List<QueryWrapper> queries, String resourcePrefix, String taskID);
 
 
     /**
@@ -33,7 +40,7 @@ public interface LanguageProcessor {
      * @throws ParseException
      * @throws IOException
      */
-    public Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException;
+    Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
 
 }

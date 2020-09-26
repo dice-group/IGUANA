@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * This is the Main Controller. 
- * It will start the ResultProcessor, the Consumer and managing the metrics as well as Storages
+ * It will start the ResultProcessor, initialize the {@link org.aksw.iguana.rp.storage.StorageManager} and the {@link org.aksw.iguana.rp.metrics.MetricManager}
  * 
  * @author f.conrads
  *

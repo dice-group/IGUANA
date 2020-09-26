@@ -1,0 +1,13 @@
+datasets:
+  - name: "DatasetName"
+    #This can be attached at the pre and post script hooks, so you can load your connection using the here stated dataset file
+    file: "testfile.txt"
+connections:
+  - name: "TestSystem"
+    endpoint: "http://localhost:8890/sparql"
+
+
+tasks:
+  - className: "org.aksw.iguana.cc.tasks.MockupTask"
+    configuration:
+      empty: ""

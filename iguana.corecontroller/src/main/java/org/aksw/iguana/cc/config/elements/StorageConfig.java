@@ -7,6 +7,9 @@ import org.aksw.iguana.rp.storage.Storage;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Storage Configuration class
+ */
 public class StorageConfig {
 
 

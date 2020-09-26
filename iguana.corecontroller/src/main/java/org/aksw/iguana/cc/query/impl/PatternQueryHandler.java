@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.impl;
 
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.Worker;
+import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.apache.jena.query.*;
 import org.slf4j.Logger;

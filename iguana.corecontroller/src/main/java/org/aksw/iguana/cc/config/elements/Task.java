@@ -6,6 +6,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The task configuration class, sets the class name and it's configuration
+ */
 public class Task implements Serializable {
 
     @JsonProperty(required = true)

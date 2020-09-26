@@ -222,6 +222,19 @@ public class TypedFactory <T>{
 		return true;
 	}
 
+	/**
+	 * Uses the parameter Names and types of a constructor to find the best fitting constructor
+	 *
+	 * Uses the ParameterNames annotation of a constructor to get the parameter names
+	 *
+	 * like
+	 * . @ParameterNames(names={"a", "b"})
+	 * public Constructor(String a, Object b){...}
+	 *
+	 * @param className
+	 * @param map
+	 * @return
+	 */
 	public T createAnnotated(String className, Map<Object, Object> map){
 		Class<? extends T> clazz;
 		try {

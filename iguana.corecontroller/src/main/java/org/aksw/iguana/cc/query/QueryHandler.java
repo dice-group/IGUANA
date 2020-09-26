@@ -19,8 +19,13 @@ public interface QueryHandler {
 	 * This will generate the queries.
 	 * @return
 	 */
-	public Map<String, File[]> generate();
+	Map<String, File[]> generate();
 
-	public Model generateTripleStats(String taskID);
+	/**
+	 * Generates some stats for the queries
+	 * @param taskID
+	 * @return
+	 */
+	Model generateTripleStats(String taskID);
 	
 }

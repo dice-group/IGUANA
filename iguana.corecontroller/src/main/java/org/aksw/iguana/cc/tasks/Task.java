@@ -45,6 +45,11 @@ public interface Task {
 	void addMetaData();
 
 
-
+	/**
+	 * Will initialize the task
+	 * @param ids normally the suiteID, experimentID, taskID
+	 * @param dataset the dataset name
+	 * @param con the current connection to execute the task against
+	 */
     void init(String[] ids, String dataset, Connection con);
 }

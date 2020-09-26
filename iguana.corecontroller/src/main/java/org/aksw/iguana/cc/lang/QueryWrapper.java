@@ -1,5 +1,8 @@
 package org.aksw.iguana.cc.lang;
 
+/**
+ * Util class to wrap a Query of what ever class it may be and it's id
+ */
 public class QueryWrapper {
 
     private Object query;

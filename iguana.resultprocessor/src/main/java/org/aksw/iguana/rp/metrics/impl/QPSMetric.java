@@ -70,29 +70,10 @@ public class QPSMetric extends AbstractMetric {
 		long timeout = tmpSuccess==COMMON.QUERY_SOCKET_TIMEOUT?1:0;
 		long unknown = tmpSuccess==COMMON.QUERY_UNKNOWN_EXCEPTION?1:0;
 		long wrongCode = tmpSuccess==COMMON.QUERY_HTTP_FAILURE?1:0;
-		Double penalty=null;
-		try {
-			if(p.containsKey(COMMON.PENALTY)) {
-				penalty = Double.parseDouble(p.get(COMMON.PENALTY).toString());
-			}
-		}catch(Exception e){
-			LOGGER.warn("Penalty could not be set. Error: {}", e);
-		}
+		Double penalty=getPenalty(p);
+
 		long size=-1;
-		double penalizedTime=time;
-		if(failure==1){
-			if(this.penalty!=null) {
-				penalizedTime = this.penalty;
-			}
-			else if(penalty!=null){
-				//use task provided penalty
-				penalizedTime = penalty;
-			}
-			else{
-				LOGGER.error("Penalty was neither set in Task nor Config. penaltyQPS will show not be included.");
-				this.noPenalty=true;
-			}
-		}
+		double penalizedTime=getPenalizedTime(penalty, failure, time);
 		if(p.containsKey(COMMON.RECEIVE_DATA_SIZE)) {
 			size = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SIZE).toString());
 		}
@@ -100,12 +81,18 @@ public class QPSMetric extends AbstractMetric {
 		int queryHash = Integer.parseInt(p.get(COMMON.QUERY_HASH).toString());
 		Properties extra = getExtraMeta(p);
 		
+		Properties tmp = putResults(extra, time, success, failure, timeout, unknown, wrongCode, penalizedTime, size, queryHash, queryID);
+		addDataToContainer(extra, tmp);
+		
+	}
+
+	private Properties putResults(Properties extra, double time, long success, long failure, long timeout, long unknown, long wrongCode, double penalizedTime, long size, int queryHash, String queryID) {
 		Properties tmp = getDataFromContainer(extra);
 		if(tmp!=null && tmp.containsKey(queryID)){
 			Object[] oldArr = (Object[]) tmp.get(queryID);
 			oldArr[0] = (double) oldArr[0] + time;
-			 oldArr[1] = (long) oldArr[1] + success;
-			 oldArr[2] = (long) oldArr[2] + failure;
+			oldArr[1] = (long) oldArr[1] + success;
+			oldArr[2] = (long) oldArr[2] + failure;
 			if((long)oldArr[3]<size) {
 				oldArr[3]=size;
 			}
@@ -123,8 +110,36 @@ public class QPSMetric extends AbstractMetric {
 			Object[] resArr = new Object[]{time, success, failure, size, timeout, unknown, wrongCode,penalizedTime,queryHash};
 			tmp.put(queryID, resArr);
 		}
-		addDataToContainer(extra, tmp);
-		
+		return tmp;
+	}
+
+
+	private double getPenalizedTime(Double penalty, long failure, double time) {
+		if(failure==1){
+			if(this.penalty!=null) {
+				return this.penalty;
+			}
+			else if(penalty!=null){
+				//use task provided penalty
+				return penalty;
+			}
+			else{
+				LOGGER.error("Penalty was neither set in Task nor Config. penaltyQPS will show not be included.");
+				this.noPenalty=true;
+			}
+		}
+		return time;
+	}
+
+	private Double getPenalty(Properties p) {
+		try {
+			if(p.containsKey(COMMON.PENALTY)) {
+				return Double.parseDouble(p.get(COMMON.PENALTY).toString());
+			}
+		}catch(Exception e){
+			LOGGER.warn("Penalty could not be set. Error: {}", e);
+		}
+		return null;
 	}
 
 	@Override
@@ -134,6 +149,9 @@ public class QPSMetric extends AbstractMetric {
 		
 	}
 
+	/**
+	 * Callback method which will be used in close
+	 */
 	protected void qpsClose() {
 		//for each query/extra put {qID:amount} to properties
 		Map<Object, Object> map = new HashMap<Object, Object>();

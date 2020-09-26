@@ -35,9 +35,12 @@ public interface Storage {
 	 * 
 	 */
 	public void commit();
-	
 
 
+	/**
+	 * Will tell the storage that the task with taskID ended
+	 * @param taskID
+	 */
 	public void endTask(String taskID);
 
 

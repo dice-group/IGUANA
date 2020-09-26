@@ -1,5 +1,7 @@
 datasets:
   - name: "DatasetName"
+    #optional, will just be set in the pre & post script hooks by using {{dataset.file}}
+    file: "src/test/resources/dataset.txt"
 connections:
   - name: "Virtuoso7"
     user: "dba"
@@ -19,7 +21,19 @@ connections:
 tasks:
   - className: "org.aksw.iguana.cc.tasks.impl.Stresstest"
     configuration:
+      # 1 hour (time Limit is in ms)
       timeLimit: 360000
+      # warmup is optional
+      warmup:
+        # 1 minutes (is in ms)
+        timeLimit: 600000
+        # queryHandler could be set too, same as in the stresstest configuration, otherwise the same queryHandler will be use.
+        # workers are set the same way as in the configuration part
+        workers:
+          - threads: 1
+            className: "SPARQLWorker"
+            queriesFile: "queries_warmup.txt"
+            timeOut: 180000
       queryHandler:
         className: "InstancesQueryHandler"
       workers:
@@ -35,10 +49,11 @@ tasks:
           parameterName: "query"
           responseType: "application/sparql-results+json"
 
+# both are optional and can be used to load and start as well as stop the connection before and after every task
+preScriptHook: "./triplestores/{{connection}}/start.sh {{dataset.file}} {{dataset.name}} {{taskID}}"
+postScriptHook: "./triplestores/{{connection}}/stop.sh"
 
-preScriptHook: "echo \"test\""
-postScriptHook: "ls"
-
+#optional otherwise the same metrics will be used as default
 metrics:
   - className: "QMPH"
   - className: "QPS"
@@ -46,5 +61,8 @@ metrics:
   - className: "AvgQPS"
   - className: "NoQ"
 
+#optional otherwise an nt file will be used
 storages:
   - className: "NTFileStorage"
+    #configuration:
+      #fileName: YOUR_RESULT_FILE_NAME.nt

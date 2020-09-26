@@ -5,9 +5,9 @@ import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.cc.query.AbstractWorkerQueryHandler;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.Worker;
+import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.cc.utils.FileUtils;
-import org.aksw.iguana.cc.utils.QueryStatistics;
+import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.factory.TypedFactory;
 import org.apache.jena.rdf.model.Model;
@@ -29,11 +29,11 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InstancesQueryHandler.class);
 
-	protected  String outputFolder = "queryInstances";
+	protected  String outputFolder = "queryCache";
 
 	protected HashMap<String, Integer> type2IDcounter = new HashMap<String, Integer>();
 
-	protected QueryStatistics qs = new QueryStatistics();
+	protected SPARQLQueryStatistics qs = new SPARQLQueryStatistics();
 
 	private File[] queryFiles;
 

@@ -36,6 +36,9 @@ public class QMPHMetric extends NoQPHMetric {
 		super.close();
 	}
 
+	/**
+	 * callback which will be called in close
+	 */
 	@Override
 	protected void callbackClose(){
 		Model m = ModelFactory.createDefaultModel();

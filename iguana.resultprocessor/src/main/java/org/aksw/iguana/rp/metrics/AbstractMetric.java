@@ -22,25 +22,25 @@ import java.util.Properties;
 public abstract class AbstractMetric implements Metric{
 
 	protected StorageManager storageManager = StorageManager.getInstance();
-	
+
 	protected Properties metaData = new Properties();
-	
+
 	protected Map<Properties, Properties> dataContainer = new HashMap<Properties, Properties>();
-	
+
 	protected String name;
 	protected String shortName;
 	protected String description;
-	
+
 	/**
 	 * This constructor will not set name, Short name and description
-	 * Thus the final Metric class has to set them itself. 
+	 * Thus the final Metric class has to set them itself.
 	 */
 	public AbstractMetric(){
 	}
-	
+
 	/**
 	 * Will create an Metric class with the name, short name and description
-	 * 
+	 *
 	 * @param name
 	 * @param shortName
 	 * @param description
@@ -50,32 +50,32 @@ public abstract class AbstractMetric implements Metric{
 		this.shortName=shortName;
 		this.description=description;
 	}
-	
+
 	@Override
 	public void setStorageManager(StorageManager smanager){
 		this.storageManager = smanager;
 	}
-	
+
 	@Override
 	public StorageManager getStorageManager(){
 		return this.storageManager;
 	}
-	
+
 	@Override
 	public String getDescription(){
 		return this.description;
 	}
-	
+
 	@Override
 	public String getName(){
 		return this.name;
 	}
-	
+
 	@Override
 	public String getShortName(){
 		return this.shortName;
 	}
-	
+
 
 	/**
 	 * Will add the Meta Data to the Metric
@@ -85,11 +85,11 @@ public abstract class AbstractMetric implements Metric{
 		this.metaData = metaData;
 	}
 
-	
+
 	/**
 	 * Will return the Properties Object with the associated key: EXTRA_META_KEY</br>
 	 * if this key does not exists: recv will be returned
-	 * 
+	 *
 	 * @param recv
 	 * @return
 	 */
@@ -98,9 +98,9 @@ public abstract class AbstractMetric implements Metric{
 			return (Properties) recv.get(COMMON.EXTRA_META_KEY);
 		return recv;
 	}
-	
 
-	
+
+
 	/**
 	 * Will create a subject node string from the recv object (ExperimentTaskID and extraMeta Hash)
 	 * @param recv
@@ -114,10 +114,10 @@ public abstract class AbstractMetric implements Metric{
 		}
 		return subject;
 	}
-	
+
 	/**
 	 * Will add the data to a in  memory container which can be assessed by extra
-	 * 
+	 *
 	 * @param extra
 	 * @param data
 	 */
@@ -127,24 +127,24 @@ public abstract class AbstractMetric implements Metric{
 
 	/**
 	 * Getting the data Properties from the data container associated to extra
-	 * 
+	 *
 	 * @param extra
 	 * @return
 	 */
 	protected Properties getDataFromContainer(Properties extra){
 		return this.dataContainer.get(extra);
 	}
-	
+
 	/**
-	 * Assuming that the results are Integer objects, this will 
+	 * Assuming that the results are Integer objects, this will
 	 * 1. if no data for extra exists, create the data from the results object
-	 * 2. if the data exists, sum the corresponding 
-	 * 
-	 * for example:  
+	 * 2. if the data exists, sum the corresponding
+	 *
+	 * for example:
 	 * container has data object e1:(a:10, b:12)
 	 * new results for e1 are (a:2, b:5)
-	 * The new container data will be (a:12, b:17) 
-	 * 
+	 * The new container data will be (a:12, b:17)
+	 *
 	 * @param extra
 	 * @param results
 	 */
@@ -209,6 +209,7 @@ public abstract class AbstractMetric implements Metric{
 		this.storageManager.addData(m);
 	}
 
+	@Override
 	public void close() {
 		//Add metric description and worker class
 		Model m = ModelFactory.createDefaultModel();

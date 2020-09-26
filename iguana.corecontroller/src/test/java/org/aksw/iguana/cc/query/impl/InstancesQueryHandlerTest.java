@@ -2,9 +2,8 @@ package org.aksw.iguana.cc.query.impl;
 
 import com.google.common.collect.Lists;
 import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.query.impl.InstancesQueryHandler;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.Worker;
-import org.aksw.iguana.cc.tasks.impl.stresstest.worker.impl.SPARQLWorker;
+import org.aksw.iguana.cc.worker.Worker;
+import org.aksw.iguana.cc.worker.impl.SPARQLWorker;
 import org.apache.commons.io.FileUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;

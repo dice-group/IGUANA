@@ -2,7 +2,7 @@ package org.aksw.iguana.cc.lang.impl;
 
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
-import org.aksw.iguana.cc.utils.QueryStatistics;
+import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.vocab.Vocab;
@@ -37,6 +37,11 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * SPARQL Language Processor.
+ * Tries to analyze Queries as SPARQL queries and checks http response for either application/sparql-results+json
+ * or application/sparql-results+xml to count the result size correctly. Otherwise assumes it record per line and counts the returning lines.
+ */
 @Shorthand("lang.SPARQL")
 public class SPARQLLanguageProcessor implements LanguageProcessor {
 
@@ -56,15 +61,15 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
     public Model generateTripleStats(List<QueryWrapper> queries, String resourcePrefix, String taskID) {
         Model model = ModelFactory.createDefaultModel();
         for(QueryWrapper wrappedQuery : queries) {
+            Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + "/" + wrappedQuery.getId());
+            model.add(subject, RDF.type, Vocab.queryClass);
+            model.add(subject, Vocab.rdfsID, wrappedQuery.getId().replace("sparql", ""));
+            model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
             try {
                 Query q = QueryFactory.create(wrappedQuery.getQuery().toString());
-                QueryStatistics qs2 = new QueryStatistics();
+                SPARQLQueryStatistics qs2 = new SPARQLQueryStatistics();
                 qs2.getStatistics(q);
 
-                Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + "/" + wrappedQuery.getId());
-                model.add(subject, RDF.type, Vocab.queryClass);
-                model.add(subject, Vocab.rdfsID, wrappedQuery.getId().replace("sparql", ""));
-                model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
                 model.add(subject, Vocab.aggrProperty, model.createTypedLiteral(qs2.aggr==1));
                 model.add(subject, Vocab.filterProperty, model.createTypedLiteral(qs2.filter==1));
                 model.add(subject, Vocab.groupByProperty, model.createTypedLiteral(qs2.groupBy==1));
@@ -75,7 +80,7 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
                 model.add(subject, Vocab.orderByProperty, model.createTypedLiteral(qs2.orderBy==1));
                 model.add(subject, Vocab.unionProperty, model.createTypedLiteral(qs2.union==1));
             }catch(Exception e){
-                LOGGER.error("Query statistics could not be created. Not using SPARQL? Will not attach them to results.", e);
+                LOGGER.warn("Query statistics could not be created. Not using SPARQL?");
             }
         }
         return model;
@@ -128,7 +133,7 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
     @Override
     public Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException {
         HttpEntity httpResponse = response.getEntity();
-        String contentType = getContentTypeVal(response.getHeaders("Content-Type")[0]);
+        String contentType = getContentTypeVal(response.getEntity().getContentType());
 
         try (InputStream inputStream = httpResponse.getContent();
              BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
