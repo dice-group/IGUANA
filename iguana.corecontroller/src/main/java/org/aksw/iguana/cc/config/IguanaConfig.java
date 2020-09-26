@@ -6,6 +6,7 @@ import org.aksw.iguana.cc.controller.TaskController;
 import org.aksw.iguana.commons.script.ScriptExecutor;
 import org.aksw.iguana.rp.controller.RPController;
 import org.aksw.iguana.rp.metrics.Metric;
+import org.aksw.iguana.rp.metrics.impl.*;
 import org.aksw.iguana.rp.storage.Storage;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.lang3.SerializationUtils;
@@ -122,22 +123,22 @@ public class IguanaConfig {
 			LOGGER.info("No metrics were set. Using default metrics.");
 			metrics = new ArrayList<>();
 			MetricConfig config = new MetricConfig();
-			config.setClassName("QMPH");
+			config.setClassName(QMPHMetric.class.getCanonicalName());
 			metrics.add(config);
 			config = new MetricConfig();
-			config.setClassName("QPS");
+			config.setClassName(QPSMetric.class.getCanonicalName());
 			Map<Object, Object> configMap = new HashMap<Object, Object>();
 			configMap.put("penalty", 180000);
 			config.setConfiguration(configMap);
 			metrics.add(config);
 			config = new MetricConfig();
-			config.setClassName("NoQPH");
+			config.setClassName(NoQPHMetric.class.getCanonicalName());
 			metrics.add(config);
 			config = new MetricConfig();
-			config.setClassName("AvgQPS");
+			config.setClassName(AvgQPSMetric.class.getCanonicalName());
 			metrics.add(config);
 			config = new MetricConfig();
-			config.setClassName("NoQ");
+			config.setClassName(NoQMetric.class.getCanonicalName());
 			metrics.add(config);
 
 		}
