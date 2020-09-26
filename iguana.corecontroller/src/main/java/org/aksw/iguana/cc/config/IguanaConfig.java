@@ -119,6 +119,7 @@ public class IguanaConfig {
 			storages.add(config);
 		}
 		if(this.metrics == null || this.metrics.isEmpty()){
+			LOGGER.info("No metrics were set. Using default metrics.");
 			metrics = new ArrayList<>();
 			MetricConfig config = new MetricConfig();
 			config.setClassName("QMPH");

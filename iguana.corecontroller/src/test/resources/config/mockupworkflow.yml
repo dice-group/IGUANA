@@ -17,11 +17,11 @@ tasks:
 
 
 metrics:
-  - className: "QMPH"
-  - className: "QPS"
-  - className: "NoQPH"
-  - className: "AvgQPS"
-  - className: "NoQ"
+  - className: "org.aksw.iguana.rp.metrics.impl.QMPHMetric"
+  - className: "org.aksw.iguana.rp.metrics.impl.QPSMetric"
+  - className: "org.aksw.iguana.rp.metrics.impl.NoQPHMetric"
+  - className: "org.aksw.iguana.rp.metrics.impl.AvgQPSMetric"
+  - className: "org.aksw.iguana.rp.metrics.impl.NoQMetric"
 
 storages:
   - className: "org.aksw.iguana.cc.tasks.MockupStorage"
