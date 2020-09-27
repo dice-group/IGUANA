@@ -98,16 +98,16 @@ public abstract class AbstractWorker implements Worker {
 
 	@Override
 	public void waitTimeMs() {
-		double wait = this.fixedLatency;
-		wait += (latencyRandomizer.nextGaussian() + 1) * this.gaussianLatency;
-		LOGGER.debug("Worker[{{}} : {{}}]: Time to wait for next Query {{}}", workerType, workerID, wait);
+		Double wait = this.fixedLatency.doubleValue();
+		double gaussian = latencyRandomizer.nextDouble();
+		wait += (gaussian * 2) * this.gaussianLatency;
+		LOGGER.debug("Worker[{} : {}]: Time to wait for next Query {}", workerType, workerID, wait);
 		try {
 			if(wait>0)
-				Thread.sleep((long) wait);
+				Thread.sleep(wait.intValue());
 		} catch (InterruptedException e) {
-			LOGGER.error("Worker[{{}} : {{}}]: Could not wait time before next query due to: {{}}", workerType,
+			LOGGER.error("Worker[{{}} : {}]: Could not wait time before next query due to: {}", workerType,
 					workerID, e);
-			LOGGER.error("", e);
 		}
 	}
 

@@ -1,0 +1,1 @@
+INSERT DATA {<http://test.com> <http://test.com/p> "test" .}

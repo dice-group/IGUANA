@@ -1,7 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.cc.query.impl.InstancesQueryHandler;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -47,22 +45,24 @@ public class HTTPWorkerTest {
     private String queryID;
     private boolean isFail;
     private String outputDir;
+    private Integer fixedLatency;
+    private Integer gaussianLatency;
 
     @Parameterized.Parameters
     public static Collection<Object[]> data(){
         Collection<Object[]> testData = new ArrayList<Object[]>();
         //get tests
-        testData.add(new Object[]{"Random Text", "doc1", "text/plain", "text", false, false});
-        testData.add(new Object[]{UUID.randomUUID().toString(), UUID.randomUUID().toString(), "text/plain", "text", false, false});
-        testData.add(new Object[]{"Random Text", "doc1", "text/plain", "test", true, false});
-        testData.add(new Object[]{"Random Text", "doc1", null, "text", false, false});
+        testData.add(new Object[]{"Random Text", "doc1", "text/plain", "text", 100,50, false, false});
+        testData.add(new Object[]{UUID.randomUUID().toString(), UUID.randomUUID().toString(), "text/plain", "text", 100,50, false, false});
+        testData.add(new Object[]{"Random Text", "doc1", "text/plain", "test", 100,50, true, false});
+        testData.add(new Object[]{"Random Text", "doc1", null, "text", 100,50, false, false});
 
         //post tests
-        testData.add(new Object[]{"Random Text", "doc1", "text/plain", "text", false, true});
-        testData.add(new Object[]{UUID.randomUUID().toString(), UUID.randomUUID().toString(), "text/plain", "text", false, true});
-        testData.add(new Object[]{"Random Text", "doc1", "text/plain", "test", true, true});
-        testData.add(new Object[]{"Random Text", "doc1", "text/plain", null,  true, true});
-        testData.add(new Object[]{"Random Text", "doc1", null, "text", false, true});
+        testData.add(new Object[]{"Random Text", "doc1", "text/plain", "text", 100,50, false, true});
+        testData.add(new Object[]{UUID.randomUUID().toString(), UUID.randomUUID().toString(), "text/plain", "text", 100,50, false, true});
+        testData.add(new Object[]{"Random Text", "doc1", "text/plain", "test", 100,50, true, true});
+        testData.add(new Object[]{"Random Text", "doc1", "text/plain", null, 100,50,  true, true});
+        testData.add(new Object[]{"Random Text", "doc1", null, "text", 100,50, false, true});
 
         return testData;
     }
@@ -84,13 +84,15 @@ public class HTTPWorkerTest {
     }
 
 
-    public HTTPWorkerTest(String query, String queryID, String responseType, String parameter, Boolean isFail, Boolean isPost){
+    public HTTPWorkerTest(String query, String queryID, String responseType, String parameter, Integer fixedLatency, Integer gaussianLatency, Boolean isFail, Boolean isPost){
         this.query=query;
         this.queryID=queryID;
         this.responseType=responseType;
         this.parameter=parameter;
         this.isFail=isFail;
         this.isPost=isPost;
+        this.fixedLatency=fixedLatency;
+        this.gaussianLatency=gaussianLatency;
         this.service = "http://localhost:8025";
         //warmup
         getWorker("1").executeQuery("test", "test");
@@ -148,11 +150,14 @@ public class HTTPWorkerTest {
     }
 
     private HttpWorker getWorker(String taskID) {
-        if(isPost){
-            return new HttpPostWorker(taskID, getConnection(), this.queriesFile, this.responseType,this.parameter, null, null, null, null,null, null, 1);
+        return getWorker(taskID, null, null);
+    }
 
+    private HttpWorker getWorker(String taskID, Integer latencyFixed, Integer gaussianFixed) {
+        if(isPost){
+            return new HttpPostWorker(taskID, getConnection(), this.queriesFile, this.responseType,this.parameter, null, null, null, latencyFixed, gaussianFixed, null, 1);
         }
-        return new HttpGetWorker(taskID, getConnection(), this.queriesFile, this.responseType,this.parameter, null, null, null, null,null, null, 1);
+        return new HttpGetWorker(taskID, getConnection(), this.queriesFile, this.responseType,this.parameter, null, null, null, latencyFixed, gaussianFixed, null, 1);
 
     }
 
@@ -161,6 +166,31 @@ public class HTTPWorkerTest {
         con.setName("test");
         con.setEndpoint(service);
         return con;
+    }
+
+    @Test
+    public void testWait() throws InterruptedException {
+        String taskID="123/1/1/";
+        HttpWorker getWorker = getWorker(taskID, this.fixedLatency, this.gaussianLatency);
+        InstancesQueryHandler qh = new InstancesQueryHandler(Lists.newArrayList(getWorker));
+        qh.setOutputFolder(outputDir);
+        qh.generate();
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        executorService.submit(getWorker);
+        long waitMS=850;
+        Thread.sleep(waitMS);
+        getWorker.stopSending();
+        executorService.shutdownNow();
+        //get expected delay
+        int expectedDelay = 100+this.fixedLatency+this.gaussianLatency;
+        if(isPost){
+            expectedDelay+=100;
+        }
+        double expectedQueries = waitMS*1.0/expectedDelay;
+        double deltaUp = waitMS*1.0/(expectedDelay+gaussianLatency);
+        double deltaDown = waitMS*1.0/(expectedDelay-gaussianLatency);
+        double delta = Math.ceil((deltaDown-deltaUp)/2);
+        assertEquals(expectedQueries, 1.0*getWorker.getExecutedQueries(), delta);
     }
 
     @Test

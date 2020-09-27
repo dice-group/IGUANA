@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.util.*;
 
 /**
  * Server Mock
@@ -21,12 +24,31 @@ import java.io.IOException;
 public class WorkerServerMock implements Container  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkerServerMock.class);
+	private final Boolean ignore;
 
+	private List<Instant> requestTimes = new ArrayList<Instant>();
+	private Set<String> encodedAuth = new HashSet<String>();
 
+	public WorkerServerMock() {
+		this(false);
+	}
+    
+    public WorkerServerMock(Boolean ignore){
+    	super();
+    	this.ignore =ignore;
+	}
+    
 	@Override
 	public void handle(Request request, Response resp) {
 		String content=null;
-		if(request.getMethod().equals("GET")) {
+		requestTimes.add(Instant.now());
+		if(ignore){
+			String authValue = request.getValue("Authorization").replace("Basic ", "");
+			this.encodedAuth.add(new String(Base64.getDecoder().decode(authValue)));
+			waitForMS(95);
+			content="";
+		}
+		else if(request.getMethod().equals("GET")) {
 			waitForMS(95);
 			content=request.getParameter("text");
 		}
@@ -75,6 +97,17 @@ public class WorkerServerMock implements Container  {
 		}
 	}
 
+	public void handleUnAuthorized(Response resp){
+		resp.setCode(Status.UNAUTHORIZED.code);
+		try {
+			//write answer
+			resp.getOutputStream().write("".getBytes());
+			resp.getOutputStream().close();
+		} catch (IOException e) {
+			LOGGER.error("Could not close Response Output Stream");
+		}
+	}
+
 	public void handleOK(Response resp, String acceptType){
 		resp.setCode(Status.OK.code);
 		String cType = acceptType;
@@ -99,5 +132,11 @@ public class WorkerServerMock implements Container  {
 		}
 	}
 
+	public List<Instant> getTimes(){
+		return this.requestTimes;
+	}
 
+	public Set<String> getEncodedAuth() {
+		return encodedAuth;
+	}
 }
