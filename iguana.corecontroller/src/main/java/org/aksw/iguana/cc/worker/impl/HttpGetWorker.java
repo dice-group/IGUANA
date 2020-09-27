@@ -33,10 +33,8 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 @Shorthand("HttpGetWorker")
 public class HttpGetWorker extends HttpWorker {
 
-    protected int currentQueryID = 0;
     protected String parameter="query";
 
-    protected Random queryChooser;
     protected String responseType=null;
 
 
@@ -51,7 +49,6 @@ public class HttpGetWorker extends HttpWorker {
         if(responseType!=null){
             this.responseType=responseType;
         }
-        queryChooser = new Random(this.workerID);
 
     }
 
@@ -88,27 +85,5 @@ public class HttpGetWorker extends HttpWorker {
         }
     }
 
-    @Override
-    public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
-        // get next Query File and next random Query out of it.
-        File currentQueryFile = this.queryFileList[this.currentQueryID++];
-        queryID.append(currentQueryFile.getName());
 
-        int queriesInFile = FileUtils.countLines(currentQueryFile);
-        int queryLine = queryChooser.nextInt(queriesInFile);
-        queryStr.append(FileUtils.readLineAt(queryLine, currentQueryFile));
-
-        // If there is no more query(Pattern) start from beginning.
-        if (this.currentQueryID >= this.queryFileList.length) {
-            this.currentQueryID = 0;
-        }
-    }
-
-
-
-    @Override
-    public void setQueriesList(File[] queries) {
-        super.setQueriesList(queries);
-        this.currentQueryID = queryChooser.nextInt(this.queryFileList.length);
-    }
 }

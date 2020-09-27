@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
+import org.aksw.iguana.cc.worker.AbstractRandomQueryChooserWorker;
 import org.aksw.iguana.cc.worker.AbstractWorker;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
@@ -28,17 +29,13 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  *
  */
 @Shorthand("CLIWorker")
-public class CLIWorker extends AbstractWorker {
+public class CLIWorker extends AbstractRandomQueryChooserWorker {
 
 	private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 
-	private int currentQueryID;
-	private Random queryChooser;
-
 	public CLIWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
 		super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, "CLIWorker", workerID);
-		queryChooser = new Random(this.workerID);
 	}
 
 
@@ -46,21 +43,13 @@ public class CLIWorker extends AbstractWorker {
 	public void executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		// use cli as service
-		String q = "";
+		String encodedQuery = "";
 		try {
-			q = URLEncoder.encode(query, "UTF-8");
+			encodedQuery = URLEncoder.encode(query, "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
 			LOGGER.error("Could not encode Query", e1);
 		}
-		String queryCLI = this.con.getEndpoint().replace("$QUERY$", query);
-		queryCLI = queryCLI.replace("$ENCODEDQUERY$", q);
-
-		if (this.con.getUser() != null) {
-			queryCLI = queryCLI.replace("$USER$", this.con.getUser());
-		}
-		if (this.con.getPassword() != null) {
-			queryCLI = queryCLI.replace("$PASSWORD$", this.con.getPassword());
-		}
+		String queryCLI = getReplacedQuery(query, encodedQuery);
 		// execute queryCLI and read response
 		ProcessBuilder processBuilder = new ProcessBuilder().redirectErrorStream(true);
 		processBuilder.command(new String[] { "bash", "-c", queryCLI });
@@ -100,27 +89,19 @@ public class CLIWorker extends AbstractWorker {
 		super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now()) ));
 	}
 
-	@Override
-	public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
-		// get next Query File and next random Query out of it.
-		File currentQueryFile = this.queryFileList[this.currentQueryID++];
-		queryID.append(currentQueryFile.getName());
+	private String getReplacedQuery(String query, String encodedQuery) {
+		String queryCLI = this.con.getEndpoint().replace("$QUERY$", query);
+		queryCLI = queryCLI.replace("$ENCODEDQUERY$", encodedQuery);
 
-		int queriesInFile = FileUtils.countLines(currentQueryFile);
-		int queryLine = queryChooser.nextInt(queriesInFile);
-		queryStr.append(FileUtils.readLineAt(queryLine, currentQueryFile));
-
-		// If there is no more query(Pattern) start from beginning.
-		if (this.currentQueryID >= this.queryFileList.length) {
-			this.currentQueryID = 0;
+		if (this.con.getUser() != null) {
+			queryCLI = queryCLI.replace("$USER$", this.con.getUser());
 		}
+		if (this.con.getPassword() != null) {
+			queryCLI = queryCLI.replace("$PASSWORD$", this.con.getPassword());
+		}
+		return queryCLI;
 
 	}
 
-	@Override
-	public void setQueriesList(File[] queries) {
-		super.setQueriesList(queries);
-		this.currentQueryID = queryChooser.nextInt(this.queryFileList.length);
-	}
 
 }

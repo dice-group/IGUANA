@@ -37,7 +37,7 @@ public class PatternQueryHandlerTest {
     private final Query expectedConversionQuery;
     private final String[] vars;
     private final String expectedReplacedQuery;
-    private final HashSet<String> expectedInstances;
+    private final List<String> expectedInstances;
     private String dir = UUID.randomUUID().toString();
 
 
@@ -73,7 +73,7 @@ public class PatternQueryHandlerTest {
         this.expectedConversionQuery = QueryFactory.create(expectedConversionStr);
         this.vars = vars;
         this.expectedReplacedQuery=expectedReplacedQuery;
-        this.expectedInstances = Sets.newHashSet(expectedInstances);
+        this.expectedInstances = Lists.newArrayList(expectedInstances);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class PatternQueryHandlerTest {
 
     @Test
     public void testPatternExchange(){
-        Set<String> instances = getHandler().getInstances(queryStr);
+        List<String> instances = getHandler().getInstances(queryStr);
         assertEquals(expectedInstances, instances);
         
     }

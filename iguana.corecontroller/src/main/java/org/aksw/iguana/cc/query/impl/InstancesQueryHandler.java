@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.impl;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
@@ -38,9 +38,9 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	private File[] queryFiles;
 
 	protected LanguageProcessor langProcessor = new SPARQLLanguageProcessor();
-
-
 	protected int hashcode;
+
+	//protected int hashcode;
 
 	/**
 	 * Default Constructor
@@ -61,14 +61,14 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		// Save hashcode of the file content for later use in generating stats
 		hashcode = FileUtils.getHashcodeFromFileContent(queryFileName);
 
-		File[] queries = generateQueryPerLine(queryFileName, langProcessor.getQueryPrefix());
+		File[] queries = generateQueryPerLine(queryFileName, langProcessor.getQueryPrefix(), hashcode);
 		this.queryFiles = queries;
 
 
 		return queries;
 	}
 
-	protected File[] generateQueryPerLine(String queryFileName, String idPrefix) {
+	protected File[] generateQueryPerLine(String queryFileName, String idPrefix, int hashcode) {
 		File queryFile = new File(queryFileName);
 		List<File> ret = new LinkedList<File>();
 		// check if folder is cached
@@ -114,12 +114,12 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		return new File[] {};
 	}
 
-	protected Set<String> getInstances(String queryStr) {
-		return Sets.newHashSet(queryStr);
+	protected List<String> getInstances(String queryStr) {
+		return Lists.newArrayList(queryStr);
 	}
 
 
-		protected File createFileWithID(File rootFolder, String idPrefix) throws IOException {
+	protected File createFileWithID(File rootFolder, String idPrefix) throws IOException {
 		// create a File with an ID
 		int id = 0;
 		if (type2IDcounter.containsKey(idPrefix)) {
@@ -144,8 +144,10 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 			} else {
 				LOGGER.info("[QueryHandler: {{}}] Uses UPDATE file as Updates Per Line file.",
 						this.getClass().getName());
+				int hashcode = FileUtils.getHashcodeFromFileContent(updatePath);
+
 				// assume is File with update/line use SPARQL approach
-				return generateQueryPerLine(updatePath, "update");
+				return generateQueryPerLine(updatePath, "update", hashcode);
 			}
 		} else {
 			// dir must exist log this error, send empty file list back
@@ -170,9 +172,6 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 		return langProcessor.generateTripleStats(queries, hashcode+"", taskID);
 	}
 
-	public String getOutputFolder() {
-		return outputFolder;
-	}
 
 	public void setOutputFolder(String outputFolder) {
 		this.outputFolder = outputFolder;

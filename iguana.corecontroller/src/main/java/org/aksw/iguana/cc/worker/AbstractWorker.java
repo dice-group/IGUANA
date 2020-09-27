@@ -49,7 +49,7 @@ public abstract class AbstractWorker implements Worker {
 	 * The unique ID of the worker, should be from 0 to n
 	 */
 	protected Integer workerID;
-	protected Properties extra;
+	protected Properties extra = new Properties();
 
 	private Integer fixedLatency=0;
 
@@ -72,7 +72,7 @@ public abstract class AbstractWorker implements Worker {
 
 	protected Double timeOut=180000D;
 
-	private int queryHash;
+	protected int queryHash;
 
 	public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
 		this.taskID=taskID;

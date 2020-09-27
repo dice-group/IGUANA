@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
+import org.aksw.iguana.cc.worker.AbstractRandomQueryChooserWorker;
 import org.aksw.iguana.cc.worker.AbstractWorker;
 import org.aksw.iguana.cc.utils.CLIProcessManager;
 import org.aksw.iguana.cc.utils.FileUtils;
@@ -30,7 +31,7 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  *
  */
 @Shorthand("CLIInputWorker")
-public class CLIInputWorker extends AbstractWorker {
+public class CLIInputWorker extends AbstractRandomQueryChooserWorker {
 
 	private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -131,28 +132,7 @@ public class CLIInputWorker extends AbstractWorker {
 		return query;
 	}
 
-	@Override
-	public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
-		// get next Query File and next random Query out of it.
-		File currentQueryFile = this.queryFileList[this.currentQueryID++];
-		queryID.append(currentQueryFile.getName());
 
-		int queriesInFile = FileUtils.countLines(currentQueryFile);
-		int queryLine = queryChooser.nextInt(queriesInFile);
-		queryStr.append(FileUtils.readLineAt(queryLine, currentQueryFile));
-
-		// If there is no more query(Pattern) start from beginning.
-		if (this.currentQueryID >= this.queryFileList.length) {
-			this.currentQueryID = 0;
-		}
-
-	}
-
-	@Override
-	public void setQueriesList(File[] queries) {
-		super.setQueriesList(queries);
-		this.currentQueryID = queryChooser.nextInt(this.queryFileList.length);
-	}
 
 	@Override
 	public void stopSending() {

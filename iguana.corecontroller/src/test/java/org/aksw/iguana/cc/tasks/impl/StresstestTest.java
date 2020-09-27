@@ -93,7 +93,7 @@ public class StresstestTest {
         task.execute();
         Instant end = Instant.now();
         //give about 200milliseconds time for init and end stuff
-        assertEquals(5000.0, end.toEpochMilli()-start.toEpochMilli(), 200.0);
+        assertEquals(5000.0, end.toEpochMilli()-start.toEpochMilli(), 300.0);
         FileUtils.deleteDirectory(new File(task.qhCacheFolder));
 
     }
@@ -123,8 +123,8 @@ public class StresstestTest {
         start = Instant.now();
         long queriesExecuted = task.warmup();
         end = Instant.now();
-        // might sadly be 400 or 500 as the warmup works in 100th steps
-        assertEquals(350.0, end.toEpochMilli()-start.toEpochMilli(), 150.0);
+        // might sadly be 400 or 500 as the warmup works in 100th steps, also overhead, as long as executed Queries are 6 its fine
+        assertEquals(350.0, end.toEpochMilli()-start.toEpochMilli(), 250.0);
         //each worker could execute 3 query
         assertEquals(6, queriesExecuted);
         FileUtils.deleteDirectory(new File(task.qhCacheFolder));
