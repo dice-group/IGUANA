@@ -8,6 +8,7 @@ import org.aksw.iguana.rp.controller.RPController;
 import org.aksw.iguana.rp.metrics.Metric;
 import org.aksw.iguana.rp.metrics.impl.*;
 import org.aksw.iguana.rp.storage.Storage;
+import org.aksw.iguana.rp.storage.impl.NTFileStorage;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
@@ -116,7 +117,7 @@ public class IguanaConfig {
 		if(this.storages== null || this.storages.isEmpty()){
 			storages = new ArrayList<>();
 			StorageConfig config = new StorageConfig();
-			config.setClassName("NTFileStorage");
+			config.setClassName(NTFileStorage.class.getCanonicalName());
 			storages.add(config);
 		}
 		if(this.metrics == null || this.metrics.isEmpty()){

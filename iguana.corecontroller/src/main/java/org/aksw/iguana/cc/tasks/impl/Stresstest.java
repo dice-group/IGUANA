@@ -293,7 +293,7 @@ public class Stresstest extends AbstractTask {
 				worker.popQueryResults();
 			}
 			try {
-				TimeUnit.MILLISECONDS.sleep(100);
+				TimeUnit.MILLISECONDS.sleep(50);
 			}catch(Exception e) {
 				LOGGER.error("Could not warmup ");
 			}
