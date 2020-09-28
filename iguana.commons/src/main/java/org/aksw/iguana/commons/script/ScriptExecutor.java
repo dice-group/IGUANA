@@ -28,8 +28,8 @@ public class ScriptExecutor {
 	 * 
 	 * @param file file to execute
 	 * @param args arguments to execute file with
-	 * @throws ExecuteException
-	 * @throws IOException
+	 * @throws ExecuteException if script can't be executed
+	 * @throws IOException if file IO errors
 	 * @return Process return, 0 means everything worked fine
 	 */
 	public static int exec(String file, String[] args) throws ExecuteException, IOException{
@@ -48,11 +48,11 @@ public class ScriptExecutor {
 
 	/**Checks if file contains arguments itself
 	 *
-	 * @param file
-	 * @param args
-	 * @return
-	 * @throws ExecuteException
-	 * @throws IOException
+	 * @param file file to execute
+	 * @param args arguments to execute file with
+	 * @return Process return, 0 means everything worked fine
+	 * @throws ExecuteException if script can't be executed
+	 * @throws IOException if file IO errors
 	 */
 	public static int execSafe(String file, String[] args) throws ExecuteException, IOException{
 		String actualScript = file;

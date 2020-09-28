@@ -129,9 +129,9 @@ public class TypedFactory <T>{
 	 * . @ParameterNames(names={"a", "b"})
 	 * public Constructor(String a, Object b){...}
 	 *
-	 * @param className
+	 * @param className The Class Name of the Implemented T Object
 	 * @param map key-value pair, whereas key represents the parameter name, where as value will be the value of the instantiation
-	 * @return
+	 * @return The instantiated object or null no constructor was found
 	 */
 	public T create(String className, Map<Object, Object> map){
 		Class<? extends T> clazz;
@@ -195,10 +195,10 @@ public class TypedFactory <T>{
 	/**
 	 * Checks if the giving parameter key-value mapping fits the constructor parameter names (key vs names) and takes into account that the parameter is allowed to be null and thus
 	 * can be disregarded
-	 * @param map
-	 * @param names
-	 * @param canBeNull
-	 * @return
+	 * @param map paramater - Object Map
+	 * @param names parameter names of the actual constructor
+	 * @param canBeNull all paramaters who can be null
+	 * @return true if constructor fits, otherwise false
 	 */
 	private boolean checkIfFits(Map<Object, Object>  map, List<String> names, Set<String> canBeNull) {
 		//check if all provided parameter names are in the constructor
@@ -231,9 +231,9 @@ public class TypedFactory <T>{
 	 * . @ParameterNames(names={"a", "b"})
 	 * public Constructor(String a, Object b){...}
 	 *
-	 * @param className
-	 * @param map
-	 * @return
+	 * @param className The Class Name of the Implemented T Object
+	 * @param map Parameter name - value mapping
+	 * @return The instantiated object or null no constructor was found
 	 */
 	public T createAnnotated(String className, Map<Object, Object> map){
 		Class<? extends T> clazz;

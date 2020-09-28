@@ -6,7 +6,6 @@ import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.model.QueryResultHashKey;
 import org.aksw.iguana.cc.worker.AbstractRandomQueryChooserWorker;
-import org.aksw.iguana.cc.worker.AbstractWorker;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.HttpEntity;

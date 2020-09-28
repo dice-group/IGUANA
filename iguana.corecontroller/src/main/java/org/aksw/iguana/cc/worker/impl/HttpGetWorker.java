@@ -3,7 +3,6 @@ package org.aksw.iguana.cc.worker.impl;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -15,12 +14,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.Random;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 

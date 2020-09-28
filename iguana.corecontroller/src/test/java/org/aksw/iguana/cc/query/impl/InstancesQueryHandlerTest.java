@@ -6,7 +6,9 @@ import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.cc.worker.impl.SPARQLWorker;
 import org.aksw.iguana.cc.worker.impl.UPDATEWorker;
 import org.apache.commons.io.FileUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

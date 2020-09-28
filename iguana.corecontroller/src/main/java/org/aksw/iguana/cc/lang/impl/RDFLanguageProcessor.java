@@ -7,7 +7,6 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.ContentType;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;

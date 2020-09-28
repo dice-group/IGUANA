@@ -10,7 +10,7 @@ public class TimeUtils {
 
 	/**
 	 * returns the current time in Nanoseconds as a long instead of a double
-	 * @return
+	 * @return current time in  nanoseconds as a long
 	 */
 	public static long getTimeInNanoseconds() {
 		Instant now = Instant.now();
@@ -19,7 +19,7 @@ public class TimeUtils {
 
 	/**
 	 * gets the current time in milliseconds
-	 * @return
+	 * @return the current time in ms
 	 */
 	public static double getTimeInMilliseconds() {
 		return getTimeInNanoseconds() / 1000000d /*ms*/;
@@ -27,9 +27,9 @@ public class TimeUtils {
 
 	/**
 	 * returns the duration in MS between two Time Instants
-	 * @param start
-	 * @param end
-	 * @return
+	 * @param start Start time
+	 * @param end end time
+	 * @return duration in ms between start and end
 	 */
 	public static double durationInMilliseconds(Instant start, Instant end) {
 		Duration duration = Duration.between(start, end);

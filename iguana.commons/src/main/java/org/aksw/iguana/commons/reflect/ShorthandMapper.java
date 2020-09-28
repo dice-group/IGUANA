@@ -36,7 +36,7 @@ public class ShorthandMapper {
 
     /**
      * create mapping, but only searches in packages with the prefix
-     * @param prefix
+     * @param prefix package prefix to check
      */
     public ShorthandMapper(String prefix){
         Reflections reflections = new Reflections(prefix);

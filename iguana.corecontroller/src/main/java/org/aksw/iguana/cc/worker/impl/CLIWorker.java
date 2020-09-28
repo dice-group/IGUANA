@@ -3,18 +3,17 @@ package org.aksw.iguana.cc.worker.impl;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.worker.AbstractRandomQueryChooserWorker;
-import org.aksw.iguana.cc.worker.AbstractWorker;
-import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.Instant;
-import java.util.Random;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 

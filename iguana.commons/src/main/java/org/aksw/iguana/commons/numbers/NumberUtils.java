@@ -11,8 +11,8 @@ public class NumberUtils {
 	/**
 	 * Returns either a long represantation of the String nm or null.
 	 *
-	 * @param nm
-	 * @return
+	 * @param nm String which should be parsed
+	 * @return String as a long representation if String is a Long, otherwise null
 	 */
 	public static Long getLong(String nm) {
 		try {
@@ -25,8 +25,8 @@ public class NumberUtils {
 	/**
 	 * Returns either a double representation of the String nm or null.
 	 *
-	 * @param nm
-	 * @return
+	 * @param nm String which should be parsed
+	 * @return String as a double representation if String is a double, otherwise null
 	 */
 	public static Double getDouble(String nm) {
 		try {

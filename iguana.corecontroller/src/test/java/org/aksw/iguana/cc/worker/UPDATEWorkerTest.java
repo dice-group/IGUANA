@@ -21,8 +21,7 @@ import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.*;
 
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 @RunWith(Parameterized.class)
