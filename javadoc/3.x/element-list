@@ -19,12 +19,10 @@ org.aksw.iguana.commons.numbers
 org.aksw.iguana.commons.reflect
 org.aksw.iguana.commons.script
 org.aksw.iguana.commons.time
-org.aksw.iguana.rp.config
 org.aksw.iguana.rp.controller
 org.aksw.iguana.rp.experiment
 org.aksw.iguana.rp.metrics
 org.aksw.iguana.rp.metrics.impl
 org.aksw.iguana.rp.storage
 org.aksw.iguana.rp.storage.impl
-org.aksw.iguana.rp.tools
 org.aksw.iguana.rp.vocab
