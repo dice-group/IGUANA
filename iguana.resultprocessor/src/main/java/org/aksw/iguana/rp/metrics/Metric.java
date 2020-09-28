@@ -1,8 +1,8 @@
 package org.aksw.iguana.rp.metrics;
 
-import java.util.Properties;
-
 import org.aksw.iguana.rp.storage.StorageManager;
+
+import java.util.Properties;
 
 /**
  * This is the Interface for all Metrics

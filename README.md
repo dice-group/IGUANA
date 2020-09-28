@@ -7,27 +7,28 @@
 
 # IGUANA
 
-<img src = "https://github.com/dice-group/IGUANA/raw/master/images/IGUANA_logo.png" alt = "IGUANA Logo" width = "400" align = "center">
-
-## Youtube Tutorials:
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/WlajBxEtCNI/0.jpg)](https://www.youtube.com/watch?v=WlajBxEtCNI&list=PLXLLzxwVkWOd1m27TZ01F843McnmlrqJy)
+<img src = "https://github.com/dice-group/IGUANA/raw/develop/images/IGUANA_logo.png" alt = "IGUANA Logo" width = "400" align = "center">
 
 ## ABOUT
+
 
 Semantic Web is becoming more important and it's data is growing each day. Triple stores are the backbone here, managing these data.
 Hence it is very important that the triple store must scale on the data and can handle several users. 
 Current Benchmark approaches could not provide a realistic scenario on realistic data and could not be adjustet for your needs very easily.
+Additionally Question Answering systems and Natural Language Processing systems are becoming more and more popular and thus needs to be stresstested as well.
 Further on it was impossible to compare results for different benchmarks. 
 
-Iguana is an An Integrated Suite for benchmarking SPARQL which solves the issue. 
+Iguana is an an Integerated suite for benchmarking read/write performance of HTTP endpoints and CLI Applications.</br>  which solves all these issues. 
 It provides an enviroment which ...
 
 
 + ... is highly configurable
 + ... provides a realistic scneario benchmark
 + ... works on every dataset
-+ ... works on any SPARQL and SPARQL Update Queries
-+ ... is easily extendable
++ ... works on SPARQL HTTP endpoints
++ ... works on HTTP Get & Post endpoints
++ ... works on CLI applications
++ and is easily extendable
 
 
 For further Information visit
@@ -41,45 +42,35 @@ For further Information visit
 
 # Prerequisites 
 
-You need to install Java 8 or greater and RabbitMQ Version 4.x.z or greater.
+You need to install Java 11 or greater.
 In Ubuntu you can install these using the following commands
 
 ```
 sudo apt-get install java
-sudo apt-get install rabbitmq-server
 ```
-
-RabbitMQ will be automatically started after you installed it. 
 
 # Iguana Modules
 
-Iguana consists of two modules! 
+Iguana consists of two modules
 
 1. **corecontroller**: This will benchmark the systems 
 2. **resultprocessor**: This will calculate the Metrics and save the raw benchmark results 
 
-Further on you need to install and start the message brocker [RabbitMQ](https://www.rabbitmq.com/). It is needed for communication between the **corecontroller** and the **resultprocessor**. 
-
 ## **corecontroller**
 
-The **corecontroller** will benchmark your system. It should be started on the same machine your Triple Store is started.
-It will be started as a daemon process in the background and you can send a benchmark configuration to this module (see [below](#run-your-benchmarks)).
-
-It will start the benchmark according to the benchmark configuration and will send data about each executed query to the **resultprocessor**. The data includes sent for each query includes:
-* the ID of the query
-* if it succeeded or failed
-* the time the execution took
+The **corecontroller** will benchmark your system. It should be started on the same machine the  is started.
 
 ## **resultprocessor**
 
-The **resultprocessor** will be started as a daemon too. 
-Its behavior is widely configurable. 
+The **resultprocessor** will calculate the metrics.
 By default it stores its result in a ntriple file. But you may configure it, to write the results directly to a Triple Store. 
 On the processing side, it calculates various metrics.
 
 Per run metrics:
 * Query Mixes Per Hour (QMPH)
 * Number of Queries Per Hour (NoQPH)
+* Number of Queries (NoQ)
+* Average Queries Per Second (AvgQPS)
 
 Per query metrics:
 * Queries Per Second (QPS)
@@ -87,13 +78,10 @@ Per query metrics:
     * result size
     * queries per second
     * sum of execution times
-* Each Query Execution (EQE)
-    * time the query execution took
-    * if it was succesfull or not
 
-You can change these in the **resultprocessor** configuration file.
+You can change these in the Iguana Benchmark suite config.
 
-If you use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/iguana_basic.config), it will save QMPH, NoQPH and QPS to a file called `results_{{DATE_RP_STARTED}}.nt`
+If you use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/example-suite.yml), it will save all mentioned metrics to a file called `results_{{DATE_RP_STARTED}}.nt`
 
 
 # Setup Iguana
@@ -111,37 +99,20 @@ cd Iguana_Release/
 It contains the following files:
 
 * iguana.corecontroller-X.Y.Z.jar
-* iguana.resultprocessor-X.Y.Z.jar
-* core.properties
-* rp.properties
 * start-iguana.sh
-* send-config.sh
-
-## Start Daemons
-
-Use the start script 
-```
-./start-iguana.sh
-```
-Now the iguana daemons are running in the background.
+* example-suite.yml
 
 # Run Your Benchmarks
 
 ## Create a Configuration
 
-You can use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/iguana_basic.config) we provide and modify it to your needs.
+You can use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/example-suite.yml) we provide and modify it to your needs.
 For further information please visit our [configuration](https://github.com/dice-group/IGUANA/wiki/config) and [Stresstest](https://github.com/dice-group/IGUANA/wiki/stresstest) wiki pages. For a detailed, step-by-step instruction please attend our [tutorial](https://github.com/dice-group/IGUANA/wiki/Tutorial-DBPSB-2012#create-the-configuration).
 
 ## Execute the Benchmark
 
-Make sure you:
-1. started Iguana 
-2. created your benchmark configuration 
-3. started and setup the Triple Store you want to bench. 
-
-Assuming your benchmark configuration is called `benchmark.config`, you can start your benchmark now with: 
-
+Use the start script 
 ```
-./send-config.sh benchmark.config
+./start-iguana.sh example-suite.yml
 ```
-It will send your configuration the **corecontroller** and start it.
+Now Iguana will execute the example benchmark suite configured in the example-suite.yml file

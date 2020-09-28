@@ -3,11 +3,11 @@
  */
 package org.aksw.iguana.rp.utils;
 
-import java.util.Properties;
-
-import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.storage.Storage;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+
+import java.util.Properties;
 
 /**
  * Class to help the Unit Metric Tests. </br>
@@ -22,50 +22,31 @@ import org.apache.jena.rdf.model.Model;
 public class EqualityStorage implements Storage{
 
 
-	private Triple[][] goldenTriples;
-	private int run=0;
-	private boolean lastCheck=false;
-	
-	/**
-	 * 
-	 */
-	public EqualityStorage( Triple[][] goldenTriples) {
-		this.goldenTriples = goldenTriples;
+	private Model expectedModel;
+	private Model actualModel = ModelFactory.createDefaultModel();
+
+
+
+	public EqualityStorage( Model expectedModel) {
+		this.expectedModel = expectedModel;
 	}
+
+
 
 	@Override
-	public void addData(Properties meta, Triple[] data) {
-		lastCheck = tripleArrEqualence(data, goldenTriples[run]);
-		run++;
+	public void addData(Model data) {
+		this.actualModel.add(data);
 	}
-	
-	private boolean tripleArrEqualence(Triple[] triples, Triple[] expects){
-		if(triples.length!=expects.length){
-			return false;
-		}
-		for(int i=0;i<triples.length;i++){
-			if(!tripleEqualence(triples[i], expects[i])){
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	private boolean tripleEqualence(Triple triple, Triple expect){
-		String s = triple.getSubject();
-		String sExp = expect.getSubject();
-		if(!s.equals(sExp))
-			return false;
-		s = triple.getPredicate();
-		sExp = expect.getPredicate();
-		if(!s.equals(sExp))
-			return false;
-		Object o = expect.getObject();
-		Object oExp = expect.getObject(); 
 
-		return o.equals(oExp) ;
+	public Model getExpectedModel(){
+		return this.expectedModel;
 	}
-	
+
+	public Model getActualModel(){
+		return this.actualModel;
+	}
+
+
 	// NOTHING TO DO IN THE FOLLOWING METHODS
 	@Override
 	public void addMetaData(Properties p) {
@@ -77,24 +58,6 @@ public class EqualityStorage implements Storage{
 		//explicity empty
 	}
 
-	@Override
-	public Properties getStorageInfo() {
-		return null;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isLastCheck() {
-		return lastCheck;
-	}
-
-	/**
-	 * @param lastCheck
-	 */
-	public void setLastCheck(boolean lastCheck) {
-		this.lastCheck = lastCheck;
-	}
 
 	@Override
 	public void endTask(String taskID) {
@@ -102,8 +65,4 @@ public class EqualityStorage implements Storage{
 		
 	}
 
-	@Override
-	public Model getDataModel() {
-		return null;
-	}
 }

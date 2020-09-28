@@ -1,14 +1,10 @@
 package org.aksw.iguana.rp.storage;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Set;
-
-import org.aksw.iguana.rp.data.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 
 /**
@@ -23,8 +19,17 @@ public class StorageManager {
 			.getLogger(StorageManager.class);
 
 	private Set<Storage> storages = new HashSet<Storage>();
-	
-	/**
+
+	private static StorageManager instance;
+
+    public static synchronized StorageManager getInstance() {
+		if (instance == null) {
+			instance = new StorageManager();
+		}
+		return instance;
+    }
+
+    /**
 	 * Will add the Storage
 	 * 
 	 * @param storage
@@ -44,23 +49,18 @@ public class StorageManager {
 	public Set<Storage> getStorages(){
 		return storages;
 	}
-	
+
 	/**
-	 * Will add the data to each Storage
-	 * 
-	 * @param p
-	 * @param triples
+	 * Simply adds a Model
+	 * @param m
 	 */
-	public void addData(Properties p, Triple[] triples){
+	public void addData(Model m){
 		for(Storage  s : storages){
-			try{
-				s.addData(p, triples);
-			}catch(Exception e){
-				LOGGER.error("Could not store data in "+s.getClass().getSimpleName()+" for Properties "+p, e);
-			}
+			s.addData(m);
 		}
 	}
-	
+
+
 	/**
 	 * Will add the MetaData to each Storage
 	 * @param p
@@ -102,5 +102,8 @@ public class StorageManager {
 			s.endTask(taskID);
 		}
 	}
-	
+
+	public void addStorages(List<Storage> storages) {
+		this.storages.addAll(storages);
+	}
 }

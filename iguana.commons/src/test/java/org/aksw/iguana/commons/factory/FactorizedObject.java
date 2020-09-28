@@ -1,19 +1,26 @@
 package org.aksw.iguana.commons.factory;
 
+import org.aksw.iguana.commons.annotation.Nullable;
+
 public class FactorizedObject {
 
-	private String[] args;
-	private String[] args2;
+	protected String[] args;
+	protected String[] args2;
 	
 	public FactorizedObject(String[] args, String[] args2) {
 		this.setArgs(args);
 		this.setArgs2(args2);
 	}
-	
+
 	public FactorizedObject(String a, String b, String c) {
 		this.setArgs(new String[] {a, b, c});
 	}
-	
+
+	public FactorizedObject(String a, @Nullable String b) {
+		this.setArgs(new String[] {a, b==null?"wasNull":b});
+	}
+
+
 	public FactorizedObject() {
 		args = new String[] {"a3", "b3"};
 	}

@@ -2,15 +2,38 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.aksw</groupId>
   <artifactId>iguana-parent</artifactId>
-  <version>2.1.0</version>
+  <version>3.0.0</version>
   <name>Iguana Parent </name>
+    <licenses>
+        <license>
+            <name>AGPLv3 or later</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.html</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Felix Conrads</name>
+            <email>felix.conrads@uni-paderborn.de</email>
+            <roles>
+                <role>Main Developer</role>
+            </roles>
+            <organization>Dice Research Group</organization>
+            <organizationUrl>https://dice-research.org</organizationUrl>
+        </developer>
+    </developers>
+    <organization>
+        <name>Dice Research Group</name>
+        <url>https://dice-research.org</url>
+    </organization>
+    <issueManagement>
+        <system>GitHub Issue Management</system>
+        <url>https://github.com/dice-group/iguana/issues</url>
+    </issueManagement>
+    <url>https://dice-research.org/IGUANA</url>
   <packaging>pom</packaging>
   <modules>
   	<module>iguana.commons</module>
-  	<module>iguana.datagenerator</module>
-  	<module>iguana.taskprocessor</module>
   	<module>iguana.corecontroller</module>
   	<module>iguana.resultprocessor</module>
   </modules>
-
 </project>

@@ -3,27 +3,37 @@
  */
 package org.aksw.iguana.rp.metrics.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.data.Triple;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
+import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  *
  * This metric will send every query execution time to the storages. Also it
- * will provide if the query succeded or failed.
+ * will provide if the query succeeded or failed.
  * 
  * @author f.conrads
  *
  */
+@Shorthand("EachQuery")
 public class EachQueryMetric extends AbstractMetric {
+
+	private static Property queryProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"query");
+	private static Property execProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryExecution");
+
+	private static Property timeProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"time");
+	private static Property successProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"success");
+	private static Property runProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"run");
+	private static Property queryIDProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryID");
+	private static Property errorCodeProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"code");
+
 
 	private Map<String, Long> queryRunMap = new HashMap<String, Long>();
 	
@@ -34,8 +44,8 @@ public class EachQueryMetric extends AbstractMetric {
 	 * 
 	 */
 	public EachQueryMetric() {
-		super("Each Query Execution", "EQE",
-				"Will calculate every query execution time.");
+		super("Each Query Execution", "EachQuery",
+				"Will save every query execution time.");
 	}
 
 	/*
@@ -47,12 +57,10 @@ public class EachQueryMetric extends AbstractMetric {
 	public void receiveData(Properties p) {
 		// set Subject Node, hash out of task ID and if not empty the extra
 		// properties
+		Model m = ModelFactory.createDefaultModel();
 		
-		String subject = getSubjectFromExtraMeta(p);
-//		Properties extraMeta = getExtraMeta(p);
-//		if (!extraMeta.isEmpty()) {
-//			subject += "/" + extraMeta.hashCode();
-//		}
+		String worker = getSubjectFromExtraMeta((Properties) p.get(COMMON.EXTRA_META_KEY));
+
 		
 		LOGGER.debug(this.getShortName() + " has received " + p);
 
@@ -60,7 +68,7 @@ public class EachQueryMetric extends AbstractMetric {
 		Boolean success = (Boolean) (((long) p.get(COMMON.RECEIVE_DATA_SUCCESS))>0?true:false);
 		String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
 		long err = (long) p.get(COMMON.RECEIVE_DATA_SUCCESS);
-		subject += "/"+queryID;
+		String subject = worker+"/"+queryID;
 
 		long run=1;
 		if(queryRunMap.containsKey(subject)){
@@ -68,22 +76,23 @@ public class EachQueryMetric extends AbstractMetric {
 		}
 		//set subject2 node subject/noOfRun
 		String subject2 = subject+"/"+run;
-		Properties results = new Properties();
-		results.put("EQE", subject2);
 
 		//as triples
-		Triple[] triples = new Triple[5];
-		triples[0] = new Triple(subject2, "time", time);
-		triples[1] = new Triple(subject2, "success", success);
-		triples[2] = new Triple(subject2, "queryID", queryID);
-		triples[3] = new Triple(subject2, "run", run);
-		triples[4] = new Triple(subject2, "errorCode", err);
+		Resource workerRes = ResourceFactory.createResource(COMMON.RES_BASE_URI+worker);
 
-		
-		Set<String> isRes = new HashSet<String>();
-		isRes.add(queryID);
-	
-		sendTriples(subject, results, isRes, p, triples);
+		Resource queryRes = ResourceFactory.createResource(COMMON.RES_BASE_URI+subject);
+
+		Resource subRes = ResourceFactory.createResource(COMMON.RES_BASE_URI+subject2);
+		m.add(getConnectingStatement(workerRes));
+		m.add(workerRes, queryProperty , queryRes);
+		m.add(queryRes, execProperty , subRes);
+		m.add(subRes, timeProperty, ResourceFactory.createTypedLiteral(time));
+		m.add(subRes, successProperty, ResourceFactory.createTypedLiteral(success));
+		m.add(subRes, queryIDProperty, ResourceFactory.createTypedLiteral(queryID));
+		m.add(subRes, runProperty, ResourceFactory.createTypedLiteral(run));
+		m.add(subRes, errorCodeProperty, ResourceFactory.createTypedLiteral(err));
+
+		sendData(m);
 		queryRunMap.put(subject, run);
 	}
 

@@ -1,23 +1,11 @@
 package org.aksw.iguana.cc.controller;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Files;
-
 import org.aksw.iguana.cc.config.ConfigManager;
-import org.aksw.iguana.cc.consumer.impl.DefaultConsumer;
-import org.aksw.iguana.commons.config.Config;
-import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.commons.exceptions.IguanaException;
-import org.aksw.iguana.commons.rabbit.RabbitMQUtils;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * The main controller for the core. 
@@ -40,57 +28,37 @@ public class MainController {
 	 * @throws IOException 
 	 */
 	public static void main(String[] argc) throws IOException{
-		if(argc.length==1){
-			Config.getInstance(argc[0]);
+		if(argc.length != 1 && argc.length !=2){
+			System.out.println("java -jar iguana.jar [--ignore-schema] suite.yml \n\tsuite.yml - The suite containing the benchmark configuration\n\t--ignore-schema - Will not validate configuration using the internal json schema\n");
+			return;
 		}
+
 		MainController controller = new MainController();
-		if(argc.length>0) {
-			controller.start(argc[0]);
+		String config =argc[0];
+		Boolean validate = true;
+		if(argc.length==2){
+			if(argc[0].equals("--ignore-schema")){
+				validate=false;
+			}
+			config = argc[1];
 		}
-		else {
-			controller.start();
-		}
+		controller.start(config, validate);
 	}
-	
+
 	/**
-	 * Will start the controlling, receiving of task properties, 
-	 * sending the {@link COMMON.TASK_FINISHED_MESSAGE} to the main controller 
+	 * Starts a configuration using the config file an states if Iguana should validate it using a json-schema
+	 *
+	 * @param configFile the Iguana config file
+	 * @param validate should the config file be validated using a json-schema
+	 * @throws IOException
 	 */
-	public void start(){		
-		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
-
+	public void start(String configFile, Boolean validate) throws IOException{
 		ConfigManager cmanager = new ConfigManager();
-		DefaultConsumer consumer = new DefaultConsumer(cmanager);
-		Thread configThread = new Thread(cmanager);
-		//configThread.start();
-		try {
-			consumer.init(host, COMMON.CONFIG2MC_QUEUE_NAME);
-		} catch (IguanaException e) {
-			LOGGER.error("Could not initalize and start communicator with Host "+host
-					+" and consume queue "+COMMON.CONFIG2MC_QUEUE_NAME, e);
-			consumer.close();
-		}
-	}
-	
-	public void start(String configFile) throws IOException{		
-		String host=Config.getInstance().getString(COMMON.CONSUMER_HOST_KEY);
-
-		ConfigManager cmanager = new ConfigManager();
-		PropertiesConfiguration config = new PropertiesConfiguration();
-		String configStr = FileUtils.readFileToString(new File(configFile));
-		System.out.println(configStr);
-		try(StringReader sreader = new StringReader(configStr)){
-			config.load(sreader);
-		} catch (ConfigurationException e1) {
-			LOGGER.error("Could not read configuration. Must ignore it... Sorry :(", e1);
-
-		} 
-		if (!config.isEmpty()) {
-			System.out.println("test");
-			cmanager.receiveData(config);
+		File f = new File(configFile);
+		if (f.length()!=0) {
+			cmanager.receiveData(f, validate);
 		} else {
-
-			LOGGER.error("Empty configuration. Must ignore it... Sorry :(");
+			LOGGER.error("Empty configuration.");
 
 		}
 

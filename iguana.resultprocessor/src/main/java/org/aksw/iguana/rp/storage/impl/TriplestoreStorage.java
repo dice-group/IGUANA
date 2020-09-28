@@ -3,7 +3,7 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
-import org.aksw.iguana.rp.config.CONSTANTS;
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -20,7 +20,6 @@ import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
 import java.io.StringWriter;
-import java.util.Properties;
 
 
 /**
@@ -29,6 +28,7 @@ import java.util.Properties;
  * @author f.conrads
  *
  */
+@Shorthand("TriplestoreStorage")
 public class TriplestoreStorage extends TripleBasedStorage {
 	
 	private UpdateRequest blockRequest = UpdateFactory.create();
@@ -84,16 +84,7 @@ public class TriplestoreStorage extends TripleBasedStorage {
 		blockRequest = new UpdateRequest();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.aksw.iguana.rp.storage.Storage#getStorageInfo()
-	 */
-	@Override
-	public Properties getStorageInfo() {
-		//Only sets the endpoint to use for result viewing
-		Properties ret = new Properties();
-		ret.setProperty(CONSTANTS.STORAGE_ENDPOINT, endpoint);
-		return ret;
-	}
+
 
 	private HttpClient createHttpClient(){
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();

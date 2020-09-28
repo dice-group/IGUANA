@@ -12,12 +12,7 @@ public class COMMON {
 	 * COMMON CONSTANTS
 	 */
 	
-	
-	/**
-	 * The property key for the host where all the rabbit messages will be consumed from
-	 */
-	public static final String CONSUMER_HOST_KEY = "iguana.consumer.host";
-	
+
 	/**
 	 * The key for the experiment task ID in the properties received from the core
 	 */
@@ -81,65 +76,6 @@ public class COMMON {
 
 	public static final String EXTRA_IS_RESOURCE_KEY = "setIsResource";
 
-	public static final String IS_EXTRA_META_KEY = "isExtraMeta";
-	
-	public static final String CLASS_NAME="class";
-	
-	public static final String CONSTRUCTOR_ARGS="constructorArgs";
-	
-	/*
-	 * QUEUE NAMES
-	 */
-	
-
-    /**
-     * The Queue name for  the rabbitMQ connection from the Iguana core to the ResultPRocessing (here)
-     */
-	public static final String CORE2RP_QUEUE_NAME = "core2rp";
-
-	public static final String DEFAULT_IGAUNA_RP_PROPERTIES_FILE_NAME = "iguana.properties";
-
-	public static final String MC2TP_QUEUE_NAME = "mc2tp";
-
-	public static final String TP2MC_QUEUE_NAME = "tp2mc";
-
-	public static final String TASK_FINISHED_MESSAGE = "task_finished";
-
-	public static final String CONSTRUCTOR_ARGS_CLASSES = "constructorClasses";
-
-	public static final String GENERATION_FINISHED_MESSAGE = "generation_finished";
-
-	public static final String DG2MC_QUEUE_NAME = "dg2mc";
-
-	public static final String MC2DG_QUEUE_NAME = "mc2dg";
-
-	public static final String DATAGEN_CLASS_NAME = "datagen.class";
-
-	public static final String DATAGEN_CONSTRUCTOR_ARGS = "datagen.constructorArgs";
-
-	public static final String DATAGEN_CONSTRUCTOR_ARGS_CLASSES = "datagen.constructorClasses";
-
-	public static final String LOADER_CLASS_NAME = "loader.class";
-
-	public static final String LOADER_CONSTRUCTOR_ARGS = "loader.constructorArgs";
-
-	public static final String LOADER_CONSTRUCTOR_ARGS_CLASSES = "loader.constructorClasses";
-
-	public static final String CONFIG_TASKS = "iguana.cc.tasks";
-
-	public static final String CONFIG_CONNECTIONS = "iguana.cc.connections";
-	
-	public static final String CONFIG_DATASETS = "iguana.cc.datasets";
-
-	public static final String RP2SENDER_QUEUENAME = "rp2senderQueue";
-
-	public static final String CONFIG2MC_QUEUE_NAME = "config2mc";
-	
-	public static final String PRE_SCRIPT_HOOK = "script.hook.pre";
-	public static final String POST_SCRIPT_HOOK = "script.hook.post";
-
-	public static final String QUERY_ID = "queryID";
-
 	public static final String QUERY_STRING = "queryString";
 
 	public static final String DOUBLE_RAW_RESULTS = "doubleRawResults";
@@ -163,4 +99,13 @@ public class COMMON {
 
 	public static final Long QUERY_HTTP_FAILURE = -2L;
 
+    public static final String EXPERIMENT_TASK_CLASS_ID_KEY = "actualTaskClass" ;
+
+	public static final String BASE_URI = "http://iguana-benchmark.eu";
+
+
+	public static final String RES_BASE_URI = BASE_URI+"/resource/";
+	public static final String PROP_BASE_URI = BASE_URI+"/properties/";
+	public static final String CLASS_BASE_URI = BASE_URI+"/class/";
+    public static final String PENALTY = "penalty";
 }

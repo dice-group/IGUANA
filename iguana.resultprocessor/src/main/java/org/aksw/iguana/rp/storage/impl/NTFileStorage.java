@@ -3,27 +3,26 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
-import org.aksw.iguana.rp.config.CONSTANTS;
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
-import java.util.Properties;
 
 /**
  * 
- * Will save results as NTriple File
+ * Will save results as NTriple File either using the provided name or the a generated one.
  * 
  * @author f.conrads
  *
  */
+@Shorthand("NTFileStorage")
 public class NTFileStorage extends TripleBasedStorage {
 
 	private static final Logger LOGGER = LoggerFactory
@@ -32,7 +31,7 @@ public class NTFileStorage extends TripleBasedStorage {
 	private StringBuilder file;
 	
 	/**
-	 * 
+	 * Uses a generated file called results_{DD}-{MM}-{YYYY}_{HH}-{mm}.nt
 	 */
 	public NTFileStorage() {
 		Calendar now = Calendar.getInstance();
@@ -45,6 +44,10 @@ public class NTFileStorage extends TripleBasedStorage {
 			.append(now.get(Calendar.MINUTE)).append(".nt");
 	}
 
+	/**
+	 * Uses the provided filename
+	 * @param fileName
+	 */
 	public NTFileStorage(String fileName){
 		this.file = new StringBuilder(fileName);
 	}
@@ -61,20 +64,15 @@ public class NTFileStorage extends TripleBasedStorage {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.aksw.iguana.rp.storage.Storage#getStorageInfo()
-	 */
-	@Override
-	public Properties getStorageInfo() {
-		File f = new File(file.toString());
-		Properties ret = new Properties();
-		ret.setProperty(CONSTANTS.STORAGE_FILE,f.getAbsolutePath());
-		return ret;
-	}
+
 	
 	@Override
 	public String toString(){
 		return this.getClass().getSimpleName();
+	}
+
+	public String getFileName(){
+		return this.file.toString();
 	}
 
 }

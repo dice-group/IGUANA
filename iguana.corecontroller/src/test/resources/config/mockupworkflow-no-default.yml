@@ -1,0 +1,27 @@
+datasets:
+  - name: "DatasetName"
+    #This can be attached at the pre and post script hooks, so you can load your connection using the here stated dataset file
+    file: "testfile.txt"
+  - name: "DatasetName2"
+    #This can be attached at the pre and post script hooks, so you can load your connection using the here stated dataset file
+    file: "testfile2.txt"
+connections:
+  - name: "TestSystem"
+    endpoint: "http://localhost:8890/sparql"
+  - name: "TestSystem2"
+    endpoint: "http://localhost:8891/sparql"
+tasks:
+  - className: "org.aksw.iguana.cc.tasks.MockupTask"
+    configuration:
+      empty: ""
+
+
+preScriptHook: "src/test/resources/config/pre.sh {{connection}} {{dataset.name}} {{dataset.file}}"
+postScriptHook: "src/test/resources/config/post.sh {{dataset.file}} {{dataset.name}} {{connection}}"
+
+metrics:
+  - className: "org.aksw.iguana.rp.metrics.impl.QMPHMetric"
+  - className: "org.aksw.iguana.rp.metrics.impl.QPSMetric"
+
+storages:
+  - className: "org.aksw.iguana.cc.tasks.MockupStorage"

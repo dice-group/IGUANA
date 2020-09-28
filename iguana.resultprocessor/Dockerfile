@@ -25,4 +25,4 @@ RUN chmod +x bl.sh
 RUN echo "java -server -jar /Blazegraph/blazegraph.jar  </dev/null &>/dev/null &" >> bl.sh
 
 #Run Blazegraph and Iguana
-CMD sh -c "sleep 10 && ./bl.sh && sed -i -e \"s/RABBIT_HOST/${RABBIT_HOST}/g\" ./IguanaRP/src/main/resources/iguana.properties && cd IguanaRP &&  java -Xmx2G -cp \"./target/lib/*\" org.aksw.iguana.rp.controller.MainController ./src/main/resources/iguana.properties"
+CMD sh -c "sleep 10 && ./bl.sh && sed -i -e \"s/RABBIT_HOST/${RABBIT_HOST}/g\" ./IguanaRP/src/main/resources/iguana.properties && cd IguanaRP &&  java -Xmx2G -cp \"./target/lib/*\" org.aksw.iguana.rp.controller.RPController ./src/main/resources/iguana.properties"

@@ -1,9 +1,8 @@
 package org.aksw.iguana.rp.storage;
 
-import java.util.Properties;
-
-import org.aksw.iguana.rp.data.Triple;
 import org.apache.jena.rdf.model.Model;
+
+import java.util.Properties;
 
 /**
  * Interface for the Result Storages
@@ -13,13 +12,15 @@ import org.apache.jena.rdf.model.Model;
  */
 public interface Storage {
 	
+
+
 	/**
-	 * Add actual result data from metrics
-	 * @param meta the meta data (metric, experimentID,...)
-	 * @param data the actual data to add
+	 * Add Triples as they are
+	 * @param data
 	 */
-	public void addData(Properties meta, Triple[] data);
-	
+	public void addData(Model data);
+
+
 	/**
 	 * Add meta data from the experiment task
 	 * for example: Query ID and Query text, ExperimentID, WorkerID,...
@@ -34,16 +35,13 @@ public interface Storage {
 	 * 
 	 */
 	public void commit();
-	
-	/**
-	 * Should return the information of the Storage. 
-	 * For Example: SPARQL endpoint, Folder directory,...
-	 * @return
-	 */
-	public Properties getStorageInfo();
 
+
+	/**
+	 * Will tell the storage that the task with taskID ended
+	 * @param taskID
+	 */
 	public void endTask(String taskID);
 
-	public Model getDataModel();
-	
+
 }
