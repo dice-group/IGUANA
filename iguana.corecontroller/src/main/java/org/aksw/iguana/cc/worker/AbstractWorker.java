@@ -6,11 +6,23 @@ import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -39,7 +51,7 @@ public abstract class AbstractWorker implements Worker {
 	protected long executedQueries;
 
 	private Collection<Properties> results = new LinkedList<Properties>();
-	private String taskID;
+	protected String taskID;
 
 	/**
 	 * The worker Type. f.e. SPARQL or UPDATE or SQL or whatever
@@ -163,6 +175,35 @@ public abstract class AbstractWorker implements Worker {
 		LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
 	}
 
+	protected HttpContext getAuthContext(String endpoint){
+		HttpClientContext context = HttpClientContext.create();
+
+		if(con.getPassword()!=null && con.getUser()!=null && !con.getPassword().isEmpty() && !con.getUser().isEmpty()) {
+			CredentialsProvider provider = new BasicCredentialsProvider();
+
+			provider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
+					new UsernamePasswordCredentials(con.getUser(), con.getPassword()));
+
+			//create target host
+			String targetHost = endpoint;
+			try {
+				URI uri = new URI(endpoint);
+				targetHost = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+			//set Auth cache
+			AuthCache authCache = new BasicAuthCache();
+			BasicScheme basicAuth = new BasicScheme();
+			authCache.put(HttpHost.create(targetHost), basicAuth);
+
+			context.setCredentialsProvider(provider);
+			context.setAuthCache(authCache);
+
+		}
+		return context;
+	}
+
 	public synchronized void addResults(QueryExecutionStats results)
 	{
 		if (!this.endSignal) {
@@ -183,7 +224,7 @@ public abstract class AbstractWorker implements Worker {
 		}
 	}
 
-	private synchronized void setResults(Properties result) {
+	protected synchronized void setResults(Properties result) {
 		results.add(result);
 	}
 

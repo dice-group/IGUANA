@@ -73,7 +73,7 @@ public class HttpGetWorker extends HttpWorker {
 
             request.setConfig(requestConfig);
             CloseableHttpClient client = HttpClients.createDefault();
-            CloseableHttpResponse response = client.execute(request);
+            CloseableHttpResponse response = client.execute(request, getAuthContext(con.getEndpoint()));
 
             // method to process the result in background
             super.processHttpResponse(queryID, start, client, response);

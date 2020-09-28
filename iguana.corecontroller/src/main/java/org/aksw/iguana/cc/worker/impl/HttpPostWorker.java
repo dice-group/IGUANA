@@ -24,12 +24,19 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  * Sends the query in plain as POST data if parameter type was not set, otherwise uses json as follows:</br>
  * {PARAMETER: QUERY}
  */
-public class HttpPostWorker extends HttpGetWorker {
+public class  HttpPostWorker extends HttpGetWorker {
 
-    public HttpPostWorker(String taskID, Connection connection, String queriesFile, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType,Integer workerID) {
+    private String contentType = "text/plain";
+    protected long tmpExecutedQueries=0;
+
+
+    public HttpPostWorker(String taskID, Connection connection, String queriesFile, @Nullable String contentType, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType, Integer workerID) {
         super(taskID, connection, queriesFile, responseType, parameterName, language, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
         if(parameterName==null){
             parameter=null;
+        }
+        if(contentType!=null){
+            this.contentType = contentType;
         }
     }
 
@@ -38,8 +45,7 @@ public class HttpPostWorker extends HttpGetWorker {
         Instant start = Instant.now();
 
         try {
-            HttpPost request = new HttpPost(con.getEndpoint());
-
+            HttpPost request = new HttpPost(con.getUpdateEndpoint());
 
             StringBuilder data = new StringBuilder();
             if(parameter!=null){
@@ -49,8 +55,8 @@ public class HttpPostWorker extends HttpGetWorker {
                 data.append(query);
             }
             StringEntity entity = new StringEntity(data.toString());
-
             request.setEntity(entity);
+            request.setHeader("Content-Type", contentType);
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
                     .setConnectTimeout(timeOut.intValue()).build();
 
@@ -58,12 +64,14 @@ public class HttpPostWorker extends HttpGetWorker {
                 request.setHeader(HttpHeaders.ACCEPT, this.responseType);
 
             request.setConfig(requestConfig);
+
             CloseableHttpClient client = HttpClients.createDefault();
-            CloseableHttpResponse response = client.execute(request);
+            CloseableHttpResponse response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
 
             // method to process the result in background
             super.processHttpResponse(queryID, start, client, response);
 
+            tmpExecutedQueries++;
         } catch (Exception e) {
             LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
                     this.workerID, query, e);

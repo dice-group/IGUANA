@@ -155,7 +155,7 @@ public class HTTPWorkerTest {
 
     private HttpWorker getWorker(String taskID, Integer latencyFixed, Integer gaussianFixed) {
         if(isPost){
-            return new HttpPostWorker(taskID, getConnection(), this.queriesFile, this.responseType,this.parameter, null, null, null, latencyFixed, gaussianFixed, null, 1);
+            return new HttpPostWorker(taskID, getConnection(), this.queriesFile, "application/json", this.responseType,this.parameter, null, null, null, latencyFixed, gaussianFixed, null, 1);
         }
         return new HttpGetWorker(taskID, getConnection(), this.queriesFile, this.responseType,this.parameter, null, null, null, latencyFixed, gaussianFixed, null, 1);
 
@@ -164,7 +164,10 @@ public class HTTPWorkerTest {
     private Connection getConnection() {
         Connection con = new Connection();
         con.setName("test");
+        con.setPassword("test");
+        con.setUser("abc");
         con.setEndpoint(service);
+        con.setUpdateEndpoint(service);
         return con;
     }
 

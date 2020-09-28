@@ -34,8 +34,9 @@ public class CLIInputFileWorker extends MultipleCLIInputWorker {
 		File f;
 		
 		try {
+			new File(dir).mkdirs();
 			f = new File(dir+File.separator+"tmpquery.sparql");
-			f.delete();
+			f.createNewFile();
 			f.deleteOnExit();
 			try(PrintWriter pw = new PrintWriter(f)){
 				pw.print(query);

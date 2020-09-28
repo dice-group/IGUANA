@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.worker;
 import com.google.common.collect.Lists;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.query.impl.InstancesQueryHandler;
+import org.aksw.iguana.cc.worker.impl.SPARQLWorker;
 import org.aksw.iguana.cc.worker.impl.UPDATEWorker;
 import org.aksw.iguana.cc.worker.impl.update.UpdateTimer;
 import org.aksw.iguana.commons.time.TimeUtils;
@@ -70,6 +71,11 @@ public class UPDATEWorkerTest {
         this.timerStrategy=timerStrategy;
         this.queriesFile=queriesFile;
         this.expectedExec=expectedExec;
+        //warmup
+        SPARQLWorker worker = new SPARQLWorker("", getConnection(), this.queriesFile, null, null, null, null, null, null, 1);
+        worker.executeQuery("INSERT DATA {", "1");
+        fastServerContainer.getTimes().clear();
+        fastServerContainer.getEncodedAuth().clear();
     }
 
     @Before
@@ -98,6 +104,9 @@ public class UPDATEWorkerTest {
         qh.setOutputFolder(this.outputDir);
         qh.generate();
         worker.run();
+        Instant now = worker.startTime;
+
+        Thread.sleep(1000);
         assertEquals(this.expectedExec, worker.getExecutedQueries());
 
         Set<String> creds = fastServerContainer.getEncodedAuth();
@@ -107,15 +116,16 @@ public class UPDATEWorkerTest {
         long noOfQueries = worker.getNoOfQueries();
         Double fixedValue = timeLimit/noOfQueries*1.0;
         Instant pastInstant = requestTimes.get(0);
-        long remainingQueries = noOfQueries;
-        long remainingTime=timeLimit;
+
+        long remainingQueries = noOfQueries-1;
+        long remainingTime=timeLimit-Double.valueOf(TimeUtils.durationInMilliseconds(now, pastInstant)).longValue();
         for(int i=1;i<requestTimes.size();i++){
             //every exec needs about 200ms
             Instant currentInstant = requestTimes.get(i);
             double timeInMS = TimeUtils.durationInMilliseconds(pastInstant, currentInstant);
             double expected = getQueryWaitTime(timerStrategy, fixedValue, remainingQueries, remainingTime);
-            assertEquals(expected, timeInMS, 100.0);
-            remainingTime-=timeInMS;
+            assertEquals("Run "+i, expected, timeInMS, 200.0);
+            remainingTime=timeLimit-(100+Double.valueOf(TimeUtils.durationInMilliseconds(now, currentInstant)).longValue());
             remainingQueries--;
             pastInstant = currentInstant;
          }
@@ -139,6 +149,8 @@ public class UPDATEWorkerTest {
     private Connection getConnection() {
         Connection con = new Connection();
         con.setName("test");
+        con.setEndpoint(service);
+
         con.setUpdateEndpoint(service);
         con.setUser("testuser");
         con.setPassword("testpwd");

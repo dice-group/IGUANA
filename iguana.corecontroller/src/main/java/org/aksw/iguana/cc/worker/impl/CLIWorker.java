@@ -96,8 +96,16 @@ public class CLIWorker extends AbstractRandomQueryChooserWorker {
 		if (this.con.getUser() != null) {
 			queryCLI = queryCLI.replace("$USER$", this.con.getUser());
 		}
+		else{
+			queryCLI = queryCLI.replace("$USER$", "");
+
+		}
 		if (this.con.getPassword() != null) {
 			queryCLI = queryCLI.replace("$PASSWORD$", this.con.getPassword());
+		}
+		else{
+			queryCLI = queryCLI.replace("$PASSWORD$", "");
+
 		}
 		return queryCLI;
 

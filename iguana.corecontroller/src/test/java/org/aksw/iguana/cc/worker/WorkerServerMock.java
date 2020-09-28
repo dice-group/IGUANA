@@ -46,7 +46,11 @@ public class WorkerServerMock implements Container  {
 			String authValue = request.getValue("Authorization").replace("Basic ", "");
 			this.encodedAuth.add(new String(Base64.getDecoder().decode(authValue)));
 			waitForMS(95);
-			content="";
+			try {
+				content = request.getContent();
+			}catch (IOException e){
+				LOGGER.error("", e);
+			}
 		}
 		else if(request.getMethod().equals("GET")) {
 			waitForMS(95);
@@ -60,7 +64,7 @@ public class WorkerServerMock implements Container  {
 					content=postContent;
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error("", e);
 			}
 		}
 

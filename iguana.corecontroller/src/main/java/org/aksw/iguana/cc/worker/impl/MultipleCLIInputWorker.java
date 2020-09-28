@@ -41,7 +41,7 @@ public class MultipleCLIInputWorker extends AbstractRandomQueryChooserWorker {
 
 	private Process currentProcess;
 	protected List<Process> processList;
-	private int currentProcessId = 0;
+	protected int currentProcessId = 0;
 	private String initFinished;
 	private String queryFinished;
 	private String error;
