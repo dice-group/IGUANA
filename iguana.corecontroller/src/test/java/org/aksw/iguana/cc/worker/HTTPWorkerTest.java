@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.worker;
 
-import com.google.common.collect.Lists;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.cc.query.impl.InstancesQueryHandler;
@@ -9,6 +8,7 @@ import org.aksw.iguana.cc.worker.impl.HttpGetWorker;
 import org.aksw.iguana.cc.worker.impl.HttpPostWorker;
 import org.aksw.iguana.cc.worker.impl.HttpWorker;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

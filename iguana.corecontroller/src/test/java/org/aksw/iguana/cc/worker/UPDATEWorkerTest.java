@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.worker;
 
-import com.google.common.collect.Lists;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.query.impl.InstancesQueryHandler;
 import org.aksw.iguana.cc.worker.impl.SPARQLWorker;
@@ -8,6 +7,7 @@ import org.aksw.iguana.cc.worker.impl.UPDATEWorker;
 import org.aksw.iguana.cc.worker.impl.update.UpdateTimer;
 import org.aksw.iguana.commons.time.TimeUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -105,7 +105,7 @@ public class UPDATEWorkerTest {
         worker.run();
         Instant now = worker.startTime;
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         assertEquals(this.expectedExec, worker.getExecutedQueries());
 
         Set<String> creds = fastServerContainer.getEncodedAuth();

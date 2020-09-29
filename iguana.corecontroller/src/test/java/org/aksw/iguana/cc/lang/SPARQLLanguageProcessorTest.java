@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.lang;
 
-import com.google.common.collect.Lists;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
+import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;

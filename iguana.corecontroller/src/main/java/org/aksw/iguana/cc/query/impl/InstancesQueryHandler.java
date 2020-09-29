@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.query.impl;
 
-import com.google.common.collect.Lists;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
@@ -10,6 +9,7 @@ import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.factory.TypedFactory;
+import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

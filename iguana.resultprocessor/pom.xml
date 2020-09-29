@@ -110,10 +110,10 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
-						<version>3.3</version>
+						<version>3.8.1</version>
 						<configuration>
-							<source>1.8</source>
-							<target>1.8</target>
+							<source>11</source>
+							<target>11</target>
 							<encoding>UTF-8</encoding>
 							<compilerArgs>
 								<arg>-parameters</arg>
@@ -138,43 +138,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-shade-plugin</artifactId>
-					<version>2.4.3</version>
-					<configuration>
-						<!-- filter all the META-INF files of other artifacts -->
-						<filters>
-							<filter>
-								<artifact>*:*</artifact>
-								<excludes>
-									<exclude>META-INF/*.SF</exclude>
-									<exclude>META-INF/*.DSA</exclude>
-									<exclude>META-INF/*.RSA</exclude>
-								</excludes>
-							</filter>
-						</filters>
-						<transformers>
-							<transformer
-								implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-								<manifestEntries>
-									<X-Compile-Source-JDK>${maven.compile.source}</X-Compile-Source-JDK>
-									<X-Compile-Target-JDK>${maven.compile.target}</X-Compile-Target-JDK>
-								</manifestEntries>
-							</transformer>
-							<transformer
-								implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-						</transformers>
-					</configuration>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<goals>
-								<goal>shade</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -211,5 +174,11 @@
 			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 		</repository>
 	</repositories>
-
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub dice-group Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/dice-group/IGUANA</url>
+		</repository>
+	</distributionManagement>
 </project>

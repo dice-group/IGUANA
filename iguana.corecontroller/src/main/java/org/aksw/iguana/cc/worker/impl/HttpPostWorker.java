@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.worker.impl;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.commons.annotation.Nullable;
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.RequestConfig;
@@ -24,6 +25,7 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  * Sends the query in plain as POST data if parameter type was not set, otherwise uses json as follows:</br>
  * {PARAMETER: QUERY}
  */
+@Shorthand("HttpPostWorker")
 public class  HttpPostWorker extends HttpGetWorker {
 
     private String contentType = "text/plain";

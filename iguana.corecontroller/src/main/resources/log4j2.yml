@@ -31,6 +31,12 @@ Configuration:
         AppenderRef:
           - ref: STDOUT
           - ref: File
+      - name: org.reflections.Reflections
+        level: fatal
+        additivity: true
+        AppenderRef:
+          - ref: STDOUT
+          - ref: File
       - name: org.apache.http.impl
         level: error
         additivity: true
