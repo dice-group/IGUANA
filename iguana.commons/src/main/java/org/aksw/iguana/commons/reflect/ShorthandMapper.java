@@ -44,8 +44,8 @@ public class ShorthandMapper {
         ClassLoader cloader = ClassLoader.getSystemClassLoader();
         for(Class<?> annotatedClass : annotatedClasses){
             Shorthand annotation = (Shorthand)annotatedClass.getAnnotation(Shorthand.class);
-            if(annotation == null ){
-                System.out.println();
+            if(annotation == null){
+                continue;
             }
             if(shortMap.containsKey(annotation.value())){
                 LOGGER.warn("Shorthand Key {} for Class {} already exists, pointing to Class {}. ", annotation.value(), shortMap.get(annotation.value()), annotatedClass.getCanonicalName());
