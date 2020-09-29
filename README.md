@@ -87,12 +87,13 @@ If you use the [basic configuration](https://github.com/dice-group/IGUANA/blob/m
 # Setup Iguana
 
 ## Download
-Please download the release zip **Iguana_Release.zip** from the newest release available [here](https://github.com/dice-group/IGUANA/releases):
+Please download the release zip **iguana-x.y.z.zip** from the newest release available [here](https://github.com/dice-group/IGUANA/releases):
 
 ```
-wget https://github.com/dice-group/IGUANA/releases/download/v2.1.0d/Iguana_Release.zip
-unzip Iguana_Release.zip
-cd Iguana_Release/
+mkdir iguana
+cd iguana/
+wget https://github.com/dice-group/IGUANA/releases/download/v3.0.0/iguana-3.0.0.zip
+unzip iguana-3.0.0.zip
 ```
 
 
