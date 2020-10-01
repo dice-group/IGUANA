@@ -78,6 +78,11 @@ a.currentSite:hover {
   font-size: 1.2em;
 }
 
+
+.wy-side-nav-search  a:hover {
+  background-color: #82BDC3;
+  }
+
 .wy-menu-vertical a {
   color: #6c6c6c;
   font-size: 1em;

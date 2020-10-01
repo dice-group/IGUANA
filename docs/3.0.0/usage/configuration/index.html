@@ -113,6 +113,8 @@
                     </li>
                     <li class="toctree-l1"><a class="reference internal " href="../script-hooks/">Script Hooks</a>
                     </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../tutorial/">Tutorial</a>
+                    </li>
                 </ul>
 
               </ul>
@@ -190,7 +192,7 @@
                 <h1 id="configuration">Configuration</h1>
 <p>The Configuration explains Iguana how to execute your benchmark. It is divided into 5 categories</p>
 <ul>
-<li>Conenctions</li>
+<li>Connections</li>
 <li>Datasets</li>
 <li>Tasks</li>
 <li>Storages</li>
@@ -210,7 +212,7 @@ A connection has the following items</p>
 <li>password - for authentication purposes (optional)</li>
 </ul>
 <p>To setup an endpoint as well as an updateEndpoint might be confusing at first, but if you to test read and write performance simultanously and how updates might have an impact on read performance, you can set up both.</p>
-<p>For more detail on how to setup the CLI call look at <a href="Implemented-Workers">Implemented Workers</a>. There are all CLI Workers explained and how to set the endpoint such that the application will be run correctly.</p>
+<p>For more detail on how to setup the CLI call look at <a href="../workers">Implemented Workers</a>. There are all CLI Workers explained and how to set the endpoint such that the application will be run correctly.</p>
 <p>Let's look at an example: </p>
 <pre><code class="yaml">connections:
   - name: &quot;System1&quot;
@@ -241,7 +243,7 @@ The dataset name will be added to the results, whereas both can be used in the t
 
 <h3 id="tasks">Tasks</h3>
 <p>A Task is one benchmark Task which will be executed against all connections for all datasets. 
-A Task might be a stresstest which we will be using in this example. Have a look at the full configuration of the <a href="Stresstest#Configuration">Stresstest</a></p>
+A Task might be a stresstest which we will be using in this example. Have a look at the full configuration of the <a href="../stresstest#Configuration">Stresstest</a></p>
 <p>The configuration of one Task consists of the following: </p>
 <ul>
 <li>className - The className or <a href="#Shorthand">Shorthand</a>  </li>
@@ -281,7 +283,7 @@ A Task might be a stresstest which we will be using in this example. Have a look
 
 <p>We configured two Tasks, both Stresstests. The first one will be executed for one hour and uses simple text queries which can be executed right away.<br />
 Further on it uses 2 simulated SPARQLWorkers with the same configuration. 
-At this point it's recommend to check out the <a href="Stresstest#Configuration">Stresstest Configuration</a> in detail for further configuration.</p>
+At this point it's recommend to check out the <a href="../stresstest#Configuration">Stresstest Configuration</a> in detail for further configuration.</p>
 <h3 id="storages">Storages</h3>
 <p>Tells Iguana how to save your results. Currently Iguana supports two solutions</p>
 <ul>
@@ -296,6 +298,13 @@ At this point it's recommend to check out the <a href="Stresstest#Configuration"
 
 <p>However it can be configured to use a different result file name. The default is <code>results_{DD}-{MM}-{YYYY}_{HH}-{mm}.nt</code>.
 See example below. </p>
+<pre><code class="yaml">storages:
+  - className: &quot;NTFileStorage&quot; 
+    #optional
+    configuration:
+      fileName: &quot;results-of-my-benchmark.nt&quot;
+</code></pre>
+
 <p>The <strong>TriplestoreStorage</strong> can be configured as follows: </p>
 <pre><code class="yaml">storages:
   - className: TriplestoreStorage
@@ -314,24 +323,43 @@ See example below. </p>
        password: &quot;secret&quot;
 </code></pre>
 
-<p>For further detail on how to read the results have a look <a href="Result-File">here</a></p>
-<p>Let's look at an example: </p>
-<pre><code class="yaml">storages:
-  - className: &quot;NTFileStorage&quot; 
-    #optional
-    configuration:
-      fileName: &quot;results-of-my-benchmark.nt&quot;
+<p>For further detail on how to read the results have a look <a href="../results">here</a></p>
+<h3 id="metrics">Metrics</h3>
+<p>Let's Iguana know what Metrics you want to include in the results. </p>
+<p>Iguana supports the following metrics:</p>
+<ul>
+<li>Queries Per Second (QPS)</li>
+<li>Average Queries Per Second (AvgQPS)</li>
+<li>Query Mixes Per Hour (QMPH)</li>
+<li>Number of Queries successfully executed (NoQ)</li>
+<li>Number of Queries per Hour (NoQPH)</li>
+<li>Each query execution (EachQuery) - experimental</li>
+</ul>
+<p>For more detail on each of the metrics have a look at <a href="../metrics">Metrics</a></p>
+<p>Let's look at an example:</p>
+<pre><code class="yaml">metrics:
+  - className: &quot;QPS&quot; 
+  - className: &quot;AvgQPS&quot;
+  - className: &quot;QMPH&quot;
+  - className: &quot;NoQ&quot;
+  - className: &quot;NoQPH&quot;
 </code></pre>
 
-<h3 id="metrics">Metrics</h3>
-<p>TODO</p>
+<p>In this case we use all the default metrics which would be included if you do not specify <code>metrics</code> in the configuration at all. 
+However you can also just use a subset of these like the following:</p>
+<pre><code class="yaml">metrics:
+   - className: &quot;NoQ&quot;
+   - className: &quot;AvgQPS&quot;
+</code></pre>
+
+<p>For more detail on how the results will include these metrics have a look at <a href="../results">Results</a>.</p>
 <h3 id="task-script-hooks">Task script hooks</h3>
 <p>To automatize the whole benchmark workflow, you can setup a script which will be executed before each task, as well as a script which will be executed after each task. </p>
 <p>To make it easier, the script can get the following values</p>
 <ul>
 <li>dataset.name - The current dataset name</li>
 <li>dataset.file - The current dataset file name if there is anyone</li>
-<li>connection.name - The current connection name</li>
+<li>connection - The current connection name</li>
 <li>taskID - The current taskID</li>
 </ul>
 <p>You can set each one of them as an argument using brackets like <code>{{connection}}</code>. 
