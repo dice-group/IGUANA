@@ -10,3 +10,4 @@
 <http://iguana-benchmark.eu/resource/query/abc> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Query>.
 <http://iguana-benchmark.eu/resource/query/abc> <http://www.w3.org/2000/01/rdf-schema#ID> "abc".
 <http://iguana-benchmark.eu/resource/query/abc> <http://www.w3.org/2000/01/rdf-schema#label> "SELECT  *\nWHERE\n  { ?s  ?p  ?o .\n    ?o  ?q  ?t\n    FILTER ( ?t = \"abc\" )\n  }\nGROUP BY ?s\n" .
+<http://iguana-benchmark.eu/resource/query/abc> <http://www.w3.org/2002/07/owl#sameAs> <http://lsq.aksw.org/res/q-fa359cdd> .

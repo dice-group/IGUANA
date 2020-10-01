@@ -6,20 +6,28 @@ import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.vocab.Vocab;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.digest.Md5Crypt;
+import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.jena.ext.com.google.common.hash.HashCode;
+import org.apache.jena.ext.com.google.common.hash.Hashing;
+import org.apache.jena.ext.com.google.common.io.BaseEncoding;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.jcodings.util.Hash;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -35,6 +43,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -51,6 +61,7 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
     public static final String XML_RESULT_ROOT_ELEMENT_NAME = "results";
     public static final String QUERY_RESULT_TYPE_JSON = "application/sparql-results+json";
     public static final String QUERY_RESULT_TYPE_XML = "application/sparql-results+xml";
+    private static final String LSQ_RES = "http://lsq.aksw.org/res/q-";
 
     @Override
     public String getQueryPrefix() {
@@ -79,11 +90,31 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
                 model.add(subject, Vocab.optionalProperty, model.createTypedLiteral(qs2.optional==1));
                 model.add(subject, Vocab.orderByProperty, model.createTypedLiteral(qs2.orderBy==1));
                 model.add(subject, Vocab.unionProperty, model.createTypedLiteral(qs2.union==1));
+                model.add(subject, OWL.sameAs, getLSQHash(q));
             }catch(Exception e){
                 LOGGER.warn("Query statistics could not be created. Not using SPARQL?");
             }
         }
         return model;
+    }
+
+    private Resource getLSQHash(Query query){
+        String result = MD5(query.toString()).substring(0, 8);;
+        return ResourceFactory.createResource(LSQ_RES+result);
+    }
+
+    private String MD5(String md5) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            byte[] array = md.digest(md5.getBytes());
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < array.length; ++i) {
+                sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+            }
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+        }
+        return null;
     }
 
     public static String getContentTypeVal(Header header) {
