@@ -35,7 +35,7 @@ For further Information visit
 
 [iguana-benchmark.eu](http://iguana-benchmark.eu) 
 
-[Wiki](https://github.com/AKSW/IGUANA/wiki)
+[Documentation](http://iguana-benchmark.eu/docs/3.0/)
 
 
 # Getting Started
@@ -91,9 +91,8 @@ Please download the release zip **iguana-x.y.z.zip** from the newest release ava
 
 ```
 mkdir iguana
-cd iguana/
-wget https://github.com/dice-group/IGUANA/releases/download/v3.0.0/iguana-3.0.0.zip
-unzip iguana-3.0.0.zip
+wget https://github.com/dice-group/IGUANA/releases/download/v3.0.1/iguana-3.0.1.zip
+unzip iguana-3.0.1.zip
 ```
 
 
@@ -108,7 +107,7 @@ It contains the following files:
 ## Create a Configuration
 
 You can use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/example-suite.yml) we provide and modify it to your needs.
-For further information please visit our [configuration](https://github.com/dice-group/IGUANA/wiki/config) and [Stresstest](https://github.com/dice-group/IGUANA/wiki/stresstest) wiki pages. For a detailed, step-by-step instruction please attend our [tutorial](https://github.com/dice-group/IGUANA/wiki/Tutorial-DBPSB-2012#create-the-configuration).
+For further information please visit our [configuration](http://iguana-benchmark.eu/docs/3.0/usage/configuration/) and [Stresstest](http://iguana-benchmark.eu/docs/3.0/usage/stresstest/) wiki pages. For a detailed, step-by-step instruction please attend our [tutorial](http://iguana-benchmark.eu/docs/3.0/usage/tutorial/).
 
 ## Execute the Benchmark
 
