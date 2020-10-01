@@ -68,6 +68,8 @@
                     <li class="toctree-l1"><a class="reference internal " href="../download/">Download</a>
                     </li>
                     <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Quick Configuration</a>
+    <ul class="currentSite active">
+    </ul>
                     </li>
                     <li class="toctree-l1"><a class="reference internal " href="../run-iguana/">Run Iguana</a>
                     </li>
@@ -171,7 +173,55 @@
           <div role="main">
             <div class="section">
               
-                
+                <h1 id="quickly-configure-iguana">Quickly Configure Iguana</h1>
+<p>Here we will setup a quick configuration which will benchmark one triple store (e.g. apache jena fuseki) using one simulated user.
+We assume that your triple store (or whatever HTTP GET endpoint you want to use) is running and loaded with data.
+For now we assume that the endpoint is at <code>http://localhost:3030/ds/sparql</code> and uses GET with the parameter <code>query</code></p>
+<p>Further on the benchmark should take 10 minutes (or 60.000 ms) and uses plain text queries located in <code>queries.txt</code>. </p>
+<p>If you do not have created some queries yet, use these for example</p>
+<pre><code class="sparql">SELECT * {?s ?p ?o}
+SELECT * {?s ?p ?o} LIMIT 10
+SELECT * {?s &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; ?o}
+</code></pre>
+
+<p>and save them to queries.txt.</p>
+<p>Your results will be written as an N-Triple file to <code>first-benchmark-results.nt</code></p>
+<p>The following configuration works with these demands. </p>
+<pre><code class="yaml"># you can ignore this for now
+datasets:
+  - name: &quot;Dataset&quot;
+
+#Your connection
+connections:
+  - name: &quot;Fuseki&quot;
+    # Change this to your actual endpoint you want to use
+    endpoint: &quot;http://localhost:3030/ds/sparql&quot;
+
+# The benchmark task
+tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      # 10 minutes (time Limit is in ms)
+      timeLimit: 600000
+      # we are using plain text queries
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+
+      # create one SPARQL Worker (it's basically a HTTP get worker using the 'query' parameter
+      # it uses the queries.txt file as benchmark queries
+      workers:
+        - threads: 1
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries.txt&quot;
+
+# tell Iguana where to save your results to          
+storages:
+  - className: &quot;NTFileStorage&quot;
+    configuration:
+      fileName: first-benchmark-results.nt
+</code></pre>
+
+<p>For more information on the confguration have a look at <a href="usage/configuration/">Configuration</a> </p>
               
             </div>
           </div>
