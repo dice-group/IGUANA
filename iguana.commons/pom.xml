@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw</groupId>
 	<artifactId>iguana.commons</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.1</version>
 	<name>Iguana Commons</name>
 	<description>Iguana Common Classes and Methods</description>
 	<licenses>
