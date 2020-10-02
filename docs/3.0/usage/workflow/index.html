@@ -78,6 +78,8 @@
         <p  class="fa fa-caret-right  ddButton caption   active  currentSite"><span class="caption-text"> Usage</span>
  	<ul class="dd-container  active">
                     <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Workflow</a>
+    <ul class="currentSite active">
+    </ul>
                     </li>
                     <li class="toctree-l1"><a class="reference internal " href="../configuration/">Configuration</a>
                     </li>
@@ -171,7 +173,25 @@
           <div role="main">
             <div class="section">
               
-                
+                <h1 id="workflow">Workflow</h1>
+<p>Iguana will first parse configuration and afterwards will execute each task for each connection for each dataset. </p>
+<p>Imagine it like the following:</p>
+<ul>
+<li>for each dataset D<ul>
+<li>for each connection C<ul>
+<li>for each task T<ol>
+<li>execute pre script hook</li>
+<li>execute task T(D, C)</li>
+<li>collect and calculate results</li>
+<li>write results</li>
+<li>execute post script hook</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
               
             </div>
           </div>
@@ -198,7 +218,7 @@
  	 <a class="icon icon-github" href="https://github.com/dice-group/Iguana" > Visit us at Github</a>
 	</li>
         <li>
-	 <a class="icon fa-download" href="https://github.com/dice-group/Iguana/releases/v3.0.0" > Download latest Release</a>
+	 <a class="icon fa-download" href="https://github.com/dice-group/Iguana/releases/" > Download latest Release</a>
  	</li>
     </ul>
   <div>
