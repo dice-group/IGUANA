@@ -184,7 +184,7 @@ SELECT * {?s ?p ?o} LIMIT 10
 SELECT * {?s &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; ?o}
 </code></pre>
 
-<p>and save them to queries.txt.</p>
+<p>and save them to <code>queries.txt</code>.</p>
 <p>Your results will be written as an N-Triple file to <code>first-benchmark-results.nt</code></p>
 <p>The following configuration works with these demands. </p>
 <pre><code class="yaml"># you can ignore this for now
@@ -218,7 +218,7 @@ tasks:
 storages:
   - className: &quot;NTFileStorage&quot;
     configuration:
-      fileName: first-benchmark-results.nt
+      fileName: &quot;first-benchmark-results.nt&quot;
 </code></pre>
 
 <p>For more information on the confguration have a look at <a href="../usage/configuration/">Configuration</a> </p>
