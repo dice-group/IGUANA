@@ -96,13 +96,13 @@ public class IguanaConfig {
 					LOGGER.info("Executing Task [{}: {}, {}, {}]", taskID, dataset.getName(), con.getName(), task.getClassName());
 					controller.startTask(new String[]{suiteID, suiteID+"/"+expID.toString(), suiteID+"/"+expID.toString()+"/"+taskID.toString()}, dataset.getName(), SerializationUtils.clone(con), SerializationUtils.clone(task));
 					if(postScriptHook!=null){
-						LOGGER.info("Executing postScriptHook");
 						String execScript = postScriptHook.replace("{{dataset.name}}", dataset.getName())
 								.replace("{{connection}}", con.getName())
 								.replace("{{taskID}}", taskID+"");
 						if(dataset.getFile()!=null){
 							execScript = execScript.replace("{{dataset.file}}", dataset.getFile());
 						}
+						LOGGER.info("Executing postScriptHook {}", execScript);
 						ScriptExecutor.execSafe(execScript, args);
 					}
 				}

@@ -84,6 +84,13 @@
 		<groupId>org.aksw</groupId>
 		<artifactId>iguana.resultprocessor</artifactId>
 		<version>3.0.1</version>
+		<exclusions>
+			<exclusion>
+				<groupId>org.aksw</groupId>
+				<artifactId>iguana.commons</artifactId>
+			</exclusion>
+
+		</exclusions>
 	</dependency>
 		<dependency>
 			<groupId>org.aksw</groupId>

@@ -32,7 +32,7 @@ Configuration:
           - ref: STDOUT
           - ref: File
       - name: org.reflections.Reflections
-        level: fatal
+        level: info
         additivity: true
         AppenderRef:
           - ref: STDOUT

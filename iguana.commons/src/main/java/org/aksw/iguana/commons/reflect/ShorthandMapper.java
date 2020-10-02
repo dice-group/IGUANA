@@ -1,7 +1,10 @@
 package org.aksw.iguana.commons.reflect;
 
 import org.aksw.iguana.commons.annotation.Shorthand;
+import org.reflections.Configuration;
 import org.reflections.Reflections;
+import org.reflections.scanners.*;
+import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +34,7 @@ public class ShorthandMapper {
 
 
     public ShorthandMapper(){
-        this("");
+        this("org");
     }
 
     /**
@@ -39,18 +42,26 @@ public class ShorthandMapper {
      * @param prefix package prefix to check
      */
     public ShorthandMapper(String prefix){
-        Reflections reflections = new Reflections(prefix);
-        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Shorthand.class);
-        ClassLoader cloader = ClassLoader.getSystemClassLoader();
-        for(Class<?> annotatedClass : annotatedClasses){
-            Shorthand annotation = (Shorthand)annotatedClass.getAnnotation(Shorthand.class);
-            if(annotation == null){
-                continue;
+        try {
+            Configuration config = ConfigurationBuilder.build(prefix).addScanners(new TypeAnnotationsScanner()).addScanners(new SubTypesScanner());
+            Reflections reflections = new Reflections(new String[]{"", prefix});
+
+            Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Shorthand.class);
+            LOGGER.info("Found {} annotated classes", annotatedClasses.size());
+            LOGGER.info("Annotated Classes : {}", annotatedClasses.toString());
+            ClassLoader cloader = ClassLoader.getSystemClassLoader();
+            for (Class<?> annotatedClass : annotatedClasses) {
+                Shorthand annotation = (Shorthand) annotatedClass.getAnnotation(Shorthand.class);
+                if (annotation == null) {
+                    continue;
+                }
+                if (shortMap.containsKey(annotation.value())) {
+                    LOGGER.warn("Shorthand Key {} for Class {} already exists, pointing to Class {}. ", annotation.value(), shortMap.get(annotation.value()), annotatedClass.getCanonicalName());
+                }
+                shortMap.put(annotation.value(), annotatedClass.getCanonicalName());
             }
-            if(shortMap.containsKey(annotation.value())){
-                LOGGER.warn("Shorthand Key {} for Class {} already exists, pointing to Class {}. ", annotation.value(), shortMap.get(annotation.value()), annotatedClass.getCanonicalName());
-            }
-            shortMap.put(annotation.value(), annotatedClass.getCanonicalName());
+        }catch(Exception e){
+            LOGGER.error("Could not create shorthand mapping", e);
         }
     }
 

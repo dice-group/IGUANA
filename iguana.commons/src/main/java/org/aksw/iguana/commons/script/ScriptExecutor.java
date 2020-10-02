@@ -7,10 +7,7 @@ import org.apache.commons.exec.ExecuteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 /**
  * Class to execute Shell Scripts
@@ -38,7 +35,7 @@ public class ScriptExecutor {
 		String[] shellCommand = new String[1 + (args == null ? 0 : args.length)];
 		shellCommand[0] = fileName;
 
-		if(args != null)
+		if(args != null && args.length!=0)
 		{
 			System.arraycopy(args, 0, shellCommand, 1, args.length);
 		}
@@ -77,25 +74,24 @@ public class ScriptExecutor {
 
 	private static int execute(String[] args)
 	{
-		ProcessBuilder processBuilder = new ProcessBuilder().redirectErrorStream(true);
+		ProcessBuilder processBuilder = new ProcessBuilder().redirectErrorStream(true).inheritIO();
 		processBuilder.command(args);
 		int exitVal;
 		try {
 			Process process = processBuilder.start();
 
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(process.getInputStream()));
-
 			StringBuilder out = new StringBuilder();
 			int character;
-			while (process.isAlive()&&(character = reader.read()) != -1)
-			{
+			try(InputStream read = process.getInputStream()) {
+				while (process.isAlive() && (character = read.read()) != -1) {
+					out.append((char) character);
+				}
+				LOGGER.debug(out.toString());
 
-				out.append((char)character);
+				exitVal = process.waitFor();
+			}catch (IOException | InterruptedException e){
+				throw e;
 			}
-			LOGGER.debug(out.toString());
-
-			exitVal = process.waitFor();
 
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Script had thrown an error. ", e);
