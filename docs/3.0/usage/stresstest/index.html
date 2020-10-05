@@ -82,6 +82,20 @@
                     <li class="toctree-l1"><a class="reference internal " href="../configuration/">Configuration</a>
                     </li>
                     <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Stresstest</a>
+    <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#query-handling">Query Handling</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#workers-simulated-users">Workers (simulated Users)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#warmup">Warmup</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#references">References</a>
+    </li>
+    </ul>
                     </li>
                     <li class="toctree-l1"><a class="reference internal " href="../workers/">Supported Workers</a>
                     </li>
@@ -169,7 +183,120 @@
           <div role="main">
             <div class="section">
               
-                
+                <h1 id="stresstest">Stresstest</h1>
+<p>Iguanas implemented Stresstest benchmark task tries to emulate a real case scenario under which an endpoint or application is under high stress. 
+As in real life endpoints might get multiple simultaneous request within seconds, it is very important to verify that you application can handle this. </p>
+<p>The stresstest emulates users or applications which will bombard the endpoint using a set of queries for a specific amount of time or a specific amount of queries executed.
+Each simulated user is called Worker in the following. 
+As you might want to test read and write performance or just want to emulate different user behaviour, the stresstest allows to configure several workers. 
+Every worker configuration can additionaly be started several times, hence if you want one configuration executed multiple times, you can simply tell Iguana to run this worker configuration the specified amount of time. 
+However to assure that the endpoint can't just cache the repsonse of the first request of a query, every worker starts at a pre determined random query, meaning that the single worker will always start at that query to assure fairness in benchmark comparisons, while every worker will start at a different query.</p>
+<h2 id="configuration">Configuration</h2>
+<p>To configure this task you have to first tell Iguana to use the implemented task like the following:</p>
+<pre><code class="yaml">tasks:
+  - className: &quot;Stresstest&quot;
+</code></pre>
+
+<p>Further on you need to configure the Stresstest using the configuration parameter like:</p>
+<pre><code class="yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      timeLimit: 600000
+      ...
+</code></pre>
+
+<p>As an end restriction you can either use <code>timeLimit</code> which will stop the stresstest after the specified amount in ms or you can set <code>noOfQueryMixes</code> which stops every worker after they executed the amount of queries in the provided query set.</p>
+<p>Additionaly to either <code>timeLimit</code> or <code>noOfQueryMixes</code> you can set the following parameters</p>
+<ul>
+<li>queryHandler</li>
+<li>workers</li>
+<li>warmup (optional)</li>
+</ul>
+<h3 id="query-handling">Query Handling</h3>
+<p>The queryHandler parameter let's the stresstest know what queries will be used. 
+Normally you will need the <code>InstancesQueryHandler</code> which will use plain text queries (could be SQL, SPARQL, a whole RDF document). The only restriction is that each query has to be in one line.</p>
+<p>You can set the query handler like the following:</p>
+<pre><code class="yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    queryHandler:
+      className: &quot;InstancesQueryHandler&quot;
+    ...
+</code></pre>
+
+<p>To see which query handlers are supported see  <a href="../queries/">Supported Queries</a></p>
+<h3 id="workers-simulated-users">Workers (simulated Users)</h3>
+<p>Further on you have to add which workers to use. 
+As described above you can set different worker configurations. 
+Let's look at an example:</p>
+<pre><code class="yaml">  - className: &quot;Stresstest&quot;
+    timeLimit: 600000
+    workers:
+      - threads: 4
+        className: &quot;SPARQLWorker&quot;
+        queriesFile: &quot;/path/to/your/queries.txt&quot;
+      - threads: 16
+        className: &quot;SPARQLWorker&quot;
+        queriesFile: &quot;/other/queries.txt&quot;
+        fixedLatency: 5000      
+</code></pre>
+
+<p>In this example we have two different worker configurations we want to use. The first want will create 4 <code>SPARQLWorker</code>s using queries at <code>/path/to/your/queries.txt</code> with any latencym thus every query will be executed immediatly after another.
+The second worker configuration will execute 16 <code>SPARQLWorker</code>s using queries at <code>/other/queries.txt</code> using a fixed waiting time of <code>5000ms</code> between each query. 
+Hence every worker will execute their queries independently from each other but will wait 5s after each of their query execution before executing the next one.
+This configuration may simulate that we have a few Users requesting your endpoint locally (e.g. some of your application relying on your database) and several users querying your endpoint from outside the network where we would have network latency and other interferences which we will try to simulate with 5s. </p>
+<p>A full list of supported workers and their parameters can be found at <a href="../workers">Supported Workers</a></p>
+<p>In this example our Stresstest would create 20 workers, which will simultaenously request the endpoint  for 60000ms (10 minutes).</p>
+<h3 id="warmup">Warmup</h3>
+<p>Additionaly to these you can optionally set a warmup, which will aim to let the system be benchmarked under a normal situation (Some times a database is faster when it was already running for a bit) 
+The configuration is similar to the stresstest itself you can set a <code>timeLimit</code> (however not a certain no of query executions), you can set different <code>workers</code>, and a <code>queryHandler</code> to use. 
+If you don't set the <code>queryHandler</code> parameter the warmup will simply use the <code>queryHandler</code> specified in the Stresstest itself. </p>
+<p>You can set the Warmup as following:</p>
+<pre><code class="yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    warmup:
+      timeLimit: 600000
+      workers: 
+        ...
+      queryHandler:
+        ...
+</code></pre>
+
+<p>That's it. 
+A full example might look like this</p>
+<pre><code class="yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      # 1 hour (time Limit is in ms)
+      timeLimit: 3600000
+      # warmup is optional
+      warmup:
+        # 10 minutes (is in ms)
+        timeLimit: 600000
+        # queryHandler could be set too, same as in the stresstest configuration, otherwise the same queryHandler will be use.
+        # workers are set the same way as in the configuration part
+        workers:
+          - threads: 1
+            className: &quot;SPARQLWorker&quot;
+            queriesFile: &quot;queries_warmup.txt&quot;
+            timeOut: 180000
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 16
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries_easy.txt&quot;
+          timeOut: 180000
+        - threads: 4
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries_complex.txt&quot;
+          fixedLatency: 100
+</code></pre>
+
+<h2 id="references">References</h2>
+<ul>
+<li><a href="../queries/">Supported Queries</a></li>
+<li><a href="../workers">Supported Workers</a></li>
+</ul>
               
             </div>
           </div>

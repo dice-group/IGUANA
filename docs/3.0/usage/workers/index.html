@@ -84,6 +84,34 @@
                     <li class="toctree-l1"><a class="reference internal " href="../stresstest/">Stresstest</a>
                     </li>
                     <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Supported Workers</a>
+    <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#http-workers">Http Workers</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#http-get-worker">Http Get Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#http-post-worker">Http Post Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sparql-worker">SPARQL Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sparql-update-worker">SPARQL UPDATE Worker</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cli-workers">CLI Workers</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#cli-worker">CLI Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cli-input-worker">CLI Input Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cli-input-file-worker">CLI Input File Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cli-input-prefix-worker">CLI Input Prefix Worker</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
                     </li>
                     <li class="toctree-l1"><a class="reference internal " href="../queries/">Supported Queries</a>
                     </li>
@@ -169,7 +197,238 @@
           <div role="main">
             <div class="section">
               
-                
+                <h1 id="supported-workers">Supported Workers</h1>
+<p>A Worker is basically just a thread querying the triple store. It tries to emulate a single user/application requesting your system until it should stop. 
+In a task (e.g. the <a href="../stresstest/">stresstest</a>) you can configure several worker configurations which will then be used inside the task.</p>
+<p>Every worker configuration can additionaly be started several times, hence if you want one configuration executed multiple times, you can simply tell Iguana to run this worker configuration the specified amount of time. 
+However to assure that the endpoint can't just cache the repsonse of the first request of a query, every worker starts at a pre determined random query, meaning that the single worker will always start at that query to assure fairness in benchmark comparisons, while every worker will start at a different query.</p>
+<p>There a few workers implemented, which can be seperated into two main categories</p>
+<ul>
+<li>Http Workers</li>
+<li>CLI Workers</li>
+</ul>
+<h2 id="http-workers">Http Workers</h2>
+<p>These Workers can be used to benchmark Http Applications (such as a SPARQL endpoint).</p>
+<h3 id="http-get-worker">Http Get Worker</h3>
+<p>A Http worker using GET requests. 
+This worker will use the <code>endpoint</code> of the connection.</p>
+<p>This worker has several configurations listed in the following table:</p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>parameterName</td>
+<td>yes</td>
+<td>query</td>
+<td>the GET paremter to set the query as value to. (see also <a href="../queries">Supported Queries</a> )</td>
+</tr>
+<tr>
+<td>responseType</td>
+<td>yes</td>
+<td></td>
+<td>The content type the endpoint should return. Setting the <code>Accept:</code> header</td>
+</tr>
+<tr>
+<td>language</td>
+<td>yes</td>
+<td>lang.SPARQL (plain text)</td>
+<td>The language the queries and response are in (e.g. SPARQL). Basically just creates some more statistics (see <a href="languages">Supported Langauges</a> )</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If a random value between [0, 2*value] (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>Let's look at an example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;HttpGetWorker&quot;
+        timeOut: 180000
+        parameterName: &quot;text&quot;
+</code></pre>
+
+<p>This will use one HttpGetWOrker using a timeout of 3 minutes and the get parameter text to request the query through.</p>
+<h3 id="http-post-worker">Http Post Worker</h3>
+<p>A Http worker using POST requests. 
+This worker will use the <code>updateEndpoint</code> of the connection.</p>
+<p>This worker has several configurations listed in the following table:</p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>parameterName</td>
+<td>yes</td>
+<td>query</td>
+<td>the GET paremter to set the query as value to. (see also <a href="../queries">Supported Queries</a> )</td>
+</tr>
+<tr>
+<td>contentType</td>
+<td>yes</td>
+<td><code>text/plain</code></td>
+<td>The content type of the update queries. Setting the <code>Content-Type:</code> header</td>
+</tr>
+<tr>
+<td>responseType</td>
+<td>yes</td>
+<td></td>
+<td>The content type the endpoint should return. Setting the <code>Accept:</code> header</td>
+</tr>
+<tr>
+<td>language</td>
+<td>yes</td>
+<td>lang.SPARQL (plain text)</td>
+<td>The language the queries and response are in (e.g. SPARQL). Basically just creates some more statistics (see <a href="languages">Supported Langauges</a> )</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If a random value between [0, 2*value] (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>Let's look at an example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;HttpPostWorker&quot;
+        timeOut: 180000
+</code></pre>
+
+<p>This will use one HttpGetWOrker using a timeout of 3 minutes.</p>
+<h3 id="sparql-worker">SPARQL Worker</h3>
+<p>Simply a GET worker but the language parameter is set to <code>lang.SPARQL</code>. 
+Otherwise see the <a href="#http-get-worker">Http Get Worker</a> for configuration</p>
+<p>An Example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;SPARQLWorker&quot;
+        timeOut: 180000
+</code></pre>
+
+<h3 id="sparql-update-worker">SPARQL UPDATE Worker</h3>
+<p>Simply a POST worker but specified for SPARQL Updates.</p>
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>timerStrategy</td>
+<td>yes</td>
+<td><code>NONE</code></td>
+<td><code>NONE</code>, <code>FIXED</code> or <code>DISTRIBUTED</code>. see below for explanation.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If a random value between [0, 2*value] (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>timerStrategy</strong> parameter let's the worker know how to distribute the updates.
+The fixedLatency and gaussianLatency parameters are not affected, the worker will wait those additionally. </p>
+<ul>
+<li>NONE: the worker just updates each update query after another </li>
+<li>FIXED: calculating the distribution by <code>timeLimit / #updates</code> at the start and waiting the amount between each update. Time Limit will be used of the task the worker is executed in.</li>
+<li>DISTRIBUTED: calculating the remaining distribution each update by  <code>timeRemaining / #updatesRemaining</code>.</li>
+</ul>
+<p>An Example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;UPDATEWorker&quot;
+        timeOut: 180000
+        timerStrategy: &quot;FIXED&quot;
+</code></pre>
+
+<h2 id="cli-workers">CLI Workers</h2>
+<p>These workers can be used to benchmark a CLI application. </p>
+<h3 id="cli-worker">CLI Worker</h3>
+<h3 id="cli-input-worker">CLI Input Worker</h3>
+<h3 id="multiple-cli-input-worker">Multiple CLI Input Worker</h3>
+<h3 id="cli-input-file-worker">CLI Input File Worker</h3>
+<h3 id="cli-input-prefix-worker">CLI Input Prefix Worker</h3>
               
             </div>
           </div>
