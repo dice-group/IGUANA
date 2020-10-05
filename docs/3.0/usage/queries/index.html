@@ -86,6 +86,12 @@
                     <li class="toctree-l1"><a class="reference internal " href="../workers/">Supported Workers</a>
                     </li>
                     <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Supported Queries</a>
+    <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#plain-text-queries">Plain Text Queries</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sparql-pattern-queries">SPARQL Pattern Queries</a>
+    </li>
+    </ul>
                     </li>
                     <li class="toctree-l1"><a class="reference internal " href="../languages/">Supported Languages</a>
                     </li>
@@ -169,7 +175,55 @@
           <div role="main">
             <div class="section">
               
-                
+                <h1 id="supported-queries">Supported Queries</h1>
+<p>There are currently two query types supported:</p>
+<ul>
+<li>plain text queries</li>
+<li>SPARQL pattern queries</li>
+</ul>
+<h2 id="plain-text-queries">Plain Text Queries</h2>
+<p>This can be anything: SPARQL, SQL, a whole book if you need to. 
+The only limitation is that it has to fit in one line per query.
+Every query can be executed as is. </p>
+<p>This can be set using the following: </p>
+<pre><code class="yaml">...
+    queryHandler:
+      className: &quot;InstancesQueryHandler&quot;
+</code></pre>
+
+<h2 id="sparql-pattern-queries">SPARQL Pattern Queries</h2>
+<p>This only works for SPARQL Queries at the moment. 
+The idea came from the DBpedia SPARQL Benchmark paper from 2011 and 2012. </p>
+<p>Instead of SPARQL queries as they are, you can set variables, which will be exchanged with real data. 
+Hence Iguana can create thousands of queries using a SPARQL pattern query. </p>
+<p>A pattern query might look like the following:</p>
+<pre><code class="sparql">SELECT * {?s rdf:type %%var0%% ; %%var1%% %%var2%%. %%var2%% ?p ?o}
+</code></pre>
+
+<p>This query in itself cannot be send to a triple store, however we can exchange the variables using real data. 
+Thus we need a reference endpoint (ideally) containing the same data as the dataset which will be tested. </p>
+<p>This query will then be exchanged to </p>
+<pre><code class="sparql">SELECT ?var0 ?var1 ?var2 {?s rdf:type ?var0 ; ?var1 ?var2. ?var2 ?p ?o} LIMIT 2000 
+</code></pre>
+
+<p>and be queried against the reference endpoint.</p>
+<p>For each result (limited to 2000) a query instance will be created.</p>
+<p>This will be done for every query in the benchmark queries. 
+All instances of these query patterns will be subsummed as if they were one query in the results. </p>
+<p>This can be set using the following:</p>
+<pre><code class="yaml">...
+    queryHandler:
+      className: &quot;PatternQueryHandler&quot;
+      endpoint: &quot;http://your-reference-endpoint/sparql&quot;
+</code></pre>
+
+<p>or</p>
+<pre><code class="yaml">...
+    queryHandler:
+      className: &quot;PatternQueryHandler&quot;
+      endpoint: &quot;http://your-reference-endpoint/sparql&quot;
+      limit: 4000 
+</code></pre>
               
             </div>
           </div>

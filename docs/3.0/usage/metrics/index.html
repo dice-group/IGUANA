@@ -90,6 +90,20 @@
                     <li class="toctree-l1"><a class="reference internal " href="../languages/">Supported Languages</a>
                     </li>
                     <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Metrics</a>
+    <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#noq">NoQ</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#qmph">QMPH</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#noqph">NoQPH</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#qps">QPS</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#avgqps">AvgQPS</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#eachquery">EachQuery</a>
+    </li>
+    </ul>
                     </li>
                     <li class="toctree-l1"><a class="reference internal " href="../results/">Benchmark Results</a>
                     </li>
@@ -169,7 +183,22 @@
           <div role="main">
             <div class="section">
               
-                
+                <h1 id="implemented-metrics">Implemented Metrics</h1>
+<p>Every metric will be calculated globally (for one Experiment Task) and locally (for each Worker) 
+Hence you can just analyze the overall metrics or if you want to look closer, you can look at each worker. </p>
+<h2 id="noq">NoQ</h2>
+<p>The number of successfully executed Queries</p>
+<h2 id="qmph">QMPH</h2>
+<p>The number of executed Query Mixes Per Hour </p>
+<h2 id="noqph">NoQPH</h2>
+<p>The number of successfully executed Number of Queries Per Hour </p>
+<h2 id="qps">QPS</h2>
+<p>For each query the <code>queries per second</code>, the <code>total time</code> in ms (summed up time of each execution), the no of <code>succeeded</code> and <code>failed</code> executions and the <code>result size</code> will be saved.
+Additionaly will try to tell how many times a query failed with what reason. (<code>timeout</code>, <code>wrong return code</code> e.g. 400, or <code>unknown</code>)</p>
+<h2 id="avgqps">AvgQPS</h2>
+<p>The average of all queries per second.</p>
+<h2 id="eachquery">EachQuery</h2>
+<p>Will save every query execution. (Experimental)</p>
               
             </div>
           </div>

@@ -88,6 +88,8 @@
                     <li class="toctree-l1"><a class="reference internal " href="../queries/">Supported Queries</a>
                     </li>
                     <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Supported Languages</a>
+    <ul class="currentSite active">
+    </ul>
                     </li>
                     <li class="toctree-l1"><a class="reference internal " href="../metrics/">Metrics</a>
                     </li>
@@ -169,7 +171,15 @@
           <div role="main">
             <div class="section">
               
-                
+                <h1 id="supported-languages">Supported Languages</h1>
+<p>The Language tag is set to assure that the result size returned by the benchmarked system is correctly read and that result can give a little extra query statistics. </p>
+<p>Currently two languages are implemented, however you can use <code>lang.SPARQL</code> or simply ignore it all the way. 
+If they are not in <code>SPARQL</code> the query statistics will be just containing the query text and the result size will be read as if each returned line were one result.</p>
+<p>The two languages are: </p>
+<ul>
+<li><code>lang.SPARQL</code></li>
+<li><code>lang.RDF</code></li>
+</ul>
               
             </div>
           </div>
