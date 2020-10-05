@@ -198,7 +198,7 @@
             <div class="section">
               
                 <h1 id="supported-workers">Supported Workers</h1>
-<p>A Worker is basically just a thread querying the triple store. It tries to emulate a single user/application requesting your system until it should stop. 
+<p>A Worker is basically just a thread querying the endpoint/application. It tries to emulate a single user/application requesting your system until it should stop. 
 In a task (e.g. the <a href="../stresstest/">stresstest</a>) you can configure several worker configurations which will then be used inside the task.</p>
 <p>Every worker configuration can additionaly be started several times, hence if you want one configuration executed multiple times, you can simply tell Iguana to run this worker configuration the specified amount of time. 
 However to assure that the endpoint can't just cache the repsonse of the first request of a query, every worker starts at a pre determined random query, meaning that the single worker will always start at that query to assure fairness in benchmark comparisons, while every worker will start at a different query.</p>
@@ -263,7 +263,7 @@ This worker will use the <code>endpoint</code> of the connection.</p>
 <td>gaussianLatency</td>
 <td>yes</td>
 <td>0</td>
-<td>If a random value between [0, 2*value] (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
 </tr>
 </tbody>
 </table>
@@ -337,7 +337,7 @@ This worker will use the <code>updateEndpoint</code> of the connection.</p>
 <td>gaussianLatency</td>
 <td>yes</td>
 <td>0</td>
-<td>If a random value between [0, 2*value] (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
 </tr>
 </tbody>
 </table>
@@ -402,7 +402,7 @@ Otherwise see the <a href="#http-get-worker">Http Get Worker</a> for configurati
 <td>gaussianLatency</td>
 <td>yes</td>
 <td>0</td>
-<td>If a random value between [0, 2*value] (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
 </tr>
 </tbody>
 </table>
@@ -411,7 +411,7 @@ The fixedLatency and gaussianLatency parameters are not affected, the worker wil
 <ul>
 <li>NONE: the worker just updates each update query after another </li>
 <li>FIXED: calculating the distribution by <code>timeLimit / #updates</code> at the start and waiting the amount between each update. Time Limit will be used of the task the worker is executed in.</li>
-<li>DISTRIBUTED: calculating the remaining distribution each update by  <code>timeRemaining / #updatesRemaining</code>.</li>
+<li>DISTRIBUTED: calculating the time to wait between two updates after each update by  <code>timeRemaining / #updatesRemaining</code>.</li>
 </ul>
 <p>An Example:</p>
 <pre><code class="yaml"> ... 
@@ -425,10 +425,414 @@ The fixedLatency and gaussianLatency parameters are not affected, the worker wil
 <h2 id="cli-workers">CLI Workers</h2>
 <p>These workers can be used to benchmark a CLI application. </p>
 <h3 id="cli-worker">CLI Worker</h3>
+<p>This Worker should be used if the CLI application runs a query once and exits afterwards. 
+Something like </p>
+<pre><code class="bash">$ cli-script.sh query
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+$ 
+</code></pre>
+
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;CLIWorker&quot;
+</code></pre>
+
 <h3 id="cli-input-worker">CLI Input Worker</h3>
+<p>This Worker should be used if the CLI application runs and the query will be send using the Input.</p>
+<p>Something like </p>
+<pre><code class="bash">$ cli-script.sh start
+Your Input: QUERY
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+
+Your Input: 
+</code></pre>
+
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>initFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when the application is ready to be requested (e.g. after loading)</td>
+</tr>
+<tr>
+<td>queryFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs if the query response finished</td>
+</tr>
+<tr>
+<td>queryError</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when an error during the query execution happend</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;CLIInputWorker&quot;
+        initFinished: &quot;loading finished&quot;
+        queryFinished: &quot;query execution took:&quot;
+        queryError: &quot;Error happend during request&quot;
+</code></pre>
+
 <h3 id="multiple-cli-input-worker">Multiple CLI Input Worker</h3>
+<p>This Worker should be used if the CLI application runs and the query will be send using the Input and will quit on errors. </p>
+<p>Something like </p>
+<pre><code class="bash">$ cli-script.sh start
+Your Input: QUERY
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+
+Your Input: ERROR
+ERROR happend, exiting 
+$ 
+</code></pre>
+
+<p>To assure a smooth benchmark, the CLI application will be run multiple times instead of once, and if the application quits, the next running process will be used, while in the background the old process will be restarted. 
+Thus as soon as an error happend, the benchmark can continue without a problem.</p>
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>initFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when the application is ready to be requested (e.g. after loading)</td>
+</tr>
+<tr>
+<td>queryFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs if the query response finished</td>
+</tr>
+<tr>
+<td>queryError</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when an error during the query execution happend</td>
+</tr>
+<tr>
+<td>numberOfProcesses</td>
+<td>yes</td>
+<td>5</td>
+<td>The number of times the application should be started to assure a smooth benchmark. see above.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;MultipleCLIInputWorker&quot;
+        initFinished: &quot;loading finished&quot;
+        queryFinished: &quot;query execution took:&quot;
+        queryError: &quot;Error happend during request&quot;
+</code></pre>
+
 <h3 id="cli-input-file-worker">CLI Input File Worker</h3>
+<p>Same as the <a href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>. However the query won't be send to the input but written to a file and the file will be send to the input</p>
+<p>Something like </p>
+<pre><code class="bash">$ cli-script.sh start
+Your Input: file-containg-the-query.txt
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+
+</code></pre>
+
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>initFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when the application is ready to be requested (e.g. after loading)</td>
+</tr>
+<tr>
+<td>queryFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs if the query response finished</td>
+</tr>
+<tr>
+<td>queryError</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when an error during the query execution happend</td>
+</tr>
+<tr>
+<td>directory</td>
+<td>no</td>
+<td></td>
+<td>Directory in which the file including the query should be saved.</td>
+</tr>
+<tr>
+<td>numberOfProcesses</td>
+<td>yes</td>
+<td>5</td>
+<td>The number of times the application should be started to assure a smooth benchmark. see <a href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;CLIInputFileWorker&quot;
+        initFinished: &quot;loading finished&quot;
+        queryFinished: &quot;query execution took:&quot;
+        queryError: &quot;Error happend during request&quot;      
+        directory: &quot;/tmp/&quot;  
+</code></pre>
+
 <h3 id="cli-input-prefix-worker">CLI Input Prefix Worker</h3>
+<p>Same as the <a href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>. However the CLI application might need a pre and suffix. </p>
+<p>Something like </p>
+<pre><code class="bash">$ cli-script.sh start
+Your Input: PREFIX QUERY SUFFIX
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+
+</code></pre>
+
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>initFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when the application is ready to be requested (e.g. after loading)</td>
+</tr>
+<tr>
+<td>queryFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs if the query response finished</td>
+</tr>
+<tr>
+<td>queryError</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when an error during the query execution happend</td>
+</tr>
+<tr>
+<td>queryPrefix</td>
+<td>no</td>
+<td></td>
+<td>String to use as a PREFIX before the query.</td>
+</tr>
+<tr>
+<td>querySuffix</td>
+<td>no</td>
+<td></td>
+<td>String to use as a SUFFIX after the query.</td>
+</tr>
+<tr>
+<td>numberOfProcesses</td>
+<td>yes</td>
+<td>5</td>
+<td>The number of times the application should be started to assure a smooth benchmark. see <a href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;CLIInputPrefixWorker&quot;
+        initFinished: &quot;loading finished&quot;
+        queryFinished: &quot;query execution took:&quot;
+        queryError: &quot;Error happend during request&quot;
+        queryPrefix: &quot;SPARQL&quot;
+        querySuffix: &quot;;&quot;
+</code></pre>
+
+<p>Will send the following as Input <code>SPARQL QUERY ;</code></p>
               
             </div>
           </div>
