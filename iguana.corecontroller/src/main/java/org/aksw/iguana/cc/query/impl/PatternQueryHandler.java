@@ -62,11 +62,11 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 	 * querysFile/updatePath to generate queries out of it.
 	 * 
 	 * @param workers 
-	 * @param service the sparql endpoint to derive the variable instances
+	 * @param endpoint the sparql endpoint to derive the variable instances
 	 * @param limit the resitriction of query instances per query pattern as String 
 	 */
-	public PatternQueryHandler(LinkedList<Worker> workers, String service, String limit) {
-		this(workers, service, Long.parseLong(limit));
+	public PatternQueryHandler(LinkedList<Worker> workers, String endpoint, String limit) {
+		this(workers, endpoint, Long.parseLong(limit));
 	}
 	
 	/**
@@ -77,12 +77,12 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 	 * querysFile/updatePath to generate queries out of it.
 	 * 
 	 * @param workers 
-	 * @param service the sparql endpoint to derive the variable instances
+	 * @param endpoint the sparql endpoint to derive the variable instances
 	 * @param limit the resitriction of query instances per query pattern
 	 */
-	public PatternQueryHandler(LinkedList<Worker> workers, String service, Long limit) {
+	public PatternQueryHandler(LinkedList<Worker> workers, String endpoint, Long limit) {
 		super(workers);
-		this.service = service;
+		this.service = endpoint;
 		this.limit = limit;
 	}
 
