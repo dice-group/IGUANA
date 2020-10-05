@@ -57,8 +57,9 @@ public class NTFileStorage extends TripleBasedStorage {
 	 */
 	@Override
 	public void commit() {
-        try (OutputStream os = new FileOutputStream(file.toString())) {
+        try (OutputStream os = new FileOutputStream(file.toString(), true)) {
 			RDFDataMgr.write(os, metricResults, RDFFormat.NTRIPLES);
+			metricResults.removeAll();
 		} catch (IOException e) {
 			LOGGER.error("Could not commit to NTFileStorage.", e);
 		}
