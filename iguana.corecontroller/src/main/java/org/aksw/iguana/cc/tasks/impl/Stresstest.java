@@ -124,12 +124,12 @@ public class Stresstest extends AbstractTask {
 	private int createWorkers(ArrayList<HashMap> workers, List<Worker> workersToAddTo, Double timeLimit){
 		int noOfWorkers=0;
 		for(HashMap workerConfig : workers){
-			noOfWorkers += createWorker(workerConfig, workersToAddTo, timeLimit);
+			noOfWorkers += createWorker(workerConfig, workersToAddTo, timeLimit, noOfWorkers);
 		}
 		return noOfWorkers;
 	}
 
-	private int createWorker(HashMap workerConfig, List<Worker> workersToAddTo, Double timeLimit) {
+	private int createWorker(HashMap workerConfig, List<Worker> workersToAddTo, Double timeLimit, Integer baseID) {
 		//let TypedFactory create from className and configuration
 		String className = workerConfig.remove("className").toString();
 		//if shorthand classname is used, exchange to full classname
@@ -139,7 +139,7 @@ public class Stresstest extends AbstractTask {
 		if(timeLimit!=null)
 			workerConfig.put("timeLimit", timeLimit.intValue());
 		for(int i=0;i<threads;i++) {
-			workerConfig.put("workerID", i);
+			workerConfig.put("workerID", baseID+i);
 			Worker worker = new WorkerFactory().create(className, workerConfig);
 			workersToAddTo.add(worker);
 		}
