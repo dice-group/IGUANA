@@ -1,2 +1,2 @@
 #!/bin/bash
-java "$IGUANA_JVM" -jar iguana.corecontroller-3.0.1.jar "$1"
+java "$IGUANA_JVM" -jar iguana.corecontroller-3.0.2.jar "$1"
