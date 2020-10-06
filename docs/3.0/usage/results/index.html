@@ -93,6 +93,12 @@
                     </li>
                     <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Benchmark Results</a>
     <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#fundamentals">Fundamentals</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sparql-query-statistics">SPARQL Query statistics</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ontology">Ontology</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#adding-lsq-analyzation">Adding LSQ analyzation</a>
     </li>
     </ul>
@@ -175,7 +181,98 @@
               
                 <h1 id="experiment-results">Experiment Results</h1>
 <p><img src = "../../images/iguana-result-schema.png" alt = "IGUANA result schema" style="width: 100%;"/></p>
-<p>TODO: exaplain results </p>
+<h2 id="fundamentals">Fundamentals</h2>
+<p>The results are saved into RDF. 
+For those who don't know what RDF is, it is best described as a way to represent a directed graph. 
+The according query language is called SPARQL. 
+The graph schema of an iguana result is shown above, where as each node represents a class object containg several annotations.</p>
+<p>To retrieve all TaskIDs you can do the following:</p>
+<pre><code class="sparql">PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+
+SELECT ?taskID {
+    ?suiteID rdf:type iont:Suite . 
+    ?suiteID iprop:experiment ?expID .
+    ?expID iprop:task ?taskID .
+}
+</code></pre>
+
+<p>Let's look at an example to clarify how to request the global NoQ metric for a taskID you already know.
+Let's assume the taskID is <code>123/1/1</code></p>
+<pre><code class="sparql">PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+
+SELECT ?noq {
+    ires:123/1/1 iprop:NoQ ?noq
+}
+</code></pre>
+
+<p>If you want to get all the local worker NoQ metrics do the following:</p>
+<pre><code class="sparql">PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+
+SELECT ?workerID ?noq {
+    ires:123/1/1 iprop:workerResult ?workerID
+    ?workerID iprop:NoQ ?noq
+}
+</code></pre>
+
+<p>However if you just want to see the global NoQ metric for all taskIDs in your results do the following:</p>
+<pre><code class="sparql">PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+
+SELECT ?taskID ?noq {
+    ?suiteID rdf:type iont:Suite . 
+    ?suiteID iprop:experiment ?expID .
+    ?expID iprop:task ?taskID .
+    ?taskID iprop:NoQ ?noq.
+}
+</code></pre>
+
+<p>Instead of the NoQ metric you can do this for all other metrics, except <code>QPS</code>.</p>
+<p>To retrieve <code>QPS</code> look above in the results schema and let's look at an example. Let's assume the taskID is <code>123/1/1</code> again.
+You can retrieve the global qps values (seen above in ExecutedQueries, e.g <code>QPS</code>, <code>succeeded</code> etc.) as follows,</p>
+<pre><code class="sparql">PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+
+SELECT ?executedQuery ?qps ?failed ?resultSize {
+    ires:123/1/1 iprop:query ?executedQuery .
+    ?executedQuery iprop:QPS ?qps.
+    ?executedQuery iprop:failed ?failed .
+    ?executedQuery iprop:resultSize ?resultSize .
+}
+</code></pre>
+
+<p>This will get you the QPS value, the no. of failed queries and the result size of the query.</p>
+<h2 id="sparql-query-statistics">SPARQL Query statistics</h2>
+<p>If you were using SPARQL queries as your benchmark queries you can add addtional further statistics of a query, such as: does the query has a FILTER.</p>
+<pre><code class="sparql">PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+
+SELECT ?executedQuery ?qps ?hasFilter ?queryText {
+    ires:123/1/1 iprop:query ?executedQuery .
+    ?executedQuery iprop:QPS ?qps.
+    ?executedQuery iprop:queryID ?query .
+    ?query iprop:filter ?hasFilter .
+    ?query rdfs:label ?queryText .
+}
+</code></pre>
+
+<p>This provides the qps value, if the SPARQL query has a filter and the actual query string. </p>
+<h2 id="ontology">Ontology</h2>
 <p>The results ontology (description of what each property and class means) can be found <a href="http://iguana-benchmark.eu/ontology/3.0.0/iguana.owl">here</a></p>
 <h2 id="adding-lsq-analyzation">Adding LSQ analyzation</h2>
 <p>If you're using SPARQL and want some more indepth analysation of the query statistics, you can use <a href="https://github.com/AKSW/LSQ">LSQ</a> to do so. 

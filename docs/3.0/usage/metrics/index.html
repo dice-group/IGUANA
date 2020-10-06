@@ -195,6 +195,17 @@ Hence you can just analyze the overall metrics or if you want to look closer, yo
 <h2 id="qps">QPS</h2>
 <p>For each query the <code>queries per second</code>, the <code>total time</code> in ms (summed up time of each execution), the no of <code>succeeded</code> and <code>failed</code> executions and the <code>result size</code> will be saved.
 Additionaly will try to tell how many times a query failed with what reason. (<code>timeout</code>, <code>wrong return code</code> e.g. 400, or <code>unknown</code>)</p>
+<p>Further on the QPS  metrics provides a penalized QPS which penalizes queries which will fail. 
+As some systems who cannot resolve a query just returns an error code and thus can have a very high score, even though they could only handle a few queries it would be rather unfair to the compared systems. Thus we introduced the penalty QPS. It is calculated the same as the QPS score, but for each failed query it uses the penalty instead of the actual time the failed query took.</p>
+<p>The default is set to the timeOut of the task. 
+However you can override it as follows:</p>
+<pre><code class="yaml">metrics:
+  - className: &quot;QPS&quot;
+    configuration:
+      #in MS
+      penality: 10000
+</code></pre>
+
 <h2 id="avgqps">AvgQPS</h2>
 <p>The average of all queries per second.</p>
 <h2 id="eachquery">EachQuery</h2>
