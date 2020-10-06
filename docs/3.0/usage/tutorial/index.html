@@ -108,6 +108,20 @@
     <li class="toctree-l2"><a class="reference internal" href="#benchmark-queries">Benchmark queries</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#creating-the-benchmark-configuration">Creating the Benchmark Configuration</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#datasets">Datasets</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#connections">Connections</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#task-script-hooks">Task script hooks</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#task-configuration">Task configuration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#result-storage">Result Storage</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#full-configuration">Full configuration</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#starting-benchmark">Starting Benchmark</a>
     </li>
@@ -231,6 +245,7 @@ The ISWC 2010 and the ekaw 2012 rich dataset.</p>
 cd datasets
 wget http://www.scholarlydata.org/dumps/conferences/alignments/iswc-2010-complete-alignments.rdf
 wget http://www.scholarlydata.org/dumps/conferences/alignments/ekaw-2012-complete-alignments.rdf
+cd ..
 </code></pre>
 
 <p>That's it.
@@ -309,7 +324,69 @@ SELECT * {?s &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; ?o}
 
 <p>save this to <code>queries.txt</code></p>
 <h2 id="creating-the-benchmark-configuration">Creating the Benchmark Configuration</h2>
-<p>Now let's create the Iguana benchmark configuration.</p>
+<p>Now let's create the Iguana benchmark configuration.
+Create a file called <code>benchmark-suite.yml</code></p>
+<pre><code class="bash">touch benchmark-suite.yml
+</code></pre>
+
+<p>Add the following subscections to this file, or simply go to <a href="full-configuration">#Full Configuration</a> and add the whole piece to it.</p>
+<p>Be aware that the configuration will be started on directory level below our working directory and thus paths will use <code>../</code> to get the correct path.</p>
+<h3 id="datasets">Datasets</h3>
+<p>We have two datasets, the ekaw 2012 and the iswc 2010 datasets.
+Let's name them as such and set the file path, s.t. the script hooks can use the file paths. </p>
+<pre><code class="yaml">datasets:
+  - name: &quot;ekaw-2012&quot;
+    file: &quot;../datasets/ekaw-2012-complete-alignments.rdf&quot;
+  - name: &quot;iswc-2010&quot;
+    file: &quot;../datasets/iswc-2010-complete-alignments.rdf&quot;
+</code></pre>
+
+<h3 id="connections">Connections</h3>
+<p>We have two connections, blazegraph and fuseki with their respective endpoint at them as following:</p>
+<pre><code class="yaml">connections:
+  - name: &quot;blazegraph&quot;
+    endpoint: &quot;http://localhost:9999/blazegraph/sparql&quot;
+  - name: &quot;fuseki&quot;
+    endpoint: &quot;http://localhost:3030/ds/sparql&quot;
+</code></pre>
+
+<h3 id="task-script-hooks">Task script hooks</h3>
+<p>To assure that the correct triple store will be loaded with the correct dataset add the following pre script hook <code>../{{connection}}/load-and-start.sh {{dataset.file}}</code>
+<code>{{connection}}</code> will be set to the current benchmarked connection name (e.g. <code>fuseki</code>) and the <code>{{dataset.file}}</code> will be set to the current dataset file path. </p>
+<p>For example the start script of fuseki is located at <code>fuseki/load-and-start.sh</code>. </p>
+<p>Further on add the <code>stop.sh</code> script as the post-script hook, assuring that the store will be stopped after each task</p>
+<p>This will look like this:</p>
+<pre><code class="yaml">pre-script-hook: &quot;../{{connection}}/load-and-start.sh {{dataset.file}}&quot;
+post-script-hook: &quot;../{{connection}}/stop.sh
+</code></pre>
+
+<h3 id="task-configuration">Task configuration</h3>
+<p>We want to stresstest our stores using 10 minutes (60.000 ms)for each dataset connection pair. 
+We are using plain text queries (<code>InstancesQueryHandler</code>) and want to have two simulated users querying SPARQL queries. 
+The queries file is located at our working directory at <code>queries.txt</code>. Be aware that we start Iguana one level below, which makes the correct path <code>../queries.txt</code></p>
+<p>To achieve this restrictions add the following to your file</p>
+<pre><code class="yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      timeLimit: 600000
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 2
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;../queries.txt&quot;      
+</code></pre>
+
+<h3 id="result-storage">Result Storage</h3>
+<p>Let's put the results as an NTriple file and for smootheness of this tutorial let's put it into the file <code>my-first-iguana-results.nt</code> </p>
+<p>Add the following to do this.</p>
+<pre><code class="yaml">storages:
+  - className: &quot;NTFileStorage&quot;
+    configuration:
+      fileName: &quot;my-first-iguana-results.nt&quot;
+</code></pre>
+
+<h3 id="full-configuration">Full configuration</h3>
 <pre><code class="yaml">datasets:
   - name: &quot;ekaw-2012&quot;
     file: &quot;../datasets/ekaw-2012-complete-alignments.rdf&quot;
