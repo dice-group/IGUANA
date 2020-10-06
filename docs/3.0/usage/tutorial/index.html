@@ -98,8 +98,16 @@
     <li class="toctree-l2"><a class="reference internal" href="#download">Download</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#setting-up-systems">Setting Up Systems</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#blazegraph">Blazegraph</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#creating-benchmark-configuration">Creating Benchmark Configuration</a>
+    <li class="toctree-l3"><a class="reference internal" href="#fuseki">Fuseki</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#benchmark-queries">Benchmark queries</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#creating-the-benchmark-configuration">Creating the Benchmark Configuration</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#starting-benchmark">Starting Benchmark</a>
     </li>
@@ -182,11 +190,197 @@
             <div class="section">
               
                 <h1 id="tutorial">Tutorial</h1>
+<p>In this tutorial we will go through one benchmark using two systems, two datasets and one Stresstest. </p>
+<p>We are using the following</p>
+<ul>
+<li>Iguana v3.0.2</li>
+<li>Apache Jena Fuseki 3</li>
+<li>Blazegraph</li>
+</ul>
 <h2 id="download">Download</h2>
+<p>First lets create a working directory</p>
+<pre><code class="bash">mkdir myBenchmark
+cd myBenchmark
+</code></pre>
+
+<p>Now let's download all required systems and Iguana. </p>
+<p>Starting with Iguana</p>
+<pre><code class="bash">wget https://github.com/dice-group/IGUANA/releases/download/v3.0.2/iguana-3.0.2.zip
+unzip iguana-3.0.2.zip
+</code></pre>
+
+<p>Now we will download Blazegraph</p>
+<pre><code class="bash">mkdir blazegraph &amp;&amp; cd blazegraph 
+wget https://downloads.sourceforge.net/project/bigdata/bigdata/2.1.5/blazegraph.jar?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fbigdata%2Ffiles%2Fbigdata%2F2.1.5%2Fblazegraph.jar%2Fdownload%3Fuse_mirror%3Dmaster%26r%3Dhttps%253A%252F%252Fwww.blazegraph.com%252Fdownload%252F%26use_mirror%3Dnetix&amp;ts=1602007009
+cd ../
+</code></pre>
+
+<p>At last we just need to download Apache Jena Fuseki and Apache Jena</p>
+<pre><code class="bash">mkdir fuseki &amp;&amp; cd fuseki
+wget https://downloads.apache.org/jena/binaries/apache-jena-3.16.0.zip
+unzip apache-jena-3.16.0.zip
+
+wget https://downloads.apache.org/jena/binaries/apache-jena-fuseki-3.16.0.zip
+unzip apache-jena-fuseki-3.16.0.zip
+</code></pre>
+
+<p>Finally we have to download our datasets. 
+We use two small datasets from scholarly data. 
+The ISWC 2010 and the ekaw 2012 rich dataset.</p>
+<pre><code>mkdir datasets/
+cd datasets
+wget http://www.scholarlydata.org/dumps/conferences/alignments/iswc-2010-complete-alignments.rdf
+wget http://www.scholarlydata.org/dumps/conferences/alignments/ekaw-2012-complete-alignments.rdf
+</code></pre>
+
+<p>That's it.
+Let's setup blazegraph and fuseki.</p>
 <h2 id="setting-up-systems">Setting Up Systems</h2>
-<h2 id="creating-benchmark-configuration">Creating Benchmark Configuration</h2>
+<p>To simplify the benchmark workflow we will use the pre and post script hook, in which we will load the current system and after the benchmark stop the system.</p>
+<h3 id="blazegraph">Blazegraph</h3>
+<p>First let's create the script files</p>
+<pre><code class="bash">cd blazegraph
+touch load-and-start.sh 
+touch stop.sh
+</code></pre>
+
+<p>The <code>load-and-start.sh</code> script will start blazegraph and use curl to POST our dataset. 
+In our case the datasets are pretty small, hence the loading time is minimal. 
+Otherwise it would be wise to load the dataset beforehand, backup the <code>blazegraph.jnl</code> file and simply exchanging the file in the pre script hook.</p>
+<p>For now put this into the script <code>load-and-start.sh</code></p>
+<pre><code class="bash">#starting blazegraph with 4 GB ram
+cd ../blazegraph &amp;&amp; java -Xmx4g -server -jar blazegraph.jar &amp;
+
+#load the dataset file in, which will be set as the first script argument
+curl -X POST H 'Content-Type:application/rdf+xml' --data-binary '@$1' http://localhost:9999/blazegraph/sparql
+</code></pre>
+
+<p>Now edit <code>stop.sh</code> and adding the following:</p>
+<pre><code>pkill -f blazegraph
+</code></pre>
+
+<p>Be aware that this kills all blazegraph instances, so make sure that no other process which includes the word blazegraph is running. </p>
+<p>finally get into the correct working directory again </p>
+<pre><code class="bash">cd ..
+</code></pre>
+
+<h3 id="fuseki">Fuseki</h3>
+<p>Now the same for fuseki:</p>
+<pre><code class="bash">cd fuseki
+touch load-and-start.sh 
+touch stop.sh
+</code></pre>
+
+<p>The <code>load-and-start.sh</code> script will load the dataset into a TDB directory and start fuseki using the directory.</p>
+<p>Edit the script <code>load-and-start.sh</code> as follows</p>
+<pre><code class="bash">cd ../fuseki
+# load the dataset as a tdb directory
+apache-jena-3.16.0/bin/tdbloader2 --loc DB $1
+
+# start fuseki
+apache-jena-fuseki-3.16.0/fuseki-server --loc DB /ds &amp;
+
+</code></pre>
+
+<p>To assure fairness and provide Fuseki with 4GB as well edit <code>apache-jena-fuseki-3.16.0/fuseki-server</code> and go to the last bit exchange the following</p>
+<pre><code>JVM_ARGS=${JVM_ARGS:--Xmx1200M}
+</code></pre>
+
+<p>to </p>
+<pre><code>JVM_ARGS=${JVM_ARGS:--Xmx4G}
+</code></pre>
+
+<p>Now edit <code>stop.sh</code> and adding the following:</p>
+<pre><code>pkill -f fuseki
+</code></pre>
+
+<p>Be aware that this kills all Fuseki instances, so make sure that no other process which includes the word fuseki is running. </p>
+<p>finally get into the correct working directory again </p>
+<pre><code class="bash">cd ..
+</code></pre>
+
+<h2 id="benchmark-queries">Benchmark queries</h2>
+<p>We need some queries to benchmark. </p>
+<p>For now we will just use 3 simple queryies</p>
+<pre><code>SELECT * {?s ?p ?o}
+SELECT * {?s ?p ?o} LIMIT 10
+SELECT * {?s &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; ?o}
+</code></pre>
+
+<p>save this to <code>queries.txt</code></p>
+<h2 id="creating-the-benchmark-configuration">Creating the Benchmark Configuration</h2>
+<p>Now let's create the Iguana benchmark configuration.</p>
+<pre><code class="yaml">datasets:
+  - name: &quot;ekaw-2012&quot;
+    file: &quot;../datasets/ekaw-2012-complete-alignments.rdf&quot;
+  - name: &quot;iswc-2010&quot;
+    file: &quot;../datasets/iswc-2010-complete-alignments.rdf&quot;
+
+connections:
+  - name: &quot;blazegraph&quot;
+    endpoint: &quot;http://localhost:9999/blazegraph/sparql&quot;
+  - name: &quot;fuseki&quot;
+    endpoint: &quot;http://localhost:3030/ds/sparql&quot;
+
+pre-script-hook: &quot;../{{connection}}/load-and-start.sh {{dataset.file}}&quot;
+post-script-hook: &quot;../{{connection}}/stop.sh
+
+tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      timeLimit: 600000
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 2
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;../queries.txt&quot;          
+
+storages:
+  - className: &quot;NTFileStorage&quot;
+    configuration:
+      fileName: &quot;my-first-iguana-results.nt&quot;
+</code></pre>
+
 <h2 id="starting-benchmark">Starting Benchmark</h2>
+<p>Simply use the previous created <code>benchmark-suite.yml</code> and start with</p>
+<pre><code class="bash">cd iguana/
+./start-iguana.sh ../benchmark-suite.yml
+</code></pre>
+
+<p>Now we wait for 40 minutes until the benchmark is finished.</p>
 <h2 id="results">Results</h2>
+<p>As previously shown, our results will be shown in <code>my-first-iguana-results.nt</code>.</p>
+<p>Load this into a triple store of your choice and query for the results you want to use.</p>
+<p>Just use blazegraph for example:</p>
+<pre><code class="bash">cd blazegraph
+../load-and-start.sh ../my-first-iguana-results.nt
+</code></pre>
+
+<p>To query the results go to <code>http://localhost:9999/blazegraph/</code>.</p>
+<p>An example: </p>
+<pre><code>PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+
+SELECT ?taskID ?datasetLabel ?connectionLabel ?noq {
+    ?suiteID rdf:type iont:Suite . 
+    ?suiteID iprop:experiment ?expID .
+    ?expID iprop:dataset ?dataset .
+    ?dataset rdfs:label ?datasetLabel
+    ?expID iprop:task ?taskID .
+    ?taskID iprop:connection ?connection.
+    ?connection rdfs:label ?connectionLabel .
+    ?taskID iprop:NoQ ?noq.
+}
+
+</code></pre>
+
+<p>This will provide a list of all task, naming the dataset, the connection and the no. of queries which were succesfully executed</p>
+<p>We will however not go into detail on how to read the results. 
+This can be read at <a href="../results/">Benchmark Results</a></p>
               
             </div>
           </div>

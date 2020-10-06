@@ -254,6 +254,27 @@ SELECT ?executedQuery ?qps ?failed ?resultSize {
 </code></pre>
 
 <p>This will get you the QPS value, the no. of failed queries and the result size of the query.</p>
+<p>Further on you can show the dataset and connection names. </p>
+<pre><code>PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+
+SELECT ?taskID ?datasetLabel ?connectionLabel ?noq {
+    ?suiteID rdf:type iont:Suite . 
+    ?suiteID iprop:experiment ?expID .
+    ?expID iprop:dataset ?dataset .
+    ?dataset rdfs:label ?datasetLabel
+    ?expID iprop:task ?taskID .
+    ?taskID iprop:connection ?connection.
+    ?connection rdfs:label ?connectionLabel .
+    ?taskID iprop:NoQ ?noq.
+}
+
+</code></pre>
+
+<p>This query will show a table containing for each task, the taskID, the dataset name, the connection name and the no. of queries succesfully executed.</p>
 <h2 id="sparql-query-statistics">SPARQL Query statistics</h2>
 <p>If you were using SPARQL queries as your benchmark queries you can add addtional further statistics of a query, such as: does the query has a FILTER.</p>
 <pre><code class="sparql">PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
