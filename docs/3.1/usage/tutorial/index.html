@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Tutorial - Iguana 3.1 Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+    
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Tutorial";
+    var mkdocs_page_input_path = "usage/tutorial.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+	
+    <link  rel="stylesheet" href="../../css/custom.css"></link>
+ 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-179945559-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-179945559-1');
+</script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search" style="background-color: #82BDC3 !important;">
+        <img src="../../images/Iguana_new_logo6.png" class="iguana-icon"/>
+        <a href="../.."> Iguana 3.1 Documentation</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> General</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../about/">About</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../architecture/">Architecture</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> Quick Start Guide</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../download/">Download</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../quick-config/">Quick Configuration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../run-iguana/">Run Iguana</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul class="current"> 
+        <p  class="fa fa-caret-right  ddButton caption   active  currentSite"><span class="caption-text"> Usage</span>
+ 	<ul class="dd-container  active">
+                    <li class="toctree-l1"><a class="reference internal " href="../workflow/">Workflow</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../configuration/">Configuration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../stresstest/">Stresstest</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../workers/">Supported Workers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../queries/">Supported Queries</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../languages/">Supported Languages</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../metrics/">Metrics</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../results/">Benchmark Results</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Tutorial</a>
+    <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#download">Download</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#setting-up-systems">Setting Up Systems</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#blazegraph">Blazegraph</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fuseki">Fuseki</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#benchmark-queries">Benchmark queries</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#creating-the-benchmark-configuration">Creating the Benchmark Configuration</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#datasets">Datasets</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#connections">Connections</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#task-script-hooks">Task script hooks</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#task-configuration">Task configuration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#result-storage">Result Storage</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#full-configuration">Full configuration</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#starting-benchmark">Starting Benchmark</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#results">Results</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> Development</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../develop/overview/">Overview</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="#">Extend</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-task/">Tasks</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-workers/">Workers</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-queryhandling/">Query Handling</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-lang/">Languages</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-result-storages/">Result storage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-metrics/">Metrics</a>
+                </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="#">Use Iguana</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/maven/">Maven</a>
+                </li>
+                <li class="toctree-l2"><a class="" href="http://iguana-benchmark.eu/javadoc/3.x/index.html">Javadoc</a>
+                </li>
+    </ul>
+                    </li>
+                </ul>
+
+              </ul>
+
+      </div>
+    </div>
+    <div style="height: 2em;"/>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Iguana 3.1 Documentation</a>
+
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Usage &raquo;</li>
+        
+      
+    
+    <li>Tutorial</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="tutorial">Tutorial</h1>
+<p>In this tutorial we will go through one benchmark using two systems, two datasets and one Stresstest. </p>
+<p>We are using the following</p>
+<ul>
+<li>Iguana v3.0.2</li>
+<li>Apache Jena Fuseki 3</li>
+<li>Blazegraph</li>
+</ul>
+<h2 id="download">Download</h2>
+<p>First lets create a working directory</p>
+<pre><code class="bash">mkdir myBenchmark
+cd myBenchmark
+</code></pre>
+
+<p>Now let's download all required systems and Iguana. </p>
+<p>Starting with Iguana</p>
+<pre><code class="bash">wget https://github.com/dice-group/IGUANA/releases/download/v3.0.2/iguana-3.0.2.zip
+unzip iguana-3.0.2.zip
+</code></pre>
+
+<p>Now we will download Blazegraph</p>
+<pre><code class="bash">mkdir blazegraph &amp;&amp; cd blazegraph 
+wget https://downloads.sourceforge.net/project/bigdata/bigdata/2.1.5/blazegraph.jar?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fbigdata%2Ffiles%2Fbigdata%2F2.1.5%2Fblazegraph.jar%2Fdownload%3Fuse_mirror%3Dmaster%26r%3Dhttps%253A%252F%252Fwww.blazegraph.com%252Fdownload%252F%26use_mirror%3Dnetix&amp;ts=1602007009
+cd ../
+</code></pre>
+
+<p>At last we just need to download Apache Jena Fuseki and Apache Jena</p>
+<pre><code class="bash">mkdir fuseki &amp;&amp; cd fuseki
+wget https://downloads.apache.org/jena/binaries/apache-jena-3.16.0.zip
+unzip apache-jena-3.16.0.zip
+
+wget https://downloads.apache.org/jena/binaries/apache-jena-fuseki-3.16.0.zip
+unzip apache-jena-fuseki-3.16.0.zip
+</code></pre>
+
+<p>Finally we have to download our datasets. 
+We use two small datasets from scholarly data. 
+The ISWC 2010 and the ekaw 2012 rich dataset.</p>
+<pre><code>mkdir datasets/
+cd datasets
+wget http://www.scholarlydata.org/dumps/conferences/alignments/iswc-2010-complete-alignments.rdf
+wget http://www.scholarlydata.org/dumps/conferences/alignments/ekaw-2012-complete-alignments.rdf
+cd ..
+</code></pre>
+
+<p>That's it.
+Let's setup blazegraph and fuseki.</p>
+<h2 id="setting-up-systems">Setting Up Systems</h2>
+<p>To simplify the benchmark workflow we will use the pre and post script hook, in which we will load the current system and after the benchmark stop the system.</p>
+<h3 id="blazegraph">Blazegraph</h3>
+<p>First let's create the script files</p>
+<pre><code class="bash">cd blazegraph
+touch load-and-start.sh 
+touch stop.sh
+</code></pre>
+
+<p>The <code>load-and-start.sh</code> script will start blazegraph and use curl to POST our dataset. 
+In our case the datasets are pretty small, hence the loading time is minimal. 
+Otherwise it would be wise to load the dataset beforehand, backup the <code>blazegraph.jnl</code> file and simply exchanging the file in the pre script hook.</p>
+<p>For now put this into the script <code>load-and-start.sh</code></p>
+<pre><code class="bash">#starting blazegraph with 4 GB ram
+cd ../blazegraph &amp;&amp; java -Xmx4g -server -jar blazegraph.jar &amp;
+
+#load the dataset file in, which will be set as the first script argument
+curl -X POST H 'Content-Type:application/rdf+xml' --data-binary '@$1' http://localhost:9999/blazegraph/sparql
+</code></pre>
+
+<p>Now edit <code>stop.sh</code> and adding the following:</p>
+<pre><code>pkill -f blazegraph
+</code></pre>
+
+<p>Be aware that this kills all blazegraph instances, so make sure that no other process which includes the word blazegraph is running. </p>
+<p>finally get into the correct working directory again </p>
+<pre><code class="bash">cd ..
+</code></pre>
+
+<h3 id="fuseki">Fuseki</h3>
+<p>Now the same for fuseki:</p>
+<pre><code class="bash">cd fuseki
+touch load-and-start.sh 
+touch stop.sh
+</code></pre>
+
+<p>The <code>load-and-start.sh</code> script will load the dataset into a TDB directory and start fuseki using the directory.</p>
+<p>Edit the script <code>load-and-start.sh</code> as follows</p>
+<pre><code class="bash">cd ../fuseki
+# load the dataset as a tdb directory
+apache-jena-3.16.0/bin/tdbloader2 --loc DB $1
+
+# start fuseki
+apache-jena-fuseki-3.16.0/fuseki-server --loc DB /ds &amp;
+
+</code></pre>
+
+<p>To assure fairness and provide Fuseki with 4GB as well edit <code>apache-jena-fuseki-3.16.0/fuseki-server</code> and go to the last bit exchange the following</p>
+<pre><code>JVM_ARGS=${JVM_ARGS:--Xmx1200M}
+</code></pre>
+
+<p>to </p>
+<pre><code>JVM_ARGS=${JVM_ARGS:--Xmx4G}
+</code></pre>
+
+<p>Now edit <code>stop.sh</code> and adding the following:</p>
+<pre><code>pkill -f fuseki
+</code></pre>
+
+<p>Be aware that this kills all Fuseki instances, so make sure that no other process which includes the word fuseki is running. </p>
+<p>finally get into the correct working directory again </p>
+<pre><code class="bash">cd ..
+</code></pre>
+
+<h2 id="benchmark-queries">Benchmark queries</h2>
+<p>We need some queries to benchmark. </p>
+<p>For now we will just use 3 simple queryies</p>
+<pre><code>SELECT * {?s ?p ?o}
+SELECT * {?s ?p ?o} LIMIT 10
+SELECT * {?s &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; ?o}
+</code></pre>
+
+<p>save this to <code>queries.txt</code></p>
+<h2 id="creating-the-benchmark-configuration">Creating the Benchmark Configuration</h2>
+<p>Now let's create the Iguana benchmark configuration.
+Create a file called <code>benchmark-suite.yml</code></p>
+<pre><code class="bash">touch benchmark-suite.yml
+</code></pre>
+
+<p>Add the following subscections to this file, or simply go to <a href="full-configuration">#Full Configuration</a> and add the whole piece to it.</p>
+<p>Be aware that the configuration will be started on directory level below our working directory and thus paths will use <code>../</code> to get the correct path.</p>
+<h3 id="datasets">Datasets</h3>
+<p>We have two datasets, the ekaw 2012 and the iswc 2010 datasets.
+Let's name them as such and set the file path, s.t. the script hooks can use the file paths. </p>
+<pre><code class="yaml">datasets:
+  - name: &quot;ekaw-2012&quot;
+    file: &quot;../datasets/ekaw-2012-complete-alignments.rdf&quot;
+  - name: &quot;iswc-2010&quot;
+    file: &quot;../datasets/iswc-2010-complete-alignments.rdf&quot;
+</code></pre>
+
+<h3 id="connections">Connections</h3>
+<p>We have two connections, blazegraph and fuseki with their respective endpoint at them as following:</p>
+<pre><code class="yaml">connections:
+  - name: &quot;blazegraph&quot;
+    endpoint: &quot;http://localhost:9999/blazegraph/sparql&quot;
+  - name: &quot;fuseki&quot;
+    endpoint: &quot;http://localhost:3030/ds/sparql&quot;
+</code></pre>
+
+<h3 id="task-script-hooks">Task script hooks</h3>
+<p>To assure that the correct triple store will be loaded with the correct dataset add the following pre script hook <code>../{{connection}}/load-and-start.sh {{dataset.file}}</code>
+<code>{{connection}}</code> will be set to the current benchmarked connection name (e.g. <code>fuseki</code>) and the <code>{{dataset.file}}</code> will be set to the current dataset file path. </p>
+<p>For example the start script of fuseki is located at <code>fuseki/load-and-start.sh</code>. </p>
+<p>Further on add the <code>stop.sh</code> script as the post-script hook, assuring that the store will be stopped after each task</p>
+<p>This will look like this:</p>
+<pre><code class="yaml">pre-script-hook: &quot;../{{connection}}/load-and-start.sh {{dataset.file}}&quot;
+post-script-hook: &quot;../{{connection}}/stop.sh
+</code></pre>
+
+<h3 id="task-configuration">Task configuration</h3>
+<p>We want to stresstest our stores using 10 minutes (60.000 ms)for each dataset connection pair. 
+We are using plain text queries (<code>InstancesQueryHandler</code>) and want to have two simulated users querying SPARQL queries. 
+The queries file is located at our working directory at <code>queries.txt</code>. Be aware that we start Iguana one level below, which makes the correct path <code>../queries.txt</code></p>
+<p>To achieve this restrictions add the following to your file</p>
+<pre><code class="yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      timeLimit: 600000
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 2
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;../queries.txt&quot;      
+</code></pre>
+
+<h3 id="result-storage">Result Storage</h3>
+<p>Let's put the results as an NTriple file and for smootheness of this tutorial let's put it into the file <code>my-first-iguana-results.nt</code> </p>
+<p>Add the following to do this.</p>
+<pre><code class="yaml">storages:
+  - className: &quot;NTFileStorage&quot;
+    configuration:
+      fileName: &quot;my-first-iguana-results.nt&quot;
+</code></pre>
+
+<h3 id="full-configuration">Full configuration</h3>
+<pre><code class="yaml">datasets:
+  - name: &quot;ekaw-2012&quot;
+    file: &quot;../datasets/ekaw-2012-complete-alignments.rdf&quot;
+  - name: &quot;iswc-2010&quot;
+    file: &quot;../datasets/iswc-2010-complete-alignments.rdf&quot;
+
+connections:
+  - name: &quot;blazegraph&quot;
+    endpoint: &quot;http://localhost:9999/blazegraph/sparql&quot;
+  - name: &quot;fuseki&quot;
+    endpoint: &quot;http://localhost:3030/ds/sparql&quot;
+
+pre-script-hook: &quot;../{{connection}}/load-and-start.sh {{dataset.file}}&quot;
+post-script-hook: &quot;../{{connection}}/stop.sh
+
+tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      timeLimit: 600000
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 2
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;../queries.txt&quot;          
+
+storages:
+  - className: &quot;NTFileStorage&quot;
+    configuration:
+      fileName: &quot;my-first-iguana-results.nt&quot;
+</code></pre>
+
+<h2 id="starting-benchmark">Starting Benchmark</h2>
+<p>Simply use the previous created <code>benchmark-suite.yml</code> and start with</p>
+<pre><code class="bash">cd iguana/
+./start-iguana.sh ../benchmark-suite.yml
+</code></pre>
+
+<p>Now we wait for 40 minutes until the benchmark is finished.</p>
+<h2 id="results">Results</h2>
+<p>As previously shown, our results will be shown in <code>my-first-iguana-results.nt</code>.</p>
+<p>Load this into a triple store of your choice and query for the results you want to use.</p>
+<p>Just use blazegraph for example:</p>
+<pre><code class="bash">cd blazegraph
+../load-and-start.sh ../my-first-iguana-results.nt
+</code></pre>
+
+<p>To query the results go to <code>http://localhost:9999/blazegraph/</code>.</p>
+<p>An example: </p>
+<pre><code>PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX iprop: &lt;http://iguana-benchmark.eu/properties/&gt;
+PREFIX iont: &lt;http://iguana-benchmark.eu/class/&gt;
+PREFIX ires: &lt;http://iguana-benchmark.eu/resource/&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+
+SELECT ?taskID ?datasetLabel ?connectionLabel ?noq {
+    ?suiteID rdf:type iont:Suite . 
+    ?suiteID iprop:experiment ?expID .
+    ?expID iprop:dataset ?dataset .
+    ?dataset rdfs:label ?datasetLabel
+    ?expID iprop:task ?taskID .
+    ?taskID iprop:connection ?connection.
+    ?connection rdfs:label ?connectionLabel .
+    ?taskID iprop:NoQ ?noq.
+}
+
+</code></pre>
+
+<p>This will provide a list of all task, naming the dataset, the connection and the no. of queries which were succesfully executed</p>
+<p>We will however not go into detail on how to read the results. 
+This can be read at <a href="../results/">Benchmark Results</a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../develop/overview/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../results/" class="btn btn-neutral" title="Benchmark Results"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+    <ul>
+	<li>
+ 	 <a class="icon icon-github" href="https://github.com/dice-group/Iguana" > Visit us at Github</a>
+	</li>
+        <li>
+	 <a class="icon fa-download" href="https://github.com/dice-group/Iguana/releases/latest" > Download latest Release</a>
+ 	</li>
+    </ul>
+  <div>
+  </br></br>
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../results/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../../develop/overview/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+           SphinxRtdTheme.Navigation.enable(true);
+    
+}	
+var dropdown = document.getElementsByClassName("ddButton");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  if (!dropdown[i].classList.contains("active")){
+	  dropdown[i].nextSibling.style.display = "none";
+	  dropdown[i].classList.remove("fa-caret-down");
+	  dropdown[i].classList.add("fa-caret-right");
+  }
+  else{
+  	  dropdown[i].classList.remove("fa-caret-right");
+	  dropdown[i].classList.add("fa-caret-down");
+  }
+  
+  dropdown[i].addEventListener("click", function() {
+  this.classList.toggle("active");
+  
+  if (this.classList.contains("currentSite")){
+  	return;
+  }
+  var dropdownContent = this.nextElementSibling;
+  if (dropdownContent.style.display === "block") {
+     dropdownContent.style.display = "none";   
+     this.classList.remove("fa-caret-down");
+     this.classList.add("fa-caret-right");
+     //this.classList.remove("active"):
+  } else {
+     dropdownContent.style.display = "block";
+     this.classList.remove("fa-caret-right");
+     this.classList.add("fa-caret-down");
+     //this.classList.add("active"):
+
+  }
+  });
+}
+
+   </script>
+        
+</body>
+</html>
+
