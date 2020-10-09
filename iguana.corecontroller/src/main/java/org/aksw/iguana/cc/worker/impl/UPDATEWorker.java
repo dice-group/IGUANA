@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
+import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.cc.worker.impl.update.UpdateTimer;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
@@ -81,15 +82,15 @@ public class UPDATEWorker extends HttpPostWorker {
 			return;
 		}
 		// get next Query File and next random Query out of it.
-		File currentQueryFile = this.queryFileList[this.currentQueryID++];
+		QuerySet currentQueryFile = this.queryFileList[this.currentQueryID++];
 		queryID.append(currentQueryFile.getName());
 
-		queryStr.append(org.apache.commons.io.FileUtils.readFileToString(currentQueryFile, "UTF-8"));
+		queryStr.append(currentQueryFile.getContent());
 
 	}
 
 	@Override
-	public void setQueriesList(File[] updateFiles) {
+	public void setQueriesList(QuerySet[] updateFiles) {
 		super.setQueriesList(updateFiles);
 	}
 

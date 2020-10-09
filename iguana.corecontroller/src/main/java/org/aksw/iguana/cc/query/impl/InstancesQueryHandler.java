@@ -4,6 +4,9 @@ import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.cc.query.AbstractWorkerQueryHandler;
+import org.aksw.iguana.cc.query.set.QuerySet;
+import org.aksw.iguana.cc.query.set.impl.FileBasedQuerySet;
+import org.aksw.iguana.cc.query.set.impl.InMemQuerySet;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.cc.worker.Worker;
@@ -38,7 +41,7 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 
 	protected SPARQLQueryStatistics qs = new SPARQLQueryStatistics();
 
-	private File[] queryFiles;
+	private QuerySet[] queryFiles;
 
 	protected LanguageProcessor langProcessor = new SPARQLLanguageProcessor();
 	protected int hashcode;
@@ -60,61 +63,38 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	}
 
 	@Override
-	protected File[] generateQueries(String queryFileName) {
+	protected QuerySet[] generateQueries(String queryFileName) {
 		// Save hashcode of the file content for later use in generating stats
 		hashcode = FileUtils.getHashcodeFromFileContent(queryFileName);
 
-		File[] queries = generateQueryPerLine(queryFileName, langProcessor.getQueryPrefix(), hashcode);
+		QuerySet[] queries = generateQueryPerLine(queryFileName, langProcessor.getQueryPrefix(), hashcode);
 		this.queryFiles = queries;
 
 
 		return queries;
 	}
 
-	protected File[] generateQueryPerLine(String queryFileName, String idPrefix, int hashcode) {
+	protected QuerySet[] generateQueryPerLine(String queryFileName, String idPrefix, int hashcode) {
 		File queryFile = new File(queryFileName);
-		List<File> ret = new LinkedList<File>();
-		// check if folder is cached
-		if (queryFile.exists()) {
-			File outputFolder = new File(this.outputFolder + File.separator + hashcode);
-			if (outputFolder.exists()) {
-				LOGGER.warn("[QueryHandler: {{}}] queries were instantiated already, will use old instances. To generate them new remove the {{}} folder",
-						this.getClass().getName(), this.outputFolder + File.separator + hashcode);
-				// is cached use caching
-				return outputFolder.listFiles();
-			} else {
-				LOGGER.info("[QueryHandler: {{}}] Queries will now be instantiated", this.getClass().getName());
-				// create directorys
-				outputFolder.mkdirs();
-				try (BufferedReader reader = new BufferedReader(new FileReader(queryFileName))) {
-					String queryStr;
-					// iterate over all queries
-					while ((queryStr = reader.readLine()) != null) {
-						if (queryStr.isEmpty()) {
-							continue;
-						}
-						//create file with id and write query to it
-						File out = createFileWithID(outputFolder, idPrefix);
-						try (PrintWriter pw = new PrintWriter(out)) {
-							for (String query : getInstances(queryStr)) {
-								pw.println(query);
-							}
-						}
-						ret.add(out);
+		List<QuerySet> ret = new LinkedList<QuerySet>();
+		LOGGER.info("[QueryHandler: {{}}] Queries will now be instantiated", this.getClass().getName());
 
-					}
-				} catch (IOException e) {
-					LOGGER.error("[QueryHandler: {{}}] could not write instances to folder {{}}",
-							this.getClass().getName(), outputFolder.getAbsolutePath());
+		try (BufferedReader reader = new BufferedReader(new FileReader(queryFileName))) {
+			String queryStr;
+			int id=0;
+			while ((queryStr = reader.readLine()) != null) {
+				if (queryStr.isEmpty()) {
+					continue;
 				}
-				LOGGER.info("[QueryHandler: {{}}] Finished instantiation of queries", this.getClass().getName());
+				ret.add(new InMemQuerySet(idPrefix+id++, getInstances(queryStr)));
+
 			}
-			return ret.toArray(new File[] {});
-		} else {
-			LOGGER.error("[QueryHandler: {{}}] Queries with file {{}} could not be instantiated due to missing file",
-					this.getClass().getName(), queryFileName);
+		} catch (IOException e) {
+			LOGGER.error("could not read queries");
 		}
-		return new File[] {};
+		LOGGER.info("[QueryHandler: {{}}] Finished instantiation of queries", this.getClass().getName());
+		return ret.toArray(new QuerySet[]{});
+
 	}
 
 	protected List<String> getInstances(String queryStr) {
@@ -136,36 +116,68 @@ public class InstancesQueryHandler extends AbstractWorkerQueryHandler {
 	}
 
 	@Override
-	protected File[] generateUPDATE(String updatePath) {
+	protected QuerySet[] generateUPDATE(String updatePath) {
 		File dir = new File(updatePath);
 		if (dir.exists()) {
 			if (dir.isDirectory()) {
 				LOGGER.info("[QueryHandler: {{}}] Uses all UPDATE files in {{}}", this.getClass().getName(),
 						updatePath);
 				// dir is directory, get all files in the folder
-				return dir.listFiles();
+				File[] files = dir.listFiles();
+				QuerySet[] sets = new QuerySet[files.length];
+				for(int i=0;i<sets.length;i++){
+					try {
+						sets[i] = new FileBasedQuerySet(files[i]);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				return sets;
 			} else {
 				LOGGER.info("[QueryHandler: {{}}] Uses UPDATE file as Updates Per Line file.",
 						this.getClass().getName());
 				int hashcode = FileUtils.getHashcodeFromFileContent(updatePath);
 
 				// assume is File with update/line use SPARQL approach
-				return generateQueryPerLine(updatePath, "update", hashcode);
+				//TODO
+				return generateUpdatesPerLine(updatePath, "update", hashcode);
 			}
 		} else {
 			// dir must exist log this error, send empty file list back
 			LOGGER.error("[QueryHandler: {{}}] UPDATE path/File {{}} has to exist!", this.getClass().getName(),
 					updatePath);
 		}
-		return new File[] {};
+		return new QuerySet[] {};
+	}
+
+	protected QuerySet[] generateUpdatesPerLine(String updatePath, String idPrefix, int hashcode) {
+		File queryFile = new File(updatePath);
+		List<QuerySet> ret = new LinkedList<QuerySet>();
+		LOGGER.info("[QueryHandler: {{}}] Queries will now be instantiated", this.getClass().getName());
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(updatePath))) {
+			String queryStr;
+			int id=0;
+			while ((queryStr = reader.readLine()) != null) {
+				if (queryStr.isEmpty()) {
+					continue;
+				}
+				ret.add(new InMemQuerySet(idPrefix+id++, Lists.newArrayList(queryStr)));
+
+			}
+		} catch (IOException e) {
+			LOGGER.error("could not read queries");
+		}
+		LOGGER.info("[QueryHandler: {{}}] Finished instantiation of queries", this.getClass().getName());
+		return ret.toArray(new QuerySet[]{});
 	}
 
 	@Override
 	public Model generateTripleStats(String taskID) {
 		List<QueryWrapper> queries = new ArrayList<QueryWrapper>();
-		for (File queryFile : queryFiles) {
+		for (QuerySet queryFile : queryFiles) {
 			try {
-				String query = FileUtils.readLineAt(0, queryFile);
+				String query = queryFile.getQueryAtPos(0);
 				queries.add(new QueryWrapper(query, queryFile.getName()));
 			}catch(IOException e){
 				LOGGER.error("[QueryHandler: {{}}] Cannot read file {{}}", this.getClass().getName(),

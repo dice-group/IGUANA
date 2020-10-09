@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.cc.utils.FileUtils;
 
 import java.io.File;
@@ -20,7 +21,7 @@ public abstract class AbstractRandomQueryChooserWorker extends AbstractWorker {
     }
 
     @Override
-    public void setQueriesList(File[] queries) {
+    public void setQueriesList(QuerySet[] queries) {
         super.setQueriesList(queries);
         this.currentQueryID = queryChooser.nextInt(this.queryFileList.length);
     }
@@ -29,12 +30,12 @@ public abstract class AbstractRandomQueryChooserWorker extends AbstractWorker {
     @Override
     public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
         // get next Query File and next random Query out of it.
-        File currentQueryFile = this.queryFileList[this.currentQueryID++];
+        QuerySet currentQueryFile = this.queryFileList[this.currentQueryID++];
         queryID.append(currentQueryFile.getName());
 
-        int queriesInFile = FileUtils.countLines(currentQueryFile);
+        int queriesInFile = currentQueryFile.size();
         int queryLine = queryChooser.nextInt(queriesInFile);
-        queryStr.append(FileUtils.readLineAt(queryLine, currentQueryFile));
+        queryStr.append(currentQueryFile.getQueryAtPos(queryLine));
 
         // If there is no more query(Pattern) start from beginning.
         if (this.currentQueryID >= this.queryFileList.length) {

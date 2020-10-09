@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.worker;
 import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
+import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -72,7 +73,7 @@ public abstract class AbstractWorker implements Worker {
 	/**
 	 * List which contains all Files representing one query(Pattern)
 	 */
-	protected File[] queryFileList;
+	protected QuerySet[] queryFileList;
 
 	protected Double timeLimit;
 
@@ -272,7 +273,7 @@ public abstract class AbstractWorker implements Worker {
 	 * @param queries
 	 *            File containing the query instances.
 	 */
-	public void setQueriesList(File[] queries) {
+	public void setQueriesList(QuerySet[] queries) {
 		this.queryFileList = queries;
 	}
 

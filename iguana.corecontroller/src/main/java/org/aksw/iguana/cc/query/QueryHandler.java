@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.query;
 
+import org.aksw.iguana.cc.query.set.QuerySet;
 import org.apache.jena.rdf.model.Model;
 
 import java.io.File;
@@ -19,7 +20,7 @@ public interface QueryHandler {
 	 * This will generate the queries.
 	 * @return
 	 */
-	Map<String, File[]> generate();
+	Map<String, QuerySet[]> generate();
 
 	/**
 	 * Generates some stats for the queries

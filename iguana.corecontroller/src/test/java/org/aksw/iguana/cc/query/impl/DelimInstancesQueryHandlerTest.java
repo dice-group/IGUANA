@@ -2,7 +2,6 @@ package org.aksw.iguana.cc.query.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.query.set.QuerySet;
-import org.aksw.iguana.cc.query.set.impl.FileBasedQuerySet;
 import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.cc.worker.impl.SPARQLWorker;
 import org.aksw.iguana.cc.worker.impl.UPDATEWorker;
@@ -20,12 +19,12 @@ import java.io.PrintWriter;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
-public class InstancesQueryHandlerTest {
+public class DelimInstancesQueryHandlerTest {
 
     private final boolean isUpdate;
+    private final String delim;
     private String[] queryStr;
     private String dir = UUID.randomUUID().toString();
     private File queriesFile;
@@ -33,16 +32,20 @@ public class InstancesQueryHandlerTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data(){
         Collection<Object[]> testData =  new ArrayList<Object[]>();
-        testData.add(new Object[]{new String[]{"SELECT * {?s ?p ?o}", "doesn't matter", "as long as they are not empty", "the only thing which won't do is the triplestats"}, false});
-        testData.add(new Object[]{new String[]{"SELECT * {?s ?p ?o}", "doesn't matter", "", "the only thing which won't do is the triplestats"}, false});
-        testData.add(new Object[]{new String[]{"UPDATE * {?s ?p ?o}", "UPDATE doesn't matter", "", "UPDATE the only thing which won't do is the triplestats"}, true});
+        testData.add(new Object[]{new String[]{"SELECT * \n{\n?s ?p ?o\n}", "doesn't matter", "as long as they are not empty", "the only thing which won't do is the triplestats"}, false, ""});
+        testData.add(new Object[]{new String[]{"SELECT * {?s ?p ?o}", "doesn't matter", "", "the only thing \nwhich won't do is the triplestats"}, false, ""});
+        testData.add(new Object[]{new String[]{"UPDATE * \n{?s ?p ?o}", "UPDATE \ndoesn't matter", "", "UPDATE\n the only thing which won't do is the triplestats"}, true, ""});
+        testData.add(new Object[]{new String[]{"SELECT * \n{\n?s ?p ?o\n}", "doesn't matter", "as long as they are not empty", "the only thing which won't do is the triplestats"}, false, "###"});
+        testData.add(new Object[]{new String[]{"SELECT * {?s ?p ?o}", "doesn't matter", "", "the only thing \n\nwhich won't do is the triplestats"}, false, "###"});
+        testData.add(new Object[]{new String[]{"UPDATE * \n{?s ?p ?o}", "UPDATE \ndoesn't matter", "", "UPDATE\n\n the only thing which won't do is the triplestats"}, true, "###"});
 
         return testData;
     }
 
-    public InstancesQueryHandlerTest(String[] queryStr, boolean isUpdate){
+    public DelimInstancesQueryHandlerTest(String[] queryStr, boolean isUpdate, String delim){
         this.queryStr = queryStr;
         this.isUpdate=isUpdate;
+        this.delim=delim;
     }
 
     @Before
@@ -55,6 +58,7 @@ public class InstancesQueryHandlerTest {
         try(PrintWriter pw = new PrintWriter(f)){
             for(String query : queryStr) {
                 pw.println(query);
+                pw.println(delim);
             }
         }
         //remove empty lines after printing them, so the expected asserts will correctly assume that the empty limes are ignored
@@ -76,7 +80,6 @@ public class InstancesQueryHandlerTest {
         FileUtils.deleteDirectory(f);
     }
 
-
     @Test
     public void testQueryCreation() throws IOException {
         //Get queries file
@@ -84,7 +87,7 @@ public class InstancesQueryHandlerTest {
         con.setName("a");
         con.setEndpoint("http://test.com");
         Worker worker = getWorker(con, 1, "1");
-        InstancesQueryHandler qh = new InstancesQueryHandler(Lists.newArrayList(worker));
+        DelimInstancesQueryHandler qh = new DelimInstancesQueryHandler(delim, Lists.newArrayList(worker));
         qh.setOutputFolder(this.dir);
         Map<String, QuerySet[]> map = qh.generate();
         List<String> expected = new ArrayList<String>();
@@ -100,7 +103,7 @@ public class InstancesQueryHandlerTest {
         }
         assertEquals(expected.size(), actual.size());
         actual.removeAll(expected);
-        assertEquals(actual.size(),0);
+        assertEquals(0, actual.size());
         assertEquals(queryStr.length, map.get(this.queriesFile.getAbsolutePath()).length);
     }
 
@@ -113,6 +116,5 @@ public class InstancesQueryHandlerTest {
             return new SPARQLWorker(taskID, con, this.queriesFile.getAbsolutePath(), null, null, null, null, null, null, id);
         }
     }
-
 
 }

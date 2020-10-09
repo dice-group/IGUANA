@@ -1,11 +1,14 @@
 package org.aksw.iguana.cc.query.impl;
 
+import org.aksw.iguana.cc.query.set.QuerySet;
+import org.aksw.iguana.cc.query.set.impl.FileBasedQuerySet;
 import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.apache.jena.query.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,6 +102,62 @@ public class PatternQueryHandler extends InstancesQueryHandler {
 			varNames.add(var);
 		}
 		return command;
+	}
+
+
+	@Override
+	protected QuerySet[] generateQueryPerLine(String queryFileName, String idPrefix, int hashcode) {
+		File queryFile = new File(queryFileName);
+		List<QuerySet> ret = new LinkedList<QuerySet>();
+		// check if folder is cached
+		if (queryFile.exists()) {
+			File outputFolder = new File(this.outputFolder + File.separator + hashcode);
+			if (outputFolder.exists()) {
+				LOGGER.warn("[QueryHandler: {{}}] queries were instantiated already, will use old instances. To generate them new remove the {{}} folder",
+						this.getClass().getName(), this.outputFolder + File.separator + hashcode);
+				// is cached use caching
+				for(File f : outputFolder.listFiles()){
+					try {
+						ret.add(new FileBasedQuerySet(f));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				return ret.toArray(new QuerySet[]{});
+			} else {
+				LOGGER.info("[QueryHandler: {{}}] Queries will now be instantiated", this.getClass().getName());
+				// create directorys
+				outputFolder.mkdirs();
+				try (BufferedReader reader = new BufferedReader(new FileReader(queryFileName))) {
+					String queryStr;
+					// iterate over all queries
+					while ((queryStr = reader.readLine()) != null) {
+						if (queryStr.isEmpty()) {
+							continue;
+						}
+						//create file with id and write query to it
+						File out = createFileWithID(outputFolder, idPrefix);
+						try (PrintWriter pw = new PrintWriter(out)) {
+							for (String query : getInstances(queryStr)) {
+								pw.println(query);
+							}
+						}
+						QuerySet qs = new FileBasedQuerySet(out);
+						ret.add(qs);
+
+					}
+				} catch (IOException e) {
+					LOGGER.error("[QueryHandler: {{}}] could not write instances to folder {{}}",
+							this.getClass().getName(), outputFolder.getAbsolutePath());
+				}
+				LOGGER.info("[QueryHandler: {{}}] Finished instantiation of queries", this.getClass().getName());
+			}
+			return ret.toArray(new QuerySet[]{});
+		} else {
+			LOGGER.error("[QueryHandler: {{}}] Queries with file {{}} could not be instantiated due to missing file",
+					this.getClass().getName(), queryFileName);
+		}
+		return new QuerySet[]{};
 	}
 
 	@Override

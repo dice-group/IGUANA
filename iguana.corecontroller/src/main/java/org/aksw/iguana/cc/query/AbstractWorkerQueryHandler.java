@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.query;
 
+import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.cc.worker.AbstractWorker;
 import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.cc.worker.impl.UPDATEWorker;
@@ -23,7 +24,7 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 	 * Will contain the path of the worker specified query files to 
 	 * the Files where the final querys will be saved
 	 */
-	private Map<String, File[]> mapping = new HashMap<String, File[]>();
+	private Map<String, QuerySet[]> mapping = new HashMap<String, QuerySet[]>();
 	private HashSet<String> sparqlKeys = new HashSet<String>();
 	private HashSet<String> updateKeys = new HashSet<String>();
 	private Collection<Worker> workers; 
@@ -44,7 +45,7 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 	}
 	
 	@Override
-	public Map<String, File[]> generate() {
+	public Map<String, QuerySet[]> generate() {
 		for(String sparqlKey : sparqlKeys) {
 			mapping.put(sparqlKey, generateQueries(sparqlKey));
 		}
@@ -66,7 +67,7 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 	 * @param queryFileName The queries file
 	 * @return for each query in the file, a File representing the query
 	 */
-	protected abstract File[] generateQueries(String queryFileName) ;
+	protected abstract QuerySet[] generateQueries(String queryFileName) ;
 
 	/**
 	 * This method will generate UPDATE Queries given a folder with files in which updates are stated.
@@ -74,6 +75,6 @@ public abstract class AbstractWorkerQueryHandler implements QueryHandler{
 	 * @param updatePath The path to the updates
 	 * @return for each update, a File representing it.
 	 */
-	protected abstract File[] generateUPDATE(String updatePath) ;
+	protected abstract QuerySet[] generateUPDATE(String updatePath) ;
 	
 }

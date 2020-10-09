@@ -38,7 +38,7 @@ public class NTFileStorage extends TripleBasedStorage {
 		
 		this.file = new StringBuilder();
 		file.append("results_").append(now.get(Calendar.DAY_OF_MONTH)).append("-")
-			.append(now.get(Calendar.MONTH)).append("-")
+			.append(now.get(Calendar.MONTH)+1).append("-")
 			.append(now.get(Calendar.YEAR)).append("_")
 			.append(now.get(Calendar.HOUR_OF_DAY)).append("-")
 			.append(now.get(Calendar.MINUTE)).append(".nt");
