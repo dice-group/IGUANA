@@ -35,7 +35,7 @@ For further Information visit
 
 [iguana-benchmark.eu](http://iguana-benchmark.eu) 
 
-[Documentation](http://iguana-benchmark.eu/docs/3.0/)
+[Documentation](http://iguana-benchmark.eu/docs/3.1/)
 
 
 # Getting Started
@@ -91,8 +91,8 @@ Please download the release zip **iguana-x.y.z.zip** from the newest release ava
 
 ```
 mkdir iguana
-wget https://github.com/dice-group/IGUANA/releases/download/v3.0.1/iguana-3.0.1.zip
-unzip iguana-3.0.1.zip
+wget https://github.com/dice-group/IGUANA/releases/download/v3.1.0/iguana-3.1.0.zip
+unzip iguana-3.1.0.zip
 ```
 
 
