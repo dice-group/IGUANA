@@ -87,7 +87,7 @@ If you use the [basic configuration](https://github.com/dice-group/IGUANA/blob/m
 # Setup Iguana
 
 ## Download
-Please download the release zip **iguana-x.y.z.zip** from the newest release available [here](https://github.com/dice-group/IGUANA/releases):
+Please download the release zip **iguana-x.y.z.zip** from the newest release available [here](https://github.com/dice-group/IGUANA/releases/latest):
 
 ```
 mkdir iguana
