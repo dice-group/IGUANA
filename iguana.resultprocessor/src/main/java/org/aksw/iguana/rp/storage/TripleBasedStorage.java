@@ -94,7 +94,10 @@ public abstract class TripleBasedStorage implements Storage {
 
 	private String getUrlWithResourcePrefix(String suffix) {
 		try {
-			return resource + URLEncoder.encode(suffix, StandardCharsets.UTF_8.toString());
+			String[] suffixParts = suffix.split("/");
+			for (int i = 0; i < suffixParts.length; i++)
+				suffixParts[i] = URLEncoder.encode(suffixParts[i], StandardCharsets.UTF_8.toString());
+			return resource + String.join("/", suffixParts);
 		} catch (UnsupportedEncodingException e) {
 			return resource + suffix.hashCode();
 		}
@@ -102,7 +105,10 @@ public abstract class TripleBasedStorage implements Storage {
 
 	private String getUrlWithPropertyPrefix(String suffix) {
 		try {
-			return properties + URLEncoder.encode(suffix, StandardCharsets.UTF_8.toString());
+			String[] suffixParts = suffix.split("/");
+			for (int i = 0; i < suffixParts.length; i++)
+				suffixParts[i] = URLEncoder.encode(suffixParts[i], StandardCharsets.UTF_8.toString());
+			return properties + String.join("/", suffixParts);
 		} catch (UnsupportedEncodingException e) {
 			return properties + suffix.hashCode();
 		}
