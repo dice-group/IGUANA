@@ -11,6 +11,9 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -90,11 +93,19 @@ public abstract class TripleBasedStorage implements Storage {
 	}
 
 	private String getUrlWithResourcePrefix(String suffix) {
-		return resource + suffix;
+		try {
+			return resource + URLEncoder.encode(suffix, StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException e) {
+			return resource + suffix.hashCode();
+		}
 	}
 
 	private String getUrlWithPropertyPrefix(String suffix) {
-		return properties + suffix;
+		try {
+			return properties + URLEncoder.encode(suffix, StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException e) {
+			return properties + suffix.hashCode();
+		}
 	}
 
 	private Statement createStatement(String subject, String predicate, String object, boolean isObjectUri)
