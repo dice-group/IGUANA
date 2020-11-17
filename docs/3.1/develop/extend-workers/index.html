@@ -118,6 +118,12 @@
                 </li>
                 <li class="toctree-l2 currentSite active"><a class="reference internal  active currentSite" href="#">Workers</a>
     <ul class="currentSite active">
+    <li class="toctree-l3"><a class="reference internal" href="#constructor">Constructor</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-the-next-query">Get the next query</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#execute-the-current-query">Execute the current query</a>
+    </li>
     </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal " href="../extend-queryhandling/">Query Handling</a>
@@ -185,6 +191,113 @@
             <div class="section">
               
                 <h1 id="extend-workers">Extend Workers</h1>
+<p>If the implemented workers aren't sufficient you can create your own one. </p>
+<p>Start by extending the <code>AbstractWorker</code> </p>
+<pre><code class="java">package org.benchmark.workers
+
+@Shorthand(&quot;MyWorker&quot;)
+public class MyWorker extends AbstractWorker{
+
+
+    //Setting the next query to be benchmarked in queryStr and queryID
+    public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException{
+
+    }
+
+
+    //Executing the current benchmark query
+    public void executeQuery(String query, String queryID){
+
+    }
+
+}
+</code></pre>
+
+<p>These are the only two functions you need to implement, the rest is done by the <code>AbstractWorker</code>.</p>
+<p>You can override more functions, please consider looking into the javadoc for that.</p>
+<h2 id="constructor">Constructor</h2>
+<p>The constructor parameters will be provided the same way the Task get's the parameters, thus simply look at <a href="../extend-task">Extend Task</a>.</p>
+<h2 id="get-the-next-query">Get the next query</h2>
+<p>The benchmark task should create and initialize the benchmark queries and will set them accordingly to the worker.</p>
+<p>You can access these queries using the <code>queryFileList</code> array. 
+Each element consists of one query set, containing the queryID/name and a list of one to several queries.</p>
+<p>In the following we will choose the next query set, counted by <code>currentQueryID</code> and use a random query of this. </p>
+<pre><code class="java">
+    @Override
+    public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
+        // get next Query File and next random Query out of it.
+        QuerySet currentQuery = this.queryFileList[this.currentQueryID++];
+        queryID.append(currentQuery.getName());
+
+        int queriesInSet = currentQuery.size();
+        int queryLine = queryChooser.nextInt(queriesInSet);
+        queryStr.append(currentQuery.getQueryAtPos(queryLine));
+
+        // If there is no more query(Pattern) start from beginning.
+        if (this.currentQueryID &gt;= this.queryFileList.length) {
+            this.currentQueryID = 0;
+        }
+
+    }
+</code></pre>
+
+<p>Thats it.</p>
+<p>This exact method is implemented in the <code>AbstractRandomQueryChooserWorker</code> class and instead of extend the <code>AbstractWorker</code> class, you can also extend this and spare your time. 
+However if you need another way like only executing one query and if there are no mery queries to test end the worker you can do so: </p>
+<pre><code class="java">
+    @Override
+    public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
+        // If there is no more query(Pattern) start from beginning.
+        if (this.currentQueryID &gt;= this.queryFileList.length) {
+            this.stopSending();
+        }
+
+
+        // get next Query File and the first Query out of it.
+        QuerySet currentQuery = this.queryFileList[this.currentQueryID++];
+        queryID.append(currentQuery.getName());
+
+        int queriesInSet = currentQuery.size();
+        queryStr.append(currentQuery.getQueryAtPos(0));
+
+    }
+</code></pre>
+
+<h2 id="execute-the-current-query">Execute the current query</h2>
+<p>Now you can execute the query against the current connection (<code>this.con</code>).</p>
+<p>As this is up to you how to do that, here is an example implementation for using HTTP Get.</p>
+<pre><code class="java">@Override
+    public void executeQuery(String query, String queryID) {
+        Instant start = Instant.now();
+
+        try {
+            String qEncoded = URLEncoder.encode(query, &quot;UTF-8&quot;);
+            String addChar = &quot;?&quot;;
+            if (con.getEndpoint().contains(&quot;?&quot;)) {
+                addChar = &quot;&amp;&quot;;
+            }
+            String url = con.getEndpoint() + addChar + parameter+&quot;=&quot; + qEncoded;
+            HttpGet request = new HttpGet(url);
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
+                    .setConnectTimeout(timeOut.intValue()).build();
+
+            if(this.responseType != null)
+                request.setHeader(HttpHeaders.ACCEPT, this.responseType);
+
+            request.setConfig(requestConfig);
+            CloseableHttpClient client = HttpClients.createDefault();
+            CloseableHttpResponse response = client.execute(request, getAuthContext(con.getEndpoint()));
+
+            // method to process the result in background
+            super.processHttpResponse(queryID, start, client, response);
+
+        } catch (Exception e) {
+            LOGGER.warn(&quot;Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to&quot;, this.workerType,
+                    this.workerID, query, e);
+            super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now())));
+        }
+    }
+</code></pre>
               
             </div>
           </div>

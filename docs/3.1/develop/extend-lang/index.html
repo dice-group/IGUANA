@@ -122,6 +122,12 @@
                 </li>
                 <li class="toctree-l2 currentSite active"><a class="reference internal  active currentSite" href="#">Languages</a>
     <ul class="currentSite active">
+    <li class="toctree-l3"><a class="reference internal" href="#query-prefix">Query prefix</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#generate-query-statistics">Generate Query Statistics</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-the-result-size">Get the result size</a>
+    </li>
     </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal " href="../extend-result-storages/">Result storage</a>
@@ -185,6 +191,70 @@
             <div class="section">
               
                 <h1 id="extend-languages">Extend Languages</h1>
+<p>If you want to add query specific statistics and/or using the correct result size for an HTTP Worker (Post or Get) you can do so.
+(This may be interesting if you're not using SPARQL)</p>
+<p>Let's start by implementing the <code>LanguageProcessor</code></p>
+<pre><code class="java">@Shorthand(&quot;lang.MyLanguage&quot;)
+public class MyLanguageProcessor implements LanguageProcessor {
+
+    @Override
+    public String getQueryPrefix() {
+    }
+
+
+    @Override
+    public Model generateTripleStats(List&lt;QueryWrapper&gt; queries, String resourcePrefix, String taskID) {
+    }
+
+    @Override
+    public Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException {
+    }
+
+}
+</code></pre>
+
+<h2 id="query-prefix">Query prefix</h2>
+<p>Set a query prefix which will be used in the result set, f.e. "sql"</p>
+<pre><code class="java">    @Override
+    public String getQueryPrefix() {
+        return &quot;sql&quot;;
+    }
+</code></pre>
+
+<h2 id="generate-query-statistics">Generate Query Statistics</h2>
+<p>Generating query specific statistics (which will be added in the result file)</p>
+<p>You will get the queries (containg of an ID and the query itself) a resourcePrefix you may use to create the URIs and the current taskID.</p>
+<p>A basic pretty standard exmaple is </p>
+<pre><code class="java">    @Override
+    public Model generateTripleStats(List&lt;QueryWrapper&gt; queries, String resourcePrefix, String taskID) {
+                Model model = ModelFactory.createDefaultModel();
+        for(QueryWrapper wrappedQuery : queries) {
+            Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + &quot;/&quot; + wrappedQuery.getId());
+            model.add(subject, RDF.type, Vocab.queryClass);
+            model.add(subject, Vocab.rdfsID, wrappedQuery.getId().replace(queryPrefix, &quot;&quot;).replace(&quot;sql&quot;, &quot;&quot;));
+            model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
+
+            //ADD YOUR TRIPLES HERE which contains query specific statistics
+        }
+        return model;
+
+    }
+</code></pre>
+
+<h2 id="get-the-result-size">Get the result size</h2>
+<p>To generate the correct result size in the result file do the following</p>
+<pre><code class="java">    @Override
+    public Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException {
+    InputStream inStream = response.getEntity().getContent();
+    Long size = -1L;
+    //READ INSTREAM ACCORDINGLY 
+
+
+    return size;
+    }
+
+
+</code></pre>
               
             </div>
           </div>

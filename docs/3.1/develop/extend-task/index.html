@@ -116,6 +116,18 @@
     <ul class="currentSite active">
                 <li class="toctree-l2 currentSite active"><a class="reference internal  active currentSite" href="#">Tasks</a>
     <ul class="currentSite active">
+    <li class="toctree-l3"><a class="reference internal" href="#constructor-and-configuration">Constructor and Configuration</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#add-meta-data">Add Meta Data</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#initialize-the-task">Initialize the Task</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#execute">Execute</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#close">Close</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#full-overview">Full overview</a>
+    </li>
     </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal " href="../extend-workers/">Workers</a>
@@ -185,6 +197,191 @@
             <div class="section">
               
                 <h1 id="extend-tasks">Extend Tasks</h1>
+<p>You can extend Iguana with your benchmark task, if the Stresstest doesn't fit your needs.
+F.e. you may want to check systems if they answer correctly rather than stresstest them.</p>
+<p>You will need to create your own task either in the Iguana code itself or by using Iguana as a library. 
+Either way start by extending the AbstractTask.</p>
+<pre><code class="java">package org.benchmark
+
+@Shorthand(&quot;MyBenchmarkTask&quot;)
+public class MyBenchmarkTask extend AbstractTask {
+
+}
+
+</code></pre>
+
+<p>You will need to override some functions. For now include them and go through them step by step</p>
+<pre><code class="java">package org.benchmark
+
+@Shorthand(&quot;MyBenchmarkTask&quot;)
+public class MyBenchmarkTask extend AbstractTask {
+
+    //Your constructor(s)
+    public MyBenchmarkTask(Integer timeLimit, ArrayList workers, LinkedHashMap queryHandler) throws FileNotFoundException {
+    }
+
+
+    //Meta Data (which will be added in the resultsfile)
+    @Override
+    public void addMetaData() {
+        super.addMetaData();
+    }
+
+    //Initializing 
+    @Override
+    public void init(String[] ids, String dataset, Connection connection)  {
+        super.init(ids, dataset, connection);
+    }
+
+    //Your actual Task 
+    @Override
+    public void execute() {
+    }
+
+
+    //Closing the benchmark, freeing some stuff etc.
+    @Override
+    public void close() {
+        super.close();
+    }
+}
+
+</code></pre>
+
+<h2 id="constructor-and-configuration">Constructor and Configuration</h2>
+<p>Let's start with the Constructor. 
+The YAML benchmark configuration will provide you the constructor parameters.</p>
+<p>Imagine you want to have three different parameters. 
+The first one should provide an integer (e.g. the time limit of the task) 
+The second one should provide a list of objects (e.g. a list of integers to use)
+The third parameter should provide a map of specific key-value pairs. </p>
+<p>You can set this up by using the following parameters:</p>
+<pre><code class="java">public MyBenchmarkTask(Integer param1, ArrayList param2, LinkedHashMap param3) throws FileNotFoundException {
+    //TODO whatever you need to do with the parameters
+}
+</code></pre>
+
+<p>Then Your configuration may look like the following</p>
+<pre><code class="yaml">...
+  className: &quot;MyBenchmarkTask&quot;
+  configuration:
+    param1: 123
+    param2: 
+      - &quot;1&quot;
+      - &quot;2&quot;
+    param3: 
+      val1: &quot;abc&quot;
+      val2: 123
+
+</code></pre>
+
+<p>The parameters will then be matched by their names to the names of the parameters of your constructor, allowing multiple constructors</p>
+<p>These are the three types you can represent in a Yaml configuration.
+* Single Values
+* Lists of Objects
+* Key-Value Pairs</p>
+<h2 id="add-meta-data">Add Meta Data</h2>
+<p>If you want to add Meta Data to be written in the results file do the following,</p>
+<p>Let noOfWorkers a value you already set. </p>
+<pre><code class="java">    /**
+     * Add extra Meta Data
+     */
+    @Override
+    public void addMetaData() {
+        super.addMetaData();
+
+        Properties extraMeta = new Properties();
+        extraMeta.put(&quot;noOfWorkers&quot;, noOfWorkers);
+
+        //Adding them to the actual meta data
+        this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
+    }
+
+</code></pre>
+
+<p>Then the resultsfile will contain all the mappings you put in extraMeta. </p>
+<h2 id="initialize-the-task">Initialize the Task</h2>
+<p>You may want to initialize your task, set some more values, start something in the background etc. etc. </p>
+<p>You will be provided the <code>suiteID</code>, <code>experimentID</code> and the <code>taskID</code> in the <code>ids</code> array, as well as the name of the dataset
+and the connection currently beeing benchmarked. </p>
+<pre><code class="java">    @Override
+    public void init(String[] ids, String dataset, Connection connection)  {
+        super.init(ids, dataset, connection);
+        //ADD YOUR CODE HERE
+    }
+</code></pre>
+
+<p>The ids, the dataset and the connection will be set in the <code>AbstractTask</code> which you can simply access by using <code>this.connection</code> for example.</p>
+<h2 id="execute">Execute</h2>
+<p>Now you can create the actual benchmark task you want to use. </p>
+<pre><code class="java">    @Override
+    public void execute() {
+        //ADD YOUR CODE HERE
+    }
+</code></pre>
+
+<p>Be aware that if you are using the <code>workers</code> implemented in Iguana, you need to stop them after your benchmark using the <code>worker.stopSending()</code> method.</p>
+<h2 id="close">Close</h2>
+<p>If you need to close some streams at the end of your benchmark task, you can do that in the <code>close</code> function.</p>
+<p>Simply override the existing one and call the super method and implement what you need.</p>
+<pre><code class="java">    @Override
+    public void close() {
+        super.close();
+    }
+</code></pre>
+
+<h2 id="full-overview">Full overview</h2>
+<pre><code class="java">package org.benchmark
+
+@Shorthand(&quot;MyBenchmarkTask&quot;)
+public class MyBenchmarkTask extend AbstractTask {
+
+    private Integer param1;
+    private ArrayList param2;
+    private LinkedHashMap param3;
+
+    //Your constructor(s)
+    public MyBenchmarkTask(Integer param1, ArrayList param2, LinkedHashMap param3) throws FileNotFoundException {
+
+        this.param1=param1;
+        this.param2=param2;
+        this.param3=param3;
+
+    }
+
+
+    //Meta Data (which will be added in the resultsfile)
+    @Override
+    public void addMetaData() {
+        super.addMetaData();
+
+        Properties extraMeta = new Properties();
+        extraMeta.put(&quot;noOfWorkers&quot;, noOfWorkers);
+
+        //Adding them to the actual meta data
+        this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
+    }
+
+    @Override
+    public void init(String[] ids, String dataset, Connection connection)  {
+        super.init(ids, dataset, connection);
+        //ADD YOUR CODE HERE
+    }
+
+    @Override
+    public void execute() {
+        //ADD YOUR CODE HERE
+    }
+
+
+    //Closing the benchmark, freeing some stuff etc.
+    @Override
+    public void close() {
+        super.close();
+    }
+}
+
+</code></pre>
               
             </div>
           </div>
