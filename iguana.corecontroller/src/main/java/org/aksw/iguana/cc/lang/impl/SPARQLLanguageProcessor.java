@@ -6,9 +6,6 @@ import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.vocab.Vocab;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.codec.digest.Md5Crypt;
-import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -27,7 +24,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.jcodings.util.Hash;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -41,11 +37,13 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
+import static org.aksw.iguana.commons.streams.Streams.inputStream2String;
 
 /**
  * SPARQL Language Processor.
@@ -152,28 +150,32 @@ public class SPARQLLanguageProcessor implements LanguageProcessor {
     @Override
     public Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException {
         HttpEntity httpResponse = response.getEntity();
-        String contentType = getContentTypeVal(response.getEntity().getContentType());
+        Header contentTypeHeader = response.getEntity().getContentType();
 
-        try (InputStream inputStream = httpResponse.getContent();
-             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            StringBuilder result = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                //br.readline will remove \n (add it for no Content-Type mode)
-                result.append(line).append("\n");
+        try (InputStream inputStream = httpResponse.getContent()) {
+            String entity = inputStream2String(inputStream);
+
+            return getResultSize(contentTypeHeader, entity);
+
+        } catch (IOException e) {
+            LOGGER.error("Query result could not be read.", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public Long getResultSize(Header contentTypeHeader, String content) throws ParserConfigurationException, SAXException, ParseException, IOException {
+        try {
+            switch (getContentTypeVal(contentTypeHeader)) {
+                case QUERY_RESULT_TYPE_JSON:
+                    return getJsonResultSize(content);
+
+                case QUERY_RESULT_TYPE_XML:
+                    return getXmlResultSize(content);
+                default:
+                    return (long) StringUtils.countMatches(content, "\n") + 1;
             }
-            long resultSize;
-            if (QUERY_RESULT_TYPE_JSON.equals(contentType)) {
-                resultSize = getJsonResultSize(result.toString());
-            } else if (QUERY_RESULT_TYPE_XML.equals(contentType)) {
-                resultSize = getXmlResultSize(result.toString());
-            } else {
-                resultSize = StringUtils.countMatches(result.toString(), "\n");
-            }
-
-            return resultSize;
-
-        } catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
+        } catch (ParseException | ParserConfigurationException | IOException | SAXException e) {
             LOGGER.error("Query results could not be parsed: ", e);
             throw e;
         }

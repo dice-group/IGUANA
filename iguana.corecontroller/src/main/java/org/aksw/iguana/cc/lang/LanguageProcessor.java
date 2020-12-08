@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.lang;
 
+import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.jena.rdf.model.Model;
 import org.json.simple.parser.ParseException;
@@ -41,6 +42,8 @@ public interface LanguageProcessor {
      * @throws IOException
      */
     Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException;
+
+    Long getResultSize(Header contentTypeHeader, String content) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
 
 }
