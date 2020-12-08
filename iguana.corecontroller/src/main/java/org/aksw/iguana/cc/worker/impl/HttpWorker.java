@@ -57,12 +57,13 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     }
 
     boolean checkInTime(String queryId, double duration, CloseableHttpClient client, CloseableHttpResponse response) {
-        if (this.timeOut < duration) {
+        if (this.timeOut >= duration) {
+            return true;
+        } else {
             this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, duration));
             closeHttp(client, response);
-            return true;
-        } else
             return false;
+        }
     }
 
     boolean checkResponseStatus(String queryId, double duration, CloseableHttpClient client, CloseableHttpResponse response) {
