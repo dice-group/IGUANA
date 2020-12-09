@@ -13,7 +13,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +21,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.time.Instant;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.*;
 
 import static org.aksw.iguana.commons.streams.Streams.inputStream2String;
@@ -77,6 +78,35 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         }
     }
 
+    private static class SynchronizedTimeout {
+        private boolean read_time_out = false;
+        private boolean reading_done = false;
+
+        /**
+         * Returns if state change was successful.
+         */
+        public synchronized boolean ReadTimeoutReached() {
+            if (!reading_done) {
+                read_time_out = false;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * Returns if state change was successful.
+         */
+        public synchronized boolean readingDone() {
+            if (!read_time_out) {
+                reading_done = false;
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     protected void processHttpResponse(String queryId, Instant startTime, CloseableHttpClient client, CloseableHttpResponse response) {
         // check if query execution took already longer than timeout
         double duration = durationInMilliseconds(startTime, Instant.now());
@@ -92,8 +122,23 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                 try (InputStream inputStream = httpResponse.getContent()) {
                     try {
                         // read content stream
+                        SynchronizedTimeout syncingTimeout = new SynchronizedTimeout();
+
+                        TimerTask task = new TimerTask() {
+                            @Override
+                            public void run() {
+                                if (syncingTimeout.ReadTimeoutReached())
+                                    closeHttp(client, response);
+                            }
+                        };
+                        new Timer(true).schedule(task, (long) (timeOut - duration));
+
                         String response_body_string = inputStream2String(inputStream, startTime, timeOut); // may throw TimeoutException
+                        if (!syncingTimeout.readingDone())
+                            throw new TimeoutException("reading the answer timed out");
+
                         duration = durationInMilliseconds(startTime, Instant.now());
+
                         boolean stillInTime = checkInTime(queryId, duration, client, response);
                         if (stillInTime) {  // check if we are still in time
                             // check if such a result was already parsed and is cached
@@ -123,14 +168,16 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         closeHttp(client, response);
     }
 
-    protected void closeHttp(CloseableHttpClient client, CloseableHttpResponse response) {
+    protected static void closeHttp(CloseableHttpClient client, CloseableHttpResponse response) {
         try {
-            client.close();
+            if (client != null)
+                client.close();
         } catch (IOException e) {
             LOGGER.error("Could not close http response ", e);
         }
         try {
-            response.close();
+            if (response != null)
+                response.close();
         } catch (IOException e) {
             LOGGER.error("Could not close Client ", e);
         }
@@ -181,6 +228,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             }
         }
     }
+
 
 }
 
