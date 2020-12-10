@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.lang.impl;
 
+import org.aksw.iguana.cc.lang.AbstractLanguageProcessor;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
@@ -51,7 +52,7 @@ import static org.aksw.iguana.commons.streams.Streams.inputStream2String;
  * or application/sparql-results+xml to count the result size correctly. Otherwise assumes it record per line and counts the returning lines.
  */
 @Shorthand("lang.SPARQL")
-public class SPARQLLanguageProcessor implements LanguageProcessor {
+public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implements LanguageProcessor {
 
     private static Logger LOGGER = LoggerFactory.getLogger(SPARQLLanguageProcessor.class);
 

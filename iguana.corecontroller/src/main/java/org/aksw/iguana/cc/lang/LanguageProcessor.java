@@ -8,7 +8,10 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Language Processor tells how to handle Http responses as well as how to analyze queries and generate stats.
@@ -46,4 +49,5 @@ public interface LanguageProcessor {
     Long getResultSize(Header contentTypeHeader, String content) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
 
+    int readResponse(InputStream inputStream, Instant startTime, Double timeOut, StringBuilder responseBody) throws IOException, TimeoutException;
 }

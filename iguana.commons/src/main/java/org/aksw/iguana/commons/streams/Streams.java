@@ -40,4 +40,30 @@ public class Streams {
         }
         return result.toString(StandardCharsets.UTF_8.name());
     }
+
+    static public int inputStream2String(InputStream inputStream, Instant startTime, double timeout, StringBuilder response) throws IOException, TimeoutException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
+        int length;
+        while ((length = inputStream.read(buffer)) != -1) {
+            if (durationInMilliseconds(startTime, Instant.now()) > timeout)
+                throw new TimeoutException("reading the answer timed out");
+            result.write(buffer, 0, length);
+        }
+        response.append(result.toString(StandardCharsets.UTF_8.name()));
+        return response.length();
+    }
+
+    static public int inputStream2Length(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {
+        byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
+        int length;
+        int ret=0;
+        while ((length = inputStream.read(buffer)) != -1) {
+            if (durationInMilliseconds(startTime, Instant.now()) > timeout)
+                throw new TimeoutException("reading the answer timed out");
+            ret+=length;
+        }
+        return ret;
+    }
+
 }

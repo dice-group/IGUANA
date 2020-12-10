@@ -134,7 +134,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                     try {
                         // read content stream
                         SynchronizedTimeout syncingTimeout = new SynchronizedTimeout();
-
+                        //TODO use ScheduledExecutionService
                         TimerTask task = new TimerTask() {
                             @Override
                             public void run() {
@@ -144,7 +144,10 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                         };
                         new Timer(true).schedule(task, (long) (timeOut - duration));
 
-                        String response_body_string = inputStream2String(inputStream, startTime, timeOut); // may throw TimeoutException
+                        //Stream in resultProcessor, return length, set string in StringBuilder.
+                        StringBuilder responseBody = new StringBuilder();
+                        int length = resultProcessor.readResponse(inputStream, startTime, timeOut, responseBody);
+                        //String responseBodyString = inputStream2String(inputStream, startTime, timeOut); // may throw TimeoutException
                         if (!syncingTimeout.readingDone())
                             throw new TimeoutException("reading the answer timed out");
 
@@ -153,7 +156,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                         boolean stillInTime = checkInTime(queryId, duration, client, response);
                         if (stillInTime) {  // check if we are still in time
                             // check if such a result was already parsed and is cached
-                            QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, response_body_string.length());
+                            QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, length);
                             if (processedResults.containsKey(resultCacheKey)) {
                                 LOGGER.debug("found result cache key {} ", resultCacheKey);
                                 Long preCalculatedResultSize = processedResults.get(resultCacheKey);
@@ -161,7 +164,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                             } else {
                                 // otherwise: parse it. The parsing result is cached for the next time.
                                 if (!this.endSignal) {
-                                    resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, response_body_string));
+                                    resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, responseBody.toString(), length));
                                 }
 
                             }
@@ -204,15 +207,17 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         private final HttpWorker httpWorker;
         private final String queryId;
         private final double duration;
-        Header contentTypeHeader;
-        String content;
+        private Header contentTypeHeader;
+        private String content;
+        private int contentLength;
 
-        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, String content) {
+        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, String content, int contentLength) {
             this.httpWorker = httpWorker;
             this.queryId = queryId;
             this.duration = duration;
             this.contentTypeHeader = contentTypeHeader;
             this.content = content;
+            this.contentLength = contentLength;
         }
 
         @Override
@@ -221,7 +226,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             // Result size is not saved before. Process the http response.
 
             ConcurrentMap<QueryResultHashKey, Long> processedResults = httpWorker.getProcessedResults();
-            QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, content.length());
+            QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, contentLength);
             try {
                 Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, content);
                 // Save the result size to be re-used

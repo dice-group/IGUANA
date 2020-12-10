@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.lang.impl;
 
+import org.aksw.iguana.cc.lang.AbstractLanguageProcessor;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.commons.annotation.Shorthand;
@@ -33,7 +34,7 @@ import java.util.List;
  * Counts triples returned as ResultSize
  */
 @Shorthand("lang.RDF")
-public class RDFLanguageProcessor implements LanguageProcessor {
+public class RDFLanguageProcessor extends AbstractLanguageProcessor implements LanguageProcessor {
 
     private static Logger LOGGER = LoggerFactory.getLogger(RDFLanguageProcessor.class);
     protected String queryPrefix="document";
