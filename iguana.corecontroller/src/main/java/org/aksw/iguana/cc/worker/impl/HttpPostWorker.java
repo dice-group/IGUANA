@@ -71,9 +71,11 @@ public class  HttpPostWorker extends HttpGetWorker {
             request.setConfig(requestConfig);
 
             CloseableHttpClient client = HttpClients.createDefault();
-            setTimeout(request, timeOut.intValue());
+            ScheduledExecutorService ex = setTimeout(request, timeOut.intValue());
+
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
 
+            ex.awaitTermination(1, TimeUnit.MILLISECONDS);
             // method to process the result in background
             super.processHttpResponse(queryID, start, client, response);
 
@@ -85,8 +87,11 @@ public class  HttpPostWorker extends HttpGetWorker {
         }
     }
 
-    private void setTimeout(HttpPost http, int timeOut){
+    private ScheduledExecutorService setTimeout(HttpPost http, int timeOut){
         ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
         ex.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
+        ex.shutdown();
+
+        return ex;
     }
 }
