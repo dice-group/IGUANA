@@ -72,12 +72,11 @@ public class  HttpPostWorker extends HttpGetWorker {
             Future fut = setTimeout(request, timeOut.intValue());
 
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
-            if(!fut.isDone())
-                fut.cancel(false);
-
 
             // method to process the result in background
             super.processHttpResponse(queryID, start, client, response);
+            if(!fut.isDone())
+                fut.cancel(false);
 
             tmpExecutedQueries++;
         } catch (Exception e) {

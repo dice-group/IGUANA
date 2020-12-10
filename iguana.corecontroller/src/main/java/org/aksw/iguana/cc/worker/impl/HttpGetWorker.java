@@ -75,11 +75,11 @@ public class HttpGetWorker extends HttpWorker {
             Future fut = setTimeout(request, timeOut.intValue());
 
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getEndpoint()));
-            if(!fut.isDone())
-                fut.cancel(false);
 
             // method to process the result in background
             super.processHttpResponse(queryID, start, client, response);
+            if(!fut.isDone())
+                fut.cancel(false);
 
         } catch (Exception e) {
             LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
