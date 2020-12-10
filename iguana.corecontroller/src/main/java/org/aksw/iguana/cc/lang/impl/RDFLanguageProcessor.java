@@ -20,9 +20,11 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -55,39 +57,52 @@ public class RDFLanguageProcessor implements LanguageProcessor {
 
     @Override
     public Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException {
-        Model m = null;
+        Model m;
         try {
-            m = getModel(response);
+            Header contentTypeHeader = response.getEntity().getContentType();
+            InputStream inputStream = response.getEntity().getContent();
+            m = getModel(contentTypeHeader, inputStream);
         } catch (IllegalAccessException e) {
             LOGGER.error("Could not read response as model", e);
-            return -1l;
+            return -1L;
         }
-        Long ret = countSize(m);
-        return ret;
+        return countSize(m);
+    }
+
+    @Override
+    public Long getResultSize(Header contentTypeHeader, String content) throws IOException {
+        Model m;
+        try {
+            InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+            m = getModel(contentTypeHeader, inputStream);
+        } catch (IllegalAccessException e) {
+            LOGGER.error("Could not read response as model", e);
+            return -1L;
+        }
+        return countSize(m);
     }
 
     protected Long countSize(Model m) {
         return m.size();
     }
 
-    private Model getModel(CloseableHttpResponse response) throws IOException, IllegalAccessException {
-        InputStream inStream = response.getEntity().getContent();
+    private Model getModel(Header contentTypeHeader, InputStream contentInputStream) throws IOException, IllegalAccessException {
         Model m = ModelFactory.createDefaultModel();
         Lang lang = null;
         // get actual content type
-        Header cTypeHeader =response.getEntity().getContentType();
-        String cType = cTypeHeader.getValue();
+        String contentType = contentTypeHeader.getValue();
         // use reflect to iterate over all static Lang fields of the Lang.class
-        for(Field langField : Lang.class.getFields()){
+        for (Field langField : Lang.class.getFields()) {
             //create the Language of the field
-            Lang susLang = (Lang)langField.get(Lang.class);
+            Lang susLang = (Lang) langField.get(Lang.class);
             //if they are the same we have our language
-            if(cType.equals(susLang.getContentType().getContentTypeStr())){
+            if (contentType.equals(susLang.getContentType().getContentTypeStr())) {
                 lang = susLang;
                 break;
             }
         }
-        m.read(inStream, null, lang.getName());
+        if (lang != null)
+            m.read(contentInputStream, null, lang.getName());
         return m;
     }
 }
