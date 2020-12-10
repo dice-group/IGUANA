@@ -41,8 +41,7 @@ public class Streams {
         return result.toString(StandardCharsets.UTF_8.name());
     }
 
-    static public int inputStream2String(InputStream inputStream, Instant startTime, double timeout, StringBuilder response) throws IOException, TimeoutException {
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
+    static public int inputStream2String(InputStream inputStream, Instant startTime, double timeout, ByteArrayOutputStream result) throws IOException, TimeoutException {
         byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
         int length;
         while ((length = inputStream.read(buffer)) != -1) {
@@ -50,8 +49,7 @@ public class Streams {
                 throw new TimeoutException("reading the answer timed out");
             result.write(buffer, 0, length);
         }
-        response.append(result.toString(StandardCharsets.UTF_8.name()));
-        return response.length();
+        return result.size();
     }
 
     static public int inputStream2Length(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {

@@ -15,6 +15,7 @@ import org.json.simple.parser.ParseException;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -51,7 +52,7 @@ public abstract class AbstractLanguageProcessor implements LanguageProcessor {
     }
 
     @Override
-    public int readResponse(InputStream inputStream, Instant startTime, Double timeOut, StringBuilder responseBody) throws IOException, TimeoutException {
+    public int readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException {
         return Streams.inputStream2String(inputStream, startTime, timeOut, responseBody);
     }
 }

@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -145,7 +146,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                         new Timer(true).schedule(task, (long) (timeOut - duration));
 
                         //Stream in resultProcessor, return length, set string in StringBuilder.
-                        StringBuilder responseBody = new StringBuilder();
+                        ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
                         int length = resultProcessor.readResponse(inputStream, startTime, timeOut, responseBody);
                         //String responseBodyString = inputStream2String(inputStream, startTime, timeOut); // may throw TimeoutException
                         if (!syncingTimeout.readingDone())
@@ -164,7 +165,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                             } else {
                                 // otherwise: parse it. The parsing result is cached for the next time.
                                 if (!this.endSignal) {
-                                    resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, responseBody.toString(), length));
+                                    resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, responseBody.toString(StandardCharsets.UTF_8.name()), length));
                                 }
 
                             }
