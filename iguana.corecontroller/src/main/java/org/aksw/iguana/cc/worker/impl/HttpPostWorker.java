@@ -15,9 +15,7 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.net.URLEncoder;
 import java.time.Instant;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
@@ -71,14 +69,12 @@ public class  HttpPostWorker extends HttpGetWorker {
             request.setConfig(requestConfig);
 
             CloseableHttpClient client = HttpClients.createDefault();
-            ScheduledExecutorService ex = setTimeout(request, timeOut.intValue());
+            Future fut = setTimeout(request, timeOut.intValue());
 
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
+            if(!fut.isDone())
+                fut.cancel(false);
 
-            boolean finished = ex.awaitTermination(1, TimeUnit.MILLISECONDS);
-            if(!finished){
-                LOGGER.error("Scheduled query Timeout thread could not be shutdown.");
-            }
 
             // method to process the result in background
             super.processHttpResponse(queryID, start, client, response);
@@ -91,11 +87,11 @@ public class  HttpPostWorker extends HttpGetWorker {
         }
     }
 
-    private ScheduledExecutorService setTimeout(HttpPost http, int timeOut){
-        ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
-        ex.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
+    private Future setTimeout(HttpPost http, int timeOut){
+        ScheduledThreadPoolExecutor ex = (ScheduledThreadPoolExecutor) Executors.newSingleThreadScheduledExecutor();
+        ex.setRemoveOnCancelPolicy(true);
+        Future fut = ex.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
         ex.shutdown();
-
-        return ex;
+        return fut;
     }
 }
