@@ -87,6 +87,7 @@ public class IguanaConfig {
 						String execScript = preScriptHook.replace("{{dataset.name}}", dataset.getName())
 								.replace("{{connection}}", con.getName())
 								.replace("{{taskID}}", taskID+"");
+						LOGGER.info("Finished preScriptHook");
 						if(dataset.getFile()!=null){
 							execScript = execScript.replace("{{dataset.file}}", dataset.getFile());
 						}
@@ -104,12 +105,13 @@ public class IguanaConfig {
 						}
 						LOGGER.info("Executing postScriptHook {}", execScript);
 						ScriptExecutor.execSafe(execScript, args);
+						LOGGER.info("Finished postScriptHook");
 					}
 				}
 			}
 		}
 
-
+		LOGGER.info("Finished benchmark");
 	}
 
 	private void initResultProcessor() {

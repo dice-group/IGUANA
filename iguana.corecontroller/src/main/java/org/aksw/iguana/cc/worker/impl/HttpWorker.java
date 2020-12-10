@@ -43,6 +43,8 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         return processedResults;
     }
 
+
+
     public void shutdownResultProcessor()
     {
         this.resultProcessorService.shutdown();

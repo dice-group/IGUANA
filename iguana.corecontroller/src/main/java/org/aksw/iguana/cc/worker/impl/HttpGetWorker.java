@@ -11,12 +11,16 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
@@ -68,7 +72,10 @@ public class HttpGetWorker extends HttpWorker {
                 request.setHeader(HttpHeaders.ACCEPT, this.responseType);
 
             request.setConfig(requestConfig);
+
             CloseableHttpClient client = HttpClients.createDefault();
+            setTimeout(request, timeOut.intValue());
+
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getEndpoint()));
 
             // method to process the result in background
@@ -81,5 +88,9 @@ public class HttpGetWorker extends HttpWorker {
         }
     }
 
+    private void setTimeout(HttpGet http, int timeOut){
+        ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
+        ex.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
+    }
 
 }

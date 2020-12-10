@@ -15,6 +15,9 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.net.URLEncoder;
 import java.time.Instant;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
@@ -68,6 +71,7 @@ public class  HttpPostWorker extends HttpGetWorker {
             request.setConfig(requestConfig);
 
             CloseableHttpClient client = HttpClients.createDefault();
+            setTimeout(request, timeOut.intValue());
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
 
             // method to process the result in background
@@ -79,5 +83,10 @@ public class  HttpPostWorker extends HttpGetWorker {
                     this.workerID, query, e);
             super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now())));
         }
+    }
+
+    private void setTimeout(HttpPost http, int timeOut){
+        ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
+        ex.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
     }
 }
