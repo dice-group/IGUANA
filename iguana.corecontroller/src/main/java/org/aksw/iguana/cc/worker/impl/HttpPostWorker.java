@@ -75,7 +75,11 @@ public class  HttpPostWorker extends HttpGetWorker {
 
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
 
-            ex.awaitTermination(1, TimeUnit.MILLISECONDS);
+            boolean finished = ex.awaitTermination(1, TimeUnit.MILLISECONDS);
+            if(!finished){
+                LOGGER.error("Scheduled query Timeout thread could not be shutdown.");
+            }
+
             // method to process the result in background
             super.processHttpResponse(queryID, start, client, response);
 

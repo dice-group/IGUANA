@@ -52,7 +52,10 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     public void shutdownResultProcessor() {
         this.resultProcessorService.shutdown();
         try {
-            this.resultProcessorService.awaitTermination(3000, TimeUnit.MILLISECONDS);
+            boolean finished = this.resultProcessorService.awaitTermination(3000, TimeUnit.MILLISECONDS);
+            if(!finished){
+                LOGGER.error("Result Processor could not shutdown.");
+            }
         } catch (InterruptedException e) {
             LOGGER.error("Could not shut down http result processor: " + e.getLocalizedMessage());
         }
