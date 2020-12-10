@@ -49,6 +49,13 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     }
 
 
+    @Override
+    public void stopSending(){
+        super.stopSending();
+        this.shutdownResultProcessor();
+    }
+
+
     public void shutdownResultProcessor() {
         this.resultProcessorService.shutdown();
         try {
@@ -155,9 +162,8 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                                 // otherwise: parse it. The parsing result is cached for the next time.
                                 if (!this.endSignal) {
                                     resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, response_body_string));
-                                } else {
-                                    this.shutdownResultProcessor();
                                 }
+
                             }
                         }
                     } catch (TimeoutException e) {
