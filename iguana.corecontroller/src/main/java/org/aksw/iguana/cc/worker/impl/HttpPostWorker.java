@@ -69,7 +69,7 @@ public class  HttpPostWorker extends HttpGetWorker {
             request.setConfig(requestConfig);
 
             CloseableHttpClient client = HttpClients.createDefault();
-            Future fut = setTimeout(request, timeOut.intValue());
+            Future<?> fut = setTimeout(request, timeOut.intValue());
 
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
 
@@ -86,11 +86,7 @@ public class  HttpPostWorker extends HttpGetWorker {
         }
     }
 
-    private Future setTimeout(HttpPost http, int timeOut){
-        ScheduledThreadPoolExecutor ex = (ScheduledThreadPoolExecutor) Executors.newSingleThreadScheduledExecutor();
-        ex.setRemoveOnCancelPolicy(true);
-        Future fut = ex.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
-        ex.shutdown();
-        return fut;
+    private ScheduledFuture<?> setTimeout(HttpPost http, int timeOut){
+        return timeoutExecutorPool.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
     }
 }
