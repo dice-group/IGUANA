@@ -35,13 +35,16 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
 
 
-    private final ExecutorService resultProcessorService = Executors.newFixedThreadPool(5);
+    protected final ExecutorService resultProcessorService = Executors.newFixedThreadPool(5);
+    protected ScheduledThreadPoolExecutor timeoutExecutorPool;
     protected ConcurrentMap<QueryResultHashKey, Long> processedResults = new ConcurrentHashMap<>();
     protected LanguageProcessor resultProcessor = new SPARQLLanguageProcessor();
 
 
     public HttpWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
         super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
+        timeoutExecutorPool = new ScheduledThreadPoolExecutor(3);
+        timeoutExecutorPool.setRemoveOnCancelPolicy(true);
     }
 
 
@@ -62,10 +65,21 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         try {
             boolean finished = this.resultProcessorService.awaitTermination(3000, TimeUnit.MILLISECONDS);
             if(!finished){
-                LOGGER.error("Result Processor could not shutdown.");
+                LOGGER.error("Result Processor could be shutdown orderly. Terminating.");
+                this.resultProcessorService.shutdownNow();
             }
         } catch (InterruptedException e) {
             LOGGER.error("Could not shut down http result processor: " + e.getLocalizedMessage());
+        }
+
+        try {
+            boolean finished = this.timeoutExecutorPool.awaitTermination(3000, TimeUnit.MILLISECONDS);
+            if(!finished){
+                LOGGER.error("Timeout Executor could be shutdown orderly. Terminating.");
+                this.timeoutExecutorPool.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Could not shut down http timout executor: " + e.getLocalizedMessage());
         }
     }
 

@@ -11,7 +11,6 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
@@ -72,7 +71,7 @@ public class HttpGetWorker extends HttpWorker {
             request.setConfig(requestConfig);
 
             CloseableHttpClient client = HttpClients.createDefault();
-            Future fut = setTimeout(request, timeOut.intValue());
+            Future<?> fut = setTimeout(request, timeOut.intValue());
 
             CloseableHttpResponse response = client.execute(request, getAuthContext(con.getEndpoint()));
 
@@ -88,13 +87,8 @@ public class HttpGetWorker extends HttpWorker {
         }
     }
 
-    private ScheduledFuture setTimeout(HttpGet http, int timeOut){
-        ScheduledThreadPoolExecutor ex = (ScheduledThreadPoolExecutor) Executors.newSingleThreadScheduledExecutor();
-        ex.setRemoveOnCancelPolicy(true);
-        ScheduledFuture fut = ex.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
-        ex.shutdown();
-
-        return fut;
+    private ScheduledFuture<?> setTimeout(HttpGet http, int timeOut){
+        return timeoutExecutorPool.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
     }
 
 }
