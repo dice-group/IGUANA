@@ -45,7 +45,9 @@ public class HttpPostWorker extends HttpGetWorker {
 
     @Override
     public void executeQuery(String query, String queryID) {
-        Instant start = Instant.now();
+        requestStartTime = Instant.now();
+        queryId = queryID;
+        resultsSaved = false;
 
         try {
             StringBuilder data = new StringBuilder();
@@ -76,7 +78,7 @@ public class HttpPostWorker extends HttpGetWorker {
             response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
 
             // method to process the result in background
-            super.processHttpResponse(queryID, start);
+            super.processHttpResponse();
             if (!abortCurrentRequestFuture.isDone())
                 abortCurrentRequestFuture.cancel(false);
 
@@ -84,11 +86,7 @@ public class HttpPostWorker extends HttpGetWorker {
         } catch (Exception e) {
             LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
                     this.workerID, query, e);
-            super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now())));
+            super.addResultsOnce(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(requestStartTime, Instant.now())));
         }
-    }
-
-    private ScheduledFuture<?> setTimeout(HttpPost http, int timeOut) {
-        return timeoutExecutorPool.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
     }
 }

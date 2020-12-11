@@ -72,6 +72,24 @@ public class Streams {
     }
 
     /**
+     * Fastest way to serialize a stream to UTF-8 according to https://stackoverflow.com/a/35446009/6800941
+     *
+     * @param inputStream the stream to read from
+     * @param result      the stream where the result is written to.
+     * @return size of the output stream
+     * @throws IOException from inputStream.read
+     */
+    public static int inputStream2ByteArrayOutputStream(InputStream inputStream, ByteArrayOutputStream result) throws IOException {
+        assert (result != null);
+        byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
+        int length;
+        while ((length = inputStream.read(buffer)) != -1) {
+            result.write(buffer, 0, length);
+        }
+        return result.size();
+    }
+
+    /**
      * reads a stream and throws away the result.
      *
      * @param inputStream the stream to read from

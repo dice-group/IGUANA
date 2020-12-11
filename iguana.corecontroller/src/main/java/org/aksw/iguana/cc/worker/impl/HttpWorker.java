@@ -23,8 +23,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.*;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
@@ -44,6 +42,9 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     protected Runnable abortCurrentRequestRunnable;
     protected ScheduledFuture<?> abortCurrentRequestFuture;
     protected CloseableHttpResponse response;
+    protected boolean resultsSaved = false;
+    protected String queryId;
+    protected Instant requestStartTime;
 
 
     public HttpWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
@@ -66,6 +67,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     @Override
     public void stopSending() {
         super.stopSending();
+        closeHttp();
         this.shutdownResultProcessor();
     }
 
@@ -93,120 +95,65 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         }
     }
 
-    boolean checkInTime(String queryId, double duration, CloseableHttpClient client, CloseableHttpResponse response) {
-        if (this.timeOut >= duration) {
-            return true;
-        } else {
-            this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, duration));
-            closeHttp(client, response);
-            return false;
-        }
-    }
-
-    boolean checkResponseStatus(String queryId, double duration, CloseableHttpClient client, CloseableHttpResponse response) {
+    boolean checkResponseStatus() {
         int responseCode = response.getStatusLine().getStatusCode();
         if (responseCode == 200) {
             return true;
         } else {
-            this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
-            closeHttp(client, response);
+            double duration = durationInMilliseconds(requestStartTime, Instant.now());
+            addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
             return false;
         }
     }
 
-    private static class SynchronizedTimeout {
-        private boolean read_time_out = false;
-        private boolean reading_done = false;
-
-        /**
-         * Returns if state change was successful.
-         */
-        public synchronized boolean ReadTimeoutReached() {
-            if (!reading_done) {
-                read_time_out = false;
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        /**
-         * Returns if state change was successful.
-         */
-        public synchronized boolean readingDone() {
-            if (!read_time_out) {
-                reading_done = false;
-                return true;
-            } else {
-                return false;
-            }
+    synchronized protected void addResultsOnce(QueryExecutionStats queryExecutionStats) {
+        if (!resultsSaved) {
+            this.addResults(queryExecutionStats);
+            resultsSaved = true;
         }
     }
 
-    protected void processHttpResponse(String queryId, Instant startTime) {
+    protected void processHttpResponse() {
         // check if query execution took already longer than timeout
-        double duration = durationInMilliseconds(startTime, Instant.now());
-        boolean inTime = checkInTime(queryId, duration, client, response);
-        if (inTime) { // we are in time
-            // check the response status
-            boolean responseCodeOK = checkResponseStatus(queryId, duration, client, response);
+            boolean responseCodeOK = checkResponseStatus();
             if (responseCodeOK) { // response status is OK (200)
                 // get content type header
                 HttpEntity httpResponse = response.getEntity();
                 Header contentTypeHeader = new BasicHeader(httpResponse.getContentType().getName(), httpResponse.getContentType().getValue());
                 // get content stream
                 try (InputStream inputStream = httpResponse.getContent()) {
-                    try {
-                        // read content stream
-                        SynchronizedTimeout syncingTimeout = new SynchronizedTimeout();
-                        //TODO use ScheduledExecutionService
-                        TimerTask task = new TimerTask() {
-                            @Override
-                            public void run() {
-                                if (syncingTimeout.ReadTimeoutReached())
-                                    closeHttp(client, response);
-                            }
-                        };
-                        new Timer(true).schedule(task, (long) (timeOut - duration));
+                    // read content stream
+                    //Stream in resultProcessor, return length, set string in StringBuilder.
+                    ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
+                    int length = resultProcessor.readResponse(inputStream, responseBody);
 
-                        //Stream in resultProcessor, return length, set string in StringBuilder.
-                        ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
-                        int length = resultProcessor.readResponse(inputStream, startTime, timeOut, responseBody);
-                        //String responseBodyString = inputStream2String(inputStream, startTime, timeOut); // may throw TimeoutException
-                        if (!syncingTimeout.readingDone())
-                            throw new TimeoutException("reading the answer timed out");
-
-                        duration = durationInMilliseconds(startTime, Instant.now());
-
-                        boolean stillInTime = checkInTime(queryId, duration, client, response);
-                        if (stillInTime) {  // check if we are still in time
-                            // check if such a result was already parsed and is cached
-                            QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, length);
-                            if (processedResults.containsKey(resultCacheKey)) {
-                                LOGGER.debug("found result cache key {} ", resultCacheKey);
-                                Long preCalculatedResultSize = processedResults.get(resultCacheKey);
-                                this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, preCalculatedResultSize));
-                            } else {
-                                // otherwise: parse it. The parsing result is cached for the next time.
-                                if (!this.endSignal) {
-                                    resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, responseBody.toString(StandardCharsets.UTF_8.name()), length));
-                                }
-
+                    // check if such a result was already parsed and is cached
+                    synchronized(this) {
+                        double duration = durationInMilliseconds(requestStartTime, Instant.now());
+                        QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, length);
+                        if (processedResults.containsKey(resultCacheKey)) {
+                            LOGGER.debug("found result cache key {} ", resultCacheKey);
+                            Long preCalculatedResultSize = processedResults.get(resultCacheKey);
+                            addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, preCalculatedResultSize));
+                        } else {
+                            // otherwise: parse it. The parsing result is cached for the next time.
+                            if (!this.endSignal) {
+                                // TODO: convert to string async
+                                resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, responseBody, length));
+                                resultsSaved = true;
                             }
                         }
-                    } catch (TimeoutException e) {
-                        this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, duration));
                     }
 
                 } catch (IOException e) {
-                    this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
+                    double duration = durationInMilliseconds(requestStartTime, Instant.now());
+                    addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
                 }
             }
-        }
-        closeHttp(client, response);
+        closeHttp();
     }
 
-    protected static void closeHttp(CloseableHttpClient client, CloseableHttpResponse response) {
+    protected void closeHttp() {
         try {
             if (client != null)
                 client.close();
@@ -232,27 +179,27 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         private final HttpWorker httpWorker;
         private final String queryId;
         private final double duration;
-        private Header contentTypeHeader;
-        private String content;
-        private int contentLength;
+        private final Header contentTypeHeader;
+        private final ByteArrayOutputStream contentStream;
+        private final int contentLength;
 
-        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, String content, int contentLength) {
+        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, ByteArrayOutputStream contentStream, int contentLength){
             this.httpWorker = httpWorker;
             this.queryId = queryId;
             this.duration = duration;
             this.contentTypeHeader = contentTypeHeader;
-            this.content = content;
+            this.contentStream = contentStream;
             this.contentLength = contentLength;
         }
 
         @Override
         public void run() {
-
             // Result size is not saved before. Process the http response.
 
             ConcurrentMap<QueryResultHashKey, Long> processedResults = httpWorker.getProcessedResults();
             QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, contentLength);
             try {
+                String content = contentStream.toString(StandardCharsets.UTF_8.name());
                 Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, content);
                 // Save the result size to be re-used
                 processedResults.put(resultCacheKey, resultSize);

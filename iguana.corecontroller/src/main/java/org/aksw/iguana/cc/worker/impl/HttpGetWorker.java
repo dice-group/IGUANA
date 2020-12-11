@@ -9,15 +9,12 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.factory.TypedFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.concurrent.*;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
@@ -50,7 +47,9 @@ public class HttpGetWorker extends HttpWorker {
 
     @Override
     public void executeQuery(String query, String queryID) {
-        Instant start = Instant.now();
+        requestStartTime = Instant.now();
+        queryId = queryID;
+        resultsSaved = false;
 
         try {
             String qEncoded = URLEncoder.encode(query, "UTF-8");
@@ -77,14 +76,14 @@ public class HttpGetWorker extends HttpWorker {
 
             response = client.execute(request, getAuthContext(con.getEndpoint()));
             // method to process the result in background
-            super.processHttpResponse(queryID, start);
+            super.processHttpResponse();
             if (!abortCurrentRequestFuture.isDone())
                 abortCurrentRequestFuture.cancel(false);
 
         } catch (Exception e) {
             LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
                     this.workerID, query, e);
-            super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now())));
+            super.addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(requestStartTime, Instant.now())));
         }
     }
 
