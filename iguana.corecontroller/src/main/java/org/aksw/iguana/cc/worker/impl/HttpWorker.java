@@ -26,7 +26,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
 
-import static org.aksw.iguana.commons.streams.Streams.inputStream2String;
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
 /**
