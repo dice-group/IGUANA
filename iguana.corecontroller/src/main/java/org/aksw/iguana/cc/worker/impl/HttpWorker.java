@@ -10,6 +10,7 @@ import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -53,7 +54,6 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
         timeoutExecutorPool.setRemoveOnCancelPolicy(true);
     }
-
 
     public ConcurrentMap<QueryResultHashKey, Long> getProcessedResults() {
         return processedResults;
@@ -132,6 +132,54 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         }
     }
 
+    @Override
+    public void executeQuery(String query, String queryID) {
+        requestStartTime = Instant.now();
+        queryId = queryID;
+        resultsSaved = false;
+        requestTimedOut = false;
+
+        if (client == null)
+            initClient();
+
+        try {
+            buildRequest(query, queryId);
+
+            setTimeout(timeOut.intValue());
+
+            response = client.execute(request, getAuthContext(con.getEndpoint()));
+            // method to process the result in background
+            processHttpResponse();
+
+            abortTimeout();
+
+        } catch (ClientProtocolException e) {
+            handleException(query, COMMON.QUERY_HTTP_FAILURE, e);
+        } catch (IOException e) {
+            if (requestTimedOut) {
+                LOGGER.warn("Worker[{} : {}]: Reached timout on query (ID {})\n{}",
+                        this.workerType, this.workerID, queryId, query);
+                addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, timeOut));
+            } else {
+                handleException(query, COMMON.QUERY_UNKNOWN_EXCEPTION, e);
+            }
+        } catch (Exception e) {
+            handleException(query, COMMON.QUERY_UNKNOWN_EXCEPTION, e);
+        } finally {
+            abortTimeout();
+            closeResponse();
+        }
+    }
+
+    private void handleException(String query, Long cause, Exception e) {
+        double duration = durationInMilliseconds(requestStartTime, Instant.now());
+        addResultsOnce(new QueryExecutionStats(queryId, cause, duration));
+        LOGGER.warn("Worker[{} : {}]: {} on query (ID {})\n{}",
+                this.workerType, this.workerID, e.getMessage(), queryId, query);
+        closeClient();
+        initClient();
+    }
+
     protected void processHttpResponse() {
         // check if query execution took already longer than timeout
         boolean responseCodeOK = checkResponseStatus();
@@ -170,15 +218,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         }
     }
 
-    protected void closeResponse() {
-        try {
-            if (response != null)
-                response.close();
-        } catch (IOException e) {
-            LOGGER.error("Could not close Client ", e);
-        }
-        response = null;
-    }
+    abstract void buildRequest(String query, String queryID) throws UnsupportedEncodingException;
 
     protected void initClient() {
         client = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build();
@@ -193,6 +233,16 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             LOGGER.error("Could not close http response ", e);
         }
         client = null;
+    }
+
+    protected void closeResponse() {
+        try {
+            if (response != null)
+                response.close();
+        } catch (IOException e) {
+            LOGGER.error("Could not close Client ", e);
+        }
+        response = null;
     }
 
     /**
@@ -242,7 +292,5 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             }
         }
     }
-
-
 }
 
