@@ -27,18 +27,18 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  * {PARAMETER: QUERY}
  */
 @Shorthand("HttpPostWorker")
-public class  HttpPostWorker extends HttpGetWorker {
+public class HttpPostWorker extends HttpGetWorker {
 
     private String contentType = "text/plain";
-    protected long tmpExecutedQueries=0;
+    protected long tmpExecutedQueries = 0;
 
 
     public HttpPostWorker(String taskID, Connection connection, String queriesFile, @Nullable String contentType, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType, Integer workerID) {
         super(taskID, connection, queriesFile, responseType, parameterName, language, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
-        if(parameterName==null){
-            parameter=null;
+        if (parameterName == null) {
+            parameter = null;
         }
-        if(contentType!=null){
+        if (contentType != null) {
             this.contentType = contentType;
         }
     }
@@ -48,35 +48,37 @@ public class  HttpPostWorker extends HttpGetWorker {
         Instant start = Instant.now();
 
         try {
-            HttpPost request = new HttpPost(con.getUpdateEndpoint());
-
             StringBuilder data = new StringBuilder();
-            if(parameter!=null){
+            if (parameter != null) {
                 String qEncoded = URLEncoder.encode(query, "UTF-8");
-                data.append("{ \""+parameter+"\": \"").append(qEncoded).append("\"}");
-            }else{
+                data.append("{ \"" + parameter + "\": \"").append(qEncoded).append("\"}");
+            } else {
                 data.append(query);
             }
             StringEntity entity = new StringEntity(data.toString());
-            request.setEntity(entity);
+            request = new HttpPost(con.getUpdateEndpoint());
+            ((HttpPost) request).setEntity(entity);
             request.setHeader("Content-Type", contentType);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
-                    .setConnectTimeout(timeOut.intValue()).build();
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setSocketTimeout(timeOut.intValue())
+                    .setConnectTimeout(timeOut.intValue())
+                    .build();
 
-            if(this.responseType != null)
+            if (this.responseType != null)
                 request.setHeader(HttpHeaders.ACCEPT, this.responseType);
 
             request.setConfig(requestConfig);
 
-            CloseableHttpClient client = HttpClients.createDefault();
-            Future<?> fut = setTimeout(request, timeOut.intValue());
+            client = HttpClients.createDefault();
 
-            CloseableHttpResponse response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
+            setTimeout(timeOut.intValue());
+
+            response = client.execute(request, getAuthContext(con.getUpdateEndpoint()));
 
             // method to process the result in background
-            super.processHttpResponse(queryID, start, client, response);
-            if(!fut.isDone())
-                fut.cancel(false);
+            super.processHttpResponse(queryID, start);
+            if (!abortCurrentRequestFuture.isDone())
+                abortCurrentRequestFuture.cancel(false);
 
             tmpExecutedQueries++;
         } catch (Exception e) {
@@ -86,7 +88,7 @@ public class  HttpPostWorker extends HttpGetWorker {
         }
     }
 
-    private ScheduledFuture<?> setTimeout(HttpPost http, int timeOut){
+    private ScheduledFuture<?> setTimeout(HttpPost http, int timeOut) {
         return timeoutExecutorPool.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
     }
 }

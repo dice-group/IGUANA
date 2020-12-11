@@ -25,28 +25,26 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  * HTTP Get Worker.
  * Uses HTTP Get to execute a Query.</br></br>
  * if the parameter type was not set it will use 'query' as the parameter as default, otherwise it will use the provided parameter
- *
  */
 @Shorthand("HttpGetWorker")
 public class HttpGetWorker extends HttpWorker {
 
-    protected String parameter="query";
+    protected String parameter = "query";
 
-    protected String responseType=null;
+    protected String responseType = null;
 
 
     public HttpGetWorker(String taskID, Connection connection, String queriesFile, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType, Integer workerID) {
-        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType==null?"HttpGetWorker":workerType, workerID);
-        if(language!=null){
+        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType == null ? "HttpGetWorker" : workerType, workerID);
+        if (language != null) {
             resultProcessor = new TypedFactory<LanguageProcessor>().create(language, new HashMap<Object, Object>());
         }
-        if(parameterName!=null){
+        if (parameterName != null) {
             parameter = parameterName;
         }
-        if(responseType!=null){
-            this.responseType=responseType;
+        if (responseType != null) {
+            this.responseType = responseType;
         }
-
     }
 
 
@@ -60,35 +58,34 @@ public class HttpGetWorker extends HttpWorker {
             if (con.getEndpoint().contains("?")) {
                 addChar = "&";
             }
-            String url = con.getEndpoint() + addChar + parameter+"=" + qEncoded;
-            HttpGet request = new HttpGet(url);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeOut.intValue())
-                    .setConnectTimeout(timeOut.intValue()).build();
+            String url = con.getEndpoint() + addChar + parameter + "=" + qEncoded;
+            request = new HttpGet(url);
+            RequestConfig requestConfig =
+                    RequestConfig.custom()
+                            .setSocketTimeout(timeOut.intValue())
+                            .setConnectTimeout(timeOut.intValue())
+                            .build();
 
-            if(this.responseType != null)
+            if (this.responseType != null)
                 request.setHeader(HttpHeaders.ACCEPT, this.responseType);
 
             request.setConfig(requestConfig);
 
-            CloseableHttpClient client = HttpClients.createDefault();
-            Future<?> fut = setTimeout(request, timeOut.intValue());
+            client = HttpClients.createDefault();
 
-            CloseableHttpResponse response = client.execute(request, getAuthContext(con.getEndpoint()));
+            setTimeout(timeOut.intValue());
 
+            response = client.execute(request, getAuthContext(con.getEndpoint()));
             // method to process the result in background
-            super.processHttpResponse(queryID, start, client, response);
-            if(!fut.isDone())
-                fut.cancel(false);
+            super.processHttpResponse(queryID, start);
+            if (!abortCurrentRequestFuture.isDone())
+                abortCurrentRequestFuture.cancel(false);
 
         } catch (Exception e) {
             LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
                     this.workerID, query, e);
             super.addResults(new QueryExecutionStats(queryID, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(start, Instant.now())));
         }
-    }
-
-    private ScheduledFuture<?> setTimeout(HttpGet http, int timeOut){
-        return timeoutExecutorPool.schedule(() -> http.abort(), timeOut, TimeUnit.MILLISECONDS);
     }
 
 }

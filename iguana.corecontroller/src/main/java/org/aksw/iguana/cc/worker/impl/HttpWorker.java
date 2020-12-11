@@ -11,6 +11,7 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.json.simple.parser.ParseException;
@@ -35,14 +36,18 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
 
 
     protected final ExecutorService resultProcessorService = Executors.newFixedThreadPool(5);
-    protected ScheduledThreadPoolExecutor timeoutExecutorPool;
+    protected ScheduledThreadPoolExecutor timeoutExecutorPool = new ScheduledThreadPoolExecutor(3);
     protected ConcurrentMap<QueryResultHashKey, Long> processedResults = new ConcurrentHashMap<>();
     protected LanguageProcessor resultProcessor = new SPARQLLanguageProcessor();
+    protected CloseableHttpClient client;
+    protected HttpRequestBase request;
+    protected Runnable abortCurrentRequestRunnable;
+    protected ScheduledFuture<?> abortCurrentRequestFuture;
+    protected CloseableHttpResponse response;
 
 
     public HttpWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
         super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
-        timeoutExecutorPool = new ScheduledThreadPoolExecutor(3);
         timeoutExecutorPool.setRemoveOnCancelPolicy(true);
     }
 
@@ -51,9 +56,15 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         return processedResults;
     }
 
+    protected void setTimeout(int timeOut) {
+        assert (request != null);
+        abortCurrentRequestRunnable = request::abort;
+        abortCurrentRequestFuture = timeoutExecutorPool.schedule(abortCurrentRequestRunnable, timeOut, TimeUnit.MILLISECONDS);
+    }
+
 
     @Override
-    public void stopSending(){
+    public void stopSending() {
         super.stopSending();
         this.shutdownResultProcessor();
     }
@@ -63,7 +74,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         this.resultProcessorService.shutdown();
         try {
             boolean finished = this.resultProcessorService.awaitTermination(3000, TimeUnit.MILLISECONDS);
-            if(!finished){
+            if (!finished) {
                 LOGGER.error("Result Processor could be shutdown orderly. Terminating.");
                 this.resultProcessorService.shutdownNow();
             }
@@ -73,7 +84,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
 
         try {
             boolean finished = this.timeoutExecutorPool.awaitTermination(3000, TimeUnit.MILLISECONDS);
-            if(!finished){
+            if (!finished) {
                 LOGGER.error("Timeout Executor could be shutdown orderly. Terminating.");
                 this.timeoutExecutorPool.shutdownNow();
             }
@@ -132,7 +143,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         }
     }
 
-    protected void processHttpResponse(String queryId, Instant startTime, CloseableHttpClient client, CloseableHttpResponse response) {
+    protected void processHttpResponse(String queryId, Instant startTime) {
         // check if query execution took already longer than timeout
         double duration = durationInMilliseconds(startTime, Instant.now());
         boolean inTime = checkInTime(queryId, duration, client, response);
