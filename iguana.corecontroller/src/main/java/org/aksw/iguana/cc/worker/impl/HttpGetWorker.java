@@ -8,11 +8,20 @@ import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.commons.factory.TypedFactory;
 import org.apache.http.HttpHeaders;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.ConnectException;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 
@@ -50,9 +59,13 @@ public class HttpGetWorker extends HttpWorker {
         requestStartTime = Instant.now();
         queryId = queryID;
         resultsSaved = false;
+        requestTimedOut = false;
+
+        if (client == null)
+            initClient();
 
         try {
-            String qEncoded = URLEncoder.encode(query, "UTF-8");
+            String qEncoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
             String addChar = "?";
             if (con.getEndpoint().contains("?")) {
                 addChar = "&";
@@ -70,21 +83,37 @@ public class HttpGetWorker extends HttpWorker {
 
             request.setConfig(requestConfig);
 
-            client = HttpClients.createDefault();
-
             setTimeout(timeOut.intValue());
 
             response = client.execute(request, getAuthContext(con.getEndpoint()));
             // method to process the result in background
             super.processHttpResponse();
-            if (!abortCurrentRequestFuture.isDone())
-                abortCurrentRequestFuture.cancel(false);
 
+            abortTimeout();
+
+        } catch (ClientProtocolException e) {
+            handleException(query, COMMON.QUERY_HTTP_FAILURE, e);
+        } catch (IOException e) {
+            if (requestTimedOut) {
+                LOGGER.warn("Worker[{} : {}]: Reached timout on query (ID {})\n{}",
+                        this.workerType, this.workerID, queryId, query);
+                super.addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, timeOut));
+            } else {
+                handleException(query, COMMON.QUERY_UNKNOWN_EXCEPTION, e);
+            }
         } catch (Exception e) {
-            LOGGER.warn("Worker[{{}} : {{}}]: Could not execute the following query\n{{}}\n due to", this.workerType,
-                    this.workerID, query, e);
-            super.addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_UNKNOWN_EXCEPTION, durationInMilliseconds(requestStartTime, Instant.now())));
+            handleException(query, COMMON.QUERY_UNKNOWN_EXCEPTION, e);
         }
+        closeResponse();
+    }
+
+    private void handleException(String query, Long cause, Exception e) {
+        double duration = durationInMilliseconds(requestStartTime, Instant.now());
+        super.addResultsOnce(new QueryExecutionStats(queryId, cause, duration));
+        LOGGER.warn("Worker[{} : {}]: {} on query (ID {})\n{}",
+                this.workerType, this.workerID, e.getMessage(), queryId, query);
+        closeClient();
+        initClient();
     }
 
 }
