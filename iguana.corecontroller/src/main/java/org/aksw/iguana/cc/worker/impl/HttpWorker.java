@@ -196,7 +196,6 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
 
                 // check if such a result was already parsed and is cached
                 synchronized (this) {
-                    double duration = durationInMilliseconds(requestStartTime, Instant.now());
                     QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, length);
                     if (processedResults.containsKey(resultCacheKey)) {
                         LOGGER.debug("found result cache key {} ", resultCacheKey);
@@ -257,7 +256,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         private final String queryId;
         private final double duration;
         private final Header contentTypeHeader;
-        private final ByteArrayOutputStream contentStream;
+        private ByteArrayOutputStream contentStream;
         private final int contentLength;
 
         public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, ByteArrayOutputStream contentStream, int contentLength) {
@@ -277,6 +276,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, contentLength);
             try {
                 String content = contentStream.toString(StandardCharsets.UTF_8.name());
+                contentStream = null; // might be hugh, dereference immediately after consumed
                 Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, content);
                 // Save the result size to be re-used
                 processedResults.put(resultCacheKey, resultSize);
