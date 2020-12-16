@@ -25,8 +25,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -125,9 +123,9 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
 
     public static long getJsonResultSize(String res) throws ParseException {
         JSONParser parser = new JSONParser();
-        JSONObject json = (JSONObject) parser.parse(res.trim());
-        long size = ((JSONArray) ((JSONObject) json.get("results")).get("bindings")).size();
-        return size;
+        SaxSparqlJsonResultCountingParser handler = new SaxSparqlJsonResultCountingParser();
+        parser.parse(res, handler, true);
+        return handler.getNoBindings();
     }
 
     public static long getXmlResultSize(String res) throws ParserConfigurationException, IOException, SAXException {
@@ -153,15 +151,14 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
         HttpEntity httpResponse = response.getEntity();
         Header contentTypeHeader = response.getEntity().getContentType();
 
+        String entity;
         try (InputStream inputStream = httpResponse.getContent()) {
-            String entity = inputStream2String(inputStream);
-
-            return getResultSize(contentTypeHeader, entity);
-
+             entity = inputStream2String(inputStream);
         } catch (IOException e) {
             LOGGER.error("Query result could not be read.", e);
             throw e;
         }
+        return getResultSize(contentTypeHeader, entity);
     }
 
     @Override
