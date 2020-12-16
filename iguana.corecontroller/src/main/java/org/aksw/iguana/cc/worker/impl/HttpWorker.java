@@ -195,6 +195,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                 int length = resultProcessor.readResponse(inputStream, responseBody);
 
                 // check if such a result was already parsed and is cached
+                double duration = durationInMilliseconds(requestStartTime, Instant.now());
                 synchronized (this) {
                     QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, length);
                     if (processedResults.containsKey(resultCacheKey)) {
