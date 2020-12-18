@@ -52,7 +52,12 @@ public abstract class AbstractLanguageProcessor implements LanguageProcessor {
     }
 
     @Override
+    public int readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException {
+        return Streams.inputStream2ByteArrayOutputStream(inputStream, responseBody);
+    }
+
+    @Override
     public int readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException {
-        return Streams.inputStream2String(inputStream, startTime, timeOut, responseBody);
+        return Streams.inputStream2ByteArrayOutputStream(inputStream, startTime, timeOut, responseBody);
     }
 }

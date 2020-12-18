@@ -50,5 +50,7 @@ public interface LanguageProcessor {
     Long getResultSize(Header contentTypeHeader, String content) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
 
+    int readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException;
+
     int readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException;
 }
