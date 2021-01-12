@@ -99,10 +99,10 @@ public class Streams {
      * @throws IOException      from inputStream.read
      * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceed
      */
-    static public int inputStream2Length(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {
+    static public long inputStream2Length(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {
         byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
-        int length;
-        int ret = 0;
+        long length;
+        long ret = 0;
         while ((length = inputStream.read(buffer)) != -1) {
             if (durationInMilliseconds(startTime, Instant.now()) > timeout)
                 throw new TimeoutException("reading the answer timed out");
