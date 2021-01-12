@@ -1,5 +1,7 @@
 package org.aksw.iguana.commons.streams;
 
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +22,7 @@ public class Streams {
      * @return the content of inputStream as a string.
      * @throws IOException from inputStream.read
      */
-    static public String inputStream2String(InputStream inputStream) throws IOException {
+    static public ByteArrayOutputStream inputStream2String(InputStream inputStream) throws IOException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         try {
             inputStream2ByteArrayOutputStream(inputStream, null, -1.0, result);
@@ -28,7 +30,7 @@ public class Streams {
             // never happens
             System.exit(-1);
         }
-        return result.toString(StandardCharsets.UTF_8.name());
+        return result;
     }
 
     /**
@@ -41,10 +43,10 @@ public class Streams {
      * @throws IOException      from inputStream.read
      * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceed
      */
-    static public String inputStream2String(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {
+    static public ByteArrayOutputStream inputStream2String(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         inputStream2ByteArrayOutputStream(inputStream, startTime, timeout, result);
-        return result.toString(StandardCharsets.UTF_8.name());
+        return result;
     }
 
     /**
@@ -58,7 +60,7 @@ public class Streams {
      * @throws IOException      from inputStream.read
      * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceed
      */
-    public static int inputStream2ByteArrayOutputStream(InputStream inputStream, Instant startTime, double timeout, ByteArrayOutputStream result) throws IOException, TimeoutException {
+    public static long inputStream2ByteArrayOutputStream(InputStream inputStream, Instant startTime, double timeout, ByteArrayOutputStream result) throws IOException, TimeoutException {
         assert (result != null);
         boolean enable_timeout = timeout > 0;
         byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
@@ -79,14 +81,13 @@ public class Streams {
      * @return size of the output stream
      * @throws IOException from inputStream.read
      */
-    public static int inputStream2ByteArrayOutputStream(InputStream inputStream, ByteArrayOutputStream result) throws IOException {
-        assert (result != null);
-        byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
-        int length;
-        while ((length = inputStream.read(buffer)) != -1) {
-            result.write(buffer, 0, length);
+    public static long inputStream2ByteArrayOutputStream(InputStream inputStream, ByteArrayOutputStream result) throws IOException {
+        try {
+            return inputStream2ByteArrayOutputStream(inputStream, Instant.now(), -1, result);
+        }catch(TimeoutException e){
+            //will never happen
+            return 0;
         }
-        return result.size();
     }
 
     /**

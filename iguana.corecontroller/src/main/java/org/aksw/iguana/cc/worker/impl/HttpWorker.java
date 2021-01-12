@@ -8,6 +8,7 @@ import org.aksw.iguana.cc.model.QueryResultHashKey;
 import org.aksw.iguana.cc.worker.AbstractRandomQueryChooserWorker;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -192,7 +193,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                 // read content stream
                 //Stream in resultProcessor, return length, set string in StringBuilder.
                 ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
-                int length = resultProcessor.readResponse(inputStream, responseBody);
+                long length = resultProcessor.readResponse(inputStream, responseBody);
 
                 // check if such a result was already parsed and is cached
                 double duration = durationInMilliseconds(requestStartTime, Instant.now());
@@ -258,9 +259,9 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         private final double duration;
         private final Header contentTypeHeader;
         private ByteArrayOutputStream contentStream;
-        private final int contentLength;
+        private final long contentLength;
 
-        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, ByteArrayOutputStream contentStream, int contentLength) {
+        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, ByteArrayOutputStream contentStream, long contentLength) {
             this.httpWorker = httpWorker;
             this.queryId = queryId;
             this.duration = duration;
@@ -276,9 +277,10 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             ConcurrentMap<QueryResultHashKey, Long> processedResults = httpWorker.getProcessedResults();
             QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, contentLength);
             try {
-                String content = contentStream.toString(StandardCharsets.UTF_8.name());
-                contentStream = null; // might be hugh, dereference immediately after consumed
-                Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, content);
+                //String content = contentStream.toString(StandardCharsets.UTF_8.name());
+                //contentStream = null; // might be hugh, dereference immediately after consumed
+                Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, contentStream);
+                contentStream = null;
                 // Save the result size to be re-used
                 processedResults.put(resultCacheKey, resultSize);
                 LOGGER.debug("added Result Cache Key {}", resultCacheKey);

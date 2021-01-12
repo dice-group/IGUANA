@@ -47,17 +47,17 @@ public abstract class AbstractLanguageProcessor implements LanguageProcessor {
     }
 
     @Override
-    public Long getResultSize(Header contentTypeHeader, String content) throws ParserConfigurationException, SAXException, ParseException, IOException {
-        return Long.valueOf(content.length());
+    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException {
+        return content.size();
     }
 
     @Override
-    public int readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException {
+    public long readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException {
         return Streams.inputStream2ByteArrayOutputStream(inputStream, responseBody);
     }
 
     @Override
-    public int readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException {
+    public long readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException {
         return Streams.inputStream2ByteArrayOutputStream(inputStream, startTime, timeOut, responseBody);
     }
 }

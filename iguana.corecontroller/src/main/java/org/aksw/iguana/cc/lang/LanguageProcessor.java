@@ -47,10 +47,10 @@ public interface LanguageProcessor {
      */
     Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
-    Long getResultSize(Header contentTypeHeader, String content) throws ParserConfigurationException, SAXException, ParseException, IOException;
+    Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
 
-    int readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException;
+    long readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException;
 
-    int readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException;
+    long readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException;
 }

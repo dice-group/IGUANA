@@ -22,10 +22,10 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -71,10 +71,11 @@ public class RDFLanguageProcessor extends AbstractLanguageProcessor implements L
     }
 
     @Override
-    public Long getResultSize(Header contentTypeHeader, String content) throws IOException {
+    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws IOException {
         Model m;
         try {
-            InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+            //TODO BBAIS
+            InputStream inputStream = new ByteArrayInputStream(content.toByteArray());
             m = getModel(contentTypeHeader, inputStream);
         } catch (IllegalAccessException e) {
             LOGGER.error("Could not read response as model", e);
