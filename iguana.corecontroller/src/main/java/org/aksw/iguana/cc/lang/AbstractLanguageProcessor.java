@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.lang;
 
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.aksw.iguana.commons.streams.Streams;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.http.Header;
@@ -47,17 +48,17 @@ public abstract class AbstractLanguageProcessor implements LanguageProcessor {
     }
 
     @Override
-    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException {
-        return content.size();
+    public Long getResultSize(Header contentTypeHeader, BigByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException {
+        return Long.valueOf(content.size());
     }
 
     @Override
-    public long readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException {
+    public long readResponse(InputStream inputStream, BigByteArrayOutputStream responseBody) throws IOException {
         return Streams.inputStream2ByteArrayOutputStream(inputStream, responseBody);
     }
 
     @Override
-    public long readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException {
+    public long readResponse(InputStream inputStream, Instant startTime, Double timeOut, BigByteArrayOutputStream responseBody) throws IOException, TimeoutException {
         return Streams.inputStream2ByteArrayOutputStream(inputStream, startTime, timeOut, responseBody);
     }
 }

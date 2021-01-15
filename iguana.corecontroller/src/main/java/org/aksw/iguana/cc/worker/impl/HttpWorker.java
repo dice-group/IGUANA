@@ -49,6 +49,8 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     protected boolean requestTimedOut = false;
     protected String queryId;
     protected Instant requestStartTime;
+    protected long tmpExecutedQueries = 0;
+
 
 
     public HttpWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
@@ -192,9 +194,9 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             try (InputStream inputStream = httpResponse.getContent()) {
                 // read content stream
                 //Stream in resultProcessor, return length, set string in StringBuilder.
-                ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
+                BigByteArrayOutputStream responseBody = new BigByteArrayOutputStream();
                 long length = resultProcessor.readResponse(inputStream, responseBody);
-
+                tmpExecutedQueries++;
                 // check if such a result was already parsed and is cached
                 double duration = durationInMilliseconds(requestStartTime, Instant.now());
                 synchronized (this) {
@@ -258,10 +260,10 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         private final String queryId;
         private final double duration;
         private final Header contentTypeHeader;
-        private ByteArrayOutputStream contentStream;
+        private BigByteArrayOutputStream contentStream;
         private final long contentLength;
 
-        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, ByteArrayOutputStream contentStream, long contentLength) {
+        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, BigByteArrayOutputStream contentStream, long contentLength) {
             this.httpWorker = httpWorker;
             this.queryId = queryId;
             this.duration = duration;

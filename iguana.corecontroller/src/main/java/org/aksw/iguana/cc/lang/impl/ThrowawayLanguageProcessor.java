@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 public class ThrowawayLanguageProcessor extends AbstractLanguageProcessor {
 
     @Override
-    public long readResponse(InputStream inputStream, Instant startTime, Double timeOut, ByteArrayOutputStream responseBody) throws IOException, TimeoutException {
+    public long readResponse(InputStream inputStream, Instant startTime, Double timeOut, BigByteArrayOutputStream responseBody) throws IOException, TimeoutException {
         return Streams.inputStream2Length(inputStream, startTime, timeOut);
     }
 

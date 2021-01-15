@@ -7,17 +7,48 @@ public class BigByteArrayInputStream extends InputStream {
 
     private BigByteArrayOutputStream bbaos;
 
+    private byte[] curArray;
+    private int curPos=0;
+    private int curPosInArray=0;
+
     public BigByteArrayInputStream(byte[] bytes) throws IOException {
         bbaos = new BigByteArrayOutputStream();
         bbaos.write(bytes);
+        setNextArray();
     }
 
     public BigByteArrayInputStream(BigByteArrayOutputStream bbaos){
         this.bbaos = bbaos;
+        setNextArray();
+    }
+
+    private void setNextArray(){
+        curArray=bbaos.getBaos().get(curPos++).toByteArray();
     }
 
     @Override
     public int read() throws IOException {
-        return 0;
+        if(eos()){
+            return -1;
+        }
+        int ret;
+        //Is it Integer.MAX_VALUE or Integer.MAX_VALUE-1?
+        if(curPosInArray==Integer.MAX_VALUE){
+            ret = curArray[curPosInArray];
+            curPosInArray=0;
+            setNextArray();
+        }
+        else{
+            ret=curArray[curPosInArray++];
+        }
+        return ret ;
+    }
+
+    private boolean eos() {
+        //if the current Position is equal the length of the array, this is the last array in bbaos and the last element was already read
+        if(curArray.length==curPosInArray){
+            return true;
+        }
+        return false;
     }
 }

@@ -5,6 +5,8 @@ import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.commons.io.BigByteArrayInputStream;
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -71,11 +73,11 @@ public class RDFLanguageProcessor extends AbstractLanguageProcessor implements L
     }
 
     @Override
-    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws IOException {
+    public Long getResultSize(Header contentTypeHeader, BigByteArrayOutputStream content) throws IOException {
         Model m;
         try {
             //TODO BBAIS
-            InputStream inputStream = new ByteArrayInputStream(content.toByteArray());
+            InputStream inputStream = new BigByteArrayInputStream(content);
             m = getModel(contentTypeHeader, inputStream);
         } catch (IllegalAccessException e) {
             LOGGER.error("Could not read response as model", e);

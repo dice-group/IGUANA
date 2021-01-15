@@ -22,7 +22,6 @@ import java.net.URLEncoder;
 public class HttpPostWorker extends HttpGetWorker {
 
     private String contentType = "text/plain";
-    protected long tmpExecutedQueries = 0;
 
 
     public HttpPostWorker(String taskID, Connection connection, String queriesFile, @Nullable String contentType, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType, Integer workerID) {

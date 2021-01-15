@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -69,13 +70,13 @@ public class SPARQLLanguageProcessorTest {
 
     @Test
     public void checkJSON() throws ParseException, IOException {
-        ByteArrayOutputStream bbaos = new ByteArrayOutputStream();
+        BigByteArrayOutputStream bbaos = new BigByteArrayOutputStream();
         bbaos.write(jsonResult.getBytes());
         assertEquals(3, SPARQLLanguageProcessor.getJsonResultSize(bbaos));
         //test if valid json response provide 0 bindings
         try {
             //check if invalid json throws exception
-            bbaos = new ByteArrayOutputStream();
+            bbaos = new BigByteArrayOutputStream();
             bbaos.write("{ \"a\": \"b\"}".getBytes());
             SPARQLLanguageProcessor.getJsonResultSize(bbaos);
             assertTrue("Should have thrown an error", false);
@@ -84,7 +85,7 @@ public class SPARQLLanguageProcessorTest {
         }
         try {
             //check if invalid json throws exception
-            bbaos = new ByteArrayOutputStream();
+            bbaos = new BigByteArrayOutputStream();
             bbaos.write("{ \"a\": \"b\"".getBytes());
             SPARQLLanguageProcessor.getJsonResultSize(bbaos);
             assertTrue("Should have thrown an error", false);
@@ -95,13 +96,13 @@ public class SPARQLLanguageProcessorTest {
 
     @Test
     public void checkXML() throws IOException, SAXException, ParserConfigurationException {
-        ByteArrayOutputStream bbaos = new ByteArrayOutputStream();
-        bbaos.write(xmlResult.getBytes());
+        BigByteArrayOutputStream bbaos = new BigByteArrayOutputStream();
+        bbaos.write(xmlResult.getBytes(StandardCharsets.UTF_8));
         assertEquals(2, SPARQLLanguageProcessor.getXmlResultSize(bbaos));
         //test if valid xml response provide 0 bindings
         try {
             //check if invalid xml throws exception
-            bbaos = new ByteArrayOutputStream();
+            bbaos = new BigByteArrayOutputStream();
             bbaos.write("<a>b</a>".getBytes());
             SPARQLLanguageProcessor.getJsonResultSize(bbaos);
             assertTrue("Should have thrown an error", false);
@@ -110,7 +111,7 @@ public class SPARQLLanguageProcessorTest {
         }
         try {
             //check if invalid xml throws exception
-            bbaos = new ByteArrayOutputStream();
+            bbaos = new BigByteArrayOutputStream();
             bbaos.write("{ \"a\": \"b\"".getBytes());
             SPARQLLanguageProcessor.getJsonResultSize(bbaos);
             assertTrue("Should have thrown an error", false);

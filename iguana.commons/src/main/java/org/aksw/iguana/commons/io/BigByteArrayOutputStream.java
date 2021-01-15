@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,10 @@ public class BigByteArrayOutputStream extends OutputStream {
         baos.add(new ByteArrayOutputStream());
     }
 
+
+    public List<ByteArrayOutputStream> getBaos() {
+        return baos;
+    }
 
     public void write(BigByteArrayOutputStream bbaos) throws IOException {
         for (byte[] bao : bbaos.toByteArray()) {
@@ -82,6 +87,10 @@ public class BigByteArrayOutputStream extends OutputStream {
             builder.append(baos.toString(charset));
         }
         return builder.toString();
+    }
+
+    public String toString(Charset charset) throws UnsupportedEncodingException {
+        return toString(charset.toString());
     }
 
     public Long countMatches(char s) {
