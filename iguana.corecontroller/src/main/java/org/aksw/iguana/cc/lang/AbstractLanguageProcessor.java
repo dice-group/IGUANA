@@ -57,7 +57,7 @@ public abstract class AbstractLanguageProcessor implements LanguageProcessor {
         return Streams.inputStream2ByteArrayOutputStream(inputStream, responseBody);
     }
 
-    @Override
+    //@Override
     public long readResponse(InputStream inputStream, Instant startTime, Double timeOut, BigByteArrayOutputStream responseBody) throws IOException, TimeoutException {
         return Streams.inputStream2ByteArrayOutputStream(inputStream, startTime, timeOut, responseBody);
     }

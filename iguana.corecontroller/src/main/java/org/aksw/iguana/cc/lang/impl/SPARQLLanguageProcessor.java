@@ -164,7 +164,7 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
         return getResultSize(contentTypeHeader, entity);
     }
 
-    @Override
+    //@Override
     public Long getResultSize(Header contentTypeHeader, BigByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException {
         try {
             switch (getContentTypeVal(contentTypeHeader)) {

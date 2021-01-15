@@ -53,5 +53,4 @@ public interface LanguageProcessor {
 
     long readResponse(InputStream inputStream, BigByteArrayOutputStream responseBody) throws IOException;
 
-    long readResponse(InputStream inputStream, Instant startTime, Double timeOut, BigByteArrayOutputStream responseBody) throws IOException, TimeoutException;
 }
