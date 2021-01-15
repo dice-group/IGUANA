@@ -33,7 +33,7 @@ public class BigByteArrayInputStream extends InputStream {
         }
         int ret;
 
-        if(curPosInArray==Integer.MAX_VALUE-3){
+        if(curPosInArray==2147483639){
             ret = curArray[curPosInArray];
             curPosInArray=0;
             setNextArray();
