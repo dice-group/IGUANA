@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.lang.impl;
 
 import org.aksw.iguana.cc.lang.AbstractLanguageProcessor;
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.aksw.iguana.commons.streams.Streams;
 
@@ -10,6 +11,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.concurrent.TimeoutException;
 
+@Shorthand("lang.SIMPLE")
 public class ThrowawayLanguageProcessor extends AbstractLanguageProcessor {
 
     @Override
