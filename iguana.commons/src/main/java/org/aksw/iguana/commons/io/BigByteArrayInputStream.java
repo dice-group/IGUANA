@@ -32,8 +32,8 @@ public class BigByteArrayInputStream extends InputStream {
             return -1;
         }
         int ret;
-        //Is it Integer.MAX_VALUE or Integer.MAX_VALUE-1?
-        if(curPosInArray==Integer.MAX_VALUE){
+
+        if(curPosInArray==Integer.MAX_VALUE-3){
             ret = curArray[curPosInArray];
             curPosInArray=0;
             setNextArray();
