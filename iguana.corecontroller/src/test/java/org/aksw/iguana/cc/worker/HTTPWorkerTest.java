@@ -54,12 +54,14 @@ public class HTTPWorkerTest {
         //get tests
         testData.add(new Object[]{"Random Text", "doc1", "text/plain", "text", 100,50, false, false});
         testData.add(new Object[]{UUID.randomUUID().toString(), UUID.randomUUID().toString(), "text/plain", "text", 100,50, false, false});
+
         testData.add(new Object[]{"Random Text", "doc1", "text/plain", "test", 100,50, true, false});
         testData.add(new Object[]{"Random Text", "doc1", null, "text", 100,50, false, false});
 
         //post tests
         testData.add(new Object[]{"Random Text", "doc1", "text/plain", "text", 100,50, false, true});
         testData.add(new Object[]{UUID.randomUUID().toString(), UUID.randomUUID().toString(), "text/plain", "text", 100,50, false, true});
+
         testData.add(new Object[]{"Random Text", "doc1", "text/plain", "test", 100,50, true, true});
         testData.add(new Object[]{"Random Text", "doc1", "text/plain", null, 100,50,  true, true});
         testData.add(new Object[]{"Random Text", "doc1", null, "text", 100,50, false, true});

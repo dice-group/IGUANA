@@ -8,16 +8,24 @@ import org.aksw.iguana.cc.model.QueryResultHashKey;
 import org.aksw.iguana.cc.worker.AbstractRandomQueryChooserWorker;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.concurrent.*;
 
@@ -29,143 +37,265 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
 
 
-    private ExecutorService resultProcessorService = Executors.newFixedThreadPool(5);
+    protected final ExecutorService resultProcessorService = Executors.newFixedThreadPool(5);
+    protected ScheduledThreadPoolExecutor timeoutExecutorPool = new ScheduledThreadPoolExecutor(1);
     protected ConcurrentMap<QueryResultHashKey, Long> processedResults = new ConcurrentHashMap<>();
     protected LanguageProcessor resultProcessor = new SPARQLLanguageProcessor();
+    protected CloseableHttpClient client;
+    protected HttpRequestBase request;
+    protected ScheduledFuture<?> abortCurrentRequestFuture;
+    protected CloseableHttpResponse response;
+    protected boolean resultsSaved = false;
+    protected boolean requestTimedOut = false;
+    protected String queryId;
+    protected Instant requestStartTime;
+    protected long tmpExecutedQueries = 0;
 
 
-    public HttpWorker(String taskID, Connection connection, String queriesFile, @Nullable  Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
+
+    public HttpWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
         super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
+        timeoutExecutorPool.setRemoveOnCancelPolicy(true);
     }
-
 
     public ConcurrentMap<QueryResultHashKey, Long> getProcessedResults() {
         return processedResults;
     }
 
-    public void shutdownResultProcessor()
-    {
+    protected void setTimeout(int timeOut) {
+        assert (request != null);
+        abortCurrentRequestFuture = timeoutExecutorPool.schedule(
+                () -> {
+                    synchronized (this) {
+                        request.abort();
+                        requestTimedOut = true;
+                    }
+                },
+                timeOut, TimeUnit.MILLISECONDS);
+    }
+
+    protected void abortTimeout() {
+        if (!abortCurrentRequestFuture.isDone())
+            abortCurrentRequestFuture.cancel(false);
+    }
+
+
+    @Override
+    public void stopSending() {
+        super.stopSending();
+        abortTimeout();
+        try {
+            if (request != null && !request.isAborted())
+                request.abort();
+        } catch (Exception ignored) {
+        }
+        closeClient();
+        this.shutdownResultProcessor();
+    }
+
+
+    public void shutdownResultProcessor() {
         this.resultProcessorService.shutdown();
         try {
-            this.resultProcessorService.awaitTermination(3000, TimeUnit.MILLISECONDS);
+            boolean finished = this.resultProcessorService.awaitTermination(3000, TimeUnit.MILLISECONDS);
+            if (!finished) {
+                LOGGER.error("Result Processor could be shutdown orderly. Terminating.");
+                this.resultProcessorService.shutdownNow();
+            }
         } catch (InterruptedException e) {
             LOGGER.error("Could not shut down http result processor: " + e.getLocalizedMessage());
         }
+
+        try {
+            boolean finished = this.timeoutExecutorPool.awaitTermination(3000, TimeUnit.MILLISECONDS);
+            if (!finished) {
+                LOGGER.error("Timeout Executor could be shutdown orderly. Terminating.");
+                this.timeoutExecutorPool.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Could not shut down http timout executor: " + e.getLocalizedMessage());
+        }
     }
 
-    protected void processHttpResponse(String queryId, Instant startTime, CloseableHttpClient client, CloseableHttpResponse response) {
-        double duration = durationInMilliseconds(startTime, Instant.now());
-        // check if query execution took longer than timeout
-
-        if (this.timeOut < duration) {
-            this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, duration));
-            closeHttp(client, response);
-            return;
-        }
-
-        // check if there was a problem with http response
+    boolean checkResponseStatus() {
         int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode != 200) {
-            this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
-            closeHttp(client, response);
-            return;
-        }
-
-        // Check if the result of this query is already saved, if yes then use the saved result size instead of
-        // processing the http response again
-        HttpEntity httpResponse = response.getEntity();
-        ConcurrentMap<QueryResultHashKey, Long> processedResults = this.getProcessedResults();
-        QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, httpResponse.getContentLength());
-        if(processedResults.containsKey(resultCacheKey))
-        {
-            LOGGER.debug("found result cache key {} ", resultCacheKey);
-            Long preCalculatedResultSize = processedResults.get(resultCacheKey);
-            this.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, preCalculatedResultSize));
-            closeHttp(client, response);
-            return;
-        }
-
-        if(!this.endSignal) {
-            resultProcessorService.submit(new HttpResultProcessor(this, this.timeOut, queryId, duration, client, response, httpResponse.getContentLength()));
+        if (responseCode == 200) {
+            return true;
         } else {
-            this.shutdownResultProcessor();
-            closeHttp(client, response);
+            double duration = durationInMilliseconds(requestStartTime, Instant.now());
+            addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
+            return false;
         }
     }
 
-    protected void closeHttp(CloseableHttpClient client, CloseableHttpResponse response){
-        try {
-            client.close();
-        } catch (IOException e) {
-            LOGGER.error("Could not close http response ", e);
+    synchronized protected void addResultsOnce(QueryExecutionStats queryExecutionStats) {
+        if (!resultsSaved) {
+            this.addResults(queryExecutionStats);
+            resultsSaved = true;
         }
-        try {
-            response.close();
-        } catch (IOException e) {
-            LOGGER.error("Could not close Client ", e);
-        }
-    }
-
-}
-
-/**
- * Http Result Processor, analyzes the http response in the background, if it was cached already, what is the result size,
- * did the response was a success or failure.
- */
-class HttpResultProcessor implements Runnable{
-
-    private final long contentLength;
-    private final CloseableHttpClient client;
-    private Logger LOGGER = LoggerFactory.getLogger(getClass());
-
-    private final double timeOut;
-    private final HttpWorker httpWorker;
-    private String queryId;
-    private double duration;
-    private CloseableHttpResponse response;
-
-    public HttpResultProcessor(HttpWorker httpWorker, Double timeOut, String queryId, double duration, CloseableHttpClient client, CloseableHttpResponse response, long contentLength)
-    {
-        this.httpWorker = httpWorker;
-        this.timeOut = timeOut;
-        this.queryId = queryId;
-        this.duration = duration;
-        this.response = response;
-        this.contentLength = contentLength;
-        this.client=client;
     }
 
     @Override
-    public void run() {
+    public void executeQuery(String query, String queryID) {
+        requestStartTime = Instant.now();
+        queryId = queryID;
+        resultsSaved = false;
+        requestTimedOut = false;
 
-        // Result size is not saved before. Process the http response.
+        if (client == null)
+            initClient();
 
-        ConcurrentMap<QueryResultHashKey, Long> processedResults = httpWorker.getProcessedResults();
-        QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, contentLength);
         try {
+            buildRequest(query, queryId);
 
-            Long resultSize = httpWorker.resultProcessor.getResultSize(response);
-            // Save the result size to be re-used
-            processedResults.put(resultCacheKey, resultSize);
-            LOGGER.debug("added Result Cache Key {}", resultCacheKey);
+            setTimeout(timeOut.intValue());
 
-            httpWorker.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, resultSize));
+            response = client.execute(request, getAuthContext(con.getEndpoint()));
+            // method to process the result in background
+            processHttpResponse();
 
-        } catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
-            LOGGER.error("Query results could not be parsed. ", e);
-            httpWorker.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_UNKNOWN_EXCEPTION, duration));
-        }
-        finally {
-            try {
-                response.close();
-            } catch (IOException e) {
-                LOGGER.error("Could not close http response ", e);
+            abortTimeout();
+
+        } catch (ClientProtocolException e) {
+            handleException(query, COMMON.QUERY_HTTP_FAILURE, e);
+        } catch (IOException e) {
+            if (requestTimedOut) {
+                LOGGER.warn("Worker[{} : {}]: Reached timout on query (ID {})\n{}",
+                        this.workerType, this.workerID, queryId, query);
+                addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, timeOut));
+            } else {
+                handleException(query, COMMON.QUERY_UNKNOWN_EXCEPTION, e);
             }
-            try{
-                client.close();
+        } catch (Exception e) {
+            handleException(query, COMMON.QUERY_UNKNOWN_EXCEPTION, e);
+        } finally {
+            abortTimeout();
+            closeResponse();
+        }
+    }
+
+    private void handleException(String query, Long cause, Exception e) {
+        double duration = durationInMilliseconds(requestStartTime, Instant.now());
+        addResultsOnce(new QueryExecutionStats(queryId, cause, duration));
+        LOGGER.warn("Worker[{} : {}]: {} on query (ID {})\n{}",
+                this.workerType, this.workerID, e.getMessage(), queryId, query);
+        closeClient();
+        initClient();
+    }
+
+    protected void processHttpResponse() {
+        // check if query execution took already longer than timeout
+        boolean responseCodeOK = checkResponseStatus();
+        if (responseCodeOK) { // response status is OK (200)
+            // get content type header
+            HttpEntity httpResponse = response.getEntity();
+            Header contentTypeHeader = new BasicHeader(httpResponse.getContentType().getName(), httpResponse.getContentType().getValue());
+            // get content stream
+            try (InputStream inputStream = httpResponse.getContent()) {
+                // read content stream
+                //Stream in resultProcessor, return length, set string in StringBuilder.
+                BigByteArrayOutputStream responseBody = new BigByteArrayOutputStream();
+                long length = resultProcessor.readResponse(inputStream, responseBody);
+                tmpExecutedQueries++;
+                // check if such a result was already parsed and is cached
+                double duration = durationInMilliseconds(requestStartTime, Instant.now());
+                synchronized (this) {
+                    QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, length);
+                    if (processedResults.containsKey(resultCacheKey)) {
+                        LOGGER.debug("found result cache key {} ", resultCacheKey);
+                        Long preCalculatedResultSize = processedResults.get(resultCacheKey);
+                        addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, preCalculatedResultSize));
+                    } else {
+                        // otherwise: parse it. The parsing result is cached for the next time.
+                        if (!this.endSignal) {
+                            resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, responseBody, length));
+                            resultsSaved = true;
+                        }
+                    }
+                }
+
             } catch (IOException e) {
-                LOGGER.error("Could not close Client ", e);
+                double duration = durationInMilliseconds(requestStartTime, Instant.now());
+                addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
+            }
+        }
+    }
+
+    abstract void buildRequest(String query, String queryID) throws UnsupportedEncodingException;
+
+    protected void initClient() {
+        client = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build();
+    }
+
+    protected void closeClient() {
+        closeResponse();
+        try {
+            if (client != null)
+                client.close();
+        } catch (IOException e) {
+            LOGGER.error("Could not close http response ", e);
+        }
+        client = null;
+    }
+
+    protected void closeResponse() {
+        try {
+            if (response != null)
+                response.close();
+        } catch (IOException e) {
+            LOGGER.error("Could not close Client ", e);
+        }
+        response = null;
+    }
+
+    /**
+     * Http Result Processor, analyzes the http response in the background, if it was cached already, what is the result size,
+     * did the response was a success or failure.
+     */
+    static class HttpResultProcessor implements Runnable {
+
+        private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
+        private final HttpWorker httpWorker;
+        private final String queryId;
+        private final double duration;
+        private final Header contentTypeHeader;
+        private BigByteArrayOutputStream contentStream;
+        private final long contentLength;
+
+        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, BigByteArrayOutputStream contentStream, long contentLength) {
+            this.httpWorker = httpWorker;
+            this.queryId = queryId;
+            this.duration = duration;
+            this.contentTypeHeader = contentTypeHeader;
+            this.contentStream = contentStream;
+            this.contentLength = contentLength;
+        }
+
+        @Override
+        public void run() {
+            // Result size is not saved before. Process the http response.
+
+            ConcurrentMap<QueryResultHashKey, Long> processedResults = httpWorker.getProcessedResults();
+            QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, contentLength);
+            try {
+                //String content = contentStream.toString(StandardCharsets.UTF_8.name());
+                //contentStream = null; // might be hugh, dereference immediately after consumed
+                Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, contentStream);
+                contentStream = null;
+                // Save the result size to be re-used
+                processedResults.put(resultCacheKey, resultSize);
+                LOGGER.debug("added Result Cache Key {}", resultCacheKey);
+
+                httpWorker.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, resultSize));
+
+            } catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
+                LOGGER.error("Query results could not be parsed. ", e);
+                httpWorker.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_UNKNOWN_EXCEPTION, duration));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
 }
+

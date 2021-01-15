@@ -43,6 +43,8 @@ public class MainController {
 			config = argc[1];
 		}
 		controller.start(config, validate);
+		LOGGER.info("Stopping Iguana");
+		//System.exit(0);
 	}
 
 	/**

@@ -1,13 +1,19 @@
 package org.aksw.iguana.cc.lang;
 
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
+import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.jena.rdf.model.Model;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Language Processor tells how to handle Http responses as well as how to analyze queries and generate stats.
@@ -42,5 +48,9 @@ public interface LanguageProcessor {
      */
     Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
+    Long getResultSize(Header contentTypeHeader, BigByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException;
+
+
+    long readResponse(InputStream inputStream, BigByteArrayOutputStream responseBody) throws IOException;
 
 }
