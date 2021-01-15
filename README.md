@@ -91,7 +91,7 @@ Please download the release zip **iguana-x.y.z.zip** from the newest release ava
 
 ```
 mkdir iguana
-wget https://github.com/dice-group/IGUANA/releases/download/v3.2-rc1/iguana-3.2.0-rc1.zip
+wget https://github.com/dice-group/IGUANA/releases/download/v3.2.0-rc1/iguana-3.2.0-rc1.zip
 unzip iguana-3.2.0-rc1.zip
 ```
 
@@ -107,7 +107,7 @@ It contains the following files:
 ## Create a Configuration
 
 You can use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/example-suite.yml) we provide and modify it to your needs.
-For further information please visit our [configuration](http://iguana-benchmark.eu/docs/3.0/usage/configuration/) and [Stresstest](http://iguana-benchmark.eu/docs/3.0/usage/stresstest/) wiki pages. For a detailed, step-by-step instruction please attend our [tutorial](http://iguana-benchmark.eu/docs/3.0/usage/tutorial/).
+For further information please visit our [configuration](http://iguana-benchmark.eu/docs/3.2/usage/configuration/) and [Stresstest](http://iguana-benchmark.eu/docs/3.0/usage/stresstest/) wiki pages. For a detailed, step-by-step instruction please attend our [tutorial](http://iguana-benchmark.eu/docs/3.2/usage/tutorial/).
 
 ## Execute the Benchmark
 
