@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.lang;
 
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -11,9 +12,11 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -66,19 +69,25 @@ public class SPARQLLanguageProcessorTest {
 
 
     @Test
-    public void checkJSON() throws ParseException {
-        assertEquals(3, SPARQLLanguageProcessor.getJsonResultSize(jsonResult));
+    public void checkJSON() throws ParseException, IOException {
+        BigByteArrayOutputStream bbaos = new BigByteArrayOutputStream();
+        bbaos.write(jsonResult.getBytes());
+        assertEquals(3, SPARQLLanguageProcessor.getJsonResultSize(bbaos));
         //test if valid json response provide 0 bindings
         try {
             //check if invalid json throws exception
-            SPARQLLanguageProcessor.getJsonResultSize("{ \"a\": \"b\"}");
+            bbaos = new BigByteArrayOutputStream();
+            bbaos.write("{ \"a\": \"b\"}".getBytes());
+            SPARQLLanguageProcessor.getJsonResultSize(bbaos);
             assertTrue("Should have thrown an error", false);
         }catch(Exception e){
             assertTrue(true);
         }
         try {
             //check if invalid json throws exception
-            SPARQLLanguageProcessor.getJsonResultSize("{ \"a\": \"b\"");
+            bbaos = new BigByteArrayOutputStream();
+            bbaos.write("{ \"a\": \"b\"".getBytes());
+            SPARQLLanguageProcessor.getJsonResultSize(bbaos);
             assertTrue("Should have thrown an error", false);
         }catch(Exception e){
             assertTrue(true);
@@ -87,18 +96,24 @@ public class SPARQLLanguageProcessorTest {
 
     @Test
     public void checkXML() throws IOException, SAXException, ParserConfigurationException {
-        assertEquals(2, SPARQLLanguageProcessor.getXmlResultSize(xmlResult));
+        BigByteArrayOutputStream bbaos = new BigByteArrayOutputStream();
+        bbaos.write(xmlResult.getBytes(StandardCharsets.UTF_8));
+        assertEquals(2, SPARQLLanguageProcessor.getXmlResultSize(bbaos));
         //test if valid xml response provide 0 bindings
         try {
             //check if invalid xml throws exception
-            SPARQLLanguageProcessor.getJsonResultSize("<a>b</a>");
+            bbaos = new BigByteArrayOutputStream();
+            bbaos.write("<a>b</a>".getBytes());
+            SPARQLLanguageProcessor.getJsonResultSize(bbaos);
             assertTrue("Should have thrown an error", false);
         }catch(Exception e){
             assertTrue(true);
         }
         try {
             //check if invalid xml throws exception
-            SPARQLLanguageProcessor.getJsonResultSize("{ \"a\": \"b\"");
+            bbaos = new BigByteArrayOutputStream();
+            bbaos.write("{ \"a\": \"b\"".getBytes());
+            SPARQLLanguageProcessor.getJsonResultSize(bbaos);
             assertTrue("Should have thrown an error", false);
         }catch(Exception e){
             assertTrue(true);

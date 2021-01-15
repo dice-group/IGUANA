@@ -1,9 +1,12 @@
 package org.aksw.iguana.cc.lang.impl;
 
+import org.aksw.iguana.cc.lang.AbstractLanguageProcessor;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.commons.io.BigByteArrayInputStream;
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,10 +24,10 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -33,7 +36,7 @@ import java.util.List;
  * Counts triples returned as ResultSize
  */
 @Shorthand("lang.RDF")
-public class RDFLanguageProcessor implements LanguageProcessor {
+public class RDFLanguageProcessor extends AbstractLanguageProcessor implements LanguageProcessor {
 
     private static Logger LOGGER = LoggerFactory.getLogger(RDFLanguageProcessor.class);
     protected String queryPrefix="document";
@@ -70,10 +73,11 @@ public class RDFLanguageProcessor implements LanguageProcessor {
     }
 
     @Override
-    public Long getResultSize(Header contentTypeHeader, String content) throws IOException {
+    public Long getResultSize(Header contentTypeHeader, BigByteArrayOutputStream content) throws IOException {
         Model m;
         try {
-            InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+            //TODO BBAIS
+            InputStream inputStream = new BigByteArrayInputStream(content);
             m = getModel(contentTypeHeader, inputStream);
         } catch (IllegalAccessException e) {
             LOGGER.error("Could not read response as model", e);
