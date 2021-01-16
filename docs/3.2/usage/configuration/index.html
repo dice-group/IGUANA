@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Configuration - Iguana 3.2 Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+    
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Configuration";
+    var mkdocs_page_input_path = "usage/configuration.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+	
+    <link  rel="stylesheet" href="../../css/custom.css"></link>
+ 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-179945559-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-179945559-1');
+</script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search" style="background-color: #82BDC3 !important;">
+        <img src="../../images/Iguana_new_logo6.png" class="iguana-icon"/>
+        <a href="../.."> Iguana 3.2 Documentation</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> General</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../about/">About</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../architecture/">Architecture</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> Quick Start Guide</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../download/">Download</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../quick-config/">Quick Configuration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../run-iguana/">Run Iguana</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul class="current"> 
+        <p  class="fa fa-caret-right  ddButton caption   active  currentSite"><span class="caption-text"> Usage</span>
+ 	<ul class="dd-container  active">
+                    <li class="toctree-l1"><a class="reference internal " href="../workflow/">Workflow</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Configuration</a>
+    <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#connections">Connections</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#datasets">Datasets</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tasks">Tasks</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#storages">Storages</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#metrics">Metrics</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#task-script-hooks">Task script hooks</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#full-example">Full Example</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#shorthand">Shorthand</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../stresstest/">Stresstest</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../workers/">Supported Workers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../queries/">Supported Queries</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../languages/">Supported Languages</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../metrics/">Metrics</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../results/">Benchmark Results</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../tutorial/">Tutorial</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> Development</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../develop/overview/">Overview</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="#">Extend</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-task/">Tasks</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-workers/">Workers</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-queryhandling/">Query Handling</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-lang/">Languages</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-result-storages/">Result storage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-metrics/">Metrics</a>
+                </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="#">Use Iguana</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/maven/">Maven</a>
+                </li>
+                <li class="toctree-l2"><a class="" href="http://iguana-benchmark.eu/javadoc/3.x/index.html">Javadoc</a>
+                </li>
+    </ul>
+                    </li>
+                </ul>
+
+              </ul>
+
+      </div>
+    </div>
+    <div style="height: 2em;"/>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Iguana 3.2 Documentation</a>
+
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Usage &raquo;</li>
+        
+      
+    
+    <li>Configuration</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="configuration">Configuration</h1>
+<p>The Configuration explains Iguana how to execute your benchmark. It is divided into 5 categories</p>
+<ul>
+<li>Connections</li>
+<li>Datasets</li>
+<li>Tasks</li>
+<li>Storages</li>
+<li>Metrics</li>
+</ul>
+<p>Additionally a pre and post task script hook can be set. </p>
+<p>The configuration has to be either in YAML or JSON. Each section will be detailed out and shows configuration examples. At the end the full configuration will be shown. 
+For this we will stick to the YAML format, however the equivalent JSON is also valid and can be parsed by Iguana.</p>
+<h3 id="connections">Connections</h3>
+<p>Every benchmark suite can execute several connections (e.g. an HTTP endpoint, or a CLI application). 
+A connection has the following items</p>
+<ul>
+<li>name - the name you want to give the connection, which will be saved in the results.</li>
+<li>endpoint - the HTTP endpoint or CLI call. </li>
+<li>updateEndpoint - If your HTTP endpoint is an HTTP Post endpoint set this to the post endpoint. (optional)</li>
+<li>user - for authentication purposes (optional)</li>
+<li>password - for authentication purposes (optional)</li>
+</ul>
+<p>To setup an endpoint as well as an updateEndpoint might be confusing at first, but if you to test read and write performance simultanously and how updates might have an impact on read performance, you can set up both.</p>
+<p>For more detail on how to setup the CLI call look at <a href="../workers">Implemented Workers</a>. There are all CLI Workers explained and how to set the endpoint such that the application will be run correctly.</p>
+<p>Let's look at an example: </p>
+<pre><code class="language-yaml">connections:
+  - name: &quot;System1&quot;
+    endpoint: &quot;http://localhost:8800/query&quot;
+  - name: &quot;System2&quot;
+    endpoint: &quot;http://localhost:8802/query&quot;
+    updateEndpoint: &quot;http://localhost:8802/update&quot;
+    user: &quot;testuser&quot;
+    password: &quot;secret&quot;
+</code></pre>
+<p>Here we have two connections: System1 and System2. System1 is only setup to use an HTTP Get endpoint at http://localhost:8800/query. System2 however uses authentication and has an update endpoint as well, and thus will be correctly test with updates (POSTs) too. </p>
+<h3 id="datasets">Datasets</h3>
+<p>Pretty straight forward. You might want to test your system with different datasets (e.g. databases, triplestores etc.) 
+If you system does not work on different datasets, just add one datasetname like</p>
+<pre><code class="language-yaml">datasets:
+  - name: &quot;DoesNotMatter&quot;
+</code></pre>
+<p>otherwise you might want to benchmark different datasets. Hence you can setup a Dataset Name, as well as file. 
+The dataset name will be added to the results, whereas both can be used in the task script hooks, to automatize dataset load into your system. </p>
+<p>Let's look at an example: </p>
+<pre><code class="language-yaml">datasets:
+  - name: &quot;DatasetName&quot;
+    file: &quot;your-data-base.nt&quot;
+  - name: &quot;Dataset2&quot;
+</code></pre>
+<h3 id="tasks">Tasks</h3>
+<p>A Task is one benchmark Task which will be executed against all connections for all datasets. 
+A Task might be a stresstest which we will be using in this example. Have a look at the full configuration of the <a href="../stresstest#Configuration">Stresstest</a></p>
+<p>The configuration of one Task consists of the following: </p>
+<ul>
+<li>className - The className or <a href="#Shorthand">Shorthand</a>  </li>
+<li>configuration - The parameters of the task</li>
+</ul>
+<pre><code class="language-yaml">tasks:
+  - className: &quot;YourTask&quot;
+    configuration: 
+      parameter1: value1
+      parameter2: &quot;value2&quot;
+</code></pre>
+<p>Let's look at an example: </p>
+<pre><code class="language-yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      #timeLimit is in ms
+      timeLimit: 3600000
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 2
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries.txt&quot;
+          timeOut: 180000
+  - className: &quot;Stresstest&quot;
+    configuration:
+      noOfQueryMixes: 1
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 2
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries.txt&quot;
+          timeOut: 180000
+</code></pre>
+<p>We configured two Tasks, both Stresstests. The first one will be executed for one hour and uses simple text queries which can be executed right away.<br />
+Further on it uses 2 simulated SPARQLWorkers with the same configuration. 
+At this point it's recommend to check out the <a href="../stresstest#Configuration">Stresstest Configuration</a> in detail for further configuration.</p>
+<h3 id="storages">Storages</h3>
+<p>Tells Iguana how to save your results. Currently Iguana supports two solutions</p>
+<ul>
+<li>NTFileStorage - will save your results into one NTriple File.</li>
+<li>TriplestoreStorage - Will upload the results into a specified Triplestore</li>
+</ul>
+<p>This is optional. The default storage is <code>NTFileStorage</code>.</p>
+<p><strong>NTFileStorage</strong> can be setup by just stating to use it like </p>
+<pre><code class="language-yaml">storages:
+  - className: &quot;NTFileStorage&quot; 
+</code></pre>
+<p>However it can be configured to use a different result file name. The default is <code>results_{DD}-{MM}-{YYYY}_{HH}-{mm}.nt</code>.
+See example below. </p>
+<pre><code class="language-yaml">storages:
+  - className: &quot;NTFileStorage&quot; 
+    #optional
+    configuration:
+      fileName: &quot;results-of-my-benchmark.nt&quot;
+</code></pre>
+<p>The <strong>TriplestoreStorage</strong> can be configured as follows: </p>
+<pre><code class="language-yaml">storages:
+  - className: TriplestoreStorage
+    configuration:
+       endpoint: &quot;http://localhost:9999/sparql&quot;
+       updateEndpoint: &quot;http://localhost:9999/update&quot;
+</code></pre>
+<p>if you triple store uses authentication you can set that up as follows: </p>
+<pre><code class="language-yaml">storages:
+  - className: TriplestoreStorage
+    configuration:
+       endpoint: &quot;http://localhost:9999/sparql&quot;
+       updateEndpoint: &quot;http://localhost:9999/update&quot;
+       user: &quot;UserName&quot;
+       password: &quot;secret&quot;
+</code></pre>
+<p>For further detail on how to read the results have a look <a href="../results">here</a></p>
+<h3 id="metrics">Metrics</h3>
+<p>Let's Iguana know what Metrics you want to include in the results. </p>
+<p>Iguana supports the following metrics:</p>
+<ul>
+<li>Queries Per Second (QPS)</li>
+<li>Average Queries Per Second (AvgQPS)</li>
+<li>Query Mixes Per Hour (QMPH)</li>
+<li>Number of Queries successfully executed (NoQ)</li>
+<li>Number of Queries per Hour (NoQPH)</li>
+<li>Each query execution (EachQuery) - experimental</li>
+</ul>
+<p>For more detail on each of the metrics have a look at <a href="../metrics">Metrics</a></p>
+<p>Let's look at an example:</p>
+<pre><code class="language-yaml">metrics:
+  - className: &quot;QPS&quot; 
+  - className: &quot;AvgQPS&quot;
+  - className: &quot;QMPH&quot;
+  - className: &quot;NoQ&quot;
+  - className: &quot;NoQPH&quot;
+</code></pre>
+<p>In this case we use all the default metrics which would be included if you do not specify <code>metrics</code> in the configuration at all. 
+However you can also just use a subset of these like the following:</p>
+<pre><code class="language-yaml">metrics:
+   - className: &quot;NoQ&quot;
+   - className: &quot;AvgQPS&quot;
+</code></pre>
+<p>For more detail on how the results will include these metrics have a look at <a href="../results">Results</a>.</p>
+<h3 id="task-script-hooks">Task script hooks</h3>
+<p>To automatize the whole benchmark workflow, you can setup a script which will be executed before each task, as well as a script which will be executed after each task. </p>
+<p>To make it easier, the script can get the following values</p>
+<ul>
+<li>dataset.name - The current dataset name</li>
+<li>dataset.file - The current dataset file name if there is anyone</li>
+<li>connection - The current connection name</li>
+<li>taskID - The current taskID</li>
+</ul>
+<p>You can set each one of them as an argument using brackets like <code>{{connection}}</code>. 
+Thus you can setup scripts which will start your system and load it with the correct dataset file beforehand and stop the system after every task. </p>
+<p>However these script hooks are completely optional.</p>
+<p>Let's look at an example:</p>
+<pre><code class="language-yaml">preScriptHook: &quot;/full/path/{{connection}}/load-and-start.sh {{dataset.file}}&quot;
+postScriptHook: &quot;/full/path/{{connection}}/stop.sh&quot;
+
+</code></pre>
+<h3 id="full-example">Full Example</h3>
+<pre><code class="language-yaml">connections:
+  - name: &quot;System1&quot;
+    endpoint: &quot;http://localhost:8800/query&quot;
+  - name: &quot;System2&quot;
+    endpoint: &quot;http://localhost:8802/query&quot;
+    updateEndpoint: &quot;http://localhost:8802/update&quot;
+    user: &quot;testuser&quot;
+    password: &quot;secret&quot;
+
+datasets:
+  - name: &quot;DatasetName&quot;
+    file: &quot;your-data-base.nt&quot;
+  - name: &quot;Dataset2&quot;
+
+tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      #timeLimit is in ms
+      timeLimit: 3600000
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 2
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries.txt&quot;
+          timeOut: 180000
+  - className: &quot;Stresstest&quot;
+    configuration:
+      noOfQueryMixes: 1
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 2
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries.txt&quot;
+          timeOut: 180000
+
+preScriptHook: &quot;/full/path/{{connection}}/load-and-start.sh {{dataset.file}}&quot;
+postScriptHook: &quot;/full/path/{{connection}}/stop.sh&quot;
+
+
+metrics:
+  - className: &quot;QMPH&quot;
+  - className: &quot;QPS&quot;
+  - className: &quot;NoQPH&quot;
+  - className: &quot;NoQ&quot;
+  - className: &quot;AvgQPS&quot;
+
+storages:
+  - className: &quot;NTFileStorage&quot; 
+  #optional
+  - configuration:
+      fileName: &quot;results-of-my-benchmark.nt&quot;
+</code></pre>
+<h3 id="shorthand">Shorthand</h3>
+<p>A shorthand is a short name for a class in Iguana which can be used in the configuration instead of the complete class name: 
+e.g. instead of </p>
+<pre><code class="language-yaml">storages:
+   - className: &quot;org.aksw.iguana.rp.storage.impl.NTFileStorage&quot;
+</code></pre>
+<p>you can use the shortname NTFileStorage:</p>
+<pre><code class="language-yaml">storages:
+   - className: &quot;NTFileStorage&quot;
+</code></pre>
+<p>For a full map of the Shorthands have a look at <a href="../../shorthand-mapping">Shorthand-Mapping</a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../stresstest/" class="btn btn-neutral float-right" title="Stresstest">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../workflow/" class="btn btn-neutral" title="Workflow"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+    <ul>
+	<li>
+ 	 <a class="icon icon-github" href="https://github.com/dice-group/Iguana" > Visit us at Github</a>
+	</li>
+        <li>
+	 <a class="icon fa-download" href="https://github.com/dice-group/Iguana/releases/latest" > Download latest Release</a>
+ 	</li>
+    </ul>
+  <div>
+  </br></br>
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../workflow/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../stresstest/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+           SphinxRtdTheme.Navigation.enable(true);
+    
+}	
+var dropdown = document.getElementsByClassName("ddButton");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  if (!dropdown[i].classList.contains("active")){
+	  dropdown[i].nextSibling.style.display = "none";
+	  dropdown[i].classList.remove("fa-caret-down");
+	  dropdown[i].classList.add("fa-caret-right");
+  }
+  else{
+  	  dropdown[i].classList.remove("fa-caret-right");
+	  dropdown[i].classList.add("fa-caret-down");
+  }
+  
+  dropdown[i].addEventListener("click", function() {
+  this.classList.toggle("active");
+  
+  if (this.classList.contains("currentSite")){
+  	return;
+  }
+  var dropdownContent = this.nextElementSibling;
+  if (dropdownContent.style.display === "block") {
+     dropdownContent.style.display = "none";   
+     this.classList.remove("fa-caret-down");
+     this.classList.add("fa-caret-right");
+     //this.classList.remove("active"):
+  } else {
+     dropdownContent.style.display = "block";
+     this.classList.remove("fa-caret-right");
+     this.classList.add("fa-caret-down");
+     //this.classList.add("active"):
+
+  }
+  });
+}
+
+   </script>
+        
+</body>
+</html>
+

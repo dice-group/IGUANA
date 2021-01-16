@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Supported Workers - Iguana 3.2 Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+    
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Supported Workers";
+    var mkdocs_page_input_path = "usage/workers.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+	
+    <link  rel="stylesheet" href="../../css/custom.css"></link>
+ 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-179945559-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-179945559-1');
+</script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search" style="background-color: #82BDC3 !important;">
+        <img src="../../images/Iguana_new_logo6.png" class="iguana-icon"/>
+        <a href="../.."> Iguana 3.2 Documentation</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> General</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../about/">About</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../architecture/">Architecture</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> Quick Start Guide</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../download/">Download</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../quick-config/">Quick Configuration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../run-iguana/">Run Iguana</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul class="current"> 
+        <p  class="fa fa-caret-right  ddButton caption   active  currentSite"><span class="caption-text"> Usage</span>
+ 	<ul class="dd-container  active">
+                    <li class="toctree-l1"><a class="reference internal " href="../workflow/">Workflow</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../configuration/">Configuration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../stresstest/">Stresstest</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Supported Workers</a>
+    <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#http-workers">Http Workers</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#http-get-worker">Http Get Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#http-post-worker">Http Post Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sparql-worker">SPARQL Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sparql-update-worker">SPARQL UPDATE Worker</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cli-workers">CLI Workers</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#cli-worker">CLI Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cli-input-worker">CLI Input Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cli-input-file-worker">CLI Input File Worker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cli-input-prefix-worker">CLI Input Prefix Worker</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../queries/">Supported Queries</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../languages/">Supported Languages</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../metrics/">Metrics</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../results/">Benchmark Results</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../tutorial/">Tutorial</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> Development</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../develop/overview/">Overview</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="#">Extend</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-task/">Tasks</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-workers/">Workers</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-queryhandling/">Query Handling</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-lang/">Languages</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-result-storages/">Result storage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-metrics/">Metrics</a>
+                </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="#">Use Iguana</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/maven/">Maven</a>
+                </li>
+                <li class="toctree-l2"><a class="" href="http://iguana-benchmark.eu/javadoc/3.x/index.html">Javadoc</a>
+                </li>
+    </ul>
+                    </li>
+                </ul>
+
+              </ul>
+
+      </div>
+    </div>
+    <div style="height: 2em;"/>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Iguana 3.2 Documentation</a>
+
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Usage &raquo;</li>
+        
+      
+    
+    <li>Supported Workers</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="supported-workers">Supported Workers</h1>
+<p>A Worker is basically just a thread querying the endpoint/application. It tries to emulate a single user/application requesting your system until it should stop. 
+In a task (e.g. the <a href="../stresstest/">stresstest</a>) you can configure several worker configurations which will then be used inside the task.</p>
+<p>Every worker configuration can additionaly be started several times, hence if you want one configuration executed multiple times, you can simply tell Iguana to run this worker configuration the specified amount of time. 
+However to assure that the endpoint can't just cache the repsonse of the first request of a query, every worker starts at a pre determined random query, meaning that the single worker will always start at that query to assure fairness in benchmark comparisons, while every worker will start at a different query.</p>
+<p>There a few workers implemented, which can be seperated into two main categories</p>
+<ul>
+<li>Http Workers</li>
+<li>CLI Workers</li>
+</ul>
+<h2 id="http-workers">Http Workers</h2>
+<p>These Workers can be used to benchmark Http Applications (such as a SPARQL endpoint).</p>
+<h3 id="http-get-worker">Http Get Worker</h3>
+<p>A Http worker using GET requests. 
+This worker will use the <code>endpoint</code> of the connection.</p>
+<p>This worker has several configurations listed in the following table:</p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>parameterName</td>
+<td>yes</td>
+<td>query</td>
+<td>the GET paremter to set the query as value to. (see also <a href="../queries">Supported Queries</a> )</td>
+</tr>
+<tr>
+<td>responseType</td>
+<td>yes</td>
+<td></td>
+<td>The content type the endpoint should return. Setting the <code>Accept:</code> header</td>
+</tr>
+<tr>
+<td>language</td>
+<td>yes</td>
+<td>lang.SPARQL (plain text)</td>
+<td>The language the queries and response are in (e.g. SPARQL). Basically just creates some more statistics (see <a href="languages">Supported Langauges</a> )</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>Let's look at an example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;HttpGetWorker&quot;
+        timeOut: 180000
+        parameterName: &quot;text&quot;
+</code></pre>
+<p>This will use one HttpGetWOrker using a timeout of 3 minutes and the get parameter text to request the query through.</p>
+<h3 id="http-post-worker">Http Post Worker</h3>
+<p>A Http worker using POST requests. 
+This worker will use the <code>updateEndpoint</code> of the connection.</p>
+<p>This worker has several configurations listed in the following table:</p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>parameterName</td>
+<td>yes</td>
+<td>query</td>
+<td>the GET paremter to set the query as value to. (see also <a href="../queries">Supported Queries</a> )</td>
+</tr>
+<tr>
+<td>contentType</td>
+<td>yes</td>
+<td><code>text/plain</code></td>
+<td>The content type of the update queries. Setting the <code>Content-Type:</code> header</td>
+</tr>
+<tr>
+<td>responseType</td>
+<td>yes</td>
+<td></td>
+<td>The content type the endpoint should return. Setting the <code>Accept:</code> header</td>
+</tr>
+<tr>
+<td>language</td>
+<td>yes</td>
+<td>lang.SPARQL (plain text)</td>
+<td>The language the queries and response are in (e.g. SPARQL). Basically just creates some more statistics (see <a href="languages">Supported Langauges</a> )</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>Let's look at an example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;HttpPostWorker&quot;
+        timeOut: 180000
+</code></pre>
+<p>This will use one HttpGetWOrker using a timeout of 3 minutes.</p>
+<h3 id="sparql-worker">SPARQL Worker</h3>
+<p>Simply a GET worker but the language parameter is set to <code>lang.SPARQL</code>. 
+Otherwise see the <a href="#http-get-worker">Http Get Worker</a> for configuration</p>
+<p>An Example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;SPARQLWorker&quot;
+        timeOut: 180000
+</code></pre>
+<h3 id="sparql-update-worker">SPARQL UPDATE Worker</h3>
+<p>Simply a POST worker but specified for SPARQL Updates.</p>
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>timerStrategy</td>
+<td>yes</td>
+<td><code>NONE</code></td>
+<td><code>NONE</code>, <code>FIXED</code> or <code>DISTRIBUTED</code>. see below for explanation.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>timerStrategy</strong> parameter let's the worker know how to distribute the updates.
+The fixedLatency and gaussianLatency parameters are not affected, the worker will wait those additionally. </p>
+<ul>
+<li>NONE: the worker just updates each update query after another </li>
+<li>FIXED: calculating the distribution by <code>timeLimit / #updates</code> at the start and waiting the amount between each update. Time Limit will be used of the task the worker is executed in.</li>
+<li>DISTRIBUTED: calculating the time to wait between two updates after each update by  <code>timeRemaining / #updatesRemaining</code>.</li>
+</ul>
+<p>An Example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;UPDATEWorker&quot;
+        timeOut: 180000
+        timerStrategy: &quot;FIXED&quot;
+</code></pre>
+<h2 id="cli-workers">CLI Workers</h2>
+<p>These workers can be used to benchmark a CLI application. </p>
+<h3 id="cli-worker">CLI Worker</h3>
+<p>This Worker should be used if the CLI application runs a query once and exits afterwards. 
+Something like </p>
+<pre><code class="language-bash">$ cli-script.sh query
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+$ 
+</code></pre>
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;CLIWorker&quot;
+</code></pre>
+<h3 id="cli-input-worker">CLI Input Worker</h3>
+<p>This Worker should be used if the CLI application runs and the query will be send using the Input.</p>
+<p>Something like </p>
+<pre><code class="language-bash">$ cli-script.sh start
+Your Input: QUERY
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+
+Your Input: 
+</code></pre>
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>initFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when the application is ready to be requested (e.g. after loading)</td>
+</tr>
+<tr>
+<td>queryFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs if the query response finished</td>
+</tr>
+<tr>
+<td>queryError</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when an error during the query execution happend</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;CLIInputWorker&quot;
+        initFinished: &quot;loading finished&quot;
+        queryFinished: &quot;query execution took:&quot;
+        queryError: &quot;Error happend during request&quot;
+</code></pre>
+<h3 id="multiple-cli-input-worker">Multiple CLI Input Worker</h3>
+<p>This Worker should be used if the CLI application runs and the query will be send using the Input and will quit on errors. </p>
+<p>Something like </p>
+<pre><code class="language-bash">$ cli-script.sh start
+Your Input: QUERY
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+
+Your Input: ERROR
+ERROR happend, exiting 
+$ 
+</code></pre>
+<p>To assure a smooth benchmark, the CLI application will be run multiple times instead of once, and if the application quits, the next running process will be used, while in the background the old process will be restarted. 
+Thus as soon as an error happend, the benchmark can continue without a problem.</p>
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>initFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when the application is ready to be requested (e.g. after loading)</td>
+</tr>
+<tr>
+<td>queryFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs if the query response finished</td>
+</tr>
+<tr>
+<td>queryError</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when an error during the query execution happend</td>
+</tr>
+<tr>
+<td>numberOfProcesses</td>
+<td>yes</td>
+<td>5</td>
+<td>The number of times the application should be started to assure a smooth benchmark. see above.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;MultipleCLIInputWorker&quot;
+        initFinished: &quot;loading finished&quot;
+        queryFinished: &quot;query execution took:&quot;
+        queryError: &quot;Error happend during request&quot;
+</code></pre>
+<h3 id="cli-input-file-worker">CLI Input File Worker</h3>
+<p>Same as the <a href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>. However the query won't be send to the input but written to a file and the file will be send to the input</p>
+<p>Something like </p>
+<pre><code class="language-bash">$ cli-script.sh start
+Your Input: file-containg-the-query.txt
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+
+</code></pre>
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>initFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when the application is ready to be requested (e.g. after loading)</td>
+</tr>
+<tr>
+<td>queryFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs if the query response finished</td>
+</tr>
+<tr>
+<td>queryError</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when an error during the query execution happend</td>
+</tr>
+<tr>
+<td>directory</td>
+<td>no</td>
+<td></td>
+<td>Directory in which the file including the query should be saved.</td>
+</tr>
+<tr>
+<td>numberOfProcesses</td>
+<td>yes</td>
+<td>5</td>
+<td>The number of times the application should be started to assure a smooth benchmark. see <a href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;CLIInputFileWorker&quot;
+        initFinished: &quot;loading finished&quot;
+        queryFinished: &quot;query execution took:&quot;
+        queryError: &quot;Error happend during request&quot;      
+        directory: &quot;/tmp/&quot;  
+</code></pre>
+<h3 id="cli-input-prefix-worker">CLI Input Prefix Worker</h3>
+<p>Same as the <a href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>. However the CLI application might need a pre and suffix. </p>
+<p>Something like </p>
+<pre><code class="language-bash">$ cli-script.sh start
+Your Input: PREFIX QUERY SUFFIX
+HEADER
+QUERY RESULT 1
+QUERY RESULT 2
+...
+
+</code></pre>
+<p>Parameters are : </p>
+<table>
+<thead>
+<tr>
+<th>parameter</th>
+<th>optional</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queriesFile</td>
+<td>no</td>
+<td></td>
+<td>File containg the queries this worker should use.</td>
+</tr>
+<tr>
+<td>initFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when the application is ready to be requested (e.g. after loading)</td>
+</tr>
+<tr>
+<td>queryFinished</td>
+<td>no</td>
+<td></td>
+<td>String which occurs if the query response finished</td>
+</tr>
+<tr>
+<td>queryError</td>
+<td>no</td>
+<td></td>
+<td>String which occurs when an error during the query execution happend</td>
+</tr>
+<tr>
+<td>queryPrefix</td>
+<td>no</td>
+<td></td>
+<td>String to use as a PREFIX before the query.</td>
+</tr>
+<tr>
+<td>querySuffix</td>
+<td>no</td>
+<td></td>
+<td>String to use as a SUFFIX after the query.</td>
+</tr>
+<tr>
+<td>numberOfProcesses</td>
+<td>yes</td>
+<td>5</td>
+<td>The number of times the application should be started to assure a smooth benchmark. see <a href="#multiple-cli-input-worker">Multiple CLI Input Worker</a>.</td>
+</tr>
+<tr>
+<td>timeOut</td>
+<td>yes</td>
+<td>180000 (3 minutes)</td>
+<td>The timeout in MS after a query should be aborted</td>
+</tr>
+<tr>
+<td>fixedLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>If the value (in MS) should be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+<tr>
+<td>gaussianLatency</td>
+<td>yes</td>
+<td>0</td>
+<td>A random value between <code>[0, 2*value]</code> (in MS) will be waited between each query. Simulating network latency or user behaviour.</td>
+</tr>
+</tbody>
+</table>
+<p>An Example:</p>
+<pre><code class="language-yaml"> ... 
+    workers:
+      - threads: 1
+        className: &quot;CLIInputPrefixWorker&quot;
+        initFinished: &quot;loading finished&quot;
+        queryFinished: &quot;query execution took:&quot;
+        queryError: &quot;Error happend during request&quot;
+        queryPrefix: &quot;SPARQL&quot;
+        querySuffix: &quot;;&quot;
+</code></pre>
+<p>Will send the following as Input <code>SPARQL QUERY ;</code></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../queries/" class="btn btn-neutral float-right" title="Supported Queries">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../stresstest/" class="btn btn-neutral" title="Stresstest"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+    <ul>
+	<li>
+ 	 <a class="icon icon-github" href="https://github.com/dice-group/Iguana" > Visit us at Github</a>
+	</li>
+        <li>
+	 <a class="icon fa-download" href="https://github.com/dice-group/Iguana/releases/latest" > Download latest Release</a>
+ 	</li>
+    </ul>
+  <div>
+  </br></br>
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../stresstest/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../queries/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+           SphinxRtdTheme.Navigation.enable(true);
+    
+}	
+var dropdown = document.getElementsByClassName("ddButton");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  if (!dropdown[i].classList.contains("active")){
+	  dropdown[i].nextSibling.style.display = "none";
+	  dropdown[i].classList.remove("fa-caret-down");
+	  dropdown[i].classList.add("fa-caret-right");
+  }
+  else{
+  	  dropdown[i].classList.remove("fa-caret-right");
+	  dropdown[i].classList.add("fa-caret-down");
+  }
+  
+  dropdown[i].addEventListener("click", function() {
+  this.classList.toggle("active");
+  
+  if (this.classList.contains("currentSite")){
+  	return;
+  }
+  var dropdownContent = this.nextElementSibling;
+  if (dropdownContent.style.display === "block") {
+     dropdownContent.style.display = "none";   
+     this.classList.remove("fa-caret-down");
+     this.classList.add("fa-caret-right");
+     //this.classList.remove("active"):
+  } else {
+     dropdownContent.style.display = "block";
+     this.classList.remove("fa-caret-right");
+     this.classList.add("fa-caret-down");
+     //this.classList.add("active"):
+
+  }
+  });
+}
+
+   </script>
+        
+</body>
+</html>
+
