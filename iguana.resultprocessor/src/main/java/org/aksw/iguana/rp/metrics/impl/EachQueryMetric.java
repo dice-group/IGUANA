@@ -27,7 +27,7 @@ public class EachQueryMetric extends AbstractMetric {
 
 	private static Property queryProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"query");
 	private static Property execProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryExecution");
-
+	private static Property resultSize = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"resultSize");
 	private static Property timeProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"time");
 	private static Property successProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"success");
 	private static Property runProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"run");
@@ -88,9 +88,16 @@ public class EachQueryMetric extends AbstractMetric {
 		m.add(queryRes, execProperty , subRes);
 		m.add(subRes, timeProperty, ResourceFactory.createTypedLiteral(time));
 		m.add(subRes, successProperty, ResourceFactory.createTypedLiteral(success));
-		m.add(subRes, queryIDProperty, ResourceFactory.createTypedLiteral(queryID));
+		if(p.containsKey(COMMON.QUERY_HASH)) {
+			int queryHash = Integer.parseInt(p.get(COMMON.QUERY_HASH).toString());
+			m.add(subRes, queryIDProperty, ResourceFactory.createTypedLiteral(COMMON.RES_BASE_URI+queryHash+"/"+queryID));
+		}
+		else{
+			m.add(subRes, queryIDProperty, ResourceFactory.createTypedLiteral(queryID));
+		}
 		m.add(subRes, runProperty, ResourceFactory.createTypedLiteral(run));
 		m.add(subRes, errorCodeProperty, ResourceFactory.createTypedLiteral(err));
+		m.add(subRes, resultSize, ResourceFactory.createTypedLiteral(p.get(COMMON.RECEIVE_DATA_SIZE)));
 
 		sendData(m);
 		queryRunMap.put(subject, run);
