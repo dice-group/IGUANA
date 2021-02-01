@@ -249,9 +249,9 @@ public class Stresstest extends AbstractTask {
 	private void loopSleep(int timeout) {
 		try {
 			TimeUnit.MILLISECONDS.sleep(timeout);
-
 		}catch(Exception e) {
-			LOGGER.error("Could not warmup ");
+			//shouldn't be thrown except something else really went wrong
+			LOGGER.error("Loop sleep did not work.", e);
 		}
 	}
 

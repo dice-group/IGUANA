@@ -6,8 +6,6 @@ import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.commons.io.BigByteArrayInputStream;
-import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -123,18 +121,18 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
         return "application/sparql-results+json";
     }
 
-    public static long getJsonResultSize(BigByteArrayOutputStream res) throws ParseException, UnsupportedEncodingException {
+    public static long getJsonResultSize(ByteArrayOutputStream res) throws ParseException, UnsupportedEncodingException {
         JSONParser parser = new JSONParser();
         SaxSparqlJsonResultCountingParser handler = new SaxSparqlJsonResultCountingParser();
         parser.parse(res.toString(StandardCharsets.UTF_8), handler, true);
         return handler.getNoBindings();
     }
 
-    public static long getXmlResultSize(BigByteArrayOutputStream res) throws ParserConfigurationException, IOException, SAXException {
+    public static long getXmlResultSize(ByteArrayOutputStream res) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
-        BigByteArrayInputStream bbais = new BigByteArrayInputStream(res);
+        ByteArrayInputStream bbais = new ByteArrayInputStream(res.toByteArray());
         Document doc = dBuilder.parse(bbais);
         NodeList childNodes = doc.getDocumentElement().getElementsByTagName(XML_RESULT_ROOT_ELEMENT_NAME).item(0).getChildNodes();
 
@@ -153,7 +151,7 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
         HttpEntity httpResponse = response.getEntity();
         Header contentTypeHeader = response.getEntity().getContentType();
 
-        BigByteArrayOutputStream entity;
+        ByteArrayOutputStream entity;
         try (InputStream inputStream = httpResponse.getContent()) {
 
              entity = inputStream2String(inputStream);
@@ -165,7 +163,7 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
     }
 
     //@Override
-    public Long getResultSize(Header contentTypeHeader, BigByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException {
+    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException {
         try {
             switch (getContentTypeVal(contentTypeHeader)) {
                 case QUERY_RESULT_TYPE_JSON:
@@ -174,8 +172,14 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
                 case QUERY_RESULT_TYPE_XML:
                     return getXmlResultSize(content);
                 default:
-                    return content.countMatches('\n')+1;
-                    //return (long) StringUtils.countMatches(content, "\n") + 1;
+                    //return content.countMatches('\n')+1;
+                    long matches=0;
+                    for(byte b: content.toByteArray()){
+                        if(b=='\n'){
+                            matches++;
+                        }
+                    }
+                    return matches+1;
             }
         } catch (ParseException | ParserConfigurationException | IOException | SAXException e) {
             LOGGER.error("Query results could not be parsed: ", e);
