@@ -8,7 +8,6 @@ import org.aksw.iguana.cc.model.QueryResultHashKey;
 import org.aksw.iguana.cc.worker.AbstractRandomQueryChooserWorker;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -160,7 +159,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             handleException(query, COMMON.QUERY_HTTP_FAILURE, e);
         } catch (IOException e) {
             if (requestTimedOut) {
-                LOGGER.warn("Worker[{} : {}]: Reached timout on query (ID {})\n{}",
+                LOGGER.warn("Worker[{} : {}]: Reached timeout on query (ID {})\n{}",
                         this.workerType, this.workerID, queryId, query);
                 addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, timeOut));
             } else {
@@ -194,7 +193,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             try (InputStream inputStream = httpResponse.getContent()) {
                 // read content stream
                 //Stream in resultProcessor, return length, set string in StringBuilder.
-                BigByteArrayOutputStream responseBody = new BigByteArrayOutputStream();
+                ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
                 long length = resultProcessor.readResponse(inputStream, responseBody);
                 tmpExecutedQueries++;
                 // check if such a result was already parsed and is cached
@@ -214,7 +213,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                     }
                 }
 
-            } catch (IOException e) {
+            } catch (IOException | TimeoutException e) {
                 double duration = durationInMilliseconds(requestStartTime, Instant.now());
                 addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
             }
@@ -260,10 +259,10 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         private final String queryId;
         private final double duration;
         private final Header contentTypeHeader;
-        private BigByteArrayOutputStream contentStream;
+        private ByteArrayOutputStream contentStream;
         private final long contentLength;
 
-        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, BigByteArrayOutputStream contentStream, long contentLength) {
+        public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, ByteArrayOutputStream contentStream, long contentLength) {
             this.httpWorker = httpWorker;
             this.queryId = queryId;
             this.duration = duration;

@@ -217,7 +217,7 @@ public class Stresstest extends AbstractTask {
 				// if so send all results buffered
 				sendWorkerResult(worker);
 			}
-			
+			loopSleep(100);
 		}
 		LOGGER.debug("Sending stop signal to workers");
 		// tell all workers to stop sending properties, thus the await termination will
@@ -246,9 +246,23 @@ public class Stresstest extends AbstractTask {
 		
 	}
 
+	private void loopSleep(int timeout) {
+		try {
+			TimeUnit.MILLISECONDS.sleep(timeout);
+		}catch(Exception e) {
+			//shouldn't be thrown except something else really went wrong
+			LOGGER.error("Loop sleep did not work.", e);
+		}
+	}
+
 	private void sendWorkerResult(Worker worker){
-		for (Properties results : worker.popQueryResults()) {
+		Collection<Properties> props = worker.popQueryResults();
+		if(props == null){
+			return;
+		}
+		for (Properties results : props) {
 			try {
+
 				// send results via RabbitMQ
 				LOGGER.debug("[TaskID: {{}}] Send results", taskID);
 				this.sendResults(results);
@@ -330,17 +344,13 @@ public class Stresstest extends AbstractTask {
 	 */
 	protected boolean isFinished() {
 		if (timeLimit !=null) {
-			try {
-				TimeUnit.MILLISECONDS.sleep(10);
-				
-			}catch(Exception e) {
-				LOGGER.error("Could not warmup ");
-			}
+
 			Instant current = Instant.now();
 			double passed_time = timeLimit - durationInMilliseconds(this.startTime, current);
 			return passed_time <= 0D;
 		}
 		else if (noOfQueryMixes != null) {
+
 			// use noOfQueries of SPARQLWorkers (as soon as a worker hit the noOfQueries, it
 			// will stop sending results
 			// UpdateWorker are allowed to execute all their updates

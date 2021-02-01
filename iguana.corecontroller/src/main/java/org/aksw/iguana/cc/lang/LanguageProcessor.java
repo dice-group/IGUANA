@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.lang;
 
-import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.jena.rdf.model.Model;
@@ -48,9 +47,9 @@ public interface LanguageProcessor {
      */
     Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
-    Long getResultSize(Header contentTypeHeader, BigByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException;
+    Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
 
-    long readResponse(InputStream inputStream, BigByteArrayOutputStream responseBody) throws IOException;
+    long readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException, TimeoutException;
 
 }
