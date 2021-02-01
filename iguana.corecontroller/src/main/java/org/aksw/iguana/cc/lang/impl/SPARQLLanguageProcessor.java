@@ -159,11 +159,11 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
             LOGGER.error("Query result could not be read.", e);
             throw e;
         }
-        return getResultSize(contentTypeHeader, entity);
+        return getResultSize(contentTypeHeader, entity, entity.size());
     }
 
-    //@Override
-    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException {
+    @Override
+    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content, long contentLength) throws ParserConfigurationException, SAXException, ParseException, IOException {
         try {
             switch (getContentTypeVal(contentTypeHeader)) {
                 case QUERY_RESULT_TYPE_JSON:

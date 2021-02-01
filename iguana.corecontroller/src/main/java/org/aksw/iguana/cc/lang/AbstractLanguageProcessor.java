@@ -47,7 +47,7 @@ public abstract class AbstractLanguageProcessor implements LanguageProcessor {
     }
 
     @Override
-    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException {
+    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content, long contentLength) throws ParserConfigurationException, SAXException, ParseException, IOException {
         return Long.valueOf(content.size());
     }
 

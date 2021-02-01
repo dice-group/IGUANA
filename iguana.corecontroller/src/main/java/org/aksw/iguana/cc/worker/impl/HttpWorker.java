@@ -280,7 +280,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             try {
                 //String content = contentStream.toString(StandardCharsets.UTF_8.name());
                 //contentStream = null; // might be hugh, dereference immediately after consumed
-                Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, contentStream);
+                Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, contentStream, contentLength);
                 contentStream = null;
                 // Save the result size to be re-used
                 processedResults.put(resultCacheKey, resultSize);

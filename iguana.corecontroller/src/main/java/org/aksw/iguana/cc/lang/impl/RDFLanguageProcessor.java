@@ -71,7 +71,7 @@ public class RDFLanguageProcessor extends AbstractLanguageProcessor implements L
     }
 
     @Override
-    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws IOException {
+    public Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content, long contentLength) throws IOException {
         Model m;
         try {
             //TODO BBAIS

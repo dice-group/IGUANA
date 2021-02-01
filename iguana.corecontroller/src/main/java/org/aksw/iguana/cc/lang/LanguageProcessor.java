@@ -47,7 +47,7 @@ public interface LanguageProcessor {
      */
     Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
-    Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content) throws ParserConfigurationException, SAXException, ParseException, IOException;
+    Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content, long contentLength) throws ParserConfigurationException, SAXException, ParseException, IOException;
 
 
     long readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException, TimeoutException;
