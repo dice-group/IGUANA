@@ -90,14 +90,17 @@ public class EachQueryMetric extends AbstractMetric {
 		m.add(subRes, successProperty, ResourceFactory.createTypedLiteral(success));
 		if(p.containsKey(COMMON.QUERY_HASH)) {
 			int queryHash = Integer.parseInt(p.get(COMMON.QUERY_HASH).toString());
-			m.add(subRes, queryIDProperty, ResourceFactory.createTypedLiteral(COMMON.RES_BASE_URI+queryHash+"/"+queryID));
+			m.add(subRes, queryIDProperty, ResourceFactory.createResource(COMMON.RES_BASE_URI+queryHash+"/"+queryID));
 		}
 		else{
 			m.add(subRes, queryIDProperty, ResourceFactory.createTypedLiteral(queryID));
 		}
 		m.add(subRes, runProperty, ResourceFactory.createTypedLiteral(run));
 		m.add(subRes, errorCodeProperty, ResourceFactory.createTypedLiteral(err));
-		m.add(subRes, resultSize, ResourceFactory.createTypedLiteral(p.get(COMMON.RECEIVE_DATA_SIZE)));
+		if(p.containsKey(COMMON.RECEIVE_DATA_SIZE)) {
+			long resSize = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SIZE).toString());
+			m.add(subRes, resultSize, ResourceFactory.createTypedLiteral(resSize));
+		}
 
 		sendData(m);
 		queryRunMap.put(subject, run);
