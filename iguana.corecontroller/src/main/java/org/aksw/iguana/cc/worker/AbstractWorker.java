@@ -231,6 +231,9 @@ public abstract class AbstractWorker implements Worker {
 
 	@Override
 	public synchronized Collection<Properties> popQueryResults() {
+		if(results.isEmpty()){
+			return null;
+		}
 		Collection<Properties> ret = this.results;
 		this.results = new LinkedList<Properties>();
 		return ret;
