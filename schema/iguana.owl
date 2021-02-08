@@ -26,15 +26,16 @@
     xmlns:iont="http://iguana-benchmark.eu/class/"
     >
     
-<owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/3.0.0/iguana.owl">
+<owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/3.2.0/iguana.owl">
         <rdfs:label xml:lang="en">Iguana results ontology</rdfs:label>
-        <owl:versionInfo>3.0.0</owl:versionInfo>
+        <owl:versionInfo>3.2.0</owl:versionInfo>
         <dcterms:created>2020/09/18</dcterms:created>
-        <dcterms:lastModified>2020/09/18</dcterms:lastModified>
+        <dcterms:lastModified>2021/02/08</dcterms:lastModified>
         <dc:title xml:lang="en">Iguana results ontology</dc:title>
         <rdfs:comment xml:lang="en">The Iguana results ontology explains the rdf results of an Iguana benchmark.</rdfs:comment>
         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
         <dc:creator rdf:resource="https://dice-research.org/FelixConrads"/>
+        <dc:creator rdf:resource="https://dice-research.org/AlexanderBigerl"/>
     </owl:Ontology>
     
     <!-- Class definitions -->
@@ -169,16 +170,16 @@
     <rdfs:range rdf:resource="&iont;Metric"/>
   </owl:ObjectProperty>  
   
-  <owl:ObjectProperty rdf:about="&iprop;query">
-      	<rdfs:label>query</rdfs:label>
+  <owl:ObjectProperty rdf:about="&iprop;executedQuery">
+      	<rdfs:label>executedQuery</rdfs:label>
 	<rdfs:comment xml:lang="en">Assigns an ExecutedQuery to a Worker or Task. The ExecutedQuery provides further metrics for example.</rdfs:comment>  
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:range rdf:resource="&iont;ExecutedQuery"/>
   </owl:ObjectProperty>  
   
-  <owl:ObjectProperty rdf:about="&iprop;queryID">
-        <rdfs:label>queryID</rdfs:label>
+  <owl:ObjectProperty rdf:about="&iprop;query">
+        <rdfs:label>query</rdfs:label>
 	<rdfs:comment xml:lang="en">Assigns a Query and its statistics, as well as the query string to an ExecutedQuery.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="&iont;Query"/>
@@ -209,14 +210,14 @@
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
   </owl:DatatypeProperty>  
   
-  <owl:DatatypeProperty rdf:about="&rdfs;startDate">
+  <owl:DatatypeProperty rdf:about="&iprop;startDate">
   	<rdfs:label>startDate</rdfs:label>
 	<rdfs:comment xml:lang="en">The date and time the Task was started.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
   </owl:DatatypeProperty>  
   
-  <owl:DatatypeProperty rdf:about="&rdfs;endDate">
+  <owl:DatatypeProperty rdf:about="&iprop;endDate">
     	<rdfs:label>endDate</rdfs:label>
 	<rdfs:comment xml:lang="en">The date and time the Task was ended.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Task"/>
@@ -307,11 +308,11 @@
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty> 
   
-  <owl:DatatypeProperty rdf:about="&rdfs;ID">
-      	<rdfs:label>ID</rdfs:label>
-	<rdfs:comment xml:lang="en">The query ID.</rdfs:comment>  
+  <owl:DatatypeProperty rdf:about="&iprop;queryID">
+      	<rdfs:label>queryID</rdfs:label>
+	<rdfs:comment xml:lang="en">The query integer ID.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
   </owl:DatatypeProperty>   
   
   <owl:DatatypeProperty rdf:about="&iprop;totalTime">
