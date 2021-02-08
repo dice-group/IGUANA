@@ -35,7 +35,7 @@ public abstract class AbstractLanguageProcessor implements LanguageProcessor {
         for(QueryWrapper wrappedQuery : queries) {
             Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + "/" + wrappedQuery.getId());
             model.add(subject, RDF.type, Vocab.queryClass);
-            model.add(subject, Vocab.rdfsID, wrappedQuery.getId());
+            model.add(subject, Vocab.queryIDProp, ResourceFactory.createTypedLiteral(wrappedQuery.getId()));
             model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
         }
         return model;

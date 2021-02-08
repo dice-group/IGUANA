@@ -131,7 +131,7 @@ public class SPARQLLanguageProcessorTest {
     @Test
     public void checkGeneratedStatsModel() throws IOException {
         Query q = QueryFactory.create("SELECT * {?s ?p ?o. ?o ?q ?t. FILTER(?t = \"abc\")} GROUP BY ?s");
-        QueryWrapper wrapped = new QueryWrapper(q, "abc");
+        QueryWrapper wrapped = new QueryWrapper(q, "5");
         SPARQLLanguageProcessor languageProcessor = new SPARQLLanguageProcessor();
         Model actual = languageProcessor.generateTripleStats(Lists.newArrayList(wrapped),"query","1/1/2");
         Model expected = ModelFactory.createDefaultModel();

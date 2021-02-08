@@ -69,9 +69,9 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
     public Model generateTripleStats(List<QueryWrapper> queries, String resourcePrefix, String taskID) {
         Model model = ModelFactory.createDefaultModel();
         for(QueryWrapper wrappedQuery : queries) {
-            Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + "/" + wrappedQuery.getId());
+            Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + "/" + wrappedQuery.getFullId());
             model.add(subject, RDF.type, Vocab.queryClass);
-            model.add(subject, Vocab.rdfsID, wrappedQuery.getId().replace("sparql", ""));
+            model.add(subject, Vocab.queryIDProp, ResourceFactory.createTypedLiteral(wrappedQuery.getId()));
             model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
             try {
                 Query q = QueryFactory.create(wrappedQuery.getQuery().toString());

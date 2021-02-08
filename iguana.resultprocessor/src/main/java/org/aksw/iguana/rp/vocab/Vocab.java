@@ -10,9 +10,8 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public class Vocab {
 
-    private static String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
     public static Property aggrProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI + "aggregations");
-    public static Property rdfsID = ResourceFactory.createProperty(rdfs + "ID");
+    public static Property queryIDProp = ResourceFactory.createProperty(COMMON.PROP_BASE_URI + "queryID");
     public static Property filterProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI + "filter");
     public static Property groupByProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI + "groupBy");
     public static Property havingProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI + "having");

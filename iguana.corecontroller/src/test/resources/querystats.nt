@@ -1,13 +1,13 @@
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/aggregations> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/filter> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/groupBy> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/having> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/triples> "2"^^<http://www.w3.org/2001/XMLSchema#int>.
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/offset> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/optional> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/orderBy> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-<http://iguana-benchmark.eu/resource/query/abc> <http://iguana-benchmark.eu/properties/union> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-<http://iguana-benchmark.eu/resource/query/abc> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Query>.
-<http://iguana-benchmark.eu/resource/query/abc> <http://www.w3.org/2000/01/rdf-schema#ID> "abc".
-<http://iguana-benchmark.eu/resource/query/abc> <http://www.w3.org/2000/01/rdf-schema#label> "SELECT  *\nWHERE\n  { ?s  ?p  ?o .\n    ?o  ?q  ?t\n    FILTER ( ?t = \"abc\" )\n  }\nGROUP BY ?s\n" .
-<http://iguana-benchmark.eu/resource/query/abc> <http://www.w3.org/2002/07/owl#sameAs> <http://lsq.aksw.org/res/q-kak7oJkxFzCGKpreI88JTv0qc4cSkC7YZ8zB-XPZzPY> .
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/aggregations> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/filter> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/groupBy> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/having> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/triples> "2"^^<http://www.w3.org/2001/XMLSchema#int>.
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/offset> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/optional> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/orderBy> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/union> "false"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+<http://iguana-benchmark.eu/resource/query/5> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Query>.
+<http://iguana-benchmark.eu/resource/query/5> <http://iguana-benchmark.eu/properties/queryID> "5"^^<http://www.w3.org/2001/XMLSchema#int>.
+<http://iguana-benchmark.eu/resource/query/5> <http://www.w3.org/2000/01/rdf-schema#label> "SELECT  *\nWHERE\n  { ?s  ?p  ?o .\n    ?o  ?q  ?t\n    FILTER ( ?t = \"abc\" )\n  }\nGROUP BY ?s\n" .
+<http://iguana-benchmark.eu/resource/query/5> <http://www.w3.org/2002/07/owl#sameAs> <http://lsq.aksw.org/res/q-kak7oJkxFzCGKpreI88JTv0qc4cSkC7YZ8zB-XPZzPY> .
