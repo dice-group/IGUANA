@@ -1,13 +1,11 @@
 /**
- * 
+ *
  */
 package org.aksw.iguana.rp.storage;
 
 import org.aksw.iguana.commons.constants.COMMON;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
+import org.aksw.iguana.rp.vocab.Vocab;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
@@ -17,150 +15,112 @@ import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * This Storage will save all the metric results as triples
- * 
+ *
  * @author f.conrads
  *
  */
 public abstract class TripleBasedStorage implements Storage {
 
-	protected String baseUri = COMMON.BASE_URI;
-	private String resource = COMMON.RES_BASE_URI;
-	private String properties = COMMON.PROP_BASE_URI;
+    protected String baseUri = COMMON.BASE_URI;
+
+    protected Model metricResults = ModelFactory.createDefaultModel();
 
 
-	protected Model metricResults = ModelFactory.createDefaultModel();
-
-	private String suiteClassUri = baseUri + "/class/Suite";
-	private String expClassUri = baseUri + "/class/Experiment";
-	private String taskClassUri = baseUri + "/class/Task";
-	private String conClassUri = baseUri + "/class/Connection";
-	private String datasetClassUri = baseUri + "/class/Dataset";
-
-
-	private String classUri = RDF.type.getURI();
-	private String rdfsUri = "http://www.w3.org/2000/01/rdf-schema#";
-	private String xsdUri = "http://www.w3.org/2001/XMLSchema#";
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.aksw.iguana.rp.storage.Storage#addMetaData(java.util.Properties)
+     */
+    @Override
+    public void addMetaData(Properties p) {
 
 
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.aksw.iguana.rp.storage.Storage#addMetaData(java.util.Properties)
-	 */
-	@Override
-	public void addMetaData(Properties p) {
-
-		String suiteUrl = getUrlWithResourcePrefix(p, COMMON.SUITE_ID_KEY);
-		String expUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_ID_KEY);
-		String taskUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_ID_KEY);
-		String datasetUrl = getUrlWithResourcePrefix(p, COMMON.DATASET_ID_KEY);
-		String connUrl = getUrlWithResourcePrefix(p, COMMON.CONNECTION_ID_KEY);
-		String actualTaskID = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_CLASS_ID_KEY);
+        Resource suiteUrl = getUrlWithResourcePrefix(p, COMMON.SUITE_ID_KEY);
+        Resource expUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_ID_KEY);
+        Resource taskUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_ID_KEY);
+        Resource datasetUrl = getUrlWithResourcePrefix(p, COMMON.DATASET_ID_KEY);
+        Resource connUrl = getUrlWithResourcePrefix(p, COMMON.CONNECTION_ID_KEY);
+        Resource actualTaskID = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_CLASS_ID_KEY);
 
 
-		metricResults.add(createStatement(suiteUrl, getUrlWithPropertyPrefix("experiment"), expUrl, true));
-		metricResults.add(createStatement(suiteUrl, classUri, suiteClassUri, true));
-		metricResults.add(createStatement(expUrl, getUrlWithPropertyPrefix("task"), taskUrl, true));
-		metricResults.add(createStatement(expUrl, getUrlWithPropertyPrefix("dataset"), datasetUrl, true));
-		metricResults.add(createStatement(expUrl, classUri, expClassUri, true));
-		metricResults.add(createStatement(taskUrl, getUrlWithPropertyPrefix("connection"), connUrl, true));
-		metricResults.add(createStatement(connUrl, classUri, conClassUri, true));
-		metricResults.add(createStatement(datasetUrl, classUri, datasetClassUri, true));
-		metricResults.add(createStatement(taskUrl, classUri, taskClassUri, true));
-		metricResults.add(createStatement(taskUrl, classUri, actualTaskID, true));
+        metricResults.add(suiteUrl, Vocab.experiment, expUrl);
+        metricResults.add(suiteUrl, RDF.type, Vocab.suiteClass);
+        metricResults.add(expUrl, Vocab.task, taskUrl);
+        metricResults.add(expUrl, Vocab.dataset, datasetUrl);
+        metricResults.add(expUrl, RDF.type, Vocab.experimentClass);
+        metricResults.add(taskUrl, Vocab.connection, connUrl);
+        metricResults.add(taskUrl, RDF.type, Vocab.taskClass);
+        metricResults.add(taskUrl, RDF.type, actualTaskID);
+        metricResults.add(connUrl, RDF.type, Vocab.connectionClass);
+        metricResults.add(datasetUrl, RDF.type, Vocab.datasetClass);
 
-		addExtraMetadata(p, taskUrl);
-		metricResults.add(metricResults.createResource(datasetUrl), RDFS.label, p.getProperty(COMMON.DATASET_ID_KEY));
-		metricResults.add(metricResults.createResource(connUrl), RDFS.label, p.getProperty(COMMON.CONNECTION_ID_KEY));
+        addExtraMetadata(p, taskUrl);
+        metricResults.add(metricResults.createResource(datasetUrl), RDFS.label, p.getProperty(COMMON.DATASET_ID_KEY));
+        metricResults.add(metricResults.createResource(connUrl), RDFS.label, p.getProperty(COMMON.CONNECTION_ID_KEY));
 
-		if(p.containsKey(COMMON.QUERY_STATS)) {
-			Model queryStats = (Model) p.get(COMMON.QUERY_STATS);
-			metricResults.add(queryStats);
-		}
+        if (p.containsKey(COMMON.QUERY_STATS)) {
+            Model queryStats = (Model) p.get(COMMON.QUERY_STATS);
+            metricResults.add(queryStats);
+        }
 
-		Calendar cal = GregorianCalendar.getInstance();
-		metricResults.add(metricResults.createResource(taskUrl),
-				ResourceFactory.createProperty(rdfsUri + "startDate"), metricResults.createTypedLiteral(cal));
-	}
+        Calendar cal = GregorianCalendar.getInstance();
+        metricResults.add(taskUrl, Vocab.startDateProp, metricResults.createTypedLiteral(cal));
+    }
 
-	private String getUrlWithResourcePrefix(Properties p, String key) {
-		return getUrlWithResourcePrefix(p.getProperty(key));
-	}
+    private Resource getUrlWithResourcePrefix(Properties p, String key) {
+        return getUrlWithResourcePrefix(p.getProperty(key));
+    }
 
-	private String getUrlWithResourcePrefix(String suffix) {
-		try {
-			String[] suffixParts = suffix.split("/");
-			for (int i = 0; i < suffixParts.length; i++)
-				suffixParts[i] = URLEncoder.encode(suffixParts[i], StandardCharsets.UTF_8.toString());
-			return resource + String.join("/", suffixParts);
-		} catch (UnsupportedEncodingException e) {
-			return resource + suffix.hashCode();
-		}
-	}
+    private String urlEncodePath(String urlPath) {
+        try {
+            String[] suffixParts = urlPath.split("/");
+            for (int i = 0; i < suffixParts.length; i++)
+                suffixParts[i] = URLEncoder.encode(suffixParts[i], StandardCharsets.UTF_8.toString());
+            return String.join("/", suffixParts);
+        } catch (UnsupportedEncodingException e) {
+            return String.valueOf(urlPath.hashCode());
+        }
 
-	private String getUrlWithPropertyPrefix(String suffix) {
-		try {
-			String[] suffixParts = suffix.split("/");
-			for (int i = 0; i < suffixParts.length; i++)
-				suffixParts[i] = URLEncoder.encode(suffixParts[i], StandardCharsets.UTF_8.toString());
-			return properties + String.join("/", suffixParts);
-		} catch (UnsupportedEncodingException e) {
-			return properties + suffix.hashCode();
-		}
-	}
+    }
 
-	private Statement createStatement(String subject, String predicate, String object, boolean isObjectUri)
-	{
-		if(isObjectUri)
-			return metricResults.createStatement(metricResults.createResource(subject), ResourceFactory.createProperty(predicate), metricResults.createResource(object));
-		else
-			return metricResults.createStatement(metricResults.createResource(subject), ResourceFactory.createProperty(predicate), object);
-	}
+    private Resource getUrlWithResourcePrefix(String suffix) {
+        return ResourceFactory.createResource(COMMON.RES_BASE_URI + urlEncodePath(suffix));
+    }
 
-	private void addExtraMetadata(Properties p, String taskUrl) {
-		Properties extra = (Properties) p.get(COMMON.EXTRA_META_KEY);
-		for (Object obj : extra.keySet()) {
-			if (p.containsKey(COMMON.EXTRA_IS_RESOURCE_KEY) && ((Set<?>) p.get(COMMON.EXTRA_IS_RESOURCE_KEY)).contains(obj)) {
-				metricResults.add(createStatement(
-						taskUrl,
-						getUrlWithResourcePrefix(obj.toString()),
-						getUrlWithResourcePrefix(extra.get(obj).toString()),
-						true));
-			} else {
-				metricResults.add(createStatement(
-						taskUrl,
-						getUrlWithPropertyPrefix(obj.toString()),
-						extra.get(obj).toString(),
-						false));
-			}
-		}
-	}
-
-	@Override
-	public String toString() {
-		return this.getClass().getSimpleName();
-	}
-
-	/**
-	 * Ends the task and adds a rdfs:endDate triple with the current time
-	 * @param taskID
-	 */
-	public void endTask(String taskID) {
-		Calendar cal = GregorianCalendar.getInstance();
-		String taskUrl = getUrlWithResourcePrefix(taskID);
-		metricResults.add(metricResults.add(metricResults.createResource(taskUrl),
-				ResourceFactory.createProperty(rdfsUri + "endDate"), metricResults.createTypedLiteral(cal)));
-	}
+    private Property getUrlWithPropertyPrefix(String suffix) {
+        return ResourceFactory.createProperty(COMMON.PROP_BASE_URI + urlEncodePath(suffix));
+    }
 
 
-	public void addData(Model data){
-		metricResults.add(data);
-	}
+    private void addExtraMetadata(Properties p, Resource task) {
+        Properties extra = (Properties) p.get(COMMON.EXTRA_META_KEY);
+        for (Object obj : extra.keySet()) {
+            metricResults.add(task, getUrlWithPropertyPrefix(obj.toString()), ResourceFactory.createTypedLiteral(extra.get(obj)));
+        }
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
+    /**
+     * Ends the task and adds a rdfs:endDate triple with the current time
+     * @param taskID
+     */
+    public void endTask(String taskID) {
+        Calendar cal = GregorianCalendar.getInstance();
+        Resource task = getUrlWithResourcePrefix(taskID);
+        metricResults.add(task, Vocab.endDateProp, metricResults.createTypedLiteral(cal));
+    }
+
+
+    public void addData(Model data) {
+        metricResults.add(data);
+    }
 
 
 }

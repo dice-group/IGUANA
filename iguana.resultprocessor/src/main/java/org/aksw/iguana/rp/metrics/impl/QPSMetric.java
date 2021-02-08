@@ -32,7 +32,7 @@ public class QPSMetric extends AbstractMetric {
 	private static Property unknownException = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"unknownException");
 	private static Property wrongCodes = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"wrongCodes");
 	private static Property penalizedQPSProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"penalizedQPS");
-	private static Property queryID = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryID");
+	private static Property query = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"query");
 
 	protected long hourInMS = 3600000;
 	protected Integer penalty = null;
@@ -196,7 +196,7 @@ public class QPSMetric extends AbstractMetric {
 			if(!noPenalty) {
 				m.add(query, penalizedQPSProperty, ResourceFactory.createTypedLiteral(pqps));
 			}
-			m.add(query, QPSMetric.queryID, ResourceFactory.createResource(COMMON.RES_BASE_URI+(int)resArr[8]+ "/" + queryID.toString()));
+			m.add(query, QPSMetric.query, ResourceFactory.createResource(COMMON.RES_BASE_URI+(int)resArr[8]+ "/" + queryID.toString()));
 			m.add(query, RDF.type, ResourceFactory.createResource(COMMON.CLASS_BASE_URI+"ExecutedQuery"));
 		}
 	}

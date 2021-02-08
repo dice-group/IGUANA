@@ -27,10 +27,5 @@ public class CONSTANTS {
 	public static final String TIME_LIMIT = "timeLimit";
 
 
-	public static final String NO_OF_QUERY_MIXES = "numberOfQueryMixes";
-
-
-
-
-
+	public static final String NO_OF_QUERY_MIXES = "noOfQueryMixes";
 }
