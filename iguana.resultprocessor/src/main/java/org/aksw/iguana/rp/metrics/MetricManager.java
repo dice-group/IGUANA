@@ -94,8 +94,7 @@ public class MetricManager {
 		for(Metric m : metrics){
 			try{
 				m.close();
-				m.getStorageManager().commit();
-				
+
 			}catch(Exception e){
 				LOGGER.error("Could not use metric "+m.getShortName()+".  Cause: {}",e);
 

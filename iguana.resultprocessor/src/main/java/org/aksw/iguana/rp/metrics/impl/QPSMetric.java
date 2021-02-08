@@ -8,6 +8,8 @@ import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -77,7 +79,7 @@ public class QPSMetric extends AbstractMetric {
 		if(p.containsKey(COMMON.RECEIVE_DATA_SIZE)) {
 			size = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SIZE).toString());
 		}
-		String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
+		String queryID = p.getProperty(COMMON.FULL_QUERY_ID_KEY);
 		int queryHash = Integer.parseInt(p.get(COMMON.QUERY_HASH).toString());
 		Properties extra = getExtraMeta(p);
 		
@@ -180,21 +182,21 @@ public class QPSMetric extends AbstractMetric {
 
 			Resource query = ResourceFactory.createResource(subjectParent.getURI()+"/"+queryID);
 			m.add(subjectParent, queryProperty, query);
-			m.add(query, qpsProperty, ResourceFactory.createTypedLiteral(qps));
-			m.add(query, ttProperty, ResourceFactory.createTypedLiteral((double)resArr[0]));
-			m.add(query, succeededProperty, ResourceFactory.createTypedLiteral((long)resArr[1]));
-			m.add(query, failProperty, ResourceFactory.createTypedLiteral((long)resArr[2]));
+			m.add(query, qpsProperty, ResourceFactory.createTypedLiteral(BigDecimal.valueOf(qps)));
+			m.add(query, ttProperty, ResourceFactory.createTypedLiteral(BigDecimal.valueOf((double)resArr[0])));
+			m.add(query, succeededProperty, ResourceFactory.createTypedLiteral(BigInteger.valueOf((long) resArr[1])));
+			m.add(query, failProperty, ResourceFactory.createTypedLiteral(BigInteger.valueOf((long) resArr[2])));
 			if((long)resArr[3]!=-1L) {
-				m.add(query, resultSize, ResourceFactory.createTypedLiteral((long)resArr[3]));
+				m.add(query, resultSize, ResourceFactory.createTypedLiteral(BigInteger.valueOf((long) resArr[3])));
 			}
 			else{
 				m.add(query, resultSize, ResourceFactory.createTypedLiteral("?"));
 			}
-			m.add(query, timeOuts, ResourceFactory.createTypedLiteral((long)resArr[4]));
-			m.add(query, unknownException, ResourceFactory.createTypedLiteral((long)resArr[5]));
-			m.add(query, wrongCodes, ResourceFactory.createTypedLiteral((long)resArr[6]));
+			m.add(query, timeOuts, ResourceFactory.createTypedLiteral(BigInteger.valueOf((long)resArr[4])));
+			m.add(query, unknownException, ResourceFactory.createTypedLiteral(BigInteger.valueOf((long)resArr[5])));
+			m.add(query, wrongCodes, ResourceFactory.createTypedLiteral(BigInteger.valueOf((long)resArr[6])));
 			if(!noPenalty) {
-				m.add(query, penalizedQPSProperty, ResourceFactory.createTypedLiteral(pqps));
+				m.add(query, penalizedQPSProperty, ResourceFactory.createTypedLiteral(BigDecimal.valueOf(pqps)));
 			}
 			m.add(query, QPSMetric.query, ResourceFactory.createResource(COMMON.RES_BASE_URI+(int)resArr[8]+ "/" + queryID.toString()));
 			m.add(query, RDF.type, ResourceFactory.createResource(COMMON.CLASS_BASE_URI+"ExecutedQuery"));

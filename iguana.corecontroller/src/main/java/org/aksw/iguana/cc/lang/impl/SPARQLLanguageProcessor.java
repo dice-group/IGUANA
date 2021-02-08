@@ -38,6 +38,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -82,7 +83,7 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
                 model.add(subject, Vocab.filterProperty, model.createTypedLiteral(qs2.filter==1));
                 model.add(subject, Vocab.groupByProperty, model.createTypedLiteral(qs2.groupBy==1));
                 model.add(subject, Vocab.havingProperty, model.createTypedLiteral(qs2.having==1));
-                model.add(subject, Vocab.triplesProperty, model.createTypedLiteral(qs2.triples));
+                model.add(subject, Vocab.triplesProperty, model.createTypedLiteral(BigInteger.valueOf(qs2.triples)));
                 model.add(subject, Vocab.offsetProperty, model.createTypedLiteral(qs2.offset==1));
                 model.add(subject, Vocab.optionalProperty, model.createTypedLiteral(qs2.optional==1));
                 model.add(subject, Vocab.orderByProperty, model.createTypedLiteral(qs2.orderBy==1));

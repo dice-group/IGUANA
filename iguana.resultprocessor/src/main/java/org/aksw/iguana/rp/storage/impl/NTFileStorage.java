@@ -4,6 +4,7 @@
 package org.aksw.iguana.rp.storage.impl;
 
 import org.aksw.iguana.commons.annotation.Shorthand;
+import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
@@ -65,7 +66,12 @@ public class NTFileStorage extends TripleBasedStorage {
 	@Override
 	public void commit() {
         try (OutputStream os = new FileOutputStream(file.toString(), true)) {
-			RDFDataMgr.write(os, metricResults, RDFFormat.NTRIPLES);
+			metricResults.setNsPrefix("imetric", COMMON.METRIC_BASE_URI);
+			metricResults.setNsPrefix("iprop", COMMON.PROP_BASE_URI);
+			metricResults.setNsPrefix("iont", COMMON.CLASS_BASE_URI);
+			metricResults.setNsPrefix("ires", COMMON.RES_BASE_URI);
+			metricResults.setNsPrefix("lsqr", "http://lsq.aksw.org/res/");
+			RDFDataMgr.write(os, metricResults, RDFFormat.TURTLE_PRETTY);
 			metricResults.removeAll();
 		} catch (IOException e) {
 			LOGGER.error("Could not commit to NTFileStorage.", e);

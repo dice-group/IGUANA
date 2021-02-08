@@ -111,7 +111,6 @@ public class ExperimentManager {
 	private void endExperimentTask(Properties p){
 		String taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
 		storageManager.endTask(taskID);
-		storageManager.commit();
 		LOGGER.info("Got end Flag for experiment task ID {}", taskID);
 		if(experiments.containsKey(taskID)){
 			experiments.get(taskID).close();
@@ -120,5 +119,6 @@ public class ExperimentManager {
 		else{
 			LOGGER.warn("Could not find Experiment Task with ID: {}.", taskID);
 		}
+		storageManager.commit();
 	}
 }

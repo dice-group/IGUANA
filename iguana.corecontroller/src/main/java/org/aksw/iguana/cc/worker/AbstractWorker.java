@@ -20,7 +20,6 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -215,7 +214,7 @@ public abstract class AbstractWorker implements Worker {
 			result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
 			result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
 			result.put(COMMON.QUERY_HASH, queryHash);
-			result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
+			result.setProperty(COMMON.FULL_QUERY_ID_KEY, results.getQueryID());
 			result.put(COMMON.PENALTY, this.timeOut);
 			// Add extra Meta Key, worker ID and worker Type
 			result.put(COMMON.EXTRA_META_KEY, this.extra);

@@ -3,13 +3,17 @@
  */
 package org.aksw.iguana.rp.storage;
 
+import java.math.BigDecimal;
+
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
@@ -98,7 +102,17 @@ public abstract class TripleBasedStorage implements Storage {
     private void addExtraMetadata(Properties p, Resource task) {
         Properties extra = (Properties) p.get(COMMON.EXTRA_META_KEY);
         for (Object obj : extra.keySet()) {
-            metricResults.add(task, getUrlWithPropertyPrefix(obj.toString()), ResourceFactory.createTypedLiteral(extra.get(obj)));
+            Object value = extra.get(obj);
+
+            if (value instanceof Integer || value instanceof Long) {
+                long long_value = ((Number) value).longValue();
+                metricResults.add(task, getUrlWithPropertyPrefix(obj.toString()), ResourceFactory.createTypedLiteral(BigInteger.valueOf(long_value)));
+            }
+            if (value instanceof Float || value instanceof Double) {
+                double double_value = ((Number) value).doubleValue();
+                metricResults.add(task, getUrlWithPropertyPrefix(obj.toString()), ResourceFactory.createTypedLiteral(BigDecimal.valueOf(double_value)));
+            } else
+                metricResults.add(task, getUrlWithPropertyPrefix(obj.toString()), ResourceFactory.createTypedLiteral(value));
         }
     }
 

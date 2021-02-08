@@ -15,7 +15,7 @@ import java.util.Properties;
  */
 @Shorthand("F1Measure")
 public class F1MeasureMetric extends AbstractMetric {
-
+	// TODO: check output
 	private static Property queryProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"query");
 	private static Property queryIDProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryID");
 	private static Property queryStringProperty = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"queryString");
@@ -53,7 +53,7 @@ public class F1MeasureMetric extends AbstractMetric {
 	
 	@Override
 	public void receiveData(Properties p) {
-		String queryID =  p.get(COMMON.QUERY_ID_KEY).toString();
+		String queryID =  p.get(COMMON.FULL_QUERY_ID_KEY).toString();
 		String queryString =  p.get(COMMON.QUERY_STRING).toString();
 		double[] doubleResults =  (double[])p.get(COMMON.DOUBLE_RAW_RESULTS);
 		Object[] rawResult = new Object[3];

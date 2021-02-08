@@ -4,6 +4,7 @@ package org.aksw.iguana.cc.model;
  * Wrapper for a query execution.
  */
 public class QueryExecutionStats {
+    // TODO: queryID
     private String queryID;
     private long responseCode;
     private double executionTime;

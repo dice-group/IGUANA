@@ -110,7 +110,7 @@ public class MetricTest {
 		p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
 	    p.put(COMMON.RECEIVE_DATA_SUCCESS, success);
 	    p.put(COMMON.RECEIVE_DATA_TIME, time);
-	    p.put(COMMON.QUERY_ID_KEY, queryID);
+	    p.put(COMMON.FULL_QUERY_ID_KEY, queryID);
 		p.put(COMMON.QUERY_HASH, queryHash);
 		p.put(COMMON.QUERY_STRING, "SELECT * {?s ?p ?o}");
 		//tp=time/5, fp=time/10, fn=8

@@ -8,7 +8,6 @@ import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Properties;
@@ -64,7 +63,7 @@ public class UPDATEWorker extends HttpPostWorker {
 			result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
 			result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
 			result.put(COMMON.QUERY_HASH, queryHash);
-			result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
+			result.setProperty(COMMON.FULL_QUERY_ID_KEY, results.getQueryID());
 			result.put(COMMON.PENALTY, this.timeOut);
 			// Add extra Meta Key, worker ID and worker Type
 			result.put(COMMON.EXTRA_META_KEY, this.extra);

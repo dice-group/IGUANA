@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.lang;
 
+import java.math.BigInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,8 +33,8 @@ public class QueryWrapper {
         return query;
     }
 
-    public int getId() {
-        return id;
+    public BigInteger getId() {
+        return BigInteger.valueOf(id);
     }
 
     public String getFullId() {

@@ -64,9 +64,7 @@ public class COMMON {
 	 */
 	public static final String NO_OF_QUERIES = "noOfQueries";
 
-
-
-	public static final String QUERY_ID_KEY = "queryID";
+	public static final String FULL_QUERY_ID_KEY = "query";
 
 	public static final String CONNECTION_ID_KEY = "connID";
 
@@ -107,5 +105,6 @@ public class COMMON {
 	public static final String RES_BASE_URI = BASE_URI+"/resource/";
 	public static final String PROP_BASE_URI = BASE_URI+"/properties/";
 	public static final String CLASS_BASE_URI = BASE_URI+"/class/";
-    public static final String PENALTY = "penalty";
+	public static final String METRIC_BASE_URI = CLASS_BASE_URI+"metric/";
+	public static final String PENALTY = "penalty";
 }

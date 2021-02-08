@@ -8,6 +8,8 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -238,14 +240,23 @@ public abstract class AbstractMetric implements Metric{
 					RDF.type,
 					Vocab.workerClass);
 			for(Object k : key.keySet()) {
-				m.add(subject, ResourceFactory.createProperty(COMMON.PROP_BASE_URI+k), ResourceFactory.createTypedLiteral(key.get(k)));
+				Property prop = ResourceFactory.createProperty(COMMON.PROP_BASE_URI + k);
+				Object value = key.get(k);
+				if (value instanceof Integer || value instanceof Long) {
+					long long_value = ((Number) value).longValue();
+					m.add(subject, prop, ResourceFactory.createTypedLiteral(BigInteger.valueOf(long_value)));
+				}
+				if (value instanceof Float || value instanceof Double) {
+					double double_value = ((Number) value).doubleValue();
+					m.add(subject, prop, ResourceFactory.createTypedLiteral(BigDecimal.valueOf(double_value)));
+				} else
+					m.add(subject, prop, ResourceFactory.createTypedLiteral(value));
 			}
 			m.add(subject, Vocab.worker2metric, metricRes);
 		}
 		m.add(getTaskResource(), Vocab.worker2metric, metricRes);
 
 		this.storageManager.addData(m);
-		this.storageManager.commit();
 
 		this.dataContainer.clear();
 	}

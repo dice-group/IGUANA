@@ -126,7 +126,7 @@ public class HTTPWorkerTest {
 
         assertEquals(taskID, p.get(COMMON.EXPERIMENT_TASK_ID_KEY));
 
-        assertEquals(queryID, p.get(COMMON.QUERY_ID_KEY));
+        assertEquals(queryID, p.get(COMMON.FULL_QUERY_ID_KEY));
         assertEquals(180000.0, p.get(COMMON.PENALTY));
         assertTrue(((Properties)p.get(COMMON.EXTRA_META_KEY)).isEmpty());
         if(isPost){

@@ -8,6 +8,7 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.jena.rdf.model.*;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 
 /**
@@ -43,22 +44,22 @@ public class QMPHMetric extends NoQPHMetric {
 	protected void callbackClose(){
 		Model m = ModelFactory.createDefaultModel();
 		Property property = getMetricProperty();
-		Double sum = 0.0;
+		double sum = 0.0;
 		for(Properties key : dataContainer.keySet()){
-			Double totalTime = (double) dataContainer.get(key).get(TOTAL_TIME);
+			double totalTime = (double) dataContainer.get(key).get(TOTAL_TIME);
 			Integer success = (Integer) dataContainer.get(key).get(TOTAL_SUCCESS);
 
 			double noOfQueriesPerHour = hourInMS*success*1.0/totalTime;
 
 			int noOfQueryMixes = (int) key.get(COMMON.NO_OF_QUERIES);
-			Double qmph=noOfQueriesPerHour*1.0/noOfQueryMixes;
+			double qmph= noOfQueriesPerHour /noOfQueryMixes;
 
 			sum+=qmph;
 			Resource subject = getSubject(key);
 			m.add(getConnectingStatement(subject));
-			m.add(subject, property, ResourceFactory.createTypedLiteral(qmph));
+			m.add(subject, property, ResourceFactory.createTypedLiteral(BigDecimal.valueOf(qmph)));
 		}
-		m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sum));
+		m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(BigDecimal.valueOf(sum)));
 		sendData(m);
 	}
 }

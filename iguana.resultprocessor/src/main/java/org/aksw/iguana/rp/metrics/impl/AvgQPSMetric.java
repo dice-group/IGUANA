@@ -3,6 +3,7 @@ package org.aksw.iguana.rp.metrics.impl;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.apache.jena.rdf.model.*;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -32,32 +33,31 @@ public class AvgQPSMetric extends QPSMetric {
         Property property = getMetricProperty();
         for(Properties key : dataContainer.keySet()){
             Properties value = dataContainer.get(key);
-            Double avgQps=0.0;
+            double avgQps=0.0;
             for(Object queryID : value.keySet()){
                 Object[] resArr = (Object[]) value.get(queryID);
-                Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
-                map.putIfAbsent(queryID, new Number[]{Double.valueOf(0), Long.valueOf(0)});
+                double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
+                map.putIfAbsent(queryID, new Number[]{(double) 0, 0L});
 
                 Number[] current =map.get(queryID);
-                Long succ = (long)resArr[1]+(Long)current[1];
-                Double time = (double)resArr[0]+(Double)current[0];
+                long succ = (long)resArr[1]+(Long)current[1];
+                double time = (double)resArr[0]+(Double)current[0];
                 map.put(queryID, new Number[]{time, succ});
                 avgQps+=qps;
             }
             avgQps = avgQps/value.size();
             Resource subject = getSubject(key);
             m.add(getConnectingStatement(subject));
-            m.add(subject, property, ResourceFactory.createTypedLiteral(avgQps));
+            m.add(subject, property, ResourceFactory.createTypedLiteral(BigDecimal.valueOf(avgQps)));
         }
-        Double avgQps=0.0;
+        double avgQps=0.0;
         for(Object queryID : map.keySet()) {
-            Double qps = (Long)map.get(queryID)[1]*1.0/((Double)map.get(queryID)[0]/1000.0);
+            double qps = (Long)map.get(queryID)[1]*1.0/((Double)map.get(queryID)[0]/1000.0);
             avgQps+=qps;
         }
         avgQps = avgQps/map.size();
-        m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(avgQps));
+        m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(BigDecimal.valueOf(avgQps)));
         this.sendData(m);
-        this.storageManager.commit();
     }
 
 }

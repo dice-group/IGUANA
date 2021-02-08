@@ -7,6 +7,7 @@ import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
 import java.util.Properties;
 
 /**
@@ -66,14 +67,13 @@ public class NoQMetric extends AbstractMetric {
         Property property = getMetricProperty();
         long sum = 0;
         for(Properties key : dataContainer.keySet()){
-            Double totalTime = (Double) dataContainer.get(key).get(TOTAL_TIME);
             Integer success = (Integer) dataContainer.get(key).get(TOTAL_SUCCESS);
             sum+=success;
             Resource subject = getSubject(key);
             m.add(getConnectingStatement(subject));
-            m.add(subject, property, ResourceFactory.createTypedLiteral(success));
+            m.add(subject, property, ResourceFactory.createTypedLiteral(BigInteger.valueOf(success)));
         }
-        m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sum));
+        m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(BigInteger.valueOf(sum)));
         sendData(m);
     }
 

@@ -6,10 +6,13 @@ package org.aksw.iguana.rp.metrics.impl;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.AbstractMetric;
+import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -66,9 +69,9 @@ public class EachQueryMetric extends AbstractMetric {
 
 		double time = (double) p.get(COMMON.RECEIVE_DATA_TIME);
 		Boolean success = ((long) p.get(COMMON.RECEIVE_DATA_SUCCESS))>0;
-		String queryID = p.getProperty(COMMON.QUERY_ID_KEY);
+		String fullQueryId = p.getProperty(COMMON.FULL_QUERY_ID_KEY);
 		long err = (long) p.get(COMMON.RECEIVE_DATA_SUCCESS);
-		String subject = worker+"/"+queryID;
+		String subject = worker+"/"+fullQueryId;
 
 		long run=1;
 		if(queryRunMap.containsKey(subject)){
@@ -86,20 +89,21 @@ public class EachQueryMetric extends AbstractMetric {
 		m.add(getConnectingStatement(workerRes));
 		m.add(workerRes, queryProperty , queryRes);
 		m.add(queryRes, execProperty , subRes);
-		m.add(subRes, timeProperty, ResourceFactory.createTypedLiteral(time));
+		m.add(subRes, timeProperty, ResourceFactory.createTypedLiteral(BigDecimal.valueOf(time)));
 		m.add(subRes, successProperty, ResourceFactory.createTypedLiteral(success));
 		if(p.containsKey(COMMON.QUERY_HASH)) {
 			int queryHash = Integer.parseInt(p.get(COMMON.QUERY_HASH).toString());
-			m.add(subRes, queryIDProperty, ResourceFactory.createResource(COMMON.RES_BASE_URI+queryHash+"/"+queryID));
+			m.add(subRes, Vocab.queryProp, ResourceFactory.createResource(COMMON.RES_BASE_URI+queryHash+"/"+fullQueryId));
 		}
 		else{
-			m.add(subRes, queryIDProperty, ResourceFactory.createTypedLiteral(queryID));
+			// TODO: when may this ever happen?
+			m.add(subRes, queryIDProperty, ResourceFactory.createTypedLiteral(fullQueryId));
 		}
-		m.add(subRes, runProperty, ResourceFactory.createTypedLiteral(run));
-		m.add(subRes, errorCodeProperty, ResourceFactory.createTypedLiteral(err));
+		m.add(subRes, runProperty, ResourceFactory.createTypedLiteral(BigInteger.valueOf(run)));
+		m.add(subRes, errorCodeProperty, ResourceFactory.createTypedLiteral(BigInteger.valueOf(err)));
 		if(p.containsKey(COMMON.RECEIVE_DATA_SIZE)) {
 			long resSize = Long.parseLong(p.get(COMMON.RECEIVE_DATA_SIZE).toString());
-			m.add(subRes, resultSize, ResourceFactory.createTypedLiteral(resSize));
+			m.add(subRes, resultSize, ResourceFactory.createTypedLiteral(BigInteger.valueOf(resSize)));
 		}
 
 		sendData(m);
