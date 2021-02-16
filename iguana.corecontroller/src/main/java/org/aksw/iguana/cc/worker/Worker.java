@@ -76,5 +76,14 @@ public interface Worker extends Runnable{
 	 * @param noOfQueryMixes
 	 * @return
 	 */
-	boolean hasExecutedNoOfQueryMixes(double noOfQueryMixes);
+	boolean hasExecutedNoOfQueryMixes(Long noOfQueryMixes);
+
+
+	/**
+	 * Sets the end restriction
+	 *
+	 * @param noOfQueryMixes
+	 */
+	void endAtNoOfQueryMixes(Long noOfQueryMixes);
+
 }

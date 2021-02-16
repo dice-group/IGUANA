@@ -69,6 +69,7 @@ public abstract class AbstractWorker implements Worker {
 	private Integer gaussianLatency=0;
 
 	private Random latencyRandomizer;
+	private Long endAtNOQM = null;
 
 	/**
 	 * List which contains all Files representing one query(Pattern)
@@ -144,7 +145,7 @@ public abstract class AbstractWorker implements Worker {
 
 		LOGGER.info("Starting Worker[{{}} : {{}}].", this.workerType, this.workerID);
 		// Execute Queries as long as the Stresstest will need.
-		while (!this.endSignal) {
+		while (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
 			// Get next query
 			StringBuilder query = new StringBuilder();
 			StringBuilder queryID = new StringBuilder();
@@ -207,7 +208,7 @@ public abstract class AbstractWorker implements Worker {
 
 	public synchronized void addResults(QueryExecutionStats results)
 	{
-		if (!this.endSignal) {
+		if (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
 			// create Properties store it in List
 			Properties result = new Properties();
 			result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
@@ -222,6 +223,10 @@ public abstract class AbstractWorker implements Worker {
 			setResults(result);
 			executedQueries++;
 
+			//
+			if(getExecutedQueries()*1.0 % getNoOfQueries() == 0 ){
+				LOGGER.info("Worker executed {} queryMixes", getExecutedQueries()*1.0/getNoOfQueries());
+			}
 		}
 	}
 
@@ -290,7 +295,15 @@ public abstract class AbstractWorker implements Worker {
 	}
 
 	@Override
-	public boolean hasExecutedNoOfQueryMixes(double noOfQueryMixes){
+	public boolean hasExecutedNoOfQueryMixes(Long noOfQueryMixes){
+		if(noOfQueryMixes==null){
+			return false;
+		}
 		return getExecutedQueries() / (getNoOfQueries() * 1.0) >= noOfQueryMixes;
+	}
+
+	@Override
+	public void endAtNoOfQueryMixes(Long noOfQueryMixes){
+		this.endAtNOQM=noOfQueryMixes;
 	}
 }
