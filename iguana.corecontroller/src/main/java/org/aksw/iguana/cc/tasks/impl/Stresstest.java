@@ -220,7 +220,7 @@ public class Stresstest extends AbstractTask {
 				// if so send all results buffered
 				sendWorkerResult(worker);
 			}
-			loopSleep(10);
+			loopSleep(100);
 		}
 		LOGGER.debug("Sending stop signal to workers");
 		// tell all workers to stop sending properties, thus the await termination will

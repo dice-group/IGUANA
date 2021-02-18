@@ -224,7 +224,7 @@ public abstract class AbstractWorker implements Worker {
 			executedQueries++;
 
 			//
-			if(getExecutedQueries()*1.0 % getNoOfQueries() == 0 ){
+			if(getExecutedQueries() % getNoOfQueries() == 0 ){
 				LOGGER.info("Worker executed {} queryMixes", getExecutedQueries()*1.0/getNoOfQueries());
 			}
 		}
