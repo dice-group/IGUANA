@@ -214,7 +214,7 @@ public class HTTPWorkerTest {
         getWorker.stopSending();
         executorService.shutdownNow();
         // check correct executedQueries
-        int expectedSize=4;
+        long expectedSize=4;
         if(isPost){
             expectedSize=2;
         }
@@ -225,7 +225,7 @@ public class HTTPWorkerTest {
             assertEquals(queryHash, p.get(COMMON.QUERY_HASH));
         }
         assertEquals(expectedSize, results.size());
-        for(int i=1;i<expectedSize;i++) {
+        for(long i=1;i<expectedSize;i++) {
             assertTrue(getWorker.hasExecutedNoOfQueryMixes(i));
         }
         assertFalse(getWorker.hasExecutedNoOfQueryMixes(expectedSize+1));
