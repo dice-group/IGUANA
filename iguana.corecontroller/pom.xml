@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.aksw</groupId>
   <artifactId>iguana.corecontroller</artifactId>
-  <version>3.2.0-SNAPSHOT</version>
+  <version>3.2.1</version>
   <name>Iguanas Core Controller</name>
   <description>The Controller of Iguanas Core Module. Handeling the messaging and is coordinating the ResultProcessor as well as the dataGenerator. Will be communicating with the Web Controller Module.</description>
 	<licenses>
@@ -82,7 +82,7 @@
 	<dependency>
 		<groupId>org.aksw</groupId>
 		<artifactId>iguana.resultprocessor</artifactId>
-		<version>3.2.0-SNAPSHOT</version>
+		<version>3.2.1</version>
 		<exclusions>
 			<exclusion>
 				<groupId>org.aksw</groupId>
@@ -94,7 +94,7 @@
 		<dependency>
 			<groupId>org.aksw</groupId>
 			<artifactId>iguana.commons</artifactId>
-			<version>3.2.0-SNAPSHOT</version>
+			<version>3.2.1</version>
 		</dependency>
 
 
@@ -175,7 +175,7 @@
 				<version>2.4.3</version>
 				<configuration>
 					<finalName>iguana-${version}</finalName>
-					<outputDirectory>../target</outputDirectory>
+					<outputDirectory>./target</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>
