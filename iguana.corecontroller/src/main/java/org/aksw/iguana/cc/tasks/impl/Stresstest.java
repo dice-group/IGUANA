@@ -141,6 +141,9 @@ public class Stresstest extends AbstractTask {
 		for(int i=0;i<threads;i++) {
 			workerConfig.put("workerID", baseID+i);
 			Worker worker = new WorkerFactory().create(className, workerConfig);
+			if(this.noOfQueryMixes!=null){
+				worker.endAtNoOfQueryMixes(noOfQueryMixes);
+			}
 			workersToAddTo.add(worker);
 		}
 		return threads;
@@ -260,6 +263,7 @@ public class Stresstest extends AbstractTask {
 		if(props == null){
 			return;
 		}
+
 		for (Properties results : props) {
 			try {
 

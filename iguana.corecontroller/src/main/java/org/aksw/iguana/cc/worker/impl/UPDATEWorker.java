@@ -135,7 +135,7 @@ public class UPDATEWorker extends HttpPostWorker {
 	 * @return
 	 */
 	@Override
-	public boolean hasExecutedNoOfQueryMixes(double noOfQueryMixes){
+	public boolean hasExecutedNoOfQueryMixes(Long noOfQueryMixes){
 		return getExecutedQueries() / (getNoOfQueries() * 1.0) >= 1;
 	}
 
