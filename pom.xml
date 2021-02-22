@@ -65,7 +65,6 @@
                                     <includes>
                                         <include>iguana-${version}.jar</include>
                                     </includes>
-                                    <filtering>true</filtering>
                                 </resource>
                             </resources>
                         </configuration>
