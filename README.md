@@ -108,6 +108,17 @@ It contains the following files:
 You can use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/example-suite.yml) we provide and modify it to your needs.
 For further information please visit our [configuration](http://iguana-benchmark.eu/docs/3.2/usage/configuration/) and [Stresstest](http://iguana-benchmark.eu/docs/3.0/usage/stresstest/) wiki pages. For a detailed, step-by-step instruction please attend our [tutorial](http://iguana-benchmark.eu/docs/3.2/usage/tutorial/).
 
+
+
+## Execute the Benchmark
+
+Use the start script 
+```
+./start-iguana.sh example-suite.yml
+```
+Now Iguana will execute the example benchmark suite configured in the example-suite.yml file
+
+
 # How to Cite
 
 ```bibtex
@@ -135,11 +146,3 @@ abstract="The performance of triples stores is crucial for applications driven b
 isbn="978-3-319-68204-4"
 }
 ```
-
-## Execute the Benchmark
-
-Use the start script 
-```
-./start-iguana.sh example-suite.yml
-```
-Now Iguana will execute the example benchmark suite configured in the example-suite.yml file
