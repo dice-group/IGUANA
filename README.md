@@ -108,6 +108,34 @@ It contains the following files:
 You can use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/example-suite.yml) we provide and modify it to your needs.
 For further information please visit our [configuration](http://iguana-benchmark.eu/docs/3.2/usage/configuration/) and [Stresstest](http://iguana-benchmark.eu/docs/3.0/usage/stresstest/) wiki pages. For a detailed, step-by-step instruction please attend our [tutorial](http://iguana-benchmark.eu/docs/3.2/usage/tutorial/).
 
+# How to Cite
+
+```bibtex
+@InProceedings{10.1007/978-3-319-68204-4_5,
+author="Conrads, Felix
+and Lehmann, Jens
+and Saleem, Muhammad
+and Morsey, Mohamed
+and Ngonga Ngomo, Axel-Cyrille",
+editor="d'Amato, Claudia
+and Fernandez, Miriam
+and Tamma, Valentina
+and Lecue, Freddy
+and Cudr{\'e}-Mauroux, Philippe
+and Sequeda, Juan
+and Lange, Christoph
+and Heflin, Jeff",
+title="Iguana: A Generic Framework for Benchmarking the Read-Write Performance of Triple Stores",
+booktitle="The Semantic Web -- ISWC 2017",
+year="2017",
+publisher="Springer International Publishing",
+address="Cham",
+pages="48--65",
+abstract="The performance of triples stores is crucial for applications driven by RDF. Several benchmarks have been proposed that assess the performance of triple stores. However, no integrated benchmark-independent execution framework for these benchmarks has yet been provided. We propose a novel SPARQL benchmark execution framework called Iguana. Our framework complements benchmarks by providing an execution environment which can measure the performance of triple stores during data loading, data updates as well as under different loads and parallel requests. Moreover, it allows a uniform comparison of results on different benchmarks. We execute the FEASIBLE and DBPSB benchmarks using the Iguana framework and measure the performance of popular triple stores under updates and parallel user requests. We compare our results (See https://doi.org/10.6084/m9.figshare.c.3767501.v1) with state-of-the-art benchmarking results and show that our benchmark execution framework can unveil new insights pertaining to the performance of triple stores.",
+isbn="978-3-319-68204-4"
+}
+```
+
 ## Execute the Benchmark
 
 Use the start script 
