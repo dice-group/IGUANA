@@ -109,4 +109,24 @@ public class Streams {
         return ret;
     }
 
+    /**
+     * reads a stream and throws away the result.
+     *
+     * @param inputStream the stream to read from
+     * @param timeout     delta from startTime when the computation must be completed. Otherwise a TimeoutException may be thrown. Timeout check is deactivated if timeout is < 0.
+     * @return size of the output stream
+     * @throws IOException      from inputStream.read
+     * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceed
+     */
+    static public long inputStream2Length(InputStream inputStream, Instant startTime, double timeout, byte[] buffer) throws IOException, TimeoutException {
+        long length;
+        long ret = 0;
+        while ((length = inputStream.read(buffer)) != -1) {
+            if (durationInMilliseconds(startTime, Instant.now()) > timeout && timeout >0)
+                throw new TimeoutException("reading the answer timed out");
+            ret += length;
+        }
+        return ret;
+    }
+
 }

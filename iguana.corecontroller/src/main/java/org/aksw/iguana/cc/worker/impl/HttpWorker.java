@@ -136,7 +136,6 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
 
     @Override
     public void executeQuery(String query, String queryID) {
-        requestStartTime = Instant.now();
         queryId = queryID;
         resultsSaved = false;
         requestTimedOut = false;
@@ -148,7 +147,8 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
             buildRequest(query, queryId);
 
             setTimeout(timeOut.intValue());
-
+            
+            requestStartTime = Instant.now();
             response = client.execute(request, getAuthContext(con.getEndpoint()));
             // method to process the result in background
             processHttpResponse();
