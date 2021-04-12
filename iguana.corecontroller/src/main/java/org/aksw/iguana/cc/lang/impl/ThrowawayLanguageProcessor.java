@@ -16,12 +16,10 @@ import java.util.concurrent.TimeoutException;
 
 @Shorthand("lang.SIMPLE")
 public class ThrowawayLanguageProcessor extends AbstractLanguageProcessor {
-    byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
-
 
     @Override
     public long readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException, TimeoutException {
-        return Streams.inputStream2Length(inputStream, Instant.now(), 0, buffer);
+        return Streams.inputStream2Length(inputStream, Instant.now(), 0);
     }
 
     @Override
