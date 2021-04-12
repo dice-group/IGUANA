@@ -14,11 +14,11 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  */
 public class Streams {
 
-    final static int bufferSize = 16 * 1024 * 1024; // 16 MB buffer
+    public static final int bufferSize = 16 * 1024 * 1024; // 16 MB buffer
 
-    final static ThreadLocal<byte[]> threadBuffer = ThreadLocal.withInitial(() -> new byte[bufferSize]);
+    protected static final ThreadLocal<byte[]> threadBuffer = ThreadLocal.withInitial(() -> new byte[bufferSize]);
 
-    final static ThreadLocal<ByteArrayOutputStream> threadByteArrayOutputStream = ThreadLocal.withInitial(() -> new ByteArrayOutputStream(bufferSize));
+    protected static final ThreadLocal<ByteArrayOutputStream> threadByteArrayOutputStream = ThreadLocal.withInitial(() -> new ByteArrayOutputStream(bufferSize));
 
     /**
      * Fastest way to serialize a stream to UTF-8 according to https://stackoverflow.com/a/35446009/6800941
