@@ -13,6 +13,13 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  * Helper functions to work with streams.
  */
 public class Streams {
+
+    public static final int bufferSize = 16 * 1024 * 1024; // 16 MB buffer
+
+    protected static final ThreadLocal<byte[]> threadBuffer = ThreadLocal.withInitial(() -> new byte[bufferSize]);
+
+    protected static final ThreadLocal<ByteArrayOutputStream> threadByteArrayOutputStream = ThreadLocal.withInitial(() -> new ByteArrayOutputStream(bufferSize));
+
     /**
      * Fastest way to serialize a stream to UTF-8 according to https://stackoverflow.com/a/35446009/6800941
      *
@@ -21,7 +28,8 @@ public class Streams {
      * @throws IOException from inputStream.read
      */
     static public ByteArrayOutputStream inputStream2String(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        ByteArrayOutputStream result = threadByteArrayOutputStream.get();
+        result.reset();
         try {
             inputStream2ByteArrayOutputStream(inputStream, null, -1.0, result);
         } catch (TimeoutException e) {
@@ -61,7 +69,7 @@ public class Streams {
     public static long inputStream2ByteArrayOutputStream(InputStream inputStream, Instant startTime, double timeout, ByteArrayOutputStream result) throws IOException, TimeoutException {
         assert (result != null);
         boolean enable_timeout = timeout > 0;
-        byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
+        byte[] buffer = threadBuffer.get();
         int length;
         while ((length = inputStream.read(buffer)) != -1) {
             if (enable_timeout && durationInMilliseconds(startTime, Instant.now()) > timeout)
@@ -82,7 +90,7 @@ public class Streams {
     public static long inputStream2ByteArrayOutputStream(InputStream inputStream, ByteArrayOutputStream result) throws IOException {
         try {
             return inputStream2ByteArrayOutputStream(inputStream, Instant.now(), -1, result);
-        }catch(TimeoutException e){
+        } catch (TimeoutException e) {
             //will never happen
             return 0;
         }
@@ -98,15 +106,14 @@ public class Streams {
      * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceed
      */
     static public long inputStream2Length(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {
-        byte[] buffer = new byte[10 * 1024 * 1024]; // 10 MB buffer
+        byte[] buffer = threadBuffer.get();
         long length;
         long ret = 0;
         while ((length = inputStream.read(buffer)) != -1) {
-            if (durationInMilliseconds(startTime, Instant.now()) > timeout && timeout >0)
+            if (durationInMilliseconds(startTime, Instant.now()) > timeout && timeout > 0)
                 throw new TimeoutException("reading the answer timed out");
             ret += length;
         }
         return ret;
     }
-
 }
