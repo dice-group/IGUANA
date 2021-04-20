@@ -44,4 +44,7 @@ public interface Storage {
 	public void endTask(String taskID);
 
 
+	public default void close(){
+	}
+
 }

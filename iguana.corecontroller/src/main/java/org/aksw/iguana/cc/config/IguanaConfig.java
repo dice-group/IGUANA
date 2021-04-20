@@ -68,7 +68,7 @@ public class IguanaConfig {
 	 * @throws ExecuteException 
 	 */
 	public void start() throws ExecuteException, IOException {
-		initResultProcessor();
+		RPController rpController = initResultProcessor();
 		TaskController controller = new TaskController();
 		//get SuiteID
 		String suiteID = generateSuiteID();
@@ -112,11 +112,12 @@ public class IguanaConfig {
 				}
 			}
 		}
+		rpController.close();
 
 		LOGGER.info("Finished benchmark");
 	}
 
-	private void initResultProcessor() {
+	private RPController initResultProcessor() {
 		//If storage or metric is empty use default
 		if(this.storages== null || this.storages.isEmpty()){
 			storages = new ArrayList<>();
@@ -159,6 +160,7 @@ public class IguanaConfig {
 		}
 		RPController controller = new RPController();
 		controller.init(storages, metrics);
+		return controller;
 	}
 
 

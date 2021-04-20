@@ -106,4 +106,10 @@ public class StorageManager {
 	public void addStorages(List<Storage> storages) {
 		this.storages.addAll(storages);
 	}
+
+    public void close() {
+		for(Storage storage : storages){
+			storage.close();
+		}
+    }
 }

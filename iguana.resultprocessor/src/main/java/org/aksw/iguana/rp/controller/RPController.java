@@ -26,14 +26,15 @@ public class RPController {
 	
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(RPController.class);
+	private StorageManager storageManager;
 
-	
+
 	/**
 	 * This will initialize the MainController.
 	 */
 	public void init(List<Storage> storages, List<Metric> metrics){
 		//add storages to StoragesManager
-		StorageManager storageManager = StorageManager.getInstance();
+		storageManager = StorageManager.getInstance();
 		storageManager.addStorages(storages);
 		LOGGER.info("Storages : {{}}", storageManager);
 		//Add default metrics to MetricsManager
@@ -43,5 +44,8 @@ public class RPController {
 		ExperimentManager emanager = new ExperimentManager(globalMetricsManager, storageManager);
 
 	}
-	
+
+	public void close() {
+		storageManager.close();
+	}
 }
