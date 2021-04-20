@@ -52,6 +52,8 @@ public class MetricTest {
 		//Test if 2000 will be used instead of provided 1000
 		testConfigs.add(new Object[] { new QPSMetric(2000), "src/test/resources/nt/qpspenaltytest2.nt", true});
 		testConfigs.add(new Object[] { new AvgQPSMetric(), "src/test/resources/nt/avgqpstest.nt", false});
+		testConfigs.add(new Object[] { new AvgQPSMetric(2000), "src/test/resources/nt/penaltyavgqpstest.nt", true});
+
 		testConfigs.add(new Object[] { new NoQMetric(), "src/test/resources/nt/noqtest.nt", false});
 		testConfigs.add(new Object[] { new QMPHMetric(), "src/test/resources/nt/qmphtest.nt", false});
 		testConfigs.add(new Object[] { new EachQueryMetric(), "src/test/resources/nt/eqtest.nt", false});

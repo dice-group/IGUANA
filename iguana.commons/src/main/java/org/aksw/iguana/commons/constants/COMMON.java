@@ -108,4 +108,5 @@ public class COMMON {
 	public static final String PROP_BASE_URI = BASE_URI+"/properties/";
 	public static final String CLASS_BASE_URI = BASE_URI+"/class/";
     public static final String PENALTY = "penalty";
+    public static final String CONNECTION_VERSION_KEY = "connectionVersion";
 }

@@ -19,6 +19,22 @@ public class Connection implements Serializable {
     private String endpoint;
     @JsonProperty(required = false)
     private String updateEndpoint;
+    @JsonProperty(required = false)
+    private String version;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getVersion(String defaultValue) {
+        if(version!=null)
+            return version;
+        return defaultValue;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
     public String getName() {
         return name;

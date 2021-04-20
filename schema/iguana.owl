@@ -28,7 +28,7 @@
     
 <owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/3.0.0/iguana.owl">
         <rdfs:label xml:lang="en">Iguana results ontology</rdfs:label>
-        <owl:versionInfo>3.0.0</owl:versionInfo>
+        <owl:versionInfo>3.3.0</owl:versionInfo>
         <dcterms:created>2020/09/18</dcterms:created>
         <dcterms:lastModified>2020/09/18</dcterms:lastModified>
         <dc:title xml:lang="en">Iguana results ontology</dc:title>
@@ -111,7 +111,7 @@
     
     <owl:Class rdf:about="&iont;metric/AvgQPS">
 	<rdfs:label>Average QPS Metric</rdfs:label>
-	<rdfs:comment xml:lang="en">Average Queries Per Second Metric. Annotates a Task or Worker if they use this metric.</rdfs:comment>    
+	<rdfs:comment xml:lang="en">Average Queries Per Second Metric. Annotates a Task or Worker if they use this metric.</rdfs:comment>
         <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
     
@@ -130,7 +130,7 @@
     <rdfs:domain rdf:resource="&iont;Task"/> 
     <rdfs:range rdf:resource="&iont;Connection"/>
   </owl:ObjectProperty>
-  
+
   <owl:ObjectProperty rdf:about="&iprop;dataset">
     	<rdfs:label>dataset</rdfs:label>
 	<rdfs:comment xml:lang="en">Assigns a Dataset to a Task.</rdfs:comment>
@@ -186,6 +186,12 @@
 
     <!-- DatatypeProperty definitions -->
 
+  <owl:DatatypeProperty rdf:about="&iprop;version">
+  	<rdfs:label>version</rdfs:label>
+	<rdfs:comment xml:lang="en">Version of the triple store tested.</rdfs:comment>
+    <rdfs:domain rdf:resource="&iont;Connection"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
 
   <owl:DatatypeProperty rdf:about="&iprop;timeLimit">
   	<rdfs:label>timeLimit</rdfs:label>
@@ -400,6 +406,14 @@
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&iprop;penalizedAvgQPS">
+        	<rdfs:label>penalizedAvgQPS</rdfs:label>
+  	<rdfs:comment xml:lang="en">The average number of queries answered successfully per second value using the penaltyQPS.</rdfs:comment>
+      <rdfs:domain rdf:resource="&iont;Worker"/>
+      <rdfs:domain rdf:resource="&iont;Task"/>
+      <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+    </owl:DatatypeProperty>
   
     
   <owl:DatatypeProperty rdf:about="&iprop;NoQ">

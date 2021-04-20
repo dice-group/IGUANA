@@ -96,6 +96,9 @@ public abstract class AbstractTask implements Task {
 		metaData.setProperty(COMMON.SUITE_ID_KEY, this.suiteID);
 		metaData.setProperty(COMMON.DATASET_ID_KEY, this.datasetID);
 		metaData.setProperty(COMMON.CONNECTION_ID_KEY, this.conID);
+		if(this.con.getVersion()!=null) {
+			metaData.setProperty(COMMON.CONNECTION_VERSION_KEY, this.con.getVersion());
+		}
 		String className=this.getClass().getCanonicalName();
 		if(this.getClass().isAnnotationPresent(Shorthand.class)){
 			className = this.getClass().getAnnotation(Shorthand.class).value();

@@ -58,8 +58,14 @@ public abstract class TripleBasedStorage implements Storage {
 		String suiteUrl = getUrlWithResourcePrefix(p, COMMON.SUITE_ID_KEY);
 		String expUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_ID_KEY);
 		String taskUrl = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_ID_KEY);
+
 		String datasetUrl = getUrlWithResourcePrefix(p, COMMON.DATASET_ID_KEY);
-		String connUrl = getUrlWithResourcePrefix(p, COMMON.CONNECTION_ID_KEY);
+		String conName = p.getProperty(COMMON.CONNECTION_ID_KEY);
+		if(p.containsKey(COMMON.CONNECTION_VERSION_KEY)){
+			conName+="-"+p.getProperty(COMMON.CONNECTION_VERSION_KEY);
+		}
+		String connUrl = getUrlWithResourcePrefix(conName);
+
 		String actualTaskID = getUrlWithResourcePrefix(p, COMMON.EXPERIMENT_TASK_CLASS_ID_KEY);
 
 
@@ -77,6 +83,9 @@ public abstract class TripleBasedStorage implements Storage {
 		addExtraMetadata(p, taskUrl);
 		metricResults.add(metricResults.createResource(datasetUrl), RDFS.label, p.getProperty(COMMON.DATASET_ID_KEY));
 		metricResults.add(metricResults.createResource(connUrl), RDFS.label, p.getProperty(COMMON.CONNECTION_ID_KEY));
+		if(p.containsKey(COMMON.CONNECTION_VERSION_KEY)) {
+			metricResults.add(metricResults.createResource(connUrl), ResourceFactory.createProperty(getUrlWithPropertyPrefix("version")), p.getProperty(COMMON.CONNECTION_VERSION_KEY));
+		}
 
 		if(p.containsKey(COMMON.QUERY_STATS)) {
 			Model queryStats = (Model) p.get(COMMON.QUERY_STATS);

@@ -8,7 +8,10 @@
         "endpoint": { "type": "string" },
         "updateEndpoint":           { "type": "string" },
         "user":          { "type": "string" },
-        "password":          { "type": "string" }
+        "password":          { "type": "string" },
+        "version": {
+          "type": "string"
+        }
       },
       "required": ["endpoint"]
     },
