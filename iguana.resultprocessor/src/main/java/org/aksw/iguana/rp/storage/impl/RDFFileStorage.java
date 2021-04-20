@@ -20,7 +20,7 @@ public class RDFFileStorage extends TripleBasedStorage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDFFileStorage.class.getName());
 
-    private Lang lang;
+    private Lang lang = Lang.TTL;
     private StringBuilder file;
 
     /**
