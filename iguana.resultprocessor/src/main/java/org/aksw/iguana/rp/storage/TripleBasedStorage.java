@@ -132,6 +132,11 @@ public abstract class TripleBasedStorage implements Storage {
 		}
 	}
 
+	private Statement createStatement(String subject, String predicate, Object object)
+	{
+			return metricResults.createStatement(metricResults.createResource(subject), ResourceFactory.createProperty(predicate), metricResults.createTypedLiteral(object));
+	}
+
 	private Statement createStatement(String subject, String predicate, String object, boolean isObjectUri)
 	{
 		if(isObjectUri)
@@ -153,8 +158,7 @@ public abstract class TripleBasedStorage implements Storage {
 				metricResults.add(createStatement(
 						taskUrl,
 						getUrlWithPropertyPrefix(obj.toString()),
-						extra.get(obj).toString(),
-						false));
+						extra.get(obj)));
 			}
 		}
 	}

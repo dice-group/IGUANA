@@ -30,7 +30,5 @@ public class CONSTANTS {
 	public static final String NO_OF_QUERY_MIXES = "numberOfQueryMixes";
 
 
-
-
-
+    public static final String WORKER_TIMEOUT_MS = "timeOutMS";
 }

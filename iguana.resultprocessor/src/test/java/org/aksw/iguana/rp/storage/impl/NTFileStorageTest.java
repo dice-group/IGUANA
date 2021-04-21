@@ -75,7 +75,7 @@ public class NTFileStorageTest {
 	    store.commit();
 	    assertEqual("results_test2.nt", "src/test/resources/nt/nt_results_wMeta.nt", false);
 	    
-	    new File("results_test.nt2").delete();
+	    new File("results_test2.nt").delete();
 	    
 
 	}

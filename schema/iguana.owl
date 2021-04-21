@@ -30,7 +30,7 @@
         <rdfs:label xml:lang="en">Iguana results ontology</rdfs:label>
         <owl:versionInfo>3.3.0</owl:versionInfo>
         <dcterms:created>2020/09/18</dcterms:created>
-        <dcterms:lastModified>2020/09/18</dcterms:lastModified>
+        <dcterms:lastModified>2021/04/21</dcterms:lastModified>
         <dc:title xml:lang="en">Iguana results ontology</dc:title>
         <rdfs:comment xml:lang="en">The Iguana results ontology explains the rdf results of an Iguana benchmark.</rdfs:comment>
         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
@@ -249,6 +249,14 @@
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
   </owl:DatatypeProperty>     
+
+  <owl:DatatypeProperty rdf:about="&iprop;timeOutMS">
+        <rdfs:label>timeOutMS</rdfs:label>
+        <rdfs:comment xml:lang="en">The timeout in ms set to this worker.</rdfs:com>
+    <rdfs:domain rdf:resource="&iont;Worker"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+  </owl:DatatypeProperty>
+
   
   <owl:DatatypeProperty rdf:about="&iprop;optional">
       	<rdfs:label>optional</rdfs:label>
