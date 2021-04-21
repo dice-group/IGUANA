@@ -32,7 +32,7 @@ public abstract class TripleBasedStorage implements Storage {
 	private String properties = COMMON.PROP_BASE_URI;
 
 
-	protected Model metricResults = ModelFactory.createDefaultModel();
+	protected Model metricResults = createPrefixModel();
 
 	private String suiteClassUri = baseUri + "/class/Suite";
 	private String expClassUri = baseUri + "/class/Experiment";
@@ -45,6 +45,15 @@ public abstract class TripleBasedStorage implements Storage {
 	private String rdfsUri = "http://www.w3.org/2000/01/rdf-schema#";
 	private String xsdUri = "http://www.w3.org/2001/XMLSchema#";
 
+
+	protected Model createPrefixModel() {
+		Model metricResults = ModelFactory.createDefaultModel();
+		metricResults.setNsPrefix("iprop", COMMON.PROP_BASE_URI);
+		metricResults.setNsPrefix("iont", COMMON.CLASS_BASE_URI);
+		metricResults.setNsPrefix("ires", COMMON.RES_BASE_URI);
+		metricResults.setNsPrefix("lsqr", "http://lsq.aksw.org/res/");
+		return metricResults;
+	}
 
 
 	/*
