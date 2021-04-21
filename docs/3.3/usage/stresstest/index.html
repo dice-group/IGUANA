@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Stresstest - Iguana 3.3 Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+    
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Stresstest";
+    var mkdocs_page_input_path = "usage/stresstest.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+	
+    <link  rel="stylesheet" href="../../css/custom.css"></link>
+ 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-179945559-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-179945559-1');
+</script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search" style="background-color: #82BDC3 !important;">
+        <img src="../../images/Iguana_new_logo6.png" class="iguana-icon"/>
+        <a href="../.."> Iguana 3.3 Documentation</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> General</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../about/">About</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../architecture/">Architecture</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> Quick Start Guide</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../download/">Download</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../quick-config/">Quick Configuration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../../run-iguana/">Run Iguana</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul class="current"> 
+        <p  class="fa fa-caret-right  ddButton caption   active  currentSite"><span class="caption-text"> Usage</span>
+ 	<ul class="dd-container  active">
+                    <li class="toctree-l1"><a class="reference internal " href="../workflow/">Workflow</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../configuration/">Configuration</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal  active currentSite" href="#">Stresstest</a>
+    <ul class="currentSite active">
+    <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#query-handling">Query Handling</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#workers-simulated-users">Workers (simulated Users)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#warmup">Warmup</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#references">References</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../workers/">Supported Workers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../queries/">Supported Queries</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../languages/">Supported Languages</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../metrics/">Metrics</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../results/">Benchmark Results</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="../tutorial/">Tutorial</a>
+                    </li>
+                </ul>
+
+              </ul>
+    <ul> 
+        <p  class="fa fa-caret-right  ddButton caption   "><span class="caption-text"> Development</span>
+ 	<ul class="dd-container ">
+                    <li class="toctree-l1"><a class="reference internal " href="../../develop/overview/">Overview</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="#">Extend</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-task/">Tasks</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-workers/">Workers</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-queryhandling/">Query Handling</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-lang/">Languages</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-result-storages/">Result storage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/extend-metrics/">Metrics</a>
+                </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal " href="#">Use Iguana</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal " href="../../develop/maven/">Maven</a>
+                </li>
+                <li class="toctree-l2"><a class="" href="http://iguana-benchmark.eu/javadoc/3.x/index.html">Javadoc</a>
+                </li>
+    </ul>
+                    </li>
+                </ul>
+
+              </ul>
+
+      </div>
+    </div>
+    <div style="height: 2em;"/>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Iguana 3.3 Documentation</a>
+
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Usage &raquo;</li>
+        
+      
+    
+    <li>Stresstest</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="stresstest">Stresstest</h1>
+<p>Iguanas implemented Stresstest benchmark task tries to emulate a real case scenario under which an endpoint or application is under high stress. 
+As in real life endpoints might get multiple simultaneous request within seconds, it is very important to verify that you application can handle this. </p>
+<p>The stresstest emulates users or applications which will bombard the endpoint using a set of queries for a specific amount of time or a specific amount of queries executed.
+Each simulated user is called Worker in the following. 
+As you might want to test read and write performance or just want to emulate different user behaviour, the stresstest allows to configure several workers. 
+Every worker configuration can additionaly be started several times, hence if you want one configuration executed multiple times, you can simply tell Iguana to run this worker configuration the specified amount of time. 
+However to assure that the endpoint can't just cache the repsonse of the first request of a query, every worker starts at a pre determined random query, meaning that the single worker will always start at that query to assure fairness in benchmark comparisons, while every worker will start at a different query.</p>
+<h2 id="configuration">Configuration</h2>
+<p>To configure this task you have to first tell Iguana to use the implemented task like the following:</p>
+<pre><code class="language-yaml">tasks:
+  - className: &quot;Stresstest&quot;
+</code></pre>
+<p>Further on you need to configure the Stresstest using the configuration parameter like:</p>
+<pre><code class="language-yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      timeLimit: 600000
+      ...
+</code></pre>
+<p>As an end restriction you can either use <code>timeLimit</code> which will stop the stresstest after the specified amount in ms or you can set <code>noOfQueryMixes</code> which stops every worker after they executed the amount of queries in the provided query set.</p>
+<p>Additionaly to either <code>timeLimit</code> or <code>noOfQueryMixes</code> you can set the following parameters</p>
+<ul>
+<li>queryHandler</li>
+<li>workers</li>
+<li>warmup (optional)</li>
+</ul>
+<h3 id="query-handling">Query Handling</h3>
+<p>The queryHandler parameter let's the stresstest know what queries will be used. 
+Normally you will need the <code>InstancesQueryHandler</code> which will use plain text queries (could be SQL, SPARQL, a whole RDF document). The only restriction is that each query has to be in one line.</p>
+<p>You can set the query handler like the following:</p>
+<pre><code class="language-yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    queryHandler:
+      className: &quot;InstancesQueryHandler&quot;
+    ...
+</code></pre>
+<p>To see which query handlers are supported see  <a href="../queries/">Supported Queries</a></p>
+<h3 id="workers-simulated-users">Workers (simulated Users)</h3>
+<p>Further on you have to add which workers to use. 
+As described above you can set different worker configurations. 
+Let's look at an example:</p>
+<pre><code class="language-yaml">  - className: &quot;Stresstest&quot;
+    timeLimit: 600000
+    workers:
+      - threads: 4
+        className: &quot;SPARQLWorker&quot;
+        queriesFile: &quot;/path/to/your/queries.txt&quot;
+      - threads: 16
+        className: &quot;SPARQLWorker&quot;
+        queriesFile: &quot;/other/queries.txt&quot;
+        fixedLatency: 5000      
+</code></pre>
+<p>In this example we have two different worker configurations we want to use. The first want will create 4 <code>SPARQLWorker</code>s using queries at <code>/path/to/your/queries.txt</code> with any latencym thus every query will be executed immediatly after another.
+The second worker configuration will execute 16 <code>SPARQLWorker</code>s using queries at <code>/other/queries.txt</code> using a fixed waiting time of <code>5000ms</code> between each query. 
+Hence every worker will execute their queries independently from each other but will wait 5s after each of their query execution before executing the next one.
+This configuration may simulate that we have a few Users requesting your endpoint locally (e.g. some of your application relying on your database) and several users querying your endpoint from outside the network where we would have network latency and other interferences which we will try to simulate with 5s. </p>
+<p>A full list of supported workers and their parameters can be found at <a href="../workers">Supported Workers</a></p>
+<p>In this example our Stresstest would create 20 workers, which will simultaenously request the endpoint  for 60000ms (10 minutes).</p>
+<h3 id="warmup">Warmup</h3>
+<p>Additionaly to these you can optionally set a warmup, which will aim to let the system be benchmarked under a normal situation (Some times a database is faster when it was already running for a bit) 
+The configuration is similar to the stresstest itself you can set a <code>timeLimit</code> (however not a certain no of query executions), you can set different <code>workers</code>, and a <code>queryHandler</code> to use. 
+If you don't set the <code>queryHandler</code> parameter the warmup will simply use the <code>queryHandler</code> specified in the Stresstest itself. </p>
+<p>You can set the Warmup as following:</p>
+<pre><code class="language-yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    warmup:
+      timeLimit: 600000
+      workers: 
+        ...
+      queryHandler:
+        ...
+</code></pre>
+<p>That's it. 
+A full example might look like this</p>
+<pre><code class="language-yaml">tasks:
+  - className: &quot;Stresstest&quot;
+    configuration:
+      # 1 hour (time Limit is in ms)
+      timeLimit: 3600000
+      # warmup is optional
+      warmup:
+        # 10 minutes (is in ms)
+        timeLimit: 600000
+        # queryHandler could be set too, same as in the stresstest configuration, otherwise the same queryHandler will be use.
+        # workers are set the same way as in the configuration part
+        workers:
+          - threads: 1
+            className: &quot;SPARQLWorker&quot;
+            queriesFile: &quot;queries_warmup.txt&quot;
+            timeOut: 180000
+      queryHandler:
+        className: &quot;InstancesQueryHandler&quot;
+      workers:
+        - threads: 16
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries_easy.txt&quot;
+          timeOut: 180000
+        - threads: 4
+          className: &quot;SPARQLWorker&quot;
+          queriesFile: &quot;queries_complex.txt&quot;
+          fixedLatency: 100
+</code></pre>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="../queries/">Supported Queries</a></li>
+<li><a href="../workers">Supported Workers</a></li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../workers/" class="btn btn-neutral float-right" title="Supported Workers">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../configuration/" class="btn btn-neutral" title="Configuration"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+    <ul>
+	<li>
+ 	 <a class="icon icon-github" href="https://github.com/dice-group/Iguana" > Visit us at Github</a>
+	</li>
+        <li>
+	 <a class="icon fa-download" href="https://github.com/dice-group/Iguana/releases/latest" > Download latest Release</a>
+ 	</li>
+    </ul>
+  <div>
+  </br></br>
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../configuration/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../workers/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+           SphinxRtdTheme.Navigation.enable(true);
+    
+}	
+var dropdown = document.getElementsByClassName("ddButton");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  if (!dropdown[i].classList.contains("active")){
+	  dropdown[i].nextSibling.style.display = "none";
+	  dropdown[i].classList.remove("fa-caret-down");
+	  dropdown[i].classList.add("fa-caret-right");
+  }
+  else{
+  	  dropdown[i].classList.remove("fa-caret-right");
+	  dropdown[i].classList.add("fa-caret-down");
+  }
+  
+  dropdown[i].addEventListener("click", function() {
+  this.classList.toggle("active");
+  
+  if (this.classList.contains("currentSite")){
+  	return;
+  }
+  var dropdownContent = this.nextElementSibling;
+  if (dropdownContent.style.display === "block") {
+     dropdownContent.style.display = "none";   
+     this.classList.remove("fa-caret-down");
+     this.classList.add("fa-caret-right");
+     //this.classList.remove("active"):
+  } else {
+     dropdownContent.style.display = "block";
+     this.classList.remove("fa-caret-right");
+     this.classList.add("fa-caret-down");
+     //this.classList.add("active"):
+
+  }
+  });
+}
+
+   </script>
+        
+</body>
+</html>
+
