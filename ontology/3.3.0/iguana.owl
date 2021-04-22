@@ -252,7 +252,7 @@
 
   <owl:DatatypeProperty rdf:about="&iprop;timeOutMS">
         <rdfs:label>timeOutMS</rdfs:label>
-        <rdfs:comment xml:lang="en">The timeout in ms set to this worker.</rdfs:com>
+        <rdfs:comment xml:lang="en">The timeout in ms set to this worker.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>
