@@ -37,7 +37,7 @@ public class TaskController {
 		TaskFactory factory = new TaskFactory();
 		tmanager.setTask(factory.create(className, task.getConfiguration()));
 		try {
-			tmanager.startTask(ids, dataset, con);
+			tmanager.startTask(ids, dataset, con, task.getName());
 		} catch (IOException | TimeoutException e) {
 			LOGGER.error("Could not start Task "+className, e);
 		}

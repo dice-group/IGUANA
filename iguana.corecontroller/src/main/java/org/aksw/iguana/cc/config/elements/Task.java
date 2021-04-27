@@ -17,6 +17,16 @@ public class Task implements Serializable {
     @JsonProperty(required = true)
     private String className;
 
+    @JsonProperty(required = false)
+    private String name=null;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Map getConfiguration() {
         return configuration;

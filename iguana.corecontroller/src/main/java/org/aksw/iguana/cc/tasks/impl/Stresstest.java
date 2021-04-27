@@ -165,8 +165,8 @@ public class Stresstest extends AbstractTask {
 	}
 
 	@Override
-	public void init(String[] ids, String dataset, Connection connection)  {
-		super.init(ids, dataset, connection);
+	public void init(String[] ids, String dataset, Connection connection, String taskName)  {
+		super.init(ids, dataset, connection, taskName);
 		setConfig(workerConfig, qhConfig , warmupConfig);
 
 		// create from construct args and class
