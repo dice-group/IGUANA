@@ -33,8 +33,8 @@
   <packaging>pom</packaging>
   <modules>
   	<module>iguana.commons</module>
-  	<module>iguana.corecontroller</module>
   	<module>iguana.resultprocessor</module>
+    <module>iguana.corecontroller</module>
   </modules>
     <properties>
         <major.minor.version>${major.version}.${minor.version}</major.minor.version>
