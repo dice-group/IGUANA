@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw</groupId>
 	<artifactId>iguana.commons</artifactId>
-	<version>3.3.0</version>
+	<version>${revision}</version>
 	<name>Iguana Commons</name>
 	<description>Iguana Common Classes and Methods</description>
 	<licenses>
@@ -14,7 +14,7 @@
 	</licenses>
 	<developers>
 		<developer>
-			<name>Felix Conrads</name>
+			<name>Lixi Alié Conrads</name>
 			<email>felix.conrads@uni-paderborn.de</email>
 			<roles>
 				<role>Main Developer</role>
@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

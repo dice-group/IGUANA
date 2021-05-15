@@ -1,0 +1,93 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - shell: bash
+        run: mvn help:evaluate -Dexpression=major.minor.version -q -DforceStdout > version.log
+      - shell: bash
+        run: mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout > artifactid.log
+      - name: Set env version
+        run: echo "MM_VERSION=$(cat version.log)" >> $GITHUB_ENV
+      - name: Set env version
+        run: echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+      - name: Set env name
+        run: echo "RELEASE_ARTIFACTID=$(cat artifactid.log)" >> $GITHUB_ENV
+      - name: test
+        run: echo ${{ env.RELEASE_VERSION }} ${{ env.RELEASE_ARTIFACTID }}
+      - run: pip install mkdocs-material
+      - run: pip install mkdocs-macros-plugin
+      - run: sed -i "s/\$VERSION/$(cat version.log)/g" mkdocs.yml
+      - run: sed -i "s/\$RELEASE_VERSION/${{ env.RELEASE_VERSION }}/g" mkdocs.yml
+      - run: mkdocs build -d site/$(cat version.log)
+      - run: mvn javadoc:javadoc
+      - run: sed -i "s/\$VERSION/$(cat version.log)/g" .github/pages/latest.html
+      - run: sed -i "s/\$VERSION/$(cat version.log)/g" .github/pages/javadoc-latest.html
+      - name: Deploy Site
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site/${{ env.MM_VERSION }}
+          destination_dir: ./docs/${{ env.MM_VERSION }}
+      - name: Deploy Javadoc
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./javadoc/${{ env.MM_VERSION }}
+          destination_dir: ./javadoc/${{ env.MM_VERSION }}
+      - name: Deploy latest.html
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .github/pages/
+          keep_files: true
+          destination_dir: ./docs/
+      - name: Deploy latest.html
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .github/pages/
+          keep_files: true
+          destination_dir: ./docs/
+      - run: mvn package -Dmaven.test.skip=true
+      - run: mkdir iguana
+      - run: cp target/start.sh iguana/
+      - run: cp target/iguana-${{ env.RELEASE_VERSION }}-shaded.jar iguana/iguana-${{ env.RELEASE_VERSION }}.jar
+      - run: cp example-suite.yml iguana/
+      - run: zip -r iguana-${{ env.RELEASE_VERSION }}.zip iguana/
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          release_name: version ${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
+          body_path: CHANGELOG.md
+      - uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: iguana-${{ env.RELEASE_VERSION }}.zip
+          asset_name: iguana-${{ env.RELEASE_VERSION }}.zip
+          asset_content_type: application/zip
+      - name: Publish package
+        run: mvn --batch-mode deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
