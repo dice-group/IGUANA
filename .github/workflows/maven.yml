@@ -13,5 +13,11 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
       - name: Testing the Java code
-        run:  mvn -B package --file pom.xml
+        run:  mvn --batch-mode --update-snapshots verify
