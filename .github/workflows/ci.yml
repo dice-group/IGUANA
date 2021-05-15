@@ -62,7 +62,7 @@ jobs:
           publish_dir: .github/pages/
           keep_files: true
           destination_dir: ./docs/
-      - run: mvn package -Dmaven.test.skip=true
+      - run: mvn install -Dmaven.test.skip=true
       - run: mkdir iguana
       - run: cp target/start.sh iguana/
       - run: cp target/iguana-${{ env.RELEASE_VERSION }}-shaded.jar iguana/iguana-${{ env.RELEASE_VERSION }}.jar
