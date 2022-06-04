@@ -70,8 +70,8 @@ jobs:
           keep_files: true
           destination_dir: ./docs/
       - run: mkdir iguana
-      - run: cp target/start.sh iguana/
-      - run: cp target/iguana-${{ env.RELEASE_VERSION }}-shaded.jar iguana/iguana-${{ env.RELEASE_VERSION }}.jar
+      - run: cp target/start-iguana.sh iguana/
+      - run: cp target/iguana-${{ env.RELEASE_VERSION }}.jar iguana/iguana-${{ env.RELEASE_VERSION }}.jar
       - run: cp example-suite.yml iguana/
       - run: zip -r iguana-${{ env.RELEASE_VERSION }}.zip iguana/
       - name: Create Release
