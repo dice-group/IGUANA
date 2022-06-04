@@ -40,7 +40,7 @@ jobs:
       - run: sed -i "s/\$RELEASE_VERSION/${{ env.RELEASE_VERSION }}/g" mkdocs.yml
       - run: mkdocs build -d site/$(cat version.log)
       - run: mvn install -Dmaven.test.skip=true
-      - run: mvn javadoc:javadoc -Dadditionalparam=-Xdoclint:none # behave like ubuntu and accept e.g. <br/>
+      - run: mvn javadoc:javadoc
       - run: sed -i "s/\$VERSION/$(cat version.log)/g" .github/pages/latest.html
       - run: sed -i "s/\$VERSION/$(cat version.log)/g" .github/pages/javadoc-latest.html
       - name: Deploy Site

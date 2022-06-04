@@ -57,6 +57,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
+                    <doclint>-html</doclint>
                     <reportOutputDirectory>javadoc/${revision}/</reportOutputDirectory>
                     <destDir></destDir>
                 </configuration>
