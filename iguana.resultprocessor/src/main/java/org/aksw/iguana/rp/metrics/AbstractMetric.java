@@ -87,7 +87,7 @@ public abstract class AbstractMetric implements Metric{
 
 
 	/**
-	 * Will return the Properties Object with the associated key: EXTRA_META_KEY</br>
+	 * Will return the Properties Object with the associated key: EXTRA_META_KEY<br/>
 	 * if this key does not exists: recv will be returned
 	 *
 	 * @param recv
