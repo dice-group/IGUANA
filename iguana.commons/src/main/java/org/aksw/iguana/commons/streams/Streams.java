@@ -43,7 +43,7 @@ public class Streams {
      *
      * @param inputStream the stream to read from
      * @param startTime   a time when the computation started
-     * @param timeout     delta from startTime when the computation must be completed. Otherwise, a TimeoutException may be thrown. Timeout check is deactivated if timeout is < 0.
+     * @param timeout     delta from startTime when the computation must be completed. Otherwise, a TimeoutException may be thrown. Timeout check is deactivated if timeout is &lt; 0.
      * @return the content of inputStream as a string.
      * @throws IOException      from {@link InputStream#read()}
      * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceeded

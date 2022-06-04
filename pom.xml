@@ -55,8 +55,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.0</version>
                 <configuration>
-                    <reportOutputDirectory>javadoc/${major.minor.version}/</reportOutputDirectory>
+                    <reportOutputDirectory>javadoc/${revision}/</reportOutputDirectory>
                     <destDir></destDir>
                 </configuration>
             </plugin>
@@ -84,7 +85,7 @@
                                 <resource>
                                     <directory>./iguana.corecontroller/target/</directory>
                                     <includes>
-                                        <include>iguana-${version}-shaded.jar</include>
+                                        <include>iguana-${revision}-shaded.jar</include>
                                     </includes>
                                 </resource>
                             </resources>
