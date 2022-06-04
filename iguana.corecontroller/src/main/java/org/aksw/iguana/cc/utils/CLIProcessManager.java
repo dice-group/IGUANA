@@ -30,6 +30,10 @@ public class CLIProcessManager {
 
                 processBuilder.command("bash", "-c", command);
 
+            } else if (SystemUtils.IS_OS_MAC) {
+
+                processBuilder.command("/bin/bash", "-c", command);
+
             } else if (SystemUtils.IS_OS_WINDOWS) {
                 processBuilder.command("cmd.exe", "-c", command);
             }
@@ -89,11 +93,12 @@ public class CLIProcessManager {
         LOGGER.debug("Will look for: {} or as error: {}",successString, errorString);
         StringBuilder output = new StringBuilder();
 
-        long size = -1;
+        long size = 0;
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
         try {
             while ((line = reader.readLine()) != null) {
+                size++;
                 if (line.contains(errorString)) {
                     LOGGER.debug("Found error");
                     LOGGER.debug("Query finished with {}", errorString);
@@ -108,7 +113,6 @@ public class CLIProcessManager {
                 if (size < 1000) {
                     output.append(line).append("\n");
                 }
-                size++;
             }
 
         } catch (IOException e) {

@@ -1,0 +1,38 @@
+datasets:
+  - name: "ekaw-2012"
+    file: "./datasets/ekaw-2012-complete-alignments.rdf"
+  - name: "iswc-2010"
+    file: "./datasets/iswc-2010-complete-alignments.rdf"
+
+connections:
+  - name: "stardog"
+    user: "admin"
+    password: "admin"
+    endpoint: "http://localhost:5820/iguana-tests/query"
+
+preScriptHook: "/Users/andreaw/Hold/stardog-current/bin/stardog-admin db create -n iguana-tests {{dataset.file}}"
+postScriptHook: "/Users/andreaw/Hold/stardog-current/bin/stardog-admin db drop iguana-tests"
+
+tasks:
+  - className: "Stresstest"
+    configuration:
+      timeLimit: 10000
+      queryHandler:
+        className: "InstancesQueryHandler"
+      workers:
+        - threads: 3
+          className: "SPARQLWorker"
+          queriesFile: "queries.txt"
+
+metrics:
+    - className: EachQuery
+    - className: NoQ
+    - className: QMPH
+    - className: NoQPH
+    - className: QPS
+    - className: AvgQPS
+
+storages:
+  - className: "RDFFileStorage"
+    configuration:
+      fileName: "iguana-results.ttl"

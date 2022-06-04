@@ -10,6 +10,7 @@
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY ires "http://iguana-benchmark.eu/resource/">
     <!ENTITY iprop "http://iguana-benchmark.eu/properties/">
+    <!ENTITY ipropwikibase "http://iguana-wikiba.se/properties/">
     <!ENTITY iont "http://iguana-benchmark.eu/class/">
 ]>
 
@@ -23,16 +24,17 @@
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:ires="http://iguana-benchmark.eu/resource/"
     xmlns:iprop="http://iguana-benchmark.eu/properties/"
+    xmlns:ipropwikibase="http://iguana-wikiba.se/properties/"
     xmlns:iont="http://iguana-benchmark.eu/class/"
     >
     
-    <owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/3.0.1/iguana.owl">
-        <rdfs:label xml:lang="en">Iguana results ontology</rdfs:label>
-        <owl:versionInfo>3.0.1</owl:versionInfo>
+    <owl:Ontology rdf:about="https://iguana-wikibase-benchmark/ontology/3.1.0/iguana.owl">
+        <rdfs:label xml:lang="en">Iguana results ontology with Wikibase extensions</rdfs:label>
+        <owl:versionInfo>3.1.0</owl:versionInfo>
         <dcterms:created>2020/09/18</dcterms:created>
         <dcterms:lastModified>2022/06/01</dcterms:lastModified>
-        <dc:title xml:lang="en">Iguana results ontology</dc:title>
-        <rdfs:comment xml:lang="en">The Iguana results ontology explains the rdf results of an Iguana benchmark.</rdfs:comment>
+        <dc:title xml:lang="en">Iguana results ontology with Wikibase extensions<</dc:title>
+        <rdfs:comment xml:lang="en">The Iguana results ontology explains the rdf results of an Iguana benchmark test suite.</rdfs:comment>
         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
         <dc:creator rdf:resource="https://dice-research.org/FelixConrads"/>
         <dc:contributor rdf:resource="https://www.wikidata.org/wiki/Q110767527"/>
@@ -400,6 +402,48 @@
 	    <rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a time out</rdfs:comment>
         <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&ipropwikibase;meanQueryTime">
+      	<rdfs:label>meanQueryTime</rdfs:label>
+	    <rdfs:comment xml:lang="en">Mean query time value for successful executions.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&ipropwikibase;penalizedMeanQueryTime">
+      	<rdfs:label>penalizedMeanQueryTime</rdfs:label>
+	    <rdfs:comment xml:lang="en">Mean query time value where failed queries are rated using a penalty (default is the timeOut of a Task).</rdfs:comment>
+        <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&ipropwikibase;geometricMeanQueryTime">
+      	<rdfs:label>geometricMeanQueryTime</rdfs:label>
+	    <rdfs:comment xml:lang="en">Geometric mean query time value for successful executions.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&ipropwikibase;penalizedGeometricMeanQueryTime">
+      	<rdfs:label>penalizedGeometricMeanQueryTime</rdfs:label>
+	    <rdfs:comment xml:lang="en">Geometric mean query time value where failed queries are rated using a penalty (default is the timeOut of a Task).</rdfs:comment>
+        <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&ipropwikibase;minQueryTime">
+      	<rdfs:label>minQueryTime</rdfs:label>
+	    <rdfs:comment xml:lang="en">Minimum time for all instances of a successful execution of the ExecutedQuery.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&ipropwikibase;maxQueryTime">
+      	<rdfs:label>maxQueryTime</rdfs:label>
+	    <rdfs:comment xml:lang="en">Maximum time for all instances of a successful execution of the ExecutedQuery.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
     </owl:DatatypeProperty>
  
     <owl:DatatypeProperty rdf:about="&iprop;QMPH">

@@ -10,6 +10,7 @@ import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 
 /**
@@ -79,13 +80,22 @@ public class NoQPHMetric extends AbstractMetric {
 			sum+=noOfQueriesPerHour;
 			Resource subject = getSubject(key);
 			m.add(getConnectingStatement(subject));
-			m.add(subject, property, ResourceFactory.createTypedLiteral(noOfQueriesPerHour));
+			try {    // Try/catch in case of nulls
+				BigDecimal noOfQBD = new BigDecimal(String.valueOf(noOfQueriesPerHour));  // Want decimal literal
+				m.add(subject, property, ResourceFactory.createTypedLiteral(noOfQBD));
+			} catch (NumberFormatException e) {
+				String noOfQStr = "no.qph." + String.valueOf(noOfQueriesPerHour);
+				m.add(subject, property, ResourceFactory.createTypedLiteral(noOfQStr));
+			}
 		}
 
-		m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sum));
+		try {
+			BigDecimal sumBD = new BigDecimal(String.valueOf(sum));
+			m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sumBD));
+		} catch (NumberFormatException e) {
+			String sumStr = "no.qph.sum." + String.valueOf(sum);
+			m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sumStr));
+		}
 		sendData(m);
 	}
-
-
-
-	}
+}

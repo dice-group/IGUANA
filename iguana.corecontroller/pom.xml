@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.aksw</groupId>
   <artifactId>iguana.corecontroller</artifactId>
-  <version>3.3.0</version>
+  <version>3.3.1</version>
   <name>Iguanas Core Controller</name>
   <description>The Controller of Iguanas Core Module. Handeling the messaging and is coordinating the ResultProcessor as well as the dataGenerator. Will be communicating with the Web Controller Module.</description>
 	<licenses>
@@ -35,8 +35,8 @@
 	<properties>
 		<java.version>11</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<log4j.version>2.13.3</log4j.version>
-		<jena.version>3.16.0</jena.version>
+		<log4j.version>2.17.2</log4j.version>
+		<jena.version>4.2.0</jena.version>
 		<maven.compile.source>11</maven.compile.source>
 		<maven.compile.target>11</maven.compile.target>
 	</properties>
@@ -71,7 +71,7 @@
 	<dependency>
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
-		<version>4.11</version>
+		<version>4.13.2</version>
 		<scope>test</scope>
 	</dependency>
 	<dependency>
@@ -82,7 +82,7 @@
 	<dependency>
 		<groupId>org.aksw</groupId>
 		<artifactId>iguana.resultprocessor</artifactId>
-		<version>3.3.0</version>
+		<version>3.3.1</version>
 		<exclusions>
 			<exclusion>
 				<groupId>org.aksw</groupId>
@@ -94,7 +94,7 @@
 		<dependency>
 			<groupId>org.aksw</groupId>
 			<artifactId>iguana.commons</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.1</version>
 		</dependency>
 
 

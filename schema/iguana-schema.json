@@ -86,8 +86,7 @@
               "gaussianLatency": {"type": "integer"},
               "responseType": {"type": "string"},
               "parameterName": {"type": "string"}
-            },
-            "additionalProperties": {"type": "undefined"}
+            }
           }
         },
         {
@@ -108,8 +107,7 @@
               "fixedLatency" : {"type": "integer"},
               "gaussianLatency" : {"type": "integer"},
               "timerStrategy" : {"type": "string"}
-            },
-            "additionalProperties": {"type": "undefined"}
+            }
           }
         },
         {
@@ -133,8 +131,7 @@
               "queryFinished" : {"type": "string"},
               "initFinished" : {"type": "string"},
               "numberOfProcesses" : {"type": "integer"}
-            },
-            "additionalProperties": {"type": "undefined"}
+            }
           }
         },
         {
@@ -159,8 +156,7 @@
               "queryError" : {"type": "string"},
               "queryFinished" : {"type": "string"},
               "initFinished" : {"type": "string"}
-            },
-            "additionalProperties": {"type": "undefined"}
+            }
           }
         },
         {
@@ -189,8 +185,7 @@
               "initFinished": {"type": "string"},
               "querySuffix": {"type": "string"},
               "queryPrefix": {"type": "string"}
-            },
-            "additionalProperties": {"type": "undefined"}
+            }
           }
         },
         {
@@ -217,8 +212,7 @@
               "initFinished": {"type": "string"},
               "directory": {"type": "string"},
               "numberOfProcesses": {"type": "integer"}
-            },
-            "additionalProperties": {"type": "undefined"}
+            }
           }
         },
         {
@@ -244,8 +238,7 @@
               "queryFinished" : {"type": "string"},
               "initFinished" : {"type": "string"},
               "directory" : {"type" :  "string"}
-            },
-            "additionalProperties": {"type": "undefined"}
+            }
           }
         }
       ]

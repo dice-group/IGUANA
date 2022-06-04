@@ -10,6 +10,7 @@ import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -45,7 +46,7 @@ public class EachQueryMetric extends AbstractMetric {
 	 */
 	public EachQueryMetric() {
 		super("Each Query Execution", "EachQuery",
-				"Will save every query execution time.");
+				"Will save every query execution time and its status (succeeded, timed out, etc.).");
 	}
 
 	/*
@@ -86,7 +87,8 @@ public class EachQueryMetric extends AbstractMetric {
 		m.add(getConnectingStatement(workerRes));
 		m.add(workerRes, queryProperty , queryRes);
 		m.add(queryRes, execProperty , subRes);
-		m.add(subRes, timeProperty, ResourceFactory.createTypedLiteral(time));
+		BigDecimal timeBD = new BigDecimal(String.valueOf(time));   // Want decimal literal
+		m.add(subRes, timeProperty, ResourceFactory.createTypedLiteral(timeBD));
 		m.add(subRes, successProperty, ResourceFactory.createTypedLiteral(success));
 		if(p.containsKey(COMMON.QUERY_HASH)) {
 			int queryHash = Integer.parseInt(p.get(COMMON.QUERY_HASH).toString());

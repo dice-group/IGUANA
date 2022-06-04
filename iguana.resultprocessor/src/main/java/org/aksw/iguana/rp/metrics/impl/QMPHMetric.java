@@ -8,6 +8,7 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.jena.rdf.model.*;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 
 /**
@@ -43,22 +44,35 @@ public class QMPHMetric extends NoQPHMetric {
 	protected void callbackClose(){
 		Model m = ModelFactory.createDefaultModel();
 		Property property = getMetricProperty();
-		Double sum = 0.0;
+		double sum = 0.0;
 		for(Properties key : dataContainer.keySet()){
-			Double totalTime = (double) dataContainer.get(key).get(TOTAL_TIME);
+			Double totalTime = (Double) dataContainer.get(key).get(TOTAL_TIME);
 			Integer success = (Integer) dataContainer.get(key).get(TOTAL_SUCCESS);
 
 			double noOfQueriesPerHour = hourInMS*success*1.0/totalTime;
 
 			int noOfQueryMixes = (int) key.get(COMMON.NO_OF_QUERIES);
-			Double qmph=noOfQueriesPerHour*1.0/noOfQueryMixes;
+			double qmph=noOfQueriesPerHour*1.0/noOfQueryMixes;
 
 			sum+=qmph;
 			Resource subject = getSubject(key);
 			m.add(getConnectingStatement(subject));
-			m.add(subject, property, ResourceFactory.createTypedLiteral(qmph));
+			try {    // Try/catch in case of nulls
+				BigDecimal qmphBD = new BigDecimal(String.valueOf(qmph));    // Want decimal literal
+				m.add(subject, property, ResourceFactory.createTypedLiteral(qmphBD));
+			} catch (NumberFormatException e) {
+				String qmphStr = "qmph." + String.valueOf(qmph);
+				m.add(subject, property, ResourceFactory.createTypedLiteral(qmphStr));
+			}
 		}
-		m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sum));
+
+		try {
+			BigDecimal sumBD = new BigDecimal(String.valueOf(sum));
+			m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sumBD));
+		} catch (NumberFormatException e) {
+			String sumStr = "qmph.sum." + String.valueOf(sum);
+			m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sumStr));
+		}
 		sendData(m);
 	}
 }

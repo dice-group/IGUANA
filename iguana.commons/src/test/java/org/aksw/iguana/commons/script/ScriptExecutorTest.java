@@ -1,5 +1,6 @@
 package org.aksw.iguana.commons.script;
 
+import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -32,13 +33,18 @@ public class ScriptExecutorTest {
     public static Collection<Object[]> data() {
         List<Object[]> testConfigs = new ArrayList<Object[]>();
         //simple method
-        testConfigs.add(new Object[]{"/bin/touch", new String[]{"ShouldNotExistWhatSoEver"}, 0, "removeFile", new Object[]{"ShouldNotExistWhatSoEver"}});
+        if (SystemUtils.IS_OS_LINUX) {
+            testConfigs.add(new Object[]{"/bin/touch", new String[]{"ShouldNotExistWhatSoEver"}, 0,
+                    "removeFile", new Object[]{"ShouldNotExistWhatSoEver"}});
+        } else if (SystemUtils.IS_OS_MAC) {
+            testConfigs.add(new Object[]{"/usr/bin/touch", new String[]{"ShouldNotExistWhatSoEver"}, 0,
+                    "removeFile", new Object[]{"ShouldNotExistWhatSoEver"}});
+        }
         //testing if additional arguments are checked
         testConfigs.add(new Object[]{"/bin/echo test", new String[]{"123", "456"}, 0, "emptyCallback", new Object[]{}});
         //should fail as file not exist
         testConfigs.add(new Object[]{"scriptThatShouldNotExist", new String[]{}, -1, "emptyCallback", new Object[]{}});
         //should fail with 1
-
 
         return testConfigs;
     }

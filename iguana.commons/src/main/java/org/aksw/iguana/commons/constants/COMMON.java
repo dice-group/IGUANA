@@ -102,10 +102,12 @@ public class COMMON {
     public static final String EXPERIMENT_TASK_CLASS_ID_KEY = "actualTaskClass" ;
 
 	public static final String BASE_URI = "http://iguana-benchmark.eu";
+	public static final String WIKIBASE_URI = "http://iguana-wikiba.se";
 
 
 	public static final String RES_BASE_URI = BASE_URI+"/resource/";
 	public static final String PROP_BASE_URI = BASE_URI+"/properties/";
+	public static final String PROP_WIKIBASE_URI = WIKIBASE_URI+"/properties/";
 	public static final String CLASS_BASE_URI = BASE_URI+"/class/";
     public static final String PENALTY = "penalty";
     public static final String CONNECTION_VERSION_KEY = "connectionVersion";

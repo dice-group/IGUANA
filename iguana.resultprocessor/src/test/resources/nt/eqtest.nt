@@ -4,7 +4,7 @@
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/queryExecution> <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2/1> .
 
 
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1/1> <http://iguana-benchmark.eu/properties/time> "200.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1/1> <http://iguana-benchmark.eu/properties/time> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1/1> <http://iguana-benchmark.eu/properties/success> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1/1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1123/sparql1>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1/1> <http://iguana-benchmark.eu/properties/run> "1"^^<http://www.w3.org/2001/XMLSchema#long> .
@@ -12,14 +12,14 @@
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1/1> <http://iguana-benchmark.eu/properties/resultSize> "120"^^<http://www.w3.org/2001/XMLSchema#long>.
 
 
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1/1> <http://iguana-benchmark.eu/properties/time> "150.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1/1> <http://iguana-benchmark.eu/properties/time> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1/1> <http://iguana-benchmark.eu/properties/success> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1/1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1123/sparql1>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1/1> <http://iguana-benchmark.eu/properties/run> "1"^^<http://www.w3.org/2001/XMLSchema#long> .
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1/1> <http://iguana-benchmark.eu/properties/code> "1"^^<http://www.w3.org/2001/XMLSchema#long> .
 
 
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2/1> <http://iguana-benchmark.eu/properties/time> "250.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2/1> <http://iguana-benchmark.eu/properties/time> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2/1> <http://iguana-benchmark.eu/properties/success> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2/1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1125/sparql2>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2/1> <http://iguana-benchmark.eu/properties/run> "1"^^<http://www.w3.org/2001/XMLSchema#long> .
@@ -27,7 +27,7 @@
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2/1> <http://iguana-benchmark.eu/properties/resultSize> "100"^^<http://www.w3.org/2001/XMLSchema#long>.
 
 
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2/1> <http://iguana-benchmark.eu/properties/time> "100.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2/1> <http://iguana-benchmark.eu/properties/time> "100"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2/1> <http://iguana-benchmark.eu/properties/success> "false"^^<http://www.w3.org/2001/XMLSchema#boolean> .
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2/1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1125/sparql2>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2/1> <http://iguana-benchmark.eu/properties/run> "1"^^<http://www.w3.org/2001/XMLSchema#long> .
@@ -43,7 +43,7 @@
 
 
 <http://iguana-benchmark.eu/resource/EachQuery> <http://www.w3.org/2000/01/rdf-schema#label> "Each Query Execution" .
-<http://iguana-benchmark.eu/resource/EachQuery> <http://www.w3.org/2000/01/rdf-schema#comment> "Will save every query execution time." .
+<http://iguana-benchmark.eu/resource/EachQuery> <http://www.w3.org/2000/01/rdf-schema#comment> "Will save every query execution time and its status (succeeded, timed out, etc.)." .
 <http://iguana-benchmark.eu/resource/EachQuery> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Metric> .
 <http://iguana-benchmark.eu/resource/EachQuery> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/metric/EachQuery> .
 <http://iguana-benchmark.eu/resource/EachQuery> <http://www.w3.org/2000/01/rdf-schema#label> "EachQuery" .

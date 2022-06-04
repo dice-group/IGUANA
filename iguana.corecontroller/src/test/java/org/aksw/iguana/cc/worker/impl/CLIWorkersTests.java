@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
+import org.apache.commons.lang.SystemUtils;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -153,7 +154,11 @@ public class CLIWorkersTests {
         assertEquals("test () user1:pwd test+%28%29\n", content);
 
         con = new Connection();
-        con.setEndpoint("/bin/echo \"$QUERY$ $USER$:$PASSWORD$ $ENCODEDQUERY$\" > "+f.getAbsolutePath()+" | /bin/printf \"HeaderDoesNotCount\na\na\"");
+        String cmd = "/bin/printf ";
+        if (SystemUtils.IS_OS_MAC) {
+            cmd = "/usr/bin/printf ";
+        }
+        con.setEndpoint("/bin/echo \"$QUERY$ $USER$:$PASSWORD$ $ENCODEDQUERY$\" > " + f.getAbsolutePath() + " | " + cmd + " \"HeaderDoesNotCount\na\na\"");
         worker = new CLIWorker("123/1/1", con, "src/test/resources/update/empty.nt", null, null, null, null, 1);
         worker.executeQuery("test ()", "1");
         content = FileUtils.readFile(f.getAbsolutePath());

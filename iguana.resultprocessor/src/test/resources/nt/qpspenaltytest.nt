@@ -5,30 +5,41 @@
 <http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1>  .
 <http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2>  .
 
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "200.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/resultSize> "120"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "5.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "5"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1123/sparql1> .
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/QPS> "5.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/QPS> "5"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-wikiba.se/properties/minQueryTime> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-wikiba.se/properties/maxQueryTime> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-wikiba.se/properties/meanQueryTime> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-wikiba.se/properties/geometricMeanQueryTime> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-wikiba.se/properties/penalizedMeanQueryTime> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-wikiba.se/properties/penalizedGeometricMeanQueryTime> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
 
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "250.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/resultSize> "100"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "4.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "4"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1125/sparql2> .
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/QPS> "4.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/QPS> "4"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-wikiba.se/properties/minQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-wikiba.se/properties/maxQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-wikiba.se/properties/meanQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-wikiba.se/properties/geometricMeanQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-wikiba.se/properties/penalizedMeanQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-wikiba.se/properties/penalizedGeometricMeanQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
-
 
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/workerID> "1" .
@@ -37,31 +48,41 @@
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1>  .
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2>  .
 
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "150.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/resultSize> "?".
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "6.666666666666667"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "6.666666666666667"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1123/sparql1> .
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/QPS> "6.666666666666667"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/QPS> "6.666666666666667"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-wikiba.se/properties/minQueryTime> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-wikiba.se/properties/maxQueryTime> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-wikiba.se/properties/meanQueryTime> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-wikiba.se/properties/geometricMeanQueryTime> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-wikiba.se/properties/penalizedMeanQueryTime> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-wikiba.se/properties/penalizedGeometricMeanQueryTime> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
 
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "100.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "100"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/succeeded> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/failed> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/resultSize> "?".
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/wrongCodes> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "0.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "0"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1125/sparql2> .
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/QPS> "0.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/QPS> "0"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-wikiba.se/properties/minQueryTime> "?".
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-wikiba.se/properties/maxQueryTime> "?".
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-wikiba.se/properties/meanQueryTime> "?".
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-wikiba.se/properties/geometricMeanQueryTime> "?".
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-wikiba.se/properties/penalizedMeanQueryTime> "?".
+<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-wikiba.se/properties/penalizedGeometricMeanQueryTime> "?".
 <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
-
-
 
 <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/1> .
 <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/QPS> .
@@ -69,37 +90,44 @@
 <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/sparql1>  .
 <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/sparql2>  .
 
-
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "350.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "350"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/succeeded> "2"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/resultSize> "120"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
 <http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "5.714285714285714"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "5.714285714285714"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1123/sparql1> .
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/QPS> "5.714285714285714"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/QPS> "5.714285714285714"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-wikiba.se/properties/minQueryTime> "150"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-wikiba.se/properties/maxQueryTime> "200"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-wikiba.se/properties/meanQueryTime> "175"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-wikiba.se/properties/geometricMeanQueryTime> "173.20508"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-wikiba.se/properties/penalizedMeanQueryTime> "175"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-wikiba.se/properties/penalizedGeometricMeanQueryTime> "173.20508"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
 
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "350.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "350"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/failed> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/resultSize> "100"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
 <http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/wrongCodes> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "0.8"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "0.8"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1125/sparql2> .
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/QPS> "2.857142857142857"^^<http://www.w3.org/2001/XMLSchema#double>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/QPS> "2.857142857142857"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-wikiba.se/properties/minQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-wikiba.se/properties/maxQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-wikiba.se/properties/meanQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-wikiba.se/properties/geometricMeanQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-wikiba.se/properties/penalizedMeanQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
+<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-wikiba.se/properties/penalizedGeometricMeanQueryTime> "250"^^<http://www.w3.org/2001/XMLSchema#decimal>.
 <http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
 
-
-
-
-
 <http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#label> "Queries Per Second" .
-<http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#comment> "Will calculate for each query the amount of how many times the query could be executed succesfully in one second. Further on it will save the totaltime of each query, the failure and the success" .
+<http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#comment> "Will calculate for each query the number of times that the query could be executed successfully in one second. It will save the total, min and max execution times of each query, the number of failures and successes, and other details." .
 <http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Metric> .
 <http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/metric/QPS> .
 <http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#label> "QPS" .

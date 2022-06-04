@@ -2,8 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.aksw</groupId>
   <artifactId>iguana-parent</artifactId>
-  <version>3.3.0</version>
-  <name>Iguana Parent </name>
+  <version>3.3.1</version>
+  <name>Iguana Parent</name>
     <licenses>
         <license>
             <name>AGPLv3 or later</name>

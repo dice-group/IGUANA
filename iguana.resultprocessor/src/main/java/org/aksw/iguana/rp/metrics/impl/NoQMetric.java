@@ -66,7 +66,6 @@ public class NoQMetric extends AbstractMetric {
         Property property = getMetricProperty();
         long sum = 0;
         for(Properties key : dataContainer.keySet()){
-            Double totalTime = (Double) dataContainer.get(key).get(TOTAL_TIME);
             Integer success = (Integer) dataContainer.get(key).get(TOTAL_SUCCESS);
             sum+=success;
             Resource subject = getSubject(key);
@@ -76,7 +75,4 @@ public class NoQMetric extends AbstractMetric {
         m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(sum));
         sendData(m);
     }
-
-
-
 }

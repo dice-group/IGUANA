@@ -4,6 +4,10 @@ import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.jena.rdf.model.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -17,14 +21,14 @@ public class AvgQPSMetric extends QPSMetric {
         super(
                 "Average Queries Per Second",
                 "AvgQPS",
-                "Will calculate the overall average queries Per second. Further on it will save the totaltime of each query, the failure and the success");
+                "Will calculate the overall average queries per second.");
     }
 
     public AvgQPSMetric(Integer penalty) {
         super(
                 "Average Queries Per Second",
                 "AvgQPS",
-                "Will calculate the overall average queries Per second. Further on it will save the totaltime of each query, the failure and the success");
+                "Will calculate the overall average queries per second.");
         this.penalty=penalty;
     }
 
@@ -40,7 +44,7 @@ public class AvgQPSMetric extends QPSMetric {
         Model m = ModelFactory.createDefaultModel();
         Map<Object, Number[]> map = new HashMap<Object, Number[]>();
         Property property = getMetricProperty();
-        Property penalziedProp = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"penalized"+shortName);
+        Property penalizedProp = ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"penalized"+shortName);
         for(Properties key : dataContainer.keySet()){
             Properties value = dataContainer.get(key);
             Double avgQps=0.0;
@@ -63,9 +67,20 @@ public class AvgQPSMetric extends QPSMetric {
             penalizedAvgQps = penalizedAvgQps/value.size();
             Resource subject = getSubject(key);
             m.add(getConnectingStatement(subject));
-            m.add(subject, property, ResourceFactory.createTypedLiteral(avgQps));
-            m.add(subject, penalziedProp, ResourceFactory.createTypedLiteral(penalizedAvgQps));
-
+            try {    // Try/catch in case of nulls
+                BigDecimal avgQpsBD = new BigDecimal(String.valueOf(avgQps));   // Want decimal literal
+                m.add(subject, property, ResourceFactory.createTypedLiteral(avgQpsBD));
+            } catch (NumberFormatException e) {
+                String avgQpsStr = "avg.qps.0." + String.valueOf(avgQps);
+                m.add(subject, property, ResourceFactory.createTypedLiteral(avgQpsStr));
+            }
+            try {
+                BigDecimal pAvgQpsBD = new BigDecimal(String.valueOf(penalizedAvgQps));
+                m.add(subject, penalizedProp, ResourceFactory.createTypedLiteral(pAvgQpsBD));
+            } catch (NumberFormatException e) {
+                String pAvgQpsStr = "penal.avg.qps.0." + String.valueOf(penalizedAvgQps);
+                m.add(subject, penalizedProp, ResourceFactory.createTypedLiteral(pAvgQpsStr));
+            }
         }
         Double avgQps=0.0;
         Double penalizedAvgQps=0.0;
@@ -77,8 +92,20 @@ public class AvgQPSMetric extends QPSMetric {
         }
         avgQps = avgQps/map.size();
         penalizedAvgQps= penalizedAvgQps/map.size();
-        m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(avgQps));
-        m.add(getTaskResource(), penalziedProp, ResourceFactory.createTypedLiteral(penalizedAvgQps));
+        try {
+            BigDecimal avgQpsBD = new BigDecimal(String.valueOf(avgQps));
+            m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(avgQpsBD));
+        } catch (NumberFormatException e) {
+            String avgQpsStr = "avg.qps.1." + String.valueOf(avgQps);
+            m.add(getTaskResource(), property, ResourceFactory.createTypedLiteral(avgQpsStr));
+        }
+        try {
+            BigDecimal pAvgQpsBD = new BigDecimal(String.valueOf(penalizedAvgQps));
+            m.add(getTaskResource(), penalizedProp, ResourceFactory.createTypedLiteral(pAvgQpsBD));
+        } catch (NumberFormatException e) {
+            String pAvgQpsStr = "penal.avg.qps.1." + String.valueOf(penalizedAvgQps);
+            m.add(getTaskResource(), penalizedProp, ResourceFactory.createTypedLiteral(pAvgQpsStr));
+        }
         this.sendData(m);
         this.storageManager.commit();
     }

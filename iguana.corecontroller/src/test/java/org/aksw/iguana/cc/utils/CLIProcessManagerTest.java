@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.utils;
 
+import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,11 +12,11 @@ public class CLIProcessManagerTest {
     @Test
     public void execTest() throws InterruptedException {
         //create process
-        Process p = CLIProcessManager.createProcess("echo \"abc\"; wait 1m");
+        Process p = CLIProcessManager.createProcess("/usr/bin/printf \"abc\"");
         //destroy process
         assertTrue(p.isAlive());
         CLIProcessManager.destroyProcess(p);
-        //give OS a little bit of time to destroy process
+        //give OS a bit of time to destroy process
         Thread.sleep(50);
         assertFalse(p.isAlive());
 
@@ -24,15 +25,19 @@ public class CLIProcessManagerTest {
     @Test
     public void countLinesSuccessfulTest() throws IOException, InterruptedException {
         //create
-        Process p = CLIProcessManager.createProcess("echo \"abc\"; wait 100; echo \"t\nt\nabc: test ended suffix\"; wait 1m;");
-        //count Lines until "test ended" occured
+        String cmd = "echo ";
+        if (SystemUtils.IS_OS_MAC) {
+            cmd = "/usr/bin/printf ";   // More consistent
+        }
+        Process p = CLIProcessManager.createProcess(cmd + " \"abc\"; " + cmd + " \"t\\nt\\nabc: test ended suffix\";");
+        //count Lines until "test ended" occurs
         Thread.sleep(100);
         assertTrue(CLIProcessManager.isReaderReady(p));
 
         assertEquals(3, CLIProcessManager.countLinesUntilStringOccurs(p, "test ended", "failed"));
         //destroy
         CLIProcessManager.destroyProcess(p);
-        //give OS a little bit of time to destroy process
+        //give OS a bit of time to destroy process
         Thread.sleep(50);
         assertFalse(p.isAlive());
 
@@ -41,10 +46,14 @@ public class CLIProcessManagerTest {
     @Test
     public void countLinesFailTest() throws IOException, InterruptedException {
         //create
-        Process p = CLIProcessManager.createProcess("echo \"abc\"; wait 100; echo \"abc: failed suffix\"; wait 1m;");
+        String cmd = "echo ";
+        if (SystemUtils.IS_OS_MAC) {
+            cmd = "/usr/bin/printf ";   // More consistent
+        }
+        Process p = CLIProcessManager.createProcess(cmd + " \"abc\"; " + cmd + " \"abc: failed suffix\";");
         Thread.sleep(100);
         assertTrue(CLIProcessManager.isReaderReady(p));
-        //count Lines until "test ended" occured
+        //count Lines until "test ended" occurs
         try{
             CLIProcessManager.countLinesUntilStringOccurs(p, "test ended", "failed");
             assertTrue("Test did not end in IOException", false);
@@ -53,7 +62,7 @@ public class CLIProcessManagerTest {
         }
         //destroy
         CLIProcessManager.destroyProcess(p);
-        //give OS a little bit of time to destroy process
+        //give OS a bit of time to destroy process
         Thread.sleep(50);
         assertFalse(p.isAlive());
 
