@@ -3,7 +3,6 @@ package org.aksw.iguana.commons.streams;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.concurrent.TimeoutException;
 
@@ -21,11 +20,11 @@ public class Streams {
     protected static final ThreadLocal<ByteArrayOutputStream> threadByteArrayOutputStream = ThreadLocal.withInitial(() -> new ByteArrayOutputStream(bufferSize));
 
     /**
-     * Fastest way to serialize a stream to UTF-8 according to https://stackoverflow.com/a/35446009/6800941
+     * Fastest way to serialize a stream to UTF-8 according to <a href="https://stackoverflow.com/a/35446009/6800941">this stackoverflow question</a>.
      *
      * @param inputStream the stream to read from
      * @return the content of inputStream as a string.
-     * @throws IOException from inputStream.read
+     * @throws IOException from {@link InputStream#read()}
      */
     static public ByteArrayOutputStream inputStream2String(InputStream inputStream) throws IOException {
         ByteArrayOutputStream result = threadByteArrayOutputStream.get();
@@ -40,14 +39,14 @@ public class Streams {
     }
 
     /**
-     * Fastest way to serialize a stream to UTF-8 according to https://stackoverflow.com/a/35446009/6800941
+     * Fastest way to serialize a stream to UTF-8 according to <a href="https://stackoverflow.com/a/35446009/6800941">this stackoverflow question</a>.
      *
      * @param inputStream the stream to read from
      * @param startTime   a time when the computation started
-     * @param timeout     delta from startTime when the computation must be completed. Otherwise a TimeoutException may be thrown. Timeout check is deactivated if timeout is < 0.
+     * @param timeout     delta from startTime when the computation must be completed. Otherwise, a TimeoutException may be thrown. Timeout check is deactivated if timeout is < 0.
      * @return the content of inputStream as a string.
-     * @throws IOException      from inputStream.read
-     * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceed
+     * @throws IOException      from {@link InputStream#read()}
+     * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceeded
      */
     static public ByteArrayOutputStream inputStream2String(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -56,15 +55,15 @@ public class Streams {
     }
 
     /**
-     * Fastest way to serialize a stream to UTF-8 according to https://stackoverflow.com/a/35446009/6800941
+     * Fastest way to serialize a stream to UTF-8 according to <a href="https://stackoverflow.com/a/35446009/6800941">this stackoverflow question</a>.
      *
      * @param inputStream the stream to read from
      * @param startTime   a time when the computation started
-     * @param timeout     delta from startTime when the computation must be completed. Otherwise a TimeoutException may be thrown. Timeout check is deactivated if timeout is < 0.
+     * @param timeout     delta from startTime when the computation must be completed. Otherwise, a TimeoutException may be thrown. Timeout check is deactivated if timeout is &lt; 0.
      * @param result      the stream where the result is written to.
      * @return size of the output stream
-     * @throws IOException      from inputStream.read
-     * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceed
+     * @throws IOException      from {@link InputStream#read()}
+     * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceeded
      */
     public static long inputStream2ByteArrayOutputStream(InputStream inputStream, Instant startTime, double timeout, ByteArrayOutputStream result) throws IOException, TimeoutException {
         assert (result != null);
@@ -80,12 +79,12 @@ public class Streams {
     }
 
     /**
-     * Fastest way to serialize a stream to UTF-8 according to https://stackoverflow.com/a/35446009/6800941
+     * Fastest way to serialize a stream to UTF-8 according to <a href="https://stackoverflow.com/a/35446009/6800941">this stackoverflow question</a>.
      *
      * @param inputStream the stream to read from
      * @param result      the stream where the result is written to.
      * @return size of the output stream
-     * @throws IOException from inputStream.read
+     * @throws IOException from {@link InputStream#read()}
      */
     public static long inputStream2ByteArrayOutputStream(InputStream inputStream, ByteArrayOutputStream result) throws IOException {
         try {
@@ -100,10 +99,10 @@ public class Streams {
      * reads a stream and throws away the result.
      *
      * @param inputStream the stream to read from
-     * @param timeout     delta from startTime when the computation must be completed. Otherwise a TimeoutException may be thrown. Timeout check is deactivated if timeout is < 0.
+     * @param timeout     delta from startTime when the computation must be completed. Otherwise, a TimeoutException may be thrown. Timeout check is deactivated if timeout is &lt; 0.
      * @return size of the output stream
-     * @throws IOException      from inputStream.read
-     * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceed
+     * @throws IOException      from {@link InputStream#read()}
+     * @throws TimeoutException Maybe thrown any time after if startTime + timeout is exceeded
      */
     static public long inputStream2Length(InputStream inputStream, Instant startTime, double timeout) throws IOException, TimeoutException {
         byte[] buffer = threadBuffer.get();
