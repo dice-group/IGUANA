@@ -37,6 +37,7 @@ public abstract class AbstractTask implements Task {
 	private String suiteID;
 	private String datasetID;
 	private String conID;
+	private String taskName;
 
 	/**
 	 * Creates an AbstractTask with the TaskID
@@ -45,20 +46,21 @@ public abstract class AbstractTask implements Task {
 
 	}
 
-	/*
+
+		/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.aksw.iguana.tp.tasks.Task#init()
 	 */
 	@Override
-	public void init(String[] ids, String dataset, Connection con) {
+	public void init(String[] ids, String dataset, Connection con, String taskName) {
 		this.suiteID=ids[0];
 		this.expID=ids[1];
 		this.taskID=ids[2];
+		this.taskName=taskName;
 		this.datasetID=dataset;
 		this.conID=con.getName();
 		this.con=con;
-
 	}
 
 	@Override
@@ -96,6 +98,9 @@ public abstract class AbstractTask implements Task {
 		metaData.setProperty(COMMON.SUITE_ID_KEY, this.suiteID);
 		metaData.setProperty(COMMON.DATASET_ID_KEY, this.datasetID);
 		metaData.setProperty(COMMON.CONNECTION_ID_KEY, this.conID);
+		if(this.taskName!=null) {
+			metaData.setProperty(COMMON.EXPERIMENT_TASK_NAME_KEY, this.taskName);
+		}
 		if(this.con.getVersion()!=null) {
 			metaData.setProperty(COMMON.CONNECTION_VERSION_KEY, this.con.getVersion());
 		}

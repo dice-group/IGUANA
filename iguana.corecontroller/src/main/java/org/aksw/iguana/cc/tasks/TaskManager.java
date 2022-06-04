@@ -32,8 +32,8 @@ public class TaskManager {
 	 * @throws IOException
 	 * @throws TimeoutException
 	 */
-	public void startTask(String[] ids, String dataset, Connection con) throws IOException, TimeoutException{
-		this.task.init(ids, dataset, con);
+	public void startTask(String[] ids, String dataset, Connection con, String taskName) throws IOException, TimeoutException{
+		this.task.init(ids, dataset, con, taskName);
 		this.task.addMetaData();
 		this.task.start();
 		this.task.execute();

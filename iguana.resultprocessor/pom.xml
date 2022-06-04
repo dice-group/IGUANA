@@ -1,9 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.aksw</groupId>
+	<parent>
+		<groupId>org.aksw</groupId>
+		<artifactId>iguana-parent</artifactId>
+		<version>${revision}</version> <!-- this is changed from [1.0,99.0) to ${revision} -->
+	</parent>
 	<artifactId>iguana.resultprocessor</artifactId>
-	<version>3.3.0</version>
+
 	<name>Iguana ResultProcessor</name>
 	<description>Processing, aggregating and store results from Iguanas core.</description>
 	<licenses>
@@ -14,7 +18,7 @@
 	</licenses>
 	<developers>
 		<developer>
-			<name>Felix Conrads</name>
+			<name>Lixi Alié Conrads</name>
 			<email>felix.conrads@uni-paderborn.de</email>
 			<roles>
 				<role>Main Developer</role>
@@ -35,7 +39,7 @@
 
 	<properties>
 		<java.version>11</java.version>
-		<jena.version>3.16.0</jena.version>
+		<jena.version>4.2.0</jena.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compile.target>11</maven.compile.target>
 		<maven.compile.source>11</maven.compile.source>
@@ -61,13 +65,13 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.aksw</groupId>
 			<artifactId>iguana.commons</artifactId>
-			<version>3.3.0</version>
+			<version>${revision}</version>
 		</dependency>
 	</dependencies>
 

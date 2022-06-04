@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.aksw</groupId>
   <artifactId>iguana-parent</artifactId>
-  <version>3.3.0</version>
+    <version>${revision}</version>
   <name>Iguana Parent </name>
     <licenses>
         <license>
@@ -12,7 +12,7 @@
     </licenses>
     <developers>
         <developer>
-            <name>Felix Conrads</name>
+            <name>Lixi Alié Conrads</name>
             <email>felix.conrads@uni-paderborn.de</email>
             <roles>
                 <role>Main Developer</role>
@@ -33,12 +33,33 @@
   <packaging>pom</packaging>
   <modules>
   	<module>iguana.commons</module>
-  	<module>iguana.corecontroller</module>
   	<module>iguana.resultprocessor</module>
+    <module>iguana.corecontroller</module>
   </modules>
-
+    <properties>
+        <revision>${major.minor.version}.${build.version}</revision>
+        <major.minor.version>${major.version}.${minor.version}</major.minor.version>
+        <major.version>3</major.version>
+        <minor.version>3</minor.version>
+        <build.version>0</build.version>
+    </properties>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/dice-group/iguana</url>
+        </repository>
+    </distributionManagement>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <reportOutputDirectory>javadoc/${major.minor.version}/</reportOutputDirectory>
+                    <destDir></destDir>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.1.0</version>
@@ -63,7 +84,7 @@
                                 <resource>
                                     <directory>./iguana.corecontroller/target/</directory>
                                     <includes>
-                                        <include>iguana-${version}.jar</include>
+                                        <include>iguana-${version}-shaded.jar</include>
                                     </includes>
                                 </resource>
                             </resources>

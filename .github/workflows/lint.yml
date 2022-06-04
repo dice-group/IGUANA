@@ -1,0 +1,10 @@
+name: lint
+on: pull_request
+
+jobs:
+  lint:
+    name: Release Tag existence Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - run: .github/scripts/tagcheck.sh v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)

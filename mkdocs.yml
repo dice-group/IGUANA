@@ -1,0 +1,94 @@
+site_name: Iguana $VERSION Documentation
+#repo_url: https://github.com/dice-group/Iguana/
+
+#google_analytics: ['UA-179945559-1', 'iguana-benchmark.eu']
+
+extra:
+  version: $VERSION
+  release_version: $RELEASE_VERSION
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/dice-group/Iguana
+
+repo_url: https://github.com/dice-group/Iguana
+repo_name: dice-group/Iguana
+
+edit_uri: ""
+
+
+theme: 
+  #name: 'readthedocs'
+  custom_dir: 'customs/'
+  name: material 
+  features:
+    - navigation.tabs
+    - navigation.top
+    - toc.integrate
+
+  include_search_page: false
+  search_index_only: true
+
+  language: en
+  font:
+    text: Roboto
+    code: Roboto Mono
+  logo: images/logo_white.png
+  favicon: images/Iguana_new_logo6.png
+  icon:
+    logo: logo
+    repo: fontawesome/brands/git-alt
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: deep purple
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      primary: teal
+      accent: deep purple
+      scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+plugins:
+  - search
+  - macros
+
+
+color: "#82BDC3"
+
+nav:
+  - "General":
+    - "About": "about.md"
+    - "Architecture": "architecture.md"
+
+  - "Quick Start Guide":
+    - "Download": "download.md"
+    - "Quick Configuration": "quick-config.md"
+    - "Run Iguana": "run-iguana.md"
+  
+  - "Usage":
+    - "Workflow": "usage/workflow.md"
+    - "Configuration": "usage/configuration.md" 
+    - "Stresstest" : "usage/stresstest.md"
+    - "Supported Workers": "usage/workers.md" 
+    - "Supported Queries": "usage/queries.md" 
+    - "Supported Languages": "usage/languages.md" 
+    - "Metrics": "usage/metrics.md"
+    - "Benchmark Results": "usage/results.md"
+    - "Tutorial": "usage/tutorial.md"
+  - "Development":
+    - "Overview": "develop/overview.md"
+    - "Extend": 
+      - "Tasks": "develop/extend-task.md"
+      - "Workers": "develop/extend-workers.md"
+      - "Query Handling": "develop/extend-queryhandling.md"
+      - "Languages": "develop/extend-lang.md"
+      - "Result storage": "develop/extend-result-storages.md"
+      - "Metrics": "develop/extend-metrics.md"
+    - "Use Iguana":
+      - "Maven": "develop/maven.md"
+      - "Javadoc": "http://iguana-benchmark.eu/javadoc/$VERSION/index.html"

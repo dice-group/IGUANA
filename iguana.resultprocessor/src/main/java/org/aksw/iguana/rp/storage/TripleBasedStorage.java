@@ -84,6 +84,10 @@ public abstract class TripleBasedStorage implements Storage {
 		metricResults.add(createStatement(expUrl, getUrlWithPropertyPrefix("dataset"), datasetUrl, true));
 		metricResults.add(createStatement(expUrl, classUri, expClassUri, true));
 		metricResults.add(createStatement(taskUrl, getUrlWithPropertyPrefix("connection"), connUrl, true));
+		if(p.containsKey(COMMON.EXPERIMENT_TASK_NAME_KEY)){
+			metricResults.add(metricResults.createResource(taskUrl), RDFS.label, p.getProperty(COMMON.EXPERIMENT_TASK_NAME_KEY));
+		}
+
 		metricResults.add(createStatement(connUrl, classUri, conClassUri, true));
 		metricResults.add(createStatement(datasetUrl, classUri, datasetClassUri, true));
 		metricResults.add(createStatement(taskUrl, classUri, taskClassUri, true));

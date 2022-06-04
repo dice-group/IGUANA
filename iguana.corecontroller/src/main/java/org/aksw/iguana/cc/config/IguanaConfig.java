@@ -95,7 +95,7 @@ public class IguanaConfig {
 
 						ScriptExecutor.execSafe(execScript, args);
 					}
-					LOGGER.info("Executing Task [{}: {}, {}, {}]", taskID, dataset.getName(), con.getName(), task.getClassName());
+					LOGGER.info("Executing Task [{}/{}: {}, {}, {}]", taskID, task.getName(), dataset.getName(), con.getName(), task.getClassName());
 					controller.startTask(new String[]{suiteID, suiteID+"/"+expID.toString(), suiteID+"/"+expID.toString()+"/"+taskID.toString()}, dataset.getName(), SerializationUtils.clone(con), SerializationUtils.clone(task));
 					if(postScriptHook!=null){
 						String execScript = postScriptHook.replace("{{dataset.name}}", dataset.getName())

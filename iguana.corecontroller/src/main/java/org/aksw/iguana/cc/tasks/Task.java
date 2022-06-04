@@ -50,6 +50,17 @@ public interface Task {
 	 * @param ids normally the suiteID, experimentID, taskID
 	 * @param dataset the dataset name
 	 * @param con the current connection to execute the task against
+	 * @param taskName the taskName
 	 */
-    void init(String[] ids, String dataset, Connection con);
+    void init(String[] ids, String dataset, Connection con, String taskName);
+
+	/**
+	 * Will initialize the task
+	 * @param ids normally the suiteID, experimentID, taskID
+	 * @param dataset the dataset name
+	 * @param con the current connection to execute the task against
+	 */
+	default void init(String[] ids, String dataset, Connection con){
+		init(ids, dataset, con, null);
+	}
 }
