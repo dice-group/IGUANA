@@ -20,9 +20,9 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 /**
  * Worker to execute a query again a CLI process, the connection.service will be the command to execute the query against.
  *
- * command may look like the following<br></br>
+ * command may look like the following<br><br/>
  * cliprocess.sh $QUERY$ $USER$ $PASSWORD$
- * </br>
+ * <br/>
  * whereas $QUERY$ will be exchanged with the actual query as well as user and password.
  * Further on it is possible to encode the query using $ENCODEDQUERY$ instead of $QUERY$
  *

@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * Gets either a JSON or YAML configuration file using a json schema and will generate
- * a SuiteID and ExperimentIDs as well as TaskIDs for it.</br>
+ * a SuiteID and ExperimentIDs as well as TaskIDs for it.<br/>
  * Afterwards it will start the taskProcessor with all specified tasks
  * <br/><br/>
  * The following order holds

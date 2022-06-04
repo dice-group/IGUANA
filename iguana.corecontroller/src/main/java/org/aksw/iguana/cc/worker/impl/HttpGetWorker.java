@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 /**
  * HTTP Get Worker.
- * Uses HTTP Get to execute a Query.</br></br>
+ * Uses HTTP Get to execute a Query.<br/><br/>
  * if the parameter type was not set it will use 'query' as the parameter as default, otherwise it will use the provided parameter
  */
 @Shorthand("HttpGetWorker")
