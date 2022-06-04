@@ -55,8 +55,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.0</version>
                 <configuration>
-                    <reportOutputDirectory>javadoc/${major.minor.version}/</reportOutputDirectory>
+                    <doclint>-html</doclint>
+                    <reportOutputDirectory>javadoc/${revision}/</reportOutputDirectory>
                     <destDir></destDir>
                 </configuration>
             </plugin>
@@ -72,19 +74,19 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>./target</outputDirectory>
+                            <outputDirectory>${project.basedir}/target</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>./src/main/resources/</directory>
+                                    <directory>${project.basedir}/src/main/resources/</directory>
                                     <includes>
                                         <include>start-iguana.sh</include>
                                     </includes>
                                     <filtering>true</filtering>
                                 </resource>
                                 <resource>
-                                    <directory>./iguana.corecontroller/target/</directory>
+                                    <directory>${project.basedir}/iguana.corecontroller/target/</directory>
                                     <includes>
-                                        <include>iguana-${version}-shaded.jar</include>
+                                        <include>iguana-${revision}-shaded.jar</include>
                                     </includes>
                                 </resource>
                             </resources>

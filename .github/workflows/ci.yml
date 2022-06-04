@@ -39,6 +39,7 @@ jobs:
       - run: sed -i "s/\$VERSION/$(cat version.log)/g" mkdocs.yml
       - run: sed -i "s/\$RELEASE_VERSION/${{ env.RELEASE_VERSION }}/g" mkdocs.yml
       - run: mkdocs build -d site/$(cat version.log)
+      - run: mvn install -Dmaven.test.skip=true
       - run: mvn javadoc:javadoc
       - run: sed -i "s/\$VERSION/$(cat version.log)/g" .github/pages/latest.html
       - run: sed -i "s/\$VERSION/$(cat version.log)/g" .github/pages/javadoc-latest.html
@@ -68,10 +69,9 @@ jobs:
           publish_dir: .github/pages/
           keep_files: true
           destination_dir: ./docs/
-      - run: mvn install -Dmaven.test.skip=true
       - run: mkdir iguana
-      - run: cp target/start.sh iguana/
-      - run: cp target/iguana-${{ env.RELEASE_VERSION }}-shaded.jar iguana/iguana-${{ env.RELEASE_VERSION }}.jar
+      - run: cp target/start-iguana.sh iguana/
+      - run: cp target/iguana-${{ env.RELEASE_VERSION }}.jar iguana/iguana-${{ env.RELEASE_VERSION }}.jar
       - run: cp example-suite.yml iguana/
       - run: zip -r iguana-${{ env.RELEASE_VERSION }}.zip iguana/
       - name: Create Release
@@ -84,7 +84,7 @@ jobs:
           release_name: version ${{ env.RELEASE_VERSION }}
           draft: false
           prerelease: false
-          body_path: CHANGELOG.md
+          body: ""
       - uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,6 +94,6 @@ jobs:
           asset_name: iguana-${{ env.RELEASE_VERSION }}.zip
           asset_content_type: application/zip
       - name: Publish package
-        run: mvn --batch-mode deploy
+        run: mvn --batch-mode deploy -Dmaven.test.skip=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

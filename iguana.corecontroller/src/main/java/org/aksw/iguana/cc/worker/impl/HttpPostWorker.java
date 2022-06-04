@@ -14,8 +14,8 @@ import java.net.URLEncoder;
 /**
  * HTTP Post worker.
  * Uses HTTP posts to execute a query.
- * </br></br>
- * Sends the query in plain as POST data if parameter type was not set, otherwise uses json as follows:</br>
+ * <br/><br/>
+ * Sends the query in plain as POST data if parameter type was not set, otherwise uses json as follows:<br/>
  * {PARAMETER: QUERY}
  */
 @Shorthand("HttpPostWorker")

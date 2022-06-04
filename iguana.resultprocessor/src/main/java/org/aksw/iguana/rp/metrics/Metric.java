@@ -13,22 +13,22 @@ import java.util.Properties;
 public interface Metric {
 
 	/**
-	 * This method should implement what to do with one result. </br></br>
+	 * This method should implement what to do with one result. <br/><br/>
 	 * 
 	 * For example: No Of Queries Per Hour will get the time query time
 	 * add the time to a variable which keeps track of the total time of all executed queries 
-	 * and increase the number of executed queries if the query was successfully executed.</br></br>
+	 * and increase the number of executed queries if the query was successfully executed.<br/><br/>
 	 *  
 	 * Be aware, that in this example, the Metric could be stopped as soon as one hour is reached,
-	 * or it could be calculate in the close method.  </br></br>
+	 * or it could be calculate in the close method.  <br/><br/>
 	 * 
 	 * Assuming, the totaltime is in minutes (it should be calculated in ms though)
-	 * Latter one will result in the following formular:  </br>
-	 * m = 60 * queries / totaltime</br></br>
+	 * Latter one will result in the following formular:  <br/>
+	 * m = 60 * queries / totaltime<br/><br/>
 	 * 
-	 * The actual keys of the properties will depend on the core.</br>
-	 * The stress test will send different keys than a completeness test.</br>
-	 * Thus not all metrics are available for each test.  </br>
+	 * The actual keys of the properties will depend on the core.<br/>
+	 * The stress test will send different keys than a completeness test.<br/>
+	 * Thus not all metrics are available for each test.  <br/>
 	 * Hence it should be implemented if the Metric cannot calculate the test results 
 	 * that it will just close itself without adding results. 
 	 * 

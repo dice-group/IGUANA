@@ -10,7 +10,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import java.util.Properties;
 
 /**
- * Class to help the Unit Metric Tests. </br>
+ * Class to help the Unit Metric Tests. <br/>
  * 
  * Will be initialized with an Array of Triple[].
  * It will be checked if the first received Data is equal to the first Array Object
