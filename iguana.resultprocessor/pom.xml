@@ -39,7 +39,7 @@
 
 	<properties>
 		<java.version>11</java.version>
-		<jena.version>3.16.0</jena.version>
+		<jena.version>4.2.0</jena.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compile.target>11</maven.compile.target>
 		<maven.compile.source>11</maven.compile.source>
