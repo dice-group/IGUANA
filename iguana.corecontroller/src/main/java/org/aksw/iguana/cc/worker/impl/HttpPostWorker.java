@@ -10,6 +10,7 @@ import org.apache.http.entity.StringEntity;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * HTTP Post worker.
@@ -37,12 +38,12 @@ public class HttpPostWorker extends HttpGetWorker {
     void buildRequest(String query, String queryID) throws UnsupportedEncodingException {
         StringBuilder data = new StringBuilder();
         if (parameter != null) {
-            String qEncoded = URLEncoder.encode(query, "UTF-8");
+            String qEncoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
             data.append("{ \"" + parameter + "\": \"").append(qEncoded).append("\"}");
         } else {
             data.append(query);
         }
-        StringEntity entity = new StringEntity(data.toString(), "UTF-8");
+        StringEntity entity = new StringEntity(data.toString(), StandardCharsets.UTF_8);
         request = new HttpPost(con.getUpdateEndpoint());
         ((HttpPost) request).setEntity(entity);
         request.setHeader("Content-Type", contentType);
