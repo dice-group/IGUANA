@@ -16,7 +16,7 @@ public class HttpPostWorkerTest {
 
     @Test
     public void buildRequest() throws IOException {
-        String query = "DELETE DATA { <http://data.semanticweb.org/organization/institut-fuer-deutsche-sprache-mannheim> <http://xmlns.com/foaf/0.1/name> \"Institut für Deutsche Sprache, Mannheim\" . }";
+        String query = "DELETE DATA { <http://example.com/A> <http://example.com/p1> \"äöüÄÖÜß\" . }";
 
         HttpPostWorker postWorker = new HttpPostWorker(null, getConnection(), null, "application/sparql", null, null, null, null, null, null, null, null, 0);
         postWorker.buildRequest(query, null);
