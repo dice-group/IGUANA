@@ -123,7 +123,7 @@ Now Iguana will execute the example benchmark suite configured in the example-su
 
 ```bibtex
 @InProceedings{10.1007/978-3-319-68204-4_5,
-author="Conrads, Felix
+author="Conrads, Lixi
 and Lehmann, Jens
 and Saleem, Muhammad
 and Morsey, Mohamed
