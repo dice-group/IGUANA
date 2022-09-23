@@ -26,7 +26,7 @@ public class HttpPostWorker extends HttpGetWorker {
 
 
     public HttpPostWorker(String taskID, Connection connection, String queriesFile, @Nullable String contentType, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType, Integer workerID) {
-        super(taskID, connection, queriesFile, responseType, parameterName, language, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType == null ? "HttpPostWorker" : workerType, workerID);
+        super(taskID, connection, queriesFile, responseType, parameterName, language, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
         if (parameterName == null) {
             parameter = null;
         }

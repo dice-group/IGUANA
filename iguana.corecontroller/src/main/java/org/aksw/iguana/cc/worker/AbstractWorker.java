@@ -6,6 +6,7 @@ import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -20,7 +21,6 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -89,18 +89,28 @@ public abstract class AbstractWorker implements Worker {
 	protected int queryHash;
 
 	public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
-		this.taskID=taskID;
+		this.taskID = taskID;
 		this.workerID = workerID;
-		this.workerType = workerType;
+
+		if (workerType != null) {
+			this.workerType = workerType;
+		} else {
+			if (this.getClass().getAnnotation(Shorthand.class) != null) {
+				this.workerType = this.getClass().getAnnotation(Shorthand.class).value();
+			} else {
+				this.workerType = this.getClass().getName();
+			}
+		}
+
 		this.con = connection;
-		if (timeLimit != null){
+		if (timeLimit != null) {
 			this.timeLimit = timeLimit.doubleValue();
 		}
 		latencyRandomizer = new Random(this.workerID);
-		if(timeOut!=null)
+		if (timeOut != null)
 			this.timeOut = timeOut.doubleValue();
 		// Add latency Specs, add defaults
-		if(fixedLatency!=null)
+		if (fixedLatency != null)
 			this.fixedLatency = fixedLatency;
 		if(gaussianLatency!=null)
 			this.gaussianLatency = gaussianLatency;
