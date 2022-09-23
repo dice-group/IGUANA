@@ -23,8 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.concurrent.*;
 
@@ -118,7 +120,7 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
 
     boolean checkResponseStatus() {
         int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode == 200) {
+        if (responseCode >= 200 && responseCode < 300) {
             return true;
         } else {
             double duration = durationInMilliseconds(requestStartTime, Instant.now());
@@ -185,7 +187,9 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     protected void processHttpResponse() {
         // check if query execution took already longer than timeout
         boolean responseCodeOK = checkResponseStatus();
-        if (responseCodeOK) { // response status is OK (200)
+        int responseCode = response.getStatusLine().getStatusCode();
+
+        if (responseCodeOK && responseCode == 200) { // response status is OK (200)
             // get content type header
             HttpEntity httpResponse = response.getEntity();
             Header contentTypeHeader = new BasicHeader(httpResponse.getContentType().getName(), httpResponse.getContentType().getValue());
@@ -217,6 +221,9 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
                 double duration = durationInMilliseconds(requestStartTime, Instant.now());
                 addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
             }
+        } else if (responseCodeOK && responseCode > 200) {
+            double duration = durationInMilliseconds(requestStartTime, Instant.now());
+            addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, 0));
         }
     }
 
