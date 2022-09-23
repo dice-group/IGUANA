@@ -44,6 +44,6 @@ Start Iguana with a benchmark suite (e.g the example-suite.yml) either using the
 or using java 11 if you want to give Iguana more RAM or in general set JVM options.
 
 ```bash
-java -jar iguana-corecontroller-3.3.0.jar example-suite.yml
+java -jar iguana-corecontroller-3.3.2.jar example-suite.yml
 ```
 
