@@ -15,7 +15,7 @@ import org.aksw.iguana.commons.annotation.Shorthand;
 public class SPARQLWorker extends HttpGetWorker {
 
 	public SPARQLWorker(String taskID, Connection connection, String queriesFile, @Nullable String responseType, @Nullable String parameterName, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		super(taskID, connection, queriesFile, responseType, parameterName, "lang.SPARQL", timeOut, timeLimit, fixedLatency, gaussianLatency, null, workerID);
+		super(taskID, connection, queriesFile, responseType, parameterName, "lang.SPARQL", timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
 	}
 
 }

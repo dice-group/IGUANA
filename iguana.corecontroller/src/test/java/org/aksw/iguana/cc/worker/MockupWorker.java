@@ -8,29 +8,29 @@ import java.io.IOException;
 
 public class MockupWorker extends AbstractWorker {
 
-    private int counter=0;
-    private String[] queries= new String[]{
+    private int counter = 0;
+    private String[] queries = new String[]{
 
     };
 
-    public MockupWorker(String[] queries, Integer workerID, @Nullable  Integer timeLimit, Connection connection, String taskID){
-        super(taskID, connection, "src/test/resources/mockupq.txt", 0, timeLimit, 0, 0, "mockup", workerID);
-        this.queries=queries;
+    public MockupWorker(String[] queries, Integer workerID, @Nullable Integer timeLimit, Connection connection, String taskID) {
+        super(taskID, connection, "src/test/resources/mockupq.txt", 0, timeLimit, 0, 0, workerID);
+        this.queries = queries;
     }
 
 
-    public MockupWorker(String taskID, Connection connection, String queriesFile, Integer timeOut, Integer timeLimit, Integer fixedLatency, Integer gaussianLatency, String workerType, Integer workerID) {
-        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
+    public MockupWorker(String taskID, Connection connection, String queriesFile, Integer timeOut, Integer timeLimit, Integer fixedLatency, Integer gaussianLatency, Integer workerID) {
+        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
     }
 
-    public String[] getStringQueries(){
+    public String[] getStringQueries() {
         return queries;
     }
 
     @Override
     public void executeQuery(String query, String queryID) {
         QueryExecutionStats results = new QueryExecutionStats();
-        long execTime =workerID*10+100;
+        long execTime = workerID * 10 + 100;
         try {
             Thread.sleep(execTime);
             results.setResponseCode(200);

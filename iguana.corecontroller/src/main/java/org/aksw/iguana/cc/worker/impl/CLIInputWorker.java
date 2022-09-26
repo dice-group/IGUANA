@@ -30,9 +30,8 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 @Shorthand("CLIInputWorker")
 public class CLIInputWorker extends AbstractRandomQueryChooserWorker {
 
-	private Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	private int currentQueryID;
 	private Random queryChooser;
 	private Process process;
 	private String initFinished;
@@ -40,7 +39,7 @@ public class CLIInputWorker extends AbstractRandomQueryChooserWorker {
 	private String error;
 
 	public CLIInputWorker(String taskID, Connection connection, String queriesFile, String initFinished, String queryFinished, String queryError, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, "CLIInputWorker", workerID);
+		super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
 		queryChooser = new Random(this.workerID);
 		this.initFinished = initFinished;
 		this.queryFinished = queryFinished;
@@ -116,7 +115,6 @@ public class CLIInputWorker extends AbstractRandomQueryChooserWorker {
 			// SUCCESS
 			LOGGER.debug("Query successfully executed size: {}", size.get());
 			super.addResults(new QueryExecutionStats (queryID, COMMON.QUERY_SUCCESS, duration, size.get() ));
-			return;
 		} catch (IOException | InterruptedException e) {
 			LOGGER.warn("Exception while executing query ",e);
 			// ERROR

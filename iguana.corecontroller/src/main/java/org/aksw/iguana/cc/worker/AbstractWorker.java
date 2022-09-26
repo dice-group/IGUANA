@@ -51,7 +51,7 @@ public abstract class AbstractWorker implements Worker {
 	protected boolean endSignal = false;
 	protected long executedQueries;
 
-	private Collection<Properties> results = new LinkedList<Properties>();
+	private Collection<Properties> results = new LinkedList<>();
 	protected String taskID;
 
 	/**
@@ -88,18 +88,14 @@ public abstract class AbstractWorker implements Worker {
 
 	protected int queryHash;
 
-	public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
+	public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
 		this.taskID = taskID;
 		this.workerID = workerID;
 
-		if (workerType != null) {
-			this.workerType = workerType;
+		if (this.getClass().getAnnotation(Shorthand.class) != null) {
+			this.workerType = this.getClass().getAnnotation(Shorthand.class).value();
 		} else {
-			if (this.getClass().getAnnotation(Shorthand.class) != null) {
-				this.workerType = this.getClass().getAnnotation(Shorthand.class).value();
-			} else {
-				this.workerType = this.getClass().getName();
-			}
+			this.workerType = this.getClass().getName();
 		}
 
 		this.con = connection;
@@ -122,13 +118,13 @@ public abstract class AbstractWorker implements Worker {
 
 	@Override
 	public void waitTimeMs() {
-		Double wait = this.fixedLatency.doubleValue();
+		double wait = this.fixedLatency.doubleValue();
 		double gaussian = latencyRandomizer.nextDouble();
 		wait += (gaussian * 2) * this.gaussianLatency;
 		LOGGER.debug("Worker[{} : {}]: Time to wait for next Query {}", workerType, workerID, wait);
 		try {
 			if(wait>0)
-				Thread.sleep(wait.intValue());
+				Thread.sleep((int) wait);
 		} catch (InterruptedException e) {
 			LOGGER.error("Worker[{{}} : {}]: Could not wait time before next query due to: {}", workerType,
 					workerID, e);
@@ -180,8 +176,7 @@ public abstract class AbstractWorker implements Worker {
 			try {
 				executeQuery(query.toString(), queryID.toString());
 			} catch (Exception e) {
-				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
-						query.toString());
+				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID, query);
 			}
 			//this.executedQueries++;
 		}
@@ -251,7 +246,7 @@ public abstract class AbstractWorker implements Worker {
 			return null;
 		}
 		Collection<Properties> ret = this.results;
-		this.results = new LinkedList<Properties>();
+		this.results = new LinkedList<>();
 		return ret;
 	}
 

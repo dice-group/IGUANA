@@ -34,7 +34,7 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 @Shorthand("MultipleCLIInputWorker")
 public class MultipleCLIInputWorker extends AbstractRandomQueryChooserWorker {
 
-	private Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	private Process currentProcess;
 	protected List<Process> processList;
@@ -45,11 +45,7 @@ public class MultipleCLIInputWorker extends AbstractRandomQueryChooserWorker {
 	protected int numberOfProcesses = 5;
 
 	public MultipleCLIInputWorker(String taskID, Connection connection, String queriesFile, String initFinished, String queryFinished, String queryError, @Nullable Integer numberOfProcesses, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		this(taskID, connection, queriesFile, initFinished,queryFinished,queryError, numberOfProcesses,timeOut, timeLimit, fixedLatency, gaussianLatency, "MultipleCLIInputWorker", workerID);
-	}
-
-	public MultipleCLIInputWorker(String taskID, Connection connection, String queriesFile, String initFinished, String queryFinished, String queryError, @Nullable Integer numberOfProcesses, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
-		super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
+		super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
 		this.initFinished = initFinished;
 		this.queryFinished = queryFinished;
 		this.error = queryError;

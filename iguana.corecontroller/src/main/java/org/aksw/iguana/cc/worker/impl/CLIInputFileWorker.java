@@ -25,7 +25,7 @@ public class CLIInputFileWorker extends MultipleCLIInputWorker {
 	private String dir;
 
 	public CLIInputFileWorker(String taskID, Connection connection, String queriesFile, String initFinished, String queryFinished, String queryError, @Nullable Integer numberOfProcesses, String directory, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		super(taskID, connection, queriesFile, initFinished,queryFinished,queryError, numberOfProcesses,timeOut, timeLimit, fixedLatency, gaussianLatency, "CLIInputFileWorker", workerID);
+		super(taskID, connection, queriesFile, initFinished, queryFinished, queryError, numberOfProcesses, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
 		this.dir = directory;
 	}
 	

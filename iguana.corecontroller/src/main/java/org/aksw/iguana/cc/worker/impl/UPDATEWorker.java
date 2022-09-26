@@ -29,7 +29,7 @@ public class UPDATEWorker extends HttpPostWorker {
 	private String timerStrategy;
 
 	public UPDATEWorker(String taskID, Connection connection, String queriesFile, @Nullable String timerStrategy, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		super(taskID, connection, queriesFile, "application/sparql-update", null, null, "lang.SPARQL", timeOut, timeLimit, fixedLatency, gaussianLatency, null, workerID);
+		super(taskID, connection, queriesFile, "application/sparql-update", null, null, "lang.SPARQL", timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
 		this.timerStrategy = timerStrategy;
 	}
 

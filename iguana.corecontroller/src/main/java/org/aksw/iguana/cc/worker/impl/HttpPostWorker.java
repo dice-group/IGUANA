@@ -8,7 +8,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -25,8 +24,8 @@ public class HttpPostWorker extends HttpGetWorker {
     private String contentType = "text/plain";
 
 
-    public HttpPostWorker(String taskID, Connection connection, String queriesFile, @Nullable String contentType, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType, Integer workerID) {
-        super(taskID, connection, queriesFile, responseType, parameterName, language, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
+    public HttpPostWorker(String taskID, Connection connection, String queriesFile, @Nullable String contentType, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
+        super(taskID, connection, queriesFile, responseType, parameterName, language, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
         if (parameterName == null) {
             parameter = null;
         }
@@ -35,11 +34,11 @@ public class HttpPostWorker extends HttpGetWorker {
         }
     }
 
-    void buildRequest(String query, String queryID) throws UnsupportedEncodingException {
+    void buildRequest(String query, String queryID) {
         StringBuilder data = new StringBuilder();
         if (parameter != null) {
             String qEncoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
-            data.append("{ \"" + parameter + "\": \"").append(qEncoded).append("\"}");
+            data.append("{ \"").append(parameter).append("\": \"").append(qEncoded).append("\"}");
         } else {
             data.append(query);
         }

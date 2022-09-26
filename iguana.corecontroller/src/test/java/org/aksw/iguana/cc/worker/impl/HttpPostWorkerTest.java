@@ -18,7 +18,7 @@ public class HttpPostWorkerTest {
     public void buildRequest() throws IOException {
         String query = "DELETE DATA { <http://example.com/A> <http://example.com/p1> \"äöüÄÖÜß\" . }";
 
-        HttpPostWorker postWorker = new HttpPostWorker(null, getConnection(), null, "application/sparql", null, null, null, null, null, null, null, null, 0);
+        HttpPostWorker postWorker = new HttpPostWorker(null, getConnection(), null, "application/sparql", null, null, null, null, null, null, null, 0);
         postWorker.buildRequest(query, null);
 
         HttpPost request = ((HttpPost) postWorker.request);
