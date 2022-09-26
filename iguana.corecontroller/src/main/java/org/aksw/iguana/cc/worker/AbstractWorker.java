@@ -6,6 +6,7 @@ import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
+import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -20,7 +21,6 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -51,11 +51,13 @@ public abstract class AbstractWorker implements Worker {
 	protected boolean endSignal = false;
 	protected long executedQueries;
 
-	private Collection<Properties> results = new LinkedList<Properties>();
+	private Collection<Properties> results = new LinkedList<>();
 	protected String taskID;
 
 	/**
 	 * The worker Type. f.e. SPARQL or UPDATE or SQL or whatever
+	 * Determined by the Shorthand of the class, if no Shorthand is provided the class name is used.
+	 * The workerType is only used in logging messages.
 	 */
 	protected String workerType;
 	/**
@@ -88,19 +90,25 @@ public abstract class AbstractWorker implements Worker {
 
 	protected int queryHash;
 
-	public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String workerType, Integer workerID) {
-		this.taskID=taskID;
+	public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
+		this.taskID = taskID;
 		this.workerID = workerID;
-		this.workerType = workerType;
+
+		if (this.getClass().getAnnotation(Shorthand.class) != null) {
+			this.workerType = this.getClass().getAnnotation(Shorthand.class).value();
+		} else {
+			this.workerType = this.getClass().getName();
+		}
+
 		this.con = connection;
-		if (timeLimit != null){
+		if (timeLimit != null) {
 			this.timeLimit = timeLimit.doubleValue();
 		}
 		latencyRandomizer = new Random(this.workerID);
-		if(timeOut!=null)
+		if (timeOut != null)
 			this.timeOut = timeOut.doubleValue();
 		// Add latency Specs, add defaults
-		if(fixedLatency!=null)
+		if (fixedLatency != null)
 			this.fixedLatency = fixedLatency;
 		if(gaussianLatency!=null)
 			this.gaussianLatency = gaussianLatency;
@@ -112,13 +120,13 @@ public abstract class AbstractWorker implements Worker {
 
 	@Override
 	public void waitTimeMs() {
-		Double wait = this.fixedLatency.doubleValue();
+		double wait = this.fixedLatency.doubleValue();
 		double gaussian = latencyRandomizer.nextDouble();
 		wait += (gaussian * 2) * this.gaussianLatency;
 		LOGGER.debug("Worker[{} : {}]: Time to wait for next Query {}", workerType, workerID, wait);
 		try {
 			if(wait>0)
-				Thread.sleep(wait.intValue());
+				Thread.sleep((int) wait);
 		} catch (InterruptedException e) {
 			LOGGER.error("Worker[{{}} : {}]: Could not wait time before next query due to: {}", workerType,
 					workerID, e);
@@ -170,8 +178,7 @@ public abstract class AbstractWorker implements Worker {
 			try {
 				executeQuery(query.toString(), queryID.toString());
 			} catch (Exception e) {
-				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID,
-						query.toString());
+				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID, query);
 			}
 			//this.executedQueries++;
 		}
@@ -241,7 +248,7 @@ public abstract class AbstractWorker implements Worker {
 			return null;
 		}
 		Collection<Properties> ret = this.results;
-		this.results = new LinkedList<Properties>();
+		this.results = new LinkedList<>();
 		return ret;
 	}
 

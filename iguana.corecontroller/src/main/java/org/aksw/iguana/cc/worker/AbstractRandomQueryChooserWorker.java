@@ -2,9 +2,7 @@ package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.query.set.QuerySet;
-import org.aksw.iguana.cc.utils.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
@@ -14,8 +12,8 @@ public abstract class AbstractRandomQueryChooserWorker extends AbstractWorker {
     protected Random queryChooser;
 
 
-    public AbstractRandomQueryChooserWorker(String taskID, Connection connection, String queriesFile, Integer timeOut, Integer timeLimit, Integer fixedLatency, Integer gaussianLatency, String workerType, Integer workerID) {
-        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType, workerID);
+    public AbstractRandomQueryChooserWorker(String taskID, Connection connection, String queriesFile, Integer timeOut, Integer timeLimit, Integer fixedLatency, Integer gaussianLatency, Integer workerID) {
+        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
         queryChooser = new Random(this.workerID);
 
     }

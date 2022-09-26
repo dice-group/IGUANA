@@ -23,9 +23,9 @@ public class CLIInputPrefixWorker extends MultipleCLIInputWorker {
 	private String suffix;
 
 	public CLIInputPrefixWorker(String taskID, Connection connection, String queriesFile, String initFinished, String queryFinished, String queryError, @Nullable Integer numberOfProcesses, String queryPrefix, String querySuffix, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		super(taskID, connection, queriesFile, initFinished,queryFinished,queryError, numberOfProcesses,timeOut, timeLimit, fixedLatency, gaussianLatency, "CLIInputPrefixWorker", workerID);
-		this.prefix=queryPrefix;
-		this.suffix=querySuffix;
+		super(taskID, connection, queriesFile, initFinished, queryFinished, queryError, numberOfProcesses, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
+		this.prefix = queryPrefix;
+		this.suffix = querySuffix;
 	}
 
 	@Override

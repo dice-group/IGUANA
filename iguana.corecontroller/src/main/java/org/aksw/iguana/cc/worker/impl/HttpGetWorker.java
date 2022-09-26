@@ -28,10 +28,10 @@ public class HttpGetWorker extends HttpWorker {
     protected String responseType = null;
 
 
-    public HttpGetWorker(String taskID, Connection connection, String queriesFile, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String workerType, Integer workerID) {
-        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerType == null ? "HttpGetWorker" : workerType, workerID);
+    public HttpGetWorker(String taskID, Connection connection, String queriesFile, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
+        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
         if (language != null) {
-            resultProcessor = new TypedFactory<LanguageProcessor>().create(language, new HashMap<Object, Object>());
+            resultProcessor = new TypedFactory<LanguageProcessor>().create(language, new HashMap<>());
         }
         if (parameterName != null) {
             parameter = parameterName;

@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
@@ -30,11 +30,11 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 @Shorthand("CLIWorker")
 public class CLIWorker extends AbstractRandomQueryChooserWorker {
 
-	private Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 
 	public CLIWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, "CLIWorker", workerID);
+		super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
 	}
 
 
@@ -42,12 +42,7 @@ public class CLIWorker extends AbstractRandomQueryChooserWorker {
 	public void executeQuery(String query, String queryID) {
 		Instant start = Instant.now();
 		// use cli as service
-		String encodedQuery = "";
-		try {
-			encodedQuery = URLEncoder.encode(query, "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-			LOGGER.error("Could not encode Query", e1);
-		}
+		String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
 		String queryCLI = getReplacedQuery(query, encodedQuery);
 		// execute queryCLI and read response
 		ProcessBuilder processBuilder = new ProcessBuilder().redirectErrorStream(true);
