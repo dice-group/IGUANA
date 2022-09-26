@@ -56,6 +56,8 @@ public abstract class AbstractWorker implements Worker {
 
 	/**
 	 * The worker Type. f.e. SPARQL or UPDATE or SQL or whatever
+	 * Determined by the Shorthand of the class, if no Shorthand is provided the class name is used.
+	 * The workerType is only used in logging messages.
 	 */
 	protected String workerType;
 	/**
