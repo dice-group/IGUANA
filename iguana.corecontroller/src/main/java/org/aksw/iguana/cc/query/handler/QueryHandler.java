@@ -82,6 +82,9 @@ public class QueryHandler {
             if (f.equals("separator")) { // No custom separator given -> use "###"
                 return new FileSeparatorQuerySource(this.location);
             }
+            if (f.equals("folder")) {
+                return new FolderQuerySource(this.location);
+            }
 
             LOGGER.error("Unknown query format: {}", f);
         }
@@ -91,9 +94,6 @@ public class QueryHandler {
             if (format.containsKey("separator")) {
                 String separator = (String) format.get("separator");
                 return new FileSeparatorQuerySource(this.location, separator);
-            }
-            if (format.containsKey("folder")) {
-                return new FolderQuerySource(this.location);
             }
 
             LOGGER.error("Unknown query format: {}", format);

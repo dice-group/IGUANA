@@ -1,0 +1,3 @@
+QUERY 3 {
+still query 3
+}

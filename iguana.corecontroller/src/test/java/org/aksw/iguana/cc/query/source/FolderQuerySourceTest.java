@@ -20,13 +20,14 @@ public class FolderQuerySourceTest {
 
     @Test
     public void size() {
-        assertEquals(2, this.querySource.size());
+        assertEquals(3, this.querySource.size());
     }
 
     @Test
     public void getQuery() throws IOException {
         assertEquals("QUERY 1 {still query 1}", this.querySource.getQuery(0));
         assertEquals("QUERY 2 {still query 2}", this.querySource.getQuery(1));
+        assertEquals("QUERY 3 {still query 3}", this.querySource.getQuery(2));
     }
 
     @Test
@@ -34,6 +35,7 @@ public class FolderQuerySourceTest {
         List<String> expected = new ArrayList<>(3);
         expected.add("QUERY 1 {still query 1}");
         expected.add("QUERY 2 {still query 2}");
+        expected.add("QUERY 3 {still query 3}");
 
         assertEquals(expected, this.querySource.getAllQueries());
     }

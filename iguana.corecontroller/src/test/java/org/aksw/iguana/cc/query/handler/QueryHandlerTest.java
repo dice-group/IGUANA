@@ -31,8 +31,14 @@ public class QueryHandlerTest {
         Collection<Object[]> testData = new ArrayList<>();
 
         // Defaults: one-per-line, caching, linear
+        Map<String, Object> config0 = new HashMap<>();
+        config0.put("location", "src/test/resources/query/source/queries.txt");
+        testData.add(new Object[]{config0, linear});
+
+        // Defaults: caching, linear
         Map<String, Object> config1 = new HashMap<>();
-        config1.put("location", "src/test/resources/query/source/queries.txt");
+        config1.put("location", "src/test/resources/query/source/query-folder");
+        config1.put("format", "folder");
         testData.add(new Object[]{config1, linear});
 
         // Defaults: separator("###"), caching, linear
@@ -40,7 +46,6 @@ public class QueryHandlerTest {
         config2.put("location", "src/test/resources/query/source/separated-queries-default.txt");
         config2.put("format", "separator");
         testData.add(new Object[]{config2, linear});
-
 
         Map<String, Object> config3 = new HashMap<>();
         config3.put("location", "src/test/resources/query/source/separated-queries-default.txt");
