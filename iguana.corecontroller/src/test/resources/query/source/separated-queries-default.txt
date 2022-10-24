@@ -1,0 +1,11 @@
+QUERY 1 {
+still query 1
+}
+###
+QUERY 2 {
+still query 2
+}
+###
+QUERY 3 {
+still query 3
+}
