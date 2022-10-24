@@ -11,17 +11,16 @@ import java.io.IOException;
  */
 public class FileBasedQuerySet implements QuerySet {
 
-    private File queryFile;
-    private int size=0;
+    private final File queryFile;
+    private int size;
 
 
-
-    public  FileBasedQuerySet(File queryFile) throws IOException {
-        this.queryFile=queryFile;
-        size=FileUtils.countLines(queryFile);
+    public FileBasedQuerySet(File queryFile) throws IOException {
+        this.queryFile = queryFile;
+        size = FileUtils.countLines(queryFile);
     }
 
-    public File getFile(){
+    public File getFile() {
         return queryFile;
     }
 
@@ -39,11 +38,4 @@ public class FileBasedQuerySet implements QuerySet {
     public String getName() {
         return queryFile.getName();
     }
-
-    @Override
-    public String getContent() throws IOException {
-        return org.apache.commons.io.FileUtils.readFileToString(queryFile, "UTF-8");
-    }
-
-
 }

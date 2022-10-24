@@ -29,9 +29,4 @@ public class InMemQuerySet implements QuerySet {
     public String getName() {
         return name;
     }
-
-    @Override
-    public String getContent() throws IOException {
-        return queries.toString();
-    }
 }

@@ -35,9 +35,4 @@ public class InMemQuerySet extends AbstractQuerySet {
     public int size() {
         return this.queries.size();
     }
-
-    @Override
-    public String getContent() throws IOException {
-        return null;
-    }
 }

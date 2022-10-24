@@ -26,7 +26,7 @@ public class UPDATEWorker extends HttpPostWorker {
 
 	private int currentQueryID = 0;
 	private UpdateTimer updateTimer = new UpdateTimer();
-	private String timerStrategy;
+	private final String timerStrategy;
 
 	public UPDATEWorker(String taskID, Connection connection, String queriesFile, @Nullable String timerStrategy, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
 		super(taskID, connection, queriesFile, "application/sparql-update", null, null, "lang.SPARQL", timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
@@ -84,7 +84,7 @@ public class UPDATEWorker extends HttpPostWorker {
 		QuerySet currentQueryFile = this.queryFileList[this.currentQueryID++];
 		queryID.append(currentQueryFile.getName());
 
-		queryStr.append(currentQueryFile.getContent());
+		queryStr.append(currentQueryFile.getQueryAtPos(0));
 
 	}
 
@@ -114,7 +114,7 @@ public class UPDATEWorker extends HttpPostWorker {
 			break;
 		case DISTRIBUTED:
 			if (timeLimit != null) {
-				this.updateTimer = new UpdateTimer(this.queryFileList.length, (double) this.timeLimit);
+				this.updateTimer = new UpdateTimer(this.queryFileList.length, this.timeLimit);
 			} else {
 				LOGGER.warn("Worker[{{}} : {{}}]: DISTRIBUTED Updates can only be used with timeLimit!", workerType,
 						workerID);

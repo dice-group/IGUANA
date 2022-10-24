@@ -18,7 +18,4 @@ public interface QuerySet {
     int size();
 
     String getName();
-
-    // TODO check if still needed
-    String getContent() throws IOException;
 }
