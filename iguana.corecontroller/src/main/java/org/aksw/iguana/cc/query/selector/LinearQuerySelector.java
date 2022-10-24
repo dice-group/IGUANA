@@ -11,7 +11,7 @@ public class LinearQuerySelector extends AbstractQuerySelector {
     }
 
     @Override
-    public int getNextQuery() {
+    public int getNextIndex() {
         if (this.querySelector >= this.size) {
             this.querySelector = 0;
         }

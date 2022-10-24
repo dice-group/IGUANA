@@ -15,7 +15,7 @@ public class RandomQuerySelector extends AbstractQuerySelector {
     }
 
     @Override
-    public int getNextQuery() {
+    public int getNextIndex() {
         return this.querySelector.nextInt(this.size);
     }
 }
