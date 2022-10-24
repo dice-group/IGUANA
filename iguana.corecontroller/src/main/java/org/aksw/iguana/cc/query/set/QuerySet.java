@@ -19,5 +19,6 @@ public interface QuerySet {
 
     String getName();
 
+    // TODO check if still needed
     String getContent() throws IOException;
 }
