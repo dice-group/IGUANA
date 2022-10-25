@@ -1,5 +1,6 @@
-package org.aksw.iguana.cc.query.selector;
+package org.aksw.iguana.cc.query.selector.impl;
 
+import org.aksw.iguana.cc.query.selector.AbstractQuerySelector;
 import org.aksw.iguana.commons.annotation.Shorthand;
 
 @Shorthand("LinearQuerySelector")

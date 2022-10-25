@@ -1,5 +1,6 @@
-package org.aksw.iguana.cc.query.source;
+package org.aksw.iguana.cc.query.source.impl;
 
+import org.aksw.iguana.cc.query.source.AbstractQuerySource;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +15,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class FileSeparatorQuerySource implements QuerySource {
+public class FileSeparatorQuerySource extends AbstractQuerySource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSeparatorQuerySource.class);
 
     private static final String DEFAULT_SEPARATOR = "###";
 
-    protected String path;
     protected File queryFile;
     protected String separator;
     protected int size;
@@ -31,7 +31,7 @@ public class FileSeparatorQuerySource implements QuerySource {
     }
 
     public FileSeparatorQuerySource(String path, String separator) {
-        this.path = path;
+        super(path);
         this.queryFile = new File(this.path);
         this.separator = separator;
 

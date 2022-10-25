@@ -1,6 +1,5 @@
-package org.aksw.iguana.cc.query.set.newimpl;
+package org.aksw.iguana.cc.query.set;
 
-import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
 public abstract class AbstractQuerySet implements QuerySet {
@@ -21,5 +20,10 @@ public abstract class AbstractQuerySet implements QuerySet {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public int getHashcode() {
+        return this.querySource.getHashcode();
     }
 }

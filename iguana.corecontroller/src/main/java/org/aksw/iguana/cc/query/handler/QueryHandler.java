@@ -1,19 +1,27 @@
 package org.aksw.iguana.cc.query.handler;
 
-import org.aksw.iguana.cc.query.selector.LinearQuerySelector;
+import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
-import org.aksw.iguana.cc.query.selector.RandomQuerySelector;
+import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
+import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
 import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.cc.query.set.newimpl.FileBasedQuerySet;
 import org.aksw.iguana.cc.query.set.newimpl.InMemQuerySet;
-import org.aksw.iguana.cc.query.source.FileLineQuerySource;
-import org.aksw.iguana.cc.query.source.FileSeparatorQuerySource;
-import org.aksw.iguana.cc.query.source.FolderQuerySource;
 import org.aksw.iguana.cc.query.source.QuerySource;
+import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
+import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
+import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
+import org.aksw.iguana.cc.utils.FileUtils;
+import org.aksw.iguana.commons.factory.TypedFactory;
+import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class QueryHandler {
@@ -23,6 +31,7 @@ public class QueryHandler {
     protected Map<String, Object> config;
     protected Integer workerID;
     protected String location;
+    protected int hashcode;
 
     protected boolean caching;
 
@@ -30,14 +39,22 @@ public class QueryHandler {
 
     protected QuerySet querySet;
 
+    protected LanguageProcessor langProcessor;
+
+    protected String outputFolder;
+
     public QueryHandler(Map<String, Object> config, Integer workerID) {
         this.config = config;
         this.workerID = workerID;
 
         this.location = (String) config.get("location");
+        this.hashcode = FileUtils.getHashcodeFromFileContent(this.location);
+
+        this.outputFolder = (String) config.get("outputFolder");
 
         initQuerySet();
         initQuerySelector();
+        initLanguageProcessor();
 
         // TODO pattern
     }
@@ -45,7 +62,23 @@ public class QueryHandler {
     public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
         int queryIndex = this.querySelector.getNextIndex();
         queryStr.append(this.querySet.getQueryAtPos(queryIndex));
-        queryID.append(this.querySet.getName()).append(":").append(queryIndex);
+        queryID.append(getQueryId(queryIndex));
+    }
+
+    public Model getTripleStats(String taskID) {
+        List<QueryWrapper> queries = new ArrayList<>(this.querySet.size());
+        for (int i = 0; i < this.querySet.size(); i++) {
+            try {
+                queries.add(new QueryWrapper(this.querySet.getQueryAtPos(i), getQueryId(i)));
+            } catch (Exception e) {
+                LOGGER.error("Could not parse query " + this.querySet.getName() + ":" + i, e);
+            }
+        }
+        return this.langProcessor.generateTripleStats(queries, "" + this.hashcode, taskID);
+    }
+
+    public int getHashcode() {
+        return this.hashcode;
     }
 
     private void initQuerySet() {
@@ -130,5 +163,18 @@ public class QueryHandler {
             }
             LOGGER.error("Unknown order: " + order);
         }
+    }
+
+    private void initLanguageProcessor() {
+        Object langObj = this.config.getOrDefault("lang", "lang.SPARQL");
+        if (langObj instanceof String) {
+            this.langProcessor = new TypedFactory<LanguageProcessor>().create((String) langObj, new HashMap<>());
+        } else {
+            LOGGER.error("Unknown language: " + langObj);
+        }
+    }
+
+    private String getQueryId(int i) {
+        return this.querySet.getName() + ":" + i;
     }
 }

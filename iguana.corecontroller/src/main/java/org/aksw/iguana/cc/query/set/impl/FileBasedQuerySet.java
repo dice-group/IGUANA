@@ -38,4 +38,9 @@ public class FileBasedQuerySet implements QuerySet {
     public String getName() {
         return queryFile.getName();
     }
+
+    @Override
+    public int getHashcode() {
+        return queryFile.hashCode();
+    }
 }

@@ -29,4 +29,9 @@ public class InMemQuerySet implements QuerySet {
     public String getName() {
         return name;
     }
+
+    @Override
+    public int getHashcode() {
+        return queries.hashCode();
+    }
 }

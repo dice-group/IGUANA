@@ -10,6 +10,7 @@ public interface QuerySet {
 
     /**
      * Gets a query at the position pos.
+     *
      * @param pos Position of the query in the set
      * @return The query at position pos
      */
@@ -18,4 +19,6 @@ public interface QuerySet {
     int size();
 
     String getName();
+
+    int getHashcode();
 }

@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.query.set.newimpl;
 
+import org.aksw.iguana.cc.query.set.AbstractQuerySet;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
 import java.io.IOException;

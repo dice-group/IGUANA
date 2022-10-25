@@ -10,4 +10,6 @@ public interface QuerySource {
     String getQuery(int index) throws IOException;
 
     List<String> getAllQueries() throws IOException;
+
+    int getHashcode();
 }

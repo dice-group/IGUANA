@@ -1,5 +1,7 @@
-package org.aksw.iguana.cc.query.source;
+package org.aksw.iguana.cc.query.source.impl;
 
+import org.aksw.iguana.cc.query.source.AbstractQuerySource;
+import org.aksw.iguana.cc.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,15 +12,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FolderQuerySource implements QuerySource {
+public class FolderQuerySource extends AbstractQuerySource {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(FolderQuerySource.class);
 
-    protected String path;
     protected File[] files;
 
     public FolderQuerySource(String path) {
-        this.path = path;
+        super(path);
 
         indexFolder();
     }
@@ -62,5 +63,10 @@ public class FolderQuerySource implements QuerySource {
             queries.add(getQuery(i));
         }
         return queries;
+    }
+
+    @Override
+    public int getHashcode() {
+        return FileUtils.getHashcodeFromFileContent(this.files[0].getAbsolutePath());
     }
 }

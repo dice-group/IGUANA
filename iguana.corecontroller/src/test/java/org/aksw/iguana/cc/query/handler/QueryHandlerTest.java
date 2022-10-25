@@ -68,7 +68,7 @@ public class QueryHandlerTest {
     }
 
     @Test
-    public void getNextQuery() throws IOException {
+    public void getNextQueryTest() throws IOException {
         StringBuilder query = new StringBuilder();
         StringBuilder queryID = new StringBuilder();
         this.queryHandler.getNextQuery(query, queryID);
