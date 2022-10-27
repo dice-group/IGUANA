@@ -12,7 +12,6 @@ import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
-import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.factory.TypedFactory;
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
@@ -28,7 +27,7 @@ public class QueryHandler {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
 
-    protected Map<String, Object> config;
+    protected Map<Object, Object> config;
     protected Integer workerID;
     protected String location;
     protected int hashcode;
@@ -43,18 +42,18 @@ public class QueryHandler {
 
     protected String outputFolder;
 
-    public QueryHandler(Map<String, Object> config, Integer workerID) {
+    public QueryHandler(Map<Object, Object> config, Integer workerID) {
         this.config = config;
         this.workerID = workerID;
 
         this.location = (String) config.get("location");
-        this.hashcode = FileUtils.getHashcodeFromFileContent(this.location);
-
         this.outputFolder = (String) config.get("outputFolder");
 
         initQuerySet();
         initQuerySelector();
         initLanguageProcessor();
+
+        this.hashcode = this.querySet.getHashcode();
 
         // TODO pattern
     }
@@ -81,65 +80,43 @@ public class QueryHandler {
         return this.hashcode;
     }
 
+    public int getQueryCount() {
+        return this.querySet.size();
+    }
+
     private void initQuerySet() {
-        try {
-            QuerySource querySource = getQuerySource();
+        this.caching = (Boolean) this.config.getOrDefault("caching", true);
 
-            Boolean caching = (Boolean) config.get("caching");
-            if (caching == null) {
-                caching = true;
-            }
-            this.caching = caching;
-
-            if (this.caching) {
-                this.querySet = new InMemQuerySet(this.location, querySource);
-            } else {
-                this.querySet = new FileBasedQuerySet(this.location, querySource);
-            }
-        } catch (IOException e) {
-            LOGGER.error("Could not create QuerySource", e);
+        if (this.caching) {
+            this.querySet = new InMemQuerySet(this.location, createQuerySource());
+        } else {
+            this.querySet = new FileBasedQuerySet(this.location, createQuerySource());
         }
     }
 
-    private QuerySource getQuerySource() throws IOException {
-        Object formatObj = this.config.get("format");
-        if (formatObj == null) { // Default
-            return new FileLineQuerySource(this.location);
-        }
-
-        if (formatObj instanceof String) {
-            String f = (String) formatObj;
-            if (f.equals("one_per_line")) {
-                return new FileLineQuerySource(this.location);
-            }
-            if (f.equals("separator")) { // No custom separator given -> use "###"
-                return new FileSeparatorQuerySource(this.location);
-            }
-            if (f.equals("folder")) {
-                return new FolderQuerySource(this.location);
-            }
-
-            LOGGER.error("Unknown query format: {}", f);
-        }
-
+    private QuerySource createQuerySource() {
+        Object formatObj = this.config.getOrDefault("format", "one-per-line");
         if (formatObj instanceof Map) {
             Map<String, Object> format = (Map<String, Object>) formatObj;
             if (format.containsKey("separator")) {
-                String separator = (String) format.get("separator");
-                return new FileSeparatorQuerySource(this.location, separator);
+                return new FileSeparatorQuerySource(this.location, (String) format.get("separator"));
             }
-
-            LOGGER.error("Unknown query format: {}", format);
+        } else {
+            switch ((String) formatObj) {
+                case "one-per-line":
+                    return new FileLineQuerySource(this.location);
+                case "separator":
+                    return new FileSeparatorQuerySource(this.location);
+                case "folder":
+                    return new FolderQuerySource(this.location);
+            }
         }
-
+        LOGGER.error("Could not create QuerySource for format {}", formatObj);
         return null;
     }
 
     private void initQuerySelector() {
-        Object orderObj = this.config.get("order");
-        if (orderObj == null) { // Default
-            this.querySelector = new LinearQuerySelector(this.querySet.size());
-        }
+        Object orderObj = this.config.getOrDefault("order", "linear");
 
         if (orderObj instanceof String) {
             String order = (String) orderObj;
@@ -156,8 +133,9 @@ public class QueryHandler {
         }
         if (orderObj instanceof Map) {
             Map<String, Object> order = (Map<String, Object>) orderObj;
-            if (order.containsKey("seed")) {
-                Integer seed = (Integer) order.get("seed");
+            if (order.containsKey("random")) {
+                Map<String, Object> random = (Map<String, Object>) order.get("random");
+                Integer seed = (Integer) random.get("seed");
                 this.querySelector = new RandomQuerySelector(this.querySet.size(), seed);
                 return;
             }

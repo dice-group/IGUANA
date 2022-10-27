@@ -18,7 +18,7 @@ public class QueryHandlerTest {
     private final QueryHandler queryHandler;
     private final String[] expected;
 
-    public QueryHandlerTest(Map<String, Object> config, String[] expected) {
+    public QueryHandlerTest(Map<Object, Object> config, String[] expected) {
         this.queryHandler = new QueryHandler(config, 0); // workerID 0 results in correct seed for RandomSelector
         this.expected = expected;
     }
@@ -59,8 +59,10 @@ public class QueryHandlerTest {
         // Defaults: one-per-line, caching
         Map<String, Object> config4 = new HashMap<>();
         config4.put("location", "src/test/resources/query/source/queries.txt");
+        Map<String, Object> random4 = new HashMap<>();
+        random4.put("seed", 0);
         Map<String, Object> order4 = new HashMap<>();
-        order4.put("seed", 0);
+        order4.put("random", random4);
         config4.put("order", order4);
         testData.add(new Object[]{config4, random});
 
