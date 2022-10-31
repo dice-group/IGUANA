@@ -10,6 +10,7 @@ import org.apache.http.entity.StringEntity;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * HTTP Post worker.
@@ -23,11 +24,11 @@ public class HttpPostWorker extends HttpGetWorker {
 
     private String contentType = "text/plain";
 
+    public HttpPostWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String parameterName, @Nullable String responseType, @Nullable String contentType) {
+        super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency, parameterName, responseType);
 
-    public HttpPostWorker(String taskID, Connection connection, String queriesFile, @Nullable String contentType, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-        super(taskID, connection, queriesFile, responseType, parameterName, language, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
         if (parameterName == null) {
-            parameter = null;
+            this.parameter = null;
         }
         if (contentType != null) {
             this.contentType = contentType;

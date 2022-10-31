@@ -8,17 +8,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
 public class HttpPostWorkerTest {
 
+    private static Map<Object, Object> getDefaultQueryConfig() {
+        Map<Object, Object> queries = new HashMap<>();
+        queries.put("location", "src/test/resources/workers/single-query.txt");
+        return queries;
+    }
+
     @Test
     public void buildRequest() throws IOException {
         String query = "DELETE DATA { <http://example.com/A> <http://example.com/p1> \"äöüÄÖÜß\" . }";
 
-        HttpPostWorker postWorker = new HttpPostWorker(null, getConnection(), null, "application/sparql", null, null, null, null, null, null, null, 0);
+        HttpPostWorker postWorker = new HttpPostWorker(null, 0, getConnection(), getDefaultQueryConfig(), null, null, null, null, null, null, "application/sparql");
         postWorker.buildRequest(query, null);
 
         HttpPost request = ((HttpPost) postWorker.request);

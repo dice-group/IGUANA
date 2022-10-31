@@ -4,6 +4,7 @@ import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
 
+import java.util.Map;
 
 
 /**
@@ -14,8 +15,8 @@ import org.aksw.iguana.commons.annotation.Shorthand;
 @Shorthand("SPARQLWorker")
 public class SPARQLWorker extends HttpGetWorker {
 
-	public SPARQLWorker(String taskID, Connection connection, String queriesFile, @Nullable String responseType, @Nullable String parameterName, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		super(taskID, connection, queriesFile, responseType, parameterName, "lang.SPARQL", timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
+	public SPARQLWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String parameterName, @Nullable String responseType) {
+		super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency, parameterName, responseType);
 	}
 
 }

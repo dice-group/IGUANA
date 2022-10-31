@@ -2,6 +2,8 @@ package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.AbstractQuerySource;
 import org.aksw.iguana.cc.utils.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,15 +11,20 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class FileLineQuerySource extends AbstractQuerySource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileLineQuerySource.class);
 
     protected File queryFile;
 
     protected int size;
 
-    public FileLineQuerySource(String path) throws IOException {
+    public FileLineQuerySource(String path) {
         super(path);
         this.queryFile = new File(this.path);
-        this.size = FileUtils.countLines(this.queryFile);
+        try {
+            this.size = FileUtils.countLines(this.queryFile);
+        } catch (IOException e) {
+            LOGGER.error("Could not read queries");
+        }
     }
 
     @Override

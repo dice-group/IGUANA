@@ -41,8 +41,7 @@ public class FileSeparatorQuerySource extends AbstractQuerySource {
     private void indexFile() {
         this.separatorPositions = new LinkedList<>();
         int separatorCount = 0;
-        try {
-            BufferedReader reader = FileUtils.getBufferedReader(this.queryFile);
+        try (BufferedReader reader = FileUtils.getBufferedReader(this.queryFile)) {
             int index = 0;
             String line;
             this.separatorPositions.add(-1);
@@ -54,7 +53,6 @@ public class FileSeparatorQuerySource extends AbstractQuerySource {
                 index++;
             }
             this.separatorPositions.add(index);
-            reader.close();
         } catch (IOException e) {
             LOGGER.error("Could not read queries");
         }

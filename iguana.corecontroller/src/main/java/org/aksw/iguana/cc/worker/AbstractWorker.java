@@ -3,8 +3,8 @@ package org.aksw.iguana.cc.worker;
 import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
+import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.query.set.QuerySet;
-import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -25,10 +25,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 
 /**
@@ -39,282 +36,284 @@ import java.util.Random;
  * and how to test this query.
  *
  * @author f.conrads
- *
  */
 public abstract class AbstractWorker implements Worker {
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractWorker.class);
 
-	/**
-	 * Logger which should be used
-	 */
-	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractWorker.class);
+    protected String taskID;
 
-	protected boolean endSignal = false;
-	protected long executedQueries;
+    /**
+     * The unique ID of the worker, should be from 0 to n
+     */
+    protected Integer workerID;
 
-	private Collection<Properties> results = new LinkedList<>();
-	protected String taskID;
+    /**
+     * The worker Type. f.e. SPARQL or UPDATE or SQL or whatever
+     * Determined by the Shorthand of the class, if no Shorthand is provided the class name is used.
+     * The workerType is only used in logging messages.
+     */
+    protected String workerType;
+    protected Connection connection;
+    protected Map<String, Object> queries;
 
-	/**
-	 * The worker Type. f.e. SPARQL or UPDATE or SQL or whatever
-	 * Determined by the Shorthand of the class, if no Shorthand is provided the class name is used.
-	 * The workerType is only used in logging messages.
-	 */
-	protected String workerType;
-	/**
-	 * The unique ID of the worker, should be from 0 to n
-	 */
-	protected Integer workerID;
-	protected Properties extra = new Properties();
+    protected Double timeLimit;
+    protected Double timeOut = 180000D;
+    protected Integer fixedLatency = 0;
+    protected Integer gaussianLatency = 0;
 
-	private Integer fixedLatency=0;
+    protected boolean endSignal = false;
+    protected long executedQueries;
+    protected Properties extra = new Properties();
+    protected Instant startTime;
+    protected Connection con;
+    protected int queryHash;
+    protected QueryHandler queryHandler;
+    private Collection<Properties> results = new LinkedList<>();
+    private Random latencyRandomizer;
+    private Long endAtNOQM = null;
 
-	private Integer gaussianLatency=0;
+    public AbstractWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
+        this.taskID = taskID;
+        this.workerID = workerID;
+        this.con = connection;
 
-	private Random latencyRandomizer;
-	private Long endAtNOQM = null;
+        handleTimeParams(timeLimit, timeOut, fixedLatency, gaussianLatency);
+        setWorkerType();
 
-	/**
-	 * List which contains all Files representing one query(Pattern)
-	 */
-	protected QuerySet[] queryFileList;
+        this.queryHandler = new QueryHandler(queries, this.workerID);
 
-	protected Double timeLimit;
+        LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", this.workerType, workerID, taskID);
+    }
 
-	protected Instant startTime;
-
-	protected String queriesFileName;
-
-	protected Connection con;
-
-	protected Double timeOut=180000D;
-
-	protected int queryHash;
-
-	public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-		this.taskID = taskID;
-		this.workerID = workerID;
-
-		if (this.getClass().getAnnotation(Shorthand.class) != null) {
-			this.workerType = this.getClass().getAnnotation(Shorthand.class).value();
-		} else {
-			this.workerType = this.getClass().getName();
-		}
-
-		this.con = connection;
-		if (timeLimit != null) {
-			this.timeLimit = timeLimit.doubleValue();
-		}
-		latencyRandomizer = new Random(this.workerID);
-		if (timeOut != null)
-			this.timeOut = timeOut.doubleValue();
-		// Add latency Specs, add defaults
-		if (fixedLatency != null)
-			this.fixedLatency = fixedLatency;
-		if(gaussianLatency!=null)
-			this.gaussianLatency = gaussianLatency;
-		// set Query file/folder Name
-		this.queriesFileName = queriesFile;
-		LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", workerType, workerID, taskID);
-	}
+    public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
+        // FIXME use other constructor in child classes
+    }
 
 
-	@Override
-	public void waitTimeMs() {
-		double wait = this.fixedLatency.doubleValue();
-		double gaussian = latencyRandomizer.nextDouble();
-		wait += (gaussian * 2) * this.gaussianLatency;
-		LOGGER.debug("Worker[{} : {}]: Time to wait for next Query {}", workerType, workerID, wait);
-		try {
-			if(wait>0)
-				Thread.sleep((int) wait);
-		} catch (InterruptedException e) {
-			LOGGER.error("Worker[{{}} : {}]: Could not wait time before next query due to: {}", workerType,
-					workerID, e);
-		}
-	}
+    @Override
+    public void waitTimeMs() {
+        double wait = this.fixedLatency.doubleValue();
+        double gaussian = this.latencyRandomizer.nextDouble();
+        wait += (gaussian * 2) * this.gaussianLatency;
+        LOGGER.debug("Worker[{} : {}]: Time to wait for next Query {}", this.workerType, this.workerID, wait);
+        try {
+            if (wait > 0)
+                Thread.sleep((int) wait);
+        } catch (InterruptedException e) {
+            LOGGER.error("Worker[{{}} : {}]: Could not wait time before next query due to: {}", this.workerType, this.workerID, e);
+        }
+    }
 
-	/**
-	 * This will start the worker. It will get the next query, wait as long as it
-	 * should wait before executing the next query, then it will test the query and
-	 * send it if not aborted yet to the ResultProcessor Module
-	 *
-	 */
-	public void startWorker() {
-		// set extra meta key to send late
-		this.extra = new Properties();
-		this.extra.put(CONSTANTS.WORKER_ID_KEY, workerID);
-		this.extra.setProperty(CONSTANTS.WORKER_TYPE_KEY, workerType);
-		this.extra.put(CONSTANTS.WORKER_TIMEOUT_MS, timeOut);
-		if(this.queryFileList!=null)
-			this.extra.put(COMMON.NO_OF_QUERIES, this.queryFileList.length);
-		// For Update and Logging purpose get startTime of Worker
-		this.startTime = Instant.now();
+    /**
+     * This will start the worker. It will get the next query, wait as long as it
+     * should wait before executing the next query, then it will test the query and
+     * send it if not aborted yet to the ResultProcessor Module
+     */
+    public void startWorker() {
+        // set extra meta key to send late
+        this.extra = new Properties();
+        this.extra.put(CONSTANTS.WORKER_ID_KEY, this.workerID);
+        this.extra.setProperty(CONSTANTS.WORKER_TYPE_KEY, this.workerType);
+        this.extra.put(CONSTANTS.WORKER_TIMEOUT_MS, this.timeOut);
+        this.extra.put(COMMON.NO_OF_QUERIES, this.queryHandler.getQueryCount());
+        // For Update and Logging purpose get startTime of Worker
+        this.startTime = Instant.now();
 
-		this.queryHash = FileUtils.getHashcodeFromFileContent(this.queriesFileName);
+        this.queryHash = this.queryHandler.getHashcode();
 
-		LOGGER.info("Starting Worker[{{}} : {{}}].", this.workerType, this.workerID);
-		// Execute Queries as long as the Stresstest will need.
-		while (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
-			// Get next query
-			StringBuilder query = new StringBuilder();
-			StringBuilder queryID = new StringBuilder();
-			try {
-				getNextQuery(query, queryID);
-				// check if endsignal was triggered
-				if (this.endSignal) {
-					break;
-				}
-			} catch (IOException e) {
-				LOGGER.error(
-						"Worker[{{}} : {{}}] : Something went terrible wrong in getting the next query. Worker will be shut down.",
-						this.workerType, this.workerID);
-				LOGGER.error("Error which occured:_", e);
-				break;
-			}
-			// Simulate Network Delay (or whatever should be simulated)
-			waitTimeMs();
+        LOGGER.info("Starting Worker[{{}} : {{}}].", this.workerType, this.workerID);
+        // Execute Queries as long as the Stresstest will need.
+        while (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
+            // Get next query
+            StringBuilder query = new StringBuilder();
+            StringBuilder queryID = new StringBuilder();
+            try {
+                getNextQuery(query, queryID);
+                // check if endsignal was triggered
+                if (this.endSignal) {
+                    break;
+                }
+            } catch (IOException e) {
+                LOGGER.error(
+                        "Worker[{{}} : {{}}] : Something went terrible wrong in getting the next query. Worker will be shut down.",
+                        this.workerType, this.workerID);
+                LOGGER.error("Error which occured:_", e);
+                break;
+            }
+            // Simulate Network Delay (or whatever should be simulated)
+            waitTimeMs();
 
-			// benchmark query
-			try {
-				executeQuery(query.toString(), queryID.toString());
-			} catch (Exception e) {
-				LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID, query);
-			}
-			//this.executedQueries++;
-		}
-		LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
-	}
+            // benchmark query
+            try {
+                executeQuery(query.toString(), queryID.toString());
+            } catch (Exception e) {
+                LOGGER.error("Worker[{{}} : {{}}] : ERROR with query: {{}}", this.workerType, this.workerID, query);
+            }
+            //this.executedQueries++;
+        }
+        LOGGER.info("Stopping Worker[{{}} : {{}}].", this.workerType, this.workerID);
+    }
 
-	protected HttpContext getAuthContext(String endpoint){
-		HttpClientContext context = HttpClientContext.create();
+    @Override
+    public void getNextQuery(StringBuilder query, StringBuilder queryID) throws IOException {
+        this.queryHandler.getNextQuery(query, queryID);
+    }
 
-		if(con.getPassword()!=null && con.getUser()!=null && !con.getPassword().isEmpty() && !con.getUser().isEmpty()) {
-			CredentialsProvider provider = new BasicCredentialsProvider();
+    protected HttpContext getAuthContext(String endpoint) {
+        HttpClientContext context = HttpClientContext.create();
 
-			provider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
-					new UsernamePasswordCredentials(con.getUser(), con.getPassword()));
+        if (this.con.getPassword() != null && this.con.getUser() != null && !this.con.getPassword().isEmpty() && !this.con.getUser().isEmpty()) {
+            CredentialsProvider provider = new BasicCredentialsProvider();
 
-			//create target host
-			String targetHost = endpoint;
-			try {
-				URI uri = new URI(endpoint);
-				targetHost = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-			//set Auth cache
-			AuthCache authCache = new BasicAuthCache();
-			BasicScheme basicAuth = new BasicScheme();
-			authCache.put(HttpHost.create(targetHost), basicAuth);
+            provider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
+                    new UsernamePasswordCredentials(this.con.getUser(), this.con.getPassword()));
 
-			context.setCredentialsProvider(provider);
-			context.setAuthCache(authCache);
+            //create target host
+            String targetHost = endpoint;
+            try {
+                URI uri = new URI(endpoint);
+                targetHost = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            //set Auth cache
+            AuthCache authCache = new BasicAuthCache();
+            BasicScheme basicAuth = new BasicScheme();
+            authCache.put(HttpHost.create(targetHost), basicAuth);
 
-		}
-		return context;
-	}
+            context.setCredentialsProvider(provider);
+            context.setAuthCache(authCache);
 
-	public synchronized void addResults(QueryExecutionStats results)
-	{
-		if (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
-			// create Properties store it in List
-			Properties result = new Properties();
-			result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-			result.put(COMMON.RECEIVE_DATA_TIME, results.getExecutionTime());
-			result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
-			result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
-			result.put(COMMON.QUERY_HASH, queryHash);
-			result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
-			result.put(COMMON.PENALTY, this.timeOut);
-			// Add extra Meta Key, worker ID and worker Type
-			result.put(COMMON.EXTRA_META_KEY, this.extra);
-			setResults(result);
-			executedQueries++;
+        }
+        return context;
+    }
 
-			//
-			if(getNoOfQueries() > 0 && getExecutedQueries() % getNoOfQueries() == 0 ){
-				LOGGER.info("Worker executed {} queryMixes", getExecutedQueries()*1.0/getNoOfQueries());
-			}
-		}
-	}
+    public synchronized void addResults(QueryExecutionStats results) {
+        if (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
+            // create Properties store it in List
+            Properties result = new Properties();
+            result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
+            result.put(COMMON.RECEIVE_DATA_TIME, results.getExecutionTime());
+            result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
+            result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
+            result.put(COMMON.QUERY_HASH, queryHash);
+            result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
+            result.put(COMMON.PENALTY, this.timeOut);
+            // Add extra Meta Key, worker ID and worker Type
+            result.put(COMMON.EXTRA_META_KEY, this.extra);
+            setResults(result);
+            this.executedQueries++;
 
-	protected synchronized void setResults(Properties result) {
-		results.add(result);
-	}
+            //
+            if (getNoOfQueries() > 0 && getExecutedQueries() % getNoOfQueries() == 0) {
+                LOGGER.info("Worker executed {} queryMixes", getExecutedQueries() * 1.0 / getNoOfQueries());
+            }
+        }
+    }
 
-	@Override
-	public synchronized Collection<Properties> popQueryResults() {
-		if(results.isEmpty()){
-			return null;
-		}
-		Collection<Properties> ret = this.results;
-		this.results = new LinkedList<>();
-		return ret;
-	}
+    protected synchronized void setResults(Properties result) {
+        this.results.add(result);
+    }
 
-	@Override
-	public long getExecutedQueries() {
-		return this.executedQueries;
-	}
+    @Override
+    public synchronized Collection<Properties> popQueryResults() {
+        if (this.results.isEmpty()) {
+            return null;
+        }
+        Collection<Properties> ret = this.results;
+        this.results = new LinkedList<>();
+        return ret;
+    }
 
-	@Override
-	public void stopSending() {
-		this.endSignal = true;
-		LOGGER.debug("Worker[{{}} : {{}}] got stop signal.", workerType, workerID);
-	}
+    @Override
+    public long getExecutedQueries() {
+        return this.executedQueries;
+    }
 
-	@Override
-	public boolean isTerminated(){
-		return this.endSignal;
-	}
+    @Override
+    public void stopSending() {
+        this.endSignal = true;
+        LOGGER.debug("Worker[{{}} : {{}}] got stop signal.", this.workerType, this.workerID);
+    }
+
+    @Override
+    public boolean isTerminated() {
+        return this.endSignal;
+    }
 
 
-	@Override
-	public void run() {
-		startWorker();
-	}
+    @Override
+    public void run() {
+        startWorker();
+    }
 
-	/**
-	 * Returns the name of the queries file name/update path
-	 *
-	 * @return file name/update path
-	 */
-	public String getQueriesFileName() {
-		return this.queriesFileName;
-	}
+    /**
+     * Returns the name of the queries file name/update path
+     *
+     * @return file name/update path
+     */
+    public String getQueriesFileName() {
+        // FIXME remove
+        return "";
+    }
 
-	/**
-	 * Sets the Query Instances repr. in Files.
-	 *
-	 * @param queries
-	 *            File containing the query instances.
-	 */
-	public void setQueriesList(QuerySet[] queries) {
-		this.queryFileList = queries;
-	}
+    /**
+     * Sets the Query Instances repr. in Files.
+     *
+     * @param queries File containing the query instances.
+     */
+    public void setQueriesList(QuerySet[] queries) {
+        // FIXME remove
+    }
 
-	/**
-	 * The number of Queries in one mix
-	 *
-	 * @return
-	 */
-	public long getNoOfQueries() {
-		if(this.queryFileList == null){
-			return 0;
-		}
-		return this.queryFileList.length;
-	}
+    /**
+     * The number of Queries in one mix
+     *
+     * @return
+     */
+    public long getNoOfQueries() {
+        return this.queryHandler.getQueryCount();
+    }
 
-	@Override
-	public boolean hasExecutedNoOfQueryMixes(Long noOfQueryMixes){
-		if(noOfQueryMixes==null){
-			return false;
-		}
-		return getExecutedQueries() / (getNoOfQueries() * 1.0) >= noOfQueryMixes;
-	}
+    @Override
+    public boolean hasExecutedNoOfQueryMixes(Long noOfQueryMixes) {
+        if (noOfQueryMixes == null) {
+            return false;
+        }
+        return getExecutedQueries() / (getNoOfQueries() * 1.0) >= noOfQueryMixes;
+    }
 
-	@Override
-	public void endAtNoOfQueryMixes(Long noOfQueryMixes){
-		this.endAtNOQM=noOfQueryMixes;
-	}
+    @Override
+    public void endAtNoOfQueryMixes(Long noOfQueryMixes) {
+        this.endAtNOQM = noOfQueryMixes;
+    }
+
+    @Override
+    public QueryHandler getQueryHandler() {
+        return this.queryHandler;
+    }
+
+    private void handleTimeParams(Integer timeLimit, Integer timeOut, Integer fixedLatency, Integer gaussianLatency) {
+        if (timeLimit != null) {
+            this.timeLimit = timeLimit.doubleValue();
+        }
+        if (timeOut != null) {
+            this.timeOut = timeOut.doubleValue();
+        }
+        if (fixedLatency != null) {
+            this.fixedLatency = fixedLatency;
+        }
+        if (gaussianLatency != null) {
+            this.gaussianLatency = gaussianLatency;
+        }
+        this.latencyRandomizer = new Random(this.workerID);
+    }
+
+    private void setWorkerType() {
+        if (this.getClass().getAnnotation(Shorthand.class) != null) {
+            this.workerType = this.getClass().getAnnotation(Shorthand.class).value();
+        } else {
+            this.workerType = this.getClass().getName();
+        }
+    }
 }

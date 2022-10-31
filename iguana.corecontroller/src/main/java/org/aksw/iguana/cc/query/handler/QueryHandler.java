@@ -84,6 +84,10 @@ public class QueryHandler {
         return this.querySet.size();
     }
 
+    public LanguageProcessor getLanguageProcessor() {
+        return this.langProcessor;
+    }
+
     private void initQuerySet() {
         this.caching = (Boolean) this.config.getOrDefault("caching", true);
 
