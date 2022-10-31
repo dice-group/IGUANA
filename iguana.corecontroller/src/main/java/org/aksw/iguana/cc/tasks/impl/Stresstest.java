@@ -1,13 +1,7 @@
-/**
- * 
- */
 package org.aksw.iguana.cc.tasks.impl;
 
 import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.query.QueryHandler;
-import org.aksw.iguana.cc.query.QueryHandlerFactory;
-import org.aksw.iguana.cc.query.impl.InstancesQueryHandler;
 import org.aksw.iguana.cc.tasks.AbstractTask;
 import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.cc.worker.WorkerFactory;
@@ -19,7 +13,6 @@ import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Instant;
@@ -37,357 +30,314 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
  */
 @Shorthand("Stresstest")
 public class Stresstest extends AbstractTask {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Stresstest.class);
+
+    private final Map<Object, Object> warmupConfig;
+    private final List<Worker> warmupWorkers = new ArrayList<>();
+    private final List<Map<Object, Object>> workerConfig;
+    protected List<Worker> workers = new LinkedList<>();
+    protected String cacheFolder = "queryInstances";
+    private Double warmupTimeMS;
+    private Double timeLimit;
+    private Long noOfQueryMixes;
+    private Instant startTime;
 
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(Stresstest.class);
+    public Stresstest(Integer timeLimit, List<Map<Object, Object>> workers) {
+        this(timeLimit, workers, null);
+    }
 
-	private ArrayList workerConfig;
-	private LinkedHashMap warmupConfig;
+    public Stresstest(Integer timeLimit, List<Map<Object, Object>> workers, Map<Object, Object> warmup) {
+        this.timeLimit = timeLimit.doubleValue();
+        this.workerConfig = workers;
+        this.warmupConfig = warmup;
+    }
 
-	private Double timeLimit;
-	private Long noOfQueryMixes;
-	protected List<Worker> workers = new LinkedList<Worker>();
-	private Instant startTime;
-	private String qhClassName;
-	private Long noOfWorkers= 0L;
-	protected  String qhCacheFolder = "queryInstances";
+    public Stresstest(List<Map<Object, Object>> workers, Integer noOfQueryMixes) {
+        this(workers, null, noOfQueryMixes);
+    }
 
-	private Double warmupTimeMS;
+    public Stresstest(List<Map<Object, Object>> workers, Map<Object, Object> warmup, Integer noOfQueryMixes) {
+        this.noOfQueryMixes = noOfQueryMixes.longValue();
+        this.workerConfig = workers;
+        this.warmupConfig = warmup;
+    }
 
+    private void initWorkers() {
+        if (this.warmupConfig != null) {
+            createWarmupWorkers();
+        }
+        createWorkers();
+    }
 
+    private void createWarmupWorkers() {
+        this.warmupTimeMS = ((Integer) this.warmupConfig.get("timeLimit")).doubleValue();
 
-	private HashMap<Object, Object> qhConfig;
-	private List<Worker> warmupWorkers = new ArrayList<>();
-	private HashMap warmupQHConfig;
-	private String warmupQHClass;
+        List<Map<Object, Object>> warmupWorkerConfig = (List<Map<Object, Object>>) this.warmupConfig.get("workers");
+        createWorkers(warmupWorkerConfig, this.warmupWorkers, this.warmupTimeMS);
+    }
 
+    private void createWorkers() {
+        createWorkers(this.workerConfig, this.workers, this.timeLimit);
+    }
 
-	public Stresstest(Integer timeLimit, ArrayList workers, LinkedHashMap queryHandler) throws FileNotFoundException {
-		this(timeLimit, workers, queryHandler, null);
-	}
+    private void createWorkers(List<Map<Object, Object>> workers, List<Worker> workersToAddTo, Double timeLimit) {
+        int workerID = 0;
+        for (Map<Object, Object> workerConfig : workers) {
+            workerID += createWorker(workerConfig, workersToAddTo, timeLimit, workerID);
+        }
+    }
 
-	public Stresstest(Integer timeLimit, ArrayList workers, LinkedHashMap queryHandler, LinkedHashMap warmup) throws FileNotFoundException {
-		this.timeLimit=timeLimit.doubleValue();
-		this.workerConfig = workers;
-		this.qhConfig = queryHandler;
-		this.warmupConfig = warmup;
-	}
+    private int createWorker(Map<Object, Object> workerConfig, List<Worker> workersToAddTo, Double timeLimit, Integer baseID) {
+        //let TypedFactory create from className and configuration
+        String className = workerConfig.remove("className").toString();
+        //if shorthand classname is used, exchange to full classname
+        workerConfig.put("connection", this.con);
+        workerConfig.put("taskID", this.taskID);
+        addOutputFolder(workerConfig);
 
-	public Stresstest(ArrayList workers, LinkedHashMap queryHandler, Integer noOfQueryMixes) throws FileNotFoundException {
-		this(workers, queryHandler, null, noOfQueryMixes);
-	}
+        if (timeLimit != null) {
+            workerConfig.put("timeLimit", timeLimit.intValue());
+        }
+        Integer threads = (Integer) workerConfig.remove("threads");
+        for (int i = 0; i < threads; i++) {
+            workerConfig.put("workerID", baseID + i);
+            Worker worker = new WorkerFactory().create(className, workerConfig);
+            if (this.noOfQueryMixes != null) {
+                worker.endAtNoOfQueryMixes(this.noOfQueryMixes);
+            }
+            workersToAddTo.add(worker);
+        }
+        return threads;
+    }
 
-	public Stresstest(ArrayList workers, LinkedHashMap queryHandler, LinkedHashMap warmup, Integer noOfQueryMixes) throws FileNotFoundException {
-		this.noOfQueryMixes=noOfQueryMixes.longValue();
-		this.workerConfig = workers;
-		this.qhConfig = queryHandler;
-		this.warmupConfig = warmup;
-	}
+    private void addOutputFolder(Map<Object, Object> workerConfig) {
+        Map<String, Object> queries = (Map<String, Object>) workerConfig.getOrDefault("queries", new HashMap<>());
+        queries.put("outputFolder", this.cacheFolder);
+    }
 
-	private void setConfig(ArrayList<HashMap> workers, HashMap queryHandler, HashMap warmup){
+    public void generateTripleStats() {
+        // TODO How are these Triplestats used?
 
-		noOfWorkers+=createWorkers(workers, this.workers, this.timeLimit);
-		//let TypedFactory create queryHandlerConfiguration from className and configuration and add Workers
-		this.qhClassName = queryHandler.get("className").toString();
-		this.qhConfig = (HashMap)queryHandler.getOrDefault("configuration", new HashMap<>());
-		qhConfig.put("workers", this.workers);
+        StringWriter sw = new StringWriter();
+        for (Worker worker : this.workers) {
+            Model tripleStats = worker.getQueryHandler().getTripleStats(this.taskID);
+            RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
+        }
+        this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, sw.toString());
+        //this.metaData.put(COMMON.QUERY_STATS, tripleStats);
+    }
 
-		//If warmup
-		if(warmup!=null){
-			//set time
-			this.warmupTimeMS = ((Integer) warmup.get("timeLimit")).doubleValue();
-			//set warmup workers
-			ArrayList<HashMap> warmupWorkerConfig = (ArrayList<HashMap>) warmup.get("workers");
-			createWorkers(warmupWorkerConfig, this.warmupWorkers, this.warmupTimeMS);
-			//if warmup uses a different queryHandler than the actual one create the query handler
-			createWarmupQueryHandler(warmup);
-		}
-		addMetaData();
-	}
-
-	private void createWarmupQueryHandler(HashMap warmup) {
-		if(warmup.containsKey("queryHandler")){
-			HashMap warmupQueryHandler = (HashMap) warmup.get("queryHandler");
-			this.warmupQHClass = warmupQueryHandler.get("className").toString();
-			this.warmupQHConfig = (HashMap)warmupQueryHandler.getOrDefault("configuration", new HashMap<>());
-			this.warmupQHConfig.put("workers", this.warmupWorkers);
-		}else{
-			//otherwise use default
-			this.warmupQHClass = qhClassName;
-			//create copy of the current configuration
-			this.warmupQHConfig = new HashMap(qhConfig);
-			this.warmupQHConfig.put("workers", this.warmupWorkers);
-		}
-	}
-
-	private int createWorkers(ArrayList<HashMap> workers, List<Worker> workersToAddTo, Double timeLimit){
-		int noOfWorkers=0;
-		for(HashMap workerConfig : workers){
-			noOfWorkers += createWorker(workerConfig, workersToAddTo, timeLimit, noOfWorkers);
-		}
-		return noOfWorkers;
-	}
-
-	private int createWorker(HashMap workerConfig, List<Worker> workersToAddTo, Double timeLimit, Integer baseID) {
-		//let TypedFactory create from className and configuration
-		String className = workerConfig.remove("className").toString();
-		//if shorthand classname is used, exchange to full classname
-		Integer threads = (Integer)workerConfig.remove("threads");
-		workerConfig.put("connection", con);
-		workerConfig.put("taskID", taskID);
-		if(timeLimit!=null)
-			workerConfig.put("timeLimit", timeLimit.intValue());
-		for(int i=0;i<threads;i++) {
-			workerConfig.put("workerID", baseID+i);
-			Worker worker = new WorkerFactory().create(className, workerConfig);
-			if(this.noOfQueryMixes!=null){
-				worker.endAtNoOfQueryMixes(noOfQueryMixes);
-			}
-			workersToAddTo.add(worker);
-		}
-		return threads;
-	}
-
-	/**
-	 * Add extra Meta Data
-	 */
-	@Override
-	public void addMetaData() {
-		super.addMetaData();
-		Properties extraMeta = new Properties();
-		if(timeLimit!=null)
-			extraMeta.put(CONSTANTS.TIME_LIMIT, timeLimit);
-		if(noOfQueryMixes!=null)
-			extraMeta.put(CONSTANTS.NO_OF_QUERY_MIXES, noOfQueryMixes);
-		extraMeta.put("noOfWorkers", noOfWorkers);
-		this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
-	}
-
-	@Override
-	public void init(String[] ids, String dataset, Connection connection, String taskName)  {
-		super.init(ids, dataset, connection, taskName);
-		setConfig(workerConfig, qhConfig , warmupConfig);
-
-		// create from construct args and class
-		QueryHandlerFactory factory = new QueryHandlerFactory();
-		//create query handler and generate queries, set them to the workers
-		QueryHandler queryHandler = factory.create(qhClassName, qhConfig);
-		if(queryHandler instanceof InstancesQueryHandler){
-			((InstancesQueryHandler)queryHandler).setOutputFolder(this.qhCacheFolder);
-		}
-		queryHandler.generate();
-
-		//init warmup queries if set
-		if(warmupQHClass!=null){
-			QueryHandler warmupQH = factory.create(warmupQHClass, warmupQHConfig);
-			if(warmupQH instanceof InstancesQueryHandler){
-				((InstancesQueryHandler)warmupQH).setOutputFolder(this.qhCacheFolder);
-			}
-			warmupQH.generate();
-		}
-
-        Model tripleStats = queryHandler.generateTripleStats(taskID);
-		StringWriter sw = new StringWriter();
-		RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
-		this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, sw.toString());
-		this.metaData.put(COMMON.QUERY_STATS, tripleStats);
+    /**
+     * Add extra Meta Data
+     */
+    @Override
+    public void addMetaData() {
+        super.addMetaData();
+        Properties extraMeta = new Properties();
+        if (this.timeLimit != null)
+            extraMeta.put(CONSTANTS.TIME_LIMIT, this.timeLimit);
+        if (this.noOfQueryMixes != null)
+            extraMeta.put(CONSTANTS.NO_OF_QUERY_MIXES, this.noOfQueryMixes);
+        extraMeta.put("noOfWorkers", this.workers.size());
+        this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
+    }
 
 
-	}
+    @Override
+    public void init(String[] ids, String dataset, Connection connection, String taskName) {
+        super.init(ids, dataset, connection, taskName);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.aksw.iguana.cc.tasks.Task#start()
-	 */
-	@Override
-	public void execute() {
-		warmup();
-		LOGGER.info("Task with ID {{}} will be executed now", this.taskID);
-		// Execute each Worker in ThreadPool
-		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkers.intValue());
-		this.startTime = Instant.now();
-		for (Worker worker : workers) {
-			executor.execute(worker);
-		}
-		LOGGER.info("[TaskID: {{}}]All {{}} workers have been started", taskID, noOfWorkers);
-		// wait timeLimit or noOfQueries
-		executor.shutdown();
-		while (!isFinished()) {
-			// check if worker has results yet
-			for (Worker worker : workers) {
-				// if so send all results buffered
-				sendWorkerResult(worker);
-			}
-			loopSleep(100);
-		}
-		LOGGER.debug("Sending stop signal to workers");
-		// tell all workers to stop sending properties, thus the await termination will
-		// be safe with the results
-		for (Worker worker : workers) {
-			worker.stopSending();
-		}
-		// Wait 5seconds so the workers can stop themselves, otherwise they will be
-		// stopped
-		try {
-			LOGGER.debug("Will shutdown now...");
+        initWorkers();
+        addMetaData();
+        generateTripleStats();
+    }
 
-			LOGGER.info("[TaskID: {{}}] Will shutdown and await termination in 5s.", taskID);
-			boolean finished = executor.awaitTermination(5, TimeUnit.SECONDS);
-			LOGGER.info("[TaskID: {{}}] Task completed. Thread finished status {}", taskID, finished);
-		} catch (InterruptedException e) {
-			LOGGER.error("[TaskID: {{}}] Could not shutdown Threads/Workers due to ...", taskID);
-			LOGGER.error("... Exception: ", e);
-			try {
-				executor.shutdownNow();
-			}catch(Exception e1) {
-				LOGGER.error("Problems shutting down", e1);
-			}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.aksw.iguana.cc.tasks.Task#start()
+     */
+    @Override
+    public void execute() {
+        warmup();
+        LOGGER.info("Task with ID {{}} will be executed now", this.taskID);
+        // Execute each Worker in ThreadPool
+        ExecutorService executor = Executors.newFixedThreadPool(this.workers.size());
+        this.startTime = Instant.now();
+        for (Worker worker : this.workers) {
+            executor.execute(worker);
+        }
+        LOGGER.info("[TaskID: {{}}]All {{}} workers have been started", this.taskID, this.workers.size());
+        // wait timeLimit or noOfQueries
+        executor.shutdown();
+        while (!isFinished()) {
+            // check if worker has results yet
+            for (Worker worker : this.workers) {
+                // if so send all results buffered
+                sendWorkerResult(worker);
+            }
+            loopSleep();
+        }
+        LOGGER.debug("Sending stop signal to workers");
+        // tell all workers to stop sending properties, thus the await termination will
+        // be safe with the results
+        for (Worker worker : this.workers) {
+            worker.stopSending();
+        }
+        // Wait 5seconds so the workers can stop themselves, otherwise they will be
+        // stopped
+        try {
+            LOGGER.debug("Will shutdown now...");
 
-		}
-		
-	}
+            LOGGER.info("[TaskID: {{}}] Will shutdown and await termination in 5s.", this.taskID);
+            boolean finished = executor.awaitTermination(5, TimeUnit.SECONDS);
+            LOGGER.info("[TaskID: {{}}] Task completed. Thread finished status {}", this.taskID, finished);
+        } catch (InterruptedException e) {
+            LOGGER.error("[TaskID: {{}}] Could not shutdown Threads/Workers due to ...", this.taskID);
+            LOGGER.error("... Exception: ", e);
+            try {
+                executor.shutdownNow();
+            } catch (Exception e1) {
+                LOGGER.error("Problems shutting down", e1);
+            }
+        }
+    }
 
-	private void loopSleep(int timeout) {
-		try {
-			TimeUnit.MILLISECONDS.sleep(timeout);
-		}catch(Exception e) {
-			//shouldn't be thrown except something else really went wrong
-			LOGGER.error("Loop sleep did not work.", e);
-		}
-	}
+    private void loopSleep() {
+        try {
+            TimeUnit.MILLISECONDS.sleep(100);
+        } catch (Exception e) {
+            //shouldn't be thrown except something else really went wrong
+            LOGGER.error("Loop sleep did not work.", e);
+        }
+    }
 
-	private void sendWorkerResult(Worker worker){
-		Collection<Properties> props = worker.popQueryResults();
-		if(props == null){
-			return;
-		}
+    private void sendWorkerResult(Worker worker) {
+        Collection<Properties> props = worker.popQueryResults();
+        if (props == null) {
+            return;
+        }
 
-		for (Properties results : props) {
-			try {
+        for (Properties results : props) {
+            try {
 
-				// send results via RabbitMQ
-				LOGGER.debug("[TaskID: {{}}] Send results", taskID);
-				this.sendResults(results);
-				LOGGER.debug("[TaskID: {{}}] results could be send", taskID);
-			} catch (IOException e) {
-				LOGGER.error("[TaskID: {{}}] Could not send results due to exc.",taskID, e);
-				LOGGER.error("[TaskID: {{}}] Results: {{}}", taskID, results);
-			}
-		}
-	}
+                // send results via RabbitMQ
+                LOGGER.debug("[TaskID: {{}}] Send results", this.taskID);
+                this.sendResults(results);
+                LOGGER.debug("[TaskID: {{}}] results could be send", this.taskID);
+            } catch (IOException e) {
+                LOGGER.error("[TaskID: {{}}] Could not send results due to exc.", this.taskID, e);
+                LOGGER.error("[TaskID: {{}}] Results: {{}}", this.taskID, results);
+            }
+        }
+    }
 
-	
-	@Override
-	public void close() {
-		super.close();
 
-	}
-	
-	protected long warmup() {
-		if(warmupTimeMS==null||warmupTimeMS==0l) {
-			return 0;
-		}
-		if(warmupWorkers.size()==0) {
-			return 0;
-		}
-		LOGGER.info("[TaskID: {{}}] will start {{}}ms warmup now using {} no of workers in total.", taskID, warmupTimeMS, warmupWorkers.size());
-		return executeWarmup(warmupWorkers);
-	}
+    @Override
+    public void close() {
+        super.close();
+    }
 
-	
-	private long executeWarmup(List<Worker> warmupWorkers) {
-		ExecutorService exec = Executors.newFixedThreadPool(2);
-		for(Worker worker : warmupWorkers) {
-			exec.submit(worker);
-		}
-		//wait as long as needed
-		Instant start = Instant.now();
-		exec.shutdown();
-		while(durationInMilliseconds(start, Instant.now()) <= warmupTimeMS) {
-			//clean up RAM
-			for(Worker worker: warmupWorkers) {
-				worker.popQueryResults();
-			}
-			try {
-				TimeUnit.MILLISECONDS.sleep(50);
-			}catch(Exception e) {
-				LOGGER.error("Could not warmup ");
-			}
-		}
-		for(Worker worker : warmupWorkers) {
-			worker.stopSending();
-		}
-		try {
-			exec.awaitTermination(5, TimeUnit.SECONDS);
+    protected long warmup() {
+        if (this.warmupTimeMS == null || this.warmupTimeMS == 0L) {
+            return 0;
+        }
+        if (this.warmupWorkers.size() == 0) {
+            return 0;
+        }
+        LOGGER.info("[TaskID: {{}}] will start {{}}ms warmup now using {} no of workers in total.", this.taskID, this.warmupTimeMS, this.warmupWorkers.size());
+        return executeWarmup(this.warmupWorkers);
+    }
 
-		} catch (InterruptedException e) {
-			LOGGER.warn("[TaskID: {{}}] Warmup. Could not await Termination of Workers.", taskID);
-		}
-		try {
-			exec.shutdownNow();
-		}catch(Exception e1) {
-			LOGGER.error("Shutdown problems ", e1);
-		}
-		//clear up
-		long queriesExec = 0;
-		for(Worker w : warmupWorkers){
-			queriesExec+=w.getExecutedQueries();
-		}
-		warmupWorkers.clear();
-		LOGGER.info("[TaskID: {{}}] Warmup finished.", taskID);
-		return queriesExec;
-	}
 
-	/**
-	 * Checks if restriction (e.g. timelimit or noOfQueryMixes for each Worker)
-	 * occurs
-	 * 
-	 * @return true if restriction occurs, false otherwise
-	 */
-	protected boolean isFinished() {
-		if (timeLimit !=null) {
+    private long executeWarmup(List<Worker> warmupWorkers) {
+        ExecutorService exec = Executors.newFixedThreadPool(2);
+        for (Worker worker : warmupWorkers) {
+            exec.submit(worker);
+        }
+        //wait as long as needed
+        Instant start = Instant.now();
+        exec.shutdown();
+        while (durationInMilliseconds(start, Instant.now()) <= this.warmupTimeMS) {
+            //clean up RAM
+            for (Worker worker : warmupWorkers) {
+                worker.popQueryResults();
+            }
+            try {
+                TimeUnit.MILLISECONDS.sleep(50);
+            } catch (Exception e) {
+                LOGGER.error("Could not warmup ");
+            }
+        }
+        for (Worker worker : warmupWorkers) {
+            worker.stopSending();
+        }
+        try {
+            exec.awaitTermination(5, TimeUnit.SECONDS);
 
-			Instant current = Instant.now();
-			double passed_time = timeLimit - durationInMilliseconds(this.startTime, current);
-			return passed_time <= 0D;
-		}
-		else if (noOfQueryMixes != null) {
+        } catch (InterruptedException e) {
+            LOGGER.warn("[TaskID: {{}}] Warmup. Could not await Termination of Workers.", this.taskID);
+        }
+        try {
+            exec.shutdownNow();
+        } catch (Exception e1) {
+            LOGGER.error("Shutdown problems ", e1);
+        }
+        //clear up
+        long queriesExec = 0;
+        for (Worker w : warmupWorkers) {
+            queriesExec += w.getExecutedQueries();
+        }
+        warmupWorkers.clear();
+        LOGGER.info("[TaskID: {{}}] Warmup finished.", this.taskID);
+        return queriesExec;
+    }
 
-			// use noOfQueries of SPARQLWorkers (as soon as a worker hit the noOfQueries, it
-			// will stop sending results
-			// UpdateWorker are allowed to execute all their updates
-			boolean endFlag=true;
-			for (Worker worker : workers) {
-				long queriesInMix = 0;
+    /**
+     * Checks if restriction (e.g. timelimit or noOfQueryMixes for each Worker)
+     * occurs
+     *
+     * @return true if restriction occurs, false otherwise
+     */
+    protected boolean isFinished() {
+        if (this.timeLimit != null) {
 
-					LOGGER.debug("No of query Mixes: {} , queriesInMix {}", worker.getExecutedQueries(),noOfQueryMixes);
-					//Check for each worker, if the
-					if (worker.hasExecutedNoOfQueryMixes(noOfQueryMixes)) {
-						if(!worker.isTerminated()) {
-							//if the worker was not already terminated, send last results, as tehy will not be sended afterwards
-							sendWorkerResult(worker);
-						}
-						worker.stopSending();
-					}
-					else {
-						endFlag = false;
-					}
+            Instant current = Instant.now();
+            double passed_time = this.timeLimit - durationInMilliseconds(this.startTime, current);
+            return passed_time <= 0D;
+        } else if (this.noOfQueryMixes != null) {
 
-			}
-			return endFlag;
-		}
-		LOGGER.error("Neither time limit nor NoOfQueryMixes is set. executing task now");
-		return true;
-	}
+            // use noOfQueries of SPARQLWorkers (as soon as a worker hit the noOfQueries, it
+            // will stop sending results
+            // UpdateWorker are allowed to execute all their updates
+            boolean endFlag = true;
+            for (Worker worker : this.workers) {
+                LOGGER.debug("No of query Mixes: {} , queriesInMix {}", worker.getExecutedQueries(), this.noOfQueryMixes);
+                //Check for each worker, if the
+                if (worker.hasExecutedNoOfQueryMixes(this.noOfQueryMixes)) {
+                    if (!worker.isTerminated()) {
+                        //if the worker was not already terminated, send last results, as tehy will not be sended afterwards
+                        sendWorkerResult(worker);
+                    }
+                    worker.stopSending();
+                } else {
+                    endFlag = false;
+                }
 
-	public long getExecutedQueries(){
-		long ret = 0;
-		for(Worker worker: workers){
-			ret += worker.getExecutedQueries();
-		}
-		return ret;
-	}
+            }
+            return endFlag;
+        }
+        LOGGER.error("Neither time limit nor NoOfQueryMixes is set. executing task now");
+        return true;
+    }
+
+    public long getExecutedQueries() {
+        long ret = 0;
+        for (Worker worker : this.workers) {
+            ret += worker.getExecutedQueries();
+        }
+        return ret;
+    }
 
 }
