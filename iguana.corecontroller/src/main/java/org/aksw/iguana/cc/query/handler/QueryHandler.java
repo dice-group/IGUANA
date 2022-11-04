@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.query.handler;
 
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
+import org.aksw.iguana.cc.query.pattern.PatternHandler;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
@@ -46,13 +47,16 @@ public class QueryHandler {
 
         this.location = (String) config.get("location");
 
-        initQuerySet();
+        if (config.containsKey("pattern")) {
+            initPattern();
+        } else {
+            initQuerySet();
+        }
+
         initQuerySelector();
         initLanguageProcessor();
 
         this.hashcode = this.querySet.getHashcode();
-
-        // TODO pattern
     }
 
     public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
@@ -85,14 +89,25 @@ public class QueryHandler {
         return this.langProcessor;
     }
 
-    private void initQuerySet() {
+    private void initPattern() {
+        Map<String, Object> patternConfig = (Map<String, Object>) this.config.get("pattern");
+        PatternHandler patternHandler = new PatternHandler(patternConfig, createQuerySource());
+
+        initQuerySet(patternHandler.generateQuerySource());
+    }
+
+    private void initQuerySet(QuerySource querySource) {
         this.caching = (Boolean) this.config.getOrDefault("caching", true);
 
         if (this.caching) {
-            this.querySet = new InMemQuerySet(this.location, createQuerySource());
+            this.querySet = new InMemQuerySet(this.location, querySource);
         } else {
-            this.querySet = new FileBasedQuerySet(this.location, createQuerySource());
+            this.querySet = new FileBasedQuerySet(this.location, querySource);
         }
+    }
+
+    private void initQuerySet() {
+        initQuerySet(createQuerySource());
     }
 
     private QuerySource createQuerySource() {
