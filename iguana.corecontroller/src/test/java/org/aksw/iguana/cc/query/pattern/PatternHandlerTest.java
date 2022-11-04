@@ -24,7 +24,7 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class PatternQueryHandlerTest {
+public class PatternHandlerTest {
 
     private static final int FAST_SERVER_PORT = 8024;
     private static ContainerServer fastServer;
@@ -38,7 +38,7 @@ public class PatternQueryHandlerTest {
     private final String dir = UUID.randomUUID().toString();
 
 
-    public PatternQueryHandlerTest(String queryStr, String expectedConversionStr, String expectedReplacedQuery, String[] vars, String[] expectedInstances) {
+    public PatternHandlerTest(String queryStr, String expectedConversionStr, String expectedReplacedQuery, String[] vars, String[] expectedInstances) {
         this.service = "http://localhost:8024";
 
         this.queryStr = queryStr;

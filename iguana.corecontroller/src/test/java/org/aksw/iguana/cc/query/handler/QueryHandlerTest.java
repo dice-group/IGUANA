@@ -1,22 +1,34 @@
 package org.aksw.iguana.cc.query.handler;
 
+import org.aksw.iguana.cc.utils.ServerMock;
+import org.apache.commons.io.FileUtils;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.simpleframework.http.core.ContainerServer;
+import org.simpleframework.transport.connect.SocketConnection;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class QueryHandlerTest {
 
+    private static final int FAST_SERVER_PORT = 8024;
+    private static final String CACHE_FOLDER = UUID.randomUUID().toString();
+    private static ContainerServer fastServer;
+    private static SocketConnection fastConnection;
+
     private final QueryHandler queryHandler;
     private final String[] expected;
+
 
     public QueryHandlerTest(Map<Object, Object> config, String[] expected) {
         this.queryHandler = new QueryHandler(config, 0); // workerID 0 results in correct seed for RandomSelector
@@ -66,7 +78,33 @@ public class QueryHandlerTest {
         config4.put("order", order4);
         testData.add(new Object[]{config4, random});
 
+        String[] expectedInstances = new String[]{"SELECT ?book {?book <http://example.org/book/book2> ?o}", "SELECT ?book {?book <http://example.org/book/book1> ?o}", "SELECT ?book {?book <http://example.org/book/book2> ?o}", "SELECT ?book {?book <http://example.org/book/book1> ?o}"};
+        Map<String, Object> config5 = new HashMap<>();
+        config5.put("location", "src/test/resources/query/pattern-query.txt");
+        Map<String, Object> pattern5 = new HashMap<>();
+        pattern5.put("endpoint", "http://localhost:8024");
+        pattern5.put("outputFolder", CACHE_FOLDER);
+        config5.put("pattern", pattern5);
+        testData.add(new Object[]{config5, expectedInstances});
+
+
         return testData;
+    }
+
+    @BeforeClass
+    public static void startServer() throws IOException {
+        ServerMock fastServerContainer = new ServerMock();
+        fastServer = new ContainerServer(fastServerContainer);
+        fastConnection = new SocketConnection(fastServer);
+        SocketAddress address1 = new InetSocketAddress(FAST_SERVER_PORT);
+        fastConnection.connect(address1);
+    }
+
+    @AfterClass
+    public static void stopServer() throws IOException {
+        fastConnection.close();
+        fastServer.stop();
+        FileUtils.deleteDirectory(new File(CACHE_FOLDER));
     }
 
     @Test
