@@ -4,7 +4,6 @@ import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
-import org.aksw.iguana.cc.query.set.QuerySet;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
@@ -83,10 +82,6 @@ public abstract class AbstractWorker implements Worker {
         this.queryHandler = new QueryHandler(queries, this.workerID);
 
         LOGGER.debug("Initialized new Worker[{{}} : {{}}] for taskID {{}}", this.workerType, workerID, taskID);
-    }
-
-    public AbstractWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-        // FIXME use other constructor in child classes
     }
 
 
@@ -245,25 +240,6 @@ public abstract class AbstractWorker implements Worker {
     @Override
     public void run() {
         startWorker();
-    }
-
-    /**
-     * Returns the name of the queries file name/update path
-     *
-     * @return file name/update path
-     */
-    public String getQueriesFileName() {
-        // FIXME remove
-        return "";
-    }
-
-    /**
-     * Sets the Query Instances repr. in Files.
-     *
-     * @param queries File containing the query instances.
-     */
-    public void setQueriesList(QuerySet[] queries) {
-        // FIXME remove
     }
 
     /**

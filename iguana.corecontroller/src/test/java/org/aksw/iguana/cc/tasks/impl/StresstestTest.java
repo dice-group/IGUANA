@@ -9,11 +9,8 @@ import org.aksw.iguana.rp.experiment.ExperimentManager;
 import org.aksw.iguana.rp.metrics.MetricManager;
 import org.aksw.iguana.rp.metrics.impl.EachQueryMetric;
 import org.aksw.iguana.rp.storage.StorageManager;
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -56,10 +53,9 @@ public class StresstestTest {
     }
 
     @Test
-    public void checkStresstestNoQM() throws IOException {
+    public void checkStresstestNoQM() {
 
         Stresstest task = new Stresstest(getWorkers(2, this.queries), 10);
-        task.cacheFolder = UUID.randomUUID().toString();
         task.init(new String[]{"1", "1/1", "1/1/1"}, "test", getConnection());
 
         init();
@@ -68,14 +64,12 @@ public class StresstestTest {
 
         //2 queries in mix, 10 executions on 2 workers -> 40 queries
         assertEquals(40, task.getExecutedQueries());
-        FileUtils.deleteDirectory(new File(task.cacheFolder));
     }
 
     @Test
-    public void checkStresstestTL() throws IOException {
+    public void checkStresstestTL() {
 
         Stresstest task = new Stresstest(5000, getWorkers(2, this.queries));
-        task.cacheFolder = UUID.randomUUID().toString();
 
         task.init(new String[]{"1", "1/1", "1/1/1"}, "test", getConnection());
 
@@ -86,15 +80,13 @@ public class StresstestTest {
         Instant end = Instant.now();
         //give about 200milliseconds time for init and end stuff
         assertEquals(5000.0, end.toEpochMilli() - start.toEpochMilli(), 300.0);
-        FileUtils.deleteDirectory(new File(task.cacheFolder));
 
     }
 
     @Test
-    public void warmupTest() throws IOException {
+    public void warmupTest() {
         //check if not executing
         Stresstest task = new Stresstest(5000, getWorkers(2, this.queries));
-        task.cacheFolder = UUID.randomUUID().toString();
 
         task.init(new String[]{"1", "1/1", "1/1/1"}, "test", getConnection());
         Instant start = Instant.now();
@@ -106,10 +98,8 @@ public class StresstestTest {
         Map<Object, Object> warmup = new LinkedHashMap<>();
         warmup.put("workers", getWorkers(2, this.queries));
         warmup.put("timeLimit", 350);
-        FileUtils.deleteDirectory(new File(task.cacheFolder));
 
         task = new Stresstest(5000, getWorkers(2, this.queries), warmup);
-        task.cacheFolder = UUID.randomUUID().toString();
 
         task.init(new String[]{"1", "1/1", "1/1/1"}, "test", getConnection());
         start = Instant.now();
@@ -119,16 +109,14 @@ public class StresstestTest {
         assertEquals(350.0, end.toEpochMilli() - start.toEpochMilli(), 250.0);
         //each worker could execute 3 query
         assertEquals(6, queriesExecuted);
-        FileUtils.deleteDirectory(new File(task.cacheFolder));
 
     }
 
     @Test
-    public void workerCreationTest() throws IOException {
+    public void workerCreationTest() {
         List<Map<Object, Object>> worker = getWorkers(2, this.queries);
         worker.addAll(getWorkers(1, this.queries2));
         Stresstest task = new Stresstest(5000, worker);
-        task.cacheFolder = UUID.randomUUID().toString();
 
         task.init(new String[]{"1", "1/1", "1/1/1"}, "test", getConnection());
         List<Worker> workers = task.workers;
@@ -147,7 +135,6 @@ public class StresstestTest {
         }
         assertEquals(2, q1);
         assertEquals(1, q2);
-        FileUtils.deleteDirectory(new File(task.cacheFolder));
 
     }
 }

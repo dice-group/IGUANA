@@ -18,8 +18,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class TaskController {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(TaskController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
 
     public void startTask(String[] ids, String dataset, Connection con, Task task) {
         TaskManager tmanager = new TaskManager();

@@ -6,8 +6,8 @@ import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
 import org.aksw.iguana.cc.query.set.QuerySet;
-import org.aksw.iguana.cc.query.set.newimpl.FileBasedQuerySet;
-import org.aksw.iguana.cc.query.set.newimpl.InMemQuerySet;
+import org.aksw.iguana.cc.query.set.impl.FileBasedQuerySet;
+import org.aksw.iguana.cc.query.set.impl.InMemQuerySet;
 import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
@@ -40,14 +40,11 @@ public class QueryHandler {
 
     protected LanguageProcessor langProcessor;
 
-    protected String outputFolder;
-
     public QueryHandler(Map<Object, Object> config, Integer workerID) {
         this.config = config;
         this.workerID = workerID;
 
         this.location = (String) config.get("location");
-        this.outputFolder = (String) config.get("outputFolder");
 
         initQuerySet();
         initQuerySelector();

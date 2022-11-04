@@ -36,7 +36,6 @@ public class Stresstest extends AbstractTask {
     private final List<Worker> warmupWorkers = new ArrayList<>();
     private final List<Map<Object, Object>> workerConfig;
     protected List<Worker> workers = new LinkedList<>();
-    protected String cacheFolder = "queryInstances";
     private Double warmupTimeMS;
     private Double timeLimit;
     private Long noOfQueryMixes;
@@ -94,7 +93,6 @@ public class Stresstest extends AbstractTask {
         //if shorthand classname is used, exchange to full classname
         workerConfig.put("connection", this.con);
         workerConfig.put("taskID", this.taskID);
-        addOutputFolder(workerConfig);
 
         if (timeLimit != null) {
             workerConfig.put("timeLimit", timeLimit.intValue());
@@ -109,11 +107,6 @@ public class Stresstest extends AbstractTask {
             workersToAddTo.add(worker);
         }
         return threads;
-    }
-
-    private void addOutputFolder(Map<Object, Object> workerConfig) {
-        Map<String, Object> queries = (Map<String, Object>) workerConfig.getOrDefault("queries", new HashMap<>());
-        queries.put("outputFolder", this.cacheFolder);
     }
 
     public void generateTripleStats() {

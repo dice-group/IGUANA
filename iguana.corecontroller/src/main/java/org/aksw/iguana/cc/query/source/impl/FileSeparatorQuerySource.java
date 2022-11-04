@@ -78,8 +78,6 @@ public class FileSeparatorQuerySource extends AbstractQuerySource {
         } catch (FileNotFoundException e) {
             LOGGER.error("Could not read queries");
         }
-
-        // todo
         return null;
     }
 
