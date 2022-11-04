@@ -12,12 +12,12 @@ import java.util.Map;
 public class Task implements Serializable {
 
     @JsonProperty(required = true)
-    private Map configuration = new HashMap();
+    private Map<Object, Object> configuration = new HashMap<>();
 
     @JsonProperty(required = true)
     private String className;
 
-    @JsonProperty(required = false)
+    @JsonProperty()
     private String name=null;
 
     public String getName() {
@@ -28,11 +28,11 @@ public class Task implements Serializable {
         this.name = name;
     }
 
-    public Map getConfiguration() {
+    public Map<Object, Object> getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(Map<String, Object> configuration) {
+    public void setConfiguration(Map<Object, Object> configuration) {
         this.configuration = configuration;
     }
 
