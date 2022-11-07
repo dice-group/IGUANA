@@ -14,8 +14,8 @@ import java.nio.file.Paths;
 public class FileUtils {
 
 	/**
-	 * Counts the lines in a file efficently Props goes to:
-	 * <a href="http://stackoverflow.com/a/453067/2917596">...</a>
+	 * Counts the lines in a file efficiently. Props goes to:
+	 * <a href="http://stackoverflow.com/a/453067/2917596">http://stackoverflow.com/a/453067/2917596</a>
 	 *
 	 * @param filename File to count lines of
 	 * @return No. of lines in File

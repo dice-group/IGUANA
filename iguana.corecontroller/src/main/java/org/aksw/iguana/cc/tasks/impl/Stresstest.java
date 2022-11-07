@@ -306,7 +306,7 @@ public class Stresstest extends AbstractTask {
             // UpdateWorker are allowed to execute all their updates
             boolean endFlag = true;
             for (Worker worker : this.workers) {
-                LOGGER.debug("No of query Mixes: {} , queriesInMix {}", worker.getExecutedQueries(), this.noOfQueryMixes);
+                LOGGER.debug("No of query Mixes: {} , queriesInMix {}", this.noOfQueryMixes, worker.getExecutedQueries());
                 //Check for each worker, if the
                 if (worker.hasExecutedNoOfQueryMixes(this.noOfQueryMixes)) {
                     if (!worker.isTerminated()) {
