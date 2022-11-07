@@ -29,7 +29,7 @@ public class PatternHandler {
     }
 
     public QuerySource generateQuerySource() {
-        File cacheFile = new File(this.outputFolder + File.separator + this.querySource.getHashcode());
+        File cacheFile = new File(this.outputFolder + File.separator + this.querySource.hashCode());
         if (cacheFile.exists()) {
 
             LOGGER.warn("Output folder already exists. Will not generate queries again. To generate them new remove the {{}} folder", cacheFile.getAbsolutePath());

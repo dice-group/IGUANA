@@ -44,6 +44,6 @@ public class FolderQuerySourceTest {
     @Test
     public void getHashcodeTest() {
         int expected = FileUtils.getHashcodeFromFileContent(PATH + "/query1.txt");
-        assertEquals(expected, this.querySource.getHashcode());
+        assertEquals(expected, this.querySource.hashCode());
     }
 }

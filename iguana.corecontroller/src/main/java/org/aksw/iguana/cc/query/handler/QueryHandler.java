@@ -56,7 +56,7 @@ public class QueryHandler {
         initQuerySelector();
         initLanguageProcessor();
 
-        this.hashcode = this.querySet.getHashcode();
+        this.hashcode = this.querySet.hashCode();
     }
 
     public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
@@ -77,7 +77,8 @@ public class QueryHandler {
         return this.langProcessor.generateTripleStats(queries, "" + this.hashcode, taskID);
     }
 
-    public int getHashcode() {
+    @Override
+    public int hashCode() {
         return this.hashcode;
     }
 

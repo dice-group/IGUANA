@@ -63,6 +63,6 @@ public class FileSeparatorQuerySourceTest {
     @Test
     public void getHashcodeTest() {
         int expected = FileUtils.getHashcodeFromFileContent(this.path);
-        assertEquals(expected, this.querySource.getHashcode());
+        assertEquals(expected, this.querySource.hashCode());
     }
 }

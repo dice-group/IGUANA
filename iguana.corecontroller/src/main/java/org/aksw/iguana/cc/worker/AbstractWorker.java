@@ -114,7 +114,7 @@ public abstract class AbstractWorker implements Worker {
         // For Update and Logging purpose get startTime of Worker
         this.startTime = Instant.now();
 
-        this.queryHash = this.queryHandler.getHashcode();
+        this.queryHash = this.queryHandler.hashCode();
 
         LOGGER.info("Starting Worker[{{}} : {{}}].", this.workerType, this.workerID);
         // Execute Queries as long as the Stresstest will need.
@@ -242,11 +242,7 @@ public abstract class AbstractWorker implements Worker {
         startWorker();
     }
 
-    /**
-     * The number of Queries in one mix
-     *
-     * @return
-     */
+    @Override
     public long getNoOfQueries() {
         return this.queryHandler.getQueryCount();
     }

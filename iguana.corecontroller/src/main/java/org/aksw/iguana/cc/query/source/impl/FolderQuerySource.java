@@ -66,7 +66,7 @@ public class FolderQuerySource extends AbstractQuerySource {
     }
 
     @Override
-    public int getHashcode() {
+    public int hashCode() {
         return FileUtils.getHashcodeFromFileContent(this.files[0].getAbsolutePath());
     }
 }

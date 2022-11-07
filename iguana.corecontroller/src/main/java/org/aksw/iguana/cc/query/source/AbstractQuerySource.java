@@ -11,7 +11,7 @@ public abstract class AbstractQuerySource implements QuerySource {
     }
 
     @Override
-    public int getHashcode() {
+    public int hashCode() {
         return FileUtils.getHashcodeFromFileContent(this.path);
     }
 }

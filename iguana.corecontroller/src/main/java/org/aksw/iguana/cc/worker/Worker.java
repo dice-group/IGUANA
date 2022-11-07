@@ -37,7 +37,11 @@ public interface Worker extends Runnable{
 	 */
 	void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException;
 
-
+	/**
+	 * This method will return the query handler which is used by this worker
+	 *
+	 * @return QueryHandler which is used by this worker
+	 */
 	QueryHandler getQueryHandler();
 
 
@@ -72,14 +76,14 @@ public interface Worker extends Runnable{
 
 	/**
 	 * Returns the no of queries in the queryset of the worker
-	 * @return
+	 * @return no of queries in the queryset
 	 */
 	long getNoOfQueries();
 
 	/**
 	 * Returns if the no of query mixes were already executed
-	 * @param noOfQueryMixes
-	 * @return
+	 * @param noOfQueryMixes no of query mixes
+	 * @return true if the no of query mixes were already executed
 	 */
 	boolean hasExecutedNoOfQueryMixes(Long noOfQueryMixes);
 
@@ -87,7 +91,7 @@ public interface Worker extends Runnable{
 	/**
 	 * Sets the end restriction
 	 *
-	 * @param noOfQueryMixes
+	 * @param noOfQueryMixes after which the worker should stop
 	 */
 	void endAtNoOfQueryMixes(Long noOfQueryMixes);
 

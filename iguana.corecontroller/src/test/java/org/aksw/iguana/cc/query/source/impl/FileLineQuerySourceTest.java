@@ -15,7 +15,7 @@ public class FileLineQuerySourceTest {
 
     private final FileLineQuerySource querySource;
 
-    public FileLineQuerySourceTest() throws IOException {
+    public FileLineQuerySourceTest() {
         this.querySource = new FileLineQuerySource(PATH);
     }
 
@@ -44,6 +44,6 @@ public class FileLineQuerySourceTest {
     @Test
     public void getHashcodeTest() {
         int expected = FileUtils.getHashcodeFromFileContent(PATH);
-        assertEquals(expected, this.querySource.getHashcode());
+        assertEquals(expected, this.querySource.hashCode());
     }
 }

@@ -16,9 +16,25 @@ public interface QuerySet {
      */
     String getQueryAtPos(int pos) throws IOException;
 
+    /**
+     * Gets no. of queries in the query set
+     *
+     * @return The no of queries in the query set
+     */
     int size();
 
+    /**
+     * Gets the name of the query set
+     *
+     * @return The name of the query set
+     */
     String getName();
 
-    int getHashcode();
+    /**
+     * Gets the hashcode of the query set which is the hashcode of the query source
+     *
+     * @return The hashcode of the query set
+     */
+    @Override
+    int hashCode();
 }

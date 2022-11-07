@@ -23,7 +23,7 @@ public abstract class AbstractQuerySet implements QuerySet {
     }
 
     @Override
-    public int getHashcode() {
-        return this.querySource.getHashcode();
+    public int hashCode() {
+        return this.querySource.hashCode();
     }
 }

@@ -78,7 +78,7 @@ public class PatternBasedQueryHandlerTest {
         QuerySource qs = ph.generateQuerySource();
 
         //check if folder exist this.dir/hashCode/ with |queries| files
-        int hashcode = originalSource.getHashcode();
+        int hashcode = originalSource.hashCode();
         File f = new File(this.dir + File.separator + hashcode);
         File outDir = new File(this.dir);
         assertTrue(outDir.exists());
@@ -107,7 +107,7 @@ public class PatternBasedQueryHandlerTest {
         PatternHandler ph = new PatternHandler(getConfig(), originalSource);
         ph.generateQuerySource();
 
-        int hashcode = originalSource.getHashcode();
+        int hashcode = originalSource.hashCode();
         File f = new File(this.dir + File.separator + hashcode);
         assertTrue(f.exists());
         assertTrue(f.isFile());
