@@ -8,6 +8,7 @@ import org.aksw.iguana.cc.worker.WorkerFactory;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
@@ -110,15 +111,14 @@ public class Stresstest extends AbstractTask {
     }
 
     public void generateTripleStats() {
-        // TODO How are these Triplestats used?
-
         StringWriter sw = new StringWriter();
+        Model tripleStats = ModelFactory.createDefaultModel();
         for (Worker worker : this.workers) {
-            Model tripleStats = worker.getQueryHandler().getTripleStats(this.taskID);
-            RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
+            tripleStats.add(worker.getQueryHandler().getTripleStats(this.taskID));
         }
+        RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
         this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, sw.toString());
-        //this.metaData.put(COMMON.QUERY_STATS, tripleStats);
+        this.metaData.put(COMMON.QUERY_STATS, tripleStats);
     }
 
     /**
