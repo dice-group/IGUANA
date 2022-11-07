@@ -32,10 +32,6 @@ public class Task implements Serializable {
         return configuration;
     }
 
-    public void setConfiguration(Map<Object, Object> configuration) {
-        this.configuration = configuration;
-    }
-
     public String getClassName() {
         return className;
     }
