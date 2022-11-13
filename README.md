@@ -90,8 +90,8 @@ Please download the release zip **iguana-x.y.z.zip** from the newest release ava
 
 ```
 mkdir iguana
-wget https://github.com/dice-group/IGUANA/releases/download/v3.3.2/iguana-3.3.2.zip
-unzip iguana-3.3.2.zip
+wget https://github.com/dice-group/IGUANA/releases/download/v4.0.0/iguana-4.0.0.zip
+unzip iguana-4.0.0.zip
 ```
 
 

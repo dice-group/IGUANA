@@ -38,17 +38,16 @@ tasks:
     configuration:
       # 10 minutes (time Limit is in ms)
       timeLimit: 600000
-      # we are using plain text queries
-      queryHandler:
-        className: "InstancesQueryHandler"
-        
+
       # create one SPARQL Worker (it's basically a HTTP get worker using the 'query' parameter
       # it uses the queries.txt file as benchmark queries
       workers:
         - threads: 1
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
-          
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
+            format: "one-per-line"
+
 # tell Iguana where to save your results to          
 storages:
   - className: "NTFileStorage"

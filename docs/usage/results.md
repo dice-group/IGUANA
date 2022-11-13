@@ -139,7 +139,8 @@ This provides the qps value, if the SPARQL query has a filter and the actual que
 
 ## Ontology 
 
-The results ontology (description of what each property and class means) can be found [here](http://iguana-benchmark.eu/ontology/3.3.2/iguana.owl)
+The results' ontology (description of what each property and class means) can be
+found [here](http://iguana-benchmark.eu/ontology/4.0.0/iguana.owl)
 
 
 

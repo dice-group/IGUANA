@@ -15,11 +15,11 @@ Iguana is capable of benchmarking and stresstesting the following applications
 
 ### What Benchmarks are possible
 
-Every simulated User (named Worker in the following) gets a set of queries. 
+Every simulated User (named Worker in the following) gets a set of queries.
 These queries have to be saved in one file, whereas each query is one line.
-Hence everything you can fit in one line (e.g a SPARQL query, a text question, an RDF document) can be used as a query and a set of these queries represent the benchmark. 
-Iguana will then let every Worker execute these queries against the endpoint. 
-
+Hence, everything you can fit in one line (e.g a SPARQL query, a text question, an RDF document) can be used as a query
+and a set of these queries represent the benchmark.
+Iguana will then let every Worker execute these queries against the endpoint.
 
 ## Download
 
@@ -44,6 +44,6 @@ Start Iguana with a benchmark suite (e.g the example-suite.yml) either using the
 or using java 11 if you want to give Iguana more RAM or in general set JVM options.
 
 ```bash
-java -jar iguana-corecontroller-3.3.2.jar example-suite.yml
+java -jar iguana-corecontroller-4.0.0.jar example-suite.yml
 ```
 

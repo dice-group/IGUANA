@@ -93,28 +93,28 @@ tasks:
     configuration:
       #timeLimit is in ms
       timeLimit: 3600000
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 2
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
           timeOut: 180000
   - className: "Stresstest"
     configuration:
       noOfQueryMixes: 1
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 2
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
           timeOut: 180000
 ```
 
-We configured two Tasks, both Stresstests. The first one will be executed for one hour and uses simple text queries which can be executed right away.  
-Further on it uses 2 simulated SPARQLWorkers with the same configuration. 
-At this point it's recommend to check out the [Stresstest Configuration](../stresstest#Configuration) in detail for further configuration.
+We configured two Tasks, both Stresstests. The first one will be executed for one hour and uses simple text queries
+which can be executed right away.  
+Further on it uses 2 simulated HttpGetWorkers with the same configuration.
+At this point it's recommend to check out the [Stresstest Configuration](../stresstest#Configuration) in detail for
+further configuration.
 
 
 ### Storages
@@ -269,22 +269,20 @@ tasks:
     configuration:
       #timeLimit is in ms
       timeLimit: 3600000
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 2
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
           timeOut: 180000
   - className: "Stresstest"
     configuration:
       noOfQueryMixes: 1
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 2
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
           timeOut: 180000
 
 preScriptHook: "/full/path/{{ '{{connection}}' }}/load-and-start.sh {{ '{{dataset.file}}' }}"

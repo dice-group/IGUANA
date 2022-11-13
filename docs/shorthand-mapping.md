@@ -2,15 +2,10 @@
 |----------|-------|
 | Stresstest | `org.aksw.iguana.cc.tasks.impl.Stresstest` |
 |----------|-------|
-| InstancesQueryHandler | `org.aksw.iguana.cc.query.impl.InstancesQueryHandler` | 
-| DelimInstancesQueryHandler | `org.aksw.iguana.cc.query.impl.DelimInstancesQueryHandler` | 
-| PatternQueryHandler | `org.aksw.iguana.cc.query.impl.PatternQueryHandler` | 
-|----------|-------|
 | lang.RDF | `org.aksw.iguana.cc.lang.impl.RDFLanguageProcessor` | 
 | lang.SPARQL | `org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor` | 
 | lang.SIMPLE | `org.aksw.iguana.cc.lang.impl.ThrowawayLanguageProcessor` |
 |----------|-------|
-| SPARQLWorker | `org.aksw.iguana.cc.worker.impl.SPARQLWorker` |
 | UPDATEWorker | `org.aksw.iguana.cc.worker.impl.UPDATEWorker` |
 | HttpPostWorker | `org.aksw.iguana.cc.worker.impl.HttpPostWorker` |
 | HttpGetWorker | `org.aksw.iguana.cc.worker.impl.HttpGetWorker` |

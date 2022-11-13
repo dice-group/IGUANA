@@ -7,10 +7,10 @@ You will need to create your own task either in the Iguana code itself or by usi
 Either way start by extending the AbstractTask.
 
 ```java
-package org.benchmark
+package org.benchmark;
 
 @Shorthand("MyBenchmarkTask")
-public class MyBenchmarkTask extend AbstractTask {
+public class MyBenchmarkTask extends AbstractTask {
 
 }
 
@@ -19,14 +19,14 @@ public class MyBenchmarkTask extend AbstractTask {
 You will need to override some functions. For now include them and go through them step by step
 
 ```java
-package org.benchmark
+package org.benchmark;
 
 @Shorthand("MyBenchmarkTask")
-public class MyBenchmarkTask extend AbstractTask {
+public class MyBenchmarkTask extends AbstractTask {
 
-	//Your constructor(s)
-	public MyBenchmarkTask(Integer timeLimit, ArrayList workers, LinkedHashMap queryHandler) throws FileNotFoundException {
-	}
+    //Your constructor(s)
+    public MyBenchmarkTask(Integer timeLimit, List workers, Map config) throws FileNotFoundException {
+    }
 
 
 	//Meta Data (which will be added in the resultsfile)
@@ -70,8 +70,8 @@ The third parameter should provide a map of specific key-value pairs.
 You can set this up by using the following parameters:
 
 ```java
-public MyBenchmarkTask(Integer param1, ArrayList param2, LinkedHashMap param3) throws FileNotFoundException {
-	//TODO whatever you need to do with the parameters
+public MyBenchmarkTask(Integer param1,List param2,Map param3)throws FileNotFoundException{
+        //TODO whatever you need to do with the parameters
 }
 ```
 
@@ -172,26 +172,26 @@ Simply override the existing one and call the super method and implement what yo
 ## Full overview
 
 ```java
-package org.benchmark
+package org.benchmark;
 
 @Shorthand("MyBenchmarkTask")
-public class MyBenchmarkTask extend AbstractTask {
+public class MyBenchmarkTask extends AbstractTask {
 
-	private Integer param1;
-	private ArrayList param2;
-	private LinkedHashMap param3;
+    private Integer param1;
+    private List param2;
+    private Map param3;
 
-	//Your constructor(s)
-	public MyBenchmarkTask(Integer param1, ArrayList param2, LinkedHashMap param3) throws FileNotFoundException {
-	
-		this.param1=param1;
-		this.param2=param2;
-		this.param3=param3;
-			
-	}
+    //Your constructor(s)
+    public MyBenchmarkTask(Integer param1, List param2, Map param3) throws FileNotFoundException {
+
+        this.param1 = param1;
+        this.param2 = param2;
+        this.param3 = param3;
+
+    }
 
 
-	//Meta Data (which will be added in the resultsfile)
+    //Meta Data (which will be added in the resultsfile)
 	@Override
 	public void addMetaData() {
 		super.addMetaData();
