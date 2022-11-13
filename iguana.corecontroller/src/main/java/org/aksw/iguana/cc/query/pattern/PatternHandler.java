@@ -12,6 +12,16 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class is used to instantiate SPARQL pattern queries.
+ * It will replace create a SPARQL query to request values, for the variables
+ * in the pattern query, from a provided SPARQL endpoint.
+ * <p>
+ * The instantiated queries are located in a text file, which is created at the given location.
+ * If a fitting query file is already present, the queries will not be instantiated again.
+ *
+ * @author frensing
+ */
 public class PatternHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PatternHandler.class);
 
@@ -28,6 +38,13 @@ public class PatternHandler {
         init();
     }
 
+    /**
+     * This method will generate the queries from the given patterns, writes them
+     * to a file, and returns a QuerySource based on that file.
+     * The QuerySource is then used in the QueryHandler to get the queries.
+     *
+     * @return QuerySource containing the instantiated queries
+     */
     public QuerySource generateQuerySource() {
         File cacheFile = new File(this.outputFolder + File.separator + this.querySource.hashCode());
         if (cacheFile.exists()) {
@@ -55,6 +72,10 @@ public class PatternHandler {
         return new FileLineQuerySource(cacheFile.getAbsolutePath());
     }
 
+    /**
+     * Initializes the PatternHandler
+     * Sets up the output folder, the endpoint and the limit.
+     */
     private void init() {
         this.endpoint = (String) this.config.get("endpoint");
         if (this.endpoint == null) {

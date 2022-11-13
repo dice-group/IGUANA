@@ -8,6 +8,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * A query set which reads the queries into memory on initialization.
+ * During the benchmark the query are returned from the memory.
+ *
+ * @author frensing
+ */
 public class InMemQuerySet extends AbstractQuerySet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemQuerySet.class);

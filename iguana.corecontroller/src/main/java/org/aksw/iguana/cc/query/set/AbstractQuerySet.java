@@ -2,6 +2,12 @@ package org.aksw.iguana.cc.query.set;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
 
+/**
+ * The abstract class for a QuerySet.
+ * It implements the basic functions that are shared for all QuerySets.
+ *
+ * @author frensing
+ */
 public abstract class AbstractQuerySet implements QuerySet {
     protected QuerySource querySource;
 

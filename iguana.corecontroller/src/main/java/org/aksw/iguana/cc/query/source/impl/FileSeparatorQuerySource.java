@@ -15,6 +15,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * The FileSeparatorQuerySource reads queries from a file with
+ * (multiline) queries that are separated by a separator line.
+ *
+ * @author frensing
+ */
 public class FileSeparatorQuerySource extends AbstractQuerySource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSeparatorQuerySource.class);
 

@@ -12,6 +12,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The FileSeparatorQuerySource reads queries from a folder with query files.
+ * Each query contains one (multiline) query.
+ *
+ * @author frensing
+ */
 public class FolderQuerySource extends AbstractQuerySource {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(FolderQuerySource.class);

@@ -3,6 +3,12 @@ package org.aksw.iguana.cc.query.source;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * The QuerySource is providing the queries to the QuerySet.
+ * It abstracts the actual format of the query files.
+ *
+ * @author frensing
+ */
 public interface QuerySource {
 
     /**

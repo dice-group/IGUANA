@@ -1,11 +1,16 @@
 package org.aksw.iguana.cc.query.selector.impl;
 
 import org.aksw.iguana.cc.query.selector.AbstractQuerySelector;
-import org.aksw.iguana.commons.annotation.Shorthand;
 
 import java.util.Random;
 
-@Shorthand("RandomQuerySelector")
+/**
+ * This QuerySelector is used to get the next query index in a random order.
+ * <p>
+ * It is used by the QueryHandler to get the next query.
+ *
+ * @author frensing
+ */
 public class RandomQuerySelector extends AbstractQuerySelector {
 
     protected Random querySelector;

@@ -10,6 +10,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
+/**
+ * The FileLineQuerySource reads queries from a file with one query per line.
+ *
+ * @author frensing
+ */
 public class FileLineQuerySource extends AbstractQuerySource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileLineQuerySource.class);
 

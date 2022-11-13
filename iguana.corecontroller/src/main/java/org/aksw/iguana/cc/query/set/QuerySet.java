@@ -4,7 +4,7 @@ package org.aksw.iguana.cc.query.set;
 import java.io.IOException;
 
 /**
- * A query set contains a benchmark query (this might be several queries in itself)
+ * A query set provides the Queries to the QueryHandler.
  */
 public interface QuerySet {
 

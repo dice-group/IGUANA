@@ -24,6 +24,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This QueryHandler which is used by every worker who is extending the AbstractWorker.
+ * It initializes the QuerySource, QuerySelector, QuerySet and, if needed, PatternHandler.
+ * After the initialization, it provides the next query to the worker using the generated QuerySource
+ * and the order given by the QuerySelector.
+ *
+ * @author frensing
+ */
 public class QueryHandler {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
@@ -90,6 +98,11 @@ public class QueryHandler {
         return this.langProcessor;
     }
 
+    /**
+     * Will initialize the PatternHandler if a pattern config is given.
+     * The PatternHandler uses the original query source and generates a new query source
+     * which is used during the benchmark execution.
+     */
     private void initPattern() {
         Map<String, Object> patternConfig = (Map<String, Object>) this.config.get("pattern");
         PatternHandler patternHandler = new PatternHandler(patternConfig, createQuerySource());
@@ -97,6 +110,12 @@ public class QueryHandler {
         initQuerySet(patternHandler.generateQuerySource());
     }
 
+    /**
+     * Will initialize the QuerySet.
+     * If caching is not set or set to true, the InMemQuerySet will be used. Otherwise the FileBasedQuerySet.
+     *
+     * @param querySource The QuerySource which contains the queries.
+     */
     private void initQuerySet(QuerySource querySource) {
         this.caching = (Boolean) this.config.getOrDefault("caching", true);
 
@@ -111,6 +130,14 @@ public class QueryHandler {
         initQuerySet(createQuerySource());
     }
 
+    /**
+     * Will initialize the QuerySource.
+     * Depending on the format configuration, the FileLineQuerySource,
+     * FileSeparatorQuerySource or FolderQuerySource will be used.
+     * The FileSeparatorQuerySource can be further configured with a separator.
+     *
+     * @return The QuerySource which contains the queries.
+     */
     private QuerySource createQuerySource() {
         Object formatObj = this.config.getOrDefault("format", "one-per-line");
         if (formatObj instanceof Map) {
@@ -132,6 +159,11 @@ public class QueryHandler {
         return null;
     }
 
+    /**
+     * Will initialize the QuerySelector that provides the next query index during the benchmark execution.
+     * <p>
+     * currently linear or random (with seed) are implemented
+     */
     private void initQuerySelector() {
         Object orderObj = this.config.getOrDefault("order", "linear");
 
