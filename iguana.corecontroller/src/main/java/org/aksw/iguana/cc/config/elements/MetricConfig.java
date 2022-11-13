@@ -15,8 +15,8 @@ public class MetricConfig {
     @JsonProperty(required = true)
     private String className;
 
-    @JsonProperty(required = false)
-    private Map configuration = new HashMap();
+    @JsonProperty()
+    private Map<String, Object> configuration = new HashMap<>();
 
 
     public String getClassName() {
@@ -27,16 +27,16 @@ public class MetricConfig {
         this.className = className;
     }
 
-    public Map getConfiguration() {
+    public Map<String, Object> getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(Map configuration) {
+    public void setConfiguration(Map<String, Object> configuration) {
         this.configuration = configuration;
     }
 
     public Metric createMetric() {
-        TypedFactory<Metric> factory = new TypedFactory<Metric>();
+        TypedFactory<Metric> factory = new TypedFactory<>();
         return factory.create(className, configuration);
     }
 }

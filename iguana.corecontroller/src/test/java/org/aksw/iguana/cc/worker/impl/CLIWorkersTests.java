@@ -161,8 +161,8 @@ public class CLIWorkersTests {
         assertEquals(2L, p.get(COMMON.RECEIVE_DATA_SIZE));
     }
 
-    private Map<Object, Object> getQueryConfig() {
-        Map<Object, Object> config = new HashMap<>();
+    private Map<String, Object> getQueryConfig() {
+        Map<String, Object> config = new HashMap<>();
         config.put("location", "src/test/resources/updates/empty.nt");
         return config;
     }

@@ -30,7 +30,7 @@ public class QueryHandlerTest {
     private final String[] expected;
 
 
-    public QueryHandlerTest(Map<Object, Object> config, String[] expected) {
+    public QueryHandlerTest(Map<String, Object> config, String[] expected) {
         this.queryHandler = new QueryHandler(config, 0); // workerID 0 results in correct seed for RandomSelector
         this.expected = expected;
     }

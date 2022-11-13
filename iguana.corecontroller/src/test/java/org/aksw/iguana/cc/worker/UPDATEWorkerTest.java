@@ -31,17 +31,17 @@ public class UPDATEWorkerTest {
     private static SocketConnection fastConnection;
     private final String service;
     private final String timerStrategy;
-    private final Map<Object, Object> queriesFile;
+    private final Map<String, Object> queriesFile;
     private final int expectedExec;
     private String outputDir;
 
-    public UPDATEWorkerTest(String timerStrategy, Map<Object, Object> queriesFile, int expectedExec) {
+    public UPDATEWorkerTest(String timerStrategy, Map<String, Object> queriesFile, int expectedExec) {
         this.service = "http://localhost:8025/test";
         this.timerStrategy = timerStrategy;
         this.queriesFile = queriesFile;
         this.expectedExec = expectedExec;
         //warmup
-        Map<Object, Object> warmupQueries = new HashMap<>();
+        Map<String, Object> warmupQueries = new HashMap<>();
         warmupQueries.put("location", "src/test/resources/workers/single-query.txt");
         SPARQLWorker worker = new SPARQLWorker("", 1, getConnection(), warmupQueries, null, null, null, null, null, null);
         worker.executeQuery("INSERT DATA {", "1");
@@ -53,30 +53,30 @@ public class UPDATEWorkerTest {
     public static Collection<Object[]> data() {
         Collection<Object[]> testData = new ArrayList<>();
 
-        Map<Object, Object> queries0 = new HashMap<>();
+        Map<String, Object> queries0 = new HashMap<>();
         queries0.put("location", "src/test/resources/workers/updates");
         queries0.put("format", "folder");
         testData.add(new Object[]{"none", queries0, 4});
 
-        Map<Object, Object> queries1 = new HashMap<>();
+        Map<String, Object> queries1 = new HashMap<>();
         queries1.put("location", "src/test/resources/workers/updates");
         queries1.put("format", "folder");
         testData.add(new Object[]{"fixed", queries1, 4});
 
-        Map<Object, Object> queries2 = new HashMap<>();
+        Map<String, Object> queries2 = new HashMap<>();
         queries2.put("location", "src/test/resources/workers/updates");
         queries2.put("format", "folder");
         testData.add(new Object[]{"distributed", queries2, 4});
 
-        Map<Object, Object> queries3 = new HashMap<>();
+        Map<String, Object> queries3 = new HashMap<>();
         queries3.put("location", "src/test/resources/workers/updates.txt");
         testData.add(new Object[]{"none", queries3, 3});
 
-        Map<Object, Object> queries4 = new HashMap<>();
+        Map<String, Object> queries4 = new HashMap<>();
         queries4.put("location", "src/test/resources/workers/updates.txt");
         testData.add(new Object[]{"fixed", queries4, 3});
 
-        Map<Object, Object> queries5 = new HashMap<>();
+        Map<String, Object> queries5 = new HashMap<>();
         queries5.put("location", "src/test/resources/workers/updates.txt");
         testData.add(new Object[]{"distributed", queries5, 3});
         return testData;

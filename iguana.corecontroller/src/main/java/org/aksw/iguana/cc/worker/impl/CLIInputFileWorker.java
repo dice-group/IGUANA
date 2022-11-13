@@ -22,7 +22,7 @@ import java.util.Map;
 public class CLIInputFileWorker extends MultipleCLIInputWorker {
     private final String dir;
 
-    public CLIInputFileWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String initFinished, String queryFinished, String queryError, @Nullable Integer numberOfProcesses, String directory) {
+    public CLIInputFileWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String initFinished, String queryFinished, String queryError, @Nullable Integer numberOfProcesses, String directory) {
         super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency, initFinished, queryFinished, queryError, numberOfProcesses);
         this.dir = directory;
     }

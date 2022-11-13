@@ -26,7 +26,7 @@ public class UPDATEWorker extends HttpPostWorker {
 
     private int queryCount;
 
-    public UPDATEWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String timerStrategy) {
+    public UPDATEWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String timerStrategy) {
         super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency, null, null, "application/sparql-update");
         this.timerStrategy = timerStrategy;
     }

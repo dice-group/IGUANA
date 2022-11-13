@@ -15,8 +15,8 @@ import java.util.Map;
 @Shorthand("SPARQLWorker")
 public class SPARQLWorker extends HttpGetWorker {
 
-	public SPARQLWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String parameterName, @Nullable String responseType) {
-		super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency, parameterName, responseType);
-	}
+    public SPARQLWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String parameterName, @Nullable String responseType) {
+        super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency, parameterName, responseType);
+    }
 
 }

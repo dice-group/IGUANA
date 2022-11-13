@@ -36,7 +36,7 @@ public class QueryHandler {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
 
-    protected Map<Object, Object> config;
+    protected Map<String, Object> config;
     protected Integer workerID;
     protected String location;
     protected int hashcode;
@@ -49,7 +49,7 @@ public class QueryHandler {
 
     protected LanguageProcessor langProcessor;
 
-    public QueryHandler(Map<Object, Object> config, Integer workerID) {
+    public QueryHandler(Map<String, Object> config, Integer workerID) {
         this.config = config;
         this.workerID = workerID;
 

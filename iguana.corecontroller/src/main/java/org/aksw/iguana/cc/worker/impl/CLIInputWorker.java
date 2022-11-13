@@ -35,7 +35,7 @@ public class CLIInputWorker extends AbstractWorker {
     private final String error;
     private Process process;
 
-    public CLIInputWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String initFinished, String queryFinished, String queryError) {
+    public CLIInputWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String initFinished, String queryFinished, String queryError) {
         super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency);
         this.initFinished = initFinished;
         this.queryFinished = queryFinished;

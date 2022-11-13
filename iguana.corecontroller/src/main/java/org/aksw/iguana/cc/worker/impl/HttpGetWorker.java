@@ -24,7 +24,7 @@ public class HttpGetWorker extends HttpWorker {
 
     protected String responseType = null;
 
-    public HttpGetWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String parameterName, @Nullable String responseType) {
+    public HttpGetWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String parameterName, @Nullable String responseType) {
         super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency);
 
         if (parameterName != null) {

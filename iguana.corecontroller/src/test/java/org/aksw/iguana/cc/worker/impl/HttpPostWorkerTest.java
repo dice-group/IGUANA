@@ -16,8 +16,8 @@ import static org.junit.Assert.assertEquals;
 
 public class HttpPostWorkerTest {
 
-    private static Map<Object, Object> getDefaultQueryConfig() {
-        Map<Object, Object> queries = new HashMap<>();
+    private static Map<String, Object> getDefaultQueryConfig() {
+        Map<String, Object> queries = new HashMap<>();
         queries.put("location", "src/test/resources/workers/single-query.txt");
         return queries;
     }

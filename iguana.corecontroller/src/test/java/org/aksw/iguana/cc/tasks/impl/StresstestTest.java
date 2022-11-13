@@ -22,9 +22,9 @@ public class StresstestTest {
     private final String[] queries = new String[]{"a", "b"};
     private final String[] queries2 = new String[]{"b", "c"};
 
-    private List<Map<Object, Object>> getWorkers(int threads, String[] queries) {
-        List<Map<Object, Object>> workers = new ArrayList<>();
-        Map<Object, Object> workerConfig = new HashMap<>();
+    private List<Map<String, Object>> getWorkers(int threads, String[] queries) {
+        List<Map<String, Object>> workers = new ArrayList<>();
+        Map<String, Object> workerConfig = new HashMap<>();
         workerConfig.put("className", MockupWorker.class.getCanonicalName());
         workerConfig.put("stringQueries", queries);
         workerConfig.put("threads", threads);
@@ -95,7 +95,7 @@ public class StresstestTest {
         assertEquals(0.0, end.toEpochMilli() - start.toEpochMilli(), 5.0);
         //check if executing
 
-        Map<Object, Object> warmup = new LinkedHashMap<>();
+        Map<String, Object> warmup = new LinkedHashMap<>();
         warmup.put("workers", getWorkers(2, this.queries));
         warmup.put("timeLimit", 350);
 
@@ -114,7 +114,7 @@ public class StresstestTest {
 
     @Test
     public void workerCreationTest() {
-        List<Map<Object, Object>> worker = getWorkers(2, this.queries);
+        List<Map<String, Object>> worker = getWorkers(2, this.queries);
         worker.addAll(getWorkers(1, this.queries2));
         Stresstest task = new Stresstest(5000, worker);
 

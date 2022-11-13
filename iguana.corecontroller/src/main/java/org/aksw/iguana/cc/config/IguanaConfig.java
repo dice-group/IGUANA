@@ -131,7 +131,7 @@ public class IguanaConfig {
 			metrics.add(config);
 			config = new MetricConfig();
 			config.setClassName(QPSMetric.class.getCanonicalName());
-			Map<Object, Object> configMap = new HashMap<>();
+			Map<String, Object> configMap = new HashMap<>();
 			configMap.put("penalty", 180000);
 			config.setConfiguration(configMap);
 			metrics.add(config);

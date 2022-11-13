@@ -21,8 +21,8 @@ public class MockupWorker extends AbstractWorker {
         return queries;
     }
 
-    private static Map<Object, Object> getQueryConfig() {
-        Map<Object, Object> queryConfig = new HashMap<>();
+    private static Map<String, Object> getQueryConfig() {
+        Map<String, Object> queryConfig = new HashMap<>();
         queryConfig.put("location", "src/test/resources/mockupq.txt");
         return queryConfig;
     }

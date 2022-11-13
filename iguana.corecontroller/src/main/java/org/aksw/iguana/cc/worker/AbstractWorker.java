@@ -71,7 +71,7 @@ public abstract class AbstractWorker implements Worker {
     private Random latencyRandomizer;
     private Long endAtNOQM = null;
 
-    public AbstractWorker(String taskID, Integer workerID, Connection connection, Map<Object, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
+    public AbstractWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
         this.taskID = taskID;
         this.workerID = workerID;
         this.con = connection;

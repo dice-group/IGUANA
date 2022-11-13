@@ -31,7 +31,7 @@ public class HTTPWorkerTest {
     private static SocketConnection fastConnection;
     private final String service;
     private final Boolean isPost;
-    private final HashMap<Object, Object> queries;
+    private final HashMap<String, Object> queries;
 
     private final String queriesFile = "src/test/resources/workers/single-query.txt";
     private final String responseType;

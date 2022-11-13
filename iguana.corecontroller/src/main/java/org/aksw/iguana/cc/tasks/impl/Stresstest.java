@@ -33,9 +33,9 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 public class Stresstest extends AbstractTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(Stresstest.class);
 
-    private final Map<Object, Object> warmupConfig;
+    private final Map<String, Object> warmupConfig;
     private final List<Worker> warmupWorkers = new ArrayList<>();
-    private final List<Map<Object, Object>> workerConfig;
+    private final List<Map<String, Object>> workerConfig;
     protected List<Worker> workers = new LinkedList<>();
     private Double warmupTimeMS;
     private Double timeLimit;
@@ -43,21 +43,21 @@ public class Stresstest extends AbstractTask {
     private Instant startTime;
 
 
-    public Stresstest(Integer timeLimit, List<Map<Object, Object>> workers) {
+    public Stresstest(Integer timeLimit, List<Map<String, Object>> workers) {
         this(timeLimit, workers, null);
     }
 
-    public Stresstest(Integer timeLimit, List<Map<Object, Object>> workers, Map<Object, Object> warmup) {
+    public Stresstest(Integer timeLimit, List<Map<String, Object>> workers, Map<String, Object> warmup) {
         this.timeLimit = timeLimit.doubleValue();
         this.workerConfig = workers;
         this.warmupConfig = warmup;
     }
 
-    public Stresstest(List<Map<Object, Object>> workers, Integer noOfQueryMixes) {
+    public Stresstest(List<Map<String, Object>> workers, Integer noOfQueryMixes) {
         this(workers, null, noOfQueryMixes);
     }
 
-    public Stresstest(List<Map<Object, Object>> workers, Map<Object, Object> warmup, Integer noOfQueryMixes) {
+    public Stresstest(List<Map<String, Object>> workers, Map<String, Object> warmup, Integer noOfQueryMixes) {
         this.noOfQueryMixes = noOfQueryMixes.longValue();
         this.workerConfig = workers;
         this.warmupConfig = warmup;
@@ -73,7 +73,7 @@ public class Stresstest extends AbstractTask {
     private void createWarmupWorkers() {
         this.warmupTimeMS = ((Integer) this.warmupConfig.get("timeLimit")).doubleValue();
 
-        List<Map<Object, Object>> warmupWorkerConfig = (List<Map<Object, Object>>) this.warmupConfig.get("workers");
+        List<Map<String, Object>> warmupWorkerConfig = (List<Map<String, Object>>) this.warmupConfig.get("workers");
         createWorkers(warmupWorkerConfig, this.warmupWorkers, this.warmupTimeMS);
     }
 
@@ -81,14 +81,14 @@ public class Stresstest extends AbstractTask {
         createWorkers(this.workerConfig, this.workers, this.timeLimit);
     }
 
-    private void createWorkers(List<Map<Object, Object>> workers, List<Worker> workersToAddTo, Double timeLimit) {
+    private void createWorkers(List<Map<String, Object>> workers, List<Worker> workersToAddTo, Double timeLimit) {
         int workerID = 0;
-        for (Map<Object, Object> workerConfig : workers) {
+        for (Map<String, Object> workerConfig : workers) {
             workerID += createWorker(workerConfig, workersToAddTo, timeLimit, workerID);
         }
     }
 
-    private int createWorker(Map<Object, Object> workerConfig, List<Worker> workersToAddTo, Double timeLimit, Integer baseID) {
+    private int createWorker(Map<String, Object> workerConfig, List<Worker> workersToAddTo, Double timeLimit, Integer baseID) {
         //let TypedFactory create from className and configuration
         String className = workerConfig.remove("className").toString();
         //if shorthand classname is used, exchange to full classname
