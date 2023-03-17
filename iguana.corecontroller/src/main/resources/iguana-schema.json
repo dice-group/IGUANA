@@ -53,7 +53,8 @@
             "endpoint": {"type": "string"},
             "outputFolder": {"type": "string"},
             "limit": {"type": "integer"}
-          }
+          },
+          "required": ["endpoint"]
         },
         "lang": {"type": "string"}
       },
@@ -115,7 +116,7 @@
               "parameterName": {"type": "string"},
               "queries": {"$ref": "#/definitions/queries"}
             },
-            "additionalProperties": {"type": "undefined"},
+            "additionalProperties": {"type": "null"},
             "required": ["className", "threads", "queries"]
           }
         },
@@ -137,7 +138,7 @@
               "timerStrategy": {"type": "string"},
               "queries": {"$ref": "#/definitions/queries"}
             },
-            "additionalProperties": {"type": "undefined"},
+            "additionalProperties": {"type": "null"},
             "required": ["className", "threads", "queries"]
           }
         },
@@ -161,7 +162,7 @@
               "numberOfProcesses": {"type": "integer"},
               "queries": {"$ref": "#/definitions/queries"}
             },
-            "additionalProperties": {"type": "undefined"},
+            "additionalProperties": {"type": "null"},
             "required": ["className", "threads", "queryError", "queryFinished", "initFinished", "queries"]
           }
         },
@@ -185,7 +186,7 @@
               "initFinished": {"type": "string"},
               "queries": {"$ref": "#/definitions/queries"}
             },
-            "additionalProperties": {"type": "undefined"},
+            "additionalProperties": {"type": "null"},
             "required": ["className", "threads", "queryError", "queryFinished", "initFinished", "queries"]
           }
         },
@@ -212,7 +213,7 @@
               "queryPrefix": {"type": "string"},
               "queries": {"$ref": "#/definitions/queries"}
             },
-            "additionalProperties": {"type": "undefined"},
+            "additionalProperties": {"type": "null"},
             "required": [
               "className",
               "threads",
@@ -247,7 +248,7 @@
               "numberOfProcesses": {"type": "integer"},
               "queries": {"$ref": "#/definitions/queries"}
             },
-            "additionalProperties": {"type": "undefined"},
+            "additionalProperties": {"type": "null"},
             "required": [
               "className",
               "threads",
@@ -282,7 +283,7 @@
                   "directory": {"type":  "string"},
                   "queries": {"$ref": "#/definitions/queries"}
                 },
-                "additionalProperties": {"type": "undefined"}
+                "additionalProperties": {"type": "null"}
               },
               {
                 "required": [
