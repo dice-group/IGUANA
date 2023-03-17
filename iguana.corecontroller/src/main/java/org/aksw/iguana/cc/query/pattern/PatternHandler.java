@@ -49,13 +49,15 @@ public class PatternHandler {
         File cacheFile = new File(this.outputFolder + File.separator + this.querySource.hashCode());
         if (cacheFile.exists()) {
 
-            LOGGER.warn("Output folder already exists. Will not generate queries again. To generate them new remove the {{}} folder", cacheFile.getAbsolutePath());
+            LOGGER.warn("Output file already exists. Will not generate queries again. To generate them new remove the {{}} file", cacheFile.getAbsolutePath());
 
         } else {
             LOGGER.info("Generating queries for pattern queries");
             File outFolder = new File(this.outputFolder);
             if (!outFolder.exists()) {
-                outFolder.mkdirs();
+                if(!outFolder.mkdirs()) {
+                    LOGGER.error("Failed to create folder for the generated queries");
+                }
             }
 
             try (PrintWriter pw = new PrintWriter(cacheFile)) {
@@ -94,6 +96,12 @@ public class PatternHandler {
         }
     }
 
+    /**
+     * This method generates a list of queries for a given pattern query.
+     *
+     * @param query String of the pattern query
+     * @return List of generated queries as strings
+     */
     protected List<String> generateQueries(String query) {
         List<String> queries = new LinkedList<>();
 
@@ -106,18 +114,20 @@ public class PatternHandler {
         } catch (Exception ignored) {
         }
 
-        //get vars from queryStr
+        // Replace the pattern variables with real variables and store them to the Set varNames
         Set<String> varNames = new HashSet<>();
         String command = replaceVars(query, varNames);
 
-        //generate parameterized sparql query
+        // Generate parameterized sparql string to construct final queries
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
         pss.setCommandText(command);
+
         ResultSet exchange = getInstanceVars(pss, varNames);
+
         // exchange vars in PSS
         if (!exchange.hasNext()) {
             //no solution
-            LOGGER.warn("Query has no solution, will use variables instead of var instances: {{}}", query);
+            LOGGER.warn("Pattern query has no solution, will use variables instead of var instances: {{}}", pss);
             queries.add(command);
         }
         while (exchange.hasNext()) {
@@ -134,25 +144,48 @@ public class PatternHandler {
         return queries;
     }
 
+    /**
+     * Replaces the pattern variables of the pattern query with actual variables and returns it.
+     * The names of the replaced variables will be stored in the set.
+     *
+     * @param queryStr String of the pattern query
+     * @param varNames This set will be extended by the strings of the replaced variable names
+     * @return The pattern query with the actual variables instead of pattern variables
+     */
     protected String replaceVars(String queryStr, Set<String> varNames) {
         String command = queryStr;
         Pattern pattern = Pattern.compile("%%var[0-9]+%%");
         Matcher m = pattern.matcher(queryStr);
         while (m.find()) {
-            String eVar = m.group();
-            String var = eVar.replace("%", "");
-            command = command.replace(eVar, "?" + var);
+            String patternVariable = m.group();
+            String var = patternVariable.replace("%", "");
+            command = command.replace(patternVariable, "?" + var);
             varNames.add(var);
         }
         return command;
     }
 
+    /**
+     * Generates valid values for the given variables in the query.
+     *
+     * @param pss The query, whose variables should be instantiated
+     * @param varNames The set of variables in the query that should be instantiated
+     * @return ResultSet that contains valid values for the given variables of the query
+     */
     protected ResultSet getInstanceVars(ParameterizedSparqlString pss, Set<String> varNames) {
         QueryExecution exec = QueryExecutionFactory.createServiceRequest(this.endpoint, convertToSelect(pss, varNames));
         //return result set
         return exec.execSelect();
     }
 
+    /**
+     * Creates a new query that can find valid values for the variables in the original query.
+     * The variables, that should be instantiated, are named by the set.
+     *
+     * @param pss The query whose variables should be instantiated
+     * @param varNames The set of variables in the given query that should be instantiated
+     * @return Query that can evaluate valid values for the given variables of the original query
+     */
     protected Query convertToSelect(ParameterizedSparqlString pss, Set<String> varNames) {
         Query queryCpy;
         try {
@@ -161,7 +194,7 @@ public class PatternHandler {
             }
             queryCpy = pss.asQuery();
         } catch (Exception e) {
-            LOGGER.error("Could not convert query to select (is it update query?): {{}}", pss.toString(), e);
+            LOGGER.error("The pattern query is not a valid SELECT query (is it perhaps an UPDATE query?): {{}}", pss.toString(), e);
             return null;
         }
 
