@@ -1,55 +1,56 @@
 # Tutorial
+In this tutorial, we will set up and execute a benchmark that will run a stresstest on two systems with two different datasets.
 
-In this tutorial we will go through one benchmark using two systems, two datasets and one Stresstest. 
+We will be using `Iguana v4.0.0` and the following two systems:
 
-We are using the following
-
-* Iguana v4.0.0
-* Apache Jena Fuseki 3
-* Blazegraph
+* Apache Jena Fuseki 4.7
+* Blazegraph 2.1.6
 
 ## Download
 
-First lets create a working directory
+First, create a working directory:
 
 ```bash
 mkdir myBenchmark
 cd myBenchmark
 ```
 
-Now let's download all required systems and Iguana. 
+Now you have to download all required systems and Iguana. 
 
-Starting with Iguana
+You can download Iguana from the GitHub release page by running these commands in bash: 
 
 ```bash
 wget https://github.com/dice-group/IGUANA/releases/download/v4.0.0/iguana-4.0.0.zip
 unzip iguana-4.0.0.zip
 ```
 
-Now we will download Blazegraph
+Now we will download Blazegraph:
 
 ```bash
-mkdir blazegraph && cd blazegraph 
-wget https://downloads.sourceforge.net/project/bigdata/bigdata/2.1.5/blazegraph.jar?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fbigdata%2Ffiles%2Fbigdata%2F2.1.5%2Fblazegraph.jar%2Fdownload%3Fuse_mirror%3Dmaster%26r%3Dhttps%253A%252F%252Fwww.blazegraph.com%252Fdownload%252F%26use_mirror%3Dnetix&ts=1602007009
-cd ../
+mkdir blazegraph
+cd blazegraph 
+wget https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/blazegraph.jar
+cd ..
 ```
 
-At last, we just need to download Apache Jena Fuseki and Apache Jena
+At last, we will download Apache Jena Fuseki and Apache Jena:
 
 ```bash
 mkdir fuseki && cd fuseki
-wget https://downloads.apache.org/jena/binaries/apache-jena-3.16.0.zip
-unzip apache-jena-3.16.0.zip
 
-wget https://downloads.apache.org/jena/binaries/apache-jena-fuseki-3.16.0.zip
-unzip apache-jena-fuseki-3.16.0.zip
+wget https://dlcdn.apache.org/jena/binaries/apache-jena-fuseki-4.7.0.tar.gz
+tar -xvf apache-jena-fuseki-4.7.0.tar.gz
+
+wget https://dlcdn.apache.org/jena/binaries/apache-jena-4.7.0.tar.gz
+tar -xvf apache-jena-4.7.0.tar.gz
+cd ..
 ```
 
 Finally, we have to download our datasets.
-We use two small datasets from scholarly data.
+We will be using two small datasets from scholarly data.
 The ISWC 2010 and the ekaw 2012 rich dataset.
 
-```
+```bash
 mkdir datasets/
 cd datasets
 wget http://www.scholarlydata.org/dumps/conferences/alignments/iswc-2010-complete-alignments.rdf
@@ -57,55 +58,73 @@ wget http://www.scholarlydata.org/dumps/conferences/alignments/ekaw-2012-complet
 cd ..
 ```
 
-That's it.
-Lets setup blazegraph and fuseki.
+## Systems Setup
 
-## Setting Up Systems
-
-To simplify the benchmark workflow we will use the pre- and post-script hook, in which we will load the current system
-and after the benchmark stop the system.
+To simplify the benchmark workflow we will use the pre- and post-task script hook, in which we will load the current system with datasets and stop it after the benchmark.
 
 ### Blazegraph
+Before we can write our scripts, we will first need to create a properties-file for blazegraph's dataloader. To do this, go to the blazegraph folder with and create a file called `p.properties` with:
+```bash 
+cd blazegraph
+touch p.properties
+```
 
-First let's create the script files
+Then, insert this basic configuration, which should suffice for this tutorial, into the `p.properties` file:
+```
+com.bigdata.rdf.store.AbstractTripleStore.statementIdentifiers=true
+com.bigdata.journal.AbstractJournal.bufferMode=DiskRW
+com.bigdata.journal.AbstractJournal.file=blazegraph.jnl
+```
+
+Now we can go ahead and create our script files. First create the files with: 
 
 ```bash
-cd blazegraph
 touch load-and-start.sh 
 touch stop.sh
 ```
 
-The `load-and-start.sh` script will start blazegraph and use curl to POST our dataset.
-In our case the datasets are pretty small, hence the loading time is minimal.
-Otherwise, it would be wise to load the dataset beforehand, backup the `blazegraph.jnl` file and simply exchanging the
-file in the pre script hook.
-
-For now put this into the script `load-and-start.sh`
+We will now write our pre-task script into `load-and-start.sh`. The following script will start
+blazegraph and load the given datasets:
 
 ```bash
-#starting blazegraph with 4 GB ram
-cd ../blazegraph && java -Xmx4g -server -jar blazegraph.jar &
+#!/bin/bash
 
-#load the dataset file in, which will be set as the first script argument
-curl -X POST H 'Content-Type:application/rdf+xml' --data-binary '@$1' http://localhost:9999/blazegraph/sparql
+cd ../blazegraph
+
+# load the dataset file, which will be set as the first script argument
+java -cp blazegraph.jar com.bigdata.rdf.store.DataLoader -defaultGraph http://example.org p.properties $1
+
+# start blazegraph with 4 GB ram
+java -Xmx4g -server -jar blazegraph.jar &
+
+# give blazegraph time to boot
+sleep 10
 ```
 
-Now edit `stop.sh` and adding the following:
+Now edit `stop.sh` and add the following:
 
-```
+```bash
+#!/bin/bash
+
+cd ../blazegraph
+
+# stop the blazegraph server
 pkill -f blazegraph
+
+# delete the previous dataset
+rm -f ./blazegraph.jnl
 ```
 
-Be aware that this kills all blazegraph instances, so make sure that no other process which includes the word blazegraph is running. 
+Be aware that this kills all blazegraph instances, so make sure that no other process, which includes the word blazegraph, is running. 
 
-finally get into the correct working directory again 
+Finally, change the current working directory again: 
 ```bash
 cd ..
 ```
 
 ### Fuseki
 
-Now the same for fuseki:
+Now we will do the same for fuseki:
 
 ```bash
 cd fuseki
@@ -113,64 +132,50 @@ touch load-and-start.sh
 touch stop.sh
 ```
 
-The `load-and-start.sh` script will load the dataset into a TDB directory and start fuseki using the directory.
-
-Edit the script `load-and-start.sh` as follows
+The `load-and-start.sh` script will start fuseki with the given dataset loaded into the memory.
+Edit the script `load-and-start.sh` as follows:
 
 ```bash
+#!/bin/bash
+
 cd ../fuseki
-# load the dataset as a tdb directory
-apache-jena-3.16.0/bin/tdbloader2 --loc DB $1
 
-# start fuseki
-apache-jena-fuseki-3.16.0/fuseki-server --loc DB /ds &
+# start fuseki server service in the background
+./apache-jena-fuseki-4.7.0/fuseki-server -q --file $1 /ds &
 
+# sleep to give fuseki time to boot
+sleep 10
 ```
 
-To assure fairness and provide Fuseki with 4GB as well edit `apache-jena-fuseki-3.16.0/fuseki-server` and go to the last bit exchange the following
+Now edit `stop.sh` and add the following:
 
-```
-JVM_ARGS=${JVM_ARGS:--Xmx1200M}
-```
-
-to 
-
-```
-JVM_ARGS=${JVM_ARGS:--Xmx4G}
-```
-
-Now edit `stop.sh` and adding the following:
-
-```
+```bash
+#!/bin/bash
 pkill -f fuseki
 ```
 
 Be aware that this kills all Fuseki instances, so make sure that no other process which includes the word fuseki is running. 
 
-finally get into the correct working directory again 
+Finally, change the current working directory again:
 ```bash
 cd ..
 ```
 
 ## Benchmark queries
 
-We need some queries to benchmark.
-
-For now, we will just use 3 simple queries
+Now we need some queries to benchmark. For now, we will just use these 3 simple queries:
 ```
 SELECT * {?s ?p ?o}
 SELECT * {?s ?p ?o} LIMIT 10
 SELECT * {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?o}
 ```
 
-save this to `queries.txt`
-
-
+Save them to `queries.txt`.
 
 ## Creating the Benchmark Configuration
 
-Now let's create the Iguana benchmark configuration.
-Create a file called `benchmark-suite.yml`
+Now, let's create the Iguana benchmark configuration.
+Create a file called `benchmark-suite.yml`:
 
 ```bash
 touch benchmark-suite.yml
@@ -179,13 +184,12 @@ touch benchmark-suite.yml
 Add the following subsections to this file, or simply go to [#Full Configuration](configuration#full-example) and add
 the whole piece to it.
 
-Be aware that the configuration will be started on directory level below our working directory and thus paths will
-use `../` to get the correct path.
+Be aware that Iguana will be started from the directory `myBenchmark/iguana/`, thus paths will need to use `../` to get the correct paths.
 
 ### Datasets
 
 We have two datasets, the ekaw 2012 and the iswc 2010 datasets.
-Let's name them as such and set the file path, s.t. the script hooks can use the file paths. 
+Let's name them as such and set the file path, so that the script hooks can use the files. 
 
 ```yaml
 datasets:
@@ -197,7 +201,7 @@ datasets:
 
 ### Connections
 
-We have two connections, blazegraph and fuseki with their respective endpoint at them as following:
+We have two connections, blazegraph and fuseki with their respective endpoint:
 
 ```yaml
 connections:
@@ -209,28 +213,34 @@ connections:
 
 ### Task script hooks
 
-To assure that the correct triple store will be loaded with the correct dataset add the following pre script hook `../{{ '{{connection}}' }}/load-and-start.sh {{ '{{dataset.file}}' }}`
-`{{ '{{connection}}' }}` will be set to the current benchmarked connection name (e.g. `fuseki`) and the `{{ '{{dataset.file}}' }}` will be set to the current dataset file path. 
-
-For example the start script of fuseki is located at `fuseki/load-and-start.sh`. 
-
-Further on add the `stop.sh` script as the post-script hook, assuring that the store will be stopped after each task
-
-This will look like this:
+To ensure that the correct triple store will be loaded with the correct dataset, add the following `preScriptHook`: 
 
 ```yaml
-pre-script-hook: "../{{ '{{connection}}' }}/load-and-start.sh {{ '{{dataset.file}}' }}"
-post-script-hook: "../{{ '{{connection}}' }}/stop.sh
+preScriptHook: "../{{connection}}/load-and-start.sh {{dataset.file}}"
+```
+
+This will execute the appropriate script with the current dataset as the argument, before running a task.
+`{{connection}}` will be set to the current benchmarked connection name (e.g. `fuseki`) and the `{{dataset.file}}` will be set to the current dataset file path. 
+
+For example, the pre-task script execution for fuseki and the ekaw dataset
+will look like this: 
+```bash 
+./fuseki/load-and-start.sh ../datasets/ekaw-2012-complete-alignments.rdf
+```
+
+Further on add the `stop.sh` scripts as the `postScriptHook`, ensuring that the triple store will be stopped after each task:
+
+```yaml
+postScriptHook: "../{{connection}}/stop.sh"
 ```
 
 ### Task configuration
 
-We want to stresstest our stores using 10 minutes (60.000 ms)for each dataset connection pair.
-We are using plain text queries (one per line) and want to have two simulated users querying SPARQL queries.
-The queries file is located at our working directory at `queries.txt`. Be aware that we start Iguana one level below,
-which makes the correct path `../queries.txt`
+We want to stresstest our triple stores for 10 minutes (600,000 ms) for each dataset and each connection.
+We are storing the queries in a single file with one query per line, and want to have two simulated users querying SPARQL queries.
+The queries are located at our working directory at `queries.txt`.
 
-To achieve these restrictions add the following to your file
+The configuration for this setup looks like this:
 
 ```yaml
 tasks:
@@ -241,14 +251,15 @@ tasks:
         - threads: 2
           className: "HttpGetWorker"
           queries:
+            format: "one-per-line"
             location: "../queries.txt"      
 ```
 
 ### Result Storage
 
-Let's put the results as an NTriple file and for smootheness of this tutorial let's put it into the file `my-first-iguana-results.nt` 
+Let's save the results as an NTriple file called `my-first-iguana-results.nt`.
 
-Add the following to do this.
+Add the following to do this:
 
 ```yaml
 storages:
@@ -272,18 +283,19 @@ connections:
   - name: "fuseki"
     endpoint: "http://localhost:3030/ds/sparql"
 
-pre-script-hook: "../{{ '{{connection}}' }}/load-and-start.sh {{ '{{dataset.file}}' }}"
-post-script-hook: "../{{ '{{connection}}' }}/stop.sh
+preScriptHook: "../{{connection}}/load-and-start.sh {{dataset.file}}"
+postScriptHook: "../{{connection}}/stop.sh"
 
 tasks:
   - className: "Stresstest"
-                    configuration:
-                      timeLimit: 600000
-                      workers:
-                        - threads: 2
-                          className: "HttpGetWorker"
-                          queries:
-                            location: "../queries.txt"
+    configuration:
+      timeLimit: 600000
+      workers:
+        - threads: 2
+          className: "HttpGetWorker"
+          queries:
+            format: "one-per-line"
+            location: "../queries.txt"
 
 storages:
   - className: "NTFileStorage"
@@ -293,7 +305,7 @@ storages:
 
 ## Starting Benchmark
 
-Simply use the previous created `benchmark-suite.yml` and start with
+Simply use the previous created `benchmark-suite.yml` and start it with:
 
 ```bash
 cd iguana/
@@ -308,11 +320,11 @@ As previously shown, our results will be shown in `my-first-iguana-results.nt`.
 
 Load this into a triple store of your choice and query for the results you want to use.
 
-Just use blazegraph for example:
+You can use blazegraph for example:
 
 ```bash
 cd blazegraph
-../load-and-start.sh ../my-first-iguana-results.nt
+./load-and-start.sh ../iguana/my-first-iguana-results.nt
 ```
 
 To query the results go to `http://localhost:9999/blazegraph/`.
@@ -330,7 +342,7 @@ SELECT ?taskID ?datasetLabel ?connectionLabel ?noq {
     ?suiteID rdf:type iont:Suite . 
     ?suiteID iprop:experiment ?expID .
     ?expID iprop:dataset ?dataset .
-    ?dataset rdfs:label ?datasetLabel
+    ?dataset rdfs:label ?datasetLabel .
     ?expID iprop:task ?taskID .
     ?taskID iprop:connection ?connection.
     ?connection rdfs:label ?connectionLabel .
@@ -339,7 +351,7 @@ SELECT ?taskID ?datasetLabel ?connectionLabel ?noq {
 
 ```
 
-This will provide a list of all task, naming the dataset, the connection and the no. of queries which were succesfully executed
+This will provide a list of all tasks, with their respective dataset, connection, and the number of successfully executed queries.
 
 We will however not go into detail on how to read the results. 
-This can be read at [Benchmark Results](../results/)
+Further details can be read at [Benchmark Results](./results).
