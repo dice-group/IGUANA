@@ -5,12 +5,12 @@ The following parameters can be set:
 
 | parameter | optional | default        | description                                                                                                                          |
 |-----------|----------|----------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| location  | no       |                | The location of the queries                                                                                                          |
-| format    | yes      | "one-per-line" | Format how the queries are stored in the file(s) (see [Query Format](#query-format))                                                 |
-| caching   | yes      | true           | Indicating if the queries should be loaded into memory or read from file when needed (see [Caching](#caching))                       |
+| location  | no       |                | The file path to the queries                                                                                                         |
+| format    | yes      | "one-per-line" | The format of how the queries are stored in the file(s) (see [Query Format](#query-format))                                          |
+| caching   | yes      | true           | Indicates if the queries should be loaded into the memory or read from a file everytime they are needed (see [Caching](#caching))    |
 | order     | yes      | "linear"       | The order in which the queries are read from the source (see [Query Order](#query-order))                                            |
 | pattern   | yes      |                | The configuration to be used to generate [SPARQL Pattern Queries](#sparql-pattern-queries)                                           |
-| lang      | yes      | "lang.SPARQL"  | The language the queries and response are in (e.g. SPARQL). Basically just creates some more statistics (see [Langauge](#language) ) |
+| lang      | yes      | "lang.SPARQL"  | The language the queries and responses are in (e.g. SPARQL). Basically just creates some more statistics (see [Langauge](#language)) |
 
 For example:
 
@@ -33,12 +33,12 @@ described in [SPARQL Pattern Queries](#sparql-pattern-queries).
 
 ## Query Format
 
-A query can be anything: SPARQL, SQL, a whole book if you need to.
+A query can be anything: SPARQL, SQL, or a whole book if you need to.
 The queries can be provided in different formats:
 
 - one file with:
   - one query per line
-  - multi line queries, separated by a separator line
+  - multi-line queries, separated by a separator line
 - a folder with query files; one query per file
 
 The format is configured using the `format` parameter.
@@ -50,7 +50,7 @@ The configuration for this format is:
 
 ```yaml
 queries:
-  location: "path/to/queries"
+  location: "path/to/file"
   format: "one-per-line"
 ```
 
@@ -74,11 +74,11 @@ The configuration for this format is:
 
 ```yaml
 queries:
-  location: "path/to/queries"
+  location: "path/to/file"
   format: "separator"
 ```
 
-However, you can set the separator in the configuration.
+However, you can also set the separator line in the configuration.
 For example if the separator is an empty line, the file can look like this:
 
 ```
@@ -95,7 +95,7 @@ The configuration for this format is:
 
 ```yaml
 queries:
-  location: "path/to/queries"
+  location: "path/to/file"
   format:
     separator: ""
 ```
@@ -108,7 +108,7 @@ The configuration for this format is:
 
 ```yaml
 queries:
-  location: "path/to/queries"
+  location: "path/to/folder"
   format: "folder"
 ```
 
@@ -116,7 +116,7 @@ queries:
 
 If the `caching` parameter is set to `true`, the queries are loaded into memory when the worker is initialized. This is
 the **default**.  
-If the `caching` parameter is set to `false`, the queries are read from file when needed. This is useful if the queries
+If the `caching` parameter is set to `false`, the queries are read from a file every time they are needed. This is useful if the queries
 are very large, and you don't want all of them to be in memory at the same time.
 
 An example configuration is:
@@ -145,7 +145,7 @@ queries:
 ### Random Order
 
 The queries are read in a (pseudo) random order.
-The if no explicit seed is given, the generated workerID is used as seed, to ensure that each worker starts at the same
+If no explicit seed is given, the generated workerID is used as the seed, to ensure that each worker starts with the same
 query each time.
 
 The configuration is:
@@ -183,21 +183,21 @@ Hence, Iguana can create thousands of queries using a SPARQL pattern query.
 A pattern query might look like the following:
 
 ```sparql
-SELECT * {?s rdf:type %%var0%% ; %%var1%% %%var2%%. %%var2%% ?p ?o}
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT * {?s rdf:type %%var0%% ; %%var1%% %%var2%%. %%var2%% ?p ?o}
 ```
 
-This query in itself cannot be sent to a triple store, however we can exchange the variables using real data.
+This query in itself cannot be sent to a triple store, however, we can exchange the variables using real data.
 Thus, we need a reference endpoint (ideally) containing the same data as the dataset which will be tested.
 
-This query will then be exchanged to
+This query will then be exchanged to:
 
 ```sparql
-SELECT ?var0 ?var1 ?var2 {?s rdf:type ?var0 ; ?var1 ?var2. ?var2 ?p ?o} LIMIT 2000 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT ?var0 ?var1 ?var2 {?s rdf:type ?var0 ; ?var1 ?var2. ?var2 ?p ?o} LIMIT 2000 
 ```
 
 and be queried against the reference endpoint.
 
-For each result (limited to 2000) a query instance will be created.
+For each result (limited to 2000 by default), a query instance will be created.
 
 This will be done for every query in the benchmark queries.
 All instances of these query patterns will be subsumed as if they were one query in the results.
@@ -220,4 +220,4 @@ queries:
     outputFolder: "queryCache"
 ```
 
-If the `outputFolder` contains a fitting cache file, the queries will not be generated again.
+If the `outputFolder` already contains a fitting cache file, the queries will not be generated again.

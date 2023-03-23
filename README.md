@@ -2,8 +2,9 @@
 
 ![Java CI with Maven](https://github.com/dice-group/IGUANA/workflows/Java%20CI%20with%20Maven/badge.svg)
 
-<img src="https://github.com/dice-group/IGUANA/raw/develop/images/IGUANA_logo.png" alt="IGUANA Logo" width="150" style="float: right">
-
+<p align="center">
+    <img src="https://github.com/dice-group/IGUANA/raw/develop/images/IGUANA_logo.png" alt="IGUANA Logo" width="200">
+</p>
 Iguana is an integrated suite for benchmarking the read/write performance of HTTP endpoints and CLI Applications.
 
 It provides an environment which ...

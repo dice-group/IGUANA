@@ -1,31 +1,30 @@
 # Architecture
 
-Iguanas architecture is build as generic as possible to ensure that your benchmark can be executed while you only have 
-to create a configuration file which fits your needs. 
-So ideally you do not need to code anything and can use Iguana out of the box.
+Iguanas architecture is built as generic as possible to ensure that you only have to create a configuration file to execute your benchmark.
+So ideally, you do not need to code anything and can use Iguana out of the box.
 
 Iguana will parse your Configuration (YAML or JSON format) and will read which Endpoints/Applications you want to benchmark.
-What datasets if you have any and what your benchmark should accomplish. 
-Do you just want to check how good your database/triple store performs against the state of the art?
-Does your new version out performs the old version? 
-Do you want to check read and write performance? 
+What datasets do you want to use, if you have any, and what should your benchmark accomplish? 
+Do you just want to check how well your database/triple store performs against the state of the art?
+Does your new version outperform the old version? 
+Do you want to check read and write performances? 
 ... 
 
-Whatever you want to do you just need to provide Iguana your tested applications, what to benchmark and which queries to use.
+Whatever you want to do you just need to provide Iguana with your applications, what to benchmark, and which queries to use.
 
-Iguana relys mainly on HTTP libraries, the JENA framework and java 11. 
+Iguana relies mainly on HTTP libraries, the JENA framework, and Java 11.
 
 
 ## Overview
 
 
-Iguana will read the configuration, parse it and executes for each specified datasets, each specified connection with the benchmark tasks you specified.
-After the executions the results will be written as RDF. Either to a NTriple file or directly to a triple store.
-The results can be queried itself using SPARQL.
+Iguana will read the configuration and parse it. Then it executes, for each specified dataset, each specified connection, the benchmark tasks you specified.
+After the executions, the results will be written as RDF in a file or directly to a triple store.
+The results themselves can be queried using SPARQL.
 
-Iguana currently consists of on implemented Task, the Stresstest. 
-However, this task is very configurable and most definetly will met your needs if you want performance measurement.
-It starts a user defined amount of Workers, which will try to simulate real users/applications querying your Endpoint/Application.  
+Iguana currently consists of one implemented Task, the Stresstest. 
+However, this task is very configurable and will most likely meet your demands if you need performance measurements.
+It starts a predefined amount of workers, which will try to simulate real users/applications querying your endpoint/application.  
 
 
 ## Components
@@ -34,17 +33,18 @@ Iguana consists of two components, the core controller and the result processor.
 
 ### **core controller**
 
-The core which implements the Tasks and Workers to use. How HTTP responses should be handled.
-How to analyze the benchmark queries to give a little bit more extra information in the results. 
-
+The core controller implements the tasks and workers you  want to use. It also specifies how HTTP responses should be handled and how the benchmark queries should be analyzed to gain additional information for the results.
 
 ### **result processor**
 
-The result processor consist of the metrics to apply to the query execution results and how to save the results. 
-Most of the SOtA metrics are implemented in Iguana. If one's missing it is pretty easy to add a metric though. 
+The result processor consists of the metrics, that should be applied to the query execution results, and specifies how to save these results. 
+Most of the SOtA metrics are implemented in Iguana. If a metric should be missing, it can be easily added to Iguana. 
 
-By default it stores its result in a ntriple file. But you may configure it, to write the results directly to a Triple Store. 
-On the processing side, it calculates various metrics.
+By default, the result processor stores its results in a file. But you may configure it, to write the results directly to a triple store. 
+
+On the processing side, the result processor calculates various metrics.
+
+#### Available metrics
 
 Per run metrics:
 * Query Mixes Per Hour (QMPH)
@@ -54,12 +54,12 @@ Per run metrics:
 
 Per query metrics:
 * Queries Per Second (QPS)
-    * Number of successful and failed queries
-    * result size
-    * queries per second
-    * sum of execution times
+* Number of successful and failed queries
+* result size
+* queries per second
+* sum of execution times
 
-You can change these in the Iguana Benchmark suite config.
+You can change these in the Iguana benchmark suite configuration.
 
 If you use the [basic configuration](https://github.com/dice-group/IGUANA/blob/master/example-suite.yml), it will save all mentioned metrics to a file called `results_{DD}-{MM}-{YYYY}_{HH}-{mm}.nt`
 

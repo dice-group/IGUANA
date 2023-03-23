@@ -7,7 +7,7 @@
 The results are saved into RDF. 
 For those who don't know what RDF is, it is best described as a way to represent a directed graph. 
 The according query language is called SPARQL. 
-The graph schema of an iguana result is shown above, where as each node represents a class object containg several annotations.
+The graph schema of an Iguana result is shown above, where each node represents a class object containing several annotations.
 
 To retrieve all TaskIDs you can do the following:
 
@@ -35,7 +35,7 @@ PREFIX iont: <http://iguana-benchmark.eu/class/>
 PREFIX ires: <http://iguana-benchmark.eu/resource/>
 
 SELECT ?noq {
-	ires:123/1/1 iprop:NoQ ?noq
+	ires:123/1/1 iprop:NoQ ?noq .
 }
 ```
 
@@ -48,12 +48,12 @@ PREFIX iont: <http://iguana-benchmark.eu/class/>
 PREFIX ires: <http://iguana-benchmark.eu/resource/>
 
 SELECT ?workerID ?noq {
-	ires:123/1/1 iprop:workerResult ?workerID
-	?workerID iprop:NoQ ?noq
+	ires:123/1/1 iprop:workerResult ?workerID .
+	?workerID iprop:NoQ ?noq .
 }
 ```
 
-However if you just want to see the global NoQ metric for all taskIDs in your results do the following:
+However, if you just want to see the global NoQ metric for all taskIDs in your results do the following:
 
 ```sparql
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -87,8 +87,8 @@ SELECT ?executedQuery ?qps ?failed ?resultSize {
 	?executedQuery iprop:resultSize ?resultSize .
 }
 ```
-This will get you the QPS value, the no. of failed queries and the result size of the query.
 
+This will get you the QPS value, the number of failed queries and the result size of the query.
 
 Further on you can show the dataset and connection names. 
 
@@ -103,20 +103,20 @@ SELECT ?taskID ?datasetLabel ?connectionLabel ?noq {
     ?suiteID rdf:type iont:Suite . 
     ?suiteID iprop:experiment ?expID .
     ?expID iprop:dataset ?dataset .
-    ?dataset rdfs:label ?datasetLabel
+    ?dataset rdfs:label ?datasetLabel .
     ?expID iprop:task ?taskID .
-    ?taskID iprop:connection ?connection.
+    ?taskID iprop:connection ?connection .
     ?connection rdfs:label ?connectionLabel .
-    ?taskID iprop:NoQ ?noq.
+    ?taskID iprop:NoQ ?noq .
 }
 
 ```
 
-This query will show a table containing for each task, the taskID, the dataset name, the connection name and the no. of queries succesfully executed.
+This query will show a table containing, for each task, the taskID, the dataset name, the connection name and the number of successfully executed queries.
 
 ## SPARQL Query statistics
 
-If you were using SPARQL queries as your benchmark queries you can add addtional further statistics of a query, such as: does the query has a FILTER.
+If you were using SPARQL queries as your benchmark queries, you can add additional  statistics of a query, such as, if the query has a FILTER:
 
 ```sparql
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -134,19 +134,19 @@ SELECT ?executedQuery ?qps ?hasFilter ?queryText {
 }
 ```
  
-This provides the qps value, if the SPARQL query has a filter and the actual query string. 
+This provides the qps value, a value that tells you, if the SPARQL query has a filter and the actual query string.
 
 
 ## Ontology 
 
 The results' ontology (description of what each property and class means) can be
-found [here](http://iguana-benchmark.eu/ontology/4.0.0/iguana.owl)
+found [here](http://iguana-benchmark.eu/ontology/4.0.0/iguana.owl).
 
 
 
-## Adding LSQ analyzation
+## Adding LSQ Analyzation
 
-If you're using SPARQL and want some more indepth analysation of the query statistics, you can use [LSQ](https://github.com/AKSW/LSQ) to do so. 
+If you're using SPARQL and want some more in-depth analysation of the query statistics, you can use [LSQ](https://github.com/AKSW/LSQ) to do so. 
 Iguana will add an `owl:sameAs` link between the SPARQL queries used in your benchmark and the equivalent LSQ query links. 
 
-Hence you can run the performance measurement using Iguana and the query analyzation using LSQ independently and combine both results afterwards
+Hence, you can run the performance measurement using Iguana and the query analyzation using LSQ independently and combine both results afterwards.

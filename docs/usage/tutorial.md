@@ -74,6 +74,7 @@ Then, insert this basic configuration, which should suffice for this tutorial, i
 com.bigdata.rdf.store.AbstractTripleStore.statementIdentifiers=true
 com.bigdata.journal.AbstractJournal.bufferMode=DiskRW
 com.bigdata.journal.AbstractJournal.file=blazegraph.jnl
+com.bigdata.rdf.store.AbstractTripleStore.quads=false
 ```
 
 Now we can go ahead and create our script files. First create the files with: 
@@ -92,7 +93,7 @@ blazegraph and load the given datasets:
 cd ../blazegraph
 
 # load the dataset file, which will be set as the first script argument
-java -cp blazegraph.jar com.bigdata.rdf.store.DataLoader -defaultGraph http://example.org p.properties $1
+java -cp blazegraph.jar com.bigdata.rdf.store.DataLoader p.properties $1
 
 # start blazegraph with 4 GB ram
 java -Xmx4g -server -jar blazegraph.jar &
@@ -181,7 +182,7 @@ Create a file called `benchmark-suite.yml`:
 touch benchmark-suite.yml
 ```
 
-Add the following subsections to this file, or simply go to [#Full Configuration](configuration#full-example) and add
+Add the following subsections to this file, or simply go to the [Full Configuration](#full-configuration) and add
 the whole piece to it.
 
 Be aware that Iguana will be started from the directory `myBenchmark/iguana/`, thus paths will need to use `../` to get the correct paths.
@@ -224,6 +225,7 @@ This will execute the appropriate script with the current dataset as the argumen
 
 For example, the pre-task script execution for fuseki and the ekaw dataset
 will look like this: 
+
 ```bash 
 ./fuseki/load-and-start.sh ../datasets/ekaw-2012-complete-alignments.rdf
 ```
@@ -344,9 +346,9 @@ SELECT ?taskID ?datasetLabel ?connectionLabel ?noq {
     ?expID iprop:dataset ?dataset .
     ?dataset rdfs:label ?datasetLabel .
     ?expID iprop:task ?taskID .
-    ?taskID iprop:connection ?connection.
+    ?taskID iprop:connection ?connection .
     ?connection rdfs:label ?connectionLabel .
-    ?taskID iprop:NoQ ?noq.
+    ?taskID iprop:NoQ ?noq .
 }
 
 ```
