@@ -1,6 +1,6 @@
 # IGUANA
 
-![Java CI with Maven](https://github.com/dice-group/IGUANA/workflows/Java%20CI%20with%20Maven/badge.svg)
+[![ci](https://github.com/dice-group/IGUANA/actions/workflows/ci.yml/badge.svg)](https://github.com/dice-group/IGUANA/actions/workflows/ci.yml)
 
 <p align="center">
     <img src="https://github.com/dice-group/IGUANA/raw/develop/images/IGUANA_logo.png" alt="IGUANA Logo" width="200">
