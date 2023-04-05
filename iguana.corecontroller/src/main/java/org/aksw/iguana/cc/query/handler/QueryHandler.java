@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This QueryHandler which is used by every worker who is extending the AbstractWorker.
+ * The QueryHandler is used by every worker that extends the AbstractWorker.
  * It initializes the QuerySource, QuerySelector, QuerySet and, if needed, PatternHandler.
  * After the initialization, it provides the next query to the worker using the generated QuerySource
  * and the order given by the QuerySelector.
@@ -55,11 +55,7 @@ public class QueryHandler {
 
         this.location = (String) config.get("location");
 
-        if (config.containsKey("pattern")) {
-            initPattern();
-        } else {
-            initQuerySet();
-        }
+        initQuerySet();
 
         initQuerySelector();
         initLanguageProcessor();
@@ -99,11 +95,12 @@ public class QueryHandler {
     }
 
     /**
-     * Will initialize the PatternHandler if a pattern config is given.
-     * The PatternHandler uses the original query source and generates a new query source
-     * which is used during the benchmark execution.
+     * This method initializes the PatternHandler if a pattern config is given, therefore
+     * <code>this.config.get("pattern")</code> should return an appropriate pattern configuration and not
+     * <code>null</code>. The PatternHandler uses the original query source to generate a new query source and set with
+     * the instantiated queries.
      */
-    private void initPattern() {
+    private void initPatternQuerySet() {
         Map<String, Object> patternConfig = (Map<String, Object>) this.config.get("pattern");
         PatternHandler patternHandler = new PatternHandler(patternConfig, createQuerySource());
 
@@ -126,8 +123,17 @@ public class QueryHandler {
         }
     }
 
+    /**
+     * This method initializes the QuerySet for the QueryHandler. If a pattern configuration is specified, this method
+     * will execute <code>initPatternQuerySet</code> to create the QuerySet.
+     */
     private void initQuerySet() {
-        initQuerySet(createQuerySource());
+        if(this.config.containsKey("pattern")) {
+            initPatternQuerySet();
+        }
+        else {
+            initQuerySet(createQuerySource());
+        }
     }
 
     /**
