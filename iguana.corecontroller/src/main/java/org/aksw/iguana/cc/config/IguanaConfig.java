@@ -50,13 +50,13 @@ public class IguanaConfig {
 	private List<Connection> connections;
 	@JsonProperty(required = true)
 	private List<Task> tasks;
-	@JsonProperty()
+	@JsonProperty
 	private String preScriptHook;
-	@JsonProperty()
+	@JsonProperty
 	private String postScriptHook;
-	@JsonProperty()
+	@JsonProperty
 	private List<MetricConfig> metrics;
-	@JsonProperty()
+	@JsonProperty
 	private List<StorageConfig> storages;
 
 
