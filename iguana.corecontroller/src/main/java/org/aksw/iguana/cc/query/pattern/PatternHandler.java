@@ -13,9 +13,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class is used to instantiate SPARQL pattern queries.
- * It will replace create a SPARQL query to request values, for the variables
- * in the pattern query, from a provided SPARQL endpoint.
+ * This class is used to instantiate SPARQL pattern queries. <br/>
+ * It will create and execute a SPARQL query against the provided SPARQL endpoint, that will retrieve fitting values for
+ * the variables in the pattern query.
  * <p>
  * The instantiated queries are located in a text file, which is created at the given location.
  * If a fitting query file is already present, the queries will not be instantiated again.
@@ -39,8 +39,8 @@ public class PatternHandler {
     }
 
     /**
-     * This method will generate the queries from the given patterns, writes them
-     * to a file, and returns a QuerySource based on that file.
+     * This method will generate the queries from the given patterns, write them
+     * to a file, and return a QuerySource based on that file.
      * The QuerySource is then used in the QueryHandler to get the queries.
      *
      * @return QuerySource containing the instantiated queries
