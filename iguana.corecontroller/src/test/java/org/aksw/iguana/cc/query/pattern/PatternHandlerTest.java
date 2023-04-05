@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.pattern;
 
-import org.aksw.iguana.cc.query.source.AbstractQuerySource;
+import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.utils.ServerMock;
 import org.apache.jena.ext.com.google.common.collect.Lists;
@@ -106,7 +106,7 @@ public class PatternHandlerTest {
         config.put("endpoint", this.service);
         config.put("outputFolder", this.dir);
 
-        AbstractQuerySource qs = new FileLineQuerySource("src/test/resources/workers/single-query.txt");
+        QuerySource qs = new FileLineQuerySource("src/test/resources/workers/single-query.txt");
 
         return new PatternHandler(config, qs);
     }

@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.pattern;
 
-import org.aksw.iguana.cc.query.source.AbstractQuerySource;
+import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.apache.jena.query.*;
 import org.slf4j.Logger;
@@ -26,12 +26,12 @@ public class PatternHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PatternHandler.class);
 
     private final Map<String, Object> config;
-    private final AbstractQuerySource querySource;
+    private final QuerySource querySource;
     private String endpoint;
     private Long limit;
     private String outputFolder;
 
-    public PatternHandler(Map<String, Object> config, AbstractQuerySource querySource) {
+    public PatternHandler(Map<String, Object> config, QuerySource querySource) {
         this.config = config;
         this.querySource = querySource;
 
@@ -45,7 +45,7 @@ public class PatternHandler {
      *
      * @return QuerySource containing the instantiated queries
      */
-    public AbstractQuerySource generateQuerySource() {
+    public QuerySource generateQuerySource() {
         File cacheFile = new File(this.outputFolder + File.separator + this.querySource.hashCode());
         if (cacheFile.exists()) {
 

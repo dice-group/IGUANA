@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.source.impl;
 
-import org.aksw.iguana.cc.query.source.AbstractQuerySource;
+import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author frensing
  */
-public class FolderQuerySource extends AbstractQuerySource {
+public class FolderQuerySource extends QuerySource {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(FolderQuerySource.class);
 

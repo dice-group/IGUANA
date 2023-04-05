@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.source.impl;
 
-import org.aksw.iguana.cc.query.source.AbstractQuerySource;
+import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  *
  * @author frensing
  */
-public class FileSeparatorQuerySource extends AbstractQuerySource {
+public class FileSeparatorQuerySource extends QuerySource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSeparatorQuerySource.class);
 
     private static final String DEFAULT_SEPARATOR = "###";

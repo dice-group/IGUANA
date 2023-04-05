@@ -11,12 +11,12 @@ import java.util.List;
  *
  * @author frensing
  */
-public abstract class AbstractQuerySource {
+public abstract class QuerySource {
 
     /** This string represents the path of the file or folder, that contains the queries. */
     protected String path;
 
-    public AbstractQuerySource(String path) {
+    public QuerySource(String path) {
         this.path = path;
     }
 

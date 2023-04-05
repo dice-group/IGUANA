@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.query.set.impl;
 
-import org.aksw.iguana.cc.query.set.AbstractQuerySet;
-import org.aksw.iguana.cc.query.source.AbstractQuerySource;
+import org.aksw.iguana.cc.query.set.QuerySet;
+import org.aksw.iguana.cc.query.source.QuerySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,13 +14,13 @@ import java.util.List;
  *
  * @author frensing
  */
-public class InMemQuerySet extends AbstractQuerySet {
+public class InMemQuerySet extends QuerySet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemQuerySet.class);
 
     private List<String> queries;
 
-    public InMemQuerySet(String name, AbstractQuerySource querySource) {
+    public InMemQuerySet(String name, QuerySource querySource) {
         super(name, querySource);
         loadQueries();
     }

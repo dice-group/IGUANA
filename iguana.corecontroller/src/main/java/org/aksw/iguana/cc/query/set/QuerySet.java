@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.set;
 
-import org.aksw.iguana.cc.query.source.AbstractQuerySource;
+import org.aksw.iguana.cc.query.source.QuerySource;
 
 import java.io.IOException;
 
@@ -9,15 +9,15 @@ import java.io.IOException;
  *
  * @author frensing
  */
-public abstract class AbstractQuerySet {
+public abstract class QuerySet {
 
     /** This is the QuerySource from which the queries should be retrieved. */
-    protected AbstractQuerySource querySource;
+    protected QuerySource querySource;
 
     /** A name for the query set. This is a part of the queryIDs. */
     protected String name;
 
-    public AbstractQuerySet(String name, AbstractQuerySource querySource) {
+    public QuerySet(String name, QuerySource querySource) {
         this.name = name;
         this.querySource = querySource;
     }
