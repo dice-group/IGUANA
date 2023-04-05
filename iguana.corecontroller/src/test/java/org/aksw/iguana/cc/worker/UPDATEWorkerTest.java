@@ -1,7 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.worker.impl.SPARQLWorker;
 import org.aksw.iguana.cc.worker.impl.UPDATEWorker;
 import org.aksw.iguana.cc.worker.impl.update.UpdateTimer;
 import org.aksw.iguana.commons.time.TimeUtils;
@@ -43,7 +42,7 @@ public class UPDATEWorkerTest {
         //warmup
         Map<String, Object> warmupQueries = new HashMap<>();
         warmupQueries.put("location", "src/test/resources/workers/single-query.txt");
-        SPARQLWorker worker = new SPARQLWorker("", 1, getConnection(), warmupQueries, null, null, null, null, null, null);
+        UPDATEWorker worker = new UPDATEWorker("", 1, getConnection(), warmupQueries, null, null, null, null, null);
         worker.executeQuery("INSERT DATA {", "1");
         fastServerContainer.getTimes().clear();
         fastServerContainer.getEncodedAuth().clear();
