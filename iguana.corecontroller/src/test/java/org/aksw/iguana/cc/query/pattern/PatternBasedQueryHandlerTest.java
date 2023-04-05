@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.pattern;
 
-import org.aksw.iguana.cc.query.source.QuerySource;
+import org.aksw.iguana.cc.query.source.AbstractQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.ext.com.google.common.collect.Lists;
@@ -73,9 +73,9 @@ public class PatternBasedQueryHandlerTest {
 
     @Test
     public void testQueryCreation() throws IOException {
-        QuerySource originalSource = getQuerySource();
+        AbstractQuerySource originalSource = getQuerySource();
         PatternHandler ph = new PatternHandler(getConfig(), originalSource);
-        QuerySource qs = ph.generateQuerySource();
+        AbstractQuerySource qs = ph.generateQuerySource();
 
         //check if folder exist this.dir/hashCode/ with |queries| files
         int hashcode = originalSource.hashCode();
@@ -103,7 +103,7 @@ public class PatternBasedQueryHandlerTest {
 
     @Test
     public void testCaching() throws IOException {
-        QuerySource originalSource = getQuerySource();
+        AbstractQuerySource originalSource = getQuerySource();
         PatternHandler ph = new PatternHandler(getConfig(), originalSource);
         ph.generateQuerySource();
 
@@ -135,7 +135,7 @@ public class PatternBasedQueryHandlerTest {
         return config;
     }
 
-    private QuerySource getQuerySource() {
+    private AbstractQuerySource getQuerySource() {
         return new FileLineQuerySource(this.queriesFile.getAbsolutePath());
     }
 }

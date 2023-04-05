@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.query.set.impl;
 
 import org.aksw.iguana.cc.query.set.AbstractQuerySet;
-import org.aksw.iguana.cc.query.source.QuerySource;
+import org.aksw.iguana.cc.query.source.AbstractQuerySource;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ import java.io.IOException;
  */
 public class FileBasedQuerySet extends AbstractQuerySet {
 
-    public FileBasedQuerySet(String name, QuerySource querySource) {
+    public FileBasedQuerySet(String name, AbstractQuerySource querySource) {
         super(name, querySource);
     }
 

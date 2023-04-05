@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.selector.impl;
 
-import org.aksw.iguana.cc.query.selector.AbstractQuerySelector;
+import org.aksw.iguana.cc.query.selector.QuerySelector;
 
 import java.util.Random;
 
@@ -11,12 +11,14 @@ import java.util.Random;
  *
  * @author frensing
  */
-public class RandomQuerySelector extends AbstractQuerySelector {
+public class RandomQuerySelector implements QuerySelector {
 
     protected Random querySelector;
 
+    private int size;
+
     public RandomQuerySelector(int size, long seed) {
-        super(size);
+        this.size = size;
         this.querySelector = new Random(seed);
     }
 

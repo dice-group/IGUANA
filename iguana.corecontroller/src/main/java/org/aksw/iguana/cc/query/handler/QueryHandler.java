@@ -6,10 +6,10 @@ import org.aksw.iguana.cc.query.pattern.PatternHandler;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
-import org.aksw.iguana.cc.query.set.QuerySet;
+import org.aksw.iguana.cc.query.set.AbstractQuerySet;
 import org.aksw.iguana.cc.query.set.impl.FileBasedQuerySet;
 import org.aksw.iguana.cc.query.set.impl.InMemQuerySet;
-import org.aksw.iguana.cc.query.source.QuerySource;
+import org.aksw.iguana.cc.query.source.AbstractQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
@@ -45,7 +45,7 @@ public class QueryHandler {
 
     protected QuerySelector querySelector;
 
-    protected QuerySet querySet;
+    protected AbstractQuerySet querySet;
 
     protected LanguageProcessor langProcessor;
 
@@ -113,7 +113,7 @@ public class QueryHandler {
      *
      * @param querySource The QuerySource which contains the queries.
      */
-    private void initQuerySet(QuerySource querySource) {
+    private void initQuerySet(AbstractQuerySource querySource) {
         this.caching = (Boolean) this.config.getOrDefault("caching", true);
 
         if (this.caching) {
@@ -144,7 +144,7 @@ public class QueryHandler {
      *
      * @return The QuerySource which contains the queries.
      */
-    private QuerySource createQuerySource() {
+    private AbstractQuerySource createQuerySource() {
         Object formatObj = this.config.getOrDefault("format", "one-per-line");
         if (formatObj instanceof Map) {
             Map<String, Object> format = (Map<String, Object>) formatObj;

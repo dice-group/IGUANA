@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.query.set.impl;
 
 import org.aksw.iguana.cc.query.set.AbstractQuerySet;
-import org.aksw.iguana.cc.query.source.QuerySource;
+import org.aksw.iguana.cc.query.source.AbstractQuerySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ public class InMemQuerySet extends AbstractQuerySet {
 
     private List<String> queries;
 
-    public InMemQuerySet(String name, QuerySource querySource) {
+    public InMemQuerySet(String name, AbstractQuerySource querySource) {
         super(name, querySource);
         loadQueries();
     }
