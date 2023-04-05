@@ -6,9 +6,9 @@ import org.aksw.iguana.cc.query.pattern.PatternHandler;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
-import org.aksw.iguana.cc.query.set.QuerySet;
-import org.aksw.iguana.cc.query.set.impl.FileBasedQuerySet;
-import org.aksw.iguana.cc.query.set.impl.InMemQuerySet;
+import org.aksw.iguana.cc.query.list.QueryList;
+import org.aksw.iguana.cc.query.list.impl.FileBasedQueryList;
+import org.aksw.iguana.cc.query.list.impl.InMemQueryList;
 import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
  * The QueryHandler is used by every worker that extends the AbstractWorker.
- * It initializes the QuerySource, QuerySelector, QuerySet and, if needed, PatternHandler.
+ * It initializes the QuerySource, QuerySelector, QueryList and, if needed, PatternHandler.
  * After the initialization, it provides the next query to the worker using the generated QuerySource
  * and the order given by the QuerySelector.
  *
@@ -45,7 +45,7 @@ public class QueryHandler {
 
     protected QuerySelector querySelector;
 
-    protected QuerySet querySet;
+    protected QueryList queryList;
 
     protected LanguageProcessor langProcessor;
 
@@ -60,22 +60,22 @@ public class QueryHandler {
         initQuerySelector();
         initLanguageProcessor();
 
-        this.hashcode = this.querySet.hashCode();
+        this.hashcode = this.queryList.hashCode();
     }
 
     public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
         int queryIndex = this.querySelector.getNextIndex();
-        queryStr.append(this.querySet.getQueryAtPos(queryIndex));
+        queryStr.append(this.queryList.getQuery(queryIndex));
         queryID.append(getQueryId(queryIndex));
     }
 
     public Model getTripleStats(String taskID) {
-        List<QueryWrapper> queries = new ArrayList<>(this.querySet.size());
-        for (int i = 0; i < this.querySet.size(); i++) {
+        List<QueryWrapper> queries = new ArrayList<>(this.queryList.size());
+        for (int i = 0; i < this.queryList.size(); i++) {
             try {
-                queries.add(new QueryWrapper(this.querySet.getQueryAtPos(i), getQueryId(i)));
+                queries.add(new QueryWrapper(this.queryList.getQuery(i), getQueryId(i)));
             } catch (Exception e) {
-                LOGGER.error("Could not parse query " + this.querySet.getName() + ":" + i, e);
+                LOGGER.error("Could not parse query " + this.queryList.getName() + ":" + i, e);
             }
         }
         return this.langProcessor.generateTripleStats(queries, "" + this.hashcode, taskID);
@@ -87,7 +87,7 @@ public class QueryHandler {
     }
 
     public int getQueryCount() {
-        return this.querySet.size();
+        return this.queryList.size();
     }
 
     public LanguageProcessor getLanguageProcessor() {
@@ -97,7 +97,7 @@ public class QueryHandler {
     /**
      * This method initializes the PatternHandler if a pattern config is given, therefore
      * <code>this.config.get("pattern")</code> should return an appropriate pattern configuration and not
-     * <code>null</code>. The PatternHandler uses the original query source to generate a new query source and set with
+     * <code>null</code>. The PatternHandler uses the original query source to generate a new query source and list with
      * the instantiated queries.
      */
     private void initPatternQuerySet() {
@@ -108,8 +108,8 @@ public class QueryHandler {
     }
 
     /**
-     * Will initialize the QuerySet.
-     * If caching is not set or set to true, the InMemQuerySet will be used. Otherwise the FileBasedQuerySet.
+     * Will initialize the QueryList.
+     * If caching is not set or set to true, the InMemQueryList will be used. Otherwise the FileBasedQueryList.
      *
      * @param querySource The QuerySource which contains the queries.
      */
@@ -117,15 +117,15 @@ public class QueryHandler {
         this.caching = (Boolean) this.config.getOrDefault("caching", true);
 
         if (this.caching) {
-            this.querySet = new InMemQuerySet(this.location, querySource);
+            this.queryList = new InMemQueryList(this.location, querySource);
         } else {
-            this.querySet = new FileBasedQuerySet(this.location, querySource);
+            this.queryList = new FileBasedQueryList(this.location, querySource);
         }
     }
 
     /**
-     * This method initializes the QuerySet for the QueryHandler. If a pattern configuration is specified, this method
-     * will execute <code>initPatternQuerySet</code> to create the QuerySet.
+     * This method initializes the QueryList for the QueryHandler. If a pattern configuration is specified, this method
+     * will execute <code>initPatternQuerySet</code> to create the QueryList.
      */
     private void initQuerySet() {
         if(this.config.containsKey("pattern")) {
@@ -176,11 +176,11 @@ public class QueryHandler {
         if (orderObj instanceof String) {
             String order = (String) orderObj;
             if (order.equals("linear")) {
-                this.querySelector = new LinearQuerySelector(this.querySet.size());
+                this.querySelector = new LinearQuerySelector(this.queryList.size());
                 return;
             }
             if (order.equals("random")) {
-                this.querySelector = new RandomQuerySelector(this.querySet.size(), this.workerID);
+                this.querySelector = new RandomQuerySelector(this.queryList.size(), this.workerID);
                 return;
             }
 
@@ -191,7 +191,7 @@ public class QueryHandler {
             if (order.containsKey("random")) {
                 Map<String, Object> random = (Map<String, Object>) order.get("random");
                 Integer seed = (Integer) random.get("seed");
-                this.querySelector = new RandomQuerySelector(this.querySet.size(), seed);
+                this.querySelector = new RandomQuerySelector(this.queryList.size(), seed);
                 return;
             }
             LOGGER.error("Unknown order: " + order);
@@ -208,6 +208,6 @@ public class QueryHandler {
     }
 
     private String getQueryId(int i) {
-        return this.querySet.getName() + ":" + i;
+        return this.queryList.getName() + ":" + i;
     }
 }

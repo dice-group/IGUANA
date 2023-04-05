@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * The abstract class for a QuerySource. <br/>
- * The QuerySource provides the queries to the QuerySet. It abstracts the actual format of the query files.
+ * The QuerySource provides the queries to the QueryList. It abstracts the actual format of the query files.
  *
  * @author frensing
  */
