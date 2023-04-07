@@ -2,25 +2,23 @@
 
 Currently, there is no way of extending the query handling without modifying the QueryHandler class.
 
-You can change the way queries are handled by extending the following abstract classes:
+You can change the way queries are handled by extending the following abstract class and interface:
 
-| Class                   | Function                                                         |
-|-------------------------|------------------------------------------------------------------|
-| `AbstractQuerySelector` | Responsible for selecting the next query a worker should execute |
-| `AbstractQuerySource`   | Responsible for loading queries                                  |
+| Class           | Function                                                         |
+|-----------------|------------------------------------------------------------------|
+| `QuerySelector` | Responsible for selecting the next query a worker should execute |
+| `QuerySource`   | Responsible for loading queries                                  |
 
-In the following sections, each extension of a class will be described briefly with the necessary changes to the `QueryHandler` class. For further details, read the corresponding javadocs.
+In the following sections, each extension of a class and implementation will be described briefly with the necessary changes to the 
+`QueryHandler` class. For further details, read the corresponding javadocs.
 
 ## QuerySelector
 
-If you want a different execution order for your queries, you can create a class that extends the class `AbstractQuerySelector` and implements the method `getNextIndex`:
+If you want a different execution order for your queries, you can create a class that implements the interface 
+`QuerySelector` and the method `getNextIndex`:
 
 ```java
-public class MyQuerySelector extends AbstractQuerySelector {
-    public MyQuerySelector(int size) {
-        super(size);
-    }
-    
+public class MyQuerySelector implements QuerySelector {
     @Override
 	public int getNextIndex(){
 		// code for selecting the next query a worker should execute 
@@ -28,7 +26,8 @@ public class MyQuerySelector extends AbstractQuerySelector {
 }
 ```
 
-Once you've created your QuerySelector class, you need to decide a value for the key `order` (in this example `"myOrder"`) for the configuration file and update the `initQuerySelector` method inside the `QueryHandler` class:
+Once you've created your QuerySelector class, you need to decide a value for the key `order` (in this example 
+`"myOrder"`) for the configuration file and update the `initQuerySelector` method inside the `QueryHandler` class:
 
 ```java
 private void initQuerySelector() {
@@ -37,17 +36,17 @@ private void initQuerySelector() {
 	if (orderObj instanceof String) {
 		String order = (String) orderObj;
 		if (order.equals("linear")) {
-			this.querySelector = new LinearQuerySelector(this.querySet.size());
+			this.querySelector = new LinearQuerySelector(this.queryList.size());
 			return;
 		}
 		if (order.equals("random")) {
-			this.querySelector = new RandomQuerySelector(this.querySet.size(), this.workerID);
+			this.querySelector = new RandomQuerySelector(this.queryList.size(), this.workerID);
 			return;
 		}
 
 		// add this 
 		if (order.equals("myOrder")) {
-			this.querySelector = new MyQuerySelector(this.querySet.size(), this.workerID);
+			this.querySelector = new MyQuerySelector();
 			return;
 		}
 
@@ -60,10 +59,11 @@ private void initQuerySelector() {
 
 ## QuerySource
 
-If you want to use different source for your queries, you can create a class that extends the class `AbstractQuerySourcer` and implements the following methods:
+If you want to use different source for your queries, you can create a class that extends the class `QuerySourcer` and 
+implements the following methods:
 
 ```java
-public class MyQuerySource extends AbstractQuerySource {
+public class MyQuerySource extends QuerySource {
 	public MyQuerySource(String filepath) {
 		// your constructor
 		// filepath is the value, specified in the "location"-key inside the configuration file
@@ -85,7 +85,8 @@ public class MyQuerySource extends AbstractQuerySource {
 	}
 }
 ```
-Once you have created your QuerySelector class, you need to decide a value for the key `format` (in this example `"myFormat"`) for the configuration file and update the `createQuerySource` method inside the `QueryHandler` class:
+Once you have created your QuerySelector class, you need to decide a value for the key `format` (in this example 
+`"myFormat"`) for the configuration file and update the `createQuerySource` method inside the `QueryHandler` class:
 
 ```Java
 private QuerySource createQuerySource() {
