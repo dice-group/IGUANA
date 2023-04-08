@@ -14,7 +14,30 @@ public class FileUtilsTest {
         //get test file
         File f = new File("src/test/resources/fileUtils.txt");
         //count lines
+
+        long startTime = 0;
+        long endTime = 0;
+
+        startTime = System.nanoTime();
         assertEquals(6, FileUtils.countLines(f));
+        endTime = System.nanoTime();
+        System.out.println(((double) (endTime - startTime) / 1000000) + "ms");
+
+        File f1 = new File("src/test/resources/readLineTestFile1.txt");
+        File f2 = new File("src/test/resources/readLineTestFile2.txt");
+        File f3 = new File("src/test/resources/readLineTestFile3.txt");
+        startTime = System.nanoTime();
+        assertEquals(4, FileUtils.countLines(f1));
+        endTime = System.nanoTime();
+        System.out.println(((double) (endTime - startTime) / 1000000) + "ms");
+        startTime = System.nanoTime();
+        assertEquals(4, FileUtils.countLines(f2));
+        endTime = System.nanoTime();
+        System.out.println(((double) (endTime - startTime) / 1000000) + "ms");
+        startTime = System.nanoTime();
+        assertEquals(4, FileUtils.countLines(f3));
+        endTime = System.nanoTime();
+        System.out.println(((double) (endTime - startTime) / 1000000) + "ms");
     }
 
     @Test
