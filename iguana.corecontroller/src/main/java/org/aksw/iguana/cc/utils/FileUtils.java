@@ -23,7 +23,7 @@ public class FileUtils {
 	 * @throws IOException
 	 */
 	public static int countLines(File filename) throws IOException {
-		try (InputStream is = new BufferedInputStream(new FileInputStream(filename));) {
+		try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
 
 			byte[] c = new byte[1024];
 			int count = 0;
@@ -51,39 +51,29 @@ public class FileUtils {
 	}
 
 	/**
-	 * Returns a line at a given position of a File
-	 * 
-	 * 
-	 * @param pos      line which should be returned
-	 * @param filename File in which the queries are stated
-	 * @return line at pos
+	 * Returns a line at a given position of a File. <br/>
+	 * This method ignores every empty line, therefore the parameter <code>pos</code> references the n-th non-empty line.
+	 *
+	 * @param index the position of a non-empty line which should be returned
+	 * @param file 	the file to read from
+	 * @return the line at the given position
 	 * @throws IOException
 	 */
-	public static String readLineAt(int pos, File filename) throws IOException {
-		try (InputStream is = new BufferedInputStream(new FileInputStream(filename));){
-		StringBuilder line = new StringBuilder();
-		
-			byte[] c = new byte[1024];
-			int count = 0;
-			int readChars = 0;
-			byte lastChar = '\n';
-			while ((readChars = is.read(c)) != -1) {
-				for (int i = 0; i < readChars; ++i) {
-					if (c[i] == '\n') {
-						// Check if line was empty
-						if (lastChar != '\n') {
-							++count;
-						}
-					} else if (count == pos) {
-						// Now the line
-						line.append((char) c[i]);
+	public static String readLineAt(int index, File file) throws IOException {
+		String line = "";
+		int count = 0;
+
+		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+			while ((line = br.readLine()) != null) {
+				if (!line.isEmpty()) {
+					if (count == index) {
+						return line;
 					}
-					lastChar = c[i];
+					count++;
 				}
 			}
-
-			return line.toString();
-		} 
+		}
+		return "";
 	}
 
 	public static int getHashcodeFromFileContent(String filepath) {
@@ -101,5 +91,4 @@ public class FileUtils {
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, StandardCharsets.UTF_8);
 	}
-
 }

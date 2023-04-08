@@ -2,8 +2,7 @@ package org.aksw.iguana.cc.utils;
 
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -29,6 +28,22 @@ public class FileUtilsTest {
         assertEquals("dfe", FileUtils.readLineAt(4, f));
         //read line at -1
         assertEquals("", FileUtils.readLineAt(-1, f));
+
+        File f1 = new File("src/test/resources/readLineTestFile1.txt");
+        File f2 = new File("src/test/resources/readLineTestFile2.txt");
+        File f3 = new File("src/test/resources/readLineTestFile3.txt");
+        assertEquals("line 1", FileUtils.readLineAt(0, f1));
+        assertEquals("line 1", FileUtils.readLineAt(0, f2));
+        assertEquals("line 1", FileUtils.readLineAt(0, f3));
+        assertEquals("line 2", FileUtils.readLineAt(1, f1));
+        assertEquals("line 2", FileUtils.readLineAt(1, f2));
+        assertEquals("line 2", FileUtils.readLineAt(1, f3));
+        assertEquals("line 3", FileUtils.readLineAt(2, f1));
+        assertEquals("line 3", FileUtils.readLineAt(2, f2));
+        assertEquals("line 3", FileUtils.readLineAt(2, f3));
+        assertEquals("line 4", FileUtils.readLineAt(3, f1));
+        assertEquals("line 4", FileUtils.readLineAt(3, f2));
+        assertEquals("line 4", FileUtils.readLineAt(3, f3));
     }
 
     @Test
