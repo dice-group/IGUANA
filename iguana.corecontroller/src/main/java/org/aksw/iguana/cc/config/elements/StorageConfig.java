@@ -17,7 +17,7 @@ public class StorageConfig {
     private String className;
 
     @JsonProperty
-    private Map configuration = new HashMap();
+    private Map<String, Object> configuration = new HashMap<>();
 
     public String getClassName() {
         return className;
@@ -27,16 +27,16 @@ public class StorageConfig {
         this.className = className;
     }
 
-    public Map getConfiguration() {
+    public Map<String, Object> getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(Map configuration) {
+    public void setConfiguration(Map<String, Object> configuration) {
         this.configuration = configuration;
     }
 
     public Storage createStorage() {
-        TypedFactory<Storage> factory = new TypedFactory<Storage>();
+        TypedFactory<Storage> factory = new TypedFactory<>();
         return factory.create(className, configuration);
     }
 }

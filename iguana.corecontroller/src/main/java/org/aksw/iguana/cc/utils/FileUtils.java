@@ -164,5 +164,8 @@ public class FileUtils {
 			// if for some reason, the matcher still doesn't find a line ending
 			return System.lineSeparator();
 		}
+
+	public static BufferedReader getBufferedReader(File queryFile) throws FileNotFoundException {
+		return new BufferedReader(new FileReader(queryFile));
 	}
 }

@@ -27,23 +27,22 @@ tasks:
       warmup:
         # 1 minutes (is in ms)
         timeLimit: 600000
-        # queryHandler could be set too, same as in the stresstest configuration, otherwise the same queryHandler will be use.
-        # workers are set the same way as in the configuration part
         workers:
           - threads: 1
-            className: "SPARQLWorker"
-            queriesFile: "queries_warmup.txt"
+            className: "HttpGetWorker"
+            queries:
+              location: "queries_warmup.txt"
             timeOut: 180000
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 16
-          className: "SPARQLWorker"
-          queriesFile: "queries_easy.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries_easy.txt"
           timeOut: 180000
         - threads: 4
-          className: "SPARQLWorker"
-          queriesFile: "queries_complex.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries_complex.txt"
           fixedLatency: 100
           gaussianLatency: 50
           parameterName: "query"

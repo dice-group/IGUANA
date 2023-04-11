@@ -1,11 +1,9 @@
 package org.aksw.iguana.cc.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.lang.LanguageProcessor;
-import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.model.QueryResultHashKey;
-import org.aksw.iguana.cc.worker.AbstractRandomQueryChooserWorker;
+import org.aksw.iguana.cc.worker.AbstractWorker;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.Header;
@@ -28,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;
+import java.util.Map;
 import java.util.concurrent.*;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
@@ -35,13 +34,12 @@ import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 /**
  * Abstract HTTP worker
  */
-public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
+public abstract class HttpWorker extends AbstractWorker {
 
 
     protected final ExecutorService resultProcessorService = Executors.newFixedThreadPool(5);
     protected ScheduledThreadPoolExecutor timeoutExecutorPool = new ScheduledThreadPoolExecutor(1);
     protected ConcurrentMap<QueryResultHashKey, Long> processedResults = new ConcurrentHashMap<>();
-    protected LanguageProcessor resultProcessor = new SPARQLLanguageProcessor();
     protected CloseableHttpClient client;
     protected HttpRequestBase request;
     protected ScheduledFuture<?> abortCurrentRequestFuture;
@@ -52,31 +50,31 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     protected Instant requestStartTime;
     protected long tmpExecutedQueries = 0;
 
-
-    public HttpWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
-        timeoutExecutorPool.setRemoveOnCancelPolicy(true);
+    public HttpWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
+        super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency);
+        this.timeoutExecutorPool.setRemoveOnCancelPolicy(true);
     }
 
     public ConcurrentMap<QueryResultHashKey, Long> getProcessedResults() {
-        return processedResults;
+        return this.processedResults;
     }
 
     protected void setTimeout(int timeOut) {
-        assert (request != null);
-        abortCurrentRequestFuture = timeoutExecutorPool.schedule(
+        assert (this.request != null);
+        this.abortCurrentRequestFuture = this.timeoutExecutorPool.schedule(
                 () -> {
                     synchronized (this) {
-                        request.abort();
-                        requestTimedOut = true;
+                        this.request.abort();
+                        this.requestTimedOut = true;
                     }
                 },
                 timeOut, TimeUnit.MILLISECONDS);
     }
 
     protected void abortTimeout() {
-        if (!abortCurrentRequestFuture.isDone())
-            abortCurrentRequestFuture.cancel(false);
+        if (!this.abortCurrentRequestFuture.isDone()) {
+            this.abortCurrentRequestFuture.cancel(false);
+        }
     }
 
 
@@ -85,12 +83,13 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         super.stopSending();
         abortTimeout();
         try {
-            if (request != null && !request.isAborted())
-                request.abort();
+            if (this.request != null && !this.request.isAborted()) {
+                this.request.abort();
+            }
         } catch (Exception ignored) {
         }
         closeClient();
-        this.shutdownResultProcessor();
+        shutdownResultProcessor();
     }
 
 
@@ -118,28 +117,28 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     }
 
     synchronized protected void addResultsOnce(QueryExecutionStats queryExecutionStats) {
-        if (!resultsSaved) {
-            this.addResults(queryExecutionStats);
-            resultsSaved = true;
+        if (!this.resultsSaved) {
+            addResults(queryExecutionStats);
+            this.resultsSaved = true;
         }
     }
 
     @Override
     public void executeQuery(String query, String queryID) {
-        queryId = queryID;
-        resultsSaved = false;
-        requestTimedOut = false;
+        this.queryId = queryID;
+        this.resultsSaved = false;
+        this.requestTimedOut = false;
 
-        if (client == null)
+        if (this.client == null)
             initClient();
 
         try {
-            buildRequest(query, queryId);
+            buildRequest(query, this.queryId);
 
-            setTimeout(timeOut.intValue());
-            
-            requestStartTime = Instant.now();
-            response = client.execute(request, getAuthContext(con.getEndpoint()));
+            setTimeout(this.timeOut.intValue());
+
+            this.requestStartTime = Instant.now();
+            this.response = this.client.execute(this.request, getAuthContext(this.con.getEndpoint()));
             // method to process the result in background
             processHttpResponse();
 
@@ -148,10 +147,10 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         } catch (ClientProtocolException e) {
             handleException(query, COMMON.QUERY_HTTP_FAILURE, e);
         } catch (IOException e) {
-            if (requestTimedOut) {
+            if (this.requestTimedOut) {
                 LOGGER.warn("Worker[{} : {}]: Reached timeout on query (ID {})\n{}",
-                        this.workerType, this.workerID, queryId, query);
-                addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SOCKET_TIMEOUT, timeOut));
+                        this.workerType, this.workerID, this.queryId, query);
+                addResultsOnce(new QueryExecutionStats(this.queryId, COMMON.QUERY_SOCKET_TIMEOUT, this.timeOut));
             } else {
                 handleException(query, COMMON.QUERY_UNKNOWN_EXCEPTION, e);
             }
@@ -164,84 +163,84 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
     }
 
     private void handleException(String query, Long cause, Exception e) {
-        double duration = durationInMilliseconds(requestStartTime, Instant.now());
-        addResultsOnce(new QueryExecutionStats(queryId, cause, duration));
+        double duration = durationInMilliseconds(this.requestStartTime, Instant.now());
+        addResultsOnce(new QueryExecutionStats(this.queryId, cause, duration));
         LOGGER.warn("Worker[{} : {}]: {} on query (ID {})\n{}",
-                this.workerType, this.workerID, e.getMessage(), queryId, query);
+                this.workerType, this.workerID, e.getMessage(), this.queryId, query);
         closeClient();
         initClient();
     }
 
     protected void processHttpResponse() {
-        int responseCode = response.getStatusLine().getStatusCode();
+        int responseCode = this.response.getStatusLine().getStatusCode();
         boolean responseCodeSuccess = responseCode >= 200 && responseCode < 300;
         boolean responseCodeOK = responseCode == 200;
 
         if (responseCodeOK) { // response status is OK (200)
             // get content type header
-            HttpEntity httpResponse = response.getEntity();
+            HttpEntity httpResponse = this.response.getEntity();
             Header contentTypeHeader = new BasicHeader(httpResponse.getContentType().getName(), httpResponse.getContentType().getValue());
             // get content stream
             try (InputStream contentStream = httpResponse.getContent()) {
                 // read content stream with resultProcessor, return length, set string in StringBuilder.
                 ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
-                long length = resultProcessor.readResponse(contentStream, responseBody);
-                tmpExecutedQueries++;
+                long length = this.queryHandler.getLanguageProcessor().readResponse(contentStream, responseBody);
+                this.tmpExecutedQueries++;
                 // check if such a result was already parsed and is cached
-                double duration = durationInMilliseconds(requestStartTime, Instant.now());
+                double duration = durationInMilliseconds(this.requestStartTime, Instant.now());
                 synchronized (this) {
                     QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, length);
-                    if (processedResults.containsKey(resultCacheKey)) {
+                    if (this.processedResults.containsKey(resultCacheKey)) {
                         LOGGER.debug("found result cache key {} ", resultCacheKey);
-                        Long preCalculatedResultSize = processedResults.get(resultCacheKey);
-                        addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, preCalculatedResultSize));
+                        Long preCalculatedResultSize = this.processedResults.get(resultCacheKey);
+                        addResultsOnce(new QueryExecutionStats(this.queryId, COMMON.QUERY_SUCCESS, duration, preCalculatedResultSize));
                     } else {
                         // otherwise: parse it. The parsing result is cached for the next time.
                         if (!this.endSignal) {
-                            resultProcessorService.submit(new HttpResultProcessor(this, queryId, duration, contentTypeHeader, responseBody, length));
-                            resultsSaved = true;
+                            this.resultProcessorService.submit(new HttpResultProcessor(this, this.queryId, duration, contentTypeHeader, responseBody, length));
+                            this.resultsSaved = true;
                         }
                     }
                 }
 
             } catch (IOException | TimeoutException e) {
-                double duration = durationInMilliseconds(requestStartTime, Instant.now());
-                addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
+                double duration = durationInMilliseconds(this.requestStartTime, Instant.now());
+                addResultsOnce(new QueryExecutionStats(this.queryId, COMMON.QUERY_HTTP_FAILURE, duration));
             }
         } else if (responseCodeSuccess) { // response status is succeeded (2xx) but not OK (200)
-            double duration = durationInMilliseconds(requestStartTime, Instant.now());
-            addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, 0));
+            double duration = durationInMilliseconds(this.requestStartTime, Instant.now());
+            addResultsOnce(new QueryExecutionStats(this.queryId, COMMON.QUERY_SUCCESS, duration, 0));
         } else { // response status indicates that the query did not succeed (!= 2xx)
-            double duration = durationInMilliseconds(requestStartTime, Instant.now());
-            addResultsOnce(new QueryExecutionStats(queryId, COMMON.QUERY_HTTP_FAILURE, duration));
+            double duration = durationInMilliseconds(this.requestStartTime, Instant.now());
+            addResultsOnce(new QueryExecutionStats(this.queryId, COMMON.QUERY_HTTP_FAILURE, duration));
         }
     }
 
     abstract void buildRequest(String query, String queryID) throws UnsupportedEncodingException;
 
     protected void initClient() {
-        client = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build();
+        this.client = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build();
     }
 
     protected void closeClient() {
         closeResponse();
         try {
-            if (client != null)
-                client.close();
+            if (this.client != null)
+                this.client.close();
         } catch (IOException e) {
             LOGGER.error("Could not close http response ", e);
         }
-        client = null;
+        this.client = null;
     }
 
     protected void closeResponse() {
         try {
-            if (response != null)
-                response.close();
+            if (this.response != null)
+                this.response.close();
         } catch (IOException e) {
             LOGGER.error("Could not close Client ", e);
         }
-        response = null;
+        this.response = null;
     }
 
     /**
@@ -256,8 +255,8 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         private final String queryId;
         private final double duration;
         private final Header contentTypeHeader;
-        private ByteArrayOutputStream contentStream;
         private final long contentLength;
+        private ByteArrayOutputStream contentStream;
 
         public HttpResultProcessor(HttpWorker httpWorker, String queryId, double duration, Header contentTypeHeader, ByteArrayOutputStream contentStream, long contentLength) {
             this.httpWorker = httpWorker;
@@ -272,22 +271,22 @@ public abstract class HttpWorker extends AbstractRandomQueryChooserWorker {
         public void run() {
             // Result size is not saved before. Process the http response.
 
-            ConcurrentMap<QueryResultHashKey, Long> processedResults = httpWorker.getProcessedResults();
-            QueryResultHashKey resultCacheKey = new QueryResultHashKey(queryId, contentLength);
+            ConcurrentMap<QueryResultHashKey, Long> processedResults = this.httpWorker.getProcessedResults();
+            QueryResultHashKey resultCacheKey = new QueryResultHashKey(this.queryId, this.contentLength);
             try {
                 //String content = contentStream.toString(StandardCharsets.UTF_8.name());
                 //contentStream = null; // might be hugh, dereference immediately after consumed
-                Long resultSize = httpWorker.resultProcessor.getResultSize(contentTypeHeader, contentStream, contentLength);
-                contentStream = null;
+                Long resultSize = this.httpWorker.queryHandler.getLanguageProcessor().getResultSize(this.contentTypeHeader, this.contentStream, this.contentLength);
+                this.contentStream = null;
                 // Save the result size to be re-used
                 processedResults.put(resultCacheKey, resultSize);
                 LOGGER.debug("added Result Cache Key {}", resultCacheKey);
 
-                httpWorker.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_SUCCESS, duration, resultSize));
+                this.httpWorker.addResults(new QueryExecutionStats(this.queryId, COMMON.QUERY_SUCCESS, this.duration, resultSize));
 
             } catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
                 LOGGER.error("Query results could not be parsed. ", e);
-                httpWorker.addResults(new QueryExecutionStats(queryId, COMMON.QUERY_UNKNOWN_EXCEPTION, duration));
+                this.httpWorker.addResults(new QueryExecutionStats(this.queryId, COMMON.QUERY_UNKNOWN_EXCEPTION, this.duration));
             } catch (Exception e) {
                 e.printStackTrace();
             }

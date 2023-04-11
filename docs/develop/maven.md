@@ -1,14 +1,11 @@
 # Use Iguana as a Maven dependency
 
-Iguana provides 3 packages
+Iguana provides 3 packages:
+- **iguana.commons** - consists of helper classes
+- **iguana.resultprocessor** - consists of the metrics and the result storage workflow
+- **iguana.corecontroller** - contains the tasks, workers, query-handler, and the overall benchmarking workflow
 
-**iguana.commons** which consists of some helper classes.
-
-**iguana.resultprocessor** which consists of metrics and the result storage workflow
-
-and **iguana.corecontroller** which contains the tasks, the workers, the query handlers, and the overall Iguana workflow
-
-to use one of these packages in your maven project add the following repository to your pom:
+To use one of these packages in your maven project add the following repository to your pom:
 
 ```xml
 <repository>

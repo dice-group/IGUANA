@@ -26,11 +26,11 @@
     xmlns:iont="http://iguana-benchmark.eu/class/"
     >
     
-<owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/3.3.2/iguana.owl">
+<owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/4.0.0/iguana.owl">
         <rdfs:label xml:lang="en">Iguana results ontology</rdfs:label>
-        <owl:versionInfo>3.3.2</owl:versionInfo>
+        <owl:versionInfo>4.0.0</owl:versionInfo>
         <dcterms:created>2020/09/18</dcterms:created>
-        <dcterms:lastModified>2022/09/23</dcterms:lastModified>
+        <dcterms:lastModified>2022/11/07</dcterms:lastModified>
         <dc:title xml:lang="en">Iguana results ontology</dc:title>
         <rdfs:comment xml:lang="en">The Iguana results ontology explains the rdf results of an Iguana benchmark.</rdfs:comment>
         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>

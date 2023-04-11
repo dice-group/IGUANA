@@ -42,7 +42,6 @@ public class TypedFactory <T>{
 	 * class name and the constructor arguments, be aware that all arguments
 	 * must be Strings in the constructor.
 	 * 
-	 * 
 	 * @param className
 	 *            The Class Name of the Implemented T Object
 	 * @param constructorArgs
@@ -57,9 +56,7 @@ public class TypedFactory <T>{
 			constructorArgs2 = new Object[0];
 		}
 		Class<String>[] stringClass = new Class[constructorArgs2.length];
-		for(int i=0;i<stringClass.length;i++){
-			stringClass[i]=String.class;
-		}
+		Arrays.fill(stringClass, String.class);
 		return create(className, constructorArgs2, stringClass);
 	}
 	
@@ -67,8 +64,7 @@ public class TypedFactory <T>{
 	 * Will create a T Object from a Constructor Object created by the
 	 * class name and the constructor arguments, and an Array which states each 
 	 * Constructor Object Class
-	 * 
-	 * 
+	 *
 	 * @param className
 	 *            The Class Name of the Implemented T Object
 	 * @param constructorArgs
@@ -78,11 +74,10 @@ public class TypedFactory <T>{
 	 *         constructor args
 	 */
 	@SuppressWarnings("unchecked")
-	public T create(String className,
-			Object[] constructorArgs, Class<?>[] constructorClasses) {
+	public T create(String className, Object[] constructorArgs, Class<?>[] constructorClasses) {
 
 		Object[] constructorArgs2 = constructorArgs;
-		
+
 		if (className == null) {
 			return null;
 		}
@@ -102,9 +97,7 @@ public class TypedFactory <T>{
 		}
 		if(constructorClasses==null){
 			constructorClasses = new Class[constructorArgs2.length];
-			for (int i = 0; i < constructorClasses.length; i++) {
-				constructorClasses[i] = String.class;
-			}
+			Arrays.fill(constructorClasses, String.class);
 		}
 
 		try {
@@ -133,19 +126,19 @@ public class TypedFactory <T>{
 	 * @param map key-value pair, whereas key represents the parameter name, where as value will be the value of the instantiation
 	 * @return The instantiated object or null no constructor was found
 	 */
-	public T create(String className, Map<Object, Object> map){
+	public T create(String className, Map<String, Object> map) {
 		Class<? extends T> clazz;
-		if(className==null){
+		if (className == null) {
 			return null;
 		}
 		try {
-			clazz = (Class<? extends T>) ClassLoader
-					.getSystemClassLoader().loadClass(getClassName(className));
+			clazz = (Class<? extends T>) ClassLoader.getSystemClassLoader().loadClass(getClassName(className));
 		} catch (ClassNotFoundException e1) {
 			return null;
 		}
-		Constructor[] constructors = clazz.getConstructors();
-		find: for(Constructor constructor : constructors){
+		Constructor<?>[] constructors = clazz.getConstructors();
+		find:
+		for (Constructor<?> constructor : constructors) {
 			//ParameterNames would be a backup
 			//ParameterNames paramNames = (ParameterNames) constructor.getAnnotation(ParameterNames.class);
 			//if(paramNames==null){
@@ -153,25 +146,27 @@ public class TypedFactory <T>{
 			//}
 			Parameter[] params = constructor.getParameters();
 
-			List<String> names = new ArrayList<String>();
-			List<Class> types = new ArrayList<Class>();
-			Set<String> canBeNull = new HashSet<String>();
-			for(Parameter p : params){
+			List<String> names = new ArrayList<>();
+			List<Class<?>> types = new ArrayList<>();
+			Set<String> canBeNull = new HashSet<>();
+			for (Parameter p : params) {
 				names.add(p.getName());
 				types.add(p.getType());
-				if(p.isAnnotationPresent(Nullable.class)){
+				if (p.isAnnotationPresent(Nullable.class)) {
 					canBeNull.add(p.getName());
 				}
 			}
-			List<Object> instanceNames = new ArrayList<Object>(map.keySet());
+			List<String> instanceNames = new ArrayList<>(map.keySet());
 			Object[] constructorArgs = new Object[names.size()];
-			if(!checkIfFits(map, names, canBeNull)){continue;}
-			for(Object key : instanceNames){
+			if (!checkIfFits(map, names, canBeNull)) {
+				continue;
+			}
+			for (String key : instanceNames) {
 				Object value = map.get(key);
 				//Check if constructor can map keys to param Names
-				int indexKey = names.indexOf(key.toString());
+				int indexKey = names.indexOf(key);
 				Class<?> clazz2 = types.get(indexKey);
-				if(!clazz2.isInstance(value)){
+				if (!clazz2.isInstance(value)) {
 					continue find;
 				}
 				constructorArgs[indexKey] = value;
@@ -195,26 +190,26 @@ public class TypedFactory <T>{
 	/**
 	 * Checks if the giving parameter key-value mapping fits the constructor parameter names (key vs names) and takes into account that the parameter is allowed to be null and thus
 	 * can be disregarded
-	 * @param map paramater - Object Map
-	 * @param names parameter names of the actual constructor
+	 *
+	 * @param map       paramater - Object Map
+	 * @param names     parameter names of the actual constructor
 	 * @param canBeNull all paramaters who can be null
 	 * @return true if constructor fits, otherwise false
 	 */
-	private boolean checkIfFits(Map<Object, Object>  map, List<String> names, Set<String> canBeNull) {
+	private boolean checkIfFits(Map<String, Object> map, List<String> names, Set<String> canBeNull) {
 		//check if all provided parameter names are in the constructor
-		for(Object key : map.keySet()){
-			Object value = map.get(key);
-			if(!names.contains(key.toString())){
+		for (String key : map.keySet()) {
+			if (!names.contains(key)) {
 				return false;
 			}
 		}
 		//check if all notNull objects are provided
-		Set<Object> keySet = map.keySet();
-		for(String name : names){
+		Set<String> keySet = map.keySet();
+		for (String name : names) {
 			//we can safely assume that Object is string
-			if(!keySet.contains(name)){
+			if (!keySet.contains(name)) {
 				//check if parameter is Nullable
-				if(!canBeNull.contains(name)){
+				if (!canBeNull.contains(name)) {
 					return false;
 				}
 			}
@@ -235,42 +230,44 @@ public class TypedFactory <T>{
 	 * @param map Parameter name - value mapping
 	 * @return The instantiated object or null no constructor was found
 	 */
-	public T createAnnotated(String className, Map<Object, Object> map){
+	public T createAnnotated(String className, Map<String, Object> map) {
 		Class<? extends T> clazz;
 		try {
-			clazz = (Class<? extends T>) ClassLoader
-					.getSystemClassLoader().loadClass(getClassName(className));
+			clazz = (Class<? extends T>) ClassLoader.getSystemClassLoader().loadClass(getClassName(className));
 		} catch (ClassNotFoundException e1) {
 			return null;
 		}
-		Constructor[] constructors = clazz.getConstructors();
-		find: for(Constructor constructor : constructors){
-			ParameterNames paramNames = (ParameterNames) constructor.getAnnotation(ParameterNames.class);
-			if(paramNames==null){
-					continue ;
+		Constructor<?>[] constructors = clazz.getConstructors();
+		find:
+		for (Constructor<?> constructor : constructors) {
+			ParameterNames paramNames = constructor.getAnnotation(ParameterNames.class);
+			if (paramNames == null) {
+				continue;
 			}
 			Parameter[] params = constructor.getParameters();
 
-			List<String> names = new ArrayList<String>();
-			List<Class> types = new ArrayList<Class>();
-			Set<String> canBeNull = new HashSet<String>();
-			for(int i=0;i<params.length;i++){
+			List<String> names = new ArrayList<>();
+			List<Class<?>> types = new ArrayList<>();
+			Set<String> canBeNull = new HashSet<>();
+			for (int i = 0; i < params.length; i++) {
 				Parameter p = params[i];
 				names.add(paramNames.names()[i]);
 				types.add(p.getType());
-				if(p.isAnnotationPresent(Nullable.class)){
+				if (p.isAnnotationPresent(Nullable.class)) {
 					canBeNull.add(p.getName());
 				}
 			}
-			List<Object> instanceNames = new ArrayList<Object>(map.keySet());
+			List<String> instanceNames = new ArrayList<>(map.keySet());
 			Object[] constructorArgs = new Object[names.size()];
-			if(!checkIfFits(map, names, canBeNull)){continue;}
-			for(Object key : instanceNames){
+			if (!checkIfFits(map, names, canBeNull)) {
+				continue;
+			}
+			for (String key : instanceNames) {
 				Object value = map.get(key);
 				//Check if constructor can map keys to param Names
-				int indexKey = names.indexOf(key.toString());
+				int indexKey = names.indexOf(key);
 				Class<?> clazz2 = types.get(indexKey);
-				if(!clazz2.isInstance(value)){
+				if (!clazz2.isInstance(value)) {
 					continue find;
 				}
 				constructorArgs[indexKey] = value;
