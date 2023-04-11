@@ -1,57 +1,110 @@
 # Extend Query Handling
 
-If you want to use another query generating method as the implemented ones you can do so. 
+Currently, there is no way of extending the query handling without modifying the QueryHandler class.
 
-Start by extend the `AbstractWorkerQueryHandler`. It will split up the generation for UPDATE queries and Request queries.
+You can change the way queries are handled by extending the following abstract class and interface:
+
+| Class           | Function                                                         |
+|-----------------|------------------------------------------------------------------|
+| `QuerySelector` | Responsible for selecting the next query a worker should execute |
+| `QuerySource`   | Responsible for loading queries                                  |
+
+In the following sections, each extension of a class and implementation will be described briefly with the necessary changes to the 
+`QueryHandler` class. For further details, read the corresponding javadocs.
+
+## QuerySelector
+
+If you want a different execution order for your queries, you can create a class that implements the interface 
+`QuerySelector` and the method `getNextIndex`:
 
 ```java
-package org.benchmark.query
-
-
-public class MyQueryHandler extends AbstractWorkerQueryHandler{
-
-	protected abstract QuerySet[] generateQueries(String queryFileName) {
-	
+public class MyQuerySelector implements QuerySelector {
+    @Override
+	public int getNextIndex(){
+		// code for selecting the next query a worker should execute 
 	}
-
-	protected abstract QuerySet[] generateUPDATE(String updatePath) {
-	
-	}
-
 }
-
 ```
 
-for simplicity we will only show the `generateQueries` as it is pretty much the same.
-However be aware that the `generateUPDATE` will use a directory or file instead of just a query file.
-
-## Generate Queries
-
-The class will get a query file containing all the queries. 
-How you read them and what to do with them is up to you. 
-You just need to return an array of `QuerySet`s 
-
-A query set is simply a container which contains the name/id of the query as well as the query or several queries (f.e. if they are of the same structure but different values).
-For simplicity we assume that we deal with only one query per query set. 
-
-Parse your file and for each query create a QuerySet
-
+Once you've created your QuerySelector class, you need to decide a value for the key `order` (in this example 
+`"myOrder"`) for the configuration file and update the `initQuerySelector` method inside the `QueryHandler` class:
 
 ```java
-	protected QuerySet[] generateQueries(String queryFileName) {
-		File queryFile = new File(queryFileName);
-		List<QuerySet> ret = new LinkedList<QuerySet>();
+private void initQuerySelector() {
+    // ...
+        
+	if (orderObj instanceof String) {
+		String order = (String) orderObj;
+		if (order.equals("linear")) {
+			this.querySelector = new LinearQuerySelector(this.queryList.size());
+			return;
+		}
+		if (order.equals("random")) {
+			this.querySelector = new RandomQuerySelector(this.queryList.size(), this.workerID);
+			return;
+		}
 
-		int id=0;		
-		//TODO parse your queries
-			...
-			
-				ret.add(new InMemQuerySet(idPrefix+id++, queryString));
-			...
+		// add this 
+		if (order.equals("myOrder")) {
+			this.querySelector = new MyQuerySelector();
+			return;
+		}
 
-
-		return ret.toArray(new QuerySet[]{});
+		LOGGER.error("Unknown order: " + order);
 	}
+
+	// ...
+}
 ```
 
-This function will parse your query accodringly and add an In Memory QuerySet (another option is a File Based Query Set, where each QuerySet will be stored in a file and IO happens during the benchmark itself.
+## QuerySource
+
+If you want to use different source for your queries, you can create a class that extends the class `QuerySourcer` and 
+implements the following methods:
+
+```java
+public class MyQuerySource extends QuerySource {
+	public MyQuerySource(String filepath) {
+		// your constructor
+		// filepath is the value, specified in the "location"-key inside the configuration file
+	}
+	
+	@Override
+	public int size() {
+		// returns the amount of queries in the source
+	}
+
+	@Override
+	public String getQuery(int index) throws IOException {
+		// retrieves a single query with the specific index
+	}
+
+	@Override
+	public List<String> getAllQueries() throws IOException {
+		// retrieves every query from the source
+	}
+}
+```
+Once you have created your QuerySelector class, you need to decide a value for the key `format` (in this example 
+`"myFormat"`) for the configuration file and update the `createQuerySource` method inside the `QueryHandler` class:
+
+```Java
+private QuerySource createQuerySource() {
+	// ...
+	else {
+		switch ((String) formatObj) {
+			case "one-per-line":
+				return new FileLineQuerySource(this.location);
+			case "separator":
+				return new FileSeparatorQuerySource(this.location);
+			case "folder":
+				return new FolderQuerySource(this.location);
+
+			// add this
+			case "myFormat":
+				return new MyQuerySource(this.location);
+		}
+	}
+	// ...
+}
+```

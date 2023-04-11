@@ -14,20 +14,19 @@ import java.nio.file.Paths;
 public class FileUtils {
 
 	/**
-	 * Counts the lines in a file efficently Props goes to:
-	 * http://stackoverflow.com/a/453067/2917596
-	 * 
-	 * 
+	 * Counts the lines in a file efficiently. Props goes to:
+	 * <a href="http://stackoverflow.com/a/453067/2917596">http://stackoverflow.com/a/453067/2917596</a>
+	 *
 	 * @param filename File to count lines of
 	 * @return No. of lines in File
 	 * @throws IOException
 	 */
 	public static int countLines(File filename) throws IOException {
-		try (InputStream is = new BufferedInputStream(new FileInputStream(filename));) {
+		try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
 
 			byte[] c = new byte[1024];
 			int count = 0;
-			int readChars = 0;
+			int readChars;
 			boolean empty = true;
 			byte lastChar = '\n';
 			while ((readChars = is.read(c)) != -1) {
@@ -53,19 +52,18 @@ public class FileUtils {
 	/**
 	 * Returns a line at a given position of a File
 	 * 
-	 * 
 	 * @param pos      line which should be returned
 	 * @param filename File in which the queries are stated
 	 * @return line at pos
 	 * @throws IOException
 	 */
 	public static String readLineAt(int pos, File filename) throws IOException {
-		try (InputStream is = new BufferedInputStream(new FileInputStream(filename));){
-		StringBuilder line = new StringBuilder();
-		
+		try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
+			StringBuilder line = new StringBuilder();
+
 			byte[] c = new byte[1024];
 			int count = 0;
-			int readChars = 0;
+			int readChars;
 			byte lastChar = '\n';
 			while ((readChars = is.read(c)) != -1) {
 				for (int i = 0; i < readChars; ++i) {
@@ -102,4 +100,7 @@ public class FileUtils {
 		return new String(encoded, StandardCharsets.UTF_8);
 	}
 
+	public static BufferedReader getBufferedReader(File queryFile) throws FileNotFoundException {
+		return new BufferedReader(new FileReader(queryFile));
+	}
 }

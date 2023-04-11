@@ -1,6 +1,7 @@
 # Configuration
 
-The Configuration explains Iguana how to execute your benchmark. It is divided into 5 categories
+The configuration tells Iguana how it should execute your benchmark.
+It is divided into five categories:
 
 * Connections
 * Datasets
@@ -8,26 +9,27 @@ The Configuration explains Iguana how to execute your benchmark. It is divided i
 * Storages
 * Metrics
 
-Additionally a pre and post task script hook can be set. 
+Additionally, a pre- and post-task script hook can be set. 
 
-The configuration has to be either in YAML or JSON. Each section will be detailed out and shows configuration examples. At the end the full configuration will be shown. 
-For this we will stick to the YAML format, however the equivalent JSON is also valid and can be parsed by Iguana.
+The configuration has to be either written in YAML or JSON. Each section contains detailed information and shows configuration examples. 
+In the end, the full configuration example will be shown. 
+For this documentation, we will stick to the YAML format, however, the equivalent JSON format can be parsed by Iguana too.
 
 ### Connections
 
-Every benchmark suite can execute several connections (e.g. an HTTP endpoint, or a CLI application). 
-A connection has the following items
+Every benchmark suite can execute tasks on several connections (e.g. an HTTP endpoint, or a CLI application). 
+A connection has the following items:
 
-* name - the name you want to give the connection, which will be saved in the results.
-* endpoint - the HTTP endpoint or CLI call. 
-* updateEndpoint - If your HTTP endpoint is an HTTP Post endpoint set this to the post endpoint. (optional)
-* user - for authentication purposes (optional)
-* password - for authentication purposes (optional)
-* version - setting the version of the tested triplestore, if set resource URI will be ires:name-version (optional)
+* `name` - the name you want the connection to have, the name will be saved in the results
+* `endpoint` - the HTTP endpoint or CLI call
+* `updateEndpoint` - if your HTTP endpoint is an HTTP POST endpoint, you can set it with this item (optional)
+* `user` - for authentication purposes (optional)
+* `password` - for authentication purposes (optional)
+* `version` - sets the version of the tested triplestore; if this is set, the resource URI will be ires:name-version (optional)
 
-To setup an endpoint as well as an updateEndpoint might be confusing at first, but if you to test read and write performance simultanously and how updates might have an impact on read performance, you can set up both.
+At first, it might be confusing to set up both an `endpoint` and `updateEndpoint`, but it is used, when you want your test to perform read and write operations simultaneously, for example, to test the impact of updates on the read performance of your triple store.
 
-For more detail on how to setup the CLI call look at [Implemented Workers](../workers). There are all CLI Workers explained and how to set the endpoint such that the application will be run correctly.
+For more detail on how to set up the CLI call look at [Implemented Workers](../workers). There, all CLI Workers will be explained and how to properly set them up.
 
 Let's look at an example: 
 
@@ -43,22 +45,21 @@ connections:
     password: "secret"
 ```
 
-Here we have two connections: System1 and System2. System1 is only setup to use an HTTP Get endpoint at http://localhost:8800/query. System2 however uses authentication and has an update endpoint as well, and thus will be correctly test with updates (POSTs) too. 
+Here we have two connections: System1 and System2. System1 is only set up to use an HTTP GET endpoint at http://localhost:8800/query. System2, however, uses authentication and has an update endpoint, and thus will be correctly tested with updates (POSTs) too. 
 
 ### Datasets
 
-Pretty straight forward. You might want to test your system with different datasets (e.g. databases, triplestores etc.) 
-If you system does not work on different datasets, just add one datasetname like
+You might want to test your system with different datasets (e.g. databases, triple stores).
+If your system does not work on different datasets, just add a single dataset-name like this:
 
 ```yaml
 datasets:
   - name: "DoesNotMatter"
 ```
 
-otherwise you might want to benchmark different datasets. Hence you can setup a Dataset Name, as well as file. 
-The dataset name will be added to the results, whereas both can be used in the task script hooks, to automatize dataset load into your system. 
+Otherwise, if you're using multiple different datasets, you can set a `name` and a `file` for each dataset. Both items can later be used in the pre- and post-task scripts to automate the loading of data into your system. The name is also used to distinguish the datasets in the result of the benchmark. 
 
-Let's look at an example: 
+A configuration with multiple datasets may look like this: 
 
 ```yaml
 datasets:
@@ -69,13 +70,12 @@ datasets:
 
 ### Tasks
 
-A Task is one benchmark Task which will be executed against all connections for all datasets. 
-A Task might be a stresstest which we will be using in this example. Have a look at the full configuration of the [Stresstest](../stresstest#Configuration)
+A Task is a benchmark task which will be executed against all connections for all datasets. A task might be, for example, the included [Stresstest](../stresstest#Configuration).
 
-The configuration of one Task consists of the following: 
+The configuration of a task consists of the following keys: 
 
-* className - The className or [Shorthand](#Shorthand)  
-* configuration - The parameters of the task
+* `className` - The classname of the task or its [Shorthand](#Shorthand)  
+* `configuration` - The parameters for the task
 
 ```yaml
 tasks:
@@ -85,7 +85,7 @@ tasks:
       parameter2: "value2"
 ```
 
-Let's look at an example: 
+The following shows an exemplary configuration for the `tasks` key: 
 
 ```yaml
 tasks:
@@ -93,48 +93,51 @@ tasks:
     configuration:
       #timeLimit is in ms
       timeLimit: 3600000
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 2
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
           timeOut: 180000
   - className: "Stresstest"
     configuration:
       noOfQueryMixes: 1
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 2
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
           timeOut: 180000
 ```
 
-We configured two Tasks, both Stresstests. The first one will be executed for one hour and uses simple text queries which can be executed right away.  
-Further on it uses 2 simulated SPARQLWorkers with the same configuration. 
-At this point it's recommend to check out the [Stresstest Configuration](../stresstest#Configuration) in detail for further configuration.
+In this configuration we have two tasks of the included Stresstest. 
+
+The first task has two workers of the class `HttpGetWorkers`, that execute the given queries simultaneously and independently of each other for an hour.
+
+The second task has also two workers of the class `HttpGetWorkers`, but they will only execute every given query once.
+
+For further details, check out the [Stresstest configuration](../stresstest#Configuration) page.
 
 
 ### Storages
 
-Tells Iguana how to save your results. Currently Iguana supports two solutions
+The `storages` setting will tell Iguana how it should save your results. Currently Iguana supports three solutions:
 
-* NTFileStorage - will save your results into one NTriple File.
-* RDFFileStorage - will save your results into an RDF File (default TURTLE).
-* TriplestoreStorage - Will upload the results into a specified Triplestore
+* NTFileStorage - saves your results as an NTriple File.
+* RDFFileStorage - saves your results as an RDF File (default TURTLE).
+* TriplestoreStorage - uploads the results into a specified triple store
 
-This is optional. The default storage is `NTFileStorage`.
+This setting is optional. The default storage is `NTFileStorage`.
 
-**NTFileStorage** can be setup by just stating to use it like 
+#### **NTFileStorage**
+You can set the NTFileStorage solution with the following configuration:
 
 ```yaml
 storages:
   - className: "NTFileStorage" 
 ```
-However it can be configured to use a different result file name. The default is `results_{DD}-{MM}-{YYYY}_{HH}-{mm}.nt`.
-See example below. 
+However, it can also be configured to use a different result file name. The default file name is `results_{DD}-{MM}-{YYYY}_{HH}-{mm}.nt`.
+See the example below: 
 
 ```yaml
 storages:
@@ -143,35 +146,34 @@ storages:
     configuration:
       fileName: "results-of-my-benchmark.nt"
 ```
-
-The **RDFFileStorage** is similar to the NTFileStorage but will determine the RDF format from the file extension
-To use RDF/XML f.e. you would end the file on .rdf, for TURTLE end it on .ttl 
+#### RDFFileStorage
+The **RDFFileStorage** is similar to the NTFileStorage, but it will determine the RDF format from the given file extension.
+To use RDF/XML you would end the file name with the `.rdf` extension, for TURTLE end it with the `.ttl` extension. 
 
 ```yaml
 storages:
-  - className: "NTFileStorage" 
+  - className: "RDFFileStorage" 
     #optional
     configuration:
-      fileName: "results-of-my-benchmark.rdf"
+      fileName: "results-of-my-benchmark.ttl"
 ```
 
-
-
+#### TriplestoreStorage
 The **TriplestoreStorage** can be configured as follows: 
 
 ```yaml
 storages:
-  - className: TriplestoreStorage
+  - className: "TriplestoreStorage"
     configuration:
        endpoint: "http://localhost:9999/sparql"
        updateEndpoint: "http://localhost:9999/update"
 ```
 
-if you triple store uses authentication you can set that up as follows: 
+If your triple store uses authentication, you can set it up as follows: 
 
 ```yaml
 storages:
-  - className: TriplestoreStorage
+  - className: "TriplestoreStorage"
     configuration:
        endpoint: "http://localhost:9999/sparql"
        updateEndpoint: "http://localhost:9999/update"
@@ -179,25 +181,24 @@ storages:
        password: "secret"
 ```
 
-
-For further detail on how to read the results have a look [here](../results)
-
-
+For further detail on how to read the results, have a look [here](../results).
 
 ### Metrics
 
-Let's Iguana know what Metrics you want to include in the results. 
+The `metrics` setting lets Iguana know what metrics you want to include in the results. 
 
 Iguana supports the following metrics:
 
-* Queries Per Second (QPS)
-* Average Queries Per Second (AvgQPS)
-* Query Mixes Per Hour (QMPH)
-* Number of Queries successfully executed (NoQ)
-* Number of Queries per Hour (NoQPH)
-* Each query execution (EachQuery) - experimental
+* Queries Per Second (`QPS`)
+* Average Queries Per Second (`AvgQPS`)
+* Query Mixes Per Hour (`QMPH`)
+* Number of Queries successfully executed (`NoQ`)
+* Number of Queries per Hour (`NoQPH`)
+* Each query execution (`EachQuery`) - experimental
 
-For more detail on each of the metrics have a look at [Metrics](../metrics)
+For more details on each of the metrics have a look at the [Metrics](../metrics) page.
+
+The `metrics` setting is optional and the default is set to every available metric, except `EachQuery`.
 
 Let's look at an example:
 
@@ -210,8 +211,9 @@ metrics:
   - className: "NoQPH"
 ```
 
-In this case we use all the default metrics which would be included if you do not specify `metrics` in the configuration at all. 
-However you can also just use a subset of these like the following:
+In this case we use every metric that Iguana has implemented. This is the default.
+
+However, you can also just use a subset of these metrics:
 
 ```yaml
 metrics:
@@ -219,33 +221,36 @@ metrics:
    - className: "AvgQPS"
 ```
 
-For more detail on how the results will include these metrics have a look at [Results](../results).
+For more details on how the results will include these metrics, have a look at [Results](../results).
 
 ### Task script hooks
 
-To automatize the whole benchmark workflow, you can setup a script which will be executed before each task, as well as a script which will be executed after each task. 
+To automate the whole benchmark workflow, you can optionally set up a script which will be executed before each task, as well as a script which will be executed after each task. 
 
-To make it easier, the script can get the following values
+You can have different scripts for different datasets, connections or tasks, by using the following variables in the `preScriptHook` and `postScriptHook`
+setting:
 
-* dataset.name - The current dataset name
-* dataset.file - The current dataset file name if there is anyone
-* connection - The current connection name
-* connection.version - The current connection version, if no version is set -> {{ '{{connection.version}}' }}
-* taskID - The current taskID
+* `dataset.name` - The name of the current dataset this task is executed with
+* `dataset.file` - The file of the current dataset
+* `connection` - The name of the current connection this task is executed with
+* `connection.version` - The version of the current connection
+* `taskID` - The current taskID
 
+You can use these variables by using brackets like this:
+`{{connection}}`.
 
-You can set each one of them as an argument using brackets like `{{ '{{connection}}' }}`. 
-Thus you can setup scripts which will start your system and load it with the correct dataset file beforehand and stop the system after every task. 
+Iguana will then instantiate these variables with the appropriate values and execute the values of `preScriptHook` and `postScriptHook`.
 
-However these script hooks are completely optional.
-
-Let's look at an example:
+This is what a full example could look like:
 
 ```yaml
-preScriptHook: "/full/path/{{ '{{connection}}' }}-{{ '{{connection.version}}' }}/load-and-start.sh {{ '{{dataset.file}}' }}"
-postScriptHook: "/full/path/{{ '{{connection}}' }}/stop.sh"
-
+  preScriptHook: "/full/path/{{connection}}-{{connection.version}}/load-and-start.sh {{dataset.file}}"
+  postScriptHook: "/full/path/{{connection}}/stop.sh"
 ```
+
+With this, you can set up scripts which will start, and load your system with the correct datasets before the task execution, and stop the system after the execution. 
+
+For a full example, see the [Tutorial](../tutorial) page.
 
 ### Full Example
 
@@ -269,26 +274,24 @@ tasks:
     configuration:
       #timeLimit is in ms
       timeLimit: 3600000
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 2
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
           timeOut: 180000
   - className: "Stresstest"
     configuration:
       noOfQueryMixes: 1
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 2
-          className: "SPARQLWorker"
-          queriesFile: "queries.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries.txt"
           timeOut: 180000
 
-preScriptHook: "/full/path/{{ '{{connection}}' }}/load-and-start.sh {{ '{{dataset.file}}' }}"
-postScriptHook: "/full/path/{{ '{{connection}}' }}/stop.sh"
+preScriptHook: "/full/path/{{connection}}/load-and-start.sh {{dataset.file}}"
+postScriptHook: "/full/path/{{connection}}/stop.sh"
 
 
 metrics:
@@ -308,8 +311,8 @@ storages:
 
 ### Shorthand
 
-A shorthand is a short name for a class in Iguana which can be used in the configuration instead of the complete class name: 
-e.g. instead of 
+A shorthand is a short name for a class in Iguana which can be used in the configuration instead of the complete class name.
+For example, instead of: 
 
 ```yaml
 storages:

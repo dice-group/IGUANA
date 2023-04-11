@@ -1,13 +1,21 @@
 # Stresstest
  
-Iguanas implemented Stresstest benchmark task tries to emulate a real case scenario under which an endpoint or application is under high stress. 
-As in real life endpoints might get multiple simultaneous request within seconds, it is very important to verify that you application can handle this. 
+Iguanas implemented Stresstest benchmark task tries to emulate a real case scenario under which an endpoint or
+application is under high stress.
+As in real life, endpoints might get multiple simultaneous requests within seconds, thus it is very important to verify that
+your application can handle that.
 
-The stresstest emulates users or applications which will bombard the endpoint using a set of queries for a specific amount of time or a specific amount of queries executed.
-Each simulated user is called Worker in the following. 
-As you might want to test read and write performance or just want to emulate different user behaviour, the stresstest allows to configure several workers. 
-Every worker configuration can additionaly be started several times, hence if you want one configuration executed multiple times, you can simply tell Iguana to run this worker configuration the specified amount of time. 
-However to assure that the endpoint can't just cache the repsonse of the first request of a query, every worker starts at a pre determined random query, meaning that the single worker will always start at that query to assure fairness in benchmark comparisons, while every worker will start at a different query.
+The stresstest emulates users or applications which will flood the endpoint using a set of queries for a specific
+amount of time or a specific amount of executed queries.
+Each simulated user is called a worker in the following.
+
+As you might want to test read and write performance or just want to emulate different user behaviour, the stresstest
+allows you to configure several workers.
+
+Every worker configuration can additionally be started as several simultaneous instances if you want one configuration to be executed
+multiple times.
+However, to assure that the endpoint can't just cache the response of the first request of a query, every worker will start
+at a pre-determined random query.
 
 ## Configuration
 
@@ -18,7 +26,7 @@ tasks:
   - className: "Stresstest"
 ```
 
-Further on you need to configure the Stresstest using the configuration parameter like:
+Further on you have to configure the Stresstest with the configuration parameter:
 
 ```yaml
 tasks:
@@ -28,77 +36,94 @@ tasks:
       ...
 ```
 
-As an end restriction you can either use `timeLimit` which will stop the stresstest after the specified amount in ms or you can set `noOfQueryMixes` which stops every worker after they executed the amount of queries in the provided query set.
+As an end restriction, you can either use `timeLimit` which will stop the stresstest after the specified amount of time in milliseconds, or
+you can set `noOfQueryMixes` which stops every worker after they have executed the specified amount of times every query in the specified location.
 
-Additionaly to either `timeLimit` or `noOfQueryMixes` you can set the following parameters
+Additionally, you have to set up these parameters:
 
-* queryHandler
 * workers
 * warmup (optional)
 
-### Query Handling
+### Workers (simulated Users)
 
-The queryHandler parameter let's the stresstest know what queries will be used. 
-Normally you will need the `InstancesQueryHandler` which will use plain text queries (could be SQL, SPARQL, a whole RDF document). The only restriction is that each query has to be in one line.
+As previously mentioned, you have to set up workers for your stresstest by providing
+a configuration for each worker.
+Let's look at an example:
 
-You can set the query handler like the following:
 ```yaml
-tasks:
   - className: "Stresstest"
-    queryHandler:
-      className: "InstancesQueryHandler"
+    configuration:
+      timeLimit: 600000
+      workers:
+        - threads: 4
+          className: "HttpGetWorker"
+          queries:
+            location: "/path/to/your/queries.txt"
+        - threads: 16
+          className: "HttpGetWorker"
+          queries:
+            location: "/other/queries.txt"
+          fixedLatency: 5000      
+```
+
+In this example, we have two different worker configurations we want to use. 
+
+The first one will create 4 workers of the class `HttpGetWorker`, that use queries located at `/path/to/your/queries.txt`. Each worker will execute their queries without any added latency between them.
+
+The second worker configuration will create 16 workers of the class `HttpGetWorker`, that use queries located at `/other/queries.txt`. Each worker will execute their queries using a fixed waiting time of `5000ms` between each query. 
+In detail, every worker will execute their queries independently of each other, but each will wait for 5s after executing one of their own queries before executing the next one.
+
+This configuration may simulate that we have a few users requesting your endpoint locally (e.g. some of your application
+relying on your database) and several users querying your endpoint from outside the network where we would have network
+latencies and other interferences. We try to simulate this behaviour with the added latency of five seconds in between queries.
+
+A full list of supported workers and their parameters can be found at [Supported Workers](../workers).
+
+In this example our Stresstest would create in total 20 workers, which will simultaneously request the endpoint for 600000ms (10
+minutes).
+
+#### Query Handling
+
+The `queries` parameter lets the worker know what queries should be used.
+The default is to have a single text file with one query per line (could be SQL, SPARQL, a whole RDF document).
+
+The query handling may be set up like the following:
+
+```yaml
+workers:
+  - className: "HttpGetWorker"
+    queries:
+      location: "/path/to/your/queries.txt"
+      format: "one-per-line"
+      order:
+        random:
+          seed: 1234
     ...
 ```
 
-To see which query handlers are supported see  [Supported Queries](../queries/)
+To see further configurations of the query handling see [Supported Queries](./queries)
 
-### Workers (simulated Users)
+### Warmup
 
-Further on you have to add which workers to use. 
-As described above you can set different worker configurations. 
-Let's look at an example:
-```yaml
-  - className: "Stresstest"
-    timeLimit: 600000
-    workers:
-      - threads: 4
-        className: "SPARQLWorker"
-        queriesFile: "/path/to/your/queries.txt"
-      - threads: 16
-        className: "SPARQLWorker"
-        queriesFile: "/other/queries.txt"
-        fixedLatency: 5000      
-```
+Additionally, you can optionally set up a warmup for your stresstest, which aims to let the system get benchmarked under a normal
+situation (sometimes a database is faster when it was already running for a while).
 
-In this example we have two different worker configurations we want to use. The first want will create 4 `SPARQLWorker`s using queries at `/path/to/your/queries.txt` with any latencym thus every query will be executed immediatly after another.
-The second worker configuration will execute 16 `SPARQLWorker`s using queries at `/other/queries.txt` using a fixed waiting time of `5000ms` between each query. 
-Hence every worker will execute their queries independently from each other but will wait 5s after each of their query execution before executing the next one.
-This configuration may simulate that we have a few Users requesting your endpoint locally (e.g. some of your application relying on your database) and several users querying your endpoint from outside the network where we would have network latency and other interferences which we will try to simulate with 5s. 
+The configuration is similar to the stresstest itself. You can set a `timeLimit` (however, you can not specify a `noOfQueryMixes`), and you can use different `workers`.
 
-A full list of supported workers and their parameters can be found at [Supported Workers](../workers)
+You can set the Warmup as follows:
 
-In this example our Stresstest would create 20 workers, which will simultaenously request the endpoint  for 60000ms (10 minutes).
- 
-### Warmup 
-
-Additionaly to these you can optionally set a warmup, which will aim to let the system be benchmarked under a normal situation (Some times a database is faster when it was already running for a bit) 
-The configuration is similar to the stresstest itself you can set a `timeLimit` (however not a certain no of query executions), you can set different `workers`, and a `queryHandler` to use. 
-If you don't set the `queryHandler` parameter the warmup will simply use the `queryHandler` specified in the Stresstest itself. 
-
-You can set the Warmup as following:
 ```yaml
 tasks:
   - className: "Stresstest"
-    warmup:
-      timeLimit: 600000
-      workers: 
-        ...
-      queryHandler:
+    configuration:
+        warmup:
+          timeLimit: 600000
+          workers: 
         ...
 ```
 
-That's it. 
-A full example might look like this
+## Example
+A full example of the stresstest configuration may look like this:
 
 ```yaml
 tasks:
@@ -110,27 +135,27 @@ tasks:
       warmup:
         # 10 minutes (is in ms)
         timeLimit: 600000
-        # queryHandler could be set too, same as in the stresstest configuration, otherwise the same queryHandler will be use.
-        # workers are set the same way as in the configuration part
+        # workers in the warmup are set the same way as in the main configuration
         workers:
           - threads: 1
-            className: "SPARQLWorker"
-            queriesFile: "queries_warmup.txt"
+            className: "HttpGetWorker"
+            queries:
+              location: "queries_warmup.txt"
             timeOut: 180000
-      queryHandler:
-        className: "InstancesQueryHandler"
       workers:
         - threads: 16
-          className: "SPARQLWorker"
-          queriesFile: "queries_easy.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries_easy.txt"
           timeOut: 180000
         - threads: 4
-          className: "SPARQLWorker"
-          queriesFile: "queries_complex.txt"
+          className: "HttpGetWorker"
+          queries:
+            location: "queries_complex.txt"
           fixedLatency: 100
 ```
 
 ## References
 
-* [Supported Queries](../queries/)
+* [Supported Queries](../queries)
 * [Supported Workers](../workers)

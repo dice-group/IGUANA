@@ -1,18 +1,15 @@
 package org.aksw.iguana.cc.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.commons.factory.TypedFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -27,37 +24,34 @@ public class HttpGetWorker extends HttpWorker {
 
     protected String responseType = null;
 
+    public HttpGetWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String parameterName, @Nullable String responseType) {
+        super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency);
 
-    public HttpGetWorker(String taskID, Connection connection, String queriesFile, @Nullable String responseType, @Nullable String parameterName, @Nullable String language, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-        super(taskID, connection, queriesFile, timeOut, timeLimit, fixedLatency, gaussianLatency, workerID);
-        if (language != null) {
-            resultProcessor = new TypedFactory<LanguageProcessor>().create(language, new HashMap<>());
-        }
         if (parameterName != null) {
-            parameter = parameterName;
+            this.parameter = parameterName;
         }
         if (responseType != null) {
             this.responseType = responseType;
         }
     }
 
-    void buildRequest(String query, String queryID) throws UnsupportedEncodingException {
+    void buildRequest(String query, String queryID) {
         String qEncoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
         String addChar = "?";
-        if (con.getEndpoint().contains("?")) {
+        if (this.con.getEndpoint().contains("?")) {
             addChar = "&";
         }
-        String url = con.getEndpoint() + addChar + parameter + "=" + qEncoded;
-        request = new HttpGet(url);
+        String url = this.con.getEndpoint() + addChar + this.parameter + "=" + qEncoded;
+        this.request = new HttpGet(url);
         RequestConfig requestConfig =
                 RequestConfig.custom()
-                        .setSocketTimeout(timeOut.intValue())
-                        .setConnectTimeout(timeOut.intValue())
+                        .setSocketTimeout(this.timeOut.intValue())
+                        .setConnectTimeout(this.timeOut.intValue())
                         .build();
 
         if (this.responseType != null)
-            request.setHeader(HttpHeaders.ACCEPT, this.responseType);
+            this.request.setHeader(HttpHeaders.ACCEPT, this.responseType);
 
-        request.setConfig(requestConfig);
+        this.request.setConfig(requestConfig);
     }
 }

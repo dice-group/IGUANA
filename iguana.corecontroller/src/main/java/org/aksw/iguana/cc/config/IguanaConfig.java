@@ -36,7 +36,6 @@ import java.util.Map;
  * Further on executes the pre and post script hooks, before and after a class.
  * Following values will be exchanged in the script string {{Connection}} {{Dataset.name}} {{Dataset.file}} {{taskID}}
  * 
- * 
  * @author f.conrads
  *
  */
@@ -45,20 +44,19 @@ public class IguanaConfig {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(IguanaConfig.class);
 
-	private String suiteID;
 	@JsonProperty(required = true)
 	private List<Dataset> datasets;
 	@JsonProperty(required = true)
 	private List<Connection> connections;
 	@JsonProperty(required = true)
 	private List<Task> tasks;
-	@JsonProperty(required = false)
+	@JsonProperty
 	private String preScriptHook;
-	@JsonProperty(required = false)
+	@JsonProperty
 	private String postScriptHook;
-	@JsonProperty(required = false)
+	@JsonProperty
 	private List<MetricConfig> metrics;
-	@JsonProperty(required = false)
+	@JsonProperty
 	private List<StorageConfig> storages;
 
 
@@ -73,7 +71,7 @@ public class IguanaConfig {
 		//get SuiteID
 		String suiteID = generateSuiteID();
 		//generate ExpID
-		Integer expID = 0;
+		int expID = 0;
 
 		for(Dataset dataset: datasets){
 			expID++;
@@ -96,7 +94,7 @@ public class IguanaConfig {
 						ScriptExecutor.execSafe(execScript, args);
 					}
 					LOGGER.info("Executing Task [{}/{}: {}, {}, {}]", taskID, task.getName(), dataset.getName(), con.getName(), task.getClassName());
-					controller.startTask(new String[]{suiteID, suiteID+"/"+expID.toString(), suiteID+"/"+expID.toString()+"/"+taskID.toString()}, dataset.getName(), SerializationUtils.clone(con), SerializationUtils.clone(task));
+					controller.startTask(new String[]{suiteID, suiteID + "/" + expID, suiteID + "/" + expID + "/" + taskID}, dataset.getName(), SerializationUtils.clone(con), SerializationUtils.clone(task));
 					if(postScriptHook!=null){
 						String execScript = postScriptHook.replace("{{dataset.name}}", dataset.getName())
 								.replace("{{connection}}", con.getName())
@@ -133,7 +131,7 @@ public class IguanaConfig {
 			metrics.add(config);
 			config = new MetricConfig();
 			config.setClassName(QPSMetric.class.getCanonicalName());
-			Map<Object, Object> configMap = new HashMap<Object, Object>();
+			Map<String, Object> configMap = new HashMap<>();
 			configMap.put("penalty", 180000);
 			config.setConfiguration(configMap);
 			metrics.add(config);
@@ -149,12 +147,12 @@ public class IguanaConfig {
 
 		}
 		//Create Storages
-		List<Storage> storages = new ArrayList<Storage>();
+		List<Storage> storages = new ArrayList<>();
 		for(StorageConfig config : this.storages){
 			storages.add(config.createStorage());
 		}
 		//Create Metrics
-		List<Metric> metrics = new ArrayList<Metric>();
+		List<Metric> metrics = new ArrayList<>();
 		for(MetricConfig config : this.metrics){
 			metrics.add(config.createMetric());
 		}

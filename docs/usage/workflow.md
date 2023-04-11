@@ -1,6 +1,7 @@
 # Workflow
 
-Iguana will first parse configuration and afterwards will execute each task for each connection for each dataset. 
+Iguana will first parse the configuration file. 
+Afterwards it will execute each task for each connection for each dataset. 
 
 Imagine it like the following:
 
@@ -12,4 +13,3 @@ Imagine it like the following:
             3. collect and calculate results
             4. write results
             5. execute post script hook
-
