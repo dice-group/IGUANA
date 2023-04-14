@@ -50,8 +50,7 @@ public class FileUtils {
 				}
 				return (count == 0 && !empty) ? 1 : count;
 			}
-		}
-		else {
+		} else {
 			String line = "";
 			int count = 0;
 			try(BufferedReader br = new BufferedReader(new FileReader(filename))) {
@@ -80,7 +79,7 @@ public class FileUtils {
 
 		try(BufferedReader br = new BufferedReader(new FileReader(file))) {
 			while ((line = br.readLine()) != null) {
-				if (!line.isEmpty()) {
+				if (!line.isBlank()) {
 					if (count == index) {
 						return line;
 					}
@@ -125,9 +124,13 @@ public class FileUtils {
 	public static String getLineEnding(String filepath) throws IOException {
 		int lineEndingIndex = 0;
 		try(BufferedReader br = new BufferedReader(new FileReader(filepath))) {
-			// readline consumes the line endings mentioned in the javadoc, thus the length of a line equals the index
-			// of the line's ending
-			lineEndingIndex = br.readLine().length();
+			char i;
+			while((i = (char) br.read()) != (char) -1) {
+				if(i == '\n' || i == '\r') {
+					break;
+				}
+				lineEndingIndex++;
+			}
 		}
 
 		// assumes that line endings can have a maximum of 2 characters
@@ -144,9 +147,9 @@ public class FileUtils {
 		}
 
 		// converts the buffer to a string
-		String bufferString = "";
+		StringBuilder bufferString = new StringBuilder();
 		for(int i = 0; i < numberOfreadChars; i++){
-			bufferString += (char) buffer[i];
+			bufferString.append((char) buffer[i]);
 		}
 
 		// The regex pattern "\R" searches for every type of line ending, the result of the pattern matching is the
@@ -156,14 +159,14 @@ public class FileUtils {
 		// a second, non-empty line, this results in bufferString equaling "\n" + the first character of the second
 		// line)
 		Pattern pattern = Pattern.compile("\\R");
-		Matcher matcher = pattern.matcher(bufferString);
+		Matcher matcher = pattern.matcher(bufferString.toString());
 		if(matcher.find()) {
 			return matcher.group();
-		}
-		else {
+		} else {
 			// if for some reason, the matcher still doesn't find a line ending
 			return System.lineSeparator();
 		}
+	}
 
 	public static BufferedReader getBufferedReader(File queryFile) throws FileNotFoundException {
 		return new BufferedReader(new FileReader(queryFile));
