@@ -5,9 +5,7 @@ import org.aksw.iguana.cc.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,14 +50,7 @@ public class FolderQuerySource extends QuerySource {
 
     @Override
     public String getQuery(int index) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(this.files[index]))) {
-            StringBuilder query = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                query.append(line);
-            }
-            return query.toString();
-        }
+        return FileUtils.readFile(files[index].getAbsolutePath());
     }
 
     @Override

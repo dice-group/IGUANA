@@ -45,17 +45,17 @@ public class FileSeparatorQuerySourceTest {
 
     @Test
     public void getQueryTest() throws IOException {
-        assertEquals("QUERY 1 {still query 1}", this.querySource.getQuery(0));
-        assertEquals("QUERY 2 {still query 2}", this.querySource.getQuery(1));
-        assertEquals("QUERY 3 {still query 3}", this.querySource.getQuery(2));
+        assertEquals("QUERY 1 {\r\nstill query 1\r\n}", this.querySource.getQuery(0));
+        assertEquals("QUERY 2 {\r\nstill query 2\r\n}", this.querySource.getQuery(1));
+        assertEquals("QUERY 3 {\r\nstill query 3\r\n}", this.querySource.getQuery(2));
     }
 
     @Test
     public void getAllQueriesTest() throws IOException {
         List<String> expected = new ArrayList<>(3);
-        expected.add("QUERY 1 {still query 1}");
-        expected.add("QUERY 2 {still query 2}");
-        expected.add("QUERY 3 {still query 3}");
+        expected.add("QUERY 1 {\r\nstill query 1\r\n}");
+        expected.add("QUERY 2 {\r\nstill query 2\r\n}");
+        expected.add("QUERY 3 {\r\nstill query 3\r\n}");
 
         assertEquals(expected, this.querySource.getAllQueries());
     }
