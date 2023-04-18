@@ -22,7 +22,7 @@ public class FileLineQuerySource extends QuerySource {
         super(path);
 
         try {
-            ilr = new IndexedLineReader(path);
+            ilr = IndexedLineReader.make(path);
         } catch (IOException e) {
             LOGGER.error("Failed to read this file for the queries: " + path + "\n" + e);
         }

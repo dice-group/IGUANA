@@ -29,7 +29,12 @@ public class FileSeparatorQuerySource extends QuerySource {
         super(path);
 
         try {
-            ilr = new IndexedLineReader(path, separator);
+            if(separator.isBlank()) {
+                ilr = IndexedLineReader.makeWithBlankLines(path);
+            }
+            else {
+                ilr = IndexedLineReader.makeWithStringSeparator(path, separator);
+            }
         } catch (IOException e) {
             LOGGER.error("Failed to read this file for the queries: " + path + "\n" + e);
         }

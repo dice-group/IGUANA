@@ -1,73 +1,86 @@
 package org.aksw.iguana.cc.utils;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * This class creates an object, that indexes the starting positions of the lines inside a file for faster access. <br/>
- * The indexing happens on either:
- * <ul>
- *     <li>the file's line endings, or</li>
- *     <li>a custom separator</li>
- * </ul>
- * This class does not index blank lines.
+ * This class creates objects, that index the start positions of lines inside a file for faster access. <br/>
+ * It indexes either every single line or a bundle of multiple lines between two lines that contain a given separator.
+ * <br/>
+ * Blank content won't be indexed. <br/>
+ * The positions and the length of the lines will be stored in an internal array.
  */
 public class IndexedLineReader {
 
-    /** This list stores the indices of the bytes, at which a new line starts. (Stores Integers, so it only supports
-     *  files that are roughly 2GB big.)*/
-    private ArrayList<Integer[]> indices;
+    /** This list stores the start position and the length of the indexed lines inside the file. */
+    private ArrayList<Long[]> indices;
 
-    private String filepath;
-
-    /**
-     * An optional object that contains the separator, that is used to index lines of the file. If the separator is
-     * blank, blank lines will be used for separation. Otherwise, if no separator is given, the constructor will index
-     * every non-blank line.
-     */
-    private Optional<String> separator;
+    /** The file whose lines should be indexed. */
+    private final File file;
 
     /** Number of indexed lines. */
     private int size;
 
-    /** The line terminator, that has been used inside the file. */
-    private String lineEnding;
+    /**
+     * Indexes every bundle of lines, that are in between the given separator (including the beginning and end of the
+     * file) inside the given file.
+     * @param filepath path to the file
+     * @param separator the separator line that is used in the file
+     * @return reader to access the indexed lines
+     * @throws IOException
+     */
+    public static IndexedLineReader makeWithStringSeparator(String filepath, String separator) throws IOException {
+        if(separator.isBlank())
+            throw new IllegalArgumentException("Separator for makeWithStringSeparator can not be blank.");
+        return new IndexedLineReader(filepath, separator);
+    }
 
     /**
-     * This constructor indexes the lines in the given file based on the file's line ending.
+     * Indexes every bundle of lines, that are in between the blank lines (including the beginning and end of the
+     * file) inside the given file.
+     * @param filepath path to the file
+     * @return reader to access the indexed lines
+     * @throws IOException
+     */
+    public static IndexedLineReader makeWithBlankLines(String filepath) throws IOException {
+        return new IndexedLineReader(filepath, "");
+    }
+
+    /**
+     * Indexes every non-blank line inside the given file.
+     * @param filepath path to the file
+     * @return reader to access the indexed lines
+     * @throws IOException
+     */
+    public static IndexedLineReader make(String filepath) throws IOException {
+        return new IndexedLineReader(filepath);
+    }
+
+    /**
+     * This constructor indexes every non-blank line inside the given file.
      * @param filepath path to the file
      * @throws IOException
      */
-    public IndexedLineReader(String filepath) throws IOException {
+    private IndexedLineReader(String filepath) throws IOException {
         this(filepath, null);
     }
 
     /**
-     * Creates an object that indexes the lines in the given file based on the specified line separator. If the given
-     * separator is empty, the object will instead index the lines based on empty lines.
+     * Creates an object that indexes every bundle of multiple lines inside the given file, that are in between two
+     * lines that contain the given separators (including the beginning and end of the given file). <br/>
+     * If the separator is blank, every bundle between two blank lines will be indexed. <br/>
+     * If the separator parameter is null, it will instead just index every non-blank line of the file.
      * @param filepath path to the file
+     * @param separator the separator for each bundle
      * @throws IOException
      */
-    public IndexedLineReader(String filepath, String separator) throws IOException {
-        this.filepath = filepath;
-        if(separator != null)
-            this.separator = Optional.of(separator);
-        else
-            this.separator = Optional.empty();
+    private IndexedLineReader(String filepath, String separator) throws IOException {
+        this.file = new File(filepath);
 
-        this.lineEnding = FileUtils.getLineEnding(this.filepath);
-
-        if(this.separator.isEmpty()) {
+        if(separator == null) {
             this.indexFile();
-        }
-        else if(this.separator.get().isEmpty()) {
-            this.indexFileWithBlankLines();
         }
         else {
             this.indexFile(separator);
@@ -75,28 +88,27 @@ public class IndexedLineReader {
     }
 
     /**
-     * This method reads a line from the file at a given index. It will skip every byte of data, that is written in the
-     * file before the line. <br/>
-     * If the lines were indexed based on a custom separator, this method returns every line inside the file
-     * between two of the given separators (the beginning and ending of the file count as separators too).
-     * @param index the index of the line
-     * @return the searched line
+     * If a separator wasn't given, this method returns the line with the corresponding index inside the file. <br/>
+     * If a separator was given, this method returns a string of multiple lines, that are between two separators
+     * (including the beginning and end of file), with the corresponding index.
+     * @param index the index of the searched line or bundle of lines
+     * @return the searched line or bundle of lines
      * @throws IOException
      */
     public String readLine(int index) throws IOException {
-        if(this.separator.isPresent()) {
-            return readLinesBetweenSeparator(index);
+        // conversion from long to int (lines shouldn't be bigger than ~2GB)
+        byte[] data = new byte[Math.toIntExact(this.indices.get(index)[1])];
+        String output;
+        try(RandomAccessFile raf = new RandomAccessFile(this.file, "r")) {
+            raf.seek(this.indices.get(index)[0]);
+            raf.read(data);
+            output = new String(data, StandardCharsets.UTF_8);
         }
-
-        RandomAccessFile raf = new RandomAccessFile(this.filepath, "r");
-        raf.seek(this.indices.get(index)[0]);
-        String output = raf.readLine();
-        raf.close();
         return output;
     }
 
     /**
-     * This method return a list that contains every line of the file.
+     * This method returns a list of strings that contains every indexed line or bundle of lines.
      * @return list of lines
      * @throws IOException
      */
@@ -109,63 +121,28 @@ public class IndexedLineReader {
     }
 
     /**
-     * Returns the number of non-blank lines the file contains.
-     * @return number of non-blank lines
+     * Returns the number of indexed non-blank lines or bundle of lines (depends on if a separator was given).
+     * @return number of indexed objects
      */
     public int size() {
         return this.size;
     }
 
     /**
-     * This method reads the lines between the given index and the next index (or file end). It begins reading every
-     * line, starting at the given index, until it reaches the position of the next index. It cuts out the line,
-     * that contains the actual separator (and everything after it).
-     * @param index
-     * @return the string consisting of the lines between two separators
-     * @throws IOException
-     */
-    private String readLinesBetweenSeparator(int index) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(this.filepath, "r");
-        raf.seek(this.indices.get(index)[0]);
-        StringBuilder output = new StringBuilder();
-
-        // This is the byte position of the next index or end of file. It's used to know, for how long the lines can be
-        // read the file starting at the position of this.indices.get(index).
-        int nextLinePosition = this.indices.get(index)[1];
-        String lastLine = raf.readLine();
-        if(raf.getFilePointer() >= nextLinePosition)
-            return lastLine;
-
-        String currentLine;
-        while((currentLine = raf.readLine()) != null) {
-            output.append(lastLine).append(this.lineEnding);
-            lastLine = currentLine;
-
-            if(raf.getFilePointer() >= nextLinePosition ||
-                    (this.separator.get().isBlank() && currentLine.isBlank())) {
-                // Break the while-loop, when the line, that contains the separator has been read, or if the current
-                // line is blank, when the separator is blank.
-                break;
-            }
-        }
-        output.append(lastLine);
-        return output.toString();
-    }
-
-    /** Indexes the lines based on its own line endings. This method ignores blank lines.
+     * Indexes every non-blank line inside the file.
      * @throws IOException
      */
     private void indexFile() throws IOException {
         this.indices = new ArrayList<>();
-        try(BufferedReader br = new BufferedReader(new FileReader(this.filepath, StandardCharsets.UTF_8))) {
+        try(BufferedReader br = new BufferedReader(new FileReader(this.file, StandardCharsets.UTF_8))) {
             // The method needs to know the length of the line ending used in the file to be able to properly calculate
             // the starting byte position of a line
-            int lineEndingLength = lineEnding.length();
-            int index = 0;
+            int lineEndingLength = FileUtils.getLineEnding(this.file.getAbsolutePath()).length();
+            long index = 0;
             String line;
             while((line = br.readLine()) != null) {
                 if(!line.isBlank()){
-                    this.indices.add(new Integer[] {index});
+                    this.indices.add(new Long[] {index, (long) line.length()});
                     this.size++;
                 }
                 index += line.length() + lineEndingLength;
@@ -174,89 +151,49 @@ public class IndexedLineReader {
     }
 
     /**
-     * Indexes the lines based on a blank line. Multiple following blank lines will be ignored.
-     * @throws IOException
-     */
-    private void indexFileWithBlankLines() throws IOException {
-        this.indices = new ArrayList<>();
-        try(BufferedReader br = new BufferedReader(new FileReader(this.filepath, StandardCharsets.UTF_8))) {
-            // The method needs to know the length of the line ending used in the file to be able to properly calculate
-            // the starting byte position of a line
-            int lineEndingLength = lineEnding.length();
-            int currentIndex = 0;
-
-            // The last stored index in the list
-            int lastIndex = 0;
-
-            // Used to check if every line between two separators is blank
-            boolean blank = true;
-
-            String line;
-            while((line = br.readLine()) != null) {
-                if(line.isBlank()) {
-                    if(!blank) {
-                        this.indices.add(new Integer[]{lastIndex, currentIndex});
-                        this.size++;
-                    }
-                    currentIndex += line.length() + lineEndingLength;
-                    lastIndex = currentIndex;
-                    blank = true;
-                    continue;
-                }
-
-                blank = false;
-                currentIndex += line.length() + lineEndingLength;
-            }
-            if(!blank) {
-                this.indices.add(new Integer[]{lastIndex, currentIndex});
-                this.size++;
-            }
-        }
-    }
-
-    /**
-     * Indexes the lines based on a custom line separator. If the content between two line separators is blank, this
-     * method won't index that line.
-     * @param separator the custom line separator
+     * Indexes each bundle of lines in between two lines, that contain the given separator. If the content between two
+     * separators is blank, this method won't index that bundle. If the separator is blank, each bundle between two
+     * blank lines will be indexed. The beginning and end of file contain as separators too for the indexing.
+     * @param separator the custom separator
      * @throws IOException
      */
     private void indexFile(String separator) throws IOException {
         this.indices = new ArrayList<>();
-        try(BufferedReader br = new BufferedReader(new FileReader(this.filepath, StandardCharsets.UTF_8))) {
+        try(BufferedReader br = new BufferedReader(new FileReader(this.file, StandardCharsets.UTF_8))) {
             // The method needs to know the length of the line ending used in the file to be able to properly calculate
             // the starting byte position of a line
-            int lineEndingLength = lineEnding.length();
-            int currentIndex = 0;
+            int lineEndingLength = FileUtils.getLineEnding(this.file.getAbsolutePath()).length();
 
-            // The last stored index in the list
-            int lastIndex = 0;
+            // The last stored position in the list
+            long lastPosition = 0;
+            long currentPosition = 0;
 
             // Used to check if every line between two separators is blank
             boolean blank = true;
-
             String line;
-            while((line = br.readLine()) != null) {
-                if(line.isBlank()) {
-                    currentIndex += line.length() + lineEndingLength;
-                    continue;
-                }
 
-                if(line.contains(separator)) {
+            while((line = br.readLine()) != null) {
+                if((!separator.isBlank() && line.contains(separator)) || (separator.isBlank() && line.isBlank())) {
                     if(!blank) {
-                        this.indices.add(new Integer[]{lastIndex, currentIndex});
+                        // Only index a position, if every line in between two separators weren't blank. Also, cutout
+                        // the line ending of the last line.
+                        this.indices.add(new Long[]{lastPosition, (currentPosition - lineEndingLength - lastPosition)});
                         this.size++;
                     }
-                    currentIndex += line.length() + lineEndingLength;
-                    lastIndex = currentIndex;
+                    currentPosition += line.length() + lineEndingLength;
+                    lastPosition = currentPosition;
                     blank = true;
                     continue;
                 }
 
-                blank = false;
-                currentIndex += line.length() + lineEndingLength;
+                if(!line.isBlank()) {
+                    blank = false;
+                }
+                currentPosition += line.length() + lineEndingLength;
             }
+
             if(!blank) {
-                this.indices.add(new Integer[]{lastIndex, currentIndex});
+                this.indices.add(new Long[]{lastPosition, (currentPosition - lineEndingLength - lastPosition)});
                 this.size++;
             }
         }
