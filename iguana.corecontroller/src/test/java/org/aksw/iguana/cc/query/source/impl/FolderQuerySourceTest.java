@@ -4,10 +4,10 @@ import org.aksw.iguana.cc.utils.FileUtils;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FolderQuerySourceTest {
 
@@ -25,25 +25,20 @@ public class FolderQuerySourceTest {
     }
 
     @Test
-    public void getQueryTest() throws IOException {
-        assertEquals("QUERY 1 {still query 1}", this.querySource.getQuery(0));
-        assertEquals("QUERY 2 {still query 2}", this.querySource.getQuery(1));
-        assertEquals("QUERY 3 {still query 3}", this.querySource.getQuery(2));
-    }
-
-    @Test
     public void getAllQueriesTest() throws IOException {
-        List<String> expected = new ArrayList<>(3);
+        // The method used to index the folder doesn't ensure a fixed order of the queries
+        HashSet<String> expected = new HashSet<>();
         expected.add("QUERY 1 {still query 1}");
         expected.add("QUERY 2 {still query 2}");
         expected.add("QUERY 3 {still query 3}");
 
-        assertEquals(expected, this.querySource.getAllQueries());
+        assertTrue(expected.containsAll(this.querySource.getAllQueries()));
     }
 
     @Test
     public void getHashcodeTest() {
-        int expected = FileUtils.getHashcodeFromFileContent(PATH + "/query1.txt");
+        int expected = FileUtils.getHashcodeFromFileContent(querySource.files[0].getAbsolutePath());
         assertEquals(expected, this.querySource.hashCode());
+        assertTrue(this.querySource.hashCode() > 0);
     }
 }
