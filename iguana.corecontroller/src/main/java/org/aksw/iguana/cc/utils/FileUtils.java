@@ -4,8 +4,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Methods to work easier with Files.
@@ -122,50 +120,21 @@ public class FileUtils {
 	 * @throws IOException
 	 */
 	public static String getLineEnding(String filepath) throws IOException {
-		int lineEndingIndex = 0;
-		try(BufferedReader br = new BufferedReader(new FileReader(filepath))) {
-			char i;
-			while((i = (char) br.read()) != (char) -1) {
-				if(i == '\n' || i == '\r') {
-					break;
+		try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
+			char c;
+			while ((c = (char) br.read()) != (char) -1) {
+				if (c == '\n')
+					return "\n";
+				else if (c == '\r') {
+					if ((char) br.read() == '\n')
+						return "\r\n";
+					return "\r";
 				}
-				lineEndingIndex++;
 			}
 		}
 
-		// assumes that line endings can have a maximum of 2 characters
-		byte[] buffer = new byte[2];
-		int numberOfreadChars = 0;
-		try(InputStream is = new BufferedInputStream(new FileInputStream(filepath))) {
-			is.skip(lineEndingIndex);
-			numberOfreadChars = is.read(buffer);
-		}
-
-		// in the case, that the file contains no line ending
-		if(numberOfreadChars == 0) {
-			return System.lineSeparator();
-		}
-
-		// converts the buffer to a string
-		StringBuilder bufferString = new StringBuilder();
-		for(int i = 0; i < numberOfreadChars; i++){
-			bufferString.append((char) buffer[i]);
-		}
-
-		// The regex pattern "\R" searches for every type of line ending, the result of the pattern matching is the
-		// result of this method.
-		// The pattern matching is done here, in case that the line ending has only one character. In that case
-		// bufferString can still contain 2 characters (i.e. the line ending is "\n" and after the first line there is
-		// a second, non-empty line, this results in bufferString equaling "\n" + the first character of the second
-		// line)
-		Pattern pattern = Pattern.compile("\\R");
-		Matcher matcher = pattern.matcher(bufferString.toString());
-		if(matcher.find()) {
-			return matcher.group();
-		} else {
-			// if for some reason, the matcher still doesn't find a line ending
-			return System.lineSeparator();
-		}
+		// fall back if there is no line end in the file
+		return System.lineSeparator();
 	}
 
 	public static BufferedReader getBufferedReader(File queryFile) throws FileNotFoundException {
