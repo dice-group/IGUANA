@@ -24,8 +24,8 @@ public class IndexedLineReader {
     private int size;
 
     /**
-     * Indexes every bundle of lines, that are in between the given separator (including the beginning and end of the
-     * file) inside the given file.
+     * Indexes every bundle of lines inside the file, that are in between two lines that contain the given separator
+     * (including the beginning and end of the file).
      * @param filepath path to the file
      * @param separator the separator line that is used in the file
      * @return reader to access the indexed lines
@@ -38,8 +38,8 @@ public class IndexedLineReader {
     }
 
     /**
-     * Indexes every bundle of lines, that are in between the blank lines (including the beginning and end of the
-     * file) inside the given file.
+     * Indexes every bundle of lines inside the file, that are in between two blank lines (including the beginning and
+     * end of the file).
      * @param filepath path to the file
      * @return reader to access the indexed lines
      * @throws IOException
