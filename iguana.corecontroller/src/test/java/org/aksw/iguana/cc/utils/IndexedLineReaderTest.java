@@ -54,5 +54,14 @@ public class IndexedLineReaderTest {
             assertEquals("line 1", reader2.readLine(1));
             assertEquals("\r\nline 2", reader2.readLine(2));
         }
+
+        @Test
+        public void testIndexingWithBlankLines() throws IOException {
+            IndexedLineReader reader = IndexedLineReader.makeWithBlankLines("src/test/resources/utils/indexingtestfile3.txt");
+
+            assertEquals(" line 1\r\nline 2", reader.readLine(0));
+            assertEquals("line 3", reader.readLine(1));
+            assertEquals("line 4\r\nline 5", reader.readLine(2));
+        }
     }
 }
