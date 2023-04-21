@@ -24,7 +24,8 @@ public class FileUtils {
 	public static int countLines(File filename) throws IOException {
 		if(getLineEnding((filename.getAbsolutePath())).equals("\n")) {
 			final int BUFFER_SIZE = 8192;
-			try (InputStream is = new BufferedInputStream(new FileInputStream(filename), BUFFER_SIZE)) {
+			try (FileInputStream fis = new FileInputStream(filename)) {
+				InputStream is = new BufferedInputStream(fis, BUFFER_SIZE);
 				byte[] c = new byte[BUFFER_SIZE];
 				int count = 0;
 				int readChars = 0;
