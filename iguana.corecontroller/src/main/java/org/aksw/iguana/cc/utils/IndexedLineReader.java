@@ -25,10 +25,11 @@ public class IndexedLineReader {
 
     /**
      * Indexes every bundle of lines inside the file, that are in between two lines that contain the given separator
-     * (including the beginning and end of the file).
+     * (including the beginning and end of the file). The given separator isn't allowed to be blank.
      * @param filepath path to the file
-     * @param separator the separator line that is used in the file
+     * @param separator the separator line that is used in the file (isn't allowed to be blank)
      * @return reader to access the indexed lines
+     * @throws IllegalArgumentException the given separator was blank
      * @throws IOException
      */
     public static IndexedLineReader makeWithStringSeparator(String filepath, String separator) throws IOException {
@@ -153,7 +154,7 @@ public class IndexedLineReader {
     /**
      * Indexes each bundle of lines in between two lines, that contain the given separator. If the content between two
      * separators is blank, this method won't index that bundle. If the separator is blank, each bundle between two
-     * blank lines will be indexed. The beginning and end of file contain as separators too for the indexing.
+     * blank lines will be indexed. The beginning and end of file count as separators too for the indexing.
      * @param separator the custom separator
      * @throws IOException
      */
