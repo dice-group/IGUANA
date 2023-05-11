@@ -49,7 +49,7 @@ public class IguanaConfig {
 	@JsonProperty(required = true)
 	private List<Connection> connections;
 	@JsonProperty(required = true)
-	private List<Task> tasks;
+	private List<TaskConfig> taskConfigs;
 	@JsonProperty
 	private String preScriptHook;
 	@JsonProperty
@@ -77,7 +77,7 @@ public class IguanaConfig {
 			expID++;
 			Integer taskID = 0;
 			for(Connection con : connections){
-				for(Task task : tasks) {
+				for(TaskConfig taskConfig : taskConfigs) {
 					taskID++;
 					String[] args = new String[] {};
 					if(preScriptHook!=null){
@@ -93,8 +93,8 @@ public class IguanaConfig {
 
 						ScriptExecutor.execSafe(execScript, args);
 					}
-					LOGGER.info("Executing Task [{}/{}: {}, {}, {}]", taskID, task.getName(), dataset.getName(), con.getName(), task.getClassName());
-					controller.startTask(new String[]{suiteID, suiteID + "/" + expID, suiteID + "/" + expID + "/" + taskID}, dataset.getName(), SerializationUtils.clone(con), SerializationUtils.clone(task));
+					LOGGER.info("Executing Task [{}/{}: {}, {}, {}]", taskID, taskConfig.getName(), dataset.getName(), con.getName(), taskConfig.getClassName());
+					controller.startTask(new String[]{suiteID, suiteID + "/" + expID, suiteID + "/" + expID + "/" + taskID}, dataset.getName(), SerializationUtils.clone(con), SerializationUtils.clone(taskConfig));
 					if(postScriptHook!=null){
 						String execScript = postScriptHook.replace("{{dataset.name}}", dataset.getName())
 								.replace("{{connection}}", con.getName())

@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * The task configuration class, sets the class name and it's configuration
  */
-public class Task implements Serializable {
+public class TaskConfig implements Serializable {
 
     @JsonProperty(required = true)
     private Map<String, Object> configuration = new HashMap<>();
