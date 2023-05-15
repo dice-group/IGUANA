@@ -21,10 +21,22 @@ public class FileSeparatorQuerySource extends QuerySource {
 
     private IndexedLineReader ilr;
 
+    /**
+     * This constructor indexes the queries inside the given file. It assumes, that the queries inside the file are
+     * separated with the default separator ('###').
+     * @param path
+     */
     public FileSeparatorQuerySource(String path) {
         this(path, DEFAULT_SEPARATOR);
     }
 
+    /**
+     * This constructor indexes the queries inside the given file. Queries inside the file should be separated with the
+     * given separator string. If the separator string parameter is blank, it assumes that the queries inside the file
+     * are separated by blank lines.
+     * @param path
+     * @param separator
+     */
     public FileSeparatorQuerySource(String path, String separator) {
         super(path);
 
