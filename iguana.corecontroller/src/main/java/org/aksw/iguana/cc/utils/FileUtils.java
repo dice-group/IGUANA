@@ -30,21 +30,22 @@ public class FileUtils {
 				int count = 0;
 				int readChars = 0;
 				boolean empty = true;
-				byte lastChar = '\n';
+				boolean blank = true;
 				while ((readChars = is.read(c)) != -1) {
 					for (int i = 0; i < readChars; ++i) {
 						if (c[i] == '\n') {
 							// Check if line was empty
-							if (lastChar != '\n') {
+							if (!blank) {
 								++count;
 							}
 						} else {
+							if (!Character.isWhitespace(c[i]))
+								blank = false;
 							empty = false;
 						}
-						lastChar = c[i];
 					}
 				}
-				if (lastChar != '\n') {
+				if (!blank) {
 					count++;
 				}
 				return (count == 0 && !empty) ? 1 : count;
@@ -55,7 +56,7 @@ public class FileUtils {
 			try(FileReader fr = new FileReader(filename)) {
 				BufferedReader br = new BufferedReader(fr);
 				while ((line = br.readLine()) != null) {
-					if (!line.isEmpty()) {
+					if (!line.isBlank()) {
 						count++;
 					}
 				}
