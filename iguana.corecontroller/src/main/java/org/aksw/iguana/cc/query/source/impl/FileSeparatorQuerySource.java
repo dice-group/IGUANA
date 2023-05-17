@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
-import org.aksw.iguana.cc.utils.IndexedLineReader;
+import org.aksw.iguana.cc.utils.IndexedQueryReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public class FileSeparatorQuerySource extends QuerySource {
 
     private static final String DEFAULT_SEPARATOR = "###";
 
-    private IndexedLineReader ilr;
+    private IndexedQueryReader iqr;
 
     /**
      * This constructor indexes the queries inside the given file. It assumes, that the queries inside the file are
@@ -42,10 +42,10 @@ public class FileSeparatorQuerySource extends QuerySource {
 
         try {
             if(separator.isBlank()) {
-                ilr = IndexedLineReader.makeWithBlankLines(path);
+                iqr = IndexedQueryReader.makeWithBlankLines(path);
             }
             else {
-                ilr = IndexedLineReader.makeWithStringSeparator(path, separator);
+                iqr = IndexedQueryReader.makeWithStringSeparator(path, separator);
             }
         } catch (IOException e) {
             LOGGER.error("Failed to read this file for the queries: " + path + "\n" + e);
@@ -54,16 +54,16 @@ public class FileSeparatorQuerySource extends QuerySource {
 
     @Override
     public int size() {
-        return ilr.size();
+        return iqr.size();
     }
 
     @Override
     public String getQuery(int index) throws IOException {
-        return ilr.readLine(index);
+        return iqr.readQuery(index);
     }
 
     @Override
     public List<String> getAllQueries() throws IOException {
-        return ilr.readLines();
+        return iqr.readQueries();
     }
 }

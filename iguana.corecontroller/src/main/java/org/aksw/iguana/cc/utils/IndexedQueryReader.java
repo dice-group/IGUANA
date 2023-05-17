@@ -12,7 +12,7 @@ import java.util.List;
  * Blank content won't be indexed. <br/>
  * The positions and the length of the lines will be stored in an internal array.
  */
-public class IndexedLineReader {
+public class IndexedQueryReader {
 
     /** This list stores the start position and the length of the indexed lines inside the file. */
     private ArrayList<Long[]> indices;
@@ -32,10 +32,10 @@ public class IndexedLineReader {
      * @throws IllegalArgumentException the given separator was blank
      * @throws IOException
      */
-    public static IndexedLineReader makeWithStringSeparator(String filepath, String separator) throws IOException {
+    public static IndexedQueryReader makeWithStringSeparator(String filepath, String separator) throws IOException {
         if(separator.isBlank())
             throw new IllegalArgumentException("Separator for makeWithStringSeparator can not be blank.");
-        return new IndexedLineReader(filepath, separator);
+        return new IndexedQueryReader(filepath, separator);
     }
 
     /**
@@ -45,8 +45,8 @@ public class IndexedLineReader {
      * @return reader to access the indexed lines
      * @throws IOException
      */
-    public static IndexedLineReader makeWithBlankLines(String filepath) throws IOException {
-        return new IndexedLineReader(filepath, "");
+    public static IndexedQueryReader makeWithBlankLines(String filepath) throws IOException {
+        return new IndexedQueryReader(filepath, "");
     }
 
     /**
@@ -55,8 +55,8 @@ public class IndexedLineReader {
      * @return reader to access the indexed lines
      * @throws IOException
      */
-    public static IndexedLineReader make(String filepath) throws IOException {
-        return new IndexedLineReader(filepath);
+    public static IndexedQueryReader make(String filepath) throws IOException {
+        return new IndexedQueryReader(filepath);
     }
 
     /**
@@ -64,7 +64,7 @@ public class IndexedLineReader {
      * @param filepath path to the file
      * @throws IOException
      */
-    private IndexedLineReader(String filepath) throws IOException {
+    private IndexedQueryReader(String filepath) throws IOException {
         this(filepath, null);
     }
 
@@ -77,7 +77,7 @@ public class IndexedLineReader {
      * @param separator the separator for each bundle
      * @throws IOException
      */
-    private IndexedLineReader(String filepath, String separator) throws IOException {
+    private IndexedQueryReader(String filepath, String separator) throws IOException {
         this.file = new File(filepath);
 
         if(separator == null) {
@@ -96,7 +96,7 @@ public class IndexedLineReader {
      * @return the searched line or bundle of lines
      * @throws IOException
      */
-    public String readLine(int index) throws IOException {
+    public String readQuery(int index) throws IOException {
         // conversion from long to int (lines shouldn't be bigger than ~2GB)
         byte[] data = new byte[Math.toIntExact(this.indices.get(index)[1])];
         String output;
@@ -113,10 +113,10 @@ public class IndexedLineReader {
      * @return list of lines
      * @throws IOException
      */
-    public List<String> readLines() throws IOException {
+    public List<String> readQueries() throws IOException {
         ArrayList<String> out = new ArrayList<>();
         for(int i = 0; i < indices.size(); i++) {
-            out.add(this.readLine(i));
+            out.add(this.readQuery(i));
         }
         return out;
     }

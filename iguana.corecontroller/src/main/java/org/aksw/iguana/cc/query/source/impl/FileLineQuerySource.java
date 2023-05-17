@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
-import org.aksw.iguana.cc.utils.IndexedLineReader;
+import org.aksw.iguana.cc.utils.IndexedQueryReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +16,13 @@ import java.util.List;
 public class FileLineQuerySource extends QuerySource {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileLineQuerySource.class);
 
-    private IndexedLineReader ilr;
+    private IndexedQueryReader iqr;
 
     public FileLineQuerySource(String path) {
         super(path);
 
         try {
-            ilr = IndexedLineReader.make(path);
+            iqr = IndexedQueryReader.make(path);
         } catch (IOException e) {
             LOGGER.error("Failed to read this file for the queries: " + path + "\n" + e);
         }
@@ -30,16 +30,16 @@ public class FileLineQuerySource extends QuerySource {
 
     @Override
     public int size() {
-        return ilr.size();
+        return iqr.size();
     }
 
     @Override
     public String getQuery(int index) throws IOException {
-        return ilr.readLine(index);
+        return iqr.readQuery(index);
     }
 
     @Override
     public List<String> getAllQueries() throws IOException {
-        return ilr.readLines();
+        return iqr.readQueries();
     }
 }
