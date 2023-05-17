@@ -78,8 +78,8 @@ public class FileUtils {
 		String line = "";
 		int count = 0;
 
-		try(FileReader fr = new FileReader(file)) {
-			BufferedReader br = new BufferedReader(fr);
+		try(FileReader fr = new FileReader(file);
+			BufferedReader br = new BufferedReader(fr)) {
 			while ((line = br.readLine()) != null) {
 				if (!line.isBlank()) {
 					if (count == index) {
@@ -124,8 +124,8 @@ public class FileUtils {
 	 * @throws IOException
 	 */
 	public static String getLineEnding(String filepath) throws IOException {
-		try(FileReader fr = new FileReader(filepath)) {
-			BufferedReader br = new BufferedReader(fr);
+		try(FileReader fr = new FileReader(filepath);
+			BufferedReader br = new BufferedReader(fr)) {
 			char c;
 			while ((c = (char) br.read()) != (char) -1) {
 				if (c == '\n')

@@ -135,8 +135,8 @@ public class IndexedQueryReader {
      */
     private void indexFile() throws IOException {
         this.indices = new ArrayList<>();
-        try(FileReader fr = new FileReader(this.file, StandardCharsets.UTF_8)) {
-            BufferedReader br = new BufferedReader(fr);
+        try(FileReader fr = new FileReader(this.file, StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(fr)) {
             // The method needs to know the length of the line ending used in the file to be able to properly calculate
             // the starting byte position of a line
             int lineEndingLength = FileUtils.getLineEnding(this.file.getAbsolutePath()).length();
@@ -161,8 +161,8 @@ public class IndexedQueryReader {
      */
     private void indexFile(String separator) throws IOException {
         this.indices = new ArrayList<>();
-        try(FileReader fr = new FileReader(this.file, StandardCharsets.UTF_8)) {
-            BufferedReader br = new BufferedReader(fr);
+        try(FileReader fr = new FileReader(this.file, StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(fr)) {
             // The method needs to know the length of the line ending used in the file to be able to properly calculate
             // the starting byte position of a line
             int lineEndingLength = FileUtils.getLineEnding(this.file.getAbsolutePath()).length();
