@@ -42,7 +42,7 @@ public class FileSeparatorQuerySource extends QuerySource {
 
         try {
             if(separator.isBlank()) {
-                iqr = IndexedQueryReader.makeWithBlankLines(path);
+                iqr = IndexedQueryReader.makeWithEmptyLines(path);
             }
             else {
                 iqr = IndexedQueryReader.makeWithStringSeparator(path, separator);

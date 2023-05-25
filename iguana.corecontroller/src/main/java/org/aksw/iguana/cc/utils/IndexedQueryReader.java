@@ -45,8 +45,9 @@ public class IndexedQueryReader {
      * @return reader to access the indexed lines
      * @throws IOException
      */
-    public static IndexedQueryReader makeWithBlankLines(String filepath) throws IOException {
-        return new IndexedQueryReader(filepath, "");
+    public static IndexedQueryReader makeWithEmptyLines(String filepath) throws IOException {
+        String lineEnding = FileUtils.getLineEnding(filepath);
+        return new IndexedQueryReader(filepath, lineEnding + lineEnding);
     }
 
     /**
@@ -56,16 +57,7 @@ public class IndexedQueryReader {
      * @throws IOException
      */
     public static IndexedQueryReader make(String filepath) throws IOException {
-        return new IndexedQueryReader(filepath);
-    }
-
-    /**
-     * This constructor indexes every non-blank line inside the given file.
-     * @param filepath path to the file
-     * @throws IOException
-     */
-    private IndexedQueryReader(String filepath) throws IOException {
-        this(filepath, null);
+        return new IndexedQueryReader(filepath, FileUtils.getLineEnding(filepath));
     }
 
     /**
@@ -81,7 +73,7 @@ public class IndexedQueryReader {
         this.file = new File(filepath);
 
         if(separator == null) {
-            this.indexFile();
+            this.indexFile(FileUtils.getLineEnding(filepath));
         }
         else {
             this.indexFile(separator);
@@ -130,29 +122,6 @@ public class IndexedQueryReader {
     }
 
     /**
-     * Indexes every non-blank line inside the file.
-     * @throws IOException
-     */
-    private void indexFile() throws IOException {
-        this.indices = new ArrayList<>();
-        try(FileReader fr = new FileReader(this.file, StandardCharsets.UTF_8);
-            BufferedReader br = new BufferedReader(fr)) {
-            // The method needs to know the length of the line ending used in the file to be able to properly calculate
-            // the starting byte position of a line
-            int lineEndingLength = FileUtils.getLineEnding(this.file.getAbsolutePath()).length();
-            long index = 0;
-            String line;
-            while((line = br.readLine()) != null) {
-                if(!line.isBlank()){
-                    this.indices.add(new Long[] {index, (long) line.length()});
-                    this.size++;
-                }
-                index += line.length() + lineEndingLength;
-            }
-        }
-    }
-
-    /**
      * Indexes each bundle of lines in between two lines, that contain the given separator. If the content between two
      * separators is blank, this method won't index that bundle. If the separator is blank, each bundle between two
      * blank lines will be indexed. The beginning and end of file count as separators too for the indexing.
@@ -165,39 +134,35 @@ public class IndexedQueryReader {
             BufferedReader br = new BufferedReader(fr)) {
             // The method needs to know the length of the line ending used in the file to be able to properly calculate
             // the starting byte position of a line
-            int lineEndingLength = FileUtils.getLineEnding(this.file.getAbsolutePath()).length();
-
-            // The last stored position in the list
-            long lastPosition = 0;
-            long currentPosition = 0;
-
-            // Used to check if every line between two separators is blank
-            boolean blank = true;
-            String line;
-
-            while((line = br.readLine()) != null) {
-                if((!separator.isBlank() && line.contains(separator)) || (separator.isBlank() && line.isBlank())) {
-                    if(!blank) {
-                        // Only index a position, if every line in between two separators weren't blank. Also, cutout
-                        // the line ending of the last line.
-                        this.indices.add(new Long[]{lastPosition, (currentPosition - lineEndingLength - lastPosition)});
-                        this.size++;
+            long lastIndex = 0;
+            long currentIndex = 0;
+            int counter = 0;
+            int character;
+            boolean isWhiteSpace = true;
+            while((character = br.read()) != -1) {
+                if(character == (int) separator.toCharArray()[counter]) {
+                    if(++counter >= separator.length()) {
+                        if(!isWhiteSpace) {
+                            this.indices.add(new Long[]{lastIndex, currentIndex - lastIndex});
+                        }
+                        currentIndex += counter;
+                        counter = 0;
+                        lastIndex = currentIndex;
+                        isWhiteSpace = true;
                     }
-                    currentPosition += line.length() + lineEndingLength;
-                    lastPosition = currentPosition;
-                    blank = true;
-                    continue;
+                } else {
+                    if(counter != 0) {
+                        currentIndex += counter;
+                        counter = 0;
+                    }
+                    if(isWhiteSpace && !Character.isWhitespace(character)) {
+                        isWhiteSpace = false;
+                    }
+                    currentIndex++;
                 }
-
-                if(!line.isBlank()) {
-                    blank = false;
-                }
-                currentPosition += line.length() + lineEndingLength;
             }
-
-            if(!blank) {
-                this.indices.add(new Long[]{lastPosition, (currentPosition - lineEndingLength - lastPosition)});
-                this.size++;
+            if(!isWhiteSpace) {
+                this.indices.add(new Long[]{lastIndex, currentIndex - lastIndex});
             }
         }
     }

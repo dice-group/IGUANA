@@ -44,20 +44,20 @@ public class IndexedQueryReaderTest {
     public static class NonParameterizedTest {
         @Test
         public void testIndexingWithCustomSeparator() throws IOException {
-            IndexedQueryReader reader1 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile1.txt", "#####");
+            IndexedQueryReader reader1 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile1.txt", "#####\r\n");
 
-            assertEquals("line 1", reader1.readQuery(0));
-            assertEquals("\r\nline 2", reader1.readQuery(1));
+            assertEquals("line 1\r\n", reader1.readQuery(0));
+            assertEquals("\r\nline 2\r\n", reader1.readQuery(1));
 
-            IndexedQueryReader reader2 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile2.txt", "#####");
-            assertEquals("\r\nline 0", reader2.readQuery(0));
-            assertEquals("line 1", reader2.readQuery(1));
+            IndexedQueryReader reader2 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile2.txt", "#####\r\n");
+            assertEquals("\r\nline 0\r\n", reader2.readQuery(0));
+            assertEquals("line 1\r\n", reader2.readQuery(1));
             assertEquals("\r\nline 2", reader2.readQuery(2));
         }
 
         @Test
         public void testIndexingWithBlankLines() throws IOException {
-            IndexedQueryReader reader = IndexedQueryReader.makeWithBlankLines("src/test/resources/utils/indexingtestfile3.txt");
+            IndexedQueryReader reader = IndexedQueryReader.makeWithEmptyLines("src/test/resources/utils/indexingtestfile3.txt");
 
             assertEquals(" line 1\r\nline 2", reader.readQuery(0));
             assertEquals("line 3", reader.readQuery(1));
