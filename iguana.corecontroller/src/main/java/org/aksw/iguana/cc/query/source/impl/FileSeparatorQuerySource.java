@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
+import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.cc.utils.IndexedQueryReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class FileSeparatorQuerySource extends QuerySource {
                 iqr = IndexedQueryReader.makeWithEmptyLines(path);
             }
             else {
-                iqr = IndexedQueryReader.makeWithStringSeparator(path, separator);
+                iqr = IndexedQueryReader.makeWithStringSeparator(path, FileUtils.getLineEnding(path) + separator + FileUtils.getLineEnding(path));
             }
         } catch (IOException e) {
             LOGGER.error("Failed to read this file for the queries: " + path + "\n" + e);
