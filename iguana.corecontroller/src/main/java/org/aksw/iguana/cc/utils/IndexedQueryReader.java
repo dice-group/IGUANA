@@ -20,9 +20,6 @@ public class IndexedQueryReader {
     /** The file whose lines should be indexed. */
     private final File file;
 
-    /** Number of indexed lines. */
-    private int size;
-
     /**
      * Indexes every bundle of lines inside the file, that are in between two lines that contain the given separator
      * (including the beginning and end of the file). The given separator isn't allowed to be blank.
@@ -118,7 +115,7 @@ public class IndexedQueryReader {
      * @return number of indexed objects
      */
     public int size() {
-        return this.size;
+        return this.indices.size();
     }
 
     /**
