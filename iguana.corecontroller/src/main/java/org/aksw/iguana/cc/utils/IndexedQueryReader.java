@@ -68,13 +68,7 @@ public class IndexedQueryReader {
      */
     private IndexedQueryReader(String filepath, String separator) throws IOException {
         this.file = new File(filepath);
-
-        if(separator == null) {
-            this.indexFile(FileUtils.getLineEnding(filepath));
-        }
-        else {
-            this.indexFile(separator);
-        }
+        this.indexFile(separator);
     }
 
     /**
@@ -84,8 +78,14 @@ public class IndexedQueryReader {
      * @throws IOException
      */
     public String readQuery(int index) throws IOException {
-        // conversion from long to int (lines shouldn't be bigger than ~2GB)
-        byte[] data = new byte[Math.toIntExact(this.indices.get(index)[1])];
+        // split long value into two integers
+        long length = this.indices.get(index)[1];
+        int upper = (int)(length >> 32);
+        int lower = (int)length;
+
+        // store content into two byte arrays (for the case that the content is >~2GB)
+        byte[] data1 = new byte[lower];
+        byte[] data2 = new byte[upper];
         String output;
         try(RandomAccessFile raf = new RandomAccessFile(this.file, "r")) {
             raf.seek(this.indices.get(index)[0]);
