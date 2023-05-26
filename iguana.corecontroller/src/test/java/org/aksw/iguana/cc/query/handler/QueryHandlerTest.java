@@ -122,19 +122,19 @@ public class QueryHandlerTest {
             return;
         }
 
-//        // Assumes that the order key is correct and only stores values for the random order
-//        Object order = this.queryHandler.config.getOrDefault("order", null);
-//        if (order != null) {
-//            HashSet<String> queries = new HashSet<>();
-//            for (int i = 0; i < 4; i++) {
-//                StringBuilder query = new StringBuilder();
-//                StringBuilder queryID = new StringBuilder();
-//                this.queryHandler.getNextQuery(query, queryID);
-//                queries.add(query.toString());
-//            }
-//            assertTrue(Arrays.asList(this.expected).containsAll(queries));
-//            return;
-//        }
+        // Assumes that the order key is correct and only stores values for the random order
+        Object order = this.queryHandler.config.getOrDefault("order", null);
+        if (order != null) {
+            HashSet<String> queries = new HashSet<>();
+            for (int i = 0; i < 4; i++) {
+                StringBuilder query = new StringBuilder();
+                StringBuilder queryID = new StringBuilder();
+                this.queryHandler.getNextQuery(query, queryID);
+                queries.add(query.toString());
+            }
+            assertTrue(Arrays.asList(this.expected).containsAll(queries));
+            return;
+        }
 
         StringBuilder query = new StringBuilder();
         StringBuilder queryID = new StringBuilder();
