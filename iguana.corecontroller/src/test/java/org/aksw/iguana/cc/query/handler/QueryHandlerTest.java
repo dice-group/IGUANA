@@ -17,6 +17,7 @@ import java.net.SocketAddress;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class QueryHandlerTest {
@@ -27,11 +28,13 @@ public class QueryHandlerTest {
     private static SocketConnection fastConnection;
 
     private final QueryHandler queryHandler;
+    private final Map<String, Object> config;
     private final String[] expected;
 
 
     public QueryHandlerTest(Map<String, Object> config, String[] expected) {
         this.queryHandler = new QueryHandler(config, 0); // workerID 0 results in correct seed for RandomSelector
+        this.config = config;
         this.expected = expected;
     }
 
@@ -111,6 +114,20 @@ public class QueryHandlerTest {
 
     @Test
     public void getNextQueryTest() throws IOException {
+        // Assumes, that the order is correct has only stored values for random retrieval
+        Object order = config.getOrDefault("order", null);
+        if (order != null) {
+            HashSet<String> queries = new HashSet<>();
+            for (int i = 0; i < 4; i++) {
+                StringBuilder query = new StringBuilder();
+                StringBuilder queryID = new StringBuilder();
+                this.queryHandler.getNextQuery(query, queryID);
+                queries.add(query.toString());
+            }
+            assertTrue(Arrays.asList(this.expected).containsAll(queries));
+            return;
+        }
+
         StringBuilder query = new StringBuilder();
         StringBuilder queryID = new StringBuilder();
         this.queryHandler.getNextQuery(query, queryID);
