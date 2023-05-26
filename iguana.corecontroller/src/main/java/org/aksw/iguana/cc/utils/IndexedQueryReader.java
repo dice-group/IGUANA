@@ -6,26 +6,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class creates objects, that index the start positions of lines inside a file for faster access. <br/>
- * It indexes either every single line or a bundle of multiple lines between two lines that contain a given separator.
+ * This class creates objects, that index the start positions characters in between two given separators.
+ * A separator can be, for example "\n", which is the equivalent of indexing every line. <br/>
+ * The beginning and the end of the file count as separators too.
  * <br/>
- * Blank content won't be indexed. <br/>
- * The positions and the length of the lines will be stored in an internal array.
+ * Blank content in between two separators won't be indexed. <br/>
+ * The start positions and the length of each indexed content will be stored in an internal array for later accessing.
  */
 public class IndexedQueryReader {
 
-    /** This list stores the start position and the length of the indexed lines inside the file. */
+    /** This list stores the start position and the length of each indexed content. */
     private ArrayList<Long[]> indices;
 
-    /** The file whose lines should be indexed. */
+    /** The file whose content should be indexed. */
     private final File file;
 
     /**
-     * Indexes every bundle of lines inside the file, that are in between two lines that contain the given separator
-     * (including the beginning and end of the file). The given separator isn't allowed to be blank.
+     * Indexes each content in between two of the given separators (including the beginning and end of the file). The
+     * given separator isn't allowed to be blank.
      * @param filepath path to the file
      * @param separator the separator line that is used in the file (isn't allowed to be blank)
-     * @return reader to access the indexed lines
+     * @return reader to access the indexed content
      * @throws IllegalArgumentException the given separator was blank
      * @throws IOException
      */
@@ -36,10 +37,11 @@ public class IndexedQueryReader {
     }
 
     /**
-     * Indexes every bundle of lines inside the file, that are in between two blank lines (including the beginning and
-     * end of the file).
+     * Indexes every bundle of lines inside the file, that are in between two empty lines (including the beginning and
+     * end of the file). <br/>
+     * It uses the doubled line ending of the file as a separator, for example "\n\n".
      * @param filepath path to the file
-     * @return reader to access the indexed lines
+     * @return reader to access the indexed content
      * @throws IOException
      */
     public static IndexedQueryReader makeWithEmptyLines(String filepath) throws IOException {
@@ -48,7 +50,7 @@ public class IndexedQueryReader {
     }
 
     /**
-     * Indexes every non-blank line inside the given file.
+     * Indexes every non-blank line inside the given file. It uses the line ending of the file as a separator.
      * @param filepath path to the file
      * @return reader to access the indexed lines
      * @throws IOException
@@ -58,10 +60,8 @@ public class IndexedQueryReader {
     }
 
     /**
-     * Creates an object that indexes every bundle of multiple lines inside the given file, that are in between two
-     * lines that contain the given separators (including the beginning and end of the given file). <br/>
-     * If the separator is blank, every bundle between two blank lines will be indexed. <br/>
-     * If the separator parameter is null, it will instead just index every non-blank line of the file.
+     * Creates an object that indexes each content in between two of the given separators (including the beginning and
+     * end of the given file). <br/>
      * @param filepath path to the file
      * @param separator the separator for each bundle
      * @throws IOException
@@ -78,11 +78,9 @@ public class IndexedQueryReader {
     }
 
     /**
-     * If a separator wasn't given, this method returns the line with the corresponding index inside the file. <br/>
-     * If a separator was given, this method returns a string of multiple lines, that are between two separators
-     * (including the beginning and end of file), with the corresponding index.
-     * @param index the index of the searched line or bundle of lines
-     * @return the searched line or bundle of lines
+     * Returns the indexed content with the given index.
+     * @param index the index of the searched content
+     * @return the searched content
      * @throws IOException
      */
     public String readQuery(int index) throws IOException {
@@ -91,14 +89,16 @@ public class IndexedQueryReader {
         String output;
         try(RandomAccessFile raf = new RandomAccessFile(this.file, "r")) {
             raf.seek(this.indices.get(index)[0]);
-            raf.read(data);
-            output = new String(data, StandardCharsets.UTF_8);
+            raf.read(data1);
+            output = new String(data1, StandardCharsets.UTF_8);
+            raf.read(data2);
+            output += new String(data2, StandardCharsets.UTF_8);
         }
         return output;
     }
 
     /**
-     * This method returns a list of strings that contains every indexed line or bundle of lines.
+     * This method returns a list of strings that contains every indexed content.
      * @return list of lines
      * @throws IOException
      */
@@ -111,7 +111,7 @@ public class IndexedQueryReader {
     }
 
     /**
-     * Returns the number of indexed non-blank lines or bundle of lines (depends on if a separator was given).
+     * Returns the number of indexed content.
      * @return number of indexed objects
      */
     public int size() {
@@ -119,9 +119,8 @@ public class IndexedQueryReader {
     }
 
     /**
-     * Indexes each bundle of lines in between two lines, that contain the given separator. If the content between two
-     * separators is blank, this method won't index that bundle. If the separator is blank, each bundle between two
-     * blank lines will be indexed. The beginning and end of file count as separators too for the indexing.
+     * Indexes every content in between two of the given separator. The beginning and the end of the file count as
+     * separators too.
      * @param separator the custom separator
      * @throws IOException
      */
