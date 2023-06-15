@@ -78,21 +78,12 @@ public class IndexedQueryReader {
      * @throws IOException
      */
     public String readQuery(int index) throws IOException {
-        // split long value into two integers
-        long length = this.indices.get(index)[1];
-        int upper = (int)(length >> 32);
-        int lower = (int)length;
-
-        // store content into two byte arrays (for the case that the content is >~2GB)
-        byte[] data1 = new byte[lower];
-        byte[] data2 = new byte[upper];
+        byte[] data = new byte[Math.toIntExact(this.indices.get(index)[1])];
         String output;
         try(RandomAccessFile raf = new RandomAccessFile(this.file, "r")) {
             raf.seek(this.indices.get(index)[0]);
-            raf.read(data1);
-            output = new String(data1, StandardCharsets.UTF_8);
-            raf.read(data2);
-            output += new String(data2, StandardCharsets.UTF_8);
+            raf.read(data);
+            output = new String(data, StandardCharsets.UTF_8);
         }
         return output;
     }
@@ -126,6 +117,7 @@ public class IndexedQueryReader {
      */
     private void indexFile(String separator) throws IOException {
         this.indices = new ArrayList<>();
+        final char[] sepArray = separator.toCharArray();
         try(FileReader fr = new FileReader(this.file, StandardCharsets.UTF_8);
             BufferedReader br = new BufferedReader(fr)) {
             // The method needs to know the length of the line ending used in the file to be able to properly calculate
@@ -136,7 +128,7 @@ public class IndexedQueryReader {
             int character;
             boolean isWhiteSpace = true;
             while((character = br.read()) != -1) {
-                if(character == (int) separator.toCharArray()[counter]) {
+                if(character == (int) sepArray[counter]) {
                     if(++counter >= separator.length()) {
                         if(!isWhiteSpace) {
                             this.indices.add(new Long[]{lastIndex, currentIndex - lastIndex});

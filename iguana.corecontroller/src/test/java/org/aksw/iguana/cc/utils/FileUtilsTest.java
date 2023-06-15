@@ -37,19 +37,6 @@ public class FileUtilsTest {
         }
 
         @Test
-        public void countLinesTest() throws IOException {
-            assertEquals(4, FileUtils.countLines(this.file));
-        }
-
-        @Test
-        public void readLineAtTest() throws IOException {
-            assertEquals("line 1", FileUtils.readLineAt(0, this.file));
-            assertEquals("line 2", FileUtils.readLineAt(1, this.file));
-            assertEquals("line 3", FileUtils.readLineAt(2, this.file));
-            assertEquals("line 4", FileUtils.readLineAt(3, this.file));
-        }
-
-        @Test
         public void getHashTest(){
             //check if hash abs works
             assertTrue(FileUtils.getHashcodeFromFileContent(this.file.getAbsolutePath())>0);

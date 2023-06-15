@@ -13,85 +13,6 @@ import java.nio.file.Paths;
  */
 public class FileUtils {
 
-	/**
-	 * Counts the lines in a file efficiently. (only if the line ending is "\n") <br/>
-	 * Source: <a href="http://stackoverflow.com/a/453067/2917596">http://stackoverflow.com/a/453067/2917596</a>
-	 *
-	 * @param filename file to count lines of
-	 * @return number of lines in the given file
-	 * @throws IOException
-	 */
-	public static int countLines(File filename) throws IOException {
-		if(getLineEnding((filename.getAbsolutePath())).equals("\n")) {
-			final int BUFFER_SIZE = 8192;
-			try (FileInputStream fis = new FileInputStream(filename)) {
-				InputStream is = new BufferedInputStream(fis, BUFFER_SIZE);
-				byte[] c = new byte[BUFFER_SIZE];
-				int count = 0;
-				int readChars = 0;
-				boolean empty = true;
-				boolean blank = true;
-				while ((readChars = is.read(c)) != -1) {
-					for (int i = 0; i < readChars; ++i) {
-						if (c[i] == '\n') {
-							// Check if line was empty
-							if (!blank) {
-								++count;
-							}
-						} else {
-							if (!Character.isWhitespace(c[i]))
-								blank = false;
-							empty = false;
-						}
-					}
-				}
-				if (!blank) {
-					count++;
-				}
-				return (count == 0 && !empty) ? 1 : count;
-			}
-		} else {
-			String line = "";
-			int count = 0;
-			try(FileReader fr = new FileReader(filename)) {
-				BufferedReader br = new BufferedReader(fr);
-				while ((line = br.readLine()) != null) {
-					if (!line.isBlank()) {
-						count++;
-					}
-				}
-			}
-			return count;
-		}
-	}
-
-	/**
-	 * Returns a line at a given position of a File. <br/>
-	 * This method ignores every empty line, therefore the parameter <code>pos</code> references the n-th non-empty line.
-	 *
-	 * @param index the position of a non-empty line which should be returned
-	 * @param file 	the file to read from
-	 * @return the line at the given position
-	 * @throws IOException
-	 */
-	public static String readLineAt(int index, File file) throws IOException {
-		String line = "";
-		int count = 0;
-
-		try(FileReader fr = new FileReader(file);
-			BufferedReader br = new BufferedReader(fr)) {
-			while ((line = br.readLine()) != null) {
-				if (!line.isBlank()) {
-					if (count == index) {
-						return line;
-					}
-					count++;
-				}
-			}
-		}
-		return "";
-	}
-
 	public static int getHashcodeFromFileContent(String filepath) {
 		int hashcode;
 		try {
@@ -140,9 +61,5 @@ public class FileUtils {
 
 		// fall back if there is no line end in the file
 		return System.lineSeparator();
-	}
-
-	public static BufferedReader getBufferedReader(File queryFile) throws FileNotFoundException {
-		return new BufferedReader(new FileReader(queryFile));
 	}
 }
