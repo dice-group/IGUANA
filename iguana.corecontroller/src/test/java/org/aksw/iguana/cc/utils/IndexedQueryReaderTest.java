@@ -53,6 +53,14 @@ public class IndexedQueryReaderTest {
             assertEquals("\r\nline 0\r\n", reader2.readQuery(0));
             assertEquals("line 1\r\n", reader2.readQuery(1));
             assertEquals("\r\nline 2", reader2.readQuery(2));
+
+            IndexedQueryReader reader3 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile4.txt", "###$");
+            assertEquals("a#", reader3.readQuery(0));
+            assertEquals("b", reader3.readQuery(1));
+
+            IndexedQueryReader reader4 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile5.txt", "211");
+            assertEquals("a21", reader4.readQuery(0));
+            assertEquals("b", reader4.readQuery(1));
         }
 
         @Test

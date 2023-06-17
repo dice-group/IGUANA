@@ -2,8 +2,7 @@ package org.aksw.iguana.cc.utils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class creates objects, that index the start positions characters in between two given separators.
@@ -78,6 +77,7 @@ public class IndexedQueryReader {
      * @throws IOException
      */
     public String readQuery(int index) throws IOException {
+        // Indexed queries can't be larger than ~2GB
         byte[] data = new byte[Math.toIntExact(this.indices.get(index)[1])];
         String output;
         try(RandomAccessFile raf = new RandomAccessFile(this.file, "r")) {
@@ -120,15 +120,26 @@ public class IndexedQueryReader {
         final char[] sepArray = separator.toCharArray();
         try(FileReader fr = new FileReader(this.file, StandardCharsets.UTF_8);
             BufferedReader br = new BufferedReader(fr)) {
-            // The method needs to know the length of the line ending used in the file to be able to properly calculate
-            // the starting byte position of a line
+            // starting position of the last indexed query
             long lastIndex = 0;
             long currentIndex = 0;
+
             int counter = 0;
-            int character;
+            int currentChar;
             boolean isWhiteSpace = true;
-            while((character = br.read()) != -1) {
-                if(character == (int) sepArray[counter]) {
+
+            // if the current character matches with sepArray[counter], this will store the read string that matched
+            // with a beginning substring of the separator
+            StringBuilder readString = new StringBuilder();
+
+            // If matching occurred but failed, this will store the characters from readString except the first
+            // character. They will need to be checked again to see, if a separator is beginning from these characters.
+            // This buffer is used to prevent having to read an already read character again from the file.
+            Queue<Character> readChars = new LinkedList<>();
+
+            while((currentChar = br.read()) != -1) {
+                if(currentChar == (int) sepArray[counter]) {
+                    readString.append((char) currentChar);
                     if(++counter >= separator.length()) {
                         if(!isWhiteSpace) {
                             this.indices.add(new Long[]{lastIndex, currentIndex - lastIndex});
@@ -137,16 +148,42 @@ public class IndexedQueryReader {
                         counter = 0;
                         lastIndex = currentIndex;
                         isWhiteSpace = true;
+                        readString = new StringBuilder();
+                        readChars = new LinkedList<>();
                     }
                 } else {
                     if(counter != 0) {
-                        currentIndex += counter;
+                        // first character from readString was already checked for a separator
+                        for(int i = 1; i < readString.length(); i++) {
+                            readChars.offer(readString.charAt(i));
+                        }
+                        // last read char that didn't match is not inside readString anymore, thus needs to be added
+                        // manually here
+                        readChars.offer((char) currentChar);
+                        readString = new StringBuilder();
                         counter = 0;
                     }
-                    if(isWhiteSpace && !Character.isWhitespace(character)) {
+                    if(isWhiteSpace && !Character.isWhitespace(currentChar)) {
                         isWhiteSpace = false;
                     }
                     currentIndex++;
+                }
+
+                // If there are characters in the buffer
+                while(!readChars.isEmpty()) {
+                    currentChar = (int) readChars.poll();
+                    readString.append((char) currentChar);
+                    if(currentChar == (int) sepArray[counter]) {
+                        counter++;
+                    } else {
+                        // First character from readString was already checked for separator
+                        for(int i = 1; i < readString.length(); i++) {
+                            readChars.offer(readString.charAt(i));
+                        }
+                        readString = new StringBuilder();
+                        currentIndex++;
+                        counter = 0;
+                    }
                 }
             }
             if(!isWhiteSpace) {
