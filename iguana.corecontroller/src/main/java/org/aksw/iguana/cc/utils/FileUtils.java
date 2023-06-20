@@ -4,10 +4,12 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Methods to work easier with Files.
- * 
+ *
  * @author f.conrads
  *
  */
@@ -62,5 +64,67 @@ public class FileUtils {
 
 		// fall back if there is no line end in the file
 		return System.lineSeparator();
+	}
+
+	private static int[] computePrefixTable(byte[] pattern) {
+		int[] prefixTable = new int[pattern.length];
+
+		int prefixIndex = 0;
+		for (int i = 1; i < pattern.length; i++) {
+			while (prefixIndex > 0 && pattern[prefixIndex] != pattern[i]) {
+				prefixIndex = prefixTable[prefixIndex - 1];
+			}
+
+			if (pattern[prefixIndex] == pattern[i]) {
+				prefixIndex++;
+			}
+
+			prefixTable[i] = prefixIndex;
+		}
+
+		return prefixTable;
+	}
+
+	public static List<long[]> indexStream(String separator, InputStream is) throws IOException {
+		// basically Knuth-Morris-Pratt
+		List<long[]> indices = new ArrayList<>();
+
+
+		final byte[] sepArray = separator.getBytes(StandardCharsets.UTF_8);
+		final int[] prefixTable = computePrefixTable(sepArray);
+
+		long itemStart = 0;
+
+		long byteOffset = 0;
+		int patternIndex = 0;
+		byte[] currentByte = new byte[1];
+		while (is.read(currentByte) == 1) {
+			// skipping fast-forward with the prefixTable
+			while (patternIndex > 0 && currentByte[0] != sepArray[patternIndex]) {
+				patternIndex = prefixTable[patternIndex - 1];
+			}
+
+
+			if (currentByte[0] == sepArray[patternIndex]) {
+				patternIndex++;
+
+				if (patternIndex == sepArray.length) { // match found
+					patternIndex = 0;
+					final long itemEnd = byteOffset - sepArray.length + 1;
+					final long len = itemEnd - itemStart;
+					indices.add(new long[]{itemStart, len});
+
+					itemStart = byteOffset + 1;
+				}
+			}
+
+			byteOffset++;
+		}
+
+		final long itemEnd = byteOffset;
+		final long len = itemEnd - itemStart;
+		indices.add(new long[]{itemStart, len});
+
+		return indices;
 	}
 }
