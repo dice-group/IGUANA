@@ -46,7 +46,7 @@ public class FileSeparatorQuerySource extends QuerySource {
                 iqr = IndexedQueryReader.makeWithEmptyLines(path);
             }
             else {
-                iqr = IndexedQueryReader.makeWithStringSeparator(path, FileUtils.getLineEnding(path) + separator + FileUtils.getLineEnding(path));
+                iqr = IndexedQueryReader.makeWithStringSeparator(path, separator);
             }
         } catch (IOException e) {
             LOGGER.error("Failed to read this file for the queries: " + path + "\n" + e);
