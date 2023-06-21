@@ -17,6 +17,7 @@ import java.net.SocketAddress;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class QueryHandlerTest {
@@ -109,6 +110,32 @@ public class QueryHandlerTest {
 
     @Test
     public void getNextQueryTest() throws IOException {
+        if (this.queryHandler.config.getOrDefault("format", "").equals("folder")) {
+            HashSet<String> set = new HashSet<>();
+            for (int i = 0; i < 4; i++) {
+                StringBuilder queryID = new StringBuilder();
+                StringBuilder query = new StringBuilder();
+                this.queryHandler.getNextQuery(query, queryID);
+                set.add(query.toString());
+            }
+            assertTrue(set.containsAll(Arrays.asList(this.expected)));
+            return;
+        }
+
+        // Assumes that the order key is correct and only stores values for the random order
+        Object order = this.queryHandler.config.getOrDefault("order", null);
+        if (order != null) {
+            HashSet<String> queries = new HashSet<>();
+            for (int i = 0; i < 4; i++) {
+                StringBuilder query = new StringBuilder();
+                StringBuilder queryID = new StringBuilder();
+                this.queryHandler.getNextQuery(query, queryID);
+                queries.add(query.toString());
+            }
+            assertTrue(Arrays.asList(this.expected).containsAll(queries));
+            return;
+        }
+
         StringBuilder query = new StringBuilder();
         StringBuilder queryID = new StringBuilder();
         this.queryHandler.getNextQuery(query, queryID);
