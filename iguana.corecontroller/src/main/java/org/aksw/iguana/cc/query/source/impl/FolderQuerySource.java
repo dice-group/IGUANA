@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,7 +41,10 @@ public class FolderQuerySource extends QuerySource {
         }
 
         LOGGER.info("indexing folder {}", this.path);
-        this.files = dir.listFiles();
+        this.files = dir.listFiles(File::isFile);
+        if (this.files == null)
+            this.files = new File[]{};
+        Arrays.sort(this.files);
     }
 
     @Override
