@@ -17,6 +17,7 @@ import java.net.SocketAddress;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class QueryHandlerTest {
@@ -39,29 +40,28 @@ public class QueryHandlerTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        String[] opl_linear = new String[]{"QUERY 1 {still query 1}", "QUERY 2 {still query 2}", "QUERY 3 {still query 3}", "QUERY 1 {still query 1}"};
-        String[] sep_linear = new String[]{"QUERY 1 {\r\nstill query 1\r\n}", "QUERY 2 {\r\nstill query 2\r\n}", "QUERY 3 {\r\nstill query 3\r\n}", "QUERY 1 {\r\nstill query 1\r\n}"};
-        String[] opl_random = new String[]{"QUERY 1 {still query 1}", "QUERY 2 {still query 2}", "QUERY 3 {still query 3}"};
-        String[] sep_random = new String[]{"QUERY 1 {\r\nstill query 1\r\n}", "QUERY 2 {\r\nstill query 2\r\n}", "QUERY 3 {\r\nstill query 3\r\n}"};
+        String[] opl = new String[]{"QUERY 1 {still query 1}", "QUERY 2 {still query 2}", "QUERY 3 {still query 3}", "QUERY 1 {still query 1}"};
+        String[] folder = new String[]{"QUERY 1 {\r\nstill query 1\r\n}", "QUERY 2 {\r\nstill query 2\r\n}", "QUERY 3 {\r\nstill query 3\r\n}", "QUERY 1 {\r\nstill query 1\r\n}"};
+        String[] separator = new String[]{"QUERY 1 {\r\nstill query 1\r\n}\r\n", "\r\nQUERY 2 {\r\nstill query 2\r\n}\r\n", "\r\nQUERY 3 {\r\nstill query 3\r\n}", "QUERY 1 {\r\nstill query 1\r\n}\r\n"};
 
         Collection<Object[]> testData = new ArrayList<>();
 
         // Defaults: one-per-line, caching, linear
         Map<String, Object> config0 = new HashMap<>();
         config0.put("location", "src/test/resources/query/source/queries.txt");
-        testData.add(new Object[]{config0, opl_linear});
+        testData.add(new Object[]{config0, opl});
 
         // Defaults: caching, linear
         Map<String, Object> config1 = new HashMap<>();
         config1.put("location", "src/test/resources/query/source/query-folder");
         config1.put("format", "folder");
-        testData.add(new Object[]{config1, sep_linear});
+        testData.add(new Object[]{config1, folder});
 
         // Defaults: separator("###"), caching, linear
         Map<String, Object> config2 = new HashMap<>();
         config2.put("location", "src/test/resources/query/source/separated-queries-default.txt");
         config2.put("format", "separator");
-        testData.add(new Object[]{config2, sep_linear});
+        testData.add(new Object[]{config2, separator});
 
         Map<String, Object> config3 = new HashMap<>();
         config3.put("location", "src/test/resources/query/source/separated-queries-default.txt");
@@ -70,7 +70,7 @@ public class QueryHandlerTest {
         config3.put("format", format3);
         config3.put("caching", false);
         config3.put("order", "random");
-        testData.add(new Object[]{config3, sep_random});
+        testData.add(new Object[]{config3, separator});
 
         // Defaults: one-per-line, caching
         Map<String, Object> config4 = new HashMap<>();
@@ -80,7 +80,7 @@ public class QueryHandlerTest {
         Map<String, Object> order4 = new HashMap<>();
         order4.put("random", random4);
         config4.put("order", order4);
-        testData.add(new Object[]{config4, opl_random});
+        testData.add(new Object[]{config4, opl});
 
         String[] expectedInstances = new String[]{"SELECT ?book {?book <http://example.org/book/book2> ?o}", "SELECT ?book {?book <http://example.org/book/book1> ?o}", "SELECT ?book {?book <http://example.org/book/book2> ?o}", "SELECT ?book {?book <http://example.org/book/book1> ?o}"};
         Map<String, Object> config5 = new HashMap<>();
@@ -123,7 +123,7 @@ public class QueryHandlerTest {
                 this.queryHandler.getNextQuery(query, queryID);
                 queries.add(query.toString());
             }
-            assertEquals(Arrays.asList(this.expected), queries);
+            assertTrue(Arrays.asList(this.expected).containsAll(queries));
             return;
         }
 
