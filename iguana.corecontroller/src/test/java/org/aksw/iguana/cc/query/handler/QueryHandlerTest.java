@@ -17,7 +17,6 @@ import java.net.SocketAddress;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class QueryHandlerTest {
@@ -117,14 +116,14 @@ public class QueryHandlerTest {
         // Assumes, that the order is correct has only stored values for random retrieval
         Object order = config.getOrDefault("order", null);
         if (order != null) {
-            HashSet<String> queries = new HashSet<>();
+            Collection<String> queries = new HashSet<>();
             for (int i = 0; i < 4; i++) {
                 StringBuilder query = new StringBuilder();
                 StringBuilder queryID = new StringBuilder();
                 this.queryHandler.getNextQuery(query, queryID);
                 queries.add(query.toString());
             }
-            assertTrue(Arrays.asList(this.expected).containsAll(queries));
+            assertEquals(Arrays.asList(this.expected), queries);
             return;
         }
 
