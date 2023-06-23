@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * A separator can be, for example "\n", which is the equivalent of indexing every line. <br/>
  * The beginning and the end of the file count as separators too.
  * <br/>
- * Blank content in between two separators won't be indexed. <br/>
+ * Empty content in between two separators won't be indexed. <br/>
  * The start positions and the length of each indexed content will be stored in an internal array for later accessing.
  */
 public class IndexedQueryReader {
@@ -25,16 +25,17 @@ public class IndexedQueryReader {
 
     /**
      * Indexes each content in between two of the given separators (including the beginning and end of the file). The
-     * given separator isn't allowed to be blank.
+     * given separator isn't allowed to be empty.
+     *
      * @param filepath path to the file
-     * @param separator the separator line that is used in the file (isn't allowed to be blank)
+     * @param separator the separator line that is used in the file (isn't allowed to be empty)
      * @return reader to access the indexed content
-     * @throws IllegalArgumentException the given separator was blank
+     * @throws IllegalArgumentException the given separator was empty
      * @throws IOException
      */
     public static IndexedQueryReader makeWithStringSeparator(String filepath, String separator) throws IOException {
-        if (separator.isBlank())
-            throw new IllegalArgumentException("Separator for makeWithStringSeparator can not be blank.");
+        if (separator.isEmpty())
+            throw new IllegalArgumentException("Separator for makeWithStringSeparator can not be empty.");
         return new IndexedQueryReader(filepath, separator);
     }
 
@@ -42,6 +43,7 @@ public class IndexedQueryReader {
      * Indexes every bundle of lines inside the file, that are in between two empty lines (including the beginning and
      * end of the file). <br/>
      * It uses the doubled line ending of the file as a separator, for example "\n\n".
+     *
      * @param filepath path to the file
      * @return reader to access the indexed content
      * @throws IOException
@@ -52,7 +54,8 @@ public class IndexedQueryReader {
     }
 
     /**
-     * Indexes every non-blank line inside the given file. It uses the line ending of the file as a separator.
+     * Indexes every non-empty line inside the given file. It uses the line ending of the file as a separator.
+     *
      * @param filepath path to the file
      * @return reader to access the indexed lines
      * @throws IOException
@@ -64,8 +67,9 @@ public class IndexedQueryReader {
     /**
      * Creates an object that indexes each content in between two of the given separators (including the beginning and
      * end of the given file). <br/>
+     *
      * @param filepath path to the file
-     * @param separator the separator for each bundle
+     * @param separator the separator for each query
      * @throws IOException
      */
     private IndexedQueryReader(String filepath, String separator) throws IOException {
@@ -75,6 +79,7 @@ public class IndexedQueryReader {
 
     /**
      * Returns the indexed content with the given index.
+     *
      * @param index the index of the searched content
      * @return the searched content
      * @throws IOException
@@ -93,6 +98,7 @@ public class IndexedQueryReader {
 
     /**
      * This method returns a list of strings that contains every indexed content.
+     *
      * @return list of lines
      * @throws IOException
      */
@@ -106,6 +112,7 @@ public class IndexedQueryReader {
 
     /**
      * Returns the number of indexed content.
+     *
      * @return number of indexed objects
      */
     public int size() {
