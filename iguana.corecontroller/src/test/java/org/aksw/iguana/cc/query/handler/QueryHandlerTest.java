@@ -39,10 +39,12 @@ public class QueryHandlerTest {
     }
 
     @Parameterized.Parameters
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> data() throws IOException {
+        String le = org.aksw.iguana.cc.utils.FileUtils.getLineEnding("src/test/resources/query/source/queries.txt");
+
         String[] opl = new String[]{"QUERY 1 {still query 1}", "QUERY 2 {still query 2}", "QUERY 3 {still query 3}", "QUERY 1 {still query 1}"};
-        String[] folder = new String[]{"QUERY 1 {\r\nstill query 1\r\n}", "QUERY 2 {\r\nstill query 2\r\n}", "QUERY 3 {\r\nstill query 3\r\n}", "QUERY 1 {\r\nstill query 1\r\n}"};
-        String[] separator = new String[]{"QUERY 1 {\r\nstill query 1\r\n}\r\n", "\r\nQUERY 2 {\r\nstill query 2\r\n}\r\n", "\r\nQUERY 3 {\r\nstill query 3\r\n}", "QUERY 1 {\r\nstill query 1\r\n}\r\n"};
+        String[] folder = new String[]{"QUERY 1 {" + le + "still query 1" + le + "}", "QUERY 2 {" + le + "still query 2" + le + "}", "QUERY 3 {" + le + "still query 3" + le + "}", "QUERY 1 {" + le + "still query 1" + le + "}"};
+        String[] separator = new String[]{"QUERY 1 {" + le + "still query 1" + le + "}", "QUERY 2 {" + le + "still query 2" + le + "}", "QUERY 3 {" + le + "still query 3" + le + "}", "QUERY 1 {" + le + "still query 1" + le + "}"};
 
         Collection<Object[]> testData = new ArrayList<>();
 
