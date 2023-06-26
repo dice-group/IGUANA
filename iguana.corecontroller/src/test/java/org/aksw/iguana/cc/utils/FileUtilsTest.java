@@ -16,6 +16,40 @@ import static org.junit.Assert.*;
 public class FileUtilsTest {
 
     @RunWith(Parameterized.class)
+    public static class TestGetLineEnding {
+        private static class TestData {
+            public String filepath;
+            public String expectedLineEnding;
+
+            public TestData(String filepath, String expectedLineEnding) {
+                this.filepath = filepath;
+                this.expectedLineEnding = expectedLineEnding;
+            }
+        }
+
+        public TestGetLineEnding(TestData data) {
+            this.data = data;
+        }
+
+        private final TestData data;
+
+        @Parameterized.Parameters
+        public static Collection<TestData> data() {
+            return List.of(
+                    new TestData("src/test/resources/readLineTestFile1.txt", "\n"),
+                    new TestData("src/test/resources/readLineTestFile2.txt", "\r"),
+                    new TestData("src/test/resources/readLineTestFile3.txt", "\r\n"),
+                    new TestData("src/test/resources/utils/indexingtestfile1.txt", "\r\n")
+            );
+        }
+
+        @Test
+        public void testGetLineEndings() throws IOException {
+            assertEquals(FileUtils.getLineEnding(this.data.filepath), this.data.expectedLineEnding);
+        }
+    }
+
+    @RunWith(Parameterized.class)
     public static class TestIndexStream {
 
         private final TestData data;
