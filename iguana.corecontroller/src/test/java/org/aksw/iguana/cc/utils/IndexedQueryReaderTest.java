@@ -8,6 +8,7 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -43,34 +44,56 @@ public class IndexedQueryReaderTest {
 
     public static class NonParameterizedTest {
         @Test
-        public void testIndexingWithCustomSeparator() throws IOException {
-            IndexedQueryReader reader1 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile1.txt", "#####\r\n");
+        public void testIndexingWithBlankLines() throws IOException {
+            IndexedQueryReader reader = IndexedQueryReader.makeWithEmptyLines("src/test/resources/utils/indexingtestfile3.txt");
+            String le = FileUtils.getLineEnding("src/test/resources/utils/indexingtestfile3.txt");
 
-            assertEquals("line 1\r\n", reader1.readQuery(0));
-            assertEquals("\r\nline 2\r\n", reader1.readQuery(1));
-            assertEquals(2, reader1.readQueries().size());
+            assertEquals(" line 1" + le + "line 2", reader.readQuery(0));
+            assertEquals("line 3", reader.readQuery(1));
+            assertEquals("line 4" + le + "line 5", reader.readQuery(2));
+        }
+    }
 
-            IndexedQueryReader reader2 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile2.txt", "#####\r\n");
-            assertEquals("line 0\r\n", reader2.readQuery(0));
-            assertEquals("line 1\r\n#####", reader2.readQuery(1));
-            assertEquals(2, reader2.readQueries().size());
+    @RunWith(Parameterized.class)
+    public static class TestCustomSeparator {
+        private static class TestData {
+            public String filepath;
+            public String separator;
+            public String[] expectedStrings;
 
-            IndexedQueryReader reader3 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile4.txt", "###$");
-            assertEquals("a#", reader3.readQuery(0));
-            assertEquals("b", reader3.readQuery(1));
+            public TestData(String filepath, String separator, String[] expectedStrings) {
+                this.filepath = filepath;
+                this.separator = separator;
+                this.expectedStrings = expectedStrings;
+            }
+        }
 
-            IndexedQueryReader reader4 = IndexedQueryReader.makeWithStringSeparator("src/test/resources/utils/indexingtestfile5.txt", "211");
-            assertEquals("a21", reader4.readQuery(0));
-            assertEquals("b", reader4.readQuery(1));
+        private TestData data;
+
+        public TestCustomSeparator(TestData data) {
+            this.data = data;
+        }
+
+        @Parameterized.Parameters
+        public static Collection<TestData> data() throws IOException {
+            // all the files should have the same line ending
+            String le = FileUtils.getLineEnding("src/test/resources/utils/indexingtestfile1.txt");
+            return List.of(
+                    new TestData("src/test/resources/utils/indexingtestfile1.txt", "#####" + le, new String[]{"line 1" + le, le + "line 2" + le}),
+                    new TestData("src/test/resources/utils/indexingtestfile2.txt", "#####" + le, new String[]{"line 0" + le, "line 1" + le + "#####"}),
+                    new TestData("src/test/resources/utils/indexingtestfile4.txt", "###$", new String[]{"a#", "b"}),
+                    new TestData("src/test/resources/utils/indexingtestfile5.txt", "211", new String[]{"a21", "b"})
+            );
         }
 
         @Test
-        public void testIndexingWithBlankLines() throws IOException {
-            IndexedQueryReader reader = IndexedQueryReader.makeWithEmptyLines("src/test/resources/utils/indexingtestfile3.txt");
-
-            assertEquals(" line 1\r\nline 2", reader.readQuery(0));
-            assertEquals("line 3", reader.readQuery(1));
-            assertEquals("line 4\r\nline 5", reader.readQuery(2));
+        public void testIndexingWithCustomSeparator() throws IOException {
+            IndexedQueryReader reader = IndexedQueryReader.makeWithStringSeparator(this.data.filepath, this.data.separator);
+            for (int i = 0; i < this.data.expectedStrings.length; i++) {
+                String read = reader.readQuery(i);
+                assertEquals(this.data.expectedStrings[i], read);
+            }
+            assertEquals(this.data.expectedStrings.length, reader.readQueries().size());
         }
     }
 }
