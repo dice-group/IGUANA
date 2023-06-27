@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @RunWith(Parameterized.class)
 public class QueryResultHashKeyTest {
