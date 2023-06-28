@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import static java.nio.file.Files.createTempFile;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
@@ -148,10 +149,16 @@ public class FileUtilsTest {
     public static class NonParameterizedTest {
         @Test
         public void readTest() throws IOException {
+
+            Path file = createTempFile("readTest", ".txt");
+            file.toFile().deleteOnExit();
+            String expectedString = UUID.randomUUID() + "\n\t\r" + UUID.randomUUID() + "\n";
+            writeStringToFile(file.toFile(), expectedString,  StandardCharsets.UTF_8);
+
             //read whole content
-            String data = FileUtils.readFile("src/test/resources/fileUtils.txt");
-            String expected = "a\nab\nabc\n\n\n\n\n\n\n\n\\n\n\n\n\n\ndfe\n\ntest";
-            assertEquals(expected, data);
+            String actualString = FileUtils.readFile(file.toString());
+
+            assertEquals(expectedString, actualString);
         }
     }
 }
