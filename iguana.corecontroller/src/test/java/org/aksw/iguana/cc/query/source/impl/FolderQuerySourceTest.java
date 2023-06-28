@@ -1,49 +1,93 @@
 package org.aksw.iguana.cc.query.source.impl;
 
-import org.aksw.iguana.cc.utils.FileUtils;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(Parameterized.class)
 public class FolderQuerySourceTest {
 
-    private static final String PATH = "src/test/resources/query/source/query-folder";
+    Path tempDir;
+    TestConfig testConfig;
 
-    private final FolderQuerySource querySource;
+    public FolderQuerySourceTest(TestConfig testConfig) {
+        this.testConfig = testConfig;
+    }
 
-    public FolderQuerySourceTest() {
-        this.querySource = new FolderQuerySource(PATH);
+    public static class TestConfig {
+
+        public TestConfig(int numberOfQueries) {
+            this.numberOfQueries = numberOfQueries;
+        }
+
+        int numberOfQueries;
+    }
+
+    public static class Query implements Comparable<Query> {
+        public Query(Path queryFile, String content) {
+            this.queryFile = queryFile;
+            this.content = content;
+        }
+
+        Path queryFile;
+        String content;
+
+        @Override
+        public int compareTo(Query other) {
+            return this.queryFile.compareTo(other.queryFile);
+        }
+    }
+
+    List<Query> queries;
+
+
+    @Parameterized.Parameters
+    public static Collection<TestConfig> data() {
+        return List.of(new TestConfig(0),
+                new TestConfig(1),
+                new TestConfig(2),
+                new TestConfig(5));
+    }
+
+    @Before
+    public void createFolder() throws IOException {
+        this.tempDir = Files.createTempDirectory("folder-query-source-test-dir");
+
+        this.queries = new LinkedList<>();
+        for (int i = 0; i < testConfig.numberOfQueries; i++) {
+            final Path queryFile = Files.createTempFile(tempDir, "Query", ".txt");
+            final String content = UUID.randomUUID().toString();
+            Files.write(queryFile, content.getBytes(StandardCharsets.UTF_8));
+            this.queries.add(new Query(queryFile, content));
+        }
+        // Queries in the folder are expected in alphabetic order of the file names.
+        Collections.sort(this.queries);
+    }
+
+    @After
+    public void removeFolder() throws IOException {
+        org.apache.commons.io.FileUtils.deleteDirectory(this.tempDir.toFile());
     }
 
     @Test
-    public void sizeTest() {
-        assertEquals(3, this.querySource.size());
-    }
+    public void testFolderQuerySource() throws IOException {
+        FolderQuerySource querySource = new FolderQuerySource(tempDir.toString());
 
-    @Test
-    public void getQueryTest() throws IOException {
-        assertEquals("QUERY 1 {still query 1}", this.querySource.getQuery(0));
-        assertEquals("QUERY 2 {still query 2}", this.querySource.getQuery(1));
-        assertEquals("QUERY 3 {still query 3}", this.querySource.getQuery(2));
-    }
+        assertEquals(this.queries.size(), querySource.size());
 
-    @Test
-    public void getAllQueriesTest() throws IOException {
-        List<String> expected = new ArrayList<>(3);
-        expected.add("QUERY 1 {still query 1}");
-        expected.add("QUERY 2 {still query 2}");
-        expected.add("QUERY 3 {still query 3}");
+        for (int i = 0; i < querySource.size(); i++) {
+            assertEquals(queries.get(i).content, querySource.getQuery(i));
+        }
 
-        assertEquals(expected, this.querySource.getAllQueries());
-    }
-
-    @Test
-    public void getHashcodeTest() {
-        int expected = FileUtils.getHashcodeFromFileContent(PATH + "/query1.txt");
-        assertEquals(expected, this.querySource.hashCode());
+        assertEquals(queries.stream().map(q -> q.content).collect(Collectors.toList()), querySource.getAllQueries());
     }
 }
