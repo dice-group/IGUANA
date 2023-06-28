@@ -4,85 +4,16 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Methods to work easier with Files.
- * 
+ *
  * @author f.conrads
  *
  */
 public class FileUtils {
-
-	/**
-	 * Counts the lines in a file efficiently. Props goes to:
-	 * <a href="http://stackoverflow.com/a/453067/2917596">http://stackoverflow.com/a/453067/2917596</a>
-	 *
-	 * @param filename File to count lines of
-	 * @return No. of lines in File
-	 * @throws IOException
-	 */
-	public static int countLines(File filename) throws IOException {
-		try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
-
-			byte[] c = new byte[1024];
-			int count = 0;
-			int readChars;
-			boolean empty = true;
-			byte lastChar = '\n';
-			while ((readChars = is.read(c)) != -1) {
-				for (int i = 0; i < readChars; ++i) {
-					if (c[i] == '\n') {
-						// Check if line was empty
-						if (lastChar != '\n') {
-							++count;
-						}
-					} else {
-						empty = false;
-					}
-					lastChar = c[i];
-				}
-			}
-			if (lastChar != '\n') {
-				count++;
-			}
-			return (count == 0 && !empty) ? 1 : count;
-		}
-	}
-
-	/**
-	 * Returns a line at a given position of a File
-	 * 
-	 * @param pos      line which should be returned
-	 * @param filename File in which the queries are stated
-	 * @return line at pos
-	 * @throws IOException
-	 */
-	public static String readLineAt(int pos, File filename) throws IOException {
-		try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
-			StringBuilder line = new StringBuilder();
-
-			byte[] c = new byte[1024];
-			int count = 0;
-			int readChars;
-			byte lastChar = '\n';
-			while ((readChars = is.read(c)) != -1) {
-				for (int i = 0; i < readChars; ++i) {
-					if (c[i] == '\n') {
-						// Check if line was empty
-						if (lastChar != '\n') {
-							++count;
-						}
-					} else if (count == pos) {
-						// Now the line
-						line.append((char) c[i]);
-					}
-					lastChar = c[i];
-				}
-			}
-
-			return line.toString();
-		} 
-	}
 
 	public static int getHashcodeFromFileContent(String filepath) {
 		int hashcode;
@@ -100,7 +31,100 @@ public class FileUtils {
 		return new String(encoded, StandardCharsets.UTF_8);
 	}
 
-	public static BufferedReader getBufferedReader(File queryFile) throws FileNotFoundException {
-		return new BufferedReader(new FileReader(queryFile));
+	/**
+	 * This method detects and returns the line-ending used in a file. <br/>
+	 * It reads the whole first line until it detects one of the following line-endings:
+	 * <ul>
+	 *     <li>\r\n - Windows</li>
+	 *     <li>\n - Linux</li>
+	 *     <li>\r - old macOS</li>
+	 * </ul>
+	 *
+	 * If the file doesn't contain a line ending, it defaults to <code>System.lineSeparator()</code>.
+	 *
+	 * @param filepath this string that contains the path of the file
+	 * @return the line ending used in the given file
+	 * @throws IOException
+	 */
+	public static String getLineEnding(String filepath) throws IOException {
+		try(FileInputStream fis = new FileInputStream(filepath);
+			InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+			BufferedReader br = new BufferedReader(isr)) {
+			char c;
+			while ((c = (char) br.read()) != (char) -1) {
+				if (c == '\n')
+					return "\n";
+				else if (c == '\r') {
+					if ((char) br.read() == '\n')
+						return "\r\n";
+					return "\r";
+				}
+			}
+		}
+
+		// fall back if there is no line end in the file
+		return System.lineSeparator();
+	}
+
+	private static int[] computePrefixTable(byte[] pattern) {
+		int[] prefixTable = new int[pattern.length];
+
+		int prefixIndex = 0;
+		for (int i = 1; i < pattern.length; i++) {
+			while (prefixIndex > 0 && pattern[prefixIndex] != pattern[i]) {
+				prefixIndex = prefixTable[prefixIndex - 1];
+			}
+
+			if (pattern[prefixIndex] == pattern[i]) {
+				prefixIndex++;
+			}
+
+			prefixTable[i] = prefixIndex;
+		}
+
+		return prefixTable;
+	}
+
+	public static List<long[]> indexStream(String separator, InputStream is) throws IOException {
+		// basically Knuth-Morris-Pratt
+		List<long[]> indices = new ArrayList<>();
+
+
+		final byte[] sepArray = separator.getBytes(StandardCharsets.UTF_8);
+		final int[] prefixTable = computePrefixTable(sepArray);
+
+		long itemStart = 0;
+
+		long byteOffset = 0;
+		int patternIndex = 0;
+		byte[] currentByte = new byte[1];
+		while (is.read(currentByte) == 1) {
+			// skipping fast-forward with the prefixTable
+			while (patternIndex > 0 && currentByte[0] != sepArray[patternIndex]) {
+				patternIndex = prefixTable[patternIndex - 1];
+			}
+
+
+			if (currentByte[0] == sepArray[patternIndex]) {
+				patternIndex++;
+
+				if (patternIndex == sepArray.length) { // match found
+					patternIndex = 0;
+					final long itemEnd = byteOffset - sepArray.length + 1;
+					final long len = itemEnd - itemStart;
+					indices.add(new long[]{itemStart, len});
+
+					itemStart = byteOffset + 1;
+				}
+			}
+
+			byteOffset++;
+		}
+
+		final long itemEnd = byteOffset;
+		final long len = itemEnd - itemStart;
+		indices.add(new long[]{itemStart, len});
+
+		return indices;
 	}
 }

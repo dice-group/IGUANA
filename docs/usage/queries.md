@@ -38,7 +38,7 @@ The queries can be provided in different formats:
 
 - one file with:
   - one query per line
-  - multi-line queries, separated by a separator line
+  - multi-line queries, separated by a separator
 - a folder with query files; one query per file
 
 The format is configured using the `format` parameter.
@@ -56,9 +56,9 @@ queries:
 
 ### Multi Line Queries
 
-The queries are stored in one file. Each query can span multiple lines and queries are separated by a separator line.
+The queries are stored in one file. Each query can span multiple lines and queries are separated by a separator.
 
-Let's look at an example, where the separator line is "###" (this is the default)
+Let's look at an example, where the separator is "###" (this is the default)
 
 ```
 QUERY  1 {
@@ -78,8 +78,8 @@ queries:
   format: "separator"
 ```
 
-However, you can also set the separator line in the configuration.
-For example if the separator is an empty line, the file can look like this:
+However, you can also set the separator in the configuration.
+For example, if you want to separate queries with empty lines, the queries-file can look like this:
 
 ```
 QUERY  1 {
@@ -91,7 +91,7 @@ still Query2
 }
 ```
 
-The configuration for this format is:
+For this configuration the given separator string can be empty:
 
 ```yaml
 queries:
