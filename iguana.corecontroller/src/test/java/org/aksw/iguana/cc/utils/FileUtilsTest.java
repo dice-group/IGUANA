@@ -35,6 +35,7 @@ public class FileUtilsTest {
         public TestGetLineEnding(String expectedLineEnding) throws IOException {
             this.data = new TestData(expectedLineEnding);
             this.data.file = createTempFile("TestGetLineEnding", ".txt");
+            this.data.file.toFile().deleteOnExit();
             writeStringToFile(this.data.file.toFile(), "a" + this.data.expectedLineEnding + "b" + this.data.expectedLineEnding, StandardCharsets.UTF_8);
         }
 
