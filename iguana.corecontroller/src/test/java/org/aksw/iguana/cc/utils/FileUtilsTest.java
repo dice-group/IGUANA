@@ -1,16 +1,19 @@
 package org.aksw.iguana.cc.utils;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static java.nio.file.Files.createTempFile;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
@@ -19,35 +22,36 @@ public class FileUtilsTest {
     @RunWith(Parameterized.class)
     public static class TestGetLineEnding {
         private static class TestData {
-            public String filepath;
+            public Path file;
             public String expectedLineEnding;
 
-            public TestData(String filepath, String expectedLineEnding) {
-                this.filepath = filepath;
+            public TestData(String expectedLineEnding) {
                 this.expectedLineEnding = expectedLineEnding;
+
+
             }
         }
 
-        public TestGetLineEnding(TestData data) {
-            this.data = data;
+        public TestGetLineEnding(String expectedLineEnding) throws IOException {
+            this.data = new TestData(expectedLineEnding);
+            this.data.file = createTempFile("TestGetLineEnding", ".txt");
+            writeStringToFile(this.data.file.toFile(), "a" + this.data.expectedLineEnding + "b" + this.data.expectedLineEnding, StandardCharsets.UTF_8);
         }
 
         private final TestData data;
 
         @Parameterized.Parameters
-        public static Collection<TestData> data() {
+        public static Collection<String> data() {
             return List.of(
-                    new TestData("src/test/resources/readLineTestFile1.txt", "\n"),
-                    new TestData("src/test/resources/readLineTestFile2.txt", "\r"),
-                    new TestData("src/test/resources/readLineTestFile3.txt", "\r\n"),
-                    new TestData("src/test/resources/utils/indexingtestfile1.txt", "\r\n")
+                    "\n", /* unix */
+                    "\r", /* old mac */
+                    "\r\n" /* windows */
             );
         }
 
         @Test
-        @Ignore
         public void testGetLineEndings() throws IOException {
-            assertEquals(FileUtils.getLineEnding(this.data.filepath), this.data.expectedLineEnding);
+            assertEquals(FileUtils.getLineEnding(this.data.file.toString()), this.data.expectedLineEnding);
         }
     }
 
