@@ -120,29 +120,36 @@ public class FileUtilsTest {
 
     @RunWith(Parameterized.class)
     public static class ParameterizedTest {
-        private final File file;
+        private final Path file;
 
-        public ParameterizedTest(File file) {
-            this.file = file;
+        private final String content;
+
+        public ParameterizedTest(String content) throws IOException {
+            this.file = createTempFile("getHashTest", ".txt");
+            writeStringToFile(this.file.toFile(), content,  StandardCharsets.UTF_8);
+            this.file.toFile().deleteOnExit();
+
+            this.content = content;
         }
 
         @Parameterized.Parameters
-        public static Collection<Object[]> data() {
-            File f1 = new File("src/test/resources/readLineTestFile1.txt");
-            File f2 = new File("src/test/resources/readLineTestFile2.txt");
-            File f3 = new File("src/test/resources/readLineTestFile3.txt");
+        public static Collection<String> data() {
 
-            return Arrays.asList(new Object[][]{
-                    {f1},
-                    {f2},
-                    {f3}
-            });
+            return Arrays.asList(
+                    UUID.randomUUID().toString(),
+                    UUID.randomUUID().toString(),
+                    UUID.randomUUID().toString(),
+                    UUID.randomUUID().toString()
+            );
         }
 
         @Test
         public void getHashTest(){
             //check if hash abs works
-            assertTrue(FileUtils.getHashcodeFromFileContent(this.file.getAbsolutePath())>0);
+            final int expected = Math.abs(content.hashCode());
+            final int actual = FileUtils.getHashcodeFromFileContent(this.file.toString());
+            assertTrue(actual >= 0);
+            assertEquals(expected, actual);
         }
     }
 
