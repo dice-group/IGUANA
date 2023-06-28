@@ -28,37 +28,42 @@ public class QueryHandlerTest {
     private static SocketConnection fastConnection;
 
     private final QueryHandler queryHandler;
+    private final Map<String, Object> config;
     private final String[] expected;
 
 
     public QueryHandlerTest(Map<String, Object> config, String[] expected) {
         this.queryHandler = new QueryHandler(config, 0); // workerID 0 results in correct seed for RandomSelector
+        this.config = config;
         this.expected = expected;
     }
 
     @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        String[] linear = new String[]{"QUERY 1 {still query 1}", "QUERY 2 {still query 2}", "QUERY 3 {still query 3}", "QUERY 1 {still query 1}"};
-        String[] random = new String[]{"QUERY 1 {still query 1}", "QUERY 2 {still query 2}", "QUERY 2 {still query 2}", "QUERY 3 {still query 3}"};
+    public static Collection<Object[]> data() throws IOException {
+        String le = org.aksw.iguana.cc.utils.FileUtils.getLineEnding("src/test/resources/query/source/queries.txt");
+
+        String[] opl = new String[]{"QUERY 1 {still query 1}", "QUERY 2 {still query 2}", "QUERY 3 {still query 3}", "QUERY 1 {still query 1}"};
+        String[] folder = new String[]{"QUERY 1 {" + le + "still query 1" + le + "}", "QUERY 2 {" + le + "still query 2" + le + "}", "QUERY 3 {" + le + "still query 3" + le + "}", "QUERY 1 {" + le + "still query 1" + le + "}"};
+        String[] separator = new String[]{"QUERY 1 {" + le + "still query 1" + le + "}", "QUERY 2 {" + le + "still query 2" + le + "}", "QUERY 3 {" + le + "still query 3" + le + "}", "QUERY 1 {" + le + "still query 1" + le + "}"};
 
         Collection<Object[]> testData = new ArrayList<>();
 
         // Defaults: one-per-line, caching, linear
         Map<String, Object> config0 = new HashMap<>();
         config0.put("location", "src/test/resources/query/source/queries.txt");
-        testData.add(new Object[]{config0, linear});
+        testData.add(new Object[]{config0, opl});
 
         // Defaults: caching, linear
         Map<String, Object> config1 = new HashMap<>();
         config1.put("location", "src/test/resources/query/source/query-folder");
         config1.put("format", "folder");
-        testData.add(new Object[]{config1, linear});
+        testData.add(new Object[]{config1, folder});
 
         // Defaults: separator("###"), caching, linear
         Map<String, Object> config2 = new HashMap<>();
         config2.put("location", "src/test/resources/query/source/separated-queries-default.txt");
         config2.put("format", "separator");
-        testData.add(new Object[]{config2, linear});
+        testData.add(new Object[]{config2, separator});
 
         Map<String, Object> config3 = new HashMap<>();
         config3.put("location", "src/test/resources/query/source/separated-queries-default.txt");
@@ -67,7 +72,7 @@ public class QueryHandlerTest {
         config3.put("format", format3);
         config3.put("caching", false);
         config3.put("order", "random");
-        testData.add(new Object[]{config3, random});
+        testData.add(new Object[]{config3, separator});
 
         // Defaults: one-per-line, caching
         Map<String, Object> config4 = new HashMap<>();
@@ -77,7 +82,7 @@ public class QueryHandlerTest {
         Map<String, Object> order4 = new HashMap<>();
         order4.put("random", random4);
         config4.put("order", order4);
-        testData.add(new Object[]{config4, random});
+        testData.add(new Object[]{config4, opl});
 
         String[] expectedInstances = new String[]{"SELECT ?book {?book <http://example.org/book/book2> ?o}", "SELECT ?book {?book <http://example.org/book/book1> ?o}", "SELECT ?book {?book <http://example.org/book/book2> ?o}", "SELECT ?book {?book <http://example.org/book/book1> ?o}"};
         Map<String, Object> config5 = new HashMap<>();
@@ -110,22 +115,10 @@ public class QueryHandlerTest {
 
     @Test
     public void getNextQueryTest() throws IOException {
-        if (this.queryHandler.config.getOrDefault("format", "").equals("folder")) {
-            HashSet<String> set = new HashSet<>();
-            for (int i = 0; i < 4; i++) {
-                StringBuilder queryID = new StringBuilder();
-                StringBuilder query = new StringBuilder();
-                this.queryHandler.getNextQuery(query, queryID);
-                set.add(query.toString());
-            }
-            assertTrue(set.containsAll(Arrays.asList(this.expected)));
-            return;
-        }
-
-        // Assumes that the order key is correct and only stores values for the random order
-        Object order = this.queryHandler.config.getOrDefault("order", null);
+        // Assumes, that the order is correct has only stored values for random retrieval
+        Object order = config.getOrDefault("order", null);
         if (order != null) {
-            HashSet<String> queries = new HashSet<>();
+            Collection<String> queries = new HashSet<>();
             for (int i = 0; i < 4; i++) {
                 StringBuilder query = new StringBuilder();
                 StringBuilder queryID = new StringBuilder();
