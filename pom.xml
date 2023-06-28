@@ -40,11 +40,11 @@
         <minor.version>0</minor.version>
         <build.version>0</build.version>
 
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <jena.version>4.2.0</jena.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compile.target>11</maven.compile.target>
-        <maven.compile.source>11</maven.compile.source>
+        <maven.compile.target>17</maven.compile.target>
+        <maven.compile.source>17</maven.compile.source>
 
         <log4j.version>2.17.1</log4j.version>
     </properties>
@@ -160,8 +160,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                     <encoding>UTF-8</encoding>
                     <compilerArgs>
                         <arg>-parameters</arg>
