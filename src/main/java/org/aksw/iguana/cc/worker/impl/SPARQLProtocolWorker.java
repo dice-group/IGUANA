@@ -15,11 +15,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.Optional;
+import java.util.Vector;
+import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker {
+
 
     public final static class SPARQLProtocolRequestFactory {
         public enum RequestType {
@@ -101,7 +104,17 @@ public class SPARQLProtocolWorker {
     public record QueryMixes(int n) implements WorkloadCompletionTarget {
     }
 
+    record ExecutionStats(Instant startTime,
+                          Optional<Duration> duration,
+                          int httpStatusCode,
+                          long contentLength,
+                          long numberOfBindings,
+                          long numberOfSolutions
+    ) {
+    }
+
     private final HttpClient httpClient;
+    private final int worderId;
     private final ExecutorService executor;
     private final HTTPWorker2Task workerTask;
 
@@ -117,8 +130,9 @@ public class SPARQLProtocolWorker {
     }
 
 
-    public SPARQLProtocolWorker(HTTPWorker2Task workerTask) {
+    public SPARQLProtocolWorker(HTTPWorker2Task workerTask, int workerId) {
         this.workerTask = workerTask;
+        this.worderId = workerId;
         this.executor = java.util.concurrent.Executors.newFixedThreadPool(2);
         this.requestFactory = new SPARQLProtocolRequestFactory(workerTask.requestType);
         this.httpClient = HttpClient.newBuilder()
@@ -128,9 +142,13 @@ public class SPARQLProtocolWorker {
                 .build();
     }
 
-    public Future<Void> start() {
+    public record Result(int workerID, List<ExecutionStats> executionStats) {
+    }
+
+    public Future<Result> start() {
         return executor.submit(() -> {
             // do stuff;
+            List<ExecutionStats> executionStats = new Vector<>();
 
             if (workerTask.completionTarget() instanceof QueryMixes queryMixes) {
                 for (int i = 0; i < queryMixes.n(); i++) {
@@ -149,13 +167,32 @@ public class SPARQLProtocolWorker {
                     final Duration timeToEnd = Duration.between(now, endTime);
                     final boolean timeoutBeforeEnd = workerTask.timeout().compareTo(timeToEnd) > 0;
                     final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? workerTask.timeout() : timeToEnd;
-                    HttpExecutionResult httpExecutionResult = executeHttpRequest(thisQueryTimeOut);
+                    HttpExecutionResult result = executeHttpRequest(thisQueryTimeOut);
+
+
+                    int statusCode = -1;
+                    if (result.completed()) {
+                        statusCode = result.response().statusCode();
+                        if (statusCode / 100 == 2) { // 2xx
+                            // process result
+                            // TODO: count sparql bindings
+                            // TODO: count sparql results
+                        }
+                    }
+
+                    executionStats.add(new ExecutionStats(result.requestStart(),
+                            (result.completed()) ? Optional.of(result.duration) : Optional.empty(),
+                            statusCode,
+                            result.response().headers().firstValueAsLong("Content-Length").getAsLong(),
+                            -1,
+                            -1));
+
                     // TODO: If timed out, decide based on timeoutBeforeEnd if it counts as failed or not
                     // TODO: process result and extract relevant infos
                 }
 
             }
-            return null;
+            return new Result(this.worderId, executionStats);
         });
     }
 
@@ -164,6 +201,9 @@ public class SPARQLProtocolWorker {
                                Instant requestStart,
                                Duration duration,
                                Exception exception) {
+        public boolean completed() {
+            return response != null;
+        }
     }
 
     private HttpExecutionResult executeHttpRequest(Duration thisQueryTimeOut) throws IOException, URISyntaxException {
@@ -177,16 +217,22 @@ public class SPARQLProtocolWorker {
                 workerTask.acceptHeader());
         final Instant requestStart = Instant.now();
         // todo: make body handler configurable to support consuming it as a stream
+        CompletableFuture<HttpResponse<String>> httpResponseFuture
+                = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+
+        Function<Exception, HttpExecutionResult> httpExecutionResult = (Exception e) -> {
+            final Duration requestDuration = Duration.between(requestStart, Instant.now());
+            return new HttpExecutionResult(null, requestStart, requestDuration, e);
+        };
         HttpResponse<String> response;
         try {
-            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException e) {
-            final Duration requestDuration = Duration.between(requestStart, Instant.now());
-            return new HttpExecutionResult(null, requestStart, requestDuration, e);
+            response = httpResponseFuture.get(thisQueryTimeOut.getNano(), TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
-            // TODO: check explicitly for timeouts
-            final Duration requestDuration = Duration.between(requestStart, Instant.now());
-            return new HttpExecutionResult(null, requestStart, requestDuration, e);
+            return httpExecutionResult.apply(e);
+        } catch (ExecutionException e) {
+            return httpExecutionResult.apply(e);
+        } catch (TimeoutException e) {
+            return httpExecutionResult.apply(e);
         }
         final Duration requestDuration = Duration.between(requestStart, Instant.now());
         return new HttpExecutionResult(response, requestStart, requestDuration, null);
