@@ -1,4 +1,4 @@
-package org.aksw.iguana.cc.tasks.impl;
+package org.aksw.iguana.cc.tasks.stresstest;
 
 import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;

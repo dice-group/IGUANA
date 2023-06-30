@@ -2,7 +2,7 @@ package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
-import org.aksw.iguana.cc.tasks.impl.Stresstest;
+import org.aksw.iguana.cc.tasks.stresstest.Stresstest;
 
 import java.io.IOException;
 import java.util.Collection;

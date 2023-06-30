@@ -1,6 +1,6 @@
 | Shorthand              | Class Name                                                |
 |------------------------|-----------------------------------------------------------|
-| Stresstest             | `org.aksw.iguana.cc.tasks.impl.Stresstest`                |
+| Stresstest             | `org.aksw.iguana.cc.tasks.stresstest.Stresstest`          |
 | ----------             | -------                                                   |
 | lang.RDF               | `org.aksw.iguana.cc.lang.impl.RDFLanguageProcessor`       | 
 | lang.SPARQL            | `org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor`    | 
