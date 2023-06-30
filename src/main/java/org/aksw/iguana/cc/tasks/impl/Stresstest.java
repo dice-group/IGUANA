@@ -2,6 +2,8 @@ package org.aksw.iguana.cc.tasks.impl;
 
 import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.model.StresstestMetadata;
+import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.AbstractTask;
 import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.cc.worker.WorkerFactory;
@@ -333,4 +335,40 @@ public class Stresstest extends AbstractTask {
         return ret;
     }
 
+    public StresstestMetadata getMetadata() {
+        String classname;
+        if (this.getClass().isAnnotationPresent(Shorthand.class)) {
+            classname = this.getClass().getAnnotation(Shorthand.class).value();
+        } else {
+            classname = this.getClass().getCanonicalName();
+        }
+
+        WorkerMetadata[] workerMetadata = new WorkerMetadata[this.workers.size()];
+        for (int i = 0; i < this.workers.size(); i++) {
+            workerMetadata[i] = this.workers.get(i).getMetadata();
+        }
+
+        StringWriter sw = new StringWriter();
+        Model tripleStats = ModelFactory.createDefaultModel();
+        for (Worker worker : this.workers) {
+            tripleStats.add(worker.getQueryHandler().getTripleStats(this.taskID));
+        }
+        RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
+
+        return new StresstestMetadata(
+                suiteID,
+                expID,
+                taskID,
+                datasetID,
+                conID,
+                con.getVersion(),
+                taskName,
+                classname,
+                this.timeLimit,
+                this.noOfQueryMixes,
+                workerMetadata,
+                sw.toString(),
+                tripleStats
+        );
+    }
 }

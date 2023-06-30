@@ -33,11 +33,11 @@ public abstract class AbstractTask implements Task {
 	 * will be send to the resultprocessor
 	 */
 	protected Properties metaData = new Properties();
-	private String expID;
-	private String suiteID;
-	private String datasetID;
-	private String conID;
-	private String taskName;
+	protected String expID;
+	protected String suiteID;
+	protected String datasetID;
+	protected String conID;
+	protected String taskName;
 
 	/**
 	 * Creates an AbstractTask with the TaskID
