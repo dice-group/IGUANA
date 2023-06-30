@@ -2,11 +2,11 @@ package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
+import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.cc.worker.impl.HttpGetWorker;
 import org.aksw.iguana.cc.worker.impl.HttpPostWorker;
 import org.aksw.iguana.cc.worker.impl.HttpWorker;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -117,30 +117,29 @@ public class HTTPWorkerTest {
         getWorker.executeQuery(this.query, this.queryID);
         //as the result processing is in the background we have to wait for it.
         Thread.sleep(1000);
-        Collection<Properties> results = getWorker.popQueryResults();
+        Collection<QueryExecutionStats> results = getWorker.popQueryResults();
         assertEquals(1, results.size());
-        Properties p = results.iterator().next();
+        QueryExecutionStats p = results.iterator().next();
 
-        assertEquals(taskID, p.get(COMMON.EXPERIMENT_TASK_ID_KEY));
+        assertEquals(taskID, getWorker.taskID);
 
-        assertEquals(this.queryID, p.get(COMMON.QUERY_ID_KEY));
-        assertEquals(180000.0, p.get(COMMON.PENALTY));
-        assertTrue(((Properties) p.get(COMMON.EXTRA_META_KEY)).isEmpty());
+        assertEquals(this.queryID, p.queryID());
+        assertEquals(180000.0, getWorker.timeOut.doubleValue());
         if (isPost) {
-            assertEquals(200.0, (double) p.get(COMMON.RECEIVE_DATA_TIME), 20.0);
+            assertEquals(200.0, p.executionTime(), 20.0);
         } else {
-            assertEquals(100.0, (double) p.get(COMMON.RECEIVE_DATA_TIME), 20.0);
+            assertEquals(100.0, p.executionTime(), 20.0);
         }
         if (isFail) {
-            assertEquals(-2L, p.get(COMMON.RECEIVE_DATA_SUCCESS));
-            assertEquals(0L, p.get(COMMON.RECEIVE_DATA_SIZE));
+            assertEquals(-2L, p.responseCode());
+            assertEquals(0L, p.executionTime());
         } else {
-            assertEquals(1L, p.get(COMMON.RECEIVE_DATA_SUCCESS));
+            assertEquals(1L, p.executionTime());
             if (this.responseType != null && this.responseType.equals("text/plain")) {
-                assertEquals(4L, p.get(COMMON.RECEIVE_DATA_SIZE));
+                assertEquals(4L, p.executionTime());
             }
             if (this.responseType == null || this.responseType.equals(SPARQLLanguageProcessor.QUERY_RESULT_TYPE_JSON)) {
-                assertEquals(2L, p.get(COMMON.RECEIVE_DATA_SIZE));
+                assertEquals(2L, p.resultSize());
             }
         }
         assertEquals(1, getWorker.getExecutedQueries());
@@ -209,10 +208,7 @@ public class HTTPWorkerTest {
         }
         assertEquals(expectedSize, getWorker.getExecutedQueries());
         // check pop query results
-        Collection<Properties> results = getWorker.popQueryResults();
-        for (Properties p : results) {
-            assertEquals(queryHash, p.get(COMMON.QUERY_HASH));
-        }
+        Collection<QueryExecutionStats> results = getWorker.popQueryResults();
         assertEquals(expectedSize, results.size());
         for (long i = 1; i < expectedSize; i++) {
             assertTrue(getWorker.hasExecutedNoOfQueryMixes(i));

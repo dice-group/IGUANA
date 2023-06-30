@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
+import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.junit.After;
@@ -85,23 +86,23 @@ public class CLIWorkersTests {
         worker.executeQuery("test", "1");
         worker.executeQuery("SELECT whatever", "1");
         assertEquals("test\nSELECT whatever\n", FileUtils.readFile(f.getAbsolutePath()));
-        Collection<Properties> succeededResults = worker.popQueryResults();
+        Collection<QueryExecutionStats> succeededResults = worker.popQueryResults();
         assertEquals(2, succeededResults.size());
-        Properties succ = succeededResults.iterator().next();
-        assertEquals(COMMON.QUERY_SUCCESS, succ.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(3L, succ.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats succ = succeededResults.iterator().next();
+        assertEquals(COMMON.QUERY_SUCCESS, succ.responseCode());
+        assertEquals(3L, succ.responseCode());
         succ = succeededResults.iterator().next();
-        assertEquals(COMMON.QUERY_SUCCESS, succ.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(3L, succ.get(COMMON.RECEIVE_DATA_SIZE));
+        assertEquals(COMMON.QUERY_SUCCESS, succ.responseCode());
+        assertEquals(3L, succ.responseCode());
 
         // check fail
         worker.executeQuery("fail", "2");
         assertEquals("test\nSELECT whatever\nfail\n", FileUtils.readFile(f.getAbsolutePath()));
-        Collection<Properties> failedResults = worker.popQueryResults();
+        Collection<QueryExecutionStats> failedResults = worker.popQueryResults();
         assertEquals(1, failedResults.size());
-        Properties fail = failedResults.iterator().next();
-        assertEquals(COMMON.QUERY_UNKNOWN_EXCEPTION, fail.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(0L, fail.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats fail = failedResults.iterator().next();
+        assertEquals(COMMON.QUERY_UNKNOWN_EXCEPTION, fail.responseCode());
+        assertEquals(0L, fail.resultSize());
         worker.stopSending();
 
 
@@ -117,23 +118,23 @@ public class CLIWorkersTests {
         worker.executeQuery("test", "1");
         worker.executeQuery("SELECT whatever", "1");
         assertEquals("prefix test suffix\nprefix SELECT whatever suffix\n", FileUtils.readFile(f.getAbsolutePath()));
-        Collection<Properties> succeededResults = worker.popQueryResults();
+        Collection<QueryExecutionStats> succeededResults = worker.popQueryResults();
         assertEquals(2, succeededResults.size());
-        Properties succ = succeededResults.iterator().next();
-        assertEquals(COMMON.QUERY_SUCCESS, succ.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(3L, succ.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats succ = succeededResults.iterator().next();
+        assertEquals(COMMON.QUERY_SUCCESS, succ.responseCode());
+        assertEquals(3L, succ.resultSize());
         succ = succeededResults.iterator().next();
-        assertEquals(COMMON.QUERY_SUCCESS, succ.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(3L, succ.get(COMMON.RECEIVE_DATA_SIZE));
+        assertEquals(COMMON.QUERY_SUCCESS, succ.responseCode());
+        assertEquals(3L, succ.resultSize());
 
         // check fail
         worker.executeQuery("fail", "2");
         assertEquals("prefix test suffix\nprefix SELECT whatever suffix\nprefix fail suffix\n", FileUtils.readFile(f.getAbsolutePath()));
-        Collection<Properties> failedResults = worker.popQueryResults();
+        Collection<QueryExecutionStats> failedResults = worker.popQueryResults();
         assertEquals(1, failedResults.size());
-        Properties fail = failedResults.iterator().next();
-        assertEquals(COMMON.QUERY_UNKNOWN_EXCEPTION, fail.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(0L, fail.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats fail = failedResults.iterator().next();
+        assertEquals(COMMON.QUERY_UNKNOWN_EXCEPTION, fail.responseCode());
+        assertEquals(0L, fail.resultSize());
         worker.stopSending();
     }
 
@@ -157,10 +158,10 @@ public class CLIWorkersTests {
         worker.executeQuery("test ()", "1");
         content = FileUtils.readFile(f.getAbsolutePath());
         assertEquals("test () : test+%28%29\n", content);
-        Collection<Properties> results = worker.popQueryResults();
+        Collection<QueryExecutionStats> results = worker.popQueryResults();
         assertEquals(1, results.size());
-        Properties p = results.iterator().next();
-        assertEquals(2L, p.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats p = results.iterator().next();
+        assertEquals(2L, p.resultSize());
     }
 
     private Map<String, Object> getQueryConfig() {

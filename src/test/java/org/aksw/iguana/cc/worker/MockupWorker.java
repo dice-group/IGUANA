@@ -29,20 +29,19 @@ public class MockupWorker extends AbstractWorker {
 
     @Override
     public void executeQuery(String query, String queryID) {
-        QueryExecutionStats results = new QueryExecutionStats();
         long execTime = this.workerID * 10 + 100;
+        long responseCode;
+        long resultSize;
         try {
             Thread.sleep(execTime);
-            results.setResponseCode(200);
-            results.setResultSize(this.workerID * 100 + 100);
+            responseCode = 200;
+            resultSize = this.workerID * 100 + 100;
         } catch (InterruptedException e) {
             e.printStackTrace();
-            results.setResponseCode(400);
-            results.setResultSize(0);
+            responseCode = 400;
+            resultSize = 0;
         }
-        results.setExecutionTime(execTime);
-        results.setQueryID(queryID);
-        super.addResults(results);
+        super.addResults(new QueryExecutionStats(queryID, responseCode, execTime, resultSize));
     }
 
     @Override

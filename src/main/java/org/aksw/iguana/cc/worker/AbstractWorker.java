@@ -68,7 +68,7 @@ public abstract class AbstractWorker implements Worker {
     protected ConnectionConfig con;
     protected int queryHash;
     protected QueryHandler queryHandler;
-    private Collection<Properties> results = new LinkedList<>();
+    private Collection<QueryExecutionStats> results = new LinkedList<>();
     private Random latencyRandomizer;
     private Long endAtNOQM = null;
 
@@ -186,18 +186,7 @@ public abstract class AbstractWorker implements Worker {
 
     public synchronized void addResults(QueryExecutionStats results) {
         if (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
-            // create Properties store it in List
-            Properties result = new Properties();
-            result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-            result.put(COMMON.RECEIVE_DATA_TIME, results.getExecutionTime());
-            result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
-            result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
-            result.put(COMMON.QUERY_HASH, queryHash);
-            result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
-            result.put(COMMON.PENALTY, this.timeOut);
-            // Add extra Meta Key, worker ID and worker Type
-            result.put(COMMON.EXTRA_META_KEY, this.extra);
-            setResults(result);
+            this.results.add(results);
             this.executedQueries++;
 
             //
@@ -207,16 +196,12 @@ public abstract class AbstractWorker implements Worker {
         }
     }
 
-    protected synchronized void setResults(Properties result) {
-        this.results.add(result);
-    }
-
     @Override
-    public synchronized Collection<Properties> popQueryResults() {
+    public synchronized Collection<QueryExecutionStats> popQueryResults() {
         if (this.results.isEmpty()) {
             return null;
         }
-        Collection<Properties> ret = this.results;
+        Collection<QueryExecutionStats> ret = this.results;
         this.results = new LinkedList<>();
         return ret;
     }
