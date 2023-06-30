@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.utils.CLIProcessManager;
 import org.aksw.iguana.cc.worker.AbstractWorker;
@@ -42,7 +42,7 @@ public class MultipleCLIInputWorker extends AbstractWorker {
     protected int numberOfProcesses = 5;
     private Process currentProcess;
 
-    public MultipleCLIInputWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String initFinished, String queryFinished, String queryError, @Nullable Integer numberOfProcesses) {
+    public MultipleCLIInputWorker(String taskID, Integer workerID, ConnectionConfig connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, String initFinished, String queryFinished, String queryError, @Nullable Integer numberOfProcesses) {
         super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency);
         this.initFinished = initFinished;
         this.queryFinished = queryFinished;

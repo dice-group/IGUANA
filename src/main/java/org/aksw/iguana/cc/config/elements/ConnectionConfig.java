@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * A connection configuration class
  */
-public class Connection implements Serializable {
+public class ConnectionConfig implements Serializable {
 
     @JsonProperty(required = true)
     private String name;

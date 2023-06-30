@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * Will set the name and if it was set in the config file the fileName
  */
-public class Dataset {
+public class DatasetConfig {
     @JsonProperty(required = true)
     private String name;
 

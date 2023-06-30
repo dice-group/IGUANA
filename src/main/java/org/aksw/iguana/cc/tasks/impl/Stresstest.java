@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.tasks.impl;
 
 import org.aksw.iguana.cc.config.CONSTANTS;
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.StresstestMetadata;
 import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.AbstractTask;
@@ -140,7 +140,7 @@ public class Stresstest extends AbstractTask {
 
 
     @Override
-    public void init(String[] ids, String dataset, Connection connection, String taskName) {
+    public void init(String[] ids, String dataset, ConnectionConfig connection, String taskName) {
         super.init(ids, dataset, connection, taskName);
 
         initWorkers();

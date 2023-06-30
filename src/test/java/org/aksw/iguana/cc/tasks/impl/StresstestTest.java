@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.tasks.impl;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.tasks.MockupStorage;
 import org.aksw.iguana.cc.worker.MockupWorker;
 import org.aksw.iguana.cc.worker.Worker;
@@ -33,8 +33,8 @@ public class StresstestTest {
         return workers;
     }
 
-    private Connection getConnection() {
-        Connection con = new Connection();
+    private ConnectionConfig getConnection() {
+        ConnectionConfig con = new ConnectionConfig();
         con.setName("test");
         con.setEndpoint("test/sparql");
         return con;

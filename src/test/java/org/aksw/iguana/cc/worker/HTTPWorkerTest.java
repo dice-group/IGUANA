@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.cc.worker.impl.HttpGetWorker;
@@ -158,8 +158,8 @@ public class HTTPWorkerTest {
 
     }
 
-    private Connection getConnection() {
-        Connection con = new Connection();
+    private ConnectionConfig getConnection() {
+        ConnectionConfig con = new ConnectionConfig();
         con.setName("test");
         con.setPassword("test");
         con.setUser("abc");

@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.junit.After;
@@ -33,7 +33,7 @@ public class CLIWorkersTests {
 
     @Test
     public void checkMultipleProcesses() {
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
         con.setEndpoint("src/test/resources/cli/echoinput.sh " + f.getAbsolutePath());
         MultipleCLIInputWorker worker = new MultipleCLIInputWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null, "init finished", "rows", "query fail", 2);
         assertEquals(2, worker.processList.size());
@@ -60,7 +60,7 @@ public class CLIWorkersTests {
     @Test
     public void checkFileInput() throws IOException {
         //check if file is created and used
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
         String dir = UUID.randomUUID().toString();
         con.setEndpoint("src/test/resources/cli/echoinput.sh " + f.getAbsolutePath());
         CLIInputFileWorker worker = new CLIInputFileWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null, "init finished", "rows", "query fail", 1, dir);
@@ -78,7 +78,7 @@ public class CLIWorkersTests {
     @Test
     public void checkInput() throws IOException {
         // check if connection stays
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
 
         con.setEndpoint("src/test/resources/cli/echoinput.sh " + f.getAbsolutePath());
         CLIInputWorker worker = new CLIInputWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null, "init finished", "rows", "query fail");
@@ -110,7 +110,7 @@ public class CLIWorkersTests {
     @Test
     public void checkPrefix() throws IOException {
         // check if connection stays
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
 
         con.setEndpoint("src/test/resources/cli/echoinput.sh " + f.getAbsolutePath());
         CLIInputPrefixWorker worker = new CLIInputPrefixWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null, "init finished", "rows", "query fail", 1, "prefix", "suffix");
@@ -141,7 +141,7 @@ public class CLIWorkersTests {
     public void checkCLI() throws IOException {
         //check if simple cli works
         //	public CLIWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
         con.setUser("user1");
         con.setPassword("pwd");
 
@@ -151,7 +151,7 @@ public class CLIWorkersTests {
         String content = FileUtils.readFile(f.getAbsolutePath());
         assertEquals("test () user1:pwd test+%28%29\n", content);
 
-        con = new Connection();
+        con = new ConnectionConfig();
         con.setEndpoint("/bin/echo \"$QUERY$ $USER$:$PASSWORD$ $ENCODEDQUERY$\" > " + f.getAbsolutePath() + " | /bin/printf \"HeaderDoesNotCount\na\na\"");
         worker = new CLIWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null);
         worker.executeQuery("test ()", "1");

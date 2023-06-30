@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.junit.Test;
 
@@ -37,10 +37,10 @@ public class HttpPostWorkerTest {
         assertEquals(query, content);
     }
 
-    private Connection getConnection() {
+    private ConnectionConfig getConnection() {
         String service = "http://localhost:3030";
 
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
         con.setName("test");
         con.setPassword("test");
         con.setUser("abc");

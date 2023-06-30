@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.worker.impl.UPDATEWorker;
 import org.aksw.iguana.cc.worker.impl.update.UpdateTimer;
 import org.aksw.iguana.commons.time.TimeUtils;
@@ -117,7 +117,7 @@ public class UPDATEWorkerTest {
     public void testWorkflow() throws InterruptedException {
         String taskID = "124/1/1";
         int timeLimit = 2000;
-        Connection con = getConnection();
+        ConnectionConfig con = getConnection();
         UPDATEWorker worker = new UPDATEWorker(taskID, 1, con, this.queriesFile, timeLimit, null, null, null, this.timerStrategy);
         worker.run();
         Instant now = worker.startTime;
@@ -162,8 +162,8 @@ public class UPDATEWorkerTest {
     }
 
 
-    private Connection getConnection() {
-        Connection con = new Connection();
+    private ConnectionConfig getConnection() {
+        ConnectionConfig con = new ConnectionConfig();
         con.setName("test");
         con.setEndpoint(this.service);
 

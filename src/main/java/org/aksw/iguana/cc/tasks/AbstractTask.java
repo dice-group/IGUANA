@@ -3,7 +3,7 @@
  */
 package org.aksw.iguana.cc.tasks;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.experiment.ExperimentManager;
@@ -26,7 +26,7 @@ public abstract class AbstractTask implements Task {
 
 	private ExperimentManager rpControl = ExperimentManager.getInstance();
 	protected String taskID;
-	protected Connection con;
+	protected ConnectionConfig con;
 
 	/**
 	 * Properties to add task specific metaData before start and execute which then
@@ -53,7 +53,7 @@ public abstract class AbstractTask implements Task {
 	 * @see org.aksw.iguana.tp.tasks.Task#init()
 	 */
 	@Override
-	public void init(String[] ids, String dataset, Connection con, String taskName) {
+	public void init(String[] ids, String dataset, ConnectionConfig con, String taskName) {
 		this.suiteID=ids[0];
 		this.expID=ids[1];
 		this.taskID=ids[2];

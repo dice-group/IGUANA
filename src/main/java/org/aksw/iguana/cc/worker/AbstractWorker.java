@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.config.CONSTANTS;
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
@@ -53,7 +53,7 @@ public abstract class AbstractWorker implements Worker {
      * The workerType is only used in logging messages.
      */
     protected String workerType;
-    protected Connection connection;
+    protected ConnectionConfig connection;
     protected Map<String, Object> queries;
 
     protected Double timeLimit;
@@ -65,14 +65,14 @@ public abstract class AbstractWorker implements Worker {
     protected long executedQueries;
     protected Properties extra = new Properties();
     protected Instant startTime;
-    protected Connection con;
+    protected ConnectionConfig con;
     protected int queryHash;
     protected QueryHandler queryHandler;
     private Collection<Properties> results = new LinkedList<>();
     private Random latencyRandomizer;
     private Long endAtNOQM = null;
 
-    public AbstractWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
+    public AbstractWorker(String taskID, Integer workerID, ConnectionConfig connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
         this.taskID = taskID;
         this.workerID = workerID;
         this.con = connection;

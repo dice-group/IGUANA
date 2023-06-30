@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.controller;
 
-import org.aksw.iguana.cc.config.elements.Connection;
-import org.aksw.iguana.cc.config.elements.Task;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
+import org.aksw.iguana.cc.config.elements.TaskConfig;
 import org.aksw.iguana.cc.tasks.TaskFactory;
 import org.aksw.iguana.cc.tasks.TaskManager;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ public class TaskController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
 
-    public void startTask(String[] ids, String dataset, Connection con, Task task) {
+    public void startTask(String[] ids, String dataset, ConnectionConfig con, TaskConfig task) {
         TaskManager tmanager = new TaskManager();
         String className = task.getClassName();
         TaskFactory factory = new TaskFactory();

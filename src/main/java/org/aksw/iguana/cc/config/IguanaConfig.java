@@ -45,11 +45,11 @@ public class IguanaConfig {
 			.getLogger(IguanaConfig.class);
 
 	@JsonProperty(required = true)
-	private List<Dataset> datasets;
+	private List<DatasetConfig> datasets;
 	@JsonProperty(required = true)
-	private List<Connection> connections;
+	private List<ConnectionConfig> connections;
 	@JsonProperty(required = true)
-	private List<Task> tasks;
+	private List<TaskConfig> tasks;
 	@JsonProperty
 	private String preScriptHook;
 	@JsonProperty
@@ -73,11 +73,11 @@ public class IguanaConfig {
 		//generate ExpID
 		int expID = 0;
 
-		for(Dataset dataset: datasets){
+		for(DatasetConfig dataset: datasets){
 			expID++;
 			Integer taskID = 0;
-			for(Connection con : connections){
-				for(Task task : tasks) {
+			for(ConnectionConfig con : connections){
+				for(TaskConfig task : tasks) {
 					taskID++;
 					String[] args = new String[] {};
 					if(preScriptHook!=null){
