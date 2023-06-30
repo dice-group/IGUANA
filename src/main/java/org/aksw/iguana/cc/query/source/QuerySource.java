@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.query.source;
 import org.aksw.iguana.cc.utils.FileUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -35,6 +36,8 @@ public abstract class QuerySource {
      * @throws IOException
      */
     public abstract String getQuery(int index) throws IOException;
+
+    public abstract InputStream getQueryStream(int index) throws IOException;
 
     /**
      * This method returns all queries in the source as a list of Strings.

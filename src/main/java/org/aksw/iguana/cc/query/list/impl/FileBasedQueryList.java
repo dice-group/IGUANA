@@ -4,6 +4,7 @@ import org.aksw.iguana.cc.query.list.QueryList;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * A query list which reads the queries directly from a file.
@@ -19,5 +20,10 @@ public class FileBasedQueryList extends QueryList {
     @Override
     public String getQuery(int index) throws IOException {
         return this.querySource.getQuery(index);
+    }
+
+    @Override
+    public InputStream getQueryStream(int index) throws IOException {
+        return this.querySource.getQueryStream(index);
     }
 }

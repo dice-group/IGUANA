@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -36,6 +37,11 @@ public class FileLineQuerySource extends QuerySource {
     @Override
     public String getQuery(int index) throws IOException {
         return iqr.readQuery(index);
+    }
+
+    @Override
+    public InputStream getQueryStream(int index) throws IOException {
+        return iqr.streamQuery(index);
     }
 
     @Override

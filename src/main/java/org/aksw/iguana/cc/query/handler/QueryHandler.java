@@ -72,22 +72,12 @@ public class QueryHandler {
         queryID.append(getQueryId(queryIndex));
     }
 
-    /**
-     * @param queryStr writes the String of the query to the builder
-     * @return Query ID
-     */
-    public String getNextQuery(StringBuilder queryStr) throws IOException {
-        int queryIndex = this.querySelector.getNextIndex();
-        queryStr.append(this.queryList.getQuery(queryIndex));
-        return getQueryId(queryIndex);
-    }
-
     public record QueryHandle(int index, InputStream queryInputStream) {
     }
 
     public QueryHandle getNextQueryStream() throws IOException {
-        int queryIndex = this.querySelector.getNextIndex();
-        return new QueryHandle(queryIndex, new ByteArrayInputStream(this.queryList.getQuery(queryIndex).getBytes(StandardCharsets.UTF_8)));
+        final int queryIndex = this.querySelector.getNextIndex();
+        return new QueryHandle(queryIndex, this.queryList.getQueryStream(queryIndex));
     }
 
 

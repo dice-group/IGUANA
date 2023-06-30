@@ -155,10 +155,9 @@ public class SPARQLProtocolWorker {
             if (workerTask.completionTarget() instanceof QueryMixes queryMixes) {
                 for (int i = 0; i < queryMixes.n(); i++) {
                     for (int j = 0; j < workerTask.queryHandler().getQueryCount(); j++) {
-                        StringBuilder queryBuilder = new StringBuilder();
-                        String queryID = workerTask.queryHandler().getNextQuery(queryBuilder);
                         HttpExecutionResult httpExecutionResult = executeHttpRequest(workerTask.timeout());
                         // TODO: process result and extract relevant infos
+                        // TODO: warp stuff from TimeLimit into a function and use here as well
                     }
 
                 }

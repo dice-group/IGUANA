@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.query.list;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * The abstract class for a QueryList. A query list provides the queries to the QueryHandler.
@@ -57,4 +58,5 @@ public abstract class QueryList {
      * @return The query at the given index
      */
     public abstract String getQuery(int index) throws IOException;
+    public abstract InputStream getQueryStream(int index) throws IOException;
 }

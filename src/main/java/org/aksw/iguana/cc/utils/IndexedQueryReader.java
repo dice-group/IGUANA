@@ -1,5 +1,8 @@
 package org.aksw.iguana.cc.utils;
 
+import org.apache.commons.io.input.AutoCloseInputStream;
+import org.apache.commons.io.input.BoundedInputStream;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -94,6 +97,16 @@ public class IndexedQueryReader {
             output = new String(data, StandardCharsets.UTF_8);
         }
         return output;
+    }
+
+    public InputStream streamQuery(int index) throws IOException {
+        RandomAccessFile raf = new RandomAccessFile(this.file, "r");
+        raf.seek(this.indices.get(index)[0] /* offset */);
+
+        FileInputStream fis = new FileInputStream(raf.getFD());
+        BoundedInputStream bis = new BoundedInputStream(fis, this.indices.get(index)[1] /* length */);
+        BufferedInputStream buis = new BufferedInputStream(bis);
+        return new AutoCloseInputStream(buis);
     }
 
     /**

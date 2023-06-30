@@ -2,11 +2,11 @@ package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.utils.FileUtils;
+import org.apache.commons.io.input.AutoCloseInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +55,11 @@ public class FolderQuerySource extends QuerySource {
     @Override
     public String getQuery(int index) throws IOException {
         return FileUtils.readFile(files[index].getAbsolutePath());
+    }
+
+    @Override
+    public InputStream getQueryStream(int index) throws IOException {
+        return new AutoCloseInputStream(new BufferedInputStream(new FileInputStream(files[index])));
     }
 
     @Override
