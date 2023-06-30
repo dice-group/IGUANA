@@ -69,6 +69,17 @@ public class QueryHandler {
         queryID.append(getQueryId(queryIndex));
     }
 
+    /**
+     * @param queryStr writes the String of the query to the builder
+     * @return Query ID
+     */
+    public String getNextQuery(StringBuilder queryStr) throws IOException {
+        int queryIndex = this.querySelector.getNextIndex();
+        queryStr.append(this.queryList.getQuery(queryIndex));
+        return getQueryId(queryIndex);
+    }
+
+
     public Model getTripleStats(String taskID) {
         List<QueryWrapper> queries = new ArrayList<>(this.queryList.size());
         for (int i = 0; i < this.queryList.size(); i++) {
