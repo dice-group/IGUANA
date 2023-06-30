@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.worker;
 import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.Connection;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
+import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
@@ -287,5 +288,16 @@ public abstract class AbstractWorker implements Worker {
         } else {
             this.workerType = this.getClass().getName();
         }
+    }
+
+    @Override
+    public WorkerMetadata getMetadata() {
+        return new WorkerMetadata(
+                this.workerID,
+                this.workerType,
+                (double) this.extra.get(CONSTANTS.WORKER_TIMEOUT_MS),
+                this.queryHandler.getQueryCount(),
+                this.queryHandler.getAllQueryIds()
+        );
     }
 }

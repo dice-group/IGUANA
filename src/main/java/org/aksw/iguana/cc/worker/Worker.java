@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
+import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.tasks.impl.Stresstest;
 
@@ -95,4 +96,5 @@ public interface Worker extends Runnable{
 	 */
 	void endAtNoOfQueryMixes(Long noOfQueryMixes);
 
+	WorkerMetadata getMetadata();
 }

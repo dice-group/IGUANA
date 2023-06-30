@@ -207,7 +207,15 @@ public class QueryHandler {
         }
     }
 
-    private String getQueryId(int i) {
+    public String getQueryId(int i) {
         return this.queryList.getName() + ":" + i;
+    }
+
+    public String[] getAllQueryIds() {
+        String[] out = new String[queryList.size()];
+        for (int i = 0; i < queryList.size(); i++) {
+            out[i] = getQueryId(i);
+        }
+        return out;
     }
 }
