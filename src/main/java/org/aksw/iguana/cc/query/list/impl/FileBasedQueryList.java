@@ -26,4 +26,9 @@ public class FileBasedQueryList extends QueryList {
     public InputStream getQueryStream(int index) throws IOException {
         return querySource.getQueryStream(index);
     }
+
+    @Override
+    public InputStream getQueryStream(int index) throws IOException {
+        return this.querySource.getQueryStream(index);
+    }
 }
