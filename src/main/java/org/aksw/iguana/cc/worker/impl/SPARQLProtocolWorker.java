@@ -4,6 +4,7 @@ import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -45,20 +46,19 @@ public class SPARQLProtocolWorker {
                     .collect(Collectors.joining("&"));
         }
 
-        public HttpRequest buildHttpRequest(StringBuilder queryBuilder,
-                                            String queryID, /* TODO: use for logging? */
+        public HttpRequest buildHttpRequest(InputStream queryStream,
+                                            int queryID, /* TODO: use for logging? */
                                             Duration timeout,
                                             URI endpoint,
-                                            String requestHeader) throws URISyntaxException {
-            // TODO: use output stream later to support streaming out huge queries from file
-            // TODO: use an int as queryID to reduce the overhead
+                                            String requestHeader) throws URISyntaxException, IOException {
             HttpRequest.Builder request = HttpRequest.newBuilder()
                     .timeout(timeout)
                     .header("Accept", requestHeader);
             switch (this.requestType) {
                 case GET_QUERY -> {
                     request.uri(new URIBuilder(endpoint)
-                                    .setParameter("query", queryBuilder.toString())
+                                    .setParameter("query",
+                                            new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
                                     .build())
                             .GET();
                 }
@@ -67,24 +67,26 @@ public class SPARQLProtocolWorker {
                             .header("Content-Type", "application/x-www-form-urlencoded")
                             .POST(HttpRequest.BodyPublishers.ofString(
                                     urlEncode(Collections.singletonList(
-                                            new String[]{"query" /* query is already URL encoded */, queryBuilder.toString()}))));
+                                            new String[]{"query" /* query is already URL encoded */,
+                                                    new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)}))));
                 }
                 case POST_QUERY -> {
                     request.uri(endpoint)
                             .header("Content-Type", "application/sparql-query")
-                            .POST(HttpRequest.BodyPublishers.ofString(queryBuilder.toString()));
+                            .POST(HttpRequest.BodyPublishers.ofInputStream(() -> queryStream));
                 }
                 case POST_URL_ENC_UPDATE -> {
                     request.uri(endpoint)
                             .header("Content-Type", "application/x-www-form-urlencoded")
                             .POST(HttpRequest.BodyPublishers.ofString(
                                     urlEncode(Collections.singletonList(
-                                            new String[]{"update" /* query is already URL encoded */, queryBuilder.toString()}))));
+                                            new String[]{"update" /* query is already URL encoded */,
+                                                    new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)}))));
                 }
                 case POST_UPDATE -> {
                     request.uri(endpoint)
                             .header("Content-Type", "application/sparql-update")
-                            .POST(HttpRequest.BodyPublishers.ofString(queryBuilder.toString()));
+                            .POST(HttpRequest.BodyPublishers.ofInputStream(() -> queryStream));
                 }
             }
             return request.build();
@@ -207,11 +209,10 @@ public class SPARQLProtocolWorker {
     }
 
     private HttpExecutionResult executeHttpRequest(Duration thisQueryTimeOut) throws IOException, URISyntaxException {
-        final StringBuilder queryBuilder = new StringBuilder();
-        final String queryID = workerTask.queryHandler().getNextQuery(queryBuilder);
+        final QueryHandler.QueryHandle queryHandle = workerTask.queryHandler().getNextQueryStream();
         final HttpRequest request = requestFactory.buildHttpRequest(
-                queryBuilder,
-                queryID,
+                queryHandle.queryInputStream(),
+                queryHandle.index(),
                 thisQueryTimeOut,
                 workerTask.endpoint(),
                 workerTask.acceptHeader());

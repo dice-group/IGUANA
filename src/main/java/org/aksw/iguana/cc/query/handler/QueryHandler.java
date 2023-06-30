@@ -18,7 +18,10 @@ import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +80,14 @@ public class QueryHandler {
         int queryIndex = this.querySelector.getNextIndex();
         queryStr.append(this.queryList.getQuery(queryIndex));
         return getQueryId(queryIndex);
+    }
+
+    public record QueryHandle(int index, InputStream queryInputStream) {
+    }
+
+    public QueryHandle getNextQueryStream() throws IOException {
+        int queryIndex = this.querySelector.getNextIndex();
+        return new QueryHandle(queryIndex, new ByteArrayInputStream(this.queryList.getQuery(queryIndex).getBytes(StandardCharsets.UTF_8)));
     }
 
 
@@ -139,10 +150,9 @@ public class QueryHandler {
      * will execute <code>initPatternQuerySet</code> to create the QueryList.
      */
     private void initQuerySet() {
-        if(this.config.containsKey("pattern")) {
+        if (this.config.containsKey("pattern")) {
             initPatternQuerySet();
-        }
-        else {
+        } else {
             initQuerySet(createQuerySource());
         }
     }
