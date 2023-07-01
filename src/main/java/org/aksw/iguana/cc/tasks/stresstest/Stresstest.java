@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.tasks.stresstest;
 
 import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
+import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.model.StresstestMetadata;
 import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.AbstractTask;
@@ -16,7 +17,6 @@ import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Instant;
 import java.util.*;
@@ -44,6 +44,10 @@ public class Stresstest extends AbstractTask {
     private Long noOfQueryMixes;
     private Instant startTime;
 
+    private StresstestResultProcessor rp;
+
+    private Calendar startDate;
+    private Calendar endDate;
 
     public Stresstest(Integer timeLimit, List<Map<String, Object>> workers) {
         this(timeLimit, workers, null);
@@ -53,6 +57,7 @@ public class Stresstest extends AbstractTask {
         this.timeLimit = timeLimit.doubleValue();
         this.workerConfig = workers;
         this.warmupConfig = warmup;
+        this.rp = new StresstestResultProcessor(this.getMetadata());
     }
 
     public Stresstest(List<Map<String, Object>> workers, Integer noOfQueryMixes) {
@@ -63,6 +68,7 @@ public class Stresstest extends AbstractTask {
         this.noOfQueryMixes = noOfQueryMixes.longValue();
         this.workerConfig = workers;
         this.warmupConfig = warmup;
+        this.rp = new StresstestResultProcessor(this.getMetadata());
     }
 
     private void initWorkers() {
@@ -115,6 +121,7 @@ public class Stresstest extends AbstractTask {
     public void generateTripleStats() {
         StringWriter sw = new StringWriter();
         Model tripleStats = ModelFactory.createDefaultModel();
+        // TODO: workers might have the same queries, the following code thus adds unnecessary redundancy
         for (Worker worker : this.workers) {
             tripleStats.add(worker.getQueryHandler().getTripleStats(this.taskID));
         }
@@ -155,6 +162,7 @@ public class Stresstest extends AbstractTask {
      */
     @Override
     public void execute() {
+        this.startDate = GregorianCalendar.getInstance();
         warmup();
         LOGGER.info("Task with ID {{}} will be executed now", this.taskID);
         // Execute each Worker in ThreadPool
@@ -197,6 +205,7 @@ public class Stresstest extends AbstractTask {
                 LOGGER.error("Problems shutting down", e1);
             }
         }
+        this.endDate = GregorianCalendar.getInstance();
     }
 
     private void loopSleep() {
@@ -209,29 +218,20 @@ public class Stresstest extends AbstractTask {
     }
 
     private void sendWorkerResult(Worker worker) {
-        Collection<Properties> props = worker.popQueryResults();
+        Collection<QueryExecutionStats> props = worker.popQueryResults();
         if (props == null) {
             return;
         }
 
-        for (Properties results : props) {
-            try {
-
-                // send results via RabbitMQ
-                LOGGER.debug("[TaskID: {{}}] Send results", this.taskID);
-                this.sendResults(results);
-                LOGGER.debug("[TaskID: {{}}] results could be send", this.taskID);
-            } catch (IOException e) {
-                LOGGER.error("[TaskID: {{}}] Could not send results due to exc.", this.taskID, e);
-                LOGGER.error("[TaskID: {{}}] Results: {{}}", this.taskID, results);
-            }
-        }
+        LOGGER.debug("[TaskID: {{}}] Send results", this.taskID);
+        this.rp.processQueryExecutions(worker.getMetadata(), props);
+        LOGGER.debug("[TaskID: {{}}] results could be send", this.taskID);
     }
 
 
     @Override
     public void close() {
-        super.close();
+        rp.calculateAndSaveMetrics(startDate, endDate);
     }
 
     protected long warmup() {
