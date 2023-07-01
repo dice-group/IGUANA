@@ -343,9 +343,11 @@ public class Stresstest extends AbstractTask {
             classname = this.getClass().getCanonicalName();
         }
 
+        Set<String> queryIDs = new HashSet<>();
         WorkerMetadata[] workerMetadata = new WorkerMetadata[this.workers.size()];
         for (int i = 0; i < this.workers.size(); i++) {
             workerMetadata[i] = this.workers.get(i).getMetadata();
+            queryIDs.addAll(Arrays.asList(workerMetadata[i].queryIDs()));
         }
 
         StringWriter sw = new StringWriter();
@@ -367,6 +369,7 @@ public class Stresstest extends AbstractTask {
                 this.timeLimit,
                 this.noOfQueryMixes,
                 workerMetadata,
+                queryIDs,
                 sw.toString(),
                 tripleStats
         );

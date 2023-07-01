@@ -2,6 +2,8 @@ package org.aksw.iguana.cc.model;
 
 import org.apache.jena.rdf.model.Model;
 
+import java.util.Set;
+
 // TODO: maybe extract parts to generic taskmetadata class
 public record StresstestMetadata(
         String suiteID,
@@ -15,6 +17,7 @@ public record StresstestMetadata(
         double timelimit,
         long noOfQueryMixes,
         WorkerMetadata[] workers,
+        Set<String> queryIDs,
         String simpleTriple,
         Model tripleStats
 ) {}
