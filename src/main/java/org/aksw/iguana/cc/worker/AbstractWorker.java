@@ -282,6 +282,7 @@ public abstract class AbstractWorker implements Worker {
                 this.workerType,
                 (double) this.extra.get(CONSTANTS.WORKER_TIMEOUT_MS),
                 this.queryHandler.getQueryCount(),
+                this.queryHandler.hashCode(),
                 this.queryHandler.getAllQueryIds()
         );
     }

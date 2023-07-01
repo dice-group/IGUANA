@@ -5,5 +5,6 @@ public record WorkerMetadata(
         String workerType,
         double timeout,
         int numberOfQueries,
-        String[] queries
+        int queryHash,
+        String[] queryIDs
 ) {}
