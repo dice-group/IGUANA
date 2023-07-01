@@ -4,10 +4,6 @@ import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.tasks.MockupStorage;
 import org.aksw.iguana.cc.worker.MockupWorker;
 import org.aksw.iguana.cc.worker.Worker;
-import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.experiment.ExperimentManager;
-import org.aksw.iguana.rp.metrics.MetricManager;
-import org.aksw.iguana.rp.metrics.impl.EachQueryMetric;
 import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,14 +38,9 @@ public class StresstestTest {
 
     private void init(){
         StorageManager storageManager = StorageManager.getInstance();
-        MetricManager mmanger = MetricManager.getInstance();
-        mmanger.addMetric(new EachQueryMetric());
-        ExperimentManager rpController = ExperimentManager.getInstance();
-        Properties p = new Properties();
-        p.put(COMMON.RECEIVE_DATA_START_KEY, "true");
-        p.put(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
+        // TODO: fix tests
+        // MetricManager.setMetrics(List.of(new EachQueryMetric()));
         MockupStorage storage = new MockupStorage();
-        rpController.receiveData(p);
         storageManager.addStorage(storage);
     }
 

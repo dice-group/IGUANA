@@ -6,7 +6,6 @@ package org.aksw.iguana.cc.tasks;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.experiment.ExperimentManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,6 @@ public abstract class AbstractTask implements Task {
 
 	private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	private ExperimentManager rpControl = ExperimentManager.getInstance();
 	protected String taskID;
 	protected ConnectionConfig con;
 
@@ -64,28 +62,13 @@ public abstract class AbstractTask implements Task {
 	}
 
 	@Override
-	public void start() {
-    	// send to ResultProcessor
-		rpControl.receiveData(metaData);
-
-	}
+	public void start() {}
 
 	@Override
-	public void sendResults(Properties data) throws IOException {
-		data.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-		rpControl.receiveData(data);
-	}
+	public void sendResults(Properties data) throws IOException {}
 
 	@Override
-	public void close() {
-		Properties end = new Properties();
-		// set exp task id
-		end.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-		// set end flag
-		end.put(COMMON.RECEIVE_DATA_END_KEY, true);
-		// send to ResultProcessor
-		rpControl.receiveData(end);
-	}
+	public void close() {}
 
 	@Override
 	public void addMetaData() {

@@ -7,7 +7,6 @@ import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.MetricManager;
 import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.aksw.iguana.commons.script.ScriptExecutor;
-import org.aksw.iguana.rp.metrics.impl.*;
 import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.aksw.iguana.cc.tasks.stresstest.storage.impl.NTFileStorage;
 import org.apache.commons.exec.ExecuteException;
@@ -124,27 +123,9 @@ public class IguanaConfig {
 		}
 		if(this.metrics == null || this.metrics.isEmpty()){
 			LOGGER.info("No metrics were set. Using default metrics.");
-			metrics = new ArrayList<>();
-			MetricConfig config = new MetricConfig();
-			config.setClassName(QMPHMetric.class.getCanonicalName());
-			metrics.add(config);
-			config = new MetricConfig();
-			config.setClassName(QPSMetric.class.getCanonicalName());
-			Map<String, Object> configMap = new HashMap<>();
-			configMap.put("penalty", 180000);
-			config.setConfiguration(configMap);
-			metrics.add(config);
-			config = new MetricConfig();
-			config.setClassName(NoQPHMetric.class.getCanonicalName());
-			metrics.add(config);
-			config = new MetricConfig();
-			config.setClassName(AvgQPSMetric.class.getCanonicalName());
-			metrics.add(config);
-			config = new MetricConfig();
-			config.setClassName(NoQMetric.class.getCanonicalName());
-			metrics.add(config);
-
+			// TODO: set default metrics
 		}
+
 		//Create Storages
 		List<Storage> storages = new ArrayList<>();
 		for(StorageConfig config : this.storages){
