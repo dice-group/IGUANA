@@ -57,7 +57,6 @@ public class Stresstest extends AbstractTask {
         this.timeLimit = timeLimit.doubleValue();
         this.workerConfig = workers;
         this.warmupConfig = warmup;
-        this.rp = new StresstestResultProcessor(this.getMetadata());
     }
 
     public Stresstest(List<Map<String, Object>> workers, Integer noOfQueryMixes) {
@@ -68,7 +67,6 @@ public class Stresstest extends AbstractTask {
         this.noOfQueryMixes = noOfQueryMixes.longValue();
         this.workerConfig = workers;
         this.warmupConfig = warmup;
-        this.rp = new StresstestResultProcessor(this.getMetadata());
     }
 
     private void initWorkers() {
@@ -153,6 +151,7 @@ public class Stresstest extends AbstractTask {
         initWorkers();
         addMetaData();
         generateTripleStats();
+        this.rp = new StresstestResultProcessor(this.getMetadata());
     }
 
     /*
@@ -350,6 +349,7 @@ public class Stresstest extends AbstractTask {
             queryIDs.addAll(Arrays.asList(workerMetadata[i].queryIDs()));
         }
 
+        // TODO: workers might have the same queries, the following code thus adds unnecessary redundancy
         StringWriter sw = new StringWriter();
         Model tripleStats = ModelFactory.createDefaultModel();
         for (Worker worker : this.workers) {
@@ -357,21 +357,23 @@ public class Stresstest extends AbstractTask {
         }
         RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
 
+        // TODO: check for correct values
+
         return new StresstestMetadata(
                 suiteID,
                 expID,
                 taskID,
                 datasetID,
                 conID,
-                con.getVersion(),
+                Optional.ofNullable(con.getVersion("")),
                 taskName,
                 classname,
-                this.timeLimit,
-                this.noOfQueryMixes,
+                Optional.ofNullable(this.timeLimit),
+                Optional.ofNullable(this.noOfQueryMixes),
                 workerMetadata,
                 queryIDs,
-                sw.toString(),
-                tripleStats
+                Optional.ofNullable(sw.toString()),
+                Optional.ofNullable(tripleStats)
         );
     }
 }

@@ -90,16 +90,17 @@ public class StresstestResultProcessor {
         m.add(datasetRes, RDFS.label, ResourceFactory.createTypedLiteral(metadata.datasetID()));
         m.add(datasetRes, RDF.type, IONT.dataset);
         m.add(taskRes, IPROP.connection, connectionRes);
-        m.add(taskRes, IPROP.noOfQueryMixes, ResourceFactory.createTypedLiteral(metadata.noOfQueryMixes()));
+        if (metadata.noOfQueryMixes().isPresent())
+            m.add(taskRes, IPROP.noOfQueryMixes, ResourceFactory.createTypedLiteral(metadata.noOfQueryMixes().get()));
         m.add(taskRes, IPROP.noOfWorkers, ResourceFactory.createTypedLiteral(metadata.workers().length));
-        m.add(taskRes, IPROP.timeLimit, ResourceFactory.createTypedLiteral(metadata.timelimit()));
+        if (metadata.timelimit().isPresent())
+            m.add(taskRes, IPROP.timeLimit, ResourceFactory.createTypedLiteral(metadata.timelimit().get()));
         m.add(taskRes, RDF.type, IONT.task);
 
         // TODO: Maybe not hardcode this, instead have the classname stored inside the metadata to make this class reusable for other tasks
         m.add(taskRes, RDF.type, IONT.stresstest);
-        if (metadata.conVersion() != null) {
-            m.add(connectionRes, IPROP.version, ResourceFactory.createTypedLiteral(metadata.conVersion()));
-        }
+        if (metadata.conVersion().isPresent())
+            m.add(connectionRes, IPROP.version, ResourceFactory.createTypedLiteral(metadata.conVersion().get()));
         m.add(connectionRes, RDFS.label, ResourceFactory.createTypedLiteral(metadata.conID()));
         m.add(connectionRes, RDF.type, IONT.connection);
 
@@ -113,8 +114,8 @@ public class StresstestResultProcessor {
             m.add(workerRes, RDF.type, IONT.worker);
         }
 
-        if (metadata.tripleStats() != null) {
-            m.add(metadata.tripleStats());
+        if (metadata.tripleStats().isPresent()) {
+            m.add(metadata.tripleStats().get());
             // Connect task and workers to the Query objects, that store the triple stats.
             // TODO: should be reworked soon after fixing triple stat generation
             for (WorkerMetadata worker : metadata.workers()) {
