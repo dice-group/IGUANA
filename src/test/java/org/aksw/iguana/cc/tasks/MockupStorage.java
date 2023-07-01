@@ -11,28 +11,11 @@ import java.util.Set;
 public class MockupStorage implements Storage {
     private Model m = ModelFactory.createDefaultModel();
 
-    private Set<Properties> meta = new HashSet<Properties>();
+    private Set<Properties> meta = new HashSet<>();
 
     @Override
-    public void addData(Model data) {
-
+    public void storeResult(Model data) {
         m.add(data);
-    }
-
-    @Override
-    public void addMetaData(Properties p) {
-        //do nothing
-        meta.add(p);
-    }
-
-    @Override
-    public void commit() {
-        //do nothing
-    }
-
-    @Override
-    public void endTask(String taskID) {
-        //do nothing
     }
 
     public Model getModel() {

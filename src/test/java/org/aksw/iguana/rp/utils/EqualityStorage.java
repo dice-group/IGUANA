@@ -7,8 +7,6 @@ import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
-import java.util.Properties;
-
 /**
  * Class to help the Unit Metric Tests. <br/>
  * 
@@ -20,7 +18,6 @@ import java.util.Properties;
  *
  */
 public class EqualityStorage implements Storage{
-
 
 	private Model expectedModel;
 	private Model actualModel = ModelFactory.createDefaultModel();
@@ -34,7 +31,7 @@ public class EqualityStorage implements Storage{
 
 
 	@Override
-	public void addData(Model data) {
+	public void storeResult(Model data) {
 		this.actualModel.add(data);
 	}
 
@@ -45,24 +42,4 @@ public class EqualityStorage implements Storage{
 	public Model getActualModel(){
 		return this.actualModel;
 	}
-
-
-	// NOTHING TO DO IN THE FOLLOWING METHODS
-	@Override
-	public void addMetaData(Properties p) {
-		//explicity empty
-	}
-
-	@Override
-	public void commit() {
-		//explicity empty
-	}
-
-
-	@Override
-	public void endTask(String taskID) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

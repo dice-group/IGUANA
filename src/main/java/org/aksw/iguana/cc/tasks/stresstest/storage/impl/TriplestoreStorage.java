@@ -12,6 +12,7 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.update.UpdateExecutionFactory;
@@ -34,8 +35,8 @@ public class TriplestoreStorage extends TripleBasedStorage {
 	private UpdateRequest blockRequest = UpdateFactory.create();
 
 	
-	private String updateEndpoint;
-	private String endpoint;
+	private final String updateEndpoint;
+	private final String endpoint;
 	private String user;
 	private String pwd;
 
@@ -67,7 +68,8 @@ public class TriplestoreStorage extends TripleBasedStorage {
 	 * @see org.aksw.iguana.rp.storage.Storage#commit()
 	 */
 	@Override
-	public void commit() {
+	public void storeResult(Model data) {
+		super.storeResult(data);
 		if (metricResults.size() == 0)
 			return;
 

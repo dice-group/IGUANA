@@ -15,10 +15,9 @@ import java.util.*;
  */
 public class StorageManager {
 	
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(StorageManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(StorageManager.class);
 
-	private Set<Storage> storages = new HashSet<Storage>();
+	private Set<Storage> storages = new HashSet<>();
 
 	private static StorageManager instance;
 
@@ -54,28 +53,12 @@ public class StorageManager {
 	 * Simply adds a Model
 	 * @param m
 	 */
-	public void addData(Model m){
+	public void storeResult(Model m){
 		for(Storage  s : storages){
-			s.addData(m);
+			s.storeResult(m);
 		}
 	}
 
-
-	/**
-	 * Will add the MetaData to each Storage
-	 * @param p
-	 */
-	public void addMetaData(Properties p){
-		for(Storage  s : storages){
-			try{
-				s.addMetaData(p);
-			}catch(Exception e){
-				LOGGER.error("Could not store meta data in "+s.getClass().getSimpleName()+" for Properties "+p, e);
-			}
-		}
-	}
-	
-	
 	@Override
 	public String toString(){
 		StringBuilder ret = new StringBuilder();
@@ -88,28 +71,7 @@ public class StorageManager {
 		return ret.toString();
 	}
 
-	/**
-	 * Will call the commit method of each storage
-	 */
-	public void commit() {
-		for(Storage s: storages){
-			s.commit();
-		}
-	}
-
-	public void endTask(String taskID) {
-		for(Storage s: storages){
-			s.endTask(taskID);
-		}
-	}
-
 	public void addStorages(List<Storage> storages) {
 		this.storages.addAll(storages);
 	}
-
-    public void close() {
-		for(Storage storage : storages){
-			storage.close();
-		}
-    }
 }

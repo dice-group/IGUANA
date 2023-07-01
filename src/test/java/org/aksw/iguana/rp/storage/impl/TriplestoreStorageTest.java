@@ -17,7 +17,6 @@ import org.simpleframework.transport.connect.SocketConnection;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -53,34 +52,6 @@ public class TriplestoreStorageTest {
 	private String dataExp = "INSERT DATA {\n"+
 "  <http://iguana-benchmark.eu/resource/a> <http://iguana-benchmark.eu/properties/b> \"c\" .\n"+
 "}";
-	
-	/**
-	 * @throws IOException
-	 */
-	@Test
-	public void metaTest() throws IOException{
-		fastServerContainer = new ServerMock();
-        fastServer = new ContainerServer(fastServerContainer);
-        fastConnection = new SocketConnection(fastServer);
-        SocketAddress address1 = new InetSocketAddress(FAST_SERVER_PORT);
-        fastConnection.connect(address1);
-        
-        String host = "http://localhost:8023";
-        TriplestoreStorage store = new TriplestoreStorage(host, host);
-        Properties p = new Properties();
-		p.put(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
-	    p.setProperty(COMMON.EXPERIMENT_ID_KEY, "1/1");
-	    p.setProperty(COMMON.CONNECTION_ID_KEY, "virtuoso");
-	    p.setProperty(COMMON.SUITE_ID_KEY, "1");
-	    p.setProperty(COMMON.DATASET_ID_KEY, "dbpedia");
-		p.put(COMMON.EXPERIMENT_TASK_CLASS_ID_KEY, "ClassName");
-		p.put(COMMON.RECEIVE_DATA_START_KEY, "true");
-	    p.put(COMMON.EXTRA_META_KEY, new Properties());
-	    p.put(COMMON.NO_OF_QUERIES, 2);
-        store.addMetaData(p);
-        store.commit();
-        assertEquals(metaExp.trim(), fastServerContainer.getActualContent().trim().replaceAll("[0-9][0-9][0-9][0-9]\\-[0-9][0-9]\\-[0-9][0-9]T[0-9][0-9]\\:[0-9][0-9]\\:[0-9][0-9]\\.[0-9]+Z", "???"));//2020-09-21T22:06:45.109Z
-	}
 
 	/**
 	 * @throws IOException
@@ -89,8 +60,7 @@ public class TriplestoreStorageTest {
 	public void close() throws IOException {
 		fastConnection.close();
 	}
-	
-	
+
 	/**
 	 * @throws IOException
 	 */
@@ -107,8 +77,7 @@ public class TriplestoreStorageTest {
 
 	    Model m = ModelFactory.createDefaultModel();
 	    m.add(ResourceFactory.createResource(COMMON.RES_BASE_URI+"a"), ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"b") , "c");
-	    store.addData(m);
-	    store.commit();
+	    store.storeResult(m);
         assertEquals(dataExp.trim(),fastServerContainer.getActualContent().trim());
 	}
 

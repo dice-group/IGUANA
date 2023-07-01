@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
  * 
  * This will test the RDFFileStorage in short.
  * 
- * 
  * @author l.conrads
  *
  */
@@ -38,9 +37,7 @@ public class RDFFileStorageTest {
 	    Model m = ModelFactory.createDefaultModel();
 	    m.read(new FileReader("src/test/resources/nt/results_test1.nt"), null, "N-TRIPLE");
 
-	    store.addData(m);
-	    store.commit();
-	    store.close();
+	    store.storeResult(m);
 
 	    assertEqual("results_test2.ttl","src/test/resources/nt/results_test1.nt", true);
 	    new File("results_test2.ttl").delete();

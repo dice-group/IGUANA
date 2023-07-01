@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.tasks.stresstest.storage.impl;
 
 import org.aksw.iguana.cc.tasks.stresstest.storage.TripleBasedStorage;
 import org.aksw.iguana.commons.annotation.Shorthand;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
@@ -19,7 +20,7 @@ public class RDFFileStorage extends TripleBasedStorage {
     private static final Logger LOGGER = LoggerFactory.getLogger(RDFFileStorage.class.getName());
 
     private Lang lang = Lang.TTL;
-    private StringBuilder file;
+    private final StringBuilder file;
 
     /**
      * Uses a generated file called results_{DD}-{MM}-{YYYY}_{HH}-{mm}.ttl
@@ -49,19 +50,11 @@ public class RDFFileStorage extends TripleBasedStorage {
     public RDFFileStorage(String fileName){
         this.file = new StringBuilder(fileName);
         this.lang= RDFLanguages.filenameToLang(fileName, Lang.TTL);
-
-    }
-
-    /* (non-Javadoc)
-     * @see org.aksw.iguana.rp.storage.Storage#commit()
-     */
-    @Override
-    public void commit() {
-
     }
 
     @Override
-    public void close(){
+    public void storeResult(Model data){
+        super.storeResult(data);
         try (OutputStream os = new FileOutputStream(file.toString(), true)) {
             RDFDataMgr.write(os, metricResults, this.lang);
             metricResults.removeAll();

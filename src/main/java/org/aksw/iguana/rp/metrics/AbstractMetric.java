@@ -206,7 +206,7 @@ public abstract class AbstractMetric implements Metric{
 	}
 
 	public void sendData(Model m){
-		this.storageManager.addData(m);
+		this.storageManager.storeResult(m);
 	}
 
 	@Override
@@ -244,8 +244,7 @@ public abstract class AbstractMetric implements Metric{
 		}
 		m.add(getTaskResource(), Vocab.worker2metric, metricRes);
 
-		this.storageManager.addData(m);
-		this.storageManager.commit();
+		this.storageManager.storeResult(m);
 
 		this.dataContainer.clear();
 	}

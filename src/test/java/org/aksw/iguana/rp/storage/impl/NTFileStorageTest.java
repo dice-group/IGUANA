@@ -4,7 +4,6 @@
 package org.aksw.iguana.rp.storage.impl;
 
 import org.aksw.iguana.cc.tasks.stresstest.storage.impl.NTFileStorage;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDFS;
@@ -14,7 +13,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -22,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * 
  * This will test the NTFileStorage in short.
- * 
  * 
  * @author f.conrads
  *
@@ -39,45 +36,9 @@ public class NTFileStorageTest {
 	    Model m = ModelFactory.createDefaultModel();
 	    m.read(new FileReader("src/test/resources/nt/results_test1.nt"), null, "N-TRIPLE");
 
-	    store.addData(m);
-	    store.commit();
+	    store.storeResult(m);
 	    assertEqual("results_test2.nt","src/test/resources/nt/results_test1.nt", true);
 	    new File("results_test2.nt").delete();
-
-	}
-	
-	@Test
-	public void metaTest() throws IOException{
-		Storage store = new NTFileStorage("results_test.nt");
-	    new File("results_test.nt").delete();
-
-		Properties extraMeta = new Properties();
-		extraMeta.setProperty("a", "b");
-		
-		Properties p = new Properties();
-		p.put(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
-	    p.setProperty(COMMON.EXPERIMENT_ID_KEY, "1/1");
-	    p.setProperty(COMMON.CONNECTION_ID_KEY, "virtuoso");
-	    p.setProperty(COMMON.SUITE_ID_KEY, "1");
-	    p.setProperty(COMMON.DATASET_ID_KEY, "dbpedia");
-	    p.put(COMMON.RECEIVE_DATA_START_KEY, "true");
-	    p.put(COMMON.EXPERIMENT_TASK_CLASS_ID_KEY, "ClassName");
-	    p.put(COMMON.EXTRA_META_KEY, new Properties());
-	    p.put(COMMON.NO_OF_QUERIES, 2);
-	    
-	    store.addMetaData(p);
-	    store.commit();
-	    assertEqual("results_test.nt", "src/test/resources/nt/nt_results_woMeta.nt", false);
-	    new File("results_test.nt").delete();
-		store = new NTFileStorage("results_test2.nt");
-	    
-	    p.put(COMMON.EXTRA_META_KEY, extraMeta);
-	    store.addMetaData(p);
-	    store.commit();
-	    assertEqual("results_test2.nt", "src/test/resources/nt/nt_results_wMeta.nt", false);
-	    
-	    new File("results_test2.nt").delete();
-	    
 
 	}
 
