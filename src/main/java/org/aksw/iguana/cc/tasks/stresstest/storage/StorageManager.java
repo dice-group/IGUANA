@@ -1,4 +1,4 @@
-package org.aksw.iguana.rp.storage;
+package org.aksw.iguana.cc.tasks.stresstest.storage;
 
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;

@@ -5,7 +5,7 @@ package org.aksw.iguana.rp.metrics.impl;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.Metric;
-import org.aksw.iguana.rp.storage.StorageManager;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.aksw.iguana.rp.utils.EqualityStorage;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;

@@ -8,7 +8,7 @@ import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.experiment.ExperimentManager;
 import org.aksw.iguana.rp.metrics.MetricManager;
 import org.aksw.iguana.rp.metrics.impl.EachQueryMetric;
-import org.aksw.iguana.rp.storage.StorageManager;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.junit.Ignore;
 import org.junit.Test;
 

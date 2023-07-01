@@ -1,10 +1,10 @@
 /**
  * 
  */
-package org.aksw.iguana.rp.storage.impl;
+package org.aksw.iguana.cc.tasks.stresstest.storage.impl;
 
+import org.aksw.iguana.cc.tasks.stresstest.storage.TripleBasedStorage;
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;

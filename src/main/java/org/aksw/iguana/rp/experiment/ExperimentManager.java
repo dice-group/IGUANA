@@ -2,7 +2,7 @@ package org.aksw.iguana.rp.experiment;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.MetricManager;
-import org.aksw.iguana.rp.storage.StorageManager;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

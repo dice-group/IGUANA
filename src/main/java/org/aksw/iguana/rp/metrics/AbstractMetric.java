@@ -2,7 +2,7 @@ package org.aksw.iguana.rp.metrics;
 
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.storage.StorageManager;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.aksw.iguana.rp.vocab.Vocab;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;

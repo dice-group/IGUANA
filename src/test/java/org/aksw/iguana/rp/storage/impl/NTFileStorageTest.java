@@ -3,8 +3,9 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
+import org.aksw.iguana.cc.tasks.stresstest.storage.impl.NTFileStorage;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.storage.Storage;
+import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDFS;
 import org.junit.Test;

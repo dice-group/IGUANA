@@ -3,7 +3,7 @@
  */
 package org.aksw.iguana.rp.utils;
 
-import org.aksw.iguana.rp.storage.Storage;
+import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 

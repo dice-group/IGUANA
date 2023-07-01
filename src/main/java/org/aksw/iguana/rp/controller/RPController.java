@@ -7,8 +7,8 @@ package org.aksw.iguana.rp.controller;
 import org.aksw.iguana.rp.experiment.ExperimentManager;
 import org.aksw.iguana.rp.metrics.Metric;
 import org.aksw.iguana.rp.metrics.MetricManager;
-import org.aksw.iguana.rp.storage.Storage;
-import org.aksw.iguana.rp.storage.StorageManager;
+import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * This is the Main Controller. 
- * It will start the ResultProcessor, initialize the {@link org.aksw.iguana.rp.storage.StorageManager} and the {@link org.aksw.iguana.rp.metrics.MetricManager}
+ * It will start the ResultProcessor, initialize the {@link StorageManager} and the {@link org.aksw.iguana.rp.metrics.MetricManager}
  * 
  * @author f.conrads
  *

@@ -3,8 +3,8 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
-import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.storage.Storage;
+import org.aksw.iguana.cc.tasks.stresstest.storage.impl.RDFFileStorage;
+import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.vocabulary.RDFS;
@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

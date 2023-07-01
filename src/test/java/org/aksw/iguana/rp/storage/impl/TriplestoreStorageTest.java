@@ -3,6 +3,7 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
+import org.aksw.iguana.cc.tasks.stresstest.storage.impl.TriplestoreStorage;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.utils.ServerMock;
 import org.apache.jena.rdf.model.Model;

@@ -1,6 +1,6 @@
 package org.aksw.iguana.rp.metrics;
 
-import org.aksw.iguana.rp.storage.StorageManager;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 
 import java.util.Properties;
 

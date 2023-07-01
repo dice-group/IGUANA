@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.iguana.rp.storage;
+package org.aksw.iguana.cc.tasks.stresstest.storage;
 
 import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.jena.rdf.model.Model;
