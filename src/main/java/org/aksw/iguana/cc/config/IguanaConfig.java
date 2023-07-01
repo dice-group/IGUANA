@@ -3,9 +3,10 @@ package org.aksw.iguana.cc.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.*;
 import org.aksw.iguana.cc.controller.TaskController;
+import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
+import org.aksw.iguana.cc.tasks.stresstest.metrics.MetricManager;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.aksw.iguana.commons.script.ScriptExecutor;
-import org.aksw.iguana.rp.controller.RPController;
-import org.aksw.iguana.rp.metrics.Metric;
 import org.aksw.iguana.rp.metrics.impl.*;
 import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.aksw.iguana.cc.tasks.stresstest.storage.impl.NTFileStorage;
@@ -41,8 +42,7 @@ import java.util.Map;
  */
 public class IguanaConfig {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(IguanaConfig.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(IguanaConfig.class);
 
 	@JsonProperty(required = true)
 	private List<DatasetConfig> datasets;
@@ -66,7 +66,7 @@ public class IguanaConfig {
 	 * @throws ExecuteException 
 	 */
 	public void start() throws ExecuteException, IOException {
-		RPController rpController = initResultProcessor();
+		initResultProcessor();
 		TaskController controller = new TaskController();
 		//get SuiteID
 		String suiteID = generateSuiteID();
@@ -110,12 +110,11 @@ public class IguanaConfig {
 				}
 			}
 		}
-		rpController.close();
 
 		LOGGER.info("Finished benchmark");
 	}
 
-	private RPController initResultProcessor() {
+	private void initResultProcessor() {
 		//If storage or metric is empty use default
 		if(this.storages== null || this.storages.isEmpty()){
 			storages = new ArrayList<>();
@@ -156,9 +155,9 @@ public class IguanaConfig {
 		for(MetricConfig config : this.metrics){
 			metrics.add(config.createMetric());
 		}
-		RPController controller = new RPController();
-		controller.init(storages, metrics);
-		return controller;
+
+		StorageManager.getInstance().addStorages(storages);
+		MetricManager.setMetrics(metrics);
 	}
 
 

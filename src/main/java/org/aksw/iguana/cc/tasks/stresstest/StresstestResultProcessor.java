@@ -4,6 +4,7 @@ import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.model.StresstestMetadata;
 import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.*;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.aksw.iguana.commons.rdf.IRES;
@@ -15,7 +16,7 @@ import java.util.*;
 
 public class StresstestResultProcessor {
 
-    private StresstestMetadata metadata;
+    private final StresstestMetadata metadata;
     private List<Metric> metrics;
 
     /**
@@ -28,11 +29,12 @@ public class StresstestResultProcessor {
      */
     private Map<String, List<QueryExecutionStats>> ab;
 
-    private Resource taskRes;
+    private final Resource taskRes;
 
     public StresstestResultProcessor(StresstestMetadata metadata) {
         this.metadata = metadata;
         this.taskRes = IRES.getResource(metadata.taskID());
+        this.metrics = MetricManager.getMetrics();
 
         WorkerMetadata[] workers = metadata.workers();
         this.queryExecutions = new List[workers.length][];
@@ -54,7 +56,7 @@ public class StresstestResultProcessor {
     public void processQueryExecutions(WorkerMetadata worker, Collection<QueryExecutionStats> data) {
         for(QueryExecutionStats stat : data) {
             // The queryIDs returned by the queryHandler are Strings, in the form of '<queryhandler_name>:<id>'.
-            int queryID = Integer.valueOf(stat.queryID().substring(stat.queryID().indexOf(":") + 1));
+            int queryID = Integer.parseInt(stat.queryID().substring(stat.queryID().indexOf(":") + 1));
             queryExecutions[worker.workerID()][queryID].add(stat);
 
             if (ab.containsKey(stat.queryID())) {
@@ -150,7 +152,12 @@ public class StresstestResultProcessor {
         m.add(taskRes, IPROP.startDate, ResourceFactory.createTypedLiteral(start));
         m.add(taskRes, IPROP.endDate, ResourceFactory.createTypedLiteral(end));
 
-        // TODO: store m
+        m.setNsPrefix(IPROP.PREFIX, IPROP.NS);
+        m.setNsPrefix(IONT.PREFIX, IONT.NS);
+        m.setNsPrefix(IRES.PREFIX, IRES.NS);
+        m.setNsPrefix("lsqr", "http://lsq.aksw.org/res/");
+
+        StorageManager.getInstance().storeResult(m);
     }
 
     /**

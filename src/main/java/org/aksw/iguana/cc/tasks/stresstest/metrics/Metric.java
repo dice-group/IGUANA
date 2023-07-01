@@ -1,9 +1,9 @@
 package org.aksw.iguana.cc.tasks.stresstest.metrics;
 
 public abstract class Metric {
-    private String name;
-    private String abbreviation;
-    private String description;
+    private final String name;
+    private final String abbreviation;
+    private final String description;
 
     public Metric(String name, String abbreviation, String description) {
         this.name = name;
