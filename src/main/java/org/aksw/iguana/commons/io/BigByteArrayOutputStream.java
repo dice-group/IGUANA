@@ -55,11 +55,6 @@ public class BigByteArrayOutputStream extends OutputStream {
     }
 
     /**
-     * Initializes a new instance of the BigByteArrayOutputStream class.
-     * @param bufferSize
-     */
-
-    /**
      * Initializes a new instance of the BigByteArrayOutputStream class with buffer size.
      *
      * @param bufferSize initial guaranteed buffer size
