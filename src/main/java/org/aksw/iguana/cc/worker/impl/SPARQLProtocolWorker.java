@@ -1,6 +1,8 @@
 package org.aksw.iguana.cc.worker.impl;
 
+import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
+import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.io.IOException;
@@ -14,10 +16,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -118,6 +117,8 @@ public class SPARQLProtocolWorker {
     private final HttpClient httpClient;
     private final int worderId;
     private final ExecutorService executor;
+
+    private final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
     private final HTTPWorker2Task workerTask;
 
     private final SPARQLProtocolRequestFactory requestFactory;
@@ -198,7 +199,7 @@ public class SPARQLProtocolWorker {
     }
 
 
-    record HttpExecutionResult(HttpResponse<String> response,
+    record HttpExecutionResult(HttpResponse<InputStream> response,
                                Instant requestStart,
                                Duration duration,
                                Exception exception) {
@@ -216,26 +217,53 @@ public class SPARQLProtocolWorker {
                 workerTask.endpoint(),
                 workerTask.acceptHeader());
         final Instant requestStart = Instant.now();
-        // todo: make body handler configurable to support consuming it as a stream
-        CompletableFuture<HttpResponse<String>> httpResponseFuture
-                = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
         Function<Exception, HttpExecutionResult> httpExecutionResult = (Exception e) -> {
             final Duration requestDuration = Duration.between(requestStart, Instant.now());
             return new HttpExecutionResult(null, requestStart, requestDuration, e);
         };
-        HttpResponse<String> response;
+        record ExecutionResult(HttpResponse<InputStream> httpResponse,
+                               BigByteArrayOutputStream outputStream,
+                               Long hash,
+                               Exception exception) {
+        }
+        ExecutionResult executionResult;
         try {
-            response = httpResponseFuture.get(thisQueryTimeOut.getNano(), TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            return httpExecutionResult.apply(e);
-        } catch (ExecutionException e) {
-            return httpExecutionResult.apply(e);
-        } catch (TimeoutException e) {
+            executionResult = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                    .thenApply(httpResponse -> {
+                        try {
+                            final var bodyStream = httpResponse.body();
+                            final var buffer = new byte[4096]; // TODO: thread local byte buffer
+                            if (httpResponse.statusCode() / 100 == 2) { // Request was successful
+                                // TODO: reuse bbaos
+                                OptionalLong contentLength = httpResponse.headers().firstValueAsLong("Content-Length");
+                                final var bbaos = ((contentLength.isPresent()) ?
+                                        new BigByteArrayOutputStream(contentLength.getAsLong()) :
+                                        new BigByteArrayOutputStream());
+
+                                try (var hasher = hasherFactory.newStreamingHash64(0)) {
+                                    int readBytes;
+                                    while ((readBytes = bodyStream.readNBytes(buffer, 0, buffer.length)) != -1) {
+                                        hasher.update(buffer, 0, readBytes);
+                                        bbaos.write(buffer, 0, readBytes);
+                                    }
+                                    return new ExecutionResult(httpResponse, bbaos, hasher.getValue(), null);
+                                }
+                            } else {
+                                while (bodyStream.readNBytes(buffer, 0, buffer.length) != -1) {
+                                }
+                                return new ExecutionResult(httpResponse, null, null, null);
+                            }
+                        } catch (IOException ex) {
+                            return new ExecutionResult(httpResponse, null, null, ex);
+                        }
+                    }).get(thisQueryTimeOut.getNano(), TimeUnit.NANOSECONDS);
+        } catch (CompletionException | InterruptedException | ExecutionException | TimeoutException e) {
             return httpExecutionResult.apply(e);
         }
+
         final Duration requestDuration = Duration.between(requestStart, Instant.now());
-        return new HttpExecutionResult(response, requestStart, requestDuration, null);
+        return new HttpExecutionResult(executionResult.httpResponse(), requestStart, requestDuration, executionResult.exception());
     }
 
 }
