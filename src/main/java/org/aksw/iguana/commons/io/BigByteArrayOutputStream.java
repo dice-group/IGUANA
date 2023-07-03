@@ -1,10 +1,9 @@
 package org.aksw.iguana.commons.io;
 
-import java.io.ByteArrayOutputStream;
+import org.apache.hadoop.hbase.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,10 +24,9 @@ import java.util.stream.IntStream;
 public class BigByteArrayOutputStream extends OutputStream {
 
     /**
-     * The maximum size limit for an array.
-     * This value is a constant and cannot be modified.
+     * The maximum size limit for an array. This is no limit to the amount of bytes {@code BigByteArrayOutputStream} can consume.
      */
-    private final static long arraySizeLimit = 2147483639;
+    public final static long ARRAY_SIZE_LIMIT = 2147483639;
 
     /**
      * Holds a list of ByteArrayOutputStream objects.
@@ -75,13 +73,13 @@ public class BigByteArrayOutputStream extends OutputStream {
     public BigByteArrayOutputStream(long bufferSize) {
         if (bufferSize < 0)
             throw new IllegalArgumentException("Negative initial size: " + bufferSize);
-        if (bufferSize < arraySizeLimit) {
+        if (bufferSize <= ARRAY_SIZE_LIMIT) {
             baosList = new ArrayList<>(1);
             baosList.add(new ByteArrayOutputStream((int) bufferSize));
         } else {
-            final var requiredBaoss = (int) (bufferSize / arraySizeLimit) + 1;
+            final var requiredBaoss = (int) (bufferSize / ARRAY_SIZE_LIMIT) + 1;
             baosList = new ArrayList<>(requiredBaoss);
-            IntStream.range(0, requiredBaoss).forEachOrdered(i -> baosList.add(new ByteArrayOutputStream((int) arraySizeLimit)));
+            IntStream.range(0, requiredBaoss).forEachOrdered(i -> baosList.add(new ByteArrayOutputStream((int) ARRAY_SIZE_LIMIT)));
         }
         reset();
     }
@@ -104,7 +102,7 @@ public class BigByteArrayOutputStream extends OutputStream {
         return baosList.stream().mapToLong(ByteArrayOutputStream::size).sum();
     }
 
-    public synchronized byte[][] toByteArray() {
+    public byte[][] toByteArray() {
         byte[][] ret = new byte[baosList.size()][];
         for (int i = 0; i < baosList.size(); i++) {
             ret[i] = baosList.get(i).toByteArray();
@@ -163,12 +161,12 @@ public class BigByteArrayOutputStream extends OutputStream {
      * @return The available space in the ByteArrayOutputStream.
      */
     private int ensureSpace() {
-        var space = (int) arraySizeLimit - currentBaos.size();
+        var space = (int) ARRAY_SIZE_LIMIT - currentBaos.size();
         if (space == 0) {
-            space = (int) arraySizeLimit;
+            space = (int) ARRAY_SIZE_LIMIT;
             if (baosListIndex == baosList.size() - 1) {
                 baosListIndex++;
-                currentBaos = new ByteArrayOutputStream((int) arraySizeLimit);
+                currentBaos = new ByteArrayOutputStream((int) ARRAY_SIZE_LIMIT);
                 baosList.add(currentBaos);
             } else {
                 baosListIndex++;
@@ -177,18 +175,6 @@ public class BigByteArrayOutputStream extends OutputStream {
             }
         }
         return space;
-    }
-
-    public String toString(String charset) throws UnsupportedEncodingException {
-        StringBuilder builder = new StringBuilder();
-        for (ByteArrayOutputStream baos : this.baosList) {
-            builder.append(baos.toString(charset));
-        }
-        return builder.toString();
-    }
-
-    public String toString(Charset charset) throws UnsupportedEncodingException {
-        return toString(charset.toString());
     }
 
     /**
