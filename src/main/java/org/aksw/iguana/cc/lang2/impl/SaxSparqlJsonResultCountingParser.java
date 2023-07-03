@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.lang2.impl;
 
-import org.aksw.iguana.cc.lang2.AbstractLanguageProcessor;
+import org.aksw.iguana.cc.lang2.LanguageProcessor;
 import org.json.simple.parser.ContentHandler;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -20,7 +20,7 @@ import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
  * For correct SPARQL JSON Results it returns the number of solutions, bound values and the names of the variables.
  * For malformed results it may or may not fail. For malformed JSON it fails if the underlying json.simple.parser fails.
  */
-class SaxSparqlJsonResultCountingParser implements AbstractLanguageProcessor {
+class SaxSparqlJsonResultCountingParser implements LanguageProcessor {
 
     @Override
     public LanguageProcessingData process(InputStream inputStream) {
@@ -40,7 +40,7 @@ class SaxSparqlJsonResultCountingParser implements AbstractLanguageProcessor {
                                    List<String> variables, Exception exception) implements LanguageProcessingData {
 
         @Override
-        public Class<? extends AbstractLanguageProcessor> processor() {
+        public Class<? extends LanguageProcessor> processor() {
             return SaxSparqlJsonResultCountingParser.class;
         }
     }

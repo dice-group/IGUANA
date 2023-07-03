@@ -5,10 +5,10 @@ import java.io.InputStream;
 /**
  * Interface for abstract language processors that work on InputStreams.
  */
-public interface AbstractLanguageProcessor {
+public interface LanguageProcessor {
 
     interface LanguageProcessingData {
-        public Class<? extends AbstractLanguageProcessor> processor();
+        Class<? extends LanguageProcessor> processor();
     }
 
     LanguageProcessingData process(InputStream inputStream);
