@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.worker.impl;
 
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
+import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -109,8 +110,8 @@ public class SPARQLProtocolWorker {
                           Optional<Duration> duration,
                           int httpStatusCode,
                           long contentLength,
-                          long numberOfBindings,
-                          long numberOfSolutions
+                          Long xxh64,
+                          Exception error
     ) {
     }
 
@@ -123,6 +124,8 @@ public class SPARQLProtocolWorker {
 
     private final SPARQLProtocolRequestFactory requestFactory;
 
+    private final ResponseBodyProcessor responseBodyProcessor;
+
     public record HTTPWorker2Task(QueryHandler queryHandler,
                                   WorkloadCompletionTarget completionTarget,
                                   URI endpoint,
@@ -133,9 +136,10 @@ public class SPARQLProtocolWorker {
     }
 
 
-    public SPARQLProtocolWorker(HTTPWorker2Task workerTask, int workerId) {
+    public SPARQLProtocolWorker(HTTPWorker2Task workerTask, int workerId, ResponseBodyProcessor responseBodyProcessor) {
         this.workerTask = workerTask;
         this.worderId = workerId;
+        this.responseBodyProcessor = responseBodyProcessor;
         this.executor = java.util.concurrent.Executors.newFixedThreadPool(2);
         this.requestFactory = new SPARQLProtocolRequestFactory(workerTask.requestType);
         this.httpClient = HttpClient.newBuilder()
@@ -150,7 +154,6 @@ public class SPARQLProtocolWorker {
 
     public Future<Result> start() {
         return executor.submit(() -> {
-            // do stuff;
             List<ExecutionStats> executionStats = new Vector<>();
 
             if (workerTask.completionTarget() instanceof QueryMixes queryMixes) {
@@ -177,20 +180,21 @@ public class SPARQLProtocolWorker {
                         statusCode = result.response().statusCode();
                         if (statusCode / 100 == 2) { // 2xx
                             // process result
-                            // TODO: count sparql bindings
-                            // TODO: count sparql results
+                            boolean bbaosConsumed = responseBodyProcessor.add(result.actualContentLength(), result.hash(), result.outputStream());
+                            // TODO: if not bbaosConsumed reset() it and reuse it for the next query.
                         }
                     }
+                    // TODO: this should be no checked in code ont in an assertion.
+                    assert result.actualContentLength() == result.response().headers().firstValueAsLong("Content-Length").getAsLong();
 
                     executionStats.add(new ExecutionStats(result.requestStart(),
                             (result.completed()) ? Optional.of(result.duration) : Optional.empty(),
                             statusCode,
-                            result.response().headers().firstValueAsLong("Content-Length").getAsLong(),
-                            -1,
-                            -1));
-
+                            result.actualContentLength(),
+                            result.hash,
+                            result.exception()
+                    ));
                     // TODO: If timed out, decide based on timeoutBeforeEnd if it counts as failed or not
-                    // TODO: process result and extract relevant infos
                 }
 
             }
@@ -202,6 +206,9 @@ public class SPARQLProtocolWorker {
     record HttpExecutionResult(HttpResponse<InputStream> response,
                                Instant requestStart,
                                Duration duration,
+                               BigByteArrayOutputStream outputStream,
+                               Long actualContentLength,
+                               Long hash,
                                Exception exception) {
         public boolean completed() {
             return response != null;
@@ -220,7 +227,7 @@ public class SPARQLProtocolWorker {
 
         Function<Exception, HttpExecutionResult> httpExecutionResult = (Exception e) -> {
             final Duration requestDuration = Duration.between(requestStart, Instant.now());
-            return new HttpExecutionResult(null, requestStart, requestDuration, e);
+            return new HttpExecutionResult(null, requestStart, requestDuration, null, null, null, e);
         };
         record ExecutionResult(HttpResponse<InputStream> httpResponse,
                                BigByteArrayOutputStream outputStream,
@@ -263,7 +270,14 @@ public class SPARQLProtocolWorker {
         }
 
         final Duration requestDuration = Duration.between(requestStart, Instant.now());
-        return new HttpExecutionResult(executionResult.httpResponse(), requestStart, requestDuration, executionResult.exception());
+        return new HttpExecutionResult(
+                executionResult.httpResponse(),
+                requestStart,
+                requestDuration,
+                executionResult.outputStream(),
+                executionResult.outputStream().size(),
+                executionResult.hash(),
+                executionResult.exception());
     }
 
 }
