@@ -117,7 +117,6 @@ public class StresstestResultProcessor {
         if (metadata.tripleStats().isPresent()) {
             m.add(metadata.tripleStats().get());
             // Connect task and workers to the Query objects, that store the triple stats.
-            // TODO: should be reworked soon after fixing triple stat generation
             for (WorkerMetadata worker : metadata.workers()) {
                 for (String queryID : worker.queryIDs()) {
                     Resource workerQueryRes = IRES.getWorkerQueryResource(metadata.taskID(), worker.workerID(), queryID);
@@ -176,7 +175,6 @@ public class StresstestResultProcessor {
         if (metric instanceof ModelWritingMetric) {
             m.add(((ModelWritingMetric) metric).createMetricModel(metadata, queryExecutions));
             m.add(((ModelWritingMetric) metric).createMetricModel(metadata, ab));
-            return m;
         }
 
         if (metric instanceof TaskMetric) {

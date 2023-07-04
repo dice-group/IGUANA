@@ -12,8 +12,9 @@ import java.util.Map;
 public interface ModelWritingMetric {
     default @Nonnull Model createMetricModel(StresstestMetadata task, List<QueryExecutionStats>[][] data) {
         return ModelFactory.createDefaultModel();
-    };
+    }
+
     default @Nonnull Model createMetricModel(StresstestMetadata task, Map<String, List<QueryExecutionStats>> data) {
         return ModelFactory.createDefaultModel();
-    };
+    }
 }

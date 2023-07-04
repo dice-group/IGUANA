@@ -4,6 +4,8 @@ import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
+import java.math.BigInteger;
+
 public class IRES {
     public static final String NS = IGUANA_BASE.NS + "resource" + "/";
     public static final String PREFIX = "ires";
@@ -37,5 +39,9 @@ public class IRES {
 
     public static Resource getMetricResource(Metric metric) {
         return ResourceFactory.createResource(NS + metric.getAbbreviation());
+    }
+
+    public static Resource getWorkerQueryRunResource(String taskID, int workerID, String queryID, BigInteger run) {
+        return ResourceFactory.createResource(NS + taskID + "/" + "workerID" + "/" + queryID + "/" + run);
     }
 }
