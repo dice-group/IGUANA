@@ -16,17 +16,17 @@ import java.util.*;
 public class StresstestResultProcessor {
 
     private final StresstestMetadata metadata;
-    private List<Metric> metrics;
+    private final List<Metric> metrics;
 
     /**
      * This array contains each query execution, grouped by each worker and each query.
      */
-    private List<QueryExecutionStats>[][] queryExecutions;
+    private List<QueryExecutionStats>[][] workerQueryExecutions;
 
     /**
      * This map contains each query execution, grouped by each query of the task.
      */
-    private Map<String, List<QueryExecutionStats>> ab;
+    private Map<String, List<QueryExecutionStats>> taskQueryExecutions;
 
     private final Resource taskRes;
 
@@ -36,14 +36,14 @@ public class StresstestResultProcessor {
         this.metrics = MetricManager.getMetrics();
 
         WorkerMetadata[] workers = metadata.workers();
-        this.queryExecutions = new List[workers.length][];
+        this.workerQueryExecutions = new List[workers.length][];
         for (int i = 0; i < workers.length; i++) {
-            this.queryExecutions[i] = new List[workers[i].numberOfQueries()];
+            this.workerQueryExecutions[i] = new List[workers[i].numberOfQueries()];
             for (int j = 0; j < workers[i].numberOfQueries(); j++) {
-                this.queryExecutions[i][j] = new LinkedList<>();
+                this.workerQueryExecutions[i][j] = new LinkedList<>();
             }
         }
-        ab = new HashMap<>();
+        taskQueryExecutions = new HashMap<>();
     }
 
     /**
@@ -56,13 +56,13 @@ public class StresstestResultProcessor {
         for(QueryExecutionStats stat : data) {
             // The queryIDs returned by the queryHandler are Strings, in the form of '<queryhandler_name>:<id>'.
             int queryID = Integer.parseInt(stat.queryID().substring(stat.queryID().indexOf(":") + 1));
-            queryExecutions[worker.workerID()][queryID].add(stat);
+            workerQueryExecutions[worker.workerID()][queryID].add(stat);
 
-            if (ab.containsKey(stat.queryID())) {
-                ab.get(stat.queryID()).add(stat);
+            if (taskQueryExecutions.containsKey(stat.queryID())) {
+                taskQueryExecutions.get(stat.queryID()).add(stat);
             } else {
-                ab.put(stat.queryID(), new LinkedList<>());
-                ab.get(stat.queryID()).add(stat);
+                taskQueryExecutions.put(stat.queryID(), new LinkedList<>());
+                taskQueryExecutions.get(stat.queryID()).add(stat);
             }
         }
     }
@@ -96,8 +96,7 @@ public class StresstestResultProcessor {
             m.add(taskRes, IPROP.timeLimit, ResourceFactory.createTypedLiteral(metadata.timelimit().get()));
         m.add(taskRes, RDF.type, IONT.task);
 
-        // TODO: Maybe not hardcode this, instead have the classname stored inside the metadata to make this class reusable for other tasks
-        m.add(taskRes, RDF.type, IONT.stresstest);
+        m.add(taskRes, RDF.type, IONT.getClass(metadata.classname()));
         if (metadata.conVersion().isPresent())
             m.add(connectionRes, IPROP.version, ResourceFactory.createTypedLiteral(metadata.conVersion().get()));
         m.add(connectionRes, RDFS.label, ResourceFactory.createTypedLiteral(metadata.conID()));
@@ -115,7 +114,7 @@ public class StresstestResultProcessor {
 
         if (metadata.tripleStats().isPresent()) {
             m.add(metadata.tripleStats().get());
-            // Connect task and workers to the Query objects, that store the triple stats.
+            // Connect task and workers to the Query nodes, that store the triple stats.
             for (WorkerMetadata worker : metadata.workers()) {
                 for (String queryID : worker.queryIDs()) {
                     Resource workerQueryRes = IRES.getWorkerQueryResource(metadata.taskID(), worker.workerID(), queryID);
@@ -131,16 +130,16 @@ public class StresstestResultProcessor {
             }
         }
 
-        // TODO: is the simple triple attribute even used for anything?
-
         for (Metric metric : metrics) {
             m.add(this.createMetricModel(metric));
         }
 
+        // Task to queries
         for (String queryID : metadata.queryIDs()) {
             m.add(taskRes, IPROP.query, IRES.getTaskQueryResource(metadata.taskID(), queryID));
         }
 
+        // Worker to queries
         for (WorkerMetadata worker : metadata.workers()) {
             for (String queryID : worker.queryIDs()) {
                 Resource workerRes = IRES.getWorkerResource(metadata.taskID(), worker.workerID());
@@ -172,12 +171,12 @@ public class StresstestResultProcessor {
         Resource metricRes = IRES.getMetricResource(metric);
 
         if (metric instanceof ModelWritingMetric) {
-            m.add(((ModelWritingMetric) metric).createMetricModel(metadata, queryExecutions));
-            m.add(((ModelWritingMetric) metric).createMetricModel(metadata, ab));
+            m.add(((ModelWritingMetric) metric).createMetricModel(metadata, workerQueryExecutions));
+            m.add(((ModelWritingMetric) metric).createMetricModel(metadata, taskQueryExecutions));
         }
 
         if (metric instanceof TaskMetric) {
-            Number metricValue = ((TaskMetric) metric).calculateTaskMetric(metadata, queryExecutions);
+            Number metricValue = ((TaskMetric) metric).calculateTaskMetric(metadata, workerQueryExecutions);
             if (metricValue != null) {
                 Literal lit = ResourceFactory.createTypedLiteral(metricValue);
                 m.add(taskRes, metricProp, lit);
@@ -188,7 +187,7 @@ public class StresstestResultProcessor {
         if (metric instanceof WorkerMetric) {
             for (WorkerMetadata worker : metadata.workers()) {
                 Resource workerRes = IRES.getWorkerResource(metadata.taskID(), worker.workerID());
-                Number metricValue = ((WorkerMetric) metric).calculateWorkerMetric(worker, queryExecutions[worker.workerID()]);
+                Number metricValue = ((WorkerMetric) metric).calculateWorkerMetric(worker, workerQueryExecutions[worker.workerID()]);
                 if (metricValue != null) {
                     Literal lit = ResourceFactory.createTypedLiteral(metricValue);
                     m.add(workerRes, metricProp, lit);
@@ -201,7 +200,7 @@ public class StresstestResultProcessor {
             // queries grouped by worker
             for (WorkerMetadata worker : metadata.workers()) {
                 for (int i = 0; i < worker.numberOfQueries(); i++) {
-                    Number metricValue = ((QueryMetric) metric).calculateQueryMetric(queryExecutions[worker.workerID()][i]);
+                    Number metricValue = ((QueryMetric) metric).calculateQueryMetric(workerQueryExecutions[worker.workerID()][i]);
                     if (metricValue != null) {
                         Literal lit = ResourceFactory.createTypedLiteral(metricValue);
                         Resource queryRes = IRES.getWorkerQueryResource(metadata.taskID(), worker.workerID(), worker.queryIDs()[i]);
@@ -211,8 +210,8 @@ public class StresstestResultProcessor {
             }
 
             // queries grouped by task
-            for (String queryID : ab.keySet()) {
-                Number metricValue = ((QueryMetric) metric).calculateQueryMetric(ab.get(queryID));
+            for (String queryID : taskQueryExecutions.keySet()) {
+                Number metricValue = ((QueryMetric) metric).calculateQueryMetric(taskQueryExecutions.get(queryID));
                 if (metricValue != null) {
                     Literal lit = ResourceFactory.createTypedLiteral(metricValue);
                     Resource queryRes = IRES.getTaskQueryResource(metadata.taskID(), queryID);
@@ -222,6 +221,7 @@ public class StresstestResultProcessor {
         }
 
         m.add(metricRes, RDFS.label, metric.getName());
+        m.add(metricRes, RDFS.label, metric.getAbbreviation());
         m.add(metricRes, RDFS.comment, metric.getDescription());
         m.add(metricRes, RDF.type, IONT.getMetricClass(metric));
         m.add(metricRes, RDF.type, IONT.metric);

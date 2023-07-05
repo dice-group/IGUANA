@@ -15,9 +15,9 @@ import java.util.List;
 @Shorthand("PQPS")
 public class PQPS extends Metric implements QueryMetric {
 
-    private final long penalty;
+    private final int penalty;
 
-    public PQPS(long penalty) {
+    public PQPS(Integer penalty) {
         super("Penalized Queries per Second", "PQPS", "This metric calculates for each query the amount of executions per second. Failed executions receive a time penalty.");
         this.penalty = penalty;
     }

@@ -23,4 +23,8 @@ public class IONT {
         // TODO: compare with stresstest class
         return ResourceFactory.createResource(NS + "metric/" + metric.getAbbreviation());
     }
+
+    public static Resource getClass(String classname) {
+        return ResourceFactory.createResource(NS + classname);
+    }
 }

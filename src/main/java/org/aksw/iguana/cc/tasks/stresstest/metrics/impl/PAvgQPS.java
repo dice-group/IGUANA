@@ -15,10 +15,10 @@ import java.util.List;
 @Shorthand("PAvgQPS")
 public class PAvgQPS extends Metric implements TaskMetric, WorkerMetric {
 
-    private final long penalty;
+    private final int penalty;
 
-    public PAvgQPS(long penalty) {
-        super("Penalized Average Queries per Second", "AvgQPS", "This metric calculates the average QPS between all queries. Failed executions receive a time penalty.");
+    public PAvgQPS(Integer penalty) {
+        super("Penalized Average Queries per Second", "PAvgQPS", "This metric calculates the average QPS between all queries. Failed executions receive a time penalty.");
         this.penalty = penalty;
     }
 

@@ -42,6 +42,6 @@ public class IRES {
     }
 
     public static Resource getWorkerQueryRunResource(String taskID, int workerID, String queryID, BigInteger run) {
-        return ResourceFactory.createResource(NS + taskID + "/" + "workerID" + "/" + queryID + "/" + run);
+        return ResourceFactory.createResource(NS + taskID + "/" + workerID + "/" + queryID + "/" + run);
     }
 }
