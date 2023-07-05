@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.tasks.stresstest;
 
-import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.model.StresstestMetadata;
@@ -9,7 +8,6 @@ import org.aksw.iguana.cc.tasks.AbstractTask;
 import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.cc.worker.WorkerFactory;
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
@@ -124,24 +122,13 @@ public class Stresstest extends AbstractTask {
             tripleStats.add(worker.getQueryHandler().getTripleStats(this.taskID));
         }
         RDFDataMgr.write(sw, tripleStats, RDFFormat.NTRIPLES);
-        this.metaData.put(COMMON.SIMPLE_TRIPLE_KEY, sw.toString());
-        this.metaData.put(COMMON.QUERY_STATS, tripleStats);
     }
 
     /**
      * Add extra Meta Data
      */
     @Override
-    public void addMetaData() {
-        super.addMetaData();
-        Properties extraMeta = new Properties();
-        if (this.timeLimit != null)
-            extraMeta.put(CONSTANTS.TIME_LIMIT, this.timeLimit);
-        if (this.noOfQueryMixes != null)
-            extraMeta.put(CONSTANTS.NO_OF_QUERY_MIXES, this.noOfQueryMixes);
-        extraMeta.put("noOfWorkers", this.workers.size());
-        this.metaData.put(COMMON.EXTRA_META_KEY, extraMeta);
-    }
+    public void addMetaData() {}
 
 
     @Override
@@ -373,7 +360,7 @@ public class Stresstest extends AbstractTask {
                 workerMetadata,
                 queryIDs,
                 Optional.ofNullable(sw.toString()),
-                Optional.ofNullable(tripleStats)
+                Optional.of(tripleStats)
         );
     }
 }

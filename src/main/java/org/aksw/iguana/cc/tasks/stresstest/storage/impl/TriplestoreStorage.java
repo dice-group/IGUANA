@@ -63,10 +63,7 @@ public class TriplestoreStorage extends TripleBasedStorage {
 		this.endpoint=endpoint;
 		this.updateEndpoint=updateEndpoint;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.aksw.iguana.rp.storage.Storage#commit()
-	 */
+
 	@Override
 	public void storeResult(Model data) {
 		super.storeResult(data);

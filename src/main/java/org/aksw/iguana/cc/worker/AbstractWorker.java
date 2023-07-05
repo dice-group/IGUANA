@@ -1,13 +1,11 @@
 package org.aksw.iguana.cc.worker;
 
-import org.aksw.iguana.cc.config.CONSTANTS;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -63,7 +61,6 @@ public abstract class AbstractWorker implements Worker {
 
     protected boolean endSignal = false;
     protected long executedQueries;
-    protected Properties extra = new Properties();
     protected Instant startTime;
     protected ConnectionConfig con;
     protected int queryHash;
@@ -106,12 +103,6 @@ public abstract class AbstractWorker implements Worker {
      * send it if not aborted yet to the ResultProcessor Module
      */
     public void startWorker() {
-        // set extra meta key to send late
-        this.extra = new Properties();
-        this.extra.put(CONSTANTS.WORKER_ID_KEY, this.workerID);
-        this.extra.setProperty(CONSTANTS.WORKER_TYPE_KEY, this.workerType);
-        this.extra.put(CONSTANTS.WORKER_TIMEOUT_MS, this.timeOut);
-        this.extra.put(COMMON.NO_OF_QUERIES, this.queryHandler.getQueryCount());
         // For Update and Logging purpose get startTime of Worker
         this.startTime = Instant.now();
 

@@ -60,9 +60,6 @@ public class NTFileStorage extends TripleBasedStorage {
 		this.file = new StringBuilder(fileName);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.aksw.iguana.rp.storage.Storage#commit()
-	 */
 	@Override
 	public void storeResult(Model data) {
 		super.storeResult(data);
