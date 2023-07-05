@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.tasks.stresstest.metrics;
 
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.model.StresstestMetadata;
+import org.aksw.iguana.cc.tasks.stresstest.StresstestMetadata;
 
 import java.util.List;
 

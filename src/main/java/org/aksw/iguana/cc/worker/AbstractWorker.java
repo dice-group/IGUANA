@@ -2,7 +2,6 @@ package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;

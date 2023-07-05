@@ -1,8 +1,8 @@
 package org.aksw.iguana.cc.tasks.stresstest.metrics.impl;
 
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.model.StresstestMetadata;
-import org.aksw.iguana.cc.model.WorkerMetadata;
+import org.aksw.iguana.cc.tasks.stresstest.StresstestMetadata;
+import org.aksw.iguana.cc.worker.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.TaskMetric;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.WorkerMetric;
@@ -19,7 +19,6 @@ public class AvgQPS extends Metric implements TaskMetric, WorkerMetric {
         super("Average Queries per Second", "AvgQPS", "This metric calculates the average QPS between all queries.");
     }
 
-    // TODO: check if this is correct
     @Override
     public Number calculateTaskMetric(StresstestMetadata task, List<QueryExecutionStats>[][] data) {
         BigDecimal sum = BigDecimal.ZERO;

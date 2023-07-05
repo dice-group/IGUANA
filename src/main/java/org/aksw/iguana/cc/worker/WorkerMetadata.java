@@ -1,4 +1,4 @@
-package org.aksw.iguana.cc.model;
+package org.aksw.iguana.cc.worker;
 
 public record WorkerMetadata(
         int workerID,

@@ -1,7 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.model.WorkerMetadata;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.tasks.stresstest.Stresstest;
 

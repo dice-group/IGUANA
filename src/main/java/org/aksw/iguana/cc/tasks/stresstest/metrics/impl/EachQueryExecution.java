@@ -1,8 +1,8 @@
 package org.aksw.iguana.cc.tasks.stresstest.metrics.impl;
 
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.model.StresstestMetadata;
-import org.aksw.iguana.cc.model.WorkerMetadata;
+import org.aksw.iguana.cc.tasks.stresstest.StresstestMetadata;
+import org.aksw.iguana.cc.worker.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.ModelWritingMetric;
 import org.aksw.iguana.commons.annotation.Shorthand;

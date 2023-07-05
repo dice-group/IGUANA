@@ -1,8 +1,7 @@
 package org.aksw.iguana.cc.tasks.stresstest;
 
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.model.StresstestMetadata;
-import org.aksw.iguana.cc.model.WorkerMetadata;
+import org.aksw.iguana.cc.worker.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.*;
 import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.aksw.iguana.commons.rdf.IONT;

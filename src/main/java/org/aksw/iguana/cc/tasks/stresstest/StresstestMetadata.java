@@ -1,5 +1,6 @@
-package org.aksw.iguana.cc.model;
+package org.aksw.iguana.cc.tasks.stresstest;
 
+import org.aksw.iguana.cc.worker.WorkerMetadata;
 import org.apache.jena.rdf.model.Model;
 
 import java.util.Optional;

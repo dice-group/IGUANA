@@ -2,8 +2,7 @@ package org.aksw.iguana.cc.tasks.stresstest;
 
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.model.StresstestMetadata;
-import org.aksw.iguana.cc.model.WorkerMetadata;
+import org.aksw.iguana.cc.worker.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.AbstractTask;
 import org.aksw.iguana.cc.worker.Worker;
 import org.aksw.iguana.cc.worker.WorkerFactory;
@@ -337,6 +336,7 @@ public class Stresstest extends AbstractTask {
         }
 
         // TODO: workers might have the same queries, the following code thus adds unnecessary redundancy
+        // TODO: is sw used for anything?
         StringWriter sw = new StringWriter();
         Model tripleStats = ModelFactory.createDefaultModel();
         for (Worker worker : this.workers) {
