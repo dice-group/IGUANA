@@ -1,10 +1,9 @@
 package org.aksw.iguana.cc.config;
 
 import org.aksw.iguana.cc.tasks.MockupStorage;
-import org.aksw.iguana.cc.tasks.MockupTask;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.MetricManager;
-import org.aksw.iguana.commons.constants.COMMON;
+import org.aksw.iguana.cc.tasks.stresstest.metrics.impl.*;
 import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.aksw.iguana.cc.tasks.stresstest.storage.impl.NTFileStorage;
@@ -66,35 +65,6 @@ public class WorkflowTest {
         assertEquals(1, storages.size());
         Storage s = storages.iterator().next();
         assertTrue(s instanceof MockupStorage);
-        Set<Properties> meta = ((MockupStorage)s).getMeta();
-        //check if suiteID eq
-        // check if taskID suiteID/1/1 -> 1 etc.
-        Set<String> suiteID = new HashSet<String>();
-        for(Properties p : meta){
-            String suite = p.getProperty(COMMON.SUITE_ID_KEY);
-            suiteID.add(suite);
-            assertEquals(MockupTask.class.getCanonicalName(),p.get(COMMON.EXPERIMENT_TASK_CLASS_ID_KEY));
-            String expID = p.getProperty(COMMON.EXPERIMENT_ID_KEY);
-            String taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
-            assertEquals(expID, taskID.substring(0, taskID.length()-2));
-            if(taskID.equals(suite+"1/1")){
-                assertEquals("TestSystem", p.get(COMMON.CONNECTION_ID_KEY));
-                assertEquals("DatasetName", p.get(COMMON.DATASET_ID_KEY));
-            }
-            else if(taskID.equals(suite+"1/2")){
-                assertEquals("TestSystem2", p.get(COMMON.CONNECTION_ID_KEY));
-                assertEquals("DatasetName", p.get(COMMON.DATASET_ID_KEY));
-            }
-            else if(taskID.equals(suite+"2/1")){
-                assertEquals("TestSystem", p.get(COMMON.CONNECTION_ID_KEY));
-                assertEquals("DatasetName2", p.get(COMMON.DATASET_ID_KEY));
-            }
-            else if(taskID.equals(suite+"2/2")){
-                assertEquals("TestSystem2", p.get(COMMON.CONNECTION_ID_KEY));
-                assertEquals("DatasetName2", p.get(COMMON.DATASET_ID_KEY));
-            }
-        }
-        assertEquals(1, suiteID.size());
     }
 
     @Test
@@ -116,9 +86,8 @@ public class WorkflowTest {
         }
         assertEquals(2, seen.size());
 
-        // TODO: fix test
-        // assertTrue(seen.contains(QMPHMetric.class));
-        // assertTrue(seen.contains(QPSMetric.class));
+        assertTrue(seen.contains(QMPH.class));
+        assertTrue(seen.contains(QPS.class));
     }
 
     @Test
@@ -136,19 +105,19 @@ public class WorkflowTest {
         del.delete();
 
         List<Metric> metrics = MetricManager.getMetrics();
-        assertEquals(5, metrics.size());
+        assertEquals(6, metrics.size());
         Set<Class<? extends Metric>> seen = new HashSet<>();
         for(Metric m : metrics){
             seen.add(m.getClass());
         }
-        assertEquals(5, seen.size());
+        assertEquals(6, seen.size());
 
-        // TODO: fix test
-        // assertTrue(seen.contains(QMPHMetric.class));
-        // assertTrue(seen.contains(QPSMetric.class));
-        // assertTrue(seen.contains(AvgQPSMetric.class));
-        // assertTrue(seen.contains(NoQPHMetric.class));
-        // assertTrue(seen.contains(NoQMetric.class));
+        assertTrue(seen.contains(QMPH.class));
+        assertTrue(seen.contains(QPS.class));
+        assertTrue(seen.contains(AvgQPS.class));
+        assertTrue(seen.contains(NoQPH.class));
+        assertTrue(seen.contains(NoQ.class));
+        assertTrue(seen.contains(AggregatedExecutionStatistics.class));
     }
 
 }

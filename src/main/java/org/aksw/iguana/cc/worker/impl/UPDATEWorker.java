@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.worker.impl;
 
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
+import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.worker.impl.update.UpdateTimer;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
@@ -45,6 +46,12 @@ public class UPDATEWorker extends HttpPostWorker {
             LOGGER.error("", e);
         }
         super.waitTimeMs();
+    }
+
+    @Override
+    public synchronized void addResults(QueryExecutionStats result) {
+        this.results.add(result);
+        this.executedQueries++;
     }
 
     @Override

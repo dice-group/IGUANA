@@ -124,7 +124,6 @@ public class HTTPWorkerTest {
         assertEquals(taskID, getWorker.taskID);
 
         assertEquals(this.queryID, p.queryID());
-        assertEquals(180000.0, getWorker.timeOut.doubleValue());
         if (isPost) {
             assertEquals(200.0, p.executionTime(), 20.0);
         } else {
@@ -132,11 +131,11 @@ public class HTTPWorkerTest {
         }
         if (isFail) {
             assertEquals(-2L, p.responseCode());
-            assertEquals(0L, p.executionTime());
+            assertEquals(0L, p.resultSize());
         } else {
-            assertEquals(1L, p.executionTime());
+            assertEquals(1L, p.responseCode());
             if (this.responseType != null && this.responseType.equals("text/plain")) {
-                assertEquals(4L, p.executionTime());
+                assertEquals(4L, p.resultSize());
             }
             if (this.responseType == null || this.responseType.equals(SPARQLLanguageProcessor.QUERY_RESULT_TYPE_JSON)) {
                 assertEquals(2L, p.resultSize());

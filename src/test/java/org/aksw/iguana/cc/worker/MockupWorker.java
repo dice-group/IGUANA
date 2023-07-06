@@ -50,7 +50,7 @@ public class MockupWorker extends AbstractWorker {
             this.counter = 0;
         }
         queryStr.append(this.queries[this.counter]);
-        queryID.append("query").append(this.counter);
+        queryID.append("query:").append(this.counter);
         this.counter++;
     }
 }

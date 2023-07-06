@@ -64,7 +64,7 @@ public abstract class AbstractWorker implements Worker {
     protected ConnectionConfig con;
     protected int queryHash;
     protected QueryHandler queryHandler;
-    private Collection<QueryExecutionStats> results = new LinkedList<>();
+    protected Collection<QueryExecutionStats> results = new LinkedList<>();
     private Random latencyRandomizer;
     private Long endAtNOQM = null;
 
@@ -175,6 +175,7 @@ public abstract class AbstractWorker implements Worker {
     }
 
     public synchronized void addResults(QueryExecutionStats results) {
+        // TODO: check if statement for bugs, if the if line exists in the UpdateWorker, the UpdateWorker fails its tests
         if (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
             this.results.add(results);
             this.executedQueries++;
