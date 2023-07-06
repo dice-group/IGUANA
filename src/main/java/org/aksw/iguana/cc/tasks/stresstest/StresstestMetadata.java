@@ -6,7 +6,6 @@ import org.apache.jena.rdf.model.Model;
 import java.util.Optional;
 import java.util.Set;
 
-// TODO: maybe extract parts to generic taskmetadata class
 public record StresstestMetadata(
         String suiteID,
         String expID,

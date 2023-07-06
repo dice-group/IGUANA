@@ -19,10 +19,10 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Shorthand("EachQuery")
-public class EachQueryExecution extends Metric implements ModelWritingMetric {
+public class EachExecutionStatistic extends Metric implements ModelWritingMetric {
 
-    public EachQueryExecution() {
-        super("Each Query Execution", "EachQuery", "This metric saves the statistics of each query execution.");
+    public EachExecutionStatistic() {
+        super("Each Query Execution Statistic", "EachQuery", "This metric saves the statistics of each query execution.");
     }
 
     @Override

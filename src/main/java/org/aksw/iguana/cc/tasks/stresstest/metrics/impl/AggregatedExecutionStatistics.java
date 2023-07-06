@@ -23,11 +23,11 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-@Shorthand("ExecutedQuery")
-public class AggregatedStatistics extends Metric implements ModelWritingMetric {
+@Shorthand("AES")
+public class AggregatedExecutionStatistics extends Metric implements ModelWritingMetric {
 
-    public AggregatedStatistics() {
-        super("Aggregated Execution Statistics", "", "Sums up the statistics of each query execution for each query a worker and task has. The result size only contains the value of the last execution.");
+    public AggregatedExecutionStatistics() {
+        super("Aggregated Execution Statistics", "AES", "Sums up the statistics of each query execution for each query a worker and task has. The result size only contains the value of the last execution.");
     }
 
     @Override
@@ -37,7 +37,7 @@ public class AggregatedStatistics extends Metric implements ModelWritingMetric {
         for (WorkerMetadata worker : task.workers()) {
             for (int i = 0; i < worker.numberOfQueries(); i++) {
                 Resource queryRes = IRES.getWorkerQueryResource(task.taskID(), worker.workerID(), worker.queryIDs()[i]);
-                m.add(createExecutedQuery(data[worker.workerID()][i], queryRes));
+                m.add(createAggregatedModel(data[worker.workerID()][i], queryRes));
             }
         }
         return m;
@@ -49,12 +49,12 @@ public class AggregatedStatistics extends Metric implements ModelWritingMetric {
         Model m = ModelFactory.createDefaultModel();
         for (String queryID : data.keySet()) {
             Resource queryRes = IRES.getTaskQueryResource(task.taskID(), queryID);
-            m.add(createExecutedQuery(data.get(queryID), queryRes));
+            m.add(createAggregatedModel(data.get(queryID), queryRes));
         }
         return m;
     }
 
-    private static Model createExecutedQuery(List<QueryExecutionStats> data, Resource queryRes) {
+    private static Model createAggregatedModel(List<QueryExecutionStats> data, Resource queryRes) {
         Model m = ModelFactory.createDefaultModel();
         BigInteger succeeded = BigInteger.ZERO;
         BigInteger failed = BigInteger.ZERO;

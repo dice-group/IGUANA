@@ -1,8 +1,6 @@
 package org.aksw.iguana.cc.tasks.stresstest.storage;
 
 import org.apache.jena.rdf.model.Model;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -14,8 +12,6 @@ import java.util.*;
  *
  */
 public class StorageManager {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(StorageManager.class);
 
 	private Set<Storage> storages = new HashSet<>();
 
