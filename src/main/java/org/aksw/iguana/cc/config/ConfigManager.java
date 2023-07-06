@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 
 /**
@@ -18,17 +19,17 @@ import java.io.IOException;
  */
 public class ConfigManager {
 
-	private Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 
 	/**
 	 * Will receive a JSON or YAML configuration and executes the configuration as an Iguana Suite
-     * @param configuration
+     * @param config
      * @param validate checks if error should be thrown if it validates the configuration given the iguana-schema.json schema
      */
-	public void receiveData(File configuration, Boolean validate) throws IOException {
+	public void receiveData(Path config, Boolean validate) throws IOException {
 
-		IguanaConfig newConfig = IguanaConfigFactory.parse(configuration, validate);
+		IguanaConfig newConfig = IguanaConfigFactory.parse(config, validate);
 		if(newConfig==null){
 			return;
 		}

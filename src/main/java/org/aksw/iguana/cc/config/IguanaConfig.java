@@ -3,14 +3,13 @@ package org.aksw.iguana.cc.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.*;
 import org.aksw.iguana.cc.controller.TaskController;
+import org.aksw.iguana.cc.tasks.Stresstest;
 import org.aksw.iguana.commons.script.ScriptExecutor;
 import org.aksw.iguana.rp.controller.RPController;
 import org.aksw.iguana.rp.metrics.Metric;
 import org.aksw.iguana.rp.metrics.impl.*;
 import org.aksw.iguana.rp.storage.Storage;
-import org.aksw.iguana.rp.storage.impl.NTFileStorage;
 import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +44,11 @@ public class IguanaConfig {
 			.getLogger(IguanaConfig.class);
 
 	@JsonProperty(required = true)
-	private List<Dataset> datasets;
+	private List<DatasetConfig> datasets;
 	@JsonProperty(required = true)
-	private List<Connection> connections;
+	private List<ConnectionConfig> connections;
 	@JsonProperty(required = true)
-	private List<Task> tasks;
+	private List<Stresstest.Config> tasks;
 	@JsonProperty
 	private String preScriptHook;
 	@JsonProperty
@@ -73,40 +72,27 @@ public class IguanaConfig {
 		//generate ExpID
 		int expID = 0;
 
-		for(Dataset dataset: datasets){
+		for(DatasetConfig dataset: datasets){
 			expID++;
 			Integer taskID = 0;
-			for(Connection con : connections){
-				for(Task task : tasks) {
+			for(ConnectionConfig con : connections){
+				for(StresstestConfig task : tasks) {
 					taskID++;
 					String[] args = new String[] {};
 					if(preScriptHook!=null){
 						LOGGER.info("Executing preScriptHook");
-						String execScript = preScriptHook.replace("{{dataset.name}}", dataset.getName())
-								.replace("{{connection}}", con.getName())
-								.replace("{{connection.version}}", con.getVersion("{{connection.version}}"))
+						String execScript = preScriptHook.replace("{{dataset.name}}", dataset.name())
+								.replace("{{connection}}", con.name())
+								.replace("{{connection.version}}", con.version())
 								.replace("{{taskID}}", taskID+"");
 						LOGGER.info("Finished preScriptHook");
-						if(dataset.getFile()!=null){
-							execScript = execScript.replace("{{dataset.file}}", dataset.getFile());
+						if(dataset.file()!=null){
+							execScript = execScript.replace("{{dataset.file}}", dataset.file());
 						}
 
 						ScriptExecutor.execSafe(execScript, args);
 					}
-					LOGGER.info("Executing Task [{}/{}: {}, {}, {}]", taskID, task.getName(), dataset.getName(), con.getName(), task.getClassName());
-					controller.startTask(new String[]{suiteID, suiteID + "/" + expID, suiteID + "/" + expID + "/" + taskID}, dataset.getName(), SerializationUtils.clone(con), SerializationUtils.clone(task));
-					if(postScriptHook!=null){
-						String execScript = postScriptHook.replace("{{dataset.name}}", dataset.getName())
-								.replace("{{connection}}", con.getName())
-								.replace("{{connection.version}}", con.getVersion("{{connection.version}}"))
-								.replace("{{taskID}}", taskID+"");
-						if(dataset.getFile()!=null){
-							execScript = execScript.replace("{{dataset.file}}", dataset.getFile());
-						}
-						LOGGER.info("Executing postScriptHook {}", execScript);
-						ScriptExecutor.execSafe(execScript, args);
-						LOGGER.info("Finished postScriptHook");
-					}
+
 				}
 			}
 		}
@@ -119,9 +105,6 @@ public class IguanaConfig {
 		//If storage or metric is empty use default
 		if(this.storages== null || this.storages.isEmpty()){
 			storages = new ArrayList<>();
-			StorageConfig config = new StorageConfig();
-			config.setClassName(NTFileStorage.class.getCanonicalName());
-			storages.add(config);
 		}
 		if(this.metrics == null || this.metrics.isEmpty()){
 			LOGGER.info("No metrics were set. Using default metrics.");
@@ -149,7 +132,6 @@ public class IguanaConfig {
 		//Create Storages
 		List<Storage> storages = new ArrayList<>();
 		for(StorageConfig config : this.storages){
-			storages.add(config.createStorage());
 		}
 		//Create Metrics
 		List<Metric> metrics = new ArrayList<>();

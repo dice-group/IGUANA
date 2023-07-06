@@ -1,14 +1,13 @@
 package org.aksw.iguana.cc.config;
 
 import org.aksw.iguana.cc.tasks.MockupStorage;
-import org.aksw.iguana.cc.tasks.MockupTask;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.metrics.Metric;
 import org.aksw.iguana.rp.metrics.MetricManager;
 import org.aksw.iguana.rp.metrics.impl.*;
 import org.aksw.iguana.rp.storage.Storage;
 import org.aksw.iguana.rp.storage.StorageManager;
-import org.aksw.iguana.rp.storage.impl.NTFileStorage;
+import org.aksw.iguana.rp.storage.impl.RDFFileStorage;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -16,6 +15,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -47,7 +47,7 @@ public class WorkflowTest {
 
     @Test
     public void hooks() throws IOException {
-        IguanaConfig config = IguanaConfigFactory.parse(new File(noDefaultFile), false);
+        IguanaConfig config = IguanaConfigFactory.parse(Path.of(noDefaultFile), false);
         //test if workflow was correct
         config.start();
         File pre = new File(preFile);
@@ -62,7 +62,7 @@ public class WorkflowTest {
 
     @Test
     public void workflowTest() throws IOException {
-        IguanaConfig config = IguanaConfigFactory.parse(new File(file), false);
+        IguanaConfig config = IguanaConfigFactory.parse(Path.of(file), false);
         //test if workflow was correct
         config.start();
         StorageManager storageManager = StorageManager.getInstance();
@@ -77,7 +77,6 @@ public class WorkflowTest {
         for(Properties p : meta){
             String suite = p.getProperty(COMMON.SUITE_ID_KEY);
             suiteID.add(suite);
-            assertEquals(MockupTask.class.getCanonicalName(),p.get(COMMON.EXPERIMENT_TASK_CLASS_ID_KEY));
             String expID = p.getProperty(COMMON.EXPERIMENT_ID_KEY);
             String taskID = p.getProperty(COMMON.EXPERIMENT_TASK_ID_KEY);
             assertEquals(expID, taskID.substring(0, taskID.length()-2));
@@ -103,7 +102,7 @@ public class WorkflowTest {
 
     @Test
     public void noDefaultTest() throws IOException {
-        IguanaConfig config = IguanaConfigFactory.parse(new File(noDefaultFile), false);
+        IguanaConfig config = IguanaConfigFactory.parse(Path.of(noDefaultFile), false);
         //test if correct defaults were loaded
         config.start();
         StorageManager storageManager = StorageManager.getInstance();
@@ -128,15 +127,15 @@ public class WorkflowTest {
     @Test
     public void initTest() throws IOException {
         String file = "src/test/resources/config/mockupworkflow-default.yml";
-        IguanaConfig config = IguanaConfigFactory.parse(new File(file), false);
+        IguanaConfig config = IguanaConfigFactory.parse(Path.of(file), false);
         //test if correct defaults were loaded
         config.start();
         StorageManager storageManager = StorageManager.getInstance();
         Set<Storage> storages = storageManager.getStorages();
         assertEquals(1, storages.size());
         Storage s = storages.iterator().next();
-        assertTrue(s instanceof NTFileStorage);
-        File del = new File(((NTFileStorage)s).getFileName());
+        assertTrue(s instanceof RDFFileStorage);
+        File del = new File(((RDFFileStorage)s).getFileName());
         del.delete();
         MetricManager metricManager = MetricManager.getInstance();
         Set<Metric> metrics = metricManager.getMetrics();

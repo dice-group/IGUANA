@@ -6,6 +6,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static java.text.MessageFormat.format;
 
 /**
  * The main controller for the core. 
@@ -56,11 +60,11 @@ public class MainController {
 	 */
 	public void start(String configFile, Boolean validate) throws IOException{
 		ConfigManager cmanager = new ConfigManager();
-		File f = new File(configFile);
-		if (f.length()!=0) {
+		var f = Path.of(configFile);
+		if (Files.isReadable(f)) {
 			cmanager.receiveData(f, validate);
 		} else {
-			LOGGER.error("Empty configuration.");
+			LOGGER.error(format("Configuration file does not exist or is not readable: {0}", f.toString()));
 
 		}
 

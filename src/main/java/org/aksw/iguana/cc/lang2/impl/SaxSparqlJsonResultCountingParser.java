@@ -20,7 +20,8 @@ import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
  * For correct SPARQL JSON Results it returns the number of solutions, bound values and the names of the variables.
  * For malformed results it may or may not fail. For malformed JSON it fails if the underlying json.simple.parser fails.
  */
-class SaxSparqlJsonResultCountingParser implements LanguageProcessor {
+@LanguageProcessor.ContentType("application/sparql-results+json")
+class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
 
     @Override
     public LanguageProcessingData process(InputStream inputStream) {

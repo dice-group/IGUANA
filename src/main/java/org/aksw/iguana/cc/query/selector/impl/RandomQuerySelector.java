@@ -1,5 +1,8 @@
 package org.aksw.iguana.cc.query.selector.impl;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.aksw.iguana.cc.config.elements.QueryHandlerConfig;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 
 import java.util.Random;
@@ -11,15 +14,14 @@ import java.util.Random;
  *
  * @author frensing
  */
-public class RandomQuerySelector implements QuerySelector {
+public class RandomQuerySelector extends QuerySelector {
 
     protected Random querySelector;
 
-    private int size;
 
     public RandomQuerySelector(int size, long seed) {
-        this.size = size;
-        this.querySelector = new Random(seed);
+        super(size);
+        querySelector = new Random(seed);
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -41,14 +42,14 @@ public class ConfigTest {
 
     @Test
     public void checkValidity() throws IOException {
-        IguanaConfig config = IguanaConfigFactory.parse(new File(file));
+        IguanaConfig config = IguanaConfigFactory.parse(Path.of(file));
         if(valid){
             assertNotNull(config);
         }
         else {
             assertNull(config);
         }
-        config = IguanaConfigFactory.parse(new File(file), false);
+        config = IguanaConfigFactory.parse(Path.of(file), false);
         assertNotNull(config);
     }
 

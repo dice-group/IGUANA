@@ -6,12 +6,18 @@ package org.aksw.iguana.cc.query.selector;
  *
  * @author frensing
  */
-public interface QuerySelector {
+public abstract class QuerySelector {
+
+    protected final int size;
+
+    public QuerySelector(int size) {
+        this.size = size;
+    }
 
     /**
      * This method gives the next query index that should be used.
      *
      * @return the next query index
      */
-    int getNextIndex();
+    public abstract int getNextIndex();
 }

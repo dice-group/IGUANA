@@ -8,12 +8,16 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Set;
 
 /**
@@ -21,49 +25,53 @@ import java.util.Set;
  */
 public class IguanaConfigFactory {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(IguanaConfigFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IguanaConfigFactory.class);
 
-    private static String schemaFile = "iguana-schema.json";
+    private static final String schemaFile = "iguana-schema.json";
 
-    public static IguanaConfig parse(File config) throws IOException {
+    public static IguanaConfig parse(Path config) throws IOException {
         return parse(config, true);
     }
 
-    public static IguanaConfig parse(File config, Boolean validate) throws IOException {
-        if(config.getName().endsWith(".yml") || config.getName().endsWith(".yaml")){
-            return parse(config, new YAMLFactory(), validate);
+    public static IguanaConfig parse(Path config, Boolean validate) throws IOException {
+        Path fileName = config.getFileName();
+        final var extension = FilenameUtils.getExtension(config.toString());
+        switch (extension){
+            case "yml", "yaml" -> {
+                return parse(config, new YAMLFactory(), validate);
+            }
+            case "json" -> {
+                return parse(config, new JsonFactory(), validate);
+            }
+            default -> throw new IllegalStateException("Unexpected suite file extension: " + extension);
         }
-        else if(config.getName().endsWith(".json")){
-            return parse(config, new JsonFactory(), validate);
-        }
-        return  null;
     }
-    private static IguanaConfig parse(File config, JsonFactory factory) throws IOException {
+    private static IguanaConfig parse(Path config, JsonFactory factory) throws IOException {
         return parse(config, factory, true);
     }
 
-    private static IguanaConfig parse(File config, JsonFactory factory, Boolean validate) throws IOException {
+    private static IguanaConfig parse(Path config, JsonFactory factory, Boolean validate) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(factory);
         if(validate && !validateConfig(config, schemaFile, mapper)){
             return null;
         }
-        return mapper.readValue(config, IguanaConfig.class);
+        return mapper.readValue(config.toFile(), IguanaConfig.class);
     }
 
-    private static boolean validateConfig(File configuration, String schemaFile, ObjectMapper mapper) throws IOException {
+    private static boolean validateConfig(Path config, String schemaFile, ObjectMapper mapper) throws IOException {
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
         InputStream is = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(schemaFile);
         JsonSchema schema = factory.getSchema(is);
-        JsonNode node = mapper.readTree(configuration);
+        JsonNode node = mapper.readTree(config.toFile());
         Set<ValidationMessage> errors = schema.validate(node);
-        if(errors.size()>0){
+        if(!errors.isEmpty()){
             LOGGER.error("Found {} errors in configuration file.", errors.size());
         }
         for(ValidationMessage message : errors){
             LOGGER.error(message.getMessage());
         }
-        return errors.size()==0;
+        return errors.isEmpty();
     }
 
 }

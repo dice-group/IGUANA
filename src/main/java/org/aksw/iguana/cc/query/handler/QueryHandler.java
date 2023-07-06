@@ -1,5 +1,9 @@
 package org.aksw.iguana.cc.query.handler;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.aksw.iguana.cc.config.elements.QueryHandlerConfig;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.query.pattern.PatternHandler;
@@ -18,10 +22,8 @@ import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +53,10 @@ public class QueryHandler {
     protected QueryList queryList;
 
     protected LanguageProcessor langProcessor;
+
+    public QueryHandler(QueryHandlerConfig config) {
+
+    }
 
     public QueryHandler(Map<String, Object> config, Integer workerID) {
         this.config = config;

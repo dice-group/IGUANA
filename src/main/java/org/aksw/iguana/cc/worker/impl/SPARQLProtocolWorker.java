@@ -1,8 +1,10 @@
 package org.aksw.iguana.cc.worker.impl;
 
 import net.jpountz.xxhash.XXHashFactory;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
+import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -22,7 +24,7 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class SPARQLProtocolWorker {
+public class SPARQLProtocolWorker extends HttpWorker {
 
 
     public final static class SPARQLProtocolRequestFactory {
@@ -97,81 +99,69 @@ public class SPARQLProtocolWorker {
 
     }
 
-    public sealed interface WorkloadCompletionTarget permits TimeLimit, QueryMixes {
-    }
-
-    public record TimeLimit(Duration d) implements WorkloadCompletionTarget {
-    }
-
-    public record QueryMixes(int n) implements WorkloadCompletionTarget {
-    }
-
-    record ExecutionStats(Instant startTime,
-                          Optional<Duration> duration,
-                          int httpStatusCode,
-                          long contentLength,
-                          Long xxh64,
-                          Exception error
-    ) {
-    }
 
     private final HttpClient httpClient;
-    private final int worderId;
     private final ExecutorService executor;
 
     private final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
-    private final HTTPWorker2Task workerTask;
-
     private final SPARQLProtocolRequestFactory requestFactory;
 
     private final ResponseBodyProcessor responseBodyProcessor;
 
-    public record HTTPWorker2Task(QueryHandler queryHandler,
-                                  WorkloadCompletionTarget completionTarget,
-                                  URI endpoint,
-                                  Duration timeout,
-                                  String acceptHeader /* e.g. application/sparql-results+json */,
-                                  SPARQLProtocolRequestFactory.RequestType requestType
-    ) {
+    public record Config(int number,
+                         QueryHandler queryHandler,
+                         CompletionTarget completionTarget,
+                         ConnectionConfig connection,
+                         Duration timeout,
+                         String acceptHeader /* e.g. application/sparql-results+json */,
+                         SPARQLProtocolRequestFactory.RequestType requestType,
+                         boolean parseResults
+    ) implements HttpWorker.Config {
+        public String type() {
+            return SPARQLProtocolWorker.class.getName();
+        }
+    }
+
+    private Config config() {
+        return (Config) config;
     }
 
 
-    public SPARQLProtocolWorker(HTTPWorker2Task workerTask, int workerId, ResponseBodyProcessor responseBodyProcessor) {
-        this.workerTask = workerTask;
-        this.worderId = workerId;
+    public SPARQLProtocolWorker(long workerId, ResponseBodyProcessor responseBodyProcessor, Config config) {
+        super(workerId, responseBodyProcessor, config);
         this.responseBodyProcessor = responseBodyProcessor;
         this.executor = java.util.concurrent.Executors.newFixedThreadPool(2);
-        this.requestFactory = new SPARQLProtocolRequestFactory(workerTask.requestType);
+        this.requestFactory = new SPARQLProtocolRequestFactory(config().requestType());
         this.httpClient = HttpClient.newBuilder()
                 .executor(this.executor)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .connectTimeout(workerTask.timeout())
+                .connectTimeout(config().timeout())
                 .build();
     }
 
-    public record Result(int workerID, List<ExecutionStats> executionStats) {
-    }
 
-    public Future<Result> start() {
-        return executor.submit(() -> {
+    public CompletableFuture<Result> start() {
+        return CompletableFuture.supplyAsync(() -> {
             List<ExecutionStats> executionStats = new Vector<>();
+            try {
 
-            if (workerTask.completionTarget() instanceof QueryMixes queryMixes) {
+            if (config().completionTarget() instanceof QueryMixes queryMixes) {
                 for (int i = 0; i < queryMixes.n(); i++) {
-                    for (int j = 0; j < workerTask.queryHandler().getQueryCount(); j++) {
-                        HttpExecutionResult httpExecutionResult = executeHttpRequest(workerTask.timeout());
+                    for (int j = 0; j < config().queryHandler().getQueryCount(); j++) {
+                            HttpExecutionResult httpExecutionResult = executeHttpRequest(config().timeout());
+
                         // TODO: process result and extract relevant infos
                         // TODO: warp stuff from TimeLimit into a function and use here as well
                     }
 
                 }
-            } else if (workerTask.completionTarget() instanceof TimeLimit timeLimit) {
+            } else if (config().completionTarget() instanceof TimeLimit timeLimit) {
                 final Instant endTime = Instant.now().plus(timeLimit.d());
                 Instant now;
                 while ((now = Instant.now()).isBefore(endTime)) {
                     final Duration timeToEnd = Duration.between(now, endTime);
-                    final boolean timeoutBeforeEnd = workerTask.timeout().compareTo(timeToEnd) > 0;
-                    final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? workerTask.timeout() : timeToEnd;
+                    final boolean timeoutBeforeEnd = config().timeout().compareTo(timeToEnd) > 0;
+                    final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? config().timeout() : timeToEnd;
                     HttpExecutionResult result = executeHttpRequest(thisQueryTimeOut);
 
 
@@ -198,8 +188,13 @@ public class SPARQLProtocolWorker {
                 }
 
             }
-            return new Result(this.worderId, executionStats);
-        });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+            return new Result(this.workerId, executionStats);
+        }, executor);
     }
 
 
@@ -216,13 +211,13 @@ public class SPARQLProtocolWorker {
     }
 
     private HttpExecutionResult executeHttpRequest(Duration thisQueryTimeOut) throws IOException, URISyntaxException {
-        final QueryHandler.QueryHandle queryHandle = workerTask.queryHandler().getNextQueryStream();
+        final QueryHandler.QueryHandle queryHandle = config().queryHandler().getNextQueryStream();
         final HttpRequest request = requestFactory.buildHttpRequest(
                 queryHandle.queryInputStream(),
                 queryHandle.index(),
                 thisQueryTimeOut,
-                workerTask.endpoint(),
-                workerTask.acceptHeader());
+                config().connection().endpoint(), // TODO: we should validate the URI before this point
+                config().acceptHeader());
         final Instant requestStart = Instant.now();
 
         Function<Exception, HttpExecutionResult> httpExecutionResult = (Exception e) -> {

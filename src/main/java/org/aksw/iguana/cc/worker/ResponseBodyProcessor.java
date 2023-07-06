@@ -9,15 +9,19 @@ import org.slf4j.LoggerFactory;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class ResponseBodyProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseBodyProcessor.class);
 
-    public ResponseBodyProcessor(LanguageProcessor languageProcessor, int threads) {
-        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threads);
-        this.languageProcessor = languageProcessor;
+    public ResponseBodyProcessor(String contentType) {
+        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1); // TODO: make configurable
+        this.languageProcessor = LanguageProcessor.getInstance(contentType);
     }
+
+
 
     public record Key(long contentLength, long xxh64) {
     }

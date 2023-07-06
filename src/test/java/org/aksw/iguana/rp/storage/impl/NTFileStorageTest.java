@@ -31,7 +31,7 @@ public class NTFileStorageTest {
 	
 	@Test
 	public void dataTest() throws IOException{
-		Storage store = new NTFileStorage("results_test2.nt");
+		Storage store = new RDFFileStorage("results_test2.nt");
 
 	    new File("results_test2.nt").delete();
 
@@ -47,7 +47,7 @@ public class NTFileStorageTest {
 	
 	@Test
 	public void metaTest() throws IOException{
-		Storage store = new NTFileStorage("results_test.nt");
+		Storage store = new RDFFileStorage("results_test.nt");
 	    new File("results_test.nt").delete();
 
 		Properties extraMeta = new Properties();
@@ -68,7 +68,7 @@ public class NTFileStorageTest {
 	    store.commit();
 	    assertEqual("results_test.nt", "src/test/resources/nt/nt_results_woMeta.nt", false);
 	    new File("results_test.nt").delete();
-		store = new NTFileStorage("results_test2.nt");
+		store = new RDFFileStorage("results_test2.nt");
 	    
 	    p.put(COMMON.EXTRA_META_KEY, extraMeta);
 	    store.addMetaData(p);

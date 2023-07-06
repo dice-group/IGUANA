@@ -316,14 +316,14 @@ For example, instead of:
 
 ```yaml
 storages:
-   - className: "org.aksw.iguana.rp.storage.impl.NTFileStorage"
+   - className: "org.aksw.iguana.rp.storage.impl.RDFFileStorage"
 ```
 
 you can use the shortname NTFileStorage:
 
 ```yaml
 storages:
-   - className: "NTFileStorage"
+   - className: "RDFFileStorage"
 ```
 
 
