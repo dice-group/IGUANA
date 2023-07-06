@@ -117,14 +117,16 @@ public class StresstestResultProcessor {
             // Connect task and workers to the Query nodes, that store the triple stats.
             for (WorkerMetadata worker : metadata.workers()) {
                 for (String queryID : worker.queryIDs()) {
+                    int intID = Integer.parseInt(queryID.substring(queryID.indexOf(":") + 1));
                     Resource workerQueryRes = IRES.getWorkerQueryResource(metadata.taskID(), worker.workerID(), queryID);
-                    Resource queryRes = IRES.getResource(worker.queryHash() + "/" + queryID);
+                    Resource queryRes = IRES.getResource(worker.queryHash() + "/" + intID);
                     m.add(workerQueryRes, IPROP.queryID, queryRes);
                 }
 
                 for (String queryID : metadata.queryIDs()) {
+                    int intID = Integer.parseInt(queryID.substring(queryID.indexOf(":") + 1));
                     Resource taskQueryRes = IRES.getTaskQueryResource(metadata.taskID(), queryID);
-                    Resource queryRes = IRES.getResource(worker.queryHash() + "/" + queryID);
+                    Resource queryRes = IRES.getResource(worker.queryHash() + "/" + intID);
                     m.add(taskQueryRes, IPROP.queryID, queryRes);
                 }
             }
