@@ -159,20 +159,27 @@ public class Stresstest extends AbstractTask {
         LOGGER.info("[TaskID: {{}}]All {{}} workers have been started", this.taskID, this.workers.size());
         // wait timeLimit or noOfQueries
         executor.shutdown();
+
+        // if a time limit is set, let the task thread sleep that amount of time, otherwise sleep for 100 ms
+        // to periodically check if the workers are finished
+        long sleep = (timeLimit != null) ? timeLimit.longValue() : 100;
         while (!isFinished()) {
-            // check if worker has results yet
-            for (Worker worker : this.workers) {
-                // if so send all results buffered
-                sendWorkerResult(worker);
+            try {
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-            loopSleep();
         }
+
+        for (Worker worker : this.workers) {
+            sendWorkerResult(worker);
+        }
+
         LOGGER.debug("Sending stop signal to workers");
-        // tell all workers to stop sending properties, thus the await termination will
-        // be safe with the results
         for (Worker worker : this.workers) {
             worker.stopSending();
         }
+
         // Wait 5seconds so the workers can stop themselves, otherwise they will be
         // stopped
         try {
@@ -191,15 +198,6 @@ public class Stresstest extends AbstractTask {
             }
         }
         this.endDate = GregorianCalendar.getInstance();
-    }
-
-    private void loopSleep() {
-        try {
-            TimeUnit.MILLISECONDS.sleep(100);
-        } catch (Exception e) {
-            //shouldn't be thrown except something else really went wrong
-            LOGGER.error("Loop sleep did not work.", e);
-        }
     }
 
     private void sendWorkerResult(Worker worker) {
