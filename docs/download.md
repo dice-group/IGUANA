@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-You need to have Java 11 or higher installed. 
+You need to have Java 17 or higher installed. 
 
 
 In Ubuntu, you can install it by executing the following command: 

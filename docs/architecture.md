@@ -51,6 +51,7 @@ Per run metrics:
 * Number of Queries Per Hour (NoQPH)
 * Number of Queries (NoQ)
 * Average Queries Per Second (AvgQPS)
+* Penalized Average Queries Per Second (PAvgQPS)
 
 Per query metrics:
 * Queries Per Second (QPS)

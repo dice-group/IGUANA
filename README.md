@@ -46,7 +46,7 @@ Per query metrics:
 
 ### Prerequisites
 
-In order to run Iguana, you need to have `Java 11`, or greater, installed on your system.
+In order to run Iguana, you need to have `Java 17`, or greater, installed on your system.
 
 ### Download
 Download the newest release of Iguana [here](https://github.com/dice-group/IGUANA/releases/latest), or run on a unix shell:
