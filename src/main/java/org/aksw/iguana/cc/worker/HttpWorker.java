@@ -2,10 +2,9 @@ package org.aksw.iguana.cc.worker;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.aksw.iguana.cc.tasks.Stresstest;
+import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 
-import java.lang.invoke.MethodHandles;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;

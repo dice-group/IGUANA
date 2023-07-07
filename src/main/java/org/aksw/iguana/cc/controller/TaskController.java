@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.controller;
 
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
-import org.aksw.iguana.cc.tasks.Stresstest;
+import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

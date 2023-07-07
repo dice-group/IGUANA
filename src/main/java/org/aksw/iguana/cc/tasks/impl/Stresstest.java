@@ -1,11 +1,10 @@
-package org.aksw.iguana.cc.tasks;
+package org.aksw.iguana.cc.tasks.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.aksw.iguana.cc.config.elements.TaskConfig;
+import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
-import org.aksw.iguana.commons.annotation.Shorthand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,19 +16,13 @@ import java.util.concurrent.*;
  * Stresstest.
  * Will stresstest a connection using several Workers (simulated Users) each in one thread.
  */
-@Shorthand("Stresstest")
-public class Stresstest {
+public class Stresstest implements Task {
 
     public record Config(
             @JsonProperty(required = true) String name,
             List<HttpWorker.Config> warmupWorkers,
             @JsonProperty(required = true) List<HttpWorker.Config> workers
-            ) implements TaskConfig {
-
-        @Override
-        public String getType() {
-            return Stresstest.class.getSimpleName();
-        }
+    ) implements Task.Config {
     }
 
 

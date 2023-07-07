@@ -18,7 +18,6 @@ import com.networknt.schema.ValidationMessage;
 import org.aksw.iguana.cc.config.IguanaConfig;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.config.elements.DatasetConfig;
-import org.aksw.iguana.cc.config.elements.QueryHandlerConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -97,7 +96,7 @@ public class IguanaSuiteParser {
         final var connections = preparsing.connections().stream()
                 .collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
 
-        final var queryHandlers = new HashMap<QueryHandlerConfig, QueryHandler>();
+        final var queryHandlers = new HashMap<QueryHandler.Config, QueryHandler>();
 
 
         class DatasetDeserializer extends StdDeserializer<DatasetConfig> {
@@ -168,7 +167,7 @@ public class IguanaSuiteParser {
 
             @Override
             public QueryHandler deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-                QueryHandlerConfig queryHandlerConfig = ctxt.readValue(jp, QueryHandlerConfig.class);
+                QueryHandler.Config queryHandlerConfig = ctxt.readValue(jp, QueryHandler.Config.class);
                 if (!queryHandlers.containsKey(queryHandlerConfig))
                     // TODO: implement QueryHandler constructor (right now only a stub)
                     queryHandlers.put(queryHandlerConfig, new QueryHandler(queryHandlerConfig));

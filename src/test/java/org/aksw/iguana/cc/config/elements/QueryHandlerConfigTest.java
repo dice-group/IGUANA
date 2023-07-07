@@ -3,7 +3,7 @@ package org.aksw.iguana.cc.config.elements;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
-import org.junit.jupiter.api.Test;
+import org.aksw.iguana.cc.query.handler.QueryHandler.Config;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,32 +22,32 @@ class QueryHandlerConfigTest {
 
     private static Stream<Arguments> testData() {
         return Stream.of(
-                Arguments.of(new QueryHandlerConfig("some.queries",
-                        QueryHandlerConfig.Format.FOLDER,
+                Arguments.of(new Config("some.queries",
+                        Config.Format.FOLDER,
                         true,
-                        QueryHandlerConfig.Order.LINEAR,
+                        Config.Order.LINEAR,
                         null,
-                        QueryHandlerConfig.Language.SPARQL
+                        Config.Language.SPARQL
                 ),
                         """
-                {"location":"some.queries","format":"folder","caching":true,"order":"linear","lang":"SPARQL"}
+                {"path":"some.queries","format":"folder","caching":true,"order":"linear","lang":"SPARQL"}
                 """),
-                Arguments.of(new QueryHandlerConfig("some.queries",
-                                QueryHandlerConfig.Format.FOLDER,
+                Arguments.of(new Config("some.queries",
+                                Config.Format.FOLDER,
                                 true,
-                                QueryHandlerConfig.Order.RANDOM,
+                                Config.Order.RANDOM,
                                 42L,
-                                QueryHandlerConfig.Language.SPARQL
+                                Config.Language.SPARQL
                         ),
                         """
-                {"location":"some.queries","format":"folder","caching":true,"order":"random","seed":42,"lang":"SPARQL"}
+                {"path":"some.queries","format":"folder","caching":true,"order":"random","seed":42,"lang":"SPARQL"}
                 """));
 
     }
 
     @ParameterizedTest
     @MethodSource("testData")
-    public void testSerialization(QueryHandlerConfig config, String expectedJson) throws Exception {
+    public void testSerialization(Config config, String expectedJson) throws Exception {
 
         final String actual = mapper.writeValueAsString(config);
         System.out.println(actual);
@@ -56,8 +56,8 @@ class QueryHandlerConfigTest {
 
     @ParameterizedTest
     @MethodSource("testData")
-    public void testDeserialization(QueryHandlerConfig expected, String json) throws Exception {
-        final var actual = mapper.readValue(json, QueryHandlerConfig.class);
+    public void testDeserialization(Config expected, String json) throws Exception {
+        final var actual = mapper.readValue(json, Config.class);
 
         assertEquals(expected, actual);
     }

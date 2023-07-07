@@ -1,6 +1,9 @@
 package org.aksw.iguana.cc.query.handler;
 
-import org.aksw.iguana.cc.config.elements.QueryHandlerConfig;
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
@@ -27,9 +30,68 @@ import java.nio.file.Path;
  */
 public class QueryHandler {
 
+    public record Config(@JsonProperty(required = true) String path,
+                         @JsonProperty(defaultValue = "one-per-line") Format format,
+                         @JsonProperty(defaultValue = "true") boolean caching,
+                         @JsonProperty(defaultValue = "linear") Order order,
+                         @JsonInclude(JsonInclude.Include.NON_NULL) Long seed,
+                         @JsonProperty(defaultValue = "SPARQL") Language lang
+    ) {
+
+        public enum Format {
+            @JsonEnumDefaultValue ONE_PER_LINE("one-per-line"),
+            SEPARATOR("separator"),
+            FOLDER("folder");
+
+            final String value;
+
+            Format(String value) {
+                this.value = value;
+            }
+
+            @JsonValue
+            public String value() {
+                return value;
+            }
+        }
+
+        public enum Order {
+            @JsonEnumDefaultValue LINEAR("linear"),
+            RANDOM("random");
+
+            final String value;
+
+            Order(String value) {
+                this.value = value;
+            }
+
+            @JsonValue
+            public String value() {
+                return value;
+            }
+        }
+
+        public enum Language {
+            @JsonEnumDefaultValue SPARQL("SPARQL"),
+            UNSPECIFIED("unspecified"),
+            ;
+
+            final String value;
+
+            Language(String value) {
+                this.value = value;
+            }
+
+            @JsonValue
+            public String value() {
+                return value;
+            }
+        }
+    }
+
     protected final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
 
-    final protected QueryHandlerConfig config;
+    final protected Config config;
 
     final protected QuerySelector querySelector;
 
@@ -37,7 +99,7 @@ public class QueryHandler {
 
     final protected int hashCode;
 
-    public QueryHandler(QueryHandlerConfig config) throws IOException {
+    public QueryHandler(Config config) throws IOException {
         final var querySource = switch (config.format()) {
             case ONE_PER_LINE -> new FileLineQuerySource(Path.of(config.path()));
             case SEPARATOR -> new FileSeparatorQuerySource(Path.of(config.path()));

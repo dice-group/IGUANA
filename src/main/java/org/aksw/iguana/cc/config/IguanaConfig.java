@@ -3,7 +3,7 @@ package org.aksw.iguana.cc.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.*;
 import org.aksw.iguana.cc.controller.TaskController;
-import org.aksw.iguana.cc.tasks.Stresstest;
+import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.aksw.iguana.commons.script.ScriptExecutor;
 import org.aksw.iguana.rp.controller.RPController;
 import org.aksw.iguana.rp.metrics.Metric;
