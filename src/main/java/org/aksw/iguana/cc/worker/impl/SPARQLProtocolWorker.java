@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
@@ -108,18 +109,16 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     private final ResponseBodyProcessor responseBodyProcessor;
 
-    public record Config(int number,
+//    @JsonTypeName("SPARQLProtocolWorker")
+    public record Config(@JsonProperty(defaultValue = "1") int number,
                          QueryHandler queryHandler,
-                         CompletionTarget completionTarget,
+                         @JsonProperty(required = true) CompletionTarget completionTarget,
                          ConnectionConfig connection,
                          Duration timeout,
                          String acceptHeader /* e.g. application/sparql-results+json */,
                          SPARQLProtocolRequestFactory.RequestType requestType,
                          boolean parseResults
     ) implements HttpWorker.Config {
-        public String type() {
-            return SPARQLProtocolWorker.class.getName();
-        }
     }
 
     private Config config() {

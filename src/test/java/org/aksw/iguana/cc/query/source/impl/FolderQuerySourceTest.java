@@ -80,7 +80,7 @@ public class FolderQuerySourceTest {
 
     @Test
     public void testFolderQuerySource() throws IOException {
-        FolderQuerySource querySource = new FolderQuerySource(tempDir.toString());
+        FolderQuerySource querySource = new FolderQuerySource(tempDir);
 
         assertEquals(this.queries.size(), querySource.size());
 

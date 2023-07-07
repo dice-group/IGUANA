@@ -4,6 +4,8 @@ import org.aksw.iguana.cc.utils.FileUtils;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,12 +13,12 @@ import static org.junit.Assert.assertEquals;
 
 public class FileLineQuerySourceTest {
 
-    private static final String PATH = "src/test/resources/query/source/queries.txt";
+    private static final Path PATH = Paths.get("src/test/resources/query/source/queries.txt");
 
     private final FileLineQuerySource querySource;
 
     public FileLineQuerySourceTest() {
-        this.querySource = new FileLineQuerySource(PATH);
+        querySource = new FileLineQuerySource(PATH);
     }
 
     @Test

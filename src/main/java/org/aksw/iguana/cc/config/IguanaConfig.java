@@ -76,7 +76,7 @@ public class IguanaConfig {
 			expID++;
 			Integer taskID = 0;
 			for(ConnectionConfig con : connections){
-				for(StresstestConfig task : tasks) {
+				for(Stresstest.Config task : tasks) {
 					taskID++;
 					String[] args = new String[] {};
 					if(preScriptHook!=null){

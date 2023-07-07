@@ -2,12 +2,11 @@ package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.*;
 
-public record QueryHandlerConfig(@JsonProperty(required = true) String location,
+public record QueryHandlerConfig(@JsonProperty(required = true) String path,
                                  @JsonProperty(defaultValue = "one-per-line") Format format,
                                  @JsonProperty(defaultValue = "true") boolean caching,
                                  @JsonProperty(defaultValue = "linear") Order order,
                                  @JsonInclude(JsonInclude.Include.NON_NULL) Long seed,
-                                 @JsonInclude(JsonInclude.Include.NON_NULL) String pattern,
                                  @JsonProperty(defaultValue = "SPARQL") Language lang
 ) {
 

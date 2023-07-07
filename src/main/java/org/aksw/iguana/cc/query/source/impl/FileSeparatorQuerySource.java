@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class FileSeparatorQuerySource extends QuerySource {
 
     private static final String DEFAULT_SEPARATOR = "###";
 
-    private IndexedQueryReader iqr;
+    final private IndexedQueryReader iqr;
 
     /**
      * This constructor indexes the queries inside the given file. It assumes, that the queries inside the file are
@@ -28,8 +29,9 @@ public class FileSeparatorQuerySource extends QuerySource {
      *
      * @param path path to the queries-file
      */
-    public FileSeparatorQuerySource(String path) {
-        this(path, DEFAULT_SEPARATOR);
+    public FileSeparatorQuerySource(Path path) throws IOException {
+        super(path);
+        iqr = getIqr(path, DEFAULT_SEPARATOR);
     }
 
     /**
@@ -40,19 +42,14 @@ public class FileSeparatorQuerySource extends QuerySource {
      * @param path path to the queries-file
      * @param separator string with which the queries inside the file are separated
      */
-    public FileSeparatorQuerySource(String path, String separator) {
+    public FileSeparatorQuerySource(Path path, String separator) throws IOException {
         super(path);
+        iqr = getIqr(path, separator);
 
-        try {
-            if(separator.isBlank()) {
-                iqr = IndexedQueryReader.makeWithEmptyLines(path);
-            }
-            else {
-                iqr = IndexedQueryReader.makeWithStringSeparator(path, separator);
-            }
-        } catch (IOException e) {
-            LOGGER.error("Failed to read this file for the queries: " + path + "\n" + e);
-        }
+    }
+
+    private static IndexedQueryReader getIqr(Path path, String separator) throws IOException {
+        return (separator.isBlank()) ? IndexedQueryReader.makeWithEmptyLines(path) : IndexedQueryReader.makeWithStringSeparator(path, separator);
     }
 
     @Override

@@ -27,7 +27,6 @@ class QueryHandlerConfigTest {
                         true,
                         QueryHandlerConfig.Order.LINEAR,
                         null,
-                        null,
                         QueryHandlerConfig.Language.SPARQL
                 ),
                         """
@@ -38,7 +37,6 @@ class QueryHandlerConfigTest {
                                 true,
                                 QueryHandlerConfig.Order.RANDOM,
                                 42L,
-                                null,
                                 QueryHandlerConfig.Language.SPARQL
                         ),
                         """

@@ -13,17 +13,17 @@ import java.io.InputStream;
  */
 public class FileBasedQueryList extends QueryList {
 
-    public FileBasedQueryList(String name, QuerySource querySource) {
-        super(name, querySource);
+    public FileBasedQueryList(QuerySource querySource) {
+        super(querySource);
     }
 
     @Override
     public String getQuery(int index) throws IOException {
-        return this.querySource.getQuery(index);
+        return querySource.getQuery(index);
     }
 
     @Override
     public InputStream getQueryStream(int index) throws IOException {
-        return this.querySource.getQueryStream(index);
+        return querySource.getQueryStream(index);
     }
 }

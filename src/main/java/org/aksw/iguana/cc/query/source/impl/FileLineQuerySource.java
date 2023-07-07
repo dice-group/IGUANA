@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ public class FileLineQuerySource extends QuerySource {
 
     private IndexedQueryReader iqr;
 
-    public FileLineQuerySource(String path) {
+    public FileLineQuerySource(Path path) {
         super(path);
 
         try {

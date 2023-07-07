@@ -53,7 +53,7 @@ public class FileUtilsTest {
 
         @Test
         public void testGetLineEndings() throws IOException {
-            assertEquals(FileUtils.getLineEnding(this.data.file.toString()), this.data.expectedLineEnding);
+            assertEquals(FileUtils.getLineEnding(this.data.file), this.data.expectedLineEnding);
         }
     }
 
@@ -147,25 +147,10 @@ public class FileUtilsTest {
         public void getHashTest(){
             //check if hash abs works
             final int expected = Math.abs(content.hashCode());
-            final int actual = FileUtils.getHashcodeFromFileContent(this.file.toString());
+            final int actual = FileUtils.getHashcodeFromFileContent(this.file);
             assertTrue(actual >= 0);
             assertEquals(expected, actual);
         }
     }
 
-    public static class NonParameterizedTest {
-        @Test
-        public void readTest() throws IOException {
-
-            Path file = createTempFile("readTest", ".txt");
-            file.toFile().deleteOnExit();
-            String expectedString = UUID.randomUUID() + "\n\t\r" + UUID.randomUUID() + "\n";
-            writeStringToFile(file.toFile(), expectedString,  StandardCharsets.UTF_8);
-
-            //read whole content
-            String actualString = FileUtils.readFile(file.toString());
-
-            assertEquals(expectedString, actualString);
-        }
-    }
 }

@@ -4,7 +4,13 @@ import org.apache.commons.io.input.AutoCloseInputStream;
 import org.apache.commons.io.input.BoundedInputStream;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,22 +27,24 @@ public class IndexedQueryReader {
     /**
      * This list stores the start position and the length of each indexed content.
      */
-    private List<long[]> indices;
+    private final List<long[]> indices;
 
-    /** The file whose content should be indexed. */
-    private final File file;
+    /**
+     * The file whose content should be indexed.
+     */
+    private final Path path;
 
     /**
      * Indexes each content in between two of the given separators (including the beginning and end of the file). The
      * given separator isn't allowed to be empty.
      *
-     * @param filepath path to the file
+     * @param filepath  path to the file
      * @param separator the separator line that is used in the file (isn't allowed to be empty)
      * @return reader to access the indexed content
      * @throws IllegalArgumentException the given separator was empty
      * @throws IOException
      */
-    public static IndexedQueryReader makeWithStringSeparator(String filepath, String separator) throws IOException {
+    public static IndexedQueryReader makeWithStringSeparator(Path filepath, String separator) throws IOException {
         if (separator.isEmpty())
             throw new IllegalArgumentException("Separator for makeWithStringSeparator can not be empty.");
         return new IndexedQueryReader(filepath, separator);
@@ -51,7 +59,7 @@ public class IndexedQueryReader {
      * @return reader to access the indexed content
      * @throws IOException
      */
-    public static IndexedQueryReader makeWithEmptyLines(String filepath) throws IOException {
+    public static IndexedQueryReader makeWithEmptyLines(Path filepath) throws IOException {
         String lineEnding = FileUtils.getLineEnding(filepath);
         return new IndexedQueryReader(filepath, lineEnding + lineEnding);
     }
@@ -63,7 +71,7 @@ public class IndexedQueryReader {
      * @return reader to access the indexed lines
      * @throws IOException
      */
-    public static IndexedQueryReader make(String filepath) throws IOException {
+    public static IndexedQueryReader make(Path filepath) throws IOException {
         return new IndexedQueryReader(filepath, FileUtils.getLineEnding(filepath));
     }
 
@@ -71,13 +79,13 @@ public class IndexedQueryReader {
      * Creates an object that indexes each content in between two of the given separators (including the beginning and
      * end of the given file). <br/>
      *
-     * @param filepath path to the file
+     * @param filepath  path to the file
      * @param separator the separator for each query
      * @throws IOException
      */
-    private IndexedQueryReader(String filepath, String separator) throws IOException {
-        this.file = new File(filepath);
-        this.indexFile(separator);
+    private IndexedQueryReader(Path filepath, String separator) throws IOException {
+        path = filepath;
+        indices = indexFile(path, separator);
     }
 
     /**
@@ -89,24 +97,22 @@ public class IndexedQueryReader {
      */
     public String readQuery(int index) throws IOException {
         // Indexed queries can't be larger than ~2GB
-        byte[] data = new byte[Math.toIntExact(this.indices.get(index)[1])];
-        String output;
-        try (RandomAccessFile raf = new RandomAccessFile(this.file, "r")) {
-            raf.seek(this.indices.get(index)[0]);
-            raf.read(data);
-            output = new String(data, StandardCharsets.UTF_8);
+        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
+            final ByteBuffer buffer = ByteBuffer.allocate((int) indices.get(index)[1]);
+            final var read = channel.read(buffer, indices.get(index)[0]);
+            assert read == indices.get(index)[1];
+            return new String(buffer.array(), StandardCharsets.UTF_8);
         }
-        return output;
     }
 
     public InputStream streamQuery(int index) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(this.file, "r");
-        raf.seek(this.indices.get(index)[0] /* offset */);
-
-        FileInputStream fis = new FileInputStream(raf.getFD());
-        BoundedInputStream bis = new BoundedInputStream(fis, this.indices.get(index)[1] /* length */);
-        BufferedInputStream buis = new BufferedInputStream(bis);
-        return new AutoCloseInputStream(buis);
+        return new AutoCloseInputStream(
+                new BufferedInputStream(
+                        new BoundedInputStream(
+                                Channels.newInputStream(
+                                        FileChannel.open(path, StandardOpenOption.READ)
+                                                .position(this.indices.get(index)[0] /* offset */)),
+                                this.indices.get(index)[1] /* length */)));
     }
 
     /**
@@ -137,12 +143,13 @@ public class IndexedQueryReader {
      * separators too.
      *
      * @param separator the custom separator
+     * @return the Indexes
      * @throws IOException
      */
-    private void indexFile(String separator) throws IOException {
-        try (FileInputStream fi = new FileInputStream(file);
+    private static List<long[]> indexFile(Path filepath, String separator) throws IOException {
+        try (InputStream fi = Files.newInputStream(filepath, StandardOpenOption.READ);
              BufferedInputStream bis = new BufferedInputStream(fi)) {
-            this.indices = FileUtils.indexStream(separator,bis)
+            return FileUtils.indexStream(separator, bis)
                     .stream().filter((long[] e) -> e[1] > 0 /* Only elements with length > 0 */).collect(Collectors.toList());
         }
     }

@@ -1,7 +1,11 @@
 package org.aksw.iguana.cc.worker;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.aksw.iguana.cc.tasks.Stresstest;
+import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 
+import java.lang.invoke.MethodHandles;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -15,10 +19,14 @@ import java.util.concurrent.CompletableFuture;
  */
 public abstract class HttpWorker {
 
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.PROPERTY,
+            property = "type")
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = SPARQLProtocolWorker.Config.class, name = "SPARQLProtocolWorker"),
+    })
     public interface Config {
         // TODO: add delay or complete after
-        String type();
-
         CompletionTarget completionTarget();
 
         String acceptHeader();
@@ -35,7 +43,7 @@ public abstract class HttpWorker {
          *
          * @return true if the results should be parsed, false otherwise
          */
-         boolean parseResults();
+        boolean parseResults();
     }
 
     public record ExecutionStats(Instant startTime,

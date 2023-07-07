@@ -1,7 +1,5 @@
 package org.aksw.iguana.cc.query.selector.impl;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.aksw.iguana.cc.config.elements.QueryHandlerConfig;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 
 /**
@@ -15,17 +13,18 @@ import org.aksw.iguana.cc.query.selector.QuerySelector;
 public class LinearQuerySelector extends QuerySelector {
 
 
-    protected int querySelector;
+    protected int nextIndex;
 
     public LinearQuerySelector(int size) {
         super(size);
+        nextIndex = 0;
     }
 
     @Override
     public int getNextIndex() {
-        if (this.querySelector >= this.size) {
-            this.querySelector = 0;
+        if (this.nextIndex >= this.size) {
+            this.nextIndex = 0;
         }
-        return this.querySelector++;
+        return this.nextIndex++;
     }
 }

@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,10 +19,10 @@ public class FileSeparatorQuerySourceTest {
 
     private final FileSeparatorQuerySource querySource;
 
-    private final String path;
+    private final Path path;
 
-    public FileSeparatorQuerySourceTest(String path, String separator) {
-        this.path = path;
+    public FileSeparatorQuerySourceTest(String path, String separator) throws IOException {
+        this.path = Paths.get(path);
 
         if (separator == null) {
             this.querySource = new FileSeparatorQuerySource(this.path);

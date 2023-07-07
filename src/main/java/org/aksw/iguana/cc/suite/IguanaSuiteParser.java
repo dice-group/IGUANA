@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.suite;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -82,6 +83,7 @@ public class IguanaSuiteParser {
     private static IguanaConfig parse(InputStream inputStream, JsonFactory factory, Boolean validate) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(factory);
         String input = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        @JsonIgnoreProperties(ignoreUnknown = true)
         record Preparsing(
                 @JsonProperty(required = true)
                 List<DatasetConfig> datasets,
@@ -174,6 +176,37 @@ public class IguanaSuiteParser {
                 return queryHandlers.get(queryHandlerConfig);
             }
         }
+
+//        class MyDeserializer<T> extends StdDeserializer<T> {
+//
+//            public MyDeserializer() {
+//                this(null);
+//            }
+//
+//            protected MyDeserializer(Class<?> vc) {
+//                super(vc);
+//            }
+//
+//            @Override
+//            public T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+//                TreeNode treeNode = jp.getCodec().readTree(jp);
+//                final var typeNode = treeNode.get("type");
+//                if (!typeNode.isValueNode())
+//                    throw new IllegalArgumentException("type field missing.");
+//                final var type = typeNode.toString();
+//
+//                org.reflections.getSubTypesOf(aClazz)Class<T>
+//                TreeNode treeNode1 = treeNode.get("type").isValueNode();
+//                if (treeNode.get("type"))
+//                jp.
+//                QueryHandlerConfig queryHandlerConfig = ctxt.readValue(jp, QueryHandlerConfig.class);
+//                if (!queryHandlers.containsKey(queryHandlerConfig))
+//                    // TODO: implement QueryHandler constructor (right now only a stub)
+//                    queryHandlers.put(queryHandlerConfig, new QueryHandler(queryHandlerConfig));
+//
+//                return queryHandlers.get(queryHandlerConfig);
+//            }
+//        }
 
         mapper.registerModule(new SimpleModule().
                 addDeserializer(ConnectionConfig.class, new ConnectionDeserializer())
