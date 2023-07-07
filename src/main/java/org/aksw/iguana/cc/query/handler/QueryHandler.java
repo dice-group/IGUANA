@@ -1,9 +1,6 @@
 package org.aksw.iguana.cc.query.handler;
 
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.*;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
@@ -91,6 +88,7 @@ public class QueryHandler {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
 
+    @JsonValue
     final protected Config config;
 
     final protected QuerySelector querySelector;
@@ -99,6 +97,7 @@ public class QueryHandler {
 
     final protected int hashCode;
 
+    @JsonCreator
     public QueryHandler(Config config) throws IOException {
         final var querySource = switch (config.format()) {
             case ONE_PER_LINE -> new FileLineQuerySource(Path.of(config.path()));
