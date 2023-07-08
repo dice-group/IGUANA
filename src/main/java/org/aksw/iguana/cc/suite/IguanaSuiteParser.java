@@ -194,6 +194,7 @@ public class IguanaSuiteParser {
                         .replace("min", "m")
                         .replace("hrs", "h")
                         .replace("hr", "h")
+                        .replace("secs", "s")
                         .replace("sec", "s")
                         .replaceFirst("(\\d+d)", "P$1T");
                 if ((durationString.charAt(0) != 'P')) durationString = "PT"+durationString;
