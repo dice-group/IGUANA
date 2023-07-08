@@ -19,48 +19,34 @@ connections:
     updateEndpoint: "http://localhost:3030/ds/update"
 
 tasks:
-  - name: testme
-    # 1 hour (time Limit is in ms)
-    warmup:
+  # 1 hour (time Limit is in ms)
+  - type: Stresstest
+    warmupWorkers:
       # 1 minutes (is in ms)
-      timeLimit: 600000
-      workers:
-        - threads: 1
-          className: "HttpGetWorker"
-          queries:
-            location: "queries_warmup.txt"
-          timeOut: 180000
+    - type: SPARQLProtocolWorker
+      number: 16
+      queries:
+        location: "queries_easy.txt"
+      timeout: 0.02s
+      completionTarget:
+        duration: 1000s
     workers:
       - type: "SPARQLProtocolWorker"
         number: 16
         queries:
           location: "queries_easy.txt"
-        timeout: 180000
+        timeout: 180s
         completionTarget:
           duration: 1000s
       - number: 4
         type: "SPARQLProtocolWorker"
         queries:
           location: "queries_complex.txt"
-        timeout: 100
-        gaussianLatency: 50
-        parameterName: "query"
+        timeout: 100s
         acceptHeader: "application/sparql-results+json"
-
-# both are optional and can be used to load and start as well as stop the connection before and after every task
-preScriptHook: "./triplestores/{{connection}}/start.sh {{dataset.file}} {{dataset.name}} {{taskID}}"
-postScriptHook: "./triplestores/{{connection}}/stop.sh"
-
-#optional otherwise the same metrics will be used as default
-metrics:
-  - className: "QMPH"
-  - className: "QPS"
-  - className: "NoQPH"
-  - className: "AvgQPS"
-  - className: "NoQ"
 
 #optional otherwise an nt file will be used
 storages:
-  - className: "NTFileStorage"
+  - type: "NTFileStorage"
     #configuration:
       #fileName: YOUR_RESULT_FILE_NAME.nt

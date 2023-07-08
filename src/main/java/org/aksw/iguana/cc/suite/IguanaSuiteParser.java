@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
@@ -27,6 +28,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -43,8 +45,7 @@ public class IguanaSuiteParser {
     private static final String schemaFile = "iguana-schema.json";
 
     enum DataFormat {
-        YAML,
-        JSON;
+        YAML, JSON;
 
         public static DataFormat getFormat(Path file) {
             final var extension = FilenameUtils.getExtension(file.toString());
@@ -71,11 +72,10 @@ public class IguanaSuiteParser {
 
 
     public static IguanaConfig parse(InputStream inputStream, DataFormat format, Boolean validate) throws IOException {
-        JsonFactory factory =
-                switch (format) {
-                    case YAML -> new YAMLFactory();
-                    case JSON -> new JsonFactory();
-                };
+        JsonFactory factory = switch (format) {
+            case YAML -> new YAMLFactory();
+            case JSON -> new JsonFactory();
+        };
         return parse(inputStream, factory, validate);
     }
 
@@ -83,18 +83,12 @@ public class IguanaSuiteParser {
         final ObjectMapper mapper = new ObjectMapper(factory);
         String input = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         @JsonIgnoreProperties(ignoreUnknown = true)
-        record Preparsing(
-                @JsonProperty(required = true)
-                List<DatasetConfig> datasets,
-                @JsonProperty(required = true)
-                List<ConnectionConfig> connections
-        ) {
+        record Preparsing(@JsonProperty(required = true) List<DatasetConfig> datasets,
+                          @JsonProperty(required = true) List<ConnectionConfig> connections) {
         }
         final var preparsing = mapper.readValue(input, Preparsing.class);
-        final var datasets = preparsing.datasets().stream()
-                .collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
-        final var connections = preparsing.connections().stream()
-                .collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
+        final var datasets = preparsing.datasets().stream().collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
+        final var connections = preparsing.connections().stream().collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
 
         final var queryHandlers = new HashMap<QueryHandler.Config, QueryHandler>();
 
@@ -120,8 +114,7 @@ public class IguanaSuiteParser {
                     DatasetConfig datasetConfig = ctxt.readValue(jp, DatasetConfig.class);
                     if (datasets.containsKey(datasetConfig.name()))
                         assert datasets.get(datasetConfig.name()) == datasetConfig;
-                    else
-                        datasets.put(datasetConfig.name(), datasetConfig);
+                    else datasets.put(datasetConfig.name(), datasetConfig);
                     return datasetConfig; // TODO: double check if this really works
                 }
             }
@@ -148,8 +141,7 @@ public class IguanaSuiteParser {
                     ConnectionConfig connectionConfig = ctxt.readValue(jp, ConnectionConfig.class);
                     if (connections.containsKey(connectionConfig.name()))
                         assert connections.get(connectionConfig.name()) == connectionConfig;
-                    else
-                        connections.put(connectionConfig.name(), connectionConfig);
+                    else connections.put(connectionConfig.name(), connectionConfig);
                     return connectionConfig; // TODO: double check if this really works
                 }
             }
@@ -173,6 +165,39 @@ public class IguanaSuiteParser {
                     queryHandlers.put(queryHandlerConfig, new QueryHandler(queryHandlerConfig));
 
                 return queryHandlers.get(queryHandlerConfig);
+            }
+        }
+
+        class HumanReadableDurationDeserializer extends StdDeserializer<Duration> {
+
+            public HumanReadableDurationDeserializer() {
+                this(null);
+            }
+
+            protected HumanReadableDurationDeserializer(Class<?> vc) {
+                super(vc);
+            }
+
+            @Override
+            public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+                var durationString = jp.getValueAsString()
+                        .replaceAll("\\s+", "")
+                        .replace("years", "y")
+                        .replace("year", "y")
+                        .replace("months", "m")
+                        .replace("month", "m")
+                        .replace("weeks", "w")
+                        .replace("week", "w")
+                        .replace("days", "d")
+                        .replace("day", "d")
+                        .replace("mins", "m")
+                        .replace("min", "m")
+                        .replace("hrs", "h")
+                        .replace("hr", "h")
+                        .replace("sec", "s")
+                        .replaceFirst("(\\d+d)", "P$1T");
+                if ((durationString.charAt(0) != 'P')) durationString = "PT"+durationString;
+                return Duration.parse(durationString);
             }
         }
 
@@ -207,10 +232,13 @@ public class IguanaSuiteParser {
 //            }
 //        }
 
-        mapper.registerModule(new SimpleModule().
-                addDeserializer(ConnectionConfig.class, new ConnectionDeserializer())
-                .addDeserializer(DatasetConfig.class, new DatasetDeserializer())
-                .addDeserializer(QueryHandler.class, new QueryHandlerDeserializer()));
+        mapper.registerModule(new JavaTimeModule())
+                .registerModule(new SimpleModule()
+                        .addDeserializer(ConnectionConfig.class, new ConnectionDeserializer())
+                        .addDeserializer(DatasetConfig.class, new DatasetDeserializer())
+                        .addDeserializer(QueryHandler.class, new QueryHandlerDeserializer())
+                        .addDeserializer(Duration.class, new HumanReadableDurationDeserializer()));
+
         // TODO: update validator
 //        if(validate && !validateConfig(config, schemaFile, mapper)){
 //            return null;
@@ -221,8 +249,7 @@ public class IguanaSuiteParser {
     private static boolean validateConfig(Path config, String schemaFile, ObjectMapper mapper) throws IOException {
         // TODO: update
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
-        InputStream is = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(schemaFile);
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(schemaFile);
         JsonSchema schema = factory.getSchema(is);
         JsonNode node = mapper.readTree(config.toFile());
         Set<ValidationMessage> errors = schema.validate(node);

@@ -145,7 +145,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             try {
 
             if (config().completionTarget() instanceof QueryMixes queryMixes) {
-                for (int i = 0; i < queryMixes.n(); i++) {
+                for (int i = 0; i < queryMixes.number(); i++) {
                     for (int j = 0; j < config().queryHandler().getQueryCount(); j++) {
                             HttpExecutionResult httpExecutionResult = executeHttpRequest(config().timeout());
 
@@ -155,7 +155,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
                 }
             } else if (config().completionTarget() instanceof TimeLimit timeLimit) {
-                final Instant endTime = Instant.now().plus(timeLimit.d());
+                final Instant endTime = Instant.now().plus(timeLimit.duration());
                 Instant now;
                 while ((now = Instant.now()).isBefore(endTime)) {
                     final Duration timeToEnd = Duration.between(now, endTime);

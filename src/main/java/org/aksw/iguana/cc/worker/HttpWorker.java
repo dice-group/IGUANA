@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.aksw.iguana.cc.tasks.impl.Stresstest;
@@ -57,13 +58,18 @@ public abstract class HttpWorker {
     public record Result(long workerID, List<ExecutionStats> executionStats) {
     }
 
+    @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = TimeLimit.class),
+            @JsonSubTypes.Type(value = QueryMixes.class),
+    })
     sealed public interface CompletionTarget permits TimeLimit, QueryMixes {
     }
 
-    public record TimeLimit(Duration d) implements CompletionTarget {
+    public record TimeLimit(@JsonProperty(required = true) Duration duration) implements CompletionTarget {
     }
 
-    public record QueryMixes(int n) implements CompletionTarget {
+    public record QueryMixes(@JsonProperty(required = true) int number) implements CompletionTarget {
     }
 
     final protected long workerId;
