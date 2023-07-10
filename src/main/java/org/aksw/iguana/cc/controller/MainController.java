@@ -1,69 +1,63 @@
 package org.aksw.iguana.cc.controller;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import org.aksw.iguana.cc.suite.IguanaSuiteParser;
+import org.aksw.iguana.cc.suite.Suite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static java.text.MessageFormat.format;
 
 /**
- * The main controller for the core. 
- * Will execute the Config Manager and the consuming for configurations.
- * 
- * @author f.conrads
- *
+ * The MainController class is responsible for executing the IGUANA program.
  */
 public class MainController {
 
-	
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(MainController.class);
-	
-	/**
-	 * main method for standalone controlling.
-	 * If the TaskController should run standalone instead of in the core itself
-	 * 
-	 * @param argc
-	 * @throws IOException 
-	 */
-	public static void main(String[] argc) throws IOException{
-		if(argc.length != 1 && argc.length !=2){
-			System.out.println("java -jar iguana.jar [--ignore-schema] suite.yml \n\tsuite.yml - The suite containing the benchmark configuration\n\t--ignore-schema - Will not validate configuration using the internal json schema\n");
-			return;
-		}
+    public static class Args {
+        @Parameter(description = "Suite file describing the configuration of the experiment.")
+        private Path suitePath;
 
-		MainController controller = new MainController();
-		String config =argc[0];
-		Boolean validate = true;
-		if(argc.length==2){
-			if(argc[0].equals("--ignore-schema")){
-				validate=false;
-			}
-			config = argc[1];
-		}
-		controller.start(config, validate);
-		LOGGER.info("Stopping Iguana");
-		//System.exit(0);
-	}
+        @Parameter(names = {"--ignore-schema", "-is"}, description = "Do not check the schema before parsing the suite file.")
+        private boolean ignoreShema = false;
 
-	/**
-	 * Starts a configuration using the config file an states if Iguana should validate it using a json-schema
-	 *
-	 * @param configFile the Iguana config file
-	 * @param validate should the config file be validated using a json-schema
-	 * @throws IOException
-	 */
-	public void start(String configFile, Boolean validate) throws IOException{
-		var f = Path.of(configFile);
-		if (Files.isReadable(f)) {
-		} else {
-			LOGGER.error(format("Configuration file does not exist or is not readable: {0}", f.toString()));
+        @Parameter(names = "--help", help = true)
+        private boolean help;
+    }
 
-		}
 
-	}
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MainController.class);
+
+    /**
+     * The main method for executing IGUANA
+     *
+     * @param argc The command line arguments that are passed to the program.
+     * @throws IOException If an I/O exception occurs.
+     */
+    public static void main(String[] argc) throws IOException {
+        var args = new Args();
+        JCommander jc = JCommander.newBuilder()
+                .addObject(args)
+                .build();
+        try {
+            jc.parse(argc);
+        } catch (ParameterException e) {
+            System.err.println(e.getLocalizedMessage());
+            jc.usage();
+            System.exit(0);
+        }
+        if (args.help) {
+            jc.usage();
+            System.exit(1);
+        }
+        // TODO: a bit of error handling
+        Suite parse = IguanaSuiteParser.parse(args.suitePath);
+        Suite.Result run = parse.run();
+        System.exit(0);
+    }
+
 }
