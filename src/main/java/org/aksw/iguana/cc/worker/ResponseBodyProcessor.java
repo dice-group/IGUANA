@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
-import org.aksw.iguana.cc.lang2.LanguageProcessor;
+import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.commons.io.BigByteArrayInputStream;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.slf4j.Logger;
@@ -14,10 +14,12 @@ import java.util.concurrent.*;
 public class ResponseBodyProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseBodyProcessor.class);
 
-    public ResponseBodyProcessor(LanguageProcessor languageProcessor, int threads) {
-        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threads);
-        this.languageProcessor = languageProcessor;
+    public ResponseBodyProcessor(String contentType) {
+        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1); // TODO: make configurable
+        this.languageProcessor = LanguageProcessor.getInstance(contentType);
     }
+
+
 
     public record Key(long contentLength, long xxh64) {
     }

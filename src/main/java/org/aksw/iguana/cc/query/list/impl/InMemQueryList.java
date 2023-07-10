@@ -21,15 +21,11 @@ public class InMemQueryList extends QueryList {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemQueryList.class);
 
-    private List<byte[]> queries; // TODO: make final
+    final private List<byte[]> queries; // TODO: make final
 
-    public InMemQueryList(String name, QuerySource querySource) {
-        super(name, querySource);
-        try {
-            this.queries = this.querySource.getAllQueries().stream().map(s->s.getBytes(StandardCharsets.UTF_8)).toList();
-        } catch (IOException e) {
-            LOGGER.error("Could not read queries");
-        }
+    public InMemQueryList(QuerySource querySource) throws IOException {
+        super(querySource);
+        queries = this.querySource.getAllQueries().stream().map(s -> s.getBytes(StandardCharsets.UTF_8)).toList();
     }
 
     @Override

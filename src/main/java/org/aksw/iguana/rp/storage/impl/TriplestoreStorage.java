@@ -3,7 +3,8 @@
  */
 package org.aksw.iguana.rp.storage.impl;
 
-import org.aksw.iguana.commons.annotation.Shorthand;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.aksw.iguana.cc.config.elements.StorageConfig;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -22,47 +23,62 @@ import org.apache.jena.update.UpdateRequest;
 import java.io.StringWriter;
 
 
+
+
+
 /**
  * This Storage will save all the metric results into a specified triple store
- * 
+ *
  * @author f.conrads
  *
  */
-@Shorthand("TriplestoreStorage")
 public class TriplestoreStorage extends TripleBasedStorage {
-	
+
+	public record Config(@JsonProperty(required = true) String endpoint,
+						 String user,
+						 String password,
+						 String baseUri) implements StorageConfig {
+	}
+
 	private UpdateRequest blockRequest = UpdateFactory.create();
+	private final String endpoint;
+	private final String user;
+	private final String password;
 
-	
-	private String updateEndpoint;
-	private String endpoint;
-	private String user;
-	private String pwd;
+	public TriplestoreStorage(Config config) {
+		endpoint = config.endpoint();
+		user = config.user();
+		password = config.password();
+		if (baseUri != null && !baseUri.isEmpty()) {
+			baseUri = config.baseUri();
+		}
+	}
 
-	
-	public TriplestoreStorage(String endpoint, String updateEndpoint, String user, String pwd, String baseUri){
-		this.endpoint=endpoint;
-		this.updateEndpoint=updateEndpoint;
+
+	public TriplestoreStorage(String endpoint, String user, String pwd, String baseUri){
+		this.endpoint = endpoint;
 		this.user=user;
-		this.pwd=pwd;
+		this.password =pwd;
 		if(baseUri!=null && !baseUri.isEmpty()){
 			this.baseUri=baseUri;
 		}
 	}
-	
-	public TriplestoreStorage(String endpoint, String updateEndpoint, String baseUri){
-		this.endpoint=endpoint;
-		this.updateEndpoint=updateEndpoint;
+
+	public TriplestoreStorage(String endpoint, String baseUri){
+		this.endpoint = endpoint;
 		if(baseUri!=null && !baseUri.isEmpty()){
 			this.baseUri=baseUri;
 		}
+		user = null;
+		password = null;
 	}
-	
-	public TriplestoreStorage(String endpoint, String updateEndpoint){
-		this.endpoint=endpoint;
-		this.updateEndpoint=updateEndpoint;
+
+	public TriplestoreStorage(String endpoint){
+		this.endpoint = endpoint;
+		user = null;
+		password = null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.aksw.iguana.rp.storage.Storage#commit()
 	 */
@@ -79,7 +95,7 @@ public class TriplestoreStorage extends TripleBasedStorage {
 
 		//submit Block to Triple Store
 		UpdateProcessor processor = UpdateExecutionFactory
-				.createRemote(blockRequest, updateEndpoint, createHttpClient());
+				.createRemote(blockRequest, endpoint, createHttpClient());
 		processor.execute();
 		blockRequest = new UpdateRequest();
 	}
@@ -88,8 +104,8 @@ public class TriplestoreStorage extends TripleBasedStorage {
 
 	private HttpClient createHttpClient(){
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		if(user !=null && pwd !=null){
-			Credentials credentials = new UsernamePasswordCredentials(user, pwd);
+		if(user !=null && password !=null){
+			Credentials credentials = new UsernamePasswordCredentials(user, password);
 			credsProvider.setCredentials(AuthScope.ANY, credentials);
 		}
 		HttpClient httpclient = HttpClients.custom()

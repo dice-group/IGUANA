@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +32,7 @@ public class IndexedQueryReaderTest {
         }
 
         public ParameterizedTest(String path) throws IOException {
-            reader = IndexedQueryReader.make(path);
+            reader = IndexedQueryReader.make(Paths.get(path));
         }
 
         @Test
@@ -45,8 +47,8 @@ public class IndexedQueryReaderTest {
     public static class NonParameterizedTest {
         @Test
         public void testIndexingWithBlankLines() throws IOException {
-            IndexedQueryReader reader = IndexedQueryReader.makeWithEmptyLines("src/test/resources/utils/indexingtestfile3.txt");
-            String le = FileUtils.getLineEnding("src/test/resources/utils/indexingtestfile3.txt");
+            IndexedQueryReader reader = IndexedQueryReader.makeWithEmptyLines(Paths.get("src/test/resources/utils/indexingtestfile3.txt"));
+            String le = FileUtils.getLineEnding(Paths.get("src/test/resources/utils/indexingtestfile3.txt"));
 
             assertEquals(" line 1" + le + "line 2", reader.readQuery(0));
             assertEquals("line 3", reader.readQuery(1));
@@ -57,12 +59,12 @@ public class IndexedQueryReaderTest {
     @RunWith(Parameterized.class)
     public static class TestCustomSeparator {
         private static class TestData {
-            public String filepath;
+            public Path filepath;
             public String separator;
             public String[] expectedStrings;
 
             public TestData(String filepath, String separator, String[] expectedStrings) {
-                this.filepath = filepath;
+                this.filepath = Path.of(filepath);
                 this.separator = separator;
                 this.expectedStrings = expectedStrings;
             }
@@ -77,7 +79,7 @@ public class IndexedQueryReaderTest {
         @Parameterized.Parameters
         public static Collection<TestData> data() throws IOException {
             // all the files should have the same line ending
-            String le = FileUtils.getLineEnding("src/test/resources/utils/indexingtestfile1.txt");
+            String le = FileUtils.getLineEnding(Path.of("src/test/resources/utils/indexingtestfile1.txt"));
             return List.of(
                     new TestData("src/test/resources/utils/indexingtestfile1.txt", "#####" + le, new String[]{"line 1" + le, le + "line 2" + le}),
                     new TestData("src/test/resources/utils/indexingtestfile2.txt", "#####" + le, new String[]{"line 0" + le, "line 1" + le + "#####"}),

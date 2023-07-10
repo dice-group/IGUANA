@@ -4,6 +4,7 @@ import org.aksw.iguana.cc.utils.FileUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -15,9 +16,9 @@ import java.util.List;
 public abstract class QuerySource {
 
     /** This string represents the path of the file or folder, that contains the queries. */
-    protected String path;
+    final protected Path path;
 
-    public QuerySource(String path) {
+    public QuerySource(Path path) {
         this.path = path;
     }
 

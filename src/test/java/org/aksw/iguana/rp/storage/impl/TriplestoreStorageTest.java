@@ -65,7 +65,7 @@ public class TriplestoreStorageTest {
         fastConnection.connect(address1);
         
         String host = "http://localhost:8023";
-        TriplestoreStorage store = new TriplestoreStorage(host, host);
+        TriplestoreStorage store = new TriplestoreStorage(host);
         Properties p = new Properties();
 		p.put(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");
 	    p.setProperty(COMMON.EXPERIMENT_ID_KEY, "1/1");
@@ -102,7 +102,7 @@ public class TriplestoreStorageTest {
         fastConnection.connect(address1);
         
         String host = "http://localhost:8023";
-        TriplestoreStorage store = new TriplestoreStorage(host, host);
+        TriplestoreStorage store = new TriplestoreStorage(host);
 
 	    Model m = ModelFactory.createDefaultModel();
 	    m.add(ResourceFactory.createResource(COMMON.RES_BASE_URI+"a"), ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"b") , "c");

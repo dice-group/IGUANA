@@ -11,19 +11,18 @@ import java.util.Random;
  *
  * @author frensing
  */
-public class RandomQuerySelector implements QuerySelector {
+public class RandomQuerySelector extends QuerySelector {
 
-    protected Random querySelector;
+    final protected Random indexGenerator;
 
-    private int size;
 
     public RandomQuerySelector(int size, long seed) {
-        this.size = size;
-        this.querySelector = new Random(seed);
+        super(size);
+        indexGenerator = new Random(seed);
     }
 
     @Override
     public int getNextIndex() {
-        return this.querySelector.nextInt(this.size);
+        return this.indexGenerator.nextInt(this.size);
     }
 }

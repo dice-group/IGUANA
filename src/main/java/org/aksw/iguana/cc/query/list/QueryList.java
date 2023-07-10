@@ -12,14 +12,12 @@ import java.io.InputStream;
  */
 public abstract class QueryList {
 
-    /** This is the QuerySource from which the queries should be retrieved. */
-    protected QuerySource querySource;
+    /**
+     * This is the QuerySource from which the queries should be retrieved.
+     */
+    final protected QuerySource querySource;
 
-    /** A name for the query list. This is a part of the queryIDs. */
-    protected String name;
-
-    public QueryList(String name, QuerySource querySource) {
-        this.name = name;
+    public QueryList(QuerySource querySource) {
         this.querySource = querySource;
     }
 
@@ -29,16 +27,7 @@ public abstract class QueryList {
      * @return The amount of queries in the query list
      */
     public int size() {
-        return this.querySource.size();
-    }
-
-    /**
-     * This method returns the name of the query list.
-     *
-     * @return The name of the query list
-     */
-    public String getName() {
-        return this.name;
+        return querySource.size();
     }
 
     /**
@@ -48,7 +37,7 @@ public abstract class QueryList {
      */
     @Override
     public int hashCode() {
-        return this.querySource.hashCode();
+        return querySource.hashCode();
     }
 
     /**
@@ -58,5 +47,6 @@ public abstract class QueryList {
      * @return The query at the given index
      */
     public abstract String getQuery(int index) throws IOException;
+
     public abstract InputStream getQueryStream(int index) throws IOException;
 }

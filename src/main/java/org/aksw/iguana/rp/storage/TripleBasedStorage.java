@@ -27,6 +27,7 @@ import java.util.Set;
  */
 public abstract class TripleBasedStorage implements Storage {
 
+
 	protected String baseUri = COMMON.BASE_URI;
 	private String resource = COMMON.RES_BASE_URI;
 	private String properties = COMMON.PROP_BASE_URI;

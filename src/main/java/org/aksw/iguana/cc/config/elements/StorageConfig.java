@@ -1,42 +1,24 @@
 package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.aksw.iguana.commons.factory.TypedFactory;
-import org.aksw.iguana.rp.storage.Storage;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
+import org.aksw.iguana.rp.storage.impl.RDFFileStorage;
+import org.aksw.iguana.rp.storage.impl.TriplestoreStorage;
 
 /**
  * Storage Configuration class
  */
-public class StorageConfig {
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = TriplestoreStorage.Config.class, name = "triplestore"),
+        @JsonSubTypes.Type(value = RDFFileStorage.Config.class, name = "RDF file"),
+})
+public interface StorageConfig {}
 
 
-    @JsonProperty(required = true)
-    private String className;
 
-    @JsonProperty
-    private Map<String, Object> configuration = new HashMap<>();
-
-    public String getClassName() {
-        return className;
-    }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    public Map<String, Object> getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(Map<String, Object> configuration) {
-        this.configuration = configuration;
-    }
-
-    public Storage createStorage() {
-        TypedFactory<Storage> factory = new TypedFactory<>();
-        return factory.create(className, configuration);
-    }
-}
