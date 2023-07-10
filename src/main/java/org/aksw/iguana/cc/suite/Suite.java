@@ -21,13 +21,8 @@ public class Suite {
             @JsonProperty(required = true)
             List<Task.Config> tasks,
             @JsonProperty
-            String preScriptHook,
-            @JsonProperty
-            String postScriptHook,
-            @JsonProperty
             List<StorageConfig> storages) {
     }
-
     public record Result(List<Stresstest.Result> stresstest) {
 
     }

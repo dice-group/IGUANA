@@ -1,6 +1,8 @@
 package org.aksw.iguana.cc.tasks.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
@@ -19,7 +21,6 @@ import java.util.concurrent.*;
 public class Stresstest implements Task {
 
     public record Config(
-            @JsonProperty(required = true) String name,
             List<HttpWorker.Config> warmupWorkers,
             @JsonProperty(required = true) List<HttpWorker.Config> workers
     ) implements Task.Config {
@@ -52,12 +53,13 @@ public class Stresstest implements Task {
         this.stresstestId = stresstestId;
         this.config = config;
         long workerId = 0;
-        for (HttpWorker.Config workerConfig : config.warmupWorkers()) {
-            for (int i = 0; i < workerConfig.number(); i++) {
-                var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
-                warmupWorkers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
+        if (config.warmupWorkers() != null)
+            for (HttpWorker.Config workerConfig : config.warmupWorkers()) {
+                for (int i = 0; i < workerConfig.number(); i++) {
+                    var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
+                    warmupWorkers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
+                }
             }
-        }
 
         for (HttpWorker.Config workerConfig : config.workers()) {
             for (int i = 0; i < workerConfig.number(); i++) {

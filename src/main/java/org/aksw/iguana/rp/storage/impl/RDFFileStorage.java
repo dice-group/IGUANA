@@ -2,7 +2,6 @@ package org.aksw.iguana.rp.storage.impl;
 
 import com.github.jsonldjava.shaded.com.google.common.base.Supplier;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
-import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -17,13 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
 
-@Shorthand("RDFFileStorage")
 public class RDFFileStorage extends TripleBasedStorage {
-    public record RDFFileStorageConfig(String path) implements StorageConfig {
-        @Override
-        public String type() {
-            return "RDFFileStorageConfig";
-        }
+    public record Config(String path) implements StorageConfig {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDFFileStorage.class.getName());
@@ -46,7 +40,7 @@ public class RDFFileStorage extends TripleBasedStorage {
     /**
      * Uses a generated file called results_{DD}-{MM}-{YYYY}_{HH}-{mm}.ttl
      */
-    public RDFFileStorage(RDFFileStorageConfig config) {
+    public RDFFileStorage(Config config) {
         if (config.path() == null)
             path = Paths.get("").resolve(defaultFileNameSupplier.get() + ".ttl");
         else

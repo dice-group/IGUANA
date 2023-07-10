@@ -16,7 +16,6 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import org.aksw.iguana.cc.config.IguanaConfig;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.config.elements.DatasetConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
@@ -31,6 +30,7 @@ import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -62,90 +62,47 @@ public class IguanaSuiteParser {
     }
 
 
-    public static IguanaConfig parse(Path config) throws IOException {
+    public static Suite parse(Path config) throws IOException {
         return parse(new FileInputStream(config.toFile()), DataFormat.getFormat(config), true);
     }
 
-    public static IguanaConfig parse(InputStream stream, DataFormat format) throws IOException {
+    public static Suite parse(InputStream stream, DataFormat format) throws IOException {
         return parse(stream, format, true);
     }
 
 
-    public static IguanaConfig parse(InputStream inputStream, DataFormat format, Boolean validate) throws IOException {
+    public static Suite parse(InputStream inputStream, DataFormat format, Boolean validate) throws IOException {
         JsonFactory factory = switch (format) {
             case YAML -> new YAMLFactory();
             case JSON -> new JsonFactory();
         };
-        return parse(inputStream, factory, validate);
+        SuiteConfigWithID configWithID = parse(inputStream, factory, validate);
+        return new Suite(configWithID.id(), configWithID.config());
     }
 
-    private static IguanaConfig parse(InputStream inputStream, JsonFactory factory, Boolean validate) throws IOException {
+    record SuiteConfigWithID(long id, Suite.Config config) {
+    }
+
+    /**
+     * Parses a IGUANA configuration file.
+     * <p>
+     * This involves two steps: First, datasets and connections are parsed and stored. In a second step, the rest of the file is parsed. If the names of datasets and connections are used , they are replaced with the respective configurations that were parsed in the first step.
+     *
+     * @param inputStream
+     * @param factory
+     * @param validate
+     * @return
+     * @throws IOException
+     */
+    private static SuiteConfigWithID parse(InputStream inputStream, JsonFactory factory, Boolean validate) throws IOException {
         final ObjectMapper mapper = new ObjectMapper(factory);
+
         String input = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        record Preparsing(@JsonProperty(required = true) List<DatasetConfig> datasets,
-                          @JsonProperty(required = true) List<ConnectionConfig> connections) {
-        }
-        final var preparsing = mapper.readValue(input, Preparsing.class);
-        final var datasets = preparsing.datasets().stream().collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
-        final var connections = preparsing.connections().stream().collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
+        final var datasets = preparseDataset(mapper, input);
+
+        final var connections = preparseConnections(mapper, input);
 
         final var queryHandlers = new HashMap<QueryHandler.Config, QueryHandler>();
-
-
-        class DatasetDeserializer extends StdDeserializer<DatasetConfig> {
-            public DatasetDeserializer() {
-                this(null);
-            }
-
-            protected DatasetDeserializer(Class<?> vc) {
-                super(vc);
-            }
-
-            @Override
-            public DatasetConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-                JsonNode node = jp.getCodec().readTree(jp);
-                if (node.isTextual()) {
-                    final var datasetName = node.asText();
-                    if (!datasets.containsKey(datasetName))
-                        throw new IllegalStateException(MessageFormat.format("Unknown dataset name: {0}", datasetName));
-                    return datasets.get(datasetName);
-                } else {
-                    DatasetConfig datasetConfig = ctxt.readValue(jp, DatasetConfig.class);
-                    if (datasets.containsKey(datasetConfig.name()))
-                        assert datasets.get(datasetConfig.name()) == datasetConfig;
-                    else datasets.put(datasetConfig.name(), datasetConfig);
-                    return datasetConfig; // TODO: double check if this really works
-                }
-            }
-        }
-        class ConnectionDeserializer extends StdDeserializer<ConnectionConfig> {
-
-            public ConnectionDeserializer() {
-                this(null);
-            }
-
-            protected ConnectionDeserializer(Class<?> vc) {
-                super(vc);
-            }
-
-            @Override
-            public ConnectionConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-                JsonNode node = jp.getCodec().readTree(jp);
-                if (node.isTextual()) {
-                    final var connectionName = node.asText();
-                    if (!connections.containsKey(connectionName))
-                        throw new IllegalStateException(MessageFormat.format("Unknown connection name: {0}", connectionName));
-                    return connections.get(connectionName);
-                } else {
-                    ConnectionConfig connectionConfig = ctxt.readValue(jp, ConnectionConfig.class);
-                    if (connections.containsKey(connectionConfig.name()))
-                        assert connections.get(connectionConfig.name()) == connectionConfig;
-                    else connections.put(connectionConfig.name(), connectionConfig);
-                    return connectionConfig; // TODO: double check if this really works
-                }
-            }
-        }
 
         class QueryHandlerDeserializer extends StdDeserializer<QueryHandler> {
 
@@ -161,7 +118,6 @@ public class IguanaSuiteParser {
             public QueryHandler deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
                 QueryHandler.Config queryHandlerConfig = ctxt.readValue(jp, QueryHandler.Config.class);
                 if (!queryHandlers.containsKey(queryHandlerConfig))
-                    // TODO: implement QueryHandler constructor (right now only a stub)
                     queryHandlers.put(queryHandlerConfig, new QueryHandler(queryHandlerConfig));
 
                 return queryHandlers.get(queryHandlerConfig);
@@ -197,54 +153,109 @@ public class IguanaSuiteParser {
                         .replace("secs", "s")
                         .replace("sec", "s")
                         .replaceFirst("(\\d+d)", "P$1T");
-                if ((durationString.charAt(0) != 'P')) durationString = "PT"+durationString;
+                if ((durationString.charAt(0) != 'P')) durationString = "PT" + durationString;
                 return Duration.parse(durationString);
             }
         }
 
-//        class MyDeserializer<T> extends StdDeserializer<T> {
-//
-//            public MyDeserializer() {
-//                this(null);
-//            }
-//
-//            protected MyDeserializer(Class<?> vc) {
-//                super(vc);
-//            }
-//
-//            @Override
-//            public T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-//                TreeNode treeNode = jp.getCodec().readTree(jp);
-//                final var typeNode = treeNode.get("type");
-//                if (!typeNode.isValueNode())
-//                    throw new IllegalArgumentException("type field missing.");
-//                final var type = typeNode.toString();
-//
-//                org.reflections.getSubTypesOf(aClazz)Class<T>
-//                TreeNode treeNode1 = treeNode.get("type").isValueNode();
-//                if (treeNode.get("type"))
-//                jp.
-//                QueryHandlerConfig queryHandlerConfig = ctxt.readValue(jp, QueryHandlerConfig.class);
-//                if (!queryHandlers.containsKey(queryHandlerConfig))
-//                    // TODO: implement QueryHandler constructor (right now only a stub)
-//                    queryHandlers.put(queryHandlerConfig, new QueryHandler(queryHandlerConfig));
-//
-//                return queryHandlers.get(queryHandlerConfig);
-//            }
-//        }
 
         mapper.registerModule(new JavaTimeModule())
                 .registerModule(new SimpleModule()
-                        .addDeserializer(ConnectionConfig.class, new ConnectionDeserializer())
-                        .addDeserializer(DatasetConfig.class, new DatasetDeserializer())
                         .addDeserializer(QueryHandler.class, new QueryHandlerDeserializer())
-                        .addDeserializer(Duration.class, new HumanReadableDurationDeserializer()));
-
+                        .addDeserializer(Duration.class, new HumanReadableDurationDeserializer()))
+        ;
         // TODO: update validator
 //        if(validate && !validateConfig(config, schemaFile, mapper)){
 //            return null;
 //        }
-        return mapper.readValue(input, IguanaConfig.class);
+        return new SuiteConfigWithID(input.hashCode(), mapper.readValue(input, Suite.Config.class));
+    }
+
+    /**
+     * Preparses the datasets field in a IGUANA configuration file and adds a custom Deserializer to mapper to enable retrieving already parsed datasets by name.
+     *
+     * @param mapper The ObjectMapper instance used for parsing the configuration file.
+     * @param input  The input String containing the configuration file content.
+     * @return A Map of DatasetConfig objects, where the key is the dataset name and the value is the corresponding DatasetConfig object.
+     * @throws JsonProcessingException If there is an error during JSON processing.
+     */
+    private static Map<String, DatasetConfig> preparseDataset(ObjectMapper mapper, String input) throws JsonProcessingException {
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        record PreparsingDatasets(@JsonProperty(required = true) List<DatasetConfig> datasets) {
+        }
+        final var preparsingDatasets = mapper.readValue(input, PreparsingDatasets.class);
+
+        final var datasets = preparsingDatasets.datasets().stream().collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
+
+        class DatasetDeserializer extends StdDeserializer<DatasetConfig> {
+            public DatasetDeserializer() {
+                this(null);
+            }
+
+            protected DatasetDeserializer(Class<?> vc) {
+                super(vc);
+            }
+
+            @Override
+            public DatasetConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+                JsonNode node = jp.getCodec().readTree(jp);
+                if (node.isTextual()) {
+                    final var datasetName = node.asText();
+                    if (!datasets.containsKey(datasetName))
+                        throw new IllegalStateException(MessageFormat.format("Unknown dataset name: {0}", datasetName));
+                    return datasets.get(datasetName);
+                } else {
+                    DatasetConfig datasetConfig = ctxt.readValue(jp, DatasetConfig.class);
+                    if (datasets.containsKey(datasetConfig.name()))
+                        assert datasets.get(datasetConfig.name()) == datasetConfig;
+                    else datasets.put(datasetConfig.name(), datasetConfig);
+                    return datasetConfig; // TODO: double check if this really works
+                }
+            }
+        }
+        mapper.registerModule(new SimpleModule()
+                .addDeserializer(DatasetConfig.class, new DatasetDeserializer()));
+        return datasets;
+    }
+
+    private static Map<String, ConnectionConfig> preparseConnections(ObjectMapper mapper, String input) throws JsonProcessingException {
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        record PreparsingConnections(@JsonProperty(required = true) List<ConnectionConfig> connections) {
+        }
+        final var preparsingConnections = mapper.readValue(input, PreparsingConnections.class);
+
+        final var connections = preparsingConnections.connections().stream().collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
+
+        class ConnectionDeserializer extends StdDeserializer<ConnectionConfig> {
+
+            public ConnectionDeserializer() {
+                this(null);
+            }
+
+            protected ConnectionDeserializer(Class<?> vc) {
+                super(vc);
+            }
+
+            @Override
+            public ConnectionConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+                JsonNode node = jp.getCodec().readTree(jp);
+                if (node.isTextual()) {
+                    final var connectionName = node.asText();
+                    if (!connections.containsKey(connectionName))
+                        throw new IllegalStateException(MessageFormat.format("Unknown connection name: {0}", connectionName));
+                    return connections.get(connectionName);
+                } else {
+                    ConnectionConfig connectionConfig = ctxt.readValue(jp, ConnectionConfig.class);
+                    if (connections.containsKey(connectionConfig.name()))
+                        assert connections.get(connectionConfig.name()) == connectionConfig;
+                    else connections.put(connectionConfig.name(), connectionConfig);
+                    return connectionConfig; // TODO: double check if this really works
+                }
+            }
+        }
+        mapper.registerModule(new SimpleModule()
+                .addDeserializer(ConnectionConfig.class, new ConnectionDeserializer()));
+        return connections;
     }
 
     private static boolean validateConfig(Path config, String schemaFile, ObjectMapper mapper) throws IOException {

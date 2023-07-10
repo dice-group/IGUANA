@@ -21,7 +21,7 @@ public class FileSeparatorQuerySource extends QuerySource {
 
     private static final String DEFAULT_SEPARATOR = "###";
 
-    final private IndexedQueryReader iqr;
+    final protected IndexedQueryReader iqr;
 
     /**
      * This constructor indexes the queries inside the given file. It assumes, that the queries inside the file are

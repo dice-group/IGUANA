@@ -5,7 +5,6 @@ package org.aksw.iguana.rp.storage.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
-import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.rp.storage.TripleBasedStorage;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -33,17 +32,12 @@ import java.io.StringWriter;
  * @author f.conrads
  *
  */
-@Shorthand("TriplestoreStorage")
 public class TriplestoreStorage extends TripleBasedStorage {
 
-	public record TriplestoreStorageConfig(@JsonProperty(required = true) String endpoint,
-									String user,
-									String password,
-									String baseUri) implements StorageConfig {
-		@Override
-		public String type() {
-			return "TriplestoreStorage";
-		}
+	public record Config(@JsonProperty(required = true) String endpoint,
+						 String user,
+						 String password,
+						 String baseUri) implements StorageConfig {
 	}
 
 	private UpdateRequest blockRequest = UpdateFactory.create();
@@ -51,7 +45,7 @@ public class TriplestoreStorage extends TripleBasedStorage {
 	private final String user;
 	private final String password;
 
-	public TriplestoreStorage(TriplestoreStorageConfig config) {
+	public TriplestoreStorage(Config config) {
 		endpoint = config.endpoint();
 		user = config.user();
 		password = config.password();

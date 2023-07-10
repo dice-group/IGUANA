@@ -28,12 +28,21 @@ import java.nio.file.Path;
 public class QueryHandler {
 
     public record Config(@JsonProperty(required = true) String path,
-                         @JsonProperty(defaultValue = "one-per-line") Format format,
-                         @JsonProperty(defaultValue = "true") boolean caching,
-                         @JsonProperty(defaultValue = "linear") Order order,
-                         @JsonInclude(JsonInclude.Include.NON_NULL) Long seed,
-                         @JsonProperty(defaultValue = "SPARQL") Language lang
+                         Format format,
+                         Boolean caching,
+                         Order order,
+                         Long seed,
+                         Language lang
     ) {
+
+        public Config(String path, Format format, Boolean caching, Order order, Long seed, Language lang) {
+            this.path = path;
+            this.format = format == null ? Format.ONE_PER_LINE : format;
+            this.caching = caching == null ? true : caching;
+            this.order = order == null ? Order.LINEAR : order;
+            this.seed = seed;
+            this.lang = lang == null ? Language.SPARQL : lang;
+        }
 
         public enum Format {
             @JsonEnumDefaultValue ONE_PER_LINE("one-per-line"),
@@ -42,8 +51,12 @@ public class QueryHandler {
 
             final String value;
 
+            @JsonCreator
             Format(String value) {
-                this.value = value;
+                if (value == null)
+                    this.value = "one-per-line";
+                else
+                    this.value = value;
             }
 
             @JsonValue
@@ -118,18 +131,20 @@ public class QueryHandler {
         hashCode = queryList.hashCode();
     }
 
-    public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
-        int queryIndex = this.querySelector.getNextIndex();
-        queryStr.append(this.queryList.getQuery(queryIndex));
-        queryID.append(getQueryId(queryIndex));
+    public record QueryStringWrapper(int index, String query) {
     }
 
-    public record QueryHandle(int index, InputStream queryInputStream) {
+    public QueryStringWrapper getNextQuery() throws IOException {
+        final var queryIndex = querySelector.getNextIndex();
+        return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex));
     }
 
-    public QueryHandle getNextQueryStream() throws IOException {
+    public record QueryStreamWrapper(int index, InputStream queryInputStream) {
+    }
+
+    public QueryStreamWrapper getNextQueryStream() throws IOException {
         final int queryIndex = this.querySelector.getNextIndex();
-        return new QueryHandle(queryIndex, this.queryList.getQueryStream(queryIndex));
+        return new QueryStreamWrapper(queryIndex, this.queryList.getQueryStream(queryIndex));
     }
 
     @Override

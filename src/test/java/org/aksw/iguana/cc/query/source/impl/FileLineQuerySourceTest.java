@@ -17,7 +17,7 @@ public class FileLineQuerySourceTest {
 
     private final FileLineQuerySource querySource;
 
-    public FileLineQuerySourceTest() {
+    public FileLineQuerySourceTest() throws IOException {
         querySource = new FileLineQuerySource(PATH);
     }
 

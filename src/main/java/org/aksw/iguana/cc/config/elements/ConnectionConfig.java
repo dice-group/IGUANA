@@ -19,15 +19,13 @@ public record ConnectionConfig(
         @JsonProperty(required = true)
         @JsonDeserialize(contentUsing = URIDeserializer.class)
         URI endpoint,
-        @JsonProperty
         String version,
-        @JsonProperty
         String user,
-        @JsonProperty
         String password,
-        @JsonProperty
         @JsonDeserialize(contentUsing = URIDeserializer.class)
-        URI updateEndpoint) {
+        URI updateEndpoint,
+
+        DatasetConfig dataset) {
     public static class URIDeserializer extends JsonDeserializer<URI> {
 
         @Override

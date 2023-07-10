@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.controller;
 
-import org.aksw.iguana.cc.config.ConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +58,8 @@ public class MainController {
 	 * @throws IOException
 	 */
 	public void start(String configFile, Boolean validate) throws IOException{
-		ConfigManager cmanager = new ConfigManager();
 		var f = Path.of(configFile);
 		if (Files.isReadable(f)) {
-			cmanager.receiveData(f, validate);
 		} else {
 			LOGGER.error(format("Configuration file does not exist or is not readable: {0}", f.toString()));
 

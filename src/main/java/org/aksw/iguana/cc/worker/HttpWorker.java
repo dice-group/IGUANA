@@ -36,7 +36,7 @@ public abstract class HttpWorker {
          *
          * @return the number of workers
          */
-        int number();
+        Integer number();
 
         /**
          * Determines whether the results should be parsed based on the acceptHeader.

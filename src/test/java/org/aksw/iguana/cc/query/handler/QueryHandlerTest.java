@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QueryHandlerTest {
 
@@ -46,9 +47,14 @@ public class QueryHandlerTest {
     @Test
     public void testDeserialization() throws Exception {
         var json = String.format("""
-                {"path":"%s","format":"folder","caching":true,"order":"linear","lang":"SPARQL"}
+                {"path":"%s","format":"folder","order":"linear","lang":"SPARQL"}
                 """, tempDir);
         final var mapper = new ObjectMapper();
-        assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
+        QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
+        assertEquals(queries.size(), queryHandler.getQueryCount());
+        QueryHandler.QueryStringWrapper nextQuery = queryHandler.getNextQuery();
+        assertEquals(0, nextQuery.index());
+        assertEquals(nextQuery.query(), queries.get(0).content());
+
     }
 }

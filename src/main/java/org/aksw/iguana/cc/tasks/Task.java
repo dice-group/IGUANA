@@ -9,7 +9,7 @@ public interface Task {
             include = JsonTypeInfo.As.PROPERTY,
             property = "type")
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = Stresstest.Config.class, name = "Stresstest"),
+            @JsonSubTypes.Type(value = Stresstest.Config.class, name = "stresstest"),
     })
     interface Config {
     }

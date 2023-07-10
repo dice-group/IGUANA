@@ -20,13 +20,13 @@ connections:
 
 tasks:
   # 1 hour (time Limit is in ms)
-  - type: Stresstest
+  - type: stresstest
     warmupWorkers:
       # 1 minutes (is in ms)
     - type: SPARQLProtocolWorker
       number: 16
       queries:
-        location: "queries_easy.txt"
+        path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
       timeout: 0.02s
       completionTarget:
         duration: 1000s
@@ -34,19 +34,35 @@ tasks:
       - type: "SPARQLProtocolWorker"
         number: 16
         queries:
-          location: "queries_easy.txt"
+          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
         timeout: 180s
         completionTarget:
           duration: 1000s
       - number: 4
         type: "SPARQLProtocolWorker"
         queries:
-          location: "queries_complex.txt"
+          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+        timeout: 100s
+        acceptHeader: "application/sparql-results+json"
+  - type: stresstest
+    workers:
+      - type: "SPARQLProtocolWorker"
+        number: 16
+        queries:
+          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+        timeout: 180s
+        completionTarget:
+          duration: 1000s
+      - number: 4
+        type: "SPARQLProtocolWorker"
+        queries:
+          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
         timeout: 100s
         acceptHeader: "application/sparql-results+json"
 
 #optional otherwise an nt file will be used
 storages:
-  - type: "NTFileStorage"
+  - type: "RDF file"
+    path: "some.ttl"
     #configuration:
       #fileName: YOUR_RESULT_FILE_NAME.nt

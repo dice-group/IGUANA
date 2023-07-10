@@ -109,16 +109,26 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     private final ResponseBodyProcessor responseBodyProcessor;
 
-//    @JsonTypeName("SPARQLProtocolWorker")
-    public record Config(@JsonProperty(defaultValue = "1") int number,
-                         QueryHandler queryHandler,
+    //    @JsonTypeName("SPARQLProtocolWorker")
+    public record Config(Integer number,
+                         @JsonProperty(required = true) QueryHandler queries,
                          @JsonProperty(required = true) CompletionTarget completionTarget,
-                         ConnectionConfig connection,
-                         Duration timeout,
+                         @JsonProperty(required = true) ConnectionConfig connection,
+                         @JsonProperty(required = true) Duration timeout,
                          String acceptHeader /* e.g. application/sparql-results+json */,
-                         SPARQLProtocolRequestFactory.RequestType requestType,
+                         @JsonProperty(required = true) SPARQLProtocolRequestFactory.RequestType requestType,
                          boolean parseResults
     ) implements HttpWorker.Config {
+        public Config(Integer number, QueryHandler queries, CompletionTarget completionTarget, ConnectionConfig connection, Duration timeout, String acceptHeader, SPARQLProtocolRequestFactory.RequestType requestType, boolean parseResults) {
+            this.number = number == null ? 1 : number;
+            this.queries = queries;
+            this.completionTarget = completionTarget;
+            this.connection = connection;
+            this.timeout = timeout;
+            this.acceptHeader = acceptHeader;
+            this.requestType = requestType;
+            this.parseResults = parseResults;
+        }
     }
 
     private Config config() {
@@ -144,49 +154,49 @@ public class SPARQLProtocolWorker extends HttpWorker {
             List<ExecutionStats> executionStats = new Vector<>();
             try {
 
-            if (config().completionTarget() instanceof QueryMixes queryMixes) {
-                for (int i = 0; i < queryMixes.number(); i++) {
-                    for (int j = 0; j < config().queryHandler().getQueryCount(); j++) {
+                if (config().completionTarget() instanceof QueryMixes queryMixes) {
+                    for (int i = 0; i < queryMixes.number(); i++) {
+                        for (int j = 0; j < config().queries().getQueryCount(); j++) {
                             HttpExecutionResult httpExecutionResult = executeHttpRequest(config().timeout());
 
-                        // TODO: process result and extract relevant infos
-                        // TODO: warp stuff from TimeLimit into a function and use here as well
-                    }
-
-                }
-            } else if (config().completionTarget() instanceof TimeLimit timeLimit) {
-                final Instant endTime = Instant.now().plus(timeLimit.duration());
-                Instant now;
-                while ((now = Instant.now()).isBefore(endTime)) {
-                    final Duration timeToEnd = Duration.between(now, endTime);
-                    final boolean timeoutBeforeEnd = config().timeout().compareTo(timeToEnd) > 0;
-                    final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? config().timeout() : timeToEnd;
-                    HttpExecutionResult result = executeHttpRequest(thisQueryTimeOut);
-
-
-                    int statusCode = -1;
-                    if (result.completed()) {
-                        statusCode = result.response().statusCode();
-                        if (statusCode / 100 == 2) { // 2xx
-                            // process result
-                            boolean bbaosConsumed = responseBodyProcessor.add(result.actualContentLength(), result.hash(), result.outputStream());
-                            // TODO: if not bbaosConsumed reset() it and reuse it for the next query.
+                            // TODO: process result and extract relevant infos
+                            // TODO: warp stuff from TimeLimit into a function and use here as well
                         }
+
                     }
-                    // TODO: this should be no checked in code ont in an assertion.
-                    assert result.actualContentLength() == result.response().headers().firstValueAsLong("Content-Length").getAsLong();
+                } else if (config().completionTarget() instanceof TimeLimit timeLimit) {
+                    final Instant endTime = Instant.now().plus(timeLimit.duration());
+                    Instant now;
+                    while ((now = Instant.now()).isBefore(endTime)) {
+                        final Duration timeToEnd = Duration.between(now, endTime);
+                        final boolean timeoutBeforeEnd = config().timeout().compareTo(timeToEnd) > 0;
+                        final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? config().timeout() : timeToEnd;
+                        HttpExecutionResult result = executeHttpRequest(thisQueryTimeOut);
 
-                    executionStats.add(new ExecutionStats(result.requestStart(),
-                            (result.completed()) ? Optional.of(result.duration) : Optional.empty(),
-                            statusCode,
-                            result.actualContentLength(),
-                            result.hash,
-                            result.exception()
-                    ));
-                    // TODO: If timed out, decide based on timeoutBeforeEnd if it counts as failed or not
+
+                        int statusCode = -1;
+                        if (result.completed()) {
+                            statusCode = result.response().statusCode();
+                            if (statusCode / 100 == 2) { // 2xx
+                                // process result
+                                boolean bbaosConsumed = responseBodyProcessor.add(result.actualContentLength(), result.hash(), result.outputStream());
+                                // TODO: if not bbaosConsumed reset() it and reuse it for the next query.
+                            }
+                        }
+                        // TODO: this should be no checked in code ont in an assertion.
+                        assert result.actualContentLength() == result.response().headers().firstValueAsLong("Content-Length").getAsLong();
+
+                        executionStats.add(new ExecutionStats(result.requestStart(),
+                                (result.completed()) ? Optional.of(result.duration) : Optional.empty(),
+                                statusCode,
+                                result.actualContentLength(),
+                                result.hash,
+                                result.exception()
+                        ));
+                        // TODO: If timed out, decide based on timeoutBeforeEnd if it counts as failed or not
+                    }
+
                 }
-
-            }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (URISyntaxException e) {
@@ -210,7 +220,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
     private HttpExecutionResult executeHttpRequest(Duration thisQueryTimeOut) throws IOException, URISyntaxException {
-        final QueryHandler.QueryHandle queryHandle = config().queryHandler().getNextQueryStream();
+        final QueryHandler.QueryStreamWrapper queryHandle = config().queries().getNextQueryStream();
         final HttpRequest request = requestFactory.buildHttpRequest(
                 queryHandle.queryInputStream(),
                 queryHandle.index(),

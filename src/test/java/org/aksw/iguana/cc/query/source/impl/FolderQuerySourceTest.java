@@ -32,20 +32,14 @@ public class FolderQuerySourceTest {
         int numberOfQueries;
     }
 
-    public static class Query implements Comparable<Query> {
-        public Query(Path queryFile, String content) {
-            this.queryFile = queryFile;
-            this.content = content;
-        }
-
-        Path queryFile;
-        String content;
+    public record Query(Path queryFile, String content) implements Comparable<Query> {
 
         @Override
         public int compareTo(Query other) {
             return this.queryFile.compareTo(other.queryFile);
         }
     }
+
 
     List<Query> queries;
 
