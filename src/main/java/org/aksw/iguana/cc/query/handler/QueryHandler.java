@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * The QueryHandler is used by every worker that extends the AbstractWorker.
@@ -27,7 +28,7 @@ import java.nio.file.Path;
  */
 public class QueryHandler {
 
-    public record Config(@JsonProperty(required = true) String path,
+    public record Config(String path,
                          Format format,
                          Boolean caching,
                          Order order,
@@ -35,7 +36,7 @@ public class QueryHandler {
                          Language lang
     ) {
 
-        public Config(String path, Format format, Boolean caching, Order order, Long seed, Language lang) {
+        public Config(@JsonProperty(required = true) String path, Format format, Boolean caching, Order order, Long seed, Language lang) {
             this.path = path;
             this.format = format == null ? Format.ONE_PER_LINE : format;
             this.caching = caching == null ? true : caching;
@@ -53,10 +54,7 @@ public class QueryHandler {
 
             @JsonCreator
             Format(String value) {
-                if (value == null)
-                    this.value = "one-per-line";
-                else
-                    this.value = value;
+                this.value = Objects.requireNonNullElse(value, "one-per-line");
             }
 
             @JsonValue

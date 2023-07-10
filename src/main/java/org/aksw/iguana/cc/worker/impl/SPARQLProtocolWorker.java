@@ -1,6 +1,8 @@
 package org.aksw.iguana.cc.worker.impl;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
@@ -30,11 +32,23 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     public final static class SPARQLProtocolRequestFactory {
         public enum RequestType {
-            GET_QUERY,
-            POST_URL_ENC_QUERY,
-            POST_QUERY,
-            POST_URL_ENC_UPDATE,
-            POST_UPDATE
+            GET_QUERY("get query"),
+            POST_URL_ENC_QUERY("post url-enc query"),
+            POST_QUERY("post query"),
+            POST_URL_ENC_UPDATE("post url-enc update"),
+            POST_UPDATE("post update");
+
+            private final String value;
+
+            @JsonCreator
+            RequestType(String value) {
+                this.value = Objects.requireNonNullElse(value, "one-per-line");
+            }
+
+            @JsonValue
+            public String value() {
+                return value;
+            }
         }
 
         private final RequestType requestType;
@@ -55,8 +69,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
                                             URI endpoint,
                                             String requestHeader) throws URISyntaxException, IOException {
             HttpRequest.Builder request = HttpRequest.newBuilder()
-                    .timeout(timeout)
-                    .header("Accept", requestHeader);
+                    .timeout(timeout);
+            if (requestHeader != null)
+                    request.header("Accept", requestHeader);
             switch (this.requestType) {
                 case GET_QUERY -> {
                     request.uri(new URIBuilder(endpoint)
@@ -111,22 +126,29 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     //    @JsonTypeName("SPARQLProtocolWorker")
     public record Config(Integer number,
-                         @JsonProperty(required = true) QueryHandler queries,
-                         @JsonProperty(required = true) CompletionTarget completionTarget,
-                         @JsonProperty(required = true) ConnectionConfig connection,
-                         @JsonProperty(required = true) Duration timeout,
+                         QueryHandler queries,
+                         CompletionTarget completionTarget,
+                         ConnectionConfig connection,
+                         Duration timeout,
                          String acceptHeader /* e.g. application/sparql-results+json */,
-                         @JsonProperty(required = true) SPARQLProtocolRequestFactory.RequestType requestType,
+                         SPARQLProtocolRequestFactory.RequestType requestType,
                          boolean parseResults
     ) implements HttpWorker.Config {
-        public Config(Integer number, QueryHandler queries, CompletionTarget completionTarget, ConnectionConfig connection, Duration timeout, String acceptHeader, SPARQLProtocolRequestFactory.RequestType requestType, boolean parseResults) {
+        public Config(Integer number,
+                      @JsonProperty(required = true) QueryHandler queries,
+                      @JsonProperty(required = true) CompletionTarget completionTarget,
+                      @JsonProperty(required = true) ConnectionConfig connection,
+                      @JsonProperty(required = true) Duration timeout,
+                      String acceptHeader,
+                      SPARQLProtocolRequestFactory.RequestType requestType,
+                      boolean parseResults) {
             this.number = number == null ? 1 : number;
             this.queries = queries;
             this.completionTarget = completionTarget;
             this.connection = connection;
             this.timeout = timeout;
             this.acceptHeader = acceptHeader;
-            this.requestType = requestType;
+            this.requestType = requestType == null ? SPARQLProtocolRequestFactory.RequestType.GET_QUERY : requestType;
             this.parseResults = parseResults;
         }
     }

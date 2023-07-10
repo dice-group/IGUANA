@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.networknt.schema.JsonSchema;
@@ -95,12 +96,69 @@ public class IguanaSuiteParser {
      * @throws IOException
      */
     private static SuiteConfigWithID parse(InputStream inputStream, JsonFactory factory, Boolean validate) throws IOException {
-        final ObjectMapper mapper = new ObjectMapper(factory);
+        ObjectMapper mapper = new ObjectMapper(factory);
 
-        String input = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        final var input = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         final var datasets = preparseDataset(mapper, input);
 
+        class DatasetDeserializer extends StdDeserializer<DatasetConfig> {
+            public DatasetDeserializer() {
+                this(null);
+            }
+
+            protected DatasetDeserializer(Class<?> vc) {
+                super(vc);
+            }
+
+            @Override
+            public DatasetConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+                JsonNode node = jp.getCodec().readTree(jp);
+                if (node.isTextual()) {
+                    final var datasetName = node.asText();
+                    if (!datasets.containsKey(datasetName))
+                        throw new IllegalStateException(MessageFormat.format("Unknown dataset name: {0}", datasetName));
+                    return datasets.get(datasetName);
+                } else {
+                    DatasetConfig datasetConfig = ctxt.readValue(jp, DatasetConfig.class);
+                    if (datasets.containsKey(datasetConfig.name()))
+                        assert datasets.get(datasetConfig.name()) == datasetConfig;
+                    else datasets.put(datasetConfig.name(), datasetConfig);
+                    return datasetConfig; // TODO: double check if this really works
+                }
+            }
+        }
+        mapper = new ObjectMapper(factory).registerModule(new SimpleModule()
+                .addDeserializer(DatasetConfig.class, new DatasetDeserializer()));
+
         final var connections = preparseConnections(mapper, input);
+
+        class ConnectionDeserializer extends StdDeserializer<ConnectionConfig> {
+
+            public ConnectionDeserializer() {
+                this(null);
+            }
+
+            protected ConnectionDeserializer(Class<?> vc) {
+                super(vc);
+            }
+
+            @Override
+            public ConnectionConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+                JsonNode node = jp.getCodec().readTree(jp);
+                if (node.isTextual()) {
+                    final var connectionName = node.asText();
+                    if (!connections.containsKey(connectionName))
+                        throw new IllegalStateException(MessageFormat.format("Unknown connection name: {0}", connectionName));
+                    return connections.get(connectionName);
+                } else {
+                    ConnectionConfig connectionConfig = ctxt.readValue(jp, ConnectionConfig.class);
+                    if (connections.containsKey(connectionConfig.name()))
+                        assert connections.get(connectionConfig.name()) == connectionConfig;
+                    else connections.put(connectionConfig.name(), connectionConfig);
+                    return connectionConfig; // TODO: double check if this really works
+                }
+            }
+        }
 
         final var queryHandlers = new HashMap<QueryHandler.Config, QueryHandler>();
 
@@ -159,12 +217,13 @@ public class IguanaSuiteParser {
         }
 
 
-        mapper.registerModule(new JavaTimeModule())
+        mapper = new ObjectMapper(factory).registerModule(new JavaTimeModule())
                 .registerModule(new SimpleModule()
+                        .addDeserializer(DatasetConfig.class, new DatasetDeserializer())
+                        .addDeserializer(ConnectionConfig.class, new ConnectionDeserializer())
                         .addDeserializer(QueryHandler.class, new QueryHandlerDeserializer())
-                        .addDeserializer(Duration.class, new HumanReadableDurationDeserializer()))
-        ;
-        // TODO: update validator
+                        .addDeserializer(Duration.class, new HumanReadableDurationDeserializer()));
+        // TODO: update validator and reactivate
 //        if(validate && !validateConfig(config, schemaFile, mapper)){
 //            return null;
 //        }
@@ -185,37 +244,7 @@ public class IguanaSuiteParser {
         }
         final var preparsingDatasets = mapper.readValue(input, PreparsingDatasets.class);
 
-        final var datasets = preparsingDatasets.datasets().stream().collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
-
-        class DatasetDeserializer extends StdDeserializer<DatasetConfig> {
-            public DatasetDeserializer() {
-                this(null);
-            }
-
-            protected DatasetDeserializer(Class<?> vc) {
-                super(vc);
-            }
-
-            @Override
-            public DatasetConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-                JsonNode node = jp.getCodec().readTree(jp);
-                if (node.isTextual()) {
-                    final var datasetName = node.asText();
-                    if (!datasets.containsKey(datasetName))
-                        throw new IllegalStateException(MessageFormat.format("Unknown dataset name: {0}", datasetName));
-                    return datasets.get(datasetName);
-                } else {
-                    DatasetConfig datasetConfig = ctxt.readValue(jp, DatasetConfig.class);
-                    if (datasets.containsKey(datasetConfig.name()))
-                        assert datasets.get(datasetConfig.name()) == datasetConfig;
-                    else datasets.put(datasetConfig.name(), datasetConfig);
-                    return datasetConfig; // TODO: double check if this really works
-                }
-            }
-        }
-        mapper.registerModule(new SimpleModule()
-                .addDeserializer(DatasetConfig.class, new DatasetDeserializer()));
-        return datasets;
+        return preparsingDatasets.datasets().stream().collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
     }
 
     private static Map<String, ConnectionConfig> preparseConnections(ObjectMapper mapper, String input) throws JsonProcessingException {
@@ -224,38 +253,7 @@ public class IguanaSuiteParser {
         }
         final var preparsingConnections = mapper.readValue(input, PreparsingConnections.class);
 
-        final var connections = preparsingConnections.connections().stream().collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
-
-        class ConnectionDeserializer extends StdDeserializer<ConnectionConfig> {
-
-            public ConnectionDeserializer() {
-                this(null);
-            }
-
-            protected ConnectionDeserializer(Class<?> vc) {
-                super(vc);
-            }
-
-            @Override
-            public ConnectionConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-                JsonNode node = jp.getCodec().readTree(jp);
-                if (node.isTextual()) {
-                    final var connectionName = node.asText();
-                    if (!connections.containsKey(connectionName))
-                        throw new IllegalStateException(MessageFormat.format("Unknown connection name: {0}", connectionName));
-                    return connections.get(connectionName);
-                } else {
-                    ConnectionConfig connectionConfig = ctxt.readValue(jp, ConnectionConfig.class);
-                    if (connections.containsKey(connectionConfig.name()))
-                        assert connections.get(connectionConfig.name()) == connectionConfig;
-                    else connections.put(connectionConfig.name(), connectionConfig);
-                    return connectionConfig; // TODO: double check if this really works
-                }
-            }
-        }
-        mapper.registerModule(new SimpleModule()
-                .addDeserializer(ConnectionConfig.class, new ConnectionDeserializer()));
-        return connections;
+        return preparsingConnections.connections().stream().collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
     }
 
     private static boolean validateConfig(Path config, String schemaFile, ObjectMapper mapper) throws IOException {

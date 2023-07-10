@@ -7,6 +7,7 @@ connections:
     user: "dba"
     password: "dba"
     endpoint: "http://localhost:8890/sparql"
+    dataset: DatasetName
   - name: "Virtuoso6"
     user: "dba"
     password: "dba"
@@ -28,6 +29,7 @@ tasks:
       queries:
         path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
       timeout: 0.02s
+      connection: Virtuoso7
       completionTarget:
         duration: 1000s
     workers:
@@ -36,10 +38,15 @@ tasks:
         queries:
           path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
         timeout: 180s
+        connection: Virtuoso7
         completionTarget:
           duration: 1000s
+        requestType: get query
       - number: 4
         type: "SPARQLProtocolWorker"
+        connection: Virtuoso7
+        completionTarget:
+          duration: 1000s
         queries:
           path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
         timeout: 100s
@@ -47,13 +54,19 @@ tasks:
   - type: stresstest
     workers:
       - type: "SPARQLProtocolWorker"
+        connection: Virtuoso7
         number: 16
+        requestType: get query
         queries:
           path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
         timeout: 180s
         completionTarget:
           duration: 1000s
       - number: 4
+        requestType: get query
+        connection: Virtuoso7
+        completionTarget:
+          duration: 1000s
         type: "SPARQLProtocolWorker"
         queries:
           path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"

@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
-import org.aksw.iguana.cc.lang2.LanguageProcessor;
+import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.commons.io.BigByteArrayInputStream;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.slf4j.Logger;
@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.*;
 
 public class ResponseBodyProcessor {

@@ -1,8 +1,6 @@
 package org.aksw.iguana.cc.controller;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.*;
 import org.aksw.iguana.cc.suite.IguanaSuiteParser;
 import org.aksw.iguana.cc.suite.Suite;
 import org.slf4j.Logger;
@@ -17,15 +15,24 @@ import java.nio.file.Path;
  */
 public class MainController {
 
+
     public static class Args {
-        @Parameter(description = "Suite file describing the configuration of the experiment.")
-        private Path suitePath;
+        public class PathConverter implements IStringConverter<Path> {
+            @Override
+            public Path convert(String value) {
+                return Path.of(value);
+            }
+        }
+
 
         @Parameter(names = {"--ignore-schema", "-is"}, description = "Do not check the schema before parsing the suite file.")
         private boolean ignoreShema = false;
 
         @Parameter(names = "--help", help = true)
         private boolean help;
+
+        @Parameter(description = "suite file {yml,yaml,json}", arity = 1, required = true, converter = PathConverter.class)
+        private Path suitePath;
     }
 
 
