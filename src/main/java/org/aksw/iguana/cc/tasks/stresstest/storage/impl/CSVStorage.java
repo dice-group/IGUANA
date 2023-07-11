@@ -55,7 +55,7 @@ public class CSVStorage implements Storage {
         this.folder = parentFolder.resolve(IguanaConfig.getSuiteID());
         this.taskFile = this.folder.resolve("tasks-overview.csv");
 
-        if (!Files.exists(parentFolder)) {
+        if (Files.notExists(parentFolder)) {
             try {
                 Files.createDirectory(parentFolder);
             } catch (IOException e) {
@@ -64,7 +64,7 @@ public class CSVStorage implements Storage {
             }
         }
 
-        if (!Files.exists(folder)) {
+        if (Files.notExists(folder)) {
             try {
                 Files.createDirectory(folder);
             } catch (IOException e) {
@@ -192,7 +192,7 @@ public class CSVStorage implements Storage {
         String filename = String.join("-", nameValues) + ".csv";
         Path file = this.folder.resolve(filename);
         Files.createFile(file);
-        return this.folder.resolve(file);
+        return file;
     }
 
     private static void storeQueryResults(Resource parentRes, Path file, Model data) throws IOException, NoSuchElementException {
