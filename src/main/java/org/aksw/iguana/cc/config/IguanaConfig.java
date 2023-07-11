@@ -59,6 +59,7 @@ public class IguanaConfig {
 	@JsonProperty
 	private List<StorageConfig> storages;
 
+	private static String suiteID = generateSuiteID();
 
 	/**
 	 * starts the config
@@ -69,7 +70,7 @@ public class IguanaConfig {
 		initResultProcessor();
 		TaskController controller = new TaskController();
 		//get SuiteID
-		String suiteID = generateSuiteID();
+		suiteID = generateSuiteID();
 		//generate ExpID
 		int expID = 0;
 
@@ -145,23 +146,27 @@ public class IguanaConfig {
 			metrics.add(config);
 		}
 
+		// Create Metrics
+		// Metrics should be created before the Storages
+		List<Metric> metrics = new ArrayList<>();
+		for(MetricConfig config : this.metrics) {
+			metrics.add(config.createMetric());
+		}
+		MetricManager.setMetrics(metrics);
+
 		//Create Storages
 		List<Storage> storages = new ArrayList<>();
 		for(StorageConfig config : this.storages){
 			storages.add(config.createStorage());
 		}
-		//Create Metrics
-		List<Metric> metrics = new ArrayList<>();
-		for(MetricConfig config : this.metrics){
-			metrics.add(config.createMetric());
-		}
-
 		StorageManager.getInstance().addStorages(storages);
-		MetricManager.setMetrics(metrics);
 	}
 
+	public static String getSuiteID() {
+		return suiteID;
+	}
 
-	private String generateSuiteID() {
+	private static String generateSuiteID() {
 		int currentTimeMillisHashCode = Math.abs(Long.valueOf(Instant.now().getEpochSecond()).hashCode());
 		return String.valueOf(currentTimeMillisHashCode);
 	}
