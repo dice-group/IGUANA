@@ -37,7 +37,7 @@ tasks:
         number: 16
         queries:
           path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
-        timeout: 180s
+        timeout: 3m
         connection: Virtuoso7
         completionTarget:
           duration: 1000s
@@ -71,6 +71,7 @@ tasks:
         queries:
           path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
         timeout: 100s
+        parseResults: true
         acceptHeader: "application/sparql-results+json"
 
 #optional otherwise an nt file will be used

@@ -40,7 +40,7 @@ public class Stresstest implements Task {
             long stresstestId,
             List<HttpWorker.Result> warmup,
             List<HttpWorker.Result> main
-    ) {
+    ) implements Task.Config {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stresstest.class);

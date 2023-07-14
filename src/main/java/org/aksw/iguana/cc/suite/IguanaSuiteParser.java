@@ -227,6 +227,7 @@ public class IguanaSuiteParser {
 //        if(validate && !validateConfig(config, schemaFile, mapper)){
 //            return null;
 //        }
+        // TODO: use date or something random as source for the suite ID
         return new SuiteConfigWithID(input.hashCode(), mapper.readValue(input, Suite.Config.class));
     }
 

@@ -42,7 +42,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             @JsonCreator
             RequestType(String value) {
-                this.value = Objects.requireNonNullElse(value, "one-per-line");
+                this.value = Objects.requireNonNullElse(value, "get query");
             }
 
             @JsonValue
