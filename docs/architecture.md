@@ -55,6 +55,7 @@ Per run metrics:
 
 Per query metrics:
 * Queries Per Second (QPS)
+* Penalized Queries Per Second (PQPS)
 * Number of successful and failed queries
 * result size
 * queries per second
