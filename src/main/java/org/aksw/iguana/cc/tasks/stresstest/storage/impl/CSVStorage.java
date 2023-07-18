@@ -1,7 +1,9 @@
 package org.aksw.iguana.cc.tasks.stresstest.storage.impl;
 
+import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 import org.aksw.iguana.cc.config.IguanaConfig;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.*;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.impl.AggregatedExecutionStatistics;
@@ -9,14 +11,16 @@ import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
+import org.apache.jena.arq.querybuilder.SelectBuilder;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.sparql.lang.sparql_11.ParseException;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -73,7 +77,6 @@ public class CSVStorage implements Storage {
             }
         }
 
-        // write headers for the tasks.csv file
         try {
             Files.createFile(taskFile);
         } catch (IOException e) {
@@ -81,11 +84,12 @@ public class CSVStorage implements Storage {
             return;
         }
 
+        // write headers for the tasks.csv file
         // This only works because the metrics are initialized sooner
         try (CSVWriter csvWriter = getCSVWriter(taskFile)) {
             Metric[] taskMetrics = MetricManager.getMetrics().stream().filter(x -> TaskMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
             List<String> headerList = new LinkedList<>();
-            headerList.addAll(List.of("dataset", "connection", "startDate", "endDate", "noOfWorkers"));
+            headerList.addAll(List.of("connection", "dataset", "startDate", "endDate", "noOfWorkers"));
             headerList.addAll(Arrays.stream(taskMetrics).map(Metric::getAbbreviation).toList());
             String[] header = headerList.toArray(String[]::new);
             csvWriter.writeNext(header, true);
@@ -112,31 +116,28 @@ public class CSVStorage implements Storage {
             storeTaskResults(data);
         } catch (IOException e) {
             LOGGER.error("Error while storing the task result in a csv file.", e);
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | ParseException e) {
             LOGGER.error("Error while storing the task result in a csv file. The given model is probably incorrect.", e);
         }
 
-        // if there is only one worker, the values are going to be the same as from the task
-        if (workerResources.size() > 1) {
-            try {
-                Path temp = createCSVFile(dataset, connection, connectionVersion, "worker");
-                storeWorkerResults(workerResources, temp, data);
-                for (Resource workerRes : workerResources) {
-                    String workerID = data.listObjectsOfProperty(workerRes, IPROP.workerID).next().asLiteral().getLexicalForm();
-                    try {
-                        Path file = createCSVFile(dataset, connection, connectionVersion, "worker", "query", workerID);
-                        storeQueryResults(workerRes, file, data);
-                    } catch (IOException e) {
-                        LOGGER.error("Error while storing the query results of a worker in a csv file.", e);
-                    } catch (NoSuchElementException e) {
-                        LOGGER.error("Error while storing the query results of a worker in a csv file. The given model is probably incorrect.", e);
-                    }
+        try {
+            Path temp = createCSVFile(dataset, connection, connectionVersion, "worker");
+            storeWorkerResults(this.taskRes, temp, data);
+            for (Resource workerRes : workerResources) {
+                String workerID = data.listObjectsOfProperty(workerRes, IPROP.workerID).next().asLiteral().getLexicalForm();
+                try {
+                    Path file = createCSVFile(dataset, connection, connectionVersion, "worker", "query", workerID);
+                    storeQueryResults(workerRes, file, data);
+                } catch (IOException e) {
+                    LOGGER.error("Error while storing the query results of a worker in a csv file.", e);
+                } catch (NoSuchElementException e) {
+                    LOGGER.error("Error while storing the query results of a worker in a csv file. The given model is probably incorrect.", e);
                 }
-            } catch (IOException e) {
-                LOGGER.error("Error while storing the worker results in a csv file.", e);
-            } catch (NoSuchElementException e) {
-                LOGGER.error("Error while storing the worker results in a csv file. The given model is probably incorrect.", e);
             }
+        } catch (IOException e) {
+            LOGGER.error("Error while storing the worker results in a csv file.", e);
+        } catch (NoSuchElementException e) {
+            LOGGER.error("Error while storing the worker results in a csv file. The given model is probably incorrect.", e);
         }
 
         try {
@@ -196,92 +197,59 @@ public class CSVStorage implements Storage {
     }
 
     private static void storeQueryResults(Resource parentRes, Path file, Model data) throws IOException, NoSuchElementException {
-        NodeIterator nodeIterator = data.listObjectsOfProperty(parentRes, IPROP.query);
-        List<Resource> queryResources = nodeIterator.toList().stream().map(RDFNode::asResource).toList();
-        int values = 1;
         boolean containsAggrStats = !MetricManager.getMetrics().stream().filter(AggregatedExecutionStatistics.class::isInstance).toList().isEmpty();
         Metric[] queryMetrics = MetricManager.getMetrics().stream().filter(x -> QueryMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
-        try (CSVWriter csvWriter = getCSVWriter(file)) {
-            List<String> headerList = new LinkedList<>();
-            headerList.add("queryID");
-            if (containsAggrStats) {
-                headerList.addAll(List.of("succeeded", "failed", "totalTime", "resultSize", "wrongCodes", "timeOuts", "unknownExceptions"));
-                values += 7;
-            }
-            headerList.addAll(Arrays.stream(queryMetrics).map(Metric::getAbbreviation).toList());
-            csvWriter.writeNext(headerList.toArray(String[]::new));
-            for (Resource queryRes : queryResources) {
-                String[] line = new String[values + queryMetrics.length];
-                line[0] = data.listObjectsOfProperty(queryRes, IPROP.queryID).next().toString();
-                if (containsAggrStats) {
-                    // might happen if queries weren't executed
-                    try {
-                        line[1] = data.listObjectsOfProperty(queryRes, IPROP.succeeded).next().asLiteral().getLexicalForm();
-                        line[2] = data.listObjectsOfProperty(queryRes, IPROP.failed).next().asLiteral().getLexicalForm();
-                        line[3] = data.listObjectsOfProperty(queryRes, IPROP.totalTime).next().asLiteral().getLexicalForm();
-                        line[4] = data.listObjectsOfProperty(queryRes, IPROP.resultSize).next().asLiteral().getLexicalForm();
-                        line[5] = data.listObjectsOfProperty(queryRes, IPROP.wrongCodes).next().asLiteral().getLexicalForm();
-                        line[6] = data.listObjectsOfProperty(queryRes, IPROP.timeOuts).next().asLiteral().getLexicalForm();
-                        line[7] = data.listObjectsOfProperty(queryRes, IPROP.unknownException).next().asLiteral().getLexicalForm();
-                    } catch (NoSuchElementException e) {
-                        continue;
-                    }
-                }
-                for (int i = 0; i < queryMetrics.length; i++) {
-                    try {
-                        line[values + i] = data.listObjectsOfProperty(queryRes, IPROP.createMetricProperty(queryMetrics[i])).next().asLiteral().getLexicalForm();
-                    } catch (NoSuchElementException e) {
-                        line[values + i] = "";
-                    }
-                }
-                csvWriter.writeNext(line, true);
-            }
+
+        SelectBuilder sb = new SelectBuilder();
+        sb.addWhere(parentRes, IPROP.query, "?eQ");
+        queryProperties(sb, "?eQ", IPROP.queryID);
+        if (containsAggrStats) {
+            queryProperties(sb, "?eQ", IPROP.succeeded, IPROP.failed, IPROP.totalTime, IPROP.resultSize, IPROP.wrongCodes, IPROP.timeOuts, IPROP.unknownException);
         }
+        queryMetrics(sb, "?eQ", queryMetrics);
+
+        executeAndStoreQuery(sb, file, data);
     }
 
-    private void storeTaskResults(Model data) throws IOException, NoSuchElementException {
-        final int values = 5;
+    private void storeTaskResults(Model data) throws IOException, NoSuchElementException, ParseException {
         Metric[] taskMetrics = MetricManager.getMetrics().stream().filter(x -> TaskMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
-        try (CSVWriter csvWriter = getCSVWriter(this.taskFile)) {
-            String[] line = new String[values + taskMetrics.length];
-            // taskID ?
-            line[0] = this.dataset;
-            line[1] = this.connection;
-            line[2] = data.listObjectsOfProperty(this.taskRes, IPROP.startDate).next().asLiteral().getLexicalForm();
-            line[3] = data.listObjectsOfProperty(this.taskRes, IPROP.endDate).next().asLiteral().getLexicalForm();
-            line[4] = String.valueOf(this.workerResources.size());
-            for (int i = 0; i < taskMetrics.length; i++) {
-                try {
-                    line[values + i] = data.listObjectsOfProperty(this.taskRes, IPROP.createMetricProperty(taskMetrics[i])).next().asLiteral().getLexicalForm();
-                } catch (NoSuchElementException ignored) {}
+
+        SelectBuilder sb = new SelectBuilder();
+        sb.addVar("connection")
+                .addWhere("?taskRes", IPROP.connection, "?connRes")
+                .addWhere("?connRes", RDFS.label, "?connection")
+                .addVar("dataset")
+                .addWhere("?expRes", IPROP.dataset, "?datasetRes")
+                .addWhere("?datasetRes", RDFS.label, "?dataset");
+        queryProperties(sb, String.format("<%s>", this.taskRes.toString()), IPROP.startDate, IPROP.endDate, IPROP.noOfWorkers);
+        queryMetrics(sb, String.format("<%s>", this.taskRes.toString()), taskMetrics);
+
+        try(QueryExecution exec = QueryExecutionFactory.create(sb.build(), data);
+            CSVWriter csvWriter = getCSVWriter(taskFile);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ResultSet results = exec.execSelect();
+            ResultSetFormatter.outputAsCSV(baos, results);
+
+            // workaround to remove the created header from the ResultSetFormatter
+            CSVReader reader = new CSVReader(new StringReader(baos.toString()));
+            try {
+                reader.readNext();
+                csvWriter.writeNext(reader.readNext(), true);
+            } catch (CsvValidationException ignored) {
+                // shouldn't happen
             }
-            csvWriter.writeNext(line, true);
         }
     }
 
-    private static void storeWorkerResults(List<Resource> workerResources, Path file, Model data) throws IOException, NoSuchElementException {
-        try (CSVWriter csvWriter = getCSVWriter(file)) {
-            Metric[] workerMetrics = MetricManager.getMetrics().stream().filter(x -> WorkerMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
-            List<String> headerList = new LinkedList<>();
-            headerList.addAll(List.of("workerID", "workerType", "noOfQueries", "timeOut"));
-            headerList.addAll(Arrays.stream(workerMetrics).map(Metric::getAbbreviation).toList());
-            csvWriter.writeNext(headerList.toArray(String[]::new));
-            for (Resource workerRes : workerResources) {
-                int defaultNumber = 4;
-                String[] line = new String[defaultNumber + workerMetrics.length];
-                line[0] = data.listObjectsOfProperty(workerRes, IPROP.workerID).next().asLiteral().getLexicalForm();
-                line[1] = data.listObjectsOfProperty(workerRes, IPROP.workerType).next().asLiteral().getLexicalForm();
-                line[2] = data.listObjectsOfProperty(workerRes, IPROP.noOfQueries).next().asLiteral().getLexicalForm();
-                line[3] = data.listObjectsOfProperty(workerRes, IPROP.timeOut).next().asLiteral().getLexicalForm();
-                for (int i = 0; i < workerMetrics.length; i++) {
-                    // Workers might miss metrics, which is fine
-                    try {
-                        line[defaultNumber + i] = data.listObjectsOfProperty(workerRes, IPROP.createMetricProperty(workerMetrics[i])).next().asLiteral().getLexicalForm();
-                    } catch (NoSuchElementException ignored) {}
-                }
-                csvWriter.writeNext(line, true);
-            }
-        }
+    private static void storeWorkerResults(Resource taskRes, Path file, Model data) throws IOException, NoSuchElementException {
+        Metric[] workerMetrics = MetricManager.getMetrics().stream().filter(x -> WorkerMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
+
+        SelectBuilder sb = new SelectBuilder();
+        sb.addWhere(taskRes, IPROP.workerResult, "?worker");
+        queryProperties(sb, "?worker", IPROP.workerID, IPROP.workerType, IPROP.noOfQueries, IPROP.timeOut);
+        queryMetrics(sb, "?worker", workerMetrics);
+
+        executeAndStoreQuery(sb, file, data);
     }
 
     private static CSVWriter getCSVWriter(Path file) throws IOException {
@@ -290,5 +258,25 @@ public class CSVStorage implements Storage {
                 .withSeparator(',')
                 .withLineEnd("\n")
                 .build();
+    }
+
+    private static void queryProperties(SelectBuilder sb, String variable, Property... properties) {
+        for (Property prop : properties) {
+            sb.addVar(prop.getLocalName()).addWhere(variable, prop, "?" + prop.getLocalName());
+        }
+    }
+
+    private static void queryMetrics(SelectBuilder sb, String variable, Metric[] metrics) {
+        for (Metric m : metrics) {
+            sb.addVar(m.getAbbreviation()).addWhere(variable, IPROP.createMetricProperty(m), "?" + m.getAbbreviation());
+        }
+    }
+
+    private static void executeAndStoreQuery(SelectBuilder sb, Path file, Model data) throws IOException {
+        try(QueryExecution exec = QueryExecutionFactory.create(sb.build(), data);
+            FileOutputStream fos = new FileOutputStream(file.toFile())) {
+            ResultSet results = exec.execSelect();
+            ResultSetFormatter.outputAsCSV(fos, results);
+        }
     }
 }

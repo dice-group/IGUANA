@@ -43,7 +43,11 @@ public class StresstestResultProcessor {
                 this.workerQueryExecutions[i][j] = new LinkedList<>();
             }
         }
+
         taskQueryExecutions = new HashMap<>();
+        for (String queryID : metadata.queryIDs()) {
+            taskQueryExecutions.put(queryID, new ArrayList<>());
+        }
     }
 
     /**
@@ -58,12 +62,7 @@ public class StresstestResultProcessor {
             int queryID = Integer.parseInt(stat.queryID().substring(stat.queryID().indexOf(":") + 1));
             workerQueryExecutions[worker.workerID()][queryID].add(stat);
 
-            if (taskQueryExecutions.containsKey(stat.queryID())) {
-                taskQueryExecutions.get(stat.queryID()).add(stat);
-            } else {
-                taskQueryExecutions.put(stat.queryID(), new LinkedList<>());
-                taskQueryExecutions.get(stat.queryID()).add(stat);
-            }
+            taskQueryExecutions.get(stat.queryID()).add(stat);
         }
     }
 
