@@ -4,6 +4,7 @@ import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.worker.WorkerMetadata;
 import org.aksw.iguana.cc.tasks.stresstest.metrics.*;
 import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
+import org.aksw.iguana.commons.rdf.IGUANA_BASE;
 import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.aksw.iguana.commons.rdf.IRES;
@@ -151,10 +152,7 @@ public class StresstestResultProcessor {
         m.add(taskRes, IPROP.startDate, ResourceFactory.createTypedLiteral(start));
         m.add(taskRes, IPROP.endDate, ResourceFactory.createTypedLiteral(end));
 
-        m.setNsPrefix(IPROP.PREFIX, IPROP.NS);
-        m.setNsPrefix(IONT.PREFIX, IONT.NS);
-        m.setNsPrefix(IRES.PREFIX, IRES.NS);
-        m.setNsPrefix("lsqr", "http://lsq.aksw.org/res/");
+        m.setNsPrefixes(IGUANA_BASE.PREFIX_MAP);
 
         StorageManager.getInstance().storeResult(m);
     }
