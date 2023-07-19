@@ -17,11 +17,12 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+
+import static org.aksw.iguana.commons.time.TimeUtils.toXSDDurationInSeconds;
 
 @Shorthand("AES")
 public class AggregatedExecutionStatistics extends Metric implements ModelWritingMetric {
@@ -92,7 +93,7 @@ public class AggregatedExecutionStatistics extends Metric implements ModelWritin
         m.add(queryRes, IPROP.timeOuts, ResourceFactory.createTypedLiteral(timeOuts));
         m.add(queryRes, IPROP.wrongCodes, ResourceFactory.createTypedLiteral(wrongCodes));
         m.add(queryRes, IPROP.unknownException, ResourceFactory.createTypedLiteral(unknownExceptions));
-        m.add(queryRes, IPROP.totalTime, ResourceFactory.createTypedLiteral(new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 6)));
+        m.add(queryRes, IPROP.totalTime, ResourceFactory.createTypedLiteral(toXSDDurationInSeconds(totalTime)));
         m.add(queryRes, RDF.type, IONT.executedQuery);
 
         return m;
