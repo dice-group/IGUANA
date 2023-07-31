@@ -184,6 +184,7 @@ public class BigByteArrayOutputStream extends OutputStream {
      */
     public void reset() {
         currentBaos = baosList.get(baosListIndex = 0);
+        currentBaos.reset();
     }
 
     /**
