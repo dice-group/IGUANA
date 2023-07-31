@@ -19,10 +19,7 @@ public class ResponseBodyProcessor {
         this.languageProcessor = LanguageProcessor.getInstance(contentType);
     }
 
-
-
-    public record Key(long contentLength, long xxh64) {
-    }
+    public record Key(long contentLength, long xxh64) { }
 
     private final ConcurrentHashMap.KeySetView<Key, Boolean> seenResponseBodies = ConcurrentHashMap.newKeySet();
 
@@ -41,7 +38,7 @@ public class ResponseBodyProcessor {
                 return true;
             }
         }
-        return false; // TODO: reuse bbaos in this case
+        return false;
     }
 
     private void submit(Key key, BigByteArrayOutputStream bigByteArrayOutputStream) {
@@ -51,6 +48,7 @@ public class ResponseBodyProcessor {
         });
     }
 
+    // TODO: integrate this in the stresstest
     public ConcurrentHashMap<Key, LanguageProcessor.LanguageProcessingData> getResponseDataMetrics() {
         final var timeout = Duration.ofMinutes(10);
         LOGGER.info(MessageFormat.format("Shutting down ResponseBodyProcessor with {0}min timeout to finish processing.\n{1} tasks remaining.", timeout.get(ChronoUnit.MINUTES), executor.getQueue().size()));
