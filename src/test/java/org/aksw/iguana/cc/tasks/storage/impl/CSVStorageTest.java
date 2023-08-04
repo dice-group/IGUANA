@@ -31,6 +31,7 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -128,7 +129,7 @@ public class CSVStorageTest {
 
         Path testFileFolder = Path.of("src/test/resources/storage/csv_test_files/");
 
-        return Arguments.of(new Suite(List.of(m), metrics, testFileFolder));
+        return Arguments.of(Named.of(String.format("One simple tasks with one faulty entry. | ExpectedFolder: %s | Metrics: %s", testFileFolder, metrics.stream().map(Metric::getAbbreviation).toList()), new Suite(List.of(m), metrics, testFileFolder)));
     }
 
     @AfterEach
@@ -144,14 +145,15 @@ public class CSVStorageTest {
 
     @ParameterizedTest
     @MethodSource("data")
+    @DisplayName("Test CSVStorage")
     public void testCSVStorage(Suite suite) throws IOException {
         for (Model m : suite.taskResults) {
             // Metrics need to be set here, because the CSVStorage uses the manager to store the results
             MetricManager.setMetrics(suite.metrics);
 
             // Test Initialisation
-            assertDoesNotThrow(() -> storage = new CSVStorage(this.folder.toAbsolutePath().toString()));
-            assertTrue(Files.exists(this.suiteFolder));
+            assertDoesNotThrow(() -> storage = new CSVStorage(this.folder.toAbsolutePath().toString()), "Initialisation failed");
+            assertTrue(Files.exists(this.suiteFolder), String.format("Result folder (%s) doesn't exist", this.suiteFolder));
             storage.storeResult(m);
 
             List<Path> expectedFiles;
@@ -161,7 +163,7 @@ public class CSVStorageTest {
 
             for (Path expectedFile : expectedFiles) {
                 Path actualFile = suiteFolder.resolve(expectedFile.getFileName());
-                assertTrue(Files.exists(actualFile));
+                assertTrue(Files.exists(actualFile), String.format("File (%s) doesn't exist", actualFile));
                 assertDoesNotThrow(() -> compareCSVFiles(expectedFile, actualFile));
             }
         }
@@ -172,9 +174,9 @@ public class CSVStorageTest {
              CSVReader readerActual = new CSVReader(new FileReader(actual.toFile()))) {
             String[] headerExpected = readerExpected.readNext();
             String[] headerActual = readerActual.readNext();
-            assertEquals(headerExpected.length, headerActual.length);
+            assertEquals(headerExpected.length, headerActual.length, String.format("Headers don't match. Actual: %s, Expected: %s", Arrays.toString(headerActual), Arrays.toString(headerExpected)));
             for (int i = 0; i < headerExpected.length; i++) {
-                assertEquals(headerExpected[i], headerActual[i]);
+                assertEquals(headerExpected[i], headerActual[i], String.format("Headers don't match. Actual: %s, Expected: %s", Arrays.toString(headerActual), Arrays.toString(headerExpected)));
             }
 
             List<String[]> expectedValues = new ArrayList<>(readerExpected.readAll());
@@ -188,11 +190,10 @@ public class CSVStorageTest {
                     return true;
                 }).toList();
 
-                assertFalse(sameLines.isEmpty());
+                assertFalse(sameLines.isEmpty(), String.format("Line (%s) not found in actual file", Arrays.toString(expectedLine)));
                 actualValues.remove(sameLines.get(0));
             }
-
-            assertTrue(actualValues.isEmpty());
+            assertTrue(actualValues.isEmpty(), String.format("Actual file contains more lines than expected. Lines: %s", actualValues.stream().map(x -> "[" + String.join(", ", x) + "]").collect(Collectors.joining("\n"))));
         }
     }
 
