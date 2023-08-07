@@ -21,12 +21,6 @@ For further information visit:
 - [iguana-benchmark.eu](http://iguana-benchmark.eu)
 - [Documentation](http://iguana-benchmark.eu/docs/3.3/)
 
-## Iguana Modules
-
-Iguana consists of two modules
-- **corecontroller** - this will benchmark the systems
-- **resultprocessor** - this will calculate the metrics and save the raw benchmark results
-
 ### Available metrics
 
 Per run metrics:
@@ -34,10 +28,12 @@ Per run metrics:
 * Number of Queries Per Hour (NoQPH)
 * Number of Queries (NoQ)
 * Average Queries Per Second (AvgQPS)
+* Penalized Average Queries Per Second (PAvgQPS)
 
 Per query metrics:
 * Queries Per Second (QPS)
-* number of successful and failed queries
+* Penalized Queries Per Second (PQPS)
+* Number of successful and failed queries
 * result size
 * queries per second
 * sum of execution times
@@ -46,7 +42,7 @@ Per query metrics:
 
 ### Prerequisites
 
-In order to run Iguana, you need to have `Java 11`, or greater, installed on your system.
+In order to run Iguana, you need to have `Java 17`, or greater, installed on your system.
 
 ### Download
 Download the newest release of Iguana [here](https://github.com/dice-group/IGUANA/releases/latest), or run on a unix shell:

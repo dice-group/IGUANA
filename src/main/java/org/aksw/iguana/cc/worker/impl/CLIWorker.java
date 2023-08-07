@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.worker.AbstractWorker;
 import org.aksw.iguana.commons.annotation.Nullable;
@@ -32,7 +32,7 @@ public class CLIWorker extends AbstractWorker {
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    public CLIWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
+    public CLIWorker(String taskID, Integer workerID, ConnectionConfig connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
         super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency);
     }
 

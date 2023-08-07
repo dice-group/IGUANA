@@ -1,8 +1,8 @@
 package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
 import org.aksw.iguana.commons.factory.TypedFactory;
-import org.aksw.iguana.rp.metrics.Metric;
 
 import java.util.HashMap;
 import java.util.Map;

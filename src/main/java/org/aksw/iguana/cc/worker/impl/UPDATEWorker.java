@@ -1,16 +1,14 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.worker.impl.update.UpdateTimer;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.commons.constants.COMMON;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Properties;
 
 import static org.aksw.iguana.commons.time.TimeUtils.durationInMilliseconds;
 
@@ -26,7 +24,7 @@ public class UPDATEWorker extends HttpPostWorker {
 
     private int queryCount;
 
-    public UPDATEWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String timerStrategy) {
+    public UPDATEWorker(String taskID, Integer workerID, ConnectionConfig connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, @Nullable String timerStrategy) {
         super(taskID, workerID, connection, queries, timeLimit, timeOut, fixedLatency, gaussianLatency, null, null, "application/sparql-update");
         this.timerStrategy = timerStrategy;
     }
@@ -51,19 +49,8 @@ public class UPDATEWorker extends HttpPostWorker {
     }
 
     @Override
-    public synchronized void addResults(QueryExecutionStats results) {
-        // create Properties store it in List
-        Properties result = new Properties();
-        result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-        result.put(COMMON.RECEIVE_DATA_TIME, results.getExecutionTime());
-        result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
-        result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
-        result.put(COMMON.QUERY_HASH, this.queryHash);
-        result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
-        result.put(COMMON.PENALTY, this.timeOut);
-        // Add extra Meta Key, worker ID and worker Type
-        result.put(COMMON.EXTRA_META_KEY, this.extra);
-        setResults(result);
+    public synchronized void addResults(QueryExecutionStats result) {
+        this.results.add(result);
         this.executedQueries++;
     }
 

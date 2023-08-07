@@ -1,0 +1,3 @@
+workerID,workerType,noOfQueries,timeOut,NoQ,NoQPH
+1,SPARQL,2,100,8,108
+2,LQRAPS,1,50,0,0

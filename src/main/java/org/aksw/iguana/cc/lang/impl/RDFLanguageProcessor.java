@@ -5,7 +5,8 @@ import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.vocab.Vocab;
+import org.aksw.iguana.commons.rdf.IONT;
+import org.aksw.iguana.commons.rdf.IPROP;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.jena.rdf.model.Model;
@@ -49,8 +50,9 @@ public class RDFLanguageProcessor extends AbstractLanguageProcessor implements L
         Model model = ModelFactory.createDefaultModel();
         for(QueryWrapper wrappedQuery : queries) {
             Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + "/" + wrappedQuery.getId());
-            model.add(subject, RDF.type, Vocab.queryClass);
-            model.add(subject, Vocab.rdfsID, wrappedQuery.getId().replace(queryPrefix, "").replace("sparql", ""));
+            model.add(subject, RDF.type, IONT.query);
+            // TODO: fix this
+            model.add(subject, IPROP.queryID, ResourceFactory.createTypedLiteral(wrappedQuery.getId()));
             model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
         }
         return model;

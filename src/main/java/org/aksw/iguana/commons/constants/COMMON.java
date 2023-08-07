@@ -91,13 +91,13 @@ public class COMMON {
 	public static final String WORKER_ID = "workerID";
 
 	/* Various status codes to denote the status of query execution and to prepare QueryExecutionStats object */
-	public static final Long QUERY_UNKNOWN_EXCEPTION = 0L;
+	public static final long QUERY_UNKNOWN_EXCEPTION = 0L;
 
-	public static final Long QUERY_SUCCESS = 1L;
+	public static final long QUERY_SUCCESS = 1L;
 
-	public static final Long QUERY_SOCKET_TIMEOUT = -1L;
+	public static final long QUERY_SOCKET_TIMEOUT = -1L;
 
-	public static final Long QUERY_HTTP_FAILURE = -2L;
+	public static final long QUERY_HTTP_FAILURE = -2L;
 
     public static final String EXPERIMENT_TASK_CLASS_ID_KEY = "actualTaskClass" ;
 

@@ -3,7 +3,7 @@
  */
 package org.aksw.iguana.cc.tasks;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -32,7 +32,7 @@ public class TaskManager {
 	 * @throws IOException
 	 * @throws TimeoutException
 	 */
-	public void startTask(String[] ids, String dataset, Connection con, String taskName) throws IOException, TimeoutException{
+	public void startTask(String[] ids, String dataset, ConnectionConfig con, String taskName) throws IOException, TimeoutException{
 		this.task.init(ids, dataset, con, taskName);
 		this.task.addMetaData();
 		this.task.start();

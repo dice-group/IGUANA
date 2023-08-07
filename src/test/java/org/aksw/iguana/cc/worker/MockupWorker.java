@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.commons.annotation.Nullable;
 
@@ -12,7 +12,7 @@ public class MockupWorker extends AbstractWorker {
     private int counter = 0;
     private final String[] queries;
 
-    public MockupWorker(String[] stringQueries, Integer workerID, @Nullable Integer timeLimit, Connection connection, String taskID) {
+    public MockupWorker(String[] stringQueries, Integer workerID, @Nullable Integer timeLimit, ConnectionConfig connection, String taskID) {
         super(taskID, workerID, connection, getQueryConfig(), 0, timeLimit, 0, 0);
         this.queries = stringQueries;
     }
@@ -29,20 +29,19 @@ public class MockupWorker extends AbstractWorker {
 
     @Override
     public void executeQuery(String query, String queryID) {
-        QueryExecutionStats results = new QueryExecutionStats();
         long execTime = this.workerID * 10 + 100;
+        long responseCode;
+        long resultSize;
         try {
             Thread.sleep(execTime);
-            results.setResponseCode(200);
-            results.setResultSize(this.workerID * 100 + 100);
+            responseCode = 200;
+            resultSize = this.workerID * 100 + 100;
         } catch (InterruptedException e) {
             e.printStackTrace();
-            results.setResponseCode(400);
-            results.setResultSize(0);
+            responseCode = 400;
+            resultSize = 0;
         }
-        results.setExecutionTime(execTime);
-        results.setQueryID(queryID);
-        super.addResults(results);
+        super.addResults(new QueryExecutionStats(queryID, responseCode, execTime, resultSize));
     }
 
     @Override
@@ -51,7 +50,7 @@ public class MockupWorker extends AbstractWorker {
             this.counter = 0;
         }
         queryStr.append(this.queries[this.counter]);
-        queryID.append("query").append(this.counter);
+        queryID.append("src/test/resources/mockupq.txt:").append(this.counter);
         this.counter++;
     }
 }

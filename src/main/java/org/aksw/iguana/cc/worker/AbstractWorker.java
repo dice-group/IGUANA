@@ -1,12 +1,10 @@
 package org.aksw.iguana.cc.worker;
 
-import org.aksw.iguana.cc.config.CONSTANTS;
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.commons.annotation.Nullable;
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -52,7 +50,7 @@ public abstract class AbstractWorker implements Worker {
      * The workerType is only used in logging messages.
      */
     protected String workerType;
-    protected Connection connection;
+    protected ConnectionConfig connection;
     protected Map<String, Object> queries;
 
     protected Double timeLimit;
@@ -62,16 +60,15 @@ public abstract class AbstractWorker implements Worker {
 
     protected boolean endSignal = false;
     protected long executedQueries;
-    protected Properties extra = new Properties();
     protected Instant startTime;
-    protected Connection con;
+    protected ConnectionConfig con;
     protected int queryHash;
     protected QueryHandler queryHandler;
-    private Collection<Properties> results = new LinkedList<>();
+    protected Collection<QueryExecutionStats> results = new LinkedList<>();
     private Random latencyRandomizer;
     private Long endAtNOQM = null;
 
-    public AbstractWorker(String taskID, Integer workerID, Connection connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
+    public AbstractWorker(String taskID, Integer workerID, ConnectionConfig connection, Map<String, Object> queries, @Nullable Integer timeLimit, @Nullable Integer timeOut, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency) {
         this.taskID = taskID;
         this.workerID = workerID;
         this.con = connection;
@@ -105,12 +102,6 @@ public abstract class AbstractWorker implements Worker {
      * send it if not aborted yet to the ResultProcessor Module
      */
     public void startWorker() {
-        // set extra meta key to send late
-        this.extra = new Properties();
-        this.extra.put(CONSTANTS.WORKER_ID_KEY, this.workerID);
-        this.extra.setProperty(CONSTANTS.WORKER_TYPE_KEY, this.workerType);
-        this.extra.put(CONSTANTS.WORKER_TIMEOUT_MS, this.timeOut);
-        this.extra.put(COMMON.NO_OF_QUERIES, this.queryHandler.getQueryCount());
         // For Update and Logging purpose get startTime of Worker
         this.startTime = Instant.now();
 
@@ -184,19 +175,9 @@ public abstract class AbstractWorker implements Worker {
     }
 
     public synchronized void addResults(QueryExecutionStats results) {
+        // TODO: check if statement for bugs, if the if line exists in the UpdateWorker, the UpdateWorker fails its tests
         if (!this.endSignal && !hasExecutedNoOfQueryMixes(this.endAtNOQM)) {
-            // create Properties store it in List
-            Properties result = new Properties();
-            result.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, this.taskID);
-            result.put(COMMON.RECEIVE_DATA_TIME, results.getExecutionTime());
-            result.put(COMMON.RECEIVE_DATA_SUCCESS, results.getResponseCode());
-            result.put(COMMON.RECEIVE_DATA_SIZE, results.getResultSize());
-            result.put(COMMON.QUERY_HASH, queryHash);
-            result.setProperty(COMMON.QUERY_ID_KEY, results.getQueryID());
-            result.put(COMMON.PENALTY, this.timeOut);
-            // Add extra Meta Key, worker ID and worker Type
-            result.put(COMMON.EXTRA_META_KEY, this.extra);
-            setResults(result);
+            this.results.add(results);
             this.executedQueries++;
 
             //
@@ -206,16 +187,12 @@ public abstract class AbstractWorker implements Worker {
         }
     }
 
-    protected synchronized void setResults(Properties result) {
-        this.results.add(result);
-    }
-
     @Override
-    public synchronized Collection<Properties> popQueryResults() {
+    public synchronized Collection<QueryExecutionStats> popQueryResults() {
         if (this.results.isEmpty()) {
             return null;
         }
-        Collection<Properties> ret = this.results;
+        Collection<QueryExecutionStats> ret = this.results;
         this.results = new LinkedList<>();
         return ret;
     }
@@ -287,5 +264,17 @@ public abstract class AbstractWorker implements Worker {
         } else {
             this.workerType = this.getClass().getName();
         }
+    }
+
+    @Override
+    public WorkerMetadata getMetadata() {
+        return new WorkerMetadata(
+                this.workerID,
+                this.workerType,
+                this.timeOut,
+                this.queryHandler.getQueryCount(),
+                this.queryHandler.hashCode(),
+                this.queryHandler.getAllQueryIds()
+        );
     }
 }

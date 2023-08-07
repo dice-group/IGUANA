@@ -6,8 +6,8 @@ import org.aksw.iguana.cc.lang.QueryWrapper;
 import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
-import org.aksw.iguana.rp.vocab.Vocab;
-import org.apache.commons.lang.StringUtils;
+import org.aksw.iguana.commons.rdf.IONT;
+import org.aksw.iguana.commons.rdf.IPROP;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -70,23 +70,24 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
         Model model = ModelFactory.createDefaultModel();
         for(QueryWrapper wrappedQuery : queries) {
             Resource subject = ResourceFactory.createResource(COMMON.RES_BASE_URI + resourcePrefix + "/" + wrappedQuery.getId());
-            model.add(subject, RDF.type, Vocab.queryClass);
-            model.add(subject, Vocab.rdfsID, wrappedQuery.getId().replace("sparql", ""));
+            model.add(subject, RDF.type, IONT.query);
+            // TODO: queryID is already used in a different context
+            model.add(subject, IPROP.queryID, ResourceFactory.createTypedLiteral(wrappedQuery.getId()));
             model.add(subject, RDFS.label, wrappedQuery.getQuery().toString());
             try {
                 Query q = QueryFactory.create(wrappedQuery.getQuery().toString());
                 SPARQLQueryStatistics qs2 = new SPARQLQueryStatistics();
                 qs2.getStatistics(q);
 
-                model.add(subject, Vocab.aggrProperty, model.createTypedLiteral(qs2.aggr==1));
-                model.add(subject, Vocab.filterProperty, model.createTypedLiteral(qs2.filter==1));
-                model.add(subject, Vocab.groupByProperty, model.createTypedLiteral(qs2.groupBy==1));
-                model.add(subject, Vocab.havingProperty, model.createTypedLiteral(qs2.having==1));
-                model.add(subject, Vocab.triplesProperty, model.createTypedLiteral(qs2.triples));
-                model.add(subject, Vocab.offsetProperty, model.createTypedLiteral(qs2.offset==1));
-                model.add(subject, Vocab.optionalProperty, model.createTypedLiteral(qs2.optional==1));
-                model.add(subject, Vocab.orderByProperty, model.createTypedLiteral(qs2.orderBy==1));
-                model.add(subject, Vocab.unionProperty, model.createTypedLiteral(qs2.union==1));
+                model.add(subject, IPROP.aggregations, model.createTypedLiteral(qs2.aggr==1));
+                model.add(subject, IPROP.filter, model.createTypedLiteral(qs2.filter==1));
+                model.add(subject, IPROP.groupBy, model.createTypedLiteral(qs2.groupBy==1));
+                model.add(subject, IPROP.having, model.createTypedLiteral(qs2.having==1));
+                model.add(subject, IPROP.triples, model.createTypedLiteral(qs2.triples));
+                model.add(subject, IPROP.offset, model.createTypedLiteral(qs2.offset==1));
+                model.add(subject, IPROP.optional, model.createTypedLiteral(qs2.optional==1));
+                model.add(subject, IPROP.orderBy, model.createTypedLiteral(qs2.orderBy==1));
+                model.add(subject, IPROP.union, model.createTypedLiteral(qs2.union==1));
                 model.add(subject, OWL.sameAs, getLSQHash(q));
             }catch(Exception e){
                 LOGGER.warn("Query statistics could not be created. Not using SPARQL?");

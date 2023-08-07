@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
+import org.aksw.iguana.cc.model.QueryExecutionStats;
 import org.aksw.iguana.cc.utils.FileUtils;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.junit.After;
@@ -33,7 +34,7 @@ public class CLIWorkersTests {
 
     @Test
     public void checkMultipleProcesses() {
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
         con.setEndpoint("src/test/resources/cli/echoinput.sh " + f.getAbsolutePath());
         MultipleCLIInputWorker worker = new MultipleCLIInputWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null, "init finished", "rows", "query fail", 2);
         assertEquals(2, worker.processList.size());
@@ -60,7 +61,7 @@ public class CLIWorkersTests {
     @Test
     public void checkFileInput() throws IOException {
         //check if file is created and used
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
         String dir = UUID.randomUUID().toString();
         con.setEndpoint("src/test/resources/cli/echoinput.sh " + f.getAbsolutePath());
         CLIInputFileWorker worker = new CLIInputFileWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null, "init finished", "rows", "query fail", 1, dir);
@@ -78,30 +79,30 @@ public class CLIWorkersTests {
     @Test
     public void checkInput() throws IOException {
         // check if connection stays
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
 
         con.setEndpoint("src/test/resources/cli/echoinput.sh " + f.getAbsolutePath());
         CLIInputWorker worker = new CLIInputWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null, "init finished", "rows", "query fail");
         worker.executeQuery("test", "1");
         worker.executeQuery("SELECT whatever", "1");
         assertEquals("test\nSELECT whatever\n", FileUtils.readFile(f.getAbsolutePath()));
-        Collection<Properties> succeededResults = worker.popQueryResults();
+        Collection<QueryExecutionStats> succeededResults = worker.popQueryResults();
         assertEquals(2, succeededResults.size());
-        Properties succ = succeededResults.iterator().next();
-        assertEquals(COMMON.QUERY_SUCCESS, succ.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(3L, succ.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats succ = succeededResults.iterator().next();
+        assertEquals(COMMON.QUERY_SUCCESS, succ.responseCode());
+        assertEquals(3L, succ.responseCode());
         succ = succeededResults.iterator().next();
-        assertEquals(COMMON.QUERY_SUCCESS, succ.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(3L, succ.get(COMMON.RECEIVE_DATA_SIZE));
+        assertEquals(COMMON.QUERY_SUCCESS, succ.responseCode());
+        assertEquals(3L, succ.responseCode());
 
         // check fail
         worker.executeQuery("fail", "2");
         assertEquals("test\nSELECT whatever\nfail\n", FileUtils.readFile(f.getAbsolutePath()));
-        Collection<Properties> failedResults = worker.popQueryResults();
+        Collection<QueryExecutionStats> failedResults = worker.popQueryResults();
         assertEquals(1, failedResults.size());
-        Properties fail = failedResults.iterator().next();
-        assertEquals(COMMON.QUERY_UNKNOWN_EXCEPTION, fail.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(0L, fail.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats fail = failedResults.iterator().next();
+        assertEquals(COMMON.QUERY_UNKNOWN_EXCEPTION, fail.responseCode());
+        assertEquals(0L, fail.resultSize());
         worker.stopSending();
 
 
@@ -110,30 +111,30 @@ public class CLIWorkersTests {
     @Test
     public void checkPrefix() throws IOException {
         // check if connection stays
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
 
         con.setEndpoint("src/test/resources/cli/echoinput.sh " + f.getAbsolutePath());
         CLIInputPrefixWorker worker = new CLIInputPrefixWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null, "init finished", "rows", "query fail", 1, "prefix", "suffix");
         worker.executeQuery("test", "1");
         worker.executeQuery("SELECT whatever", "1");
         assertEquals("prefix test suffix\nprefix SELECT whatever suffix\n", FileUtils.readFile(f.getAbsolutePath()));
-        Collection<Properties> succeededResults = worker.popQueryResults();
+        Collection<QueryExecutionStats> succeededResults = worker.popQueryResults();
         assertEquals(2, succeededResults.size());
-        Properties succ = succeededResults.iterator().next();
-        assertEquals(COMMON.QUERY_SUCCESS, succ.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(3L, succ.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats succ = succeededResults.iterator().next();
+        assertEquals(COMMON.QUERY_SUCCESS, succ.responseCode());
+        assertEquals(3L, succ.resultSize());
         succ = succeededResults.iterator().next();
-        assertEquals(COMMON.QUERY_SUCCESS, succ.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(3L, succ.get(COMMON.RECEIVE_DATA_SIZE));
+        assertEquals(COMMON.QUERY_SUCCESS, succ.responseCode());
+        assertEquals(3L, succ.resultSize());
 
         // check fail
         worker.executeQuery("fail", "2");
         assertEquals("prefix test suffix\nprefix SELECT whatever suffix\nprefix fail suffix\n", FileUtils.readFile(f.getAbsolutePath()));
-        Collection<Properties> failedResults = worker.popQueryResults();
+        Collection<QueryExecutionStats> failedResults = worker.popQueryResults();
         assertEquals(1, failedResults.size());
-        Properties fail = failedResults.iterator().next();
-        assertEquals(COMMON.QUERY_UNKNOWN_EXCEPTION, fail.get(COMMON.RECEIVE_DATA_SUCCESS));
-        assertEquals(0L, fail.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats fail = failedResults.iterator().next();
+        assertEquals(COMMON.QUERY_UNKNOWN_EXCEPTION, fail.responseCode());
+        assertEquals(0L, fail.resultSize());
         worker.stopSending();
     }
 
@@ -141,7 +142,7 @@ public class CLIWorkersTests {
     public void checkCLI() throws IOException {
         //check if simple cli works
         //	public CLIWorker(String taskID, Connection connection, String queriesFile, @Nullable Integer timeOut, @Nullable Integer timeLimit, @Nullable Integer fixedLatency, @Nullable Integer gaussianLatency, Integer workerID) {
-        Connection con = new Connection();
+        ConnectionConfig con = new ConnectionConfig();
         con.setUser("user1");
         con.setPassword("pwd");
 
@@ -151,16 +152,16 @@ public class CLIWorkersTests {
         String content = FileUtils.readFile(f.getAbsolutePath());
         assertEquals("test () user1:pwd test+%28%29\n", content);
 
-        con = new Connection();
+        con = new ConnectionConfig();
         con.setEndpoint("/bin/echo \"$QUERY$ $USER$:$PASSWORD$ $ENCODEDQUERY$\" > " + f.getAbsolutePath() + " | /bin/printf \"HeaderDoesNotCount\na\na\"");
         worker = new CLIWorker("123/1/1", 1, con, getQueryConfig(), null, null, null, null);
         worker.executeQuery("test ()", "1");
         content = FileUtils.readFile(f.getAbsolutePath());
         assertEquals("test () : test+%28%29\n", content);
-        Collection<Properties> results = worker.popQueryResults();
+        Collection<QueryExecutionStats> results = worker.popQueryResults();
         assertEquals(1, results.size());
-        Properties p = results.iterator().next();
-        assertEquals(2L, p.get(COMMON.RECEIVE_DATA_SIZE));
+        QueryExecutionStats p = results.iterator().next();
+        assertEquals(2L, p.resultSize());
     }
 
     private Map<String, Object> getQueryConfig() {

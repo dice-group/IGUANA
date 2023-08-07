@@ -20,8 +20,8 @@ preScriptHook: "src/test/resources/config/pre.sh {{connection}} {{dataset.name}}
 postScriptHook: "src/test/resources/config/post.sh {{dataset.file}} {{dataset.name}} {{connection}}"
 
 metrics:
-  - className: "org.aksw.iguana.rp.metrics.impl.QMPHMetric"
-  - className: "org.aksw.iguana.rp.metrics.impl.QPSMetric"
+  - className: "org.aksw.iguana.cc.tasks.stresstest.metrics.impl.QMPH"
+  - className: "org.aksw.iguana.cc.tasks.stresstest.metrics.impl.QPS"
 
 storages:
   - className: "org.aksw.iguana.cc.tasks.MockupStorage"

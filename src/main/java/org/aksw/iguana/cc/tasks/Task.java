@@ -3,7 +3,7 @@
  */
 package org.aksw.iguana.cc.tasks;
 
-import org.aksw.iguana.cc.config.elements.Connection;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -52,7 +52,7 @@ public interface Task {
 	 * @param con the current connection to execute the task against
 	 * @param taskName the taskName
 	 */
-    void init(String[] ids, String dataset, Connection con, String taskName);
+    void init(String[] ids, String dataset, ConnectionConfig con, String taskName);
 
 	/**
 	 * Will initialize the task
@@ -60,7 +60,7 @@ public interface Task {
 	 * @param dataset the dataset name
 	 * @param con the current connection to execute the task against
 	 */
-	default void init(String[] ids, String dataset, Connection con){
+	default void init(String[] ids, String dataset, ConnectionConfig con){
 		init(ids, dataset, con, null);
 	}
 }

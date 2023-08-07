@@ -2,7 +2,7 @@ package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.commons.factory.TypedFactory;
-import org.aksw.iguana.rp.storage.Storage;
+import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
 
 import java.util.HashMap;
 import java.util.Map;

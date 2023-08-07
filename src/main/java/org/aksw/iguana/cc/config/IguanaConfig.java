@@ -3,12 +3,13 @@ package org.aksw.iguana.cc.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.*;
 import org.aksw.iguana.cc.controller.TaskController;
+import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
+import org.aksw.iguana.cc.tasks.stresstest.metrics.MetricManager;
+import org.aksw.iguana.cc.tasks.stresstest.metrics.impl.*;
+import org.aksw.iguana.cc.tasks.stresstest.storage.StorageManager;
 import org.aksw.iguana.commons.script.ScriptExecutor;
-import org.aksw.iguana.rp.controller.RPController;
-import org.aksw.iguana.rp.metrics.Metric;
-import org.aksw.iguana.rp.metrics.impl.*;
-import org.aksw.iguana.rp.storage.Storage;
-import org.aksw.iguana.rp.storage.impl.NTFileStorage;
+import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
+import org.aksw.iguana.cc.tasks.stresstest.storage.impl.NTFileStorage;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
@@ -41,15 +42,14 @@ import java.util.Map;
  */
 public class IguanaConfig {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(IguanaConfig.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(IguanaConfig.class);
 
 	@JsonProperty(required = true)
-	private List<Dataset> datasets;
+	private List<DatasetConfig> datasets;
 	@JsonProperty(required = true)
-	private List<Connection> connections;
+	private List<ConnectionConfig> connections;
 	@JsonProperty(required = true)
-	private List<Task> tasks;
+	private List<TaskConfig> tasks;
 	@JsonProperty
 	private String preScriptHook;
 	@JsonProperty
@@ -59,6 +59,7 @@ public class IguanaConfig {
 	@JsonProperty
 	private List<StorageConfig> storages;
 
+	private static String suiteID = generateSuiteID();
 
 	/**
 	 * starts the config
@@ -66,18 +67,18 @@ public class IguanaConfig {
 	 * @throws ExecuteException 
 	 */
 	public void start() throws ExecuteException, IOException {
-		RPController rpController = initResultProcessor();
+		initResultProcessor();
 		TaskController controller = new TaskController();
 		//get SuiteID
-		String suiteID = generateSuiteID();
+		suiteID = generateSuiteID();
 		//generate ExpID
 		int expID = 0;
 
-		for(Dataset dataset: datasets){
+		for(DatasetConfig dataset: datasets){
 			expID++;
 			Integer taskID = 0;
-			for(Connection con : connections){
-				for(Task task : tasks) {
+			for(ConnectionConfig con : connections){
+				for(TaskConfig task : tasks) {
 					taskID++;
 					String[] args = new String[] {};
 					if(preScriptHook!=null){
@@ -110,12 +111,11 @@ public class IguanaConfig {
 				}
 			}
 		}
-		rpController.close();
 
 		LOGGER.info("Finished benchmark");
 	}
 
-	private RPController initResultProcessor() {
+	private void initResultProcessor() {
 		//If storage or metric is empty use default
 		if(this.storages== null || this.storages.isEmpty()){
 			storages = new ArrayList<>();
@@ -127,42 +127,46 @@ public class IguanaConfig {
 			LOGGER.info("No metrics were set. Using default metrics.");
 			metrics = new ArrayList<>();
 			MetricConfig config = new MetricConfig();
-			config.setClassName(QMPHMetric.class.getCanonicalName());
+			config.setClassName(QMPH.class.getCanonicalName());
 			metrics.add(config);
 			config = new MetricConfig();
-			config.setClassName(QPSMetric.class.getCanonicalName());
-			Map<String, Object> configMap = new HashMap<>();
-			configMap.put("penalty", 180000);
-			config.setConfiguration(configMap);
+			config.setClassName(QPS.class.getCanonicalName());
 			metrics.add(config);
 			config = new MetricConfig();
-			config.setClassName(NoQPHMetric.class.getCanonicalName());
+			config.setClassName(NoQPH.class.getCanonicalName());
 			metrics.add(config);
 			config = new MetricConfig();
-			config.setClassName(AvgQPSMetric.class.getCanonicalName());
+			config.setClassName(AvgQPS.class.getCanonicalName());
 			metrics.add(config);
 			config = new MetricConfig();
-			config.setClassName(NoQMetric.class.getCanonicalName());
+			config.setClassName(NoQ.class.getCanonicalName());
 			metrics.add(config);
-
+			config = new MetricConfig();
+			config.setClassName(AggregatedExecutionStatistics.class.getCanonicalName());
+			metrics.add(config);
 		}
+
+		// Create Metrics
+		// Metrics should be created before the Storages
+		List<Metric> metrics = new ArrayList<>();
+		for(MetricConfig config : this.metrics) {
+			metrics.add(config.createMetric());
+		}
+		MetricManager.setMetrics(metrics);
+
 		//Create Storages
 		List<Storage> storages = new ArrayList<>();
 		for(StorageConfig config : this.storages){
 			storages.add(config.createStorage());
 		}
-		//Create Metrics
-		List<Metric> metrics = new ArrayList<>();
-		for(MetricConfig config : this.metrics){
-			metrics.add(config.createMetric());
-		}
-		RPController controller = new RPController();
-		controller.init(storages, metrics);
-		return controller;
+		StorageManager.getInstance().addStorages(storages);
 	}
 
+	public static String getSuiteID() {
+		return suiteID;
+	}
 
-	private String generateSuiteID() {
+	private static String generateSuiteID() {
 		int currentTimeMillisHashCode = Math.abs(Long.valueOf(Instant.now().getEpochSecond()).hashCode());
 		return String.valueOf(currentTimeMillisHashCode);
 	}
