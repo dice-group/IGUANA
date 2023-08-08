@@ -116,7 +116,7 @@ public class BigByteArrayOutputStream extends OutputStream {
         final var space = ensureSpace();
         final var writeLength = Math.min(len, space);
         this.currentBaos.write(b, off, writeLength);
-        final var remainingBytes = b.length - writeLength;
+        final var remainingBytes = len - writeLength;
         if (remainingBytes > 0) {
             ensureSpace();
             this.currentBaos.write(b, off + writeLength, remainingBytes);
