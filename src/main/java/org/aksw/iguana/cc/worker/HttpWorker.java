@@ -47,7 +47,7 @@ public abstract class HttpWorker {
         boolean parseResults();
     }
 
-    public record ExecutionStats( // TODO: queryID
+    public record ExecutionStats( // TODO: queryID, there should also probably be a clearer way to tell, if the query was successful or not
             Instant startTime,
             Optional<Duration> duration,
             int httpStatusCode,

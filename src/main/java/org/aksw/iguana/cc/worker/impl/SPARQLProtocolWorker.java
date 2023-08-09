@@ -13,9 +13,7 @@ import org.apache.http.client.utils.URIBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
+import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -24,7 +22,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker extends HttpWorker {
@@ -93,7 +91,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 case POST_QUERY -> {
                     request.uri(connection.endpoint())
                             .header("Content-Type", "application/sparql-query")
-                            .POST(HttpRequest.BodyPublishers.ofInputStream(() -> queryStream));
+                            .POST(HttpRequest.BodyPublishers.ofByteArray(queryStream.readAllBytes())); // InputStream BodyPublisher won't work
                 }
                 case POST_URL_ENC_UPDATE -> {
                     request.uri(connection.endpoint())
@@ -106,7 +104,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 case POST_UPDATE -> {
                     request.uri(connection.endpoint())
                             .header("Content-Type", "application/sparql-update")
-                            .POST(HttpRequest.BodyPublishers.ofInputStream(() -> queryStream));
+                            .POST(HttpRequest.BodyPublishers.ofByteArray(queryStream.readAllBytes()));
                 }
             }
             return request.build();
@@ -145,16 +143,22 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
     record HttpExecutionResult(
-            HttpResponse<InputStream> response,
+            Optional<HttpResponse<InputStream>> response,
             Instant requestStart,
             Duration duration,
-            BigByteArrayOutputStream outputStream,
-            Long actualContentLength,
-            Long hash,
-            Exception exception
+            Optional<BigByteArrayOutputStream> outputStream,
+            OptionalLong actualContentLength,
+            OptionalLong hash,
+            Optional<Exception> exception
     ) {
         public boolean completed() {
-            return response != null;
+            return response.isPresent();
+        }
+
+        public boolean successful() {
+            if (completed() && exception.isEmpty())
+                return (response.get().statusCode() / 100) == 2;
+            return false;
         }
     }
 
@@ -168,13 +172,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private final ResponseBodyProcessor responseBodyProcessor;
 
     // declared here, so it can be reused across multiple method calls
-    private BigByteArrayOutputStream responseBodybbaos;
+    private BigByteArrayOutputStream responseBodybbaos = new BigByteArrayOutputStream();
 
     // used to read the http response body
     private byte[] buffer = new byte[4096];
 
 
-    private Config config() {
+    public Config config() {
         return (Config) config;
     }
 
@@ -210,7 +214,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     Instant now;
                     while ((now = Instant.now()).isBefore(endTime)) {
                         final Duration timeToEnd = Duration.between(now, endTime);
-                        final boolean timeoutBeforeEnd = config().timeout().compareTo(timeToEnd) > 0;
+                        final boolean timeoutBeforeEnd = config().timeout().compareTo(timeToEnd) < 0;
                         final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? config().timeout() : timeToEnd;
                         // If timeoutBeforeEnd is false, fail shouldn't be counted as timeout
                         ExecutionStats execution = executeQuery(thisQueryTimeOut, !timeoutBeforeEnd);
@@ -229,16 +233,17 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private ExecutionStats executeQuery(Duration timeout, boolean discardOnFailure) throws IOException, URISyntaxException {
         HttpExecutionResult result = executeHttpRequest(timeout);
 
-        int statusCode = -1;
-        if (result.completed()) {
-            statusCode = result.response().statusCode();
-            if (statusCode / 100 == 2) { // 2xx
-                // process result
-                if (!responseBodyProcessor.add(result.actualContentLength(), result.hash(), result.outputStream())) {
-                    this.responseBodybbaos = result.outputStream();
-                } else {
-                    this.responseBodybbaos = new BigByteArrayOutputStream();
-                }
+        var statusCode = -1;
+        if (result.response().isPresent()) {
+            statusCode = result.response().get().statusCode();
+        }
+
+        if (result.successful()) { // 2xx
+            // process result
+            if (!responseBodyProcessor.add(result.actualContentLength().getAsLong(), result.hash().getAsLong(), result.outputStream().get())) {
+                this.responseBodybbaos = result.outputStream().get();
+            } else {
+                this.responseBodybbaos = new BigByteArrayOutputStream();
             }
         }
 
@@ -246,80 +251,79 @@ public class SPARQLProtocolWorker extends HttpWorker {
             return null;
         }
 
-        return new ExecutionStats(result.requestStart(),
-                (result.completed()) ? Optional.of(result.duration) : Optional.empty(),
+        return new ExecutionStats(
+                result.requestStart(),
+                (result.successful()) ? Optional.of(result.duration) : Optional.empty(),
                 statusCode,
-                result.actualContentLength(),
-                result.hash,
-                result.exception()
+                result.actualContentLength().orElse(0L),
+                result.hash.orElse(0L),
+                result.exception().orElse(null)
         );
     }
 
 
-    private HttpExecutionResult executeHttpRequest(Duration thisQueryTimeOut) throws IOException, URISyntaxException {
-        record ExecutionResult(
-                HttpResponse<InputStream> httpResponse,
-                BigByteArrayOutputStream outputStream,
-                Long hash,
-                Exception exception
-        ) {}
-
+    private HttpExecutionResult executeHttpRequest(Duration timeout) throws IOException, URISyntaxException {
         final QueryHandler.QueryStreamWrapper queryHandle = config().queries().getNextQueryStream();
         final HttpRequest request = requestFactory.buildHttpRequest(
                 queryHandle.queryInputStream(),
-                thisQueryTimeOut,
+                timeout,
                 config().connection(),
                 config().acceptHeader()
         );
 
         final Instant requestStart = Instant.now();
-        Function<Exception, HttpExecutionResult> httpExecutionResult = (Exception e) -> {
+        BiFunction<HttpResponse<InputStream>, Exception, HttpExecutionResult> createFailedResult = (response, e) -> {
             final Duration requestDuration = Duration.between(requestStart, Instant.now());
-            return new HttpExecutionResult(null, requestStart, requestDuration, null, null, null, e);
+            return new HttpExecutionResult(
+                    Optional.ofNullable(response),
+                    requestStart,
+                    requestDuration,
+                    Optional.empty(),
+                    OptionalLong.empty(),
+                    OptionalLong.empty(),
+                    Optional.ofNullable(e)
+            );
         };
 
-        ExecutionResult executionResult;
         try {
-            executionResult = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+            return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
                     .thenApply(httpResponse -> {
                         try (final var bodyStream = httpResponse.body()) {
                             if (httpResponse.statusCode() / 100 == 2) { // Request was successful
                                 OptionalLong contentLength = httpResponse.headers().firstValueAsLong("Content-Length");
-
                                 try (var hasher = hasherFactory.newStreamingHash64(0)) {
                                     int readBytes;
-                                    while ((readBytes = bodyStream.readNBytes(this.buffer, 0, this.buffer.length)) != -1) {
+                                    while ((readBytes = bodyStream.readNBytes(this.buffer, 0, this.buffer.length)) != 0) {
                                         hasher.update(this.buffer, 0, readBytes);
                                         this.responseBodybbaos.write(this.buffer, 0, readBytes);
                                     }
 
-                                    if (contentLength.isPresent() && this.responseBodybbaos.size() < contentLength.getAsLong()) {
-                                        // TODO: malformed response
-                                        return new ExecutionResult(httpResponse, null, null, null);
+                                    if (contentLength.isPresent() &&
+                                            (this.responseBodybbaos.size() < contentLength.getAsLong() ||
+                                             this.responseBodybbaos.size() > contentLength.getAsLong())) {
+                                        return createFailedResult.apply(httpResponse, null); // TODO: custom exception maybe?
                                     }
-                                    return new ExecutionResult(httpResponse, this.responseBodybbaos, hasher.getValue(), null);
+
+                                    return new HttpExecutionResult(
+                                            Optional.of(httpResponse),
+                                            requestStart,
+                                            Duration.between(requestStart, Instant.now()),
+                                            Optional.of(this.responseBodybbaos),
+                                            OptionalLong.of(this.responseBodybbaos.size()),
+                                            OptionalLong.of(hasher.getValue()),
+                                            Optional.empty()
+                                    );
                                 }
                             } else {
-                                while (bodyStream.readNBytes(this.buffer, 0, this.buffer.length) != -1) {}
-                                return new ExecutionResult(httpResponse, null, null, null);
+                                bodyStream.close();
+                                return createFailedResult.apply(httpResponse, null);
                             }
                         } catch (IOException ex) {
-                            return new ExecutionResult(httpResponse, null, null, ex);
+                            return createFailedResult.apply(httpResponse, ex);
                         }
-                    }).get(thisQueryTimeOut.getNano(), TimeUnit.NANOSECONDS);
+                    }).get(timeout.toNanos(), TimeUnit.NANOSECONDS);
         } catch (CompletionException | InterruptedException | ExecutionException | TimeoutException e) {
-            return httpExecutionResult.apply(e);
+            return createFailedResult.apply(null, e);
         }
-
-        final Duration requestDuration = Duration.between(requestStart, Instant.now());
-        return new HttpExecutionResult(
-                executionResult.httpResponse(),
-                requestStart,
-                requestDuration,
-                executionResult.outputStream(),
-                executionResult.outputStream().size(),
-                executionResult.hash(),
-                executionResult.exception());
     }
-
 }

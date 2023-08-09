@@ -169,6 +169,4 @@ public class SPARQLProtocolWorkerTest {
         final HttpWorker.Result result = worker.start().join();
         assertEquals(1, result.executionStats().size()); // because of the delay, only one query should be executed
     }
-
-    // TODO: first queries have long durations
 }
