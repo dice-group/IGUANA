@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class SPARQLProtocolWorker extends HttpWorker {
 
 
-    public final static class SPARQLProtocolRequestFactory {
+    public final static class RequestFactory {
         public enum RequestType {
             GET_QUERY("get query"),
             POST_URL_ENC_QUERY("post url-enc query"),
@@ -53,7 +53,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
         private final RequestType requestType;
 
-        public SPARQLProtocolRequestFactory(RequestType requestType) {
+        public RequestFactory(RequestType requestType) {
             this.requestType = requestType;
         }
 
@@ -122,8 +122,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
             ConnectionConfig connection,
             Duration timeout,
             String acceptHeader /* e.g. application/sparql-results+json */,
-            SPARQLProtocolRequestFactory.RequestType requestType,
-            boolean parseResults
+            RequestFactory.RequestType requestType,
+            boolean parseResults // TODO: integrate this
     ) implements HttpWorker.Config {
         public Config(Integer number,
                       @JsonProperty(required = true) QueryHandler queries,
@@ -131,7 +131,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                       @JsonProperty(required = true) ConnectionConfig connection,
                       @JsonProperty(required = true) Duration timeout,
                       String acceptHeader,
-                      SPARQLProtocolRequestFactory.RequestType requestType,
+                      RequestFactory.RequestType requestType,
                       boolean parseResults) {
             this.number = number == null ? 1 : number;
             this.queries = queries;
@@ -139,7 +139,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             this.connection = connection;
             this.timeout = timeout;
             this.acceptHeader = acceptHeader;
-            this.requestType = requestType == null ? SPARQLProtocolRequestFactory.RequestType.GET_QUERY : requestType;
+            this.requestType = requestType == null ? RequestFactory.RequestType.GET_QUERY : requestType;
             this.parseResults = parseResults;
         }
     }
@@ -163,7 +163,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private final ExecutorService executor;
 
     private final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
-    private final SPARQLProtocolRequestFactory requestFactory;
+    private final RequestFactory requestFactory;
 
     private final ResponseBodyProcessor responseBodyProcessor;
 
@@ -183,7 +183,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         super(workerId, responseBodyProcessor, config);
         this.responseBodyProcessor = responseBodyProcessor;
         this.executor = Executors.newFixedThreadPool(2);
-        this.requestFactory = new SPARQLProtocolRequestFactory(config().requestType());
+        this.requestFactory = new RequestFactory(config().requestType());
         this.httpClient = HttpClient.newBuilder()
                 .executor(this.executor)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
@@ -222,7 +222,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 throw new RuntimeException(e);
             }
 
-            // TODO: make each thread have own id
             return new Result(this.workerId, executionStats);
         }, executor);
     }
