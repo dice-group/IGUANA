@@ -1,8 +1,6 @@
 package org.aksw.iguana.cc.tasks.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
@@ -23,25 +21,23 @@ public class Stresstest implements Task {
     public record Config(
             List<HttpWorker.Config> warmupWorkers,
             @JsonProperty(required = true) List<HttpWorker.Config> workers
-    ) implements Task.Config {
-    }
-
-
-    private final long stresstestId;
-    private final Config config;
+    ) implements Task.Config {}
 
     public record PhaseExecutionConfig(
             String name,
             List<HttpWorker.Config> workers
-    ) {
-    }
+    ) {}
 
     public record Result(
             long stresstestId,
             List<HttpWorker.Result> warmup,
             List<HttpWorker.Result> main
-    ) implements Task.Config {
-    }
+    ) implements Task.Config {}
+
+
+    private final long stresstestId;
+    private final Config config;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stresstest.class);
 
@@ -53,13 +49,14 @@ public class Stresstest implements Task {
         this.stresstestId = stresstestId;
         this.config = config;
         long workerId = 0;
-        if (config.warmupWorkers() != null)
+        if (config.warmupWorkers() != null) {
             for (HttpWorker.Config workerConfig : config.warmupWorkers()) {
                 for (int i = 0; i < workerConfig.number(); i++) {
                     var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
                     warmupWorkers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
                 }
             }
+        }
 
         for (HttpWorker.Config workerConfig : config.workers()) {
             for (int i = 0; i < workerConfig.number(); i++) {
@@ -71,7 +68,6 @@ public class Stresstest implements Task {
 
     public Result run() {
         try {
-
             var warmupResults = executeWorkers(warmupWorkers);
             var results = executeWorkers(workers);
 
@@ -86,7 +82,7 @@ public class Stresstest implements Task {
 
     private List<HttpWorker.Result> executeWorkers(List<HttpWorker> workers) throws InterruptedException, ExecutionException {
         List<HttpWorker.Result> results = new ArrayList<>(workers.size());
-        var futures = warmupWorkers.stream().map(HttpWorker::start).toList();
+        var futures = workers.stream().map(HttpWorker::start).toList();
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).join();
         for (CompletableFuture<HttpWorker.Result> future : futures)
             results.add(future.get());
