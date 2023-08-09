@@ -1,6 +1,6 @@
 | Shorthand              | Class Name                                                |
 |------------------------|-----------------------------------------------------------|
-| Stresstest             | `org.aksw.iguana.cc.tasks.impl.Stresstest`                |
+| Stresstest             | `org.aksw.iguana.cc.tasks.stresstest.Stresstest`          |
 | ----------             | -------                                                   |
 | lang.RDF               | `org.aksw.iguana.cc.lang.impl.RDFLanguageProcessor`       | 
 | lang.SPARQL            | `org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor`    | 
@@ -15,13 +15,16 @@
 | CLIInputPrefixWorker   | `org.aksw.iguana.cc.worker.impl.CLIInputPrefixWorker`     |
 | MultipleCLIInputWorker | `org.aksw.iguana.cc.worker.impl.MultipleCLIInputWorker`   |
 | ----------             | -------                                                   |
-| NTFileStorage          | `org.aksw.iguana.rp.storages.impl.NTFileStorage`          |
-| RDFFileStorage         | `org.aksw.iguana.rp.storages.impl.RDFFileStorage`         |
-| TriplestoreStorage     | `org.aksw.iguana.rp.storages.impl.TriplestoreStorage`     |
+| NTFileStorage          | `org.aksw.iguana.cc.tasks.stresstest.storage.impl.NTFileStorage`          |
+| RDFFileStorage         | `org.aksw.iguana.cc.tasks.stresstest.storage.impl.RDFFileStorage`         |
+| TriplestoreStorage     | `org.aksw.iguana.cc.tasks.stresstest.storage.impl.TriplestoreStorage`     |
 | ----------             | -------                                                   |
-| QPS                    | `org.aksw.iguana.rp.metrics.impl.QPSMetric`               |
-| AvgQPS                 | `org.aksw.iguana.rp.metrics.impl.AvgQPSMetric`            |
-| NoQ                    | `org.aksw.iguana.rp.metrics.impl.NoQMetric`               |
-| NoQPH                  | `org.aksw.iguana.rp.metrics.impl.NoQPHMetric`             |
-| QMPH                   | `org.aksw.iguana.rp.metrics.impl.QMPHMetric`              |
-| EachQuery              | `org.aksw.iguana.rp.metrics.impl.EQEMetric`               |
+| QPS                    | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.QPS`               |
+| PQPS                   | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.PQPS`               |
+| AvgQPS                 | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.AvgQPS`            |
+| PAvgQPS                | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.PAvgQPS`            |
+| NoQ                    | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.NoQ`               |
+| NoQPH                  | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.NoQPH`             |
+| QMPH                   | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.QMPH`              |
+| AES                    | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.AggregatedExecutionStatistics`              |
+| EachQuery              | `org.aksw.iguana.cc.tasks.stresstest.metrics.impl.EachExecutionStatistic`               |

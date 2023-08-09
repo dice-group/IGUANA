@@ -69,7 +69,6 @@ SELECT ?taskID ?noq {
 }
 ```
 
-Instead of the NoQ metric you can do this for all other metrics, except `QPS`.
 
 To retrieve `QPS` look above in the results schema and let's look at an example. Let's assume the taskID is `123/1/1` again.
 You can retrieve the global qps values (seen above in ExecutedQueries, e.g `QPS`, `succeeded` etc.) as follows,

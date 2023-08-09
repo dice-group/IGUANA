@@ -25,7 +25,7 @@ A connection has the following items:
 * `updateEndpoint` - if your HTTP endpoint is an HTTP POST endpoint, you can set it with this item (optional)
 * `user` - for authentication purposes (optional)
 * `password` - for authentication purposes (optional)
-* `version` - sets the version of the tested triplestore; if this is set, the resource URI will be ires:name-version (optional)
+* `version` - sets the version of the tested triplestore (optional)
 
 At first, it might be confusing to set up both an `endpoint` and `updateEndpoint`, but it is used, when you want your test to perform read and write operations simultaneously, for example, to test the impact of updates on the read performance of your triple store.
 
@@ -190,17 +190,18 @@ The `metrics` setting lets Iguana know what metrics you want to include in the r
 Iguana supports the following metrics:
 
 * Queries Per Second (`QPS`)
+* Penalized Queries Per Second (`PQPS`)
 * Average Queries Per Second (`AvgQPS`)
+* Penalized Average Queries Per Second (`PAvgQPS`)
 * Query Mixes Per Hour (`QMPH`)
 * Number of Queries successfully executed (`NoQ`)
 * Number of Queries per Hour (`NoQPH`)
-* Each query execution (`EachQuery`) - experimental
+* Each Execution Statistic (`EachQuery`)
+* Aggregated Execution Statistics (`AES`)
 
 For more details on each of the metrics have a look at the [Metrics](../metrics) page.
 
-The `metrics` setting is optional and the default is set to every available metric, except `EachQuery`.
-
-Let's look at an example:
+The `metrics` setting is optional and the default is set to this:
 
 ```yaml
 metrics:
@@ -209,11 +210,10 @@ metrics:
   - className: "QMPH"
   - className: "NoQ"
   - className: "NoQPH"
+  - className: "AES"
 ```
 
-In this case we use every metric that Iguana has implemented. This is the default.
-
-However, you can also just use a subset of these metrics:
+You can also use a subset of these metrics:
 
 ```yaml
 metrics:

@@ -1,46 +1,22 @@
 # Extend Result Storages
 
-If you want to use a different storage other than RDF, you can implement a different storage solution. 
-
-The current implementation of Iguana is highly optimized for RDF, thus we recommend you to work on top of the `TripleBasedStorage` class:
+If you want to use a different storage other than RDF, you can implement a different storage solution.
 
 ```java
 package org.benchmark.storage;
 
 @Shorthand("MyStorage")
-public class MyStorage extends TripleBasedStorage {
+public class MyStorage implements Storage {
 
-	@Override
-	public void commit() {
-        
-	}
-	
-	@Override
-	public String toString(){
-		return this.getClass().getSimpleName();
-	}
-}
-```
-
-## Commit
-
-This method should take all the current results, store them, and remove them from the memory.
-
-You can access the results at the Jena Model `this.metricResults`. 
-
-For example:
-
-```java
-@Override
-public void commit() {
-    try (OutputStream os = new FileOutputStream(file.toString(), true)) {
-        RDFDataMgr.write(os, metricResults, RDFFormat.NTRIPLES);
-        metricResults.removeAll();
-    } catch (IOException e) {
-        LOGGER.error("Could not commit to NTFileStorage.", e);
+    @Override
+    public void storeResults(Model m) {
+        // method for storing model
     }
 }
 ```
+
+The method `storeResults` will be called at the end of the task. The model from
+the parameter contains the final result model for that task.
 
 ## Constructor 
 
