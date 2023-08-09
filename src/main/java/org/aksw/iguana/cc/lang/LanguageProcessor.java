@@ -1,5 +1,7 @@
 package org.aksw.iguana.cc.lang;
 
+import org.aksw.iguana.cc.lang.impl.SaxSparqlJsonResultCountingParser;
+
 import java.io.InputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,12 +10,12 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 /**
  * Interface for abstract language processors that work on InputStreams.
  */
 public abstract class LanguageProcessor {
+
     /**
      * Provides the content type that a LanguageProcessor consumes.
      */
@@ -32,12 +34,14 @@ public abstract class LanguageProcessor {
     final private static Map<String, Class<? extends LanguageProcessor>> processors = new HashMap<>();
 
     static {
-        for (LanguageProcessor processor : ServiceLoader.load(LanguageProcessor.class)) {
-            LanguageProcessor.ContentType contentType = processor.getClass().getAnnotation(LanguageProcessor.ContentType.class);
-            if (contentType != null) {
-                processors.put(contentType.value(), processor.getClass());
-            }
-        }
+        processors.put("application/sparql-results+json", SaxSparqlJsonResultCountingParser.class);
+        // TODO: find better solution, because the code underneath doesn't work
+//        for (LanguageProcessor processor : ServiceLoader.load(LanguageProcessor.class)) {
+//            LanguageProcessor.ContentType contentType = processor.getClass().getAnnotation(LanguageProcessor.ContentType.class);
+//            if (contentType != null) {
+//                processors.put(contentType.value(), processor.getClass());
+//            }
+//        }
     }
 
     public static LanguageProcessor getInstance(String contentType) {
@@ -52,6 +56,5 @@ public abstract class LanguageProcessor {
         }
         throw new IllegalArgumentException("No LanguageProcessor for ContentType " + contentType);
     }
-
 
 }

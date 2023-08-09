@@ -21,7 +21,7 @@ import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
  * For malformed results it may or may not fail. For malformed JSON it fails if the underlying json.simple.parser fails.
  */
 @LanguageProcessor.ContentType("application/sparql-results+json")
-class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
+public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
 
     @Override
     public LanguageProcessingData process(InputStream inputStream) {
