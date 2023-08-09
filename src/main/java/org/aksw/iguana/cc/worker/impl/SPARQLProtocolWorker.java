@@ -65,22 +65,25 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
         public HttpRequest buildHttpRequest(InputStream queryStream,
                                             Duration timeout,
-                                            URI endpoint,
+                                            ConnectionConfig connection,
                                             String requestHeader) throws URISyntaxException, IOException {
-            HttpRequest.Builder request = HttpRequest.newBuilder()
-                    .timeout(timeout);
+            HttpRequest.Builder request = HttpRequest.newBuilder().timeout(timeout);
             if (requestHeader != null)
                 request.header("Accept", requestHeader);
+            if (connection.user() != null)
+                request.header("Authorization",
+                               HttpWorker.basicAuth(connection.user(),
+                                                    Optional.ofNullable(connection.password()).orElse("")));
             switch (this.requestType) {
                 case GET_QUERY -> {
-                    request.uri(new URIBuilder(endpoint)
+                    request.uri(new URIBuilder(connection.endpoint())
                                     .setParameter("query",
                                             new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
                                     .build())
                             .GET();
                 }
                 case POST_URL_ENC_QUERY -> {
-                    request.uri(endpoint)
+                    request.uri(connection.endpoint())
                             .header("Content-Type", "application/x-www-form-urlencoded")
                             .POST(HttpRequest.BodyPublishers.ofString(
                                     urlEncode(Collections.singletonList(
@@ -88,12 +91,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
                                                     new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)}))));
                 }
                 case POST_QUERY -> {
-                    request.uri(endpoint)
+                    request.uri(connection.endpoint())
                             .header("Content-Type", "application/sparql-query")
                             .POST(HttpRequest.BodyPublishers.ofInputStream(() -> queryStream));
                 }
                 case POST_URL_ENC_UPDATE -> {
-                    request.uri(endpoint)
+                    request.uri(connection.endpoint())
                             .header("Content-Type", "application/x-www-form-urlencoded")
                             .POST(HttpRequest.BodyPublishers.ofString(
                                     urlEncode(Collections.singletonList(
@@ -101,7 +104,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                                                     new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)}))));
                 }
                 case POST_UPDATE -> {
-                    request.uri(endpoint)
+                    request.uri(connection.endpoint())
                             .header("Content-Type", "application/sparql-update")
                             .POST(HttpRequest.BodyPublishers.ofInputStream(() -> queryStream));
                 }
@@ -266,8 +269,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
         final HttpRequest request = requestFactory.buildHttpRequest(
                 queryHandle.queryInputStream(),
                 thisQueryTimeOut,
-                config().connection().endpoint(),
-                config().acceptHeader());
+                config().connection(),
+                config().acceptHeader()
+        );
 
         final Instant requestStart = Instant.now();
         Function<Exception, HttpExecutionResult> httpExecutionResult = (Exception e) -> {
