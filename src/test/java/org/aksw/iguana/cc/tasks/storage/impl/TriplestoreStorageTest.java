@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.tasks.storage.impl;
 
-import org.aksw.iguana.cc.tasks.stresstest.storage.impl.TriplestoreStorage;
+import org.aksw.iguana.cc.storage.impl.TriplestoreStorage;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.tasks.ServerMock;
 import org.apache.jena.rdf.model.Model;

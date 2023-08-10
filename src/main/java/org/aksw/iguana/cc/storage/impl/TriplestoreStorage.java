@@ -1,8 +1,8 @@
-package org.aksw.iguana.cc.tasks.stresstest.storage.impl;
+package org.aksw.iguana.cc.storage.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
-import org.aksw.iguana.rp.storage.TripleBasedStorage;
+import org.aksw.iguana.cc.storage.Storage;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -27,61 +27,47 @@ import java.io.StringWriter;
  * @author f.conrads
  *
  */
-public class TriplestoreStorage extends TripleBasedStorage {
+public class TriplestoreStorage implements Storage {
 
-	public record Config(@JsonProperty(required = true) String endpoint,
-						 String user,
-						 String password,
-						 String baseUri) implements StorageConfig {
-	}
+	public record Config(
+			@JsonProperty(required = true) String endpoint,
+			String user,
+			String password,
+			String baseUri
+	) implements StorageConfig {}
 
 	private UpdateRequest blockRequest = UpdateFactory.create();
 	private final String endpoint;
 	private final String user;
 	private final String password;
+	private final String baseUri;
 
 	public TriplestoreStorage(Config config) {
 		endpoint = config.endpoint();
 		user = config.user();
 		password = config.password();
-		if (baseUri != null && !baseUri.isEmpty()) {
-			baseUri = config.baseUri();
-		}
+		baseUri = config.baseUri();
 	}
 
 
 	public TriplestoreStorage(String endpoint, String user, String pwd, String baseUri) {
 		this.endpoint = endpoint;
-		this.user=user;
-		this.password =pwd;
-		if(baseUri!=null && !baseUri.isEmpty()) {
-			this.baseUri=baseUri;
-		}
-	}
-
-	public TriplestoreStorage(String endpoint, String baseUri) {
-		this.endpoint = endpoint;
-		if(baseUri!=null && !baseUri.isEmpty()){
-			this.baseUri=baseUri;
-		}
-		user = null;
-		password = null;
+		this.user = user;
+		this.password = pwd;
+		this.baseUri = baseUri;
 	}
 
 	public TriplestoreStorage(String endpoint) {
 		this.endpoint = endpoint;
-		user = null;
-		password = null;
+		this.user = null;
+		this.password = null;
+		this.baseUri = null;
 	}
 
 	@Override
 	public void storeResult(Model data) {
-		super.storeResult(data);
-		if (metricResults.size() == 0)
-			return;
-
 		StringWriter results = new StringWriter();
-		RDFDataMgr.write(results, metricResults, Lang.NT);
+		RDFDataMgr.write(results, data, Lang.NT);
 		String update = "INSERT DATA {" + results.toString() + "}";
 		//Create Update Request from block
 		blockRequest.add(update);
@@ -93,11 +79,9 @@ public class TriplestoreStorage extends TripleBasedStorage {
 		blockRequest = new UpdateRequest();
 	}
 
-
-
-	private HttpClient createHttpClient(){
+	private HttpClient createHttpClient() {
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		if(user !=null && password !=null){
+		if(user != null && password != null){
 			Credentials credentials = new UsernamePasswordCredentials(user, password);
 			credsProvider.setCredentials(AuthScope.ANY, credentials);
 		}

@@ -143,6 +143,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
     record HttpExecutionResult(
+            int queryID,
             Optional<HttpResponse<InputStream>> response,
             Instant requestStart,
             Duration duration,
@@ -232,11 +233,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     private ExecutionStats executeQuery(Duration timeout, boolean discardOnFailure) throws IOException, URISyntaxException {
         HttpExecutionResult result = executeHttpRequest(timeout);
-
-        var statusCode = -1;
-        if (result.response().isPresent()) {
-            statusCode = result.response().get().statusCode();
-        }
+        Optional<Integer> statuscode = Optional.empty();
+        if (result.response().isPresent())
+            statuscode = Optional.of(result.response().get().statusCode());
 
         if (result.successful()) { // 2xx
             // process result
@@ -252,12 +251,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
         }
 
         return new ExecutionStats(
+                result.queryID(),
                 result.requestStart(),
-                (result.successful()) ? Optional.of(result.duration) : Optional.empty(),
-                statusCode,
-                result.actualContentLength().orElse(0L),
-                result.hash.orElse(0L),
-                result.exception().orElse(null)
+                result.duration(),
+                statuscode,
+                result.actualContentLength(),
+                result.hash,
+                result.exception()
         );
     }
 
@@ -275,6 +275,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         BiFunction<HttpResponse<InputStream>, Exception, HttpExecutionResult> createFailedResult = (response, e) -> {
             final Duration requestDuration = Duration.between(requestStart, Instant.now());
             return new HttpExecutionResult(
+                    queryHandle.index(),
                     Optional.ofNullable(response),
                     requestStart,
                     requestDuration,
@@ -305,6 +306,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                                     }
 
                                     return new HttpExecutionResult(
+                                            queryHandle.index(),
                                             Optional.of(httpResponse),
                                             requestStart,
                                             Duration.between(requestStart, Instant.now()),

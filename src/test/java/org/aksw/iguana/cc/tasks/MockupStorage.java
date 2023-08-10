@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.tasks;
 
-import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
+import org.aksw.iguana.cc.storage.Storage;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 

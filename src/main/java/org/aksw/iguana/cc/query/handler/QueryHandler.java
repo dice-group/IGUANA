@@ -154,10 +154,16 @@ public class QueryHandler {
         return this.queryList.size();
     }
 
-    private String getQueryId(int i) {
+    public String getQueryId(int i) {
         return this.queryList.hashCode() + ":" + i;
     }
 
+    /**
+     * Returns every query id in the format: <code>queryListHash:index</code> <br/>
+     * The index of a query inside the returned array is the same as the index inside the string.
+     *
+     * @return String[] of query ids
+     */
     public String[] getAllQueryIds() {
         String[] out = new String[queryList.size()];
         for (int i = 0; i < queryList.size(); i++) {

@@ -12,21 +12,19 @@ import static java.text.MessageFormat.format;
  *
  * @author frensing
  */
-public class LinearQuerySelector extends QuerySelector {
-
-
-    protected int nextIndex;
+public class LinearQuerySelector extends QuerySelector { // TODO: check if worker should have a query selector or if it should be in the query handler
 
     public LinearQuerySelector(int size) {
         super(size);
-        nextIndex = 0;
     }
 
     @Override
     public int getNextIndex() {
-        if (this.nextIndex >= this.size) {
-            this.nextIndex = 0;
+        int index = threadLocalIndex.get();
+        if (index >= this.size) {
+            this.threadLocalIndex.set(0);
         }
-        return this.nextIndex++;
+        this.threadLocalIndex.set(index + 1);
+        return index;
     }
 }

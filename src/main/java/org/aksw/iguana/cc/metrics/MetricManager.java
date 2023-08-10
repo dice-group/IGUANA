@@ -1,4 +1,4 @@
-package org.aksw.iguana.cc.tasks.stresstest.metrics;
+package org.aksw.iguana.cc.metrics;
 
 import java.util.List;
 

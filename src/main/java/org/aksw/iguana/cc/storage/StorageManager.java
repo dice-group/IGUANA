@@ -1,4 +1,4 @@
-package org.aksw.iguana.cc.tasks.stresstest.storage;
+package org.aksw.iguana.cc.storage;
 
 import org.apache.jena.rdf.model.Model;
 

@@ -3,8 +3,8 @@
  */
 package org.aksw.iguana.cc.tasks.storage.impl;
 
-import org.aksw.iguana.cc.tasks.stresstest.storage.impl.RDFFileStorage;
-import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
+import org.aksw.iguana.cc.storage.impl.RDFFileStorage;
+import org.aksw.iguana.cc.storage.Storage;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.vocabulary.RDFS;

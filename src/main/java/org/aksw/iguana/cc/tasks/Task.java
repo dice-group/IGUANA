@@ -11,6 +11,7 @@ public interface Task {
     @JsonSubTypes({
             @JsonSubTypes.Type(value = Stresstest.Config.class, name = "stresstest"),
     })
-    interface Config {
-    }
+    interface Config {}
+
+    void run();
 }

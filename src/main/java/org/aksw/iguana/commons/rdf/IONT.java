@@ -1,6 +1,6 @@
 package org.aksw.iguana.commons.rdf;
 
-import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
+import org.aksw.iguana.cc.metrics.Metric;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 

@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayDeque;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -117,12 +116,11 @@ public class SPARQLProtocolWorkerTest {
 
         final HttpWorker.Result result = worker.start().join();
         assertEquals(result.executionStats().size(), QUERY_MIXES, "Worker should have executed only 1 query");
-        assertNull(result.executionStats().get(0).error(), "Worker threw an exception, during execution");
-        assertEquals(200, result.executionStats().get(0).httpStatusCode(), "Worker returned wrong status code");
-        assertTrue(result.executionStats().get(0).duration().isPresent(), "Worker didn't return a duration");
-        assertNotEquals(Duration.ZERO, result.executionStats().get(0).duration().get(), "Worker returned zero duration");
-        assertNotEquals(0, result.executionStats().get(0).responseBodyHash(), "Worker didn't return a response body hash");
-        assertEquals("Non-Empty-Body".getBytes(StandardCharsets.UTF_8).length, result.executionStats().get(0).contentLength(), "Worker returned wrong content length");
+        assertNull(result.executionStats().get(0).error().orElse(null), "Worker threw an exception, during execution");
+        assertEquals(200, result.executionStats().get(0).httpStatusCode().get(), "Worker returned wrong status code");
+        assertNotEquals(Duration.ZERO, result.executionStats().get(0).duration(), "Worker returned zero duration");
+        assertNotEquals(0, result.executionStats().get(0).responseBodyHash().getAsLong(), "Worker didn't return a response body hash");
+        assertEquals("Non-Empty-Body".getBytes(StandardCharsets.UTF_8).length, result.executionStats().get(0).contentLength().getAsLong(), "Worker returned wrong content length");
     }
 
     @DisplayName("Test Malformed Response Processing")
@@ -134,8 +132,7 @@ public class SPARQLProtocolWorkerTest {
                 .willReturn(aResponse().withFault(fault)));
         final HttpWorker.Result result = worker.start().join();
         assertEquals(1, result.executionStats().size());
-        assertNotNull(result.executionStats().get(0).error());
-        assertEquals(Optional.empty(), result.executionStats().get(0).duration());
+        assertNotNull(result.executionStats().get(0).error().orElse(null));
     }
 
     @Test

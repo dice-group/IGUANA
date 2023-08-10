@@ -1,10 +1,8 @@
-package org.aksw.iguana.cc.tasks.stresstest.storage.impl;
+package org.aksw.iguana.cc.storage.impl;
 
 import com.github.jsonldjava.shaded.com.google.common.base.Supplier;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
-import org.aksw.iguana.rp.storage.TripleBasedStorage;
-import org.aksw.iguana.cc.tasks.stresstest.storage.TripleBasedStorage;
-import org.aksw.iguana.commons.annotation.Shorthand;
+import org.aksw.iguana.cc.storage.Storage;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -19,14 +17,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
 
-public class RDFFileStorage extends TripleBasedStorage {
-    public record Config(String path) implements StorageConfig {
-    }
+public class RDFFileStorage implements Storage {
+    public record Config(String path) implements StorageConfig {}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDFFileStorage.class.getName());
 
-    protected static Supplier<String> defaultFileNameSupplier = () ->
-    {
+    protected static Supplier<String> defaultFileNameSupplier = () -> {
         var now = Calendar.getInstance();
         return String.format("%d-%02d-%02d_%02d-%02d.%03d",
                 now.get(Calendar.YEAR),
@@ -70,10 +66,8 @@ public class RDFFileStorage extends TripleBasedStorage {
 
     @Override
     public void storeResult(Model data){
-        super.storeResult(data);
-        try (OutputStream os = new FileOutputStream(file.toString(), true)) {
-            RDFDataMgr.write(os, metricResults, this.lang);
-            metricResults.removeAll();
+        try (OutputStream os = new FileOutputStream(path.toString(), true)) {
+            RDFDataMgr.write(os, data, this.lang);
         } catch (IOException e) {
             LOGGER.error("Could not commit to RDFFileStorage using lang: " + lang, e);
         }

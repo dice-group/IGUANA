@@ -63,7 +63,7 @@ public class MainController {
         }
         // TODO: a bit of error handling
         Suite parse = IguanaSuiteParser.parse(args.suitePath);
-        Suite.Result run = parse.run();
+        parse.run();
         System.exit(0);
     }
 

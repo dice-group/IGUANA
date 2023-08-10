@@ -1,10 +1,9 @@
-package org.aksw.iguana.cc.tasks.stresstest.metrics.impl;
+package org.aksw.iguana.cc.metrics.impl;
 
-import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.QueryMetric;
+import org.aksw.iguana.cc.metrics.Metric;
+import org.aksw.iguana.cc.metrics.QueryMetric;
+import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.annotation.Shorthand;
-import org.aksw.iguana.commons.constants.COMMON;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -20,13 +19,13 @@ public class QPS extends Metric implements QueryMetric {
     }
 
     @Override
-    public Number calculateQueryMetric(List<QueryExecutionStats> data) {
+    public Number calculateQueryMetric(List<HttpWorker.ExecutionStats> data) {
         BigDecimal successes = BigDecimal.ZERO;
         Duration totalTime = Duration.ZERO;
-        for (QueryExecutionStats exec : data) {
-            if (exec.responseCode() == COMMON.QUERY_SUCCESS) {
+        for (HttpWorker.ExecutionStats exec : data) {
+            if (exec.successful()) {
                 successes = successes.add(BigDecimal.ONE);
-                totalTime = totalTime.plusNanos((long) exec.executionTime() * 1000000);
+                totalTime = totalTime.plus(exec.duration());
             }
         }
         BigDecimal tt = (new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 9));

@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -47,21 +48,74 @@ public abstract class HttpWorker {
         boolean parseResults();
     }
 
-    public record ExecutionStats( // TODO: queryID, there should also probably be a clearer way to tell, if the query was successful or not
+    public record ExecutionStats(
+            int queryID,
             Instant startTime,
-            Optional<Duration> duration,
-            int httpStatusCode,
-            long contentLength,
-            Long responseBodyHash,
-            Exception error
-    ) {}
+            Duration duration, // should always exist
+            Optional<Integer> httpStatusCode,
+            OptionalLong contentLength,
+            OptionalLong responseBodyHash,
+            Optional<Exception> error
+    ) {
+        public enum END_STATE {
+            SUCCESS(1), // values are the same as previous implementation for backwards compatibility
+            TIMEOUT(-1),
+            HTTP_ERROR(-2),
+            MISCELLANEOUS_EXCEPTION(0);
+
+            public final int value;
+            END_STATE(int value) {
+                this.value = value;
+            }
+        }
+
+        public END_STATE endState() {
+            if (successful()) {
+                return END_STATE.SUCCESS;
+            } else if (timeout()) {
+                return END_STATE.TIMEOUT;
+            } else if (httpError()) {
+                return END_STATE.HTTP_ERROR;
+            } else {
+                return END_STATE.MISCELLANEOUS_EXCEPTION;
+            }
+        }
+
+        public boolean completed() {
+            return httpStatusCode().isPresent();
+        }
+
+        public boolean successful() {
+            if (completed() && error().isEmpty()) {
+                return httpStatusCode().get() / 100 == 2;
+            } else {
+                return false;
+            }
+        }
+
+        public boolean timeout() {
+            if (!successful() && error().isPresent()) {
+                return error().get() instanceof java.net.SocketTimeoutException;
+            } else {
+                return false;
+            }
+        }
+
+        public boolean httpError() {
+            return httpStatusCode().isPresent() && httpStatusCode().orElse(200) / 100 != 2;
+        }
+
+        public boolean miscellaneousException() {
+            return error().isPresent() && !timeout() && !httpError() && !successful();
+        }
+    }
 
     public record Result(long workerID, List<ExecutionStats> executionStats) {}
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
     @JsonSubTypes({
             @JsonSubTypes.Type(value = TimeLimit.class),
-            @JsonSubTypes.Type(value = QueryMixes.class),
+            @JsonSubTypes.Type(value = QueryMixes.class)
     })
     sealed public interface CompletionTarget permits TimeLimit, QueryMixes {}
 
@@ -69,12 +123,12 @@ public abstract class HttpWorker {
 
     public record QueryMixes(@JsonProperty(required = true) int number) implements CompletionTarget {}
 
-    final protected long workerId;
+    final protected long workerID;
     final protected Config config;
     final protected ResponseBodyProcessor responseBodyProcessor;
 
-    public HttpWorker(long workerId, ResponseBodyProcessor responseBodyProcessor, Config config) {
-        this.workerId = workerId;
+    public HttpWorker(long workerID, ResponseBodyProcessor responseBodyProcessor, Config config) {
+        this.workerID = workerID;
         this.responseBodyProcessor = responseBodyProcessor;
         this.config = config;
     }
@@ -85,4 +139,11 @@ public abstract class HttpWorker {
 
     public abstract CompletableFuture<Result> start();
 
+    public Config config() {
+        return this.config;
+    }
+
+    public long getWorkerID() {
+        return this.workerID;
+    }
 }

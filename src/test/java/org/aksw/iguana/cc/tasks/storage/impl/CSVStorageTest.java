@@ -2,13 +2,13 @@ package org.aksw.iguana.cc.tasks.storage.impl;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import org.aksw.iguana.cc.config.IguanaConfig;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.*;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.impl.AggregatedExecutionStatistics;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.impl.NoQ;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.impl.NoQPH;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.impl.QPS;
-import org.aksw.iguana.cc.tasks.stresstest.storage.impl.CSVStorage;
+import org.aksw.iguana.cc.metrics.Metric;
+import org.aksw.iguana.cc.metrics.MetricManager;
+import org.aksw.iguana.cc.metrics.impl.AggregatedExecutionStatistics;
+import org.aksw.iguana.cc.metrics.impl.NoQ;
+import org.aksw.iguana.cc.metrics.impl.NoQPH;
+import org.aksw.iguana.cc.metrics.impl.QPS;
+import org.aksw.iguana.cc.storage.impl.CSVStorage;
 import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.aksw.iguana.commons.rdf.IRES;
@@ -44,7 +44,9 @@ public class CSVStorageTest {
     @BeforeEach
     public void setup() throws IOException {
         this.folder = Files.createTempDirectory("iguana-CSVStorage-test");
-        this.suiteFolder = folder.resolve(IguanaConfig.getSuiteID());
+
+        // TODO: suiteid
+        this.suiteFolder = folder.resolve("suite");
     }
 
     public static Arguments createTestData1() {

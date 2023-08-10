@@ -1,18 +1,14 @@
-package org.aksw.iguana.cc.tasks.stresstest.metrics.impl;
+package org.aksw.iguana.cc.metrics.impl;
 
-import org.aksw.iguana.cc.model.QueryExecutionStats;
-import org.aksw.iguana.cc.tasks.stresstest.StresstestMetadata;
-import org.aksw.iguana.cc.worker.WorkerMetadata;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.Metric;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.TaskMetric;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.WorkerMetric;
-import org.aksw.iguana.commons.annotation.Shorthand;
+import org.aksw.iguana.cc.metrics.Metric;
+import org.aksw.iguana.cc.metrics.TaskMetric;
+import org.aksw.iguana.cc.metrics.WorkerMetric;
+import org.aksw.iguana.cc.worker.HttpWorker;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-@Shorthand("PAvgQPS")
 public class PAvgQPS extends Metric implements TaskMetric, WorkerMetric {
 
     private final int penalty;
@@ -23,10 +19,10 @@ public class PAvgQPS extends Metric implements TaskMetric, WorkerMetric {
     }
 
     @Override
-    public Number calculateTaskMetric(StresstestMetadata task, List<QueryExecutionStats>[][] data) {
+    public Number calculateTaskMetric(List<HttpWorker> workers, List<HttpWorker.ExecutionStats>[][] data) {
         BigDecimal sum = BigDecimal.ZERO;
-        for (WorkerMetadata worker : task.workers()) {
-            sum = sum.add((BigDecimal) this.calculateWorkerMetric(worker, data[worker.workerID()]));
+        for (var worker : workers) {
+            sum = sum.add((BigDecimal) this.calculateWorkerMetric(worker.config(), data[(int) worker.getWorkerID()]));
         }
 
         try {
@@ -37,10 +33,10 @@ public class PAvgQPS extends Metric implements TaskMetric, WorkerMetric {
     }
 
     @Override
-    public Number calculateWorkerMetric(WorkerMetadata worker, List<QueryExecutionStats>[] data) {
+    public Number calculateWorkerMetric(HttpWorker.Config worker, List<HttpWorker.ExecutionStats>[] data) {
         BigDecimal sum = BigDecimal.ZERO;
         PQPS pqpsmetric = new PQPS(penalty);
-        for (List<QueryExecutionStats> datum : data) {
+        for (List<HttpWorker.ExecutionStats> datum : data) {
             sum = sum.add((BigDecimal) pqpsmetric.calculateQueryMetric(datum));
         }
         if (data.length == 0) {

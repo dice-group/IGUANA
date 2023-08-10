@@ -2,6 +2,8 @@ package org.aksw.iguana.commons.time;
 
 import org.apache.jena.datatypes.xsd.XSDDuration;
 import org.apache.jena.datatypes.xsd.impl.XSDDurationType;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.ResourceFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -43,5 +45,9 @@ public class TimeUtils {
 
 	public static XSDDuration toXSDDurationInSeconds(Duration duration) {
 		return (XSDDuration) new XSDDurationType().parse("PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S");
+	}
+
+	public static Literal createTypedDurationLiteral(Duration duration) {
+		return ResourceFactory.createTypedLiteral(new XSDDurationType().parse(duration.toString()));
 	}
 }

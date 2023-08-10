@@ -1,11 +1,9 @@
 package org.aksw.iguana.cc.config.elements;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
-import org.aksw.iguana.rp.storage.impl.RDFFileStorage;
-import org.aksw.iguana.rp.storage.impl.TriplestoreStorage;
+import org.aksw.iguana.cc.storage.impl.RDFFileStorage;
+import org.aksw.iguana.cc.storage.impl.TriplestoreStorage;
 
 /**
  * Storage Configuration class
@@ -16,7 +14,8 @@ import org.aksw.iguana.rp.storage.impl.TriplestoreStorage;
         property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = TriplestoreStorage.Config.class, name = "triplestore"),
-        @JsonSubTypes.Type(value = RDFFileStorage.Config.class, name = "RDF file"),
+        @JsonSubTypes.Type(value = RDFFileStorage.Config.class, name = "rdf"),
+        @JsonSubTypes.Type(value = CSVStorage.Config.class, name = "csv")
 })
 public interface StorageConfig {}
 

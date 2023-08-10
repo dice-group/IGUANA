@@ -24,37 +24,30 @@ public class Suite {
             List<StorageConfig> storages) {
     }
 
-    public record Result(List<Stresstest.Result> stresstest) {
-
-    }
 
     private final long suiteId;
     private final Config config;
     private final ResponseBodyProcessorInstances responseBodyProcessorInstances;
 
-    private final List<Stresstest> stresstests = new ArrayList<>();
+    private final List<Task> tasks = new ArrayList<>();
 
     Suite(long suiteId, Config config) {
-
         this.suiteId = suiteId;
         this.config = config;
-        long stresstestId = 0;
+        long taskID = 0;
         responseBodyProcessorInstances = new ResponseBodyProcessorInstances();
-
 
         for (Task.Config task : config.tasks()) {
             if (task instanceof Stresstest.Config) {
-                stresstests.add(new Stresstest(stresstestId, (Stresstest.Config) task, responseBodyProcessorInstances));
+                tasks.add(new Stresstest(taskID++, (Stresstest.Config) task, responseBodyProcessorInstances, this.config.storages)); // TODO: look for a better way to add the storages
             }
         }
     }
 
-    public Suite.Result run() {
-        List<Stresstest.Result> stresstestResults = new ArrayList<>();
-        for (Stresstest stresstest : stresstests) {
-            stresstestResults.add(stresstest.run());
+    public void run() {
+        for (Task task : tasks) {
+            task.run();
         }
-        return new Result(stresstestResults);
     }
 
 }

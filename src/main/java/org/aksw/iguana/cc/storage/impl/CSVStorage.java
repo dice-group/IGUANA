@@ -1,14 +1,14 @@
-package org.aksw.iguana.cc.tasks.stresstest.storage.impl;
+package org.aksw.iguana.cc.storage.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.exceptions.CsvValidationException;
-import org.aksw.iguana.cc.config.IguanaConfig;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.*;
-import org.aksw.iguana.cc.tasks.stresstest.metrics.impl.AggregatedExecutionStatistics;
-import org.aksw.iguana.cc.tasks.stresstest.storage.Storage;
-import org.aksw.iguana.commons.annotation.Shorthand;
+import org.aksw.iguana.cc.config.elements.StorageConfig;
+import org.aksw.iguana.cc.metrics.*;
+import org.aksw.iguana.cc.metrics.impl.AggregatedExecutionStatistics;
+import org.aksw.iguana.cc.storage.Storage;
 import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.apache.jena.arq.querybuilder.SelectBuilder;
@@ -31,8 +31,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
-@Shorthand("CSVStorage")
 public class CSVStorage implements Storage {
+
+    public record Config(
+            @JsonProperty String path
+    ) implements StorageConfig {}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSVStorage.class);
 
@@ -45,6 +48,10 @@ public class CSVStorage implements Storage {
     private String connectionVersion;
     private String dataset;
 
+    public CSVStorage(Config config) {
+        this(config.path());
+    }
+
     public CSVStorage(String folderPath) {
         Path parentFolder;
         try {
@@ -56,7 +63,8 @@ public class CSVStorage implements Storage {
             return;
         }
 
-        this.folder = parentFolder.resolve(IguanaConfig.getSuiteID());
+        // TODO: add the id suite back
+        this.folder = parentFolder.resolve("suite");
         this.taskFile = this.folder.resolve("tasks-overview.csv");
 
         if (Files.notExists(parentFolder)) {

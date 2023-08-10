@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aksw.iguana.rp.storage.impl.RDFFileStorage;
+import org.aksw.iguana.cc.storage.impl.RDFFileStorage;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
