@@ -2,8 +2,6 @@ package org.aksw.iguana.cc.query.selector.impl;
 
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 
-import static java.text.MessageFormat.format;
-
 /**
  * This QuerySelector is used to get the next query index in a linear order. If the last query is reached it starts
  * again at the first query.

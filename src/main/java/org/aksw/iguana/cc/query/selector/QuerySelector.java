@@ -1,7 +1,5 @@
 package org.aksw.iguana.cc.query.selector;
 
-import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
-
 import static java.text.MessageFormat.format;
 
 /**
