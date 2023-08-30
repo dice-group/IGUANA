@@ -1,6 +1,12 @@
 package org.aksw.iguana.cc.query.handler;
 
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
@@ -16,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -26,35 +33,86 @@ import java.util.Objects;
  *
  * @author frensing
  */
+@JsonDeserialize(using = QueryHandler.Deserializer.class)
 public class QueryHandler {
+    static class Deserializer extends StdDeserializer<QueryHandler> {
+        final HashMap<Config, QueryHandler> queryHandlers = new HashMap<>();
+        protected Deserializer(Class<?> vc) {
+            super(vc);
+        }
 
-    public record Config(String path,
-                         Format format,
-                         Boolean caching,
-                         Order order,
-                         Long seed,
-                         Language lang
+        protected Deserializer() {
+            this(null);
+        }
+
+        @Override
+        public QueryHandler deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+            QueryHandler.Config queryHandlerConfig = ctxt.readValue(jp, QueryHandler.Config.class);
+            if (!queryHandlers.containsKey(queryHandlerConfig))
+                queryHandlers.put(queryHandlerConfig, new QueryHandler(queryHandlerConfig));
+
+            return queryHandlers.get(queryHandlerConfig);
+        }
+    }
+
+    public record Config(
+        String path,
+        Format format,
+        Boolean caching,
+        Order order,
+        Long seed,
+        Language lang
     ) {
-
         public Config(@JsonProperty(required = true) String path, Format format, Boolean caching, Order order, Long seed, Language lang) {
             this.path = path;
             this.format = format == null ? Format.ONE_PER_LINE : format;
-            this.caching = caching == null ? true : caching;
+            this.caching = caching == null || caching;
             this.order = order == null ? Order.LINEAR : order;
             this.seed = seed;
             this.lang = lang == null ? Language.SPARQL : lang;
         }
 
+        @JsonDeserialize(using = Format.Deserializer.class)
         public enum Format {
             @JsonEnumDefaultValue ONE_PER_LINE("one-per-line"),
             SEPARATOR("separator"),
             FOLDER("folder");
 
-            final String value;
+            static class Deserializer extends StdDeserializer<Config.Format> {
+                protected Deserializer(Class<?> vc) {
+                    super(vc);
+                }
 
-            @JsonCreator
+                protected Deserializer() {
+                    this(null);
+                }
+
+                @Override
+                public Format deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+                    JsonNode root = deserializationContext.readTree(jsonParser);
+                    if (root.has("separator")) {
+                        Format format = Format.SEPARATOR;
+                        format.setSeparator(root.get("separator").textValue());
+                        return format;
+                    } else {
+                        return Format.valueOf(root.textValue());
+                    }
+                }
+            }
+
+            final String value;
+            String separator;
+
             Format(String value) {
                 this.value = Objects.requireNonNullElse(value, "one-per-line");
+            }
+
+            public void setSeparator(String separator) {
+                this.separator = separator;
+            }
+
+            public String getSeparator() {
+                return this.separator;
             }
 
             @JsonValue
@@ -81,8 +139,7 @@ public class QueryHandler {
 
         public enum Language {
             @JsonEnumDefaultValue SPARQL("SPARQL"),
-            UNSPECIFIED("unspecified"),
-            ;
+            UNSPECIFIED("unspecified");
 
             final String value;
 
@@ -112,7 +169,7 @@ public class QueryHandler {
     public QueryHandler(Config config) throws IOException {
         final var querySource = switch (config.format()) {
             case ONE_PER_LINE -> new FileLineQuerySource(Path.of(config.path()));
-            case SEPARATOR -> new FileSeparatorQuerySource(Path.of(config.path()));
+            case SEPARATOR -> new FileSeparatorQuerySource(Path.of(config.path()), config.format.separator);
             case FOLDER -> new FolderQuerySource(Path.of(config.path()));
         };
 

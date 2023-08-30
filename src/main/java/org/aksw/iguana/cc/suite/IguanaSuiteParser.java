@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.networknt.schema.JsonSchema;
@@ -19,7 +18,6 @@ import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.config.elements.DatasetConfig;
-import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,6 +35,8 @@ import java.util.stream.Collectors;
  * Creates an IguanaConfig from a given JSON or YAML file, and validates the config using a JSON schema file
  */
 public class IguanaSuiteParser {
+
+    record SuiteConfigWithID(long id, Suite.Config config) {}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IguanaSuiteParser.class);
 
@@ -64,7 +61,7 @@ public class IguanaSuiteParser {
 
 
     public static Suite parse(Path config) throws IOException {
-        return parse(new FileInputStream(config.toFile()), DataFormat.getFormat(config), true);
+        return parse(new FileInputStream(config.toFile()), DataFormat.getFormat(config), true); // TODO: validate
     }
 
     public static Suite parse(InputStream stream, DataFormat format) throws IOException {
@@ -81,8 +78,6 @@ public class IguanaSuiteParser {
         return new Suite(configWithID.id(), configWithID.config());
     }
 
-    record SuiteConfigWithID(long id, Suite.Config config) {
-    }
 
     /**
      * Parses a IGUANA configuration file.
@@ -143,7 +138,7 @@ public class IguanaSuiteParser {
             }
 
             @Override
-            public ConnectionConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            public ConnectionConfig deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
                 JsonNode node = jp.getCodec().readTree(jp);
                 if (node.isTextual()) {
                     final var connectionName = node.asText();
@@ -160,28 +155,6 @@ public class IguanaSuiteParser {
             }
         }
 
-        final var queryHandlers = new HashMap<QueryHandler.Config, QueryHandler>();
-
-        class QueryHandlerDeserializer extends StdDeserializer<QueryHandler> {
-
-            public QueryHandlerDeserializer() {
-                this(null);
-            }
-
-            protected QueryHandlerDeserializer(Class<?> vc) {
-                super(vc);
-            }
-
-            @Override
-            public QueryHandler deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-                QueryHandler.Config queryHandlerConfig = ctxt.readValue(jp, QueryHandler.Config.class);
-                if (!queryHandlers.containsKey(queryHandlerConfig))
-                    queryHandlers.put(queryHandlerConfig, new QueryHandler(queryHandlerConfig));
-
-                return queryHandlers.get(queryHandlerConfig);
-            }
-        }
-
         class HumanReadableDurationDeserializer extends StdDeserializer<Duration> {
 
             public HumanReadableDurationDeserializer() {
@@ -193,7 +166,7 @@ public class IguanaSuiteParser {
             }
 
             @Override
-            public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
                 var durationString = jp.getValueAsString()
                         .replaceAll("\\s+", "")
                         .replace("years", "y")
@@ -216,12 +189,10 @@ public class IguanaSuiteParser {
             }
         }
 
-
         mapper = new ObjectMapper(factory).registerModule(new JavaTimeModule())
                 .registerModule(new SimpleModule()
                         .addDeserializer(DatasetConfig.class, new DatasetDeserializer())
                         .addDeserializer(ConnectionConfig.class, new ConnectionDeserializer())
-                        .addDeserializer(QueryHandler.class, new QueryHandlerDeserializer())
                         .addDeserializer(Duration.class, new HumanReadableDurationDeserializer()));
         // TODO: update validator and reactivate
 //        if(validate && !validateConfig(config, schemaFile, mapper)){
@@ -250,8 +221,7 @@ public class IguanaSuiteParser {
 
     private static Map<String, ConnectionConfig> preparseConnections(ObjectMapper mapper, String input) throws JsonProcessingException {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        record PreparsingConnections(@JsonProperty(required = true) List<ConnectionConfig> connections) {
-        }
+        record PreparsingConnections(@JsonProperty(required = true) List<ConnectionConfig> connections) {}
         final var preparsingConnections = mapper.readValue(input, PreparsingConnections.class);
 
         return preparsingConnections.connections().stream().collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
