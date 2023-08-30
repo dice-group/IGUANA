@@ -2,7 +2,11 @@ package org.aksw.iguana.cc.storage.impl;
 
 import com.github.jsonldjava.shaded.com.google.common.base.Supplier;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
+import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.aksw.iguana.cc.storage.Storable;
 import org.aksw.iguana.cc.storage.Storage;
+import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
+import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -16,6 +20,7 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
+import java.util.Map;
 
 public class RDFFileStorage implements Storage {
     public record Config(String path) implements StorageConfig {}
@@ -66,13 +71,22 @@ public class RDFFileStorage implements Storage {
 
     @Override
     public void storeResult(Model data){
+        Map<String, ResponseBodyProcessor> rbpMap = ResponseBodyProcessorInstances.getEveryProcessor();
+        for (String responseType : rbpMap.keySet()) {
+            var responseDataMetrics = rbpMap.get(responseType).getResponseDataMetrics();
+            for (LanguageProcessor.LanguageProcessingData singleData : responseDataMetrics) {
+                if (singleData instanceof Storable.AsRDF) {
+                    data.add(((Storable.AsRDF) singleData).toRDF());
+                }
+            }
+        }
+
         try (OutputStream os = new FileOutputStream(path.toString(), true)) {
             RDFDataMgr.write(os, data, this.lang);
         } catch (IOException e) {
             LOGGER.error("Could not commit to RDFFileStorage using lang: " + lang, e);
         }
     }
-
 
     @Override
     public String toString() {

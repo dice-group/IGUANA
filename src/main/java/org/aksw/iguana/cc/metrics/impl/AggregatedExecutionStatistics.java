@@ -79,8 +79,7 @@ public class AggregatedExecutionStatistics extends Metric implements ModelWritin
 
         m.add(queryRes, IPROP.succeeded, ResourceFactory.createTypedLiteral(succeeded));
         m.add(queryRes, IPROP.failed, ResourceFactory.createTypedLiteral(failed));
-        if (resultSize.isPresent())
-            m.add(queryRes, IPROP.resultSize, ResourceFactory.createTypedLiteral(resultSize.get()));
+        m.add(queryRes, IPROP.resultSize, ResourceFactory.createTypedLiteral(resultSize.orElse(BigInteger.valueOf(-1))));
         m.add(queryRes, IPROP.timeOuts, ResourceFactory.createTypedLiteral(timeOuts));
         m.add(queryRes, IPROP.wrongCodes, ResourceFactory.createTypedLiteral(wrongCodes));
         m.add(queryRes, IPROP.unknownException, ResourceFactory.createTypedLiteral(unknownExceptions));

@@ -1,6 +1,13 @@
 package org.aksw.iguana.cc.lang.impl;
 
 import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.aksw.iguana.cc.storage.Storable;
+import org.aksw.iguana.commons.rdf.IPROP;
+import org.aksw.iguana.commons.rdf.IRES;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.json.simple.parser.ContentHandler;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -24,25 +31,64 @@ import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
 public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
 
     @Override
-    public LanguageProcessingData process(InputStream inputStream) {
+    public LanguageProcessingData process(InputStream inputStream, long hash) {
         var parser = new JSONParser();
         var handler = new SaxSparqlJsonResultContentHandler();
         try {
             parser.parse(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)), handler);
-            return new SaxSparqlJsonResultData(handler.solutions(), handler.boundValues(), handler.variables(), null);
+            return new SaxSparqlJsonResultData(hash, handler.solutions(), handler.boundValues(), handler.variables(), null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ParseException e) {
-            return new SaxSparqlJsonResultData(-1, -1, null, e);
+            return new SaxSparqlJsonResultData(hash, -1, -1, null, e);
         }
     }
 
-    record SaxSparqlJsonResultData(long results, long bindings,
-                                   List<String> variables, Exception exception) implements LanguageProcessingData {
+    record SaxSparqlJsonResultData(
+            long hash,
+            long results,
+            long bindings,
+            List<String> variables,
+            Exception exception
+    ) implements LanguageProcessingData, Storable.AsCSV, Storable.AsRDF {
 
         @Override
         public Class<? extends LanguageProcessor> processor() {
             return SaxSparqlJsonResultCountingParser.class;
+        }
+
+        @Override
+        public List<Storable.CSVFileData> toCSV() {
+            String variablesString = "";
+            String exceptionString = "";
+            if (variables != null)
+                variablesString = String.join("; ", variables);
+            if (exception != null)
+                exceptionString = exception().toString();
+
+            String[] header = new String[]{ "responseBodyHash", "results", "bindings", "variables", "exception" };
+            String[] content = new String[]{ String.valueOf(hash), String.valueOf(results), String.valueOf(bindings), variablesString, exceptionString};
+            String[][] data = new String[][]{ header, content };
+            return List.of(new Storable.CSVFileData("sax-sparql-result-data.csv", data));
+        }
+
+        @Override
+        public Model toRDF() {
+            Model m = ModelFactory.createDefaultModel();
+            Resource responseBodyRes = IRES.getResponsebodyResource(this.hash);
+            m.add(responseBodyRes, IPROP.results, ResourceFactory.createTypedLiteral(this.results))
+                    .add(responseBodyRes, IPROP.bindings, ResourceFactory.createTypedLiteral(this.bindings));
+
+            if (this.variables != null) {
+                for (String variable : this.variables) {
+                    m.add(responseBodyRes, IPROP.variable, ResourceFactory.createTypedLiteral(variable));
+                }
+            }
+            if (this.exception != null) {
+                m.add(responseBodyRes, IPROP.exception, ResourceFactory.createTypedLiteral(this.exception.toString()));
+            }
+
+            return m;
         }
     }
 

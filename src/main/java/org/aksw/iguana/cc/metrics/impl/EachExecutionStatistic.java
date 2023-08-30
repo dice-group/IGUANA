@@ -5,6 +5,7 @@ import org.aksw.iguana.cc.metrics.ModelWritingMetric;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.aksw.iguana.commons.rdf.IRES;
+import org.aksw.iguana.commons.time.TimeUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -32,14 +33,19 @@ public class EachExecutionStatistic extends Metric implements ModelWritingMetric
                 for (HttpWorker.ExecutionStats exec : data[(int) worker.getWorkerID()][i]) {
                     Resource runRes = iresFactory.getWorkerQueryRunResource(worker, i, run);
                     m.add(workerQueryResource, IPROP.queryExecution, runRes);
-                    m.add(runRes, IPROP.time, ResourceFactory.createTypedLiteral(exec.duration()));
+                    m.add(runRes, IPROP.time, TimeUtils.createTypedDurationLiteral(exec.duration()));
                     m.add(runRes, IPROP.success, ResourceFactory.createTypedLiteral(exec.successful()));
                     m.add(runRes, IPROP.run, ResourceFactory.createTypedLiteral(run));
                     m.add(runRes, IPROP.code, ResourceFactory.createTypedLiteral(exec.endState().value));
-                    // TODO: maybe add http status code
-                    if (exec.contentLength().isPresent())
-                        m.add(runRes, IPROP.resultSize, ResourceFactory.createTypedLiteral(exec.contentLength().getAsLong()));
+                    m.add(runRes, IPROP.resultSize, ResourceFactory.createTypedLiteral(exec.contentLength().orElse(-1)));
                     m.add(runRes, IPROP.queryID, queryRes);
+                    if (exec.responseBodyHash().isPresent()) {
+                        Resource responseBodyRes = IRES.getResponsebodyResource(exec.responseBodyHash().getAsLong());
+                        m.add(runRes, IPROP.responseBody, responseBodyRes);
+                        m.add(responseBodyRes, IPROP.responseBodyHash, ResourceFactory.createTypedLiteral(exec.responseBodyHash().getAsLong()));
+                    }
+                    // TODO: maybe add http status code and qps
+
                     run = run.add(BigInteger.ONE);
                 }
             }

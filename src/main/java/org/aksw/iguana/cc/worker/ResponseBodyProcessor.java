@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class ResponseBodyProcessor {
@@ -23,7 +25,7 @@ public class ResponseBodyProcessor {
 
     private final ConcurrentHashMap.KeySetView<Key, Boolean> seenResponseBodies = ConcurrentHashMap.newKeySet();
 
-    private final ConcurrentHashMap<Key, LanguageProcessor.LanguageProcessingData> responseDataMetrics = new ConcurrentHashMap<>();
+    private final List<LanguageProcessor.LanguageProcessingData> responseDataMetrics = Collections.synchronizedList(new ArrayList<>());
     private final LanguageProcessor languageProcessor;
 
     ThreadPoolExecutor executor;
@@ -43,17 +45,21 @@ public class ResponseBodyProcessor {
 
     private void submit(Key key, BigByteArrayOutputStream bigByteArrayOutputStream) {
         executor.execute(() -> {
-            var processingResult = languageProcessor.process(new BigByteArrayInputStream(bigByteArrayOutputStream));
-            responseDataMetrics.put(key, processingResult);
+            var processingResult = languageProcessor.process(new BigByteArrayInputStream(bigByteArrayOutputStream), key.xxh64);
+            responseDataMetrics.add(processingResult);
         });
     }
 
-    // TODO: integrate this in the stresstest
-    public ConcurrentHashMap<Key, LanguageProcessor.LanguageProcessingData> getResponseDataMetrics() {
+    public List<LanguageProcessor.LanguageProcessingData> getResponseDataMetrics() {
+        if (executor.isTerminated()) {
+            return responseDataMetrics;
+        }
+
         final var timeout = Duration.ofMinutes(10);
-        LOGGER.info(MessageFormat.format("Shutting down ResponseBodyProcessor with {0}min timeout to finish processing.\n{1} tasks remaining.", timeout.get(ChronoUnit.MINUTES), executor.getQueue().size()));
+        LOGGER.info(MessageFormat.format("Shutting down ResponseBodyProcessor with {0}min timeout to finish processing. {1} tasks remaining.", timeout.toMinutes(), executor.getQueue().size()));
         boolean noTimeout;
         try {
+            executor.shutdown();
             noTimeout = executor.awaitTermination(10, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

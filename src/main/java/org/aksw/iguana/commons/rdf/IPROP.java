@@ -59,6 +59,8 @@ public class IPROP {
     public static final Property run;
     public static final Property success;
     public static final Property time;
+    public static final Property responseBodyHash = ResourceFactory.createProperty(NS, "responseBodyHash");
+    public static final Property responseBody = ResourceFactory.createProperty(NS, "responseBody");
 
     public static final Property experiment = ResourceFactory.createProperty(NS, "experiment");
     public static final Property dataset = ResourceFactory.createProperty(NS, "dataset");
@@ -77,6 +79,13 @@ public class IPROP {
     public static final Property timeOut = ResourceFactory.createProperty(NS, "timeOut");
     public static final Property startDate = ResourceFactory.createProperty(NS, "startDate");
     public static final Property endDate = ResourceFactory.createProperty(NS, "endDate");
+
+    // Language Processor
+    public static final Property hash = ResourceFactory.createProperty(NS, "hash");
+    public static final Property results = ResourceFactory.createProperty(NS, "results");
+    public static final Property bindings = ResourceFactory.createProperty(NS, "bindings");
+    public static final Property variable = ResourceFactory.createProperty(NS, "variable");
+    public static final Property exception = ResourceFactory.createProperty(NS, "exception");
 
     static {
 

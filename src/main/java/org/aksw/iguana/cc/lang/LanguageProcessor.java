@@ -26,10 +26,11 @@ public abstract class LanguageProcessor {
     }
 
     public interface LanguageProcessingData {
+        long hash();
         Class<? extends LanguageProcessor> processor();
     }
 
-    public abstract LanguageProcessingData process(InputStream inputStream);
+    public abstract LanguageProcessingData process(InputStream inputStream, long hash);
 
     final private static Map<String, Class<? extends LanguageProcessor>> processors = new HashMap<>();
 

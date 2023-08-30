@@ -43,6 +43,10 @@ public class IRES {
         return ResourceFactory.createResource(NS + taskID + "/" + workerID + "/" + queryID + "/" + run);
     }
 
+    public static Resource getResponsebodyResource(long hash) {
+        return ResourceFactory.createResource(NS + "responseBody" + "/" + hash);
+    }
+
     public static class Factory {
 
         private final long suiteID;
