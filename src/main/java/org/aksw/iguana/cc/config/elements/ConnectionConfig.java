@@ -28,8 +28,6 @@ public record ConnectionConfig(
         URI updateEndpoint,
         DatasetConfig dataset
 ) {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
-
     public static class URIDeserializer extends JsonDeserializer<URI> {
 
         @Override
@@ -37,7 +35,6 @@ public record ConnectionConfig(
             try {
                 return URI.create(p.getValueAsString());
             } catch (IllegalArgumentException e) {
-                LOGGER.error("The given URL {} is malformed. ", p, e);
                 throw e;
             }
         }

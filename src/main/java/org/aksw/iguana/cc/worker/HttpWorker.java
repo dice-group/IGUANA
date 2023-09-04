@@ -8,6 +8,7 @@ import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 
+import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Interface for the Worker Thread used in the {@link Stresstest}
@@ -102,11 +104,14 @@ public abstract class HttpWorker {
         }
 
         public boolean timeout() {
+            boolean timeout = false;
             if (!successful() && error().isPresent()) {
-                return error().get() instanceof java.net.SocketTimeoutException;
-            } else {
-                return false;
+                timeout |= error().get() instanceof java.util.concurrent.TimeoutException;
+                if (error().get() instanceof ExecutionException exec) {
+                    timeout |= exec.getCause() instanceof HttpTimeoutException;
+                }
             }
+            return timeout;
         }
 
         public boolean httpError() {

@@ -10,6 +10,9 @@ import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.http.client.utils.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +29,6 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker extends HttpWorker {
-
 
     public final static class RequestFactory {
         public enum RequestType {
@@ -112,7 +114,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
 
-    //    @JsonTypeName("SPARQLProtocolWorker")
     public record Config(
             Integer number,
             QueryHandler queries,
@@ -121,7 +122,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             Duration timeout,
             String acceptHeader /* e.g. application/sparql-results+json */,
             RequestFactory.RequestType requestType,
-            boolean parseResults // TODO: integrate this
+            boolean parseResults
     ) implements HttpWorker.Config {
         public Config(Integer number,
                       @JsonProperty(required = true) QueryHandler queries,
@@ -178,6 +179,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
     // used to read the http response body
     private byte[] buffer = new byte[4096];
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(SPARQLProtocolWorker.class);
+
     @Override
     public Config config() {
         return (SPARQLProtocolWorker.Config) config;
@@ -196,38 +199,38 @@ public class SPARQLProtocolWorker extends HttpWorker {
     public CompletableFuture<Result> start() {
         return CompletableFuture.supplyAsync(() -> {
             List<ExecutionStats> executionStats = new ArrayList<>();
-            try {
-                if (config().completionTarget() instanceof QueryMixes queryMixes) {
-                    for (int i = 0; i < queryMixes.number(); i++) {
-                        for (int j = 0; j < config().queries().getQueryCount(); j++) {
-                            ExecutionStats execution = executeQuery(config().timeout(), false);
-                            if (execution != null)
-                                executionStats.add(execution);
-                        }
-
-                    }
-                } else if (config().completionTarget() instanceof TimeLimit timeLimit) {
-                    final Instant endTime = Instant.now().plus(timeLimit.duration());
-                    Instant now;
-                    while ((now = Instant.now()).isBefore(endTime)) {
-                        final Duration timeToEnd = Duration.between(now, endTime);
-                        final boolean timeoutBeforeEnd = config().timeout().compareTo(timeToEnd) < 0;
-                        final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? config().timeout() : timeToEnd;
-                        // If timeoutBeforeEnd is false, fail shouldn't be counted as timeout
-                        ExecutionStats execution = executeQuery(thisQueryTimeOut, !timeoutBeforeEnd);
-                        if (execution != null)
+            if (config().completionTarget() instanceof QueryMixes queryMixes) {
+                for (int i = 0; i < queryMixes.number(); i++) {
+                    for (int j = 0; j < config().queries().getQueryCount(); j++) {
+                        ExecutionStats execution = executeQuery(config().timeout(), false);
+                        if (execution != null) {
+                            logExecution(execution);
                             executionStats.add(execution);
+                        }
+                    }
+                    LOGGER.info("{}\t:: Completed {} out of {} querymixes", this, i + 1, queryMixes.number());
+                }
+            } else if (config().completionTarget() instanceof TimeLimit timeLimit) {
+                final Instant endTime = Instant.now().plus(timeLimit.duration());
+                Instant now;
+                while ((now = Instant.now()).isBefore(endTime)) {
+                    final Duration timeToEnd = Duration.between(now, endTime);
+                    final boolean timeoutBeforeEnd = config().timeout().compareTo(timeToEnd) < 0;
+                    final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? config().timeout() : timeToEnd;
+                    // If timeoutBeforeEnd is false, fail shouldn't be counted as timeout
+                    ExecutionStats execution = executeQuery(thisQueryTimeOut, !timeoutBeforeEnd);
+                    if (execution != null){
+                        logExecution(execution);
+                        executionStats.add(execution);
                     }
                 }
-            } catch (IOException | URISyntaxException e) {
-                throw new RuntimeException(e); // TODO: better error handling
+                LOGGER.info("{}\t:: Reached time limit of {}.", this, timeLimit.duration());
             }
-
             return new Result(this.workerID, executionStats);
         }, executor);
     }
 
-    private ExecutionStats executeQuery(Duration timeout, boolean discardOnFailure) throws IOException, URISyntaxException {
+    private ExecutionStats executeQuery(Duration timeout, boolean discardOnFailure)  {
         HttpExecutionResult result = executeHttpRequest(timeout);
         Optional<Integer> statuscode = Optional.empty();
         if (result.response().isPresent())
@@ -244,6 +247,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         this.responseBodybbaos.reset();
 
         if (!result.completed() && discardOnFailure) {
+            LOGGER.debug("{}\t:: Discarded execution, because the time limit has been reached: [queryID={}]", this, result.queryID);
             return null;
         }
 
@@ -259,14 +263,29 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
 
-    private HttpExecutionResult executeHttpRequest(Duration timeout) throws IOException, URISyntaxException {
-        final QueryHandler.QueryStreamWrapper queryHandle = config().queries().getNextQueryStream();
-        final HttpRequest request = requestFactory.buildHttpRequest(
-                queryHandle.queryInputStream(),
-                timeout,
-                config().connection(),
-                config().acceptHeader()
-        );
+    private HttpExecutionResult executeHttpRequest(Duration timeout) {
+        final var queryHandle = config().queries().getNextQueryStreamSupplier();
+        final HttpRequest request;
+
+        try {
+            request = requestFactory.buildHttpRequest(
+                    queryHandle.queryStreamSupplier(),
+                    timeout,
+                    config().connection(),
+                    config().acceptHeader()
+            );
+        } catch (IOException | URISyntaxException e) {
+            return new HttpExecutionResult(
+                    queryHandle.index(),
+                    Optional.empty(),
+                    Instant.now(),
+                    Duration.ZERO,
+                    Optional.empty(),
+                    OptionalLong.empty(),
+                    OptionalLong.empty(),
+                    Optional.of(e)
+            );
+        }
 
         if (((ThreadPoolExecutor) this.httpClient.executor().get()).getActiveCount() != 0) {
             ((ThreadPoolExecutor) this.httpClient.executor().get()).shutdownNow();
@@ -322,7 +341,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
                                     );
                                 }
                             } else {
-                                bodyStream.close();
                                 return createFailedResult.apply(httpResponse, null);
                             }
                         } catch (IOException ex) {
@@ -340,5 +358,19 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(config().timeout())
                 .build();
+    }
+
+    private void logExecution(ExecutionStats execution) {
+        switch (execution.endState()) {
+            case SUCCESS -> LOGGER.debug("{}\t:: Successfully executed query: [queryID={}].", this, execution.queryID());
+            case TIMEOUT -> LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, execution.queryID(), execution.duration()); // TODO: look for a possibility to add the query string for logging
+            case HTTP_ERROR -> LOGGER.warn("{}\t:: HTTP Error occurred during query execution: [queryID={}, httpError={}].", this, execution.queryID(), execution.httpStatusCode().get());
+            case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, execution.queryID(), execution.error().get());
+        }
+    }
+
+    @Override
+    public String toString() {
+        return MessageFormatter.format("[{}-{}]", SPARQLProtocolWorker.class.getSimpleName(), this.workerID).getMessage();
     }
 }

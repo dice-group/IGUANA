@@ -2,11 +2,6 @@ package org.aksw.iguana.cc.tasks.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
-import org.aksw.iguana.cc.metrics.MetricManager;
-import org.aksw.iguana.cc.metrics.impl.AggregatedExecutionStatistics;
-import org.aksw.iguana.cc.metrics.impl.AvgQPS;
-import org.aksw.iguana.cc.metrics.impl.NoQPH;
-import org.aksw.iguana.cc.metrics.impl.QPS;
 import org.aksw.iguana.cc.storage.Storage;
 import org.aksw.iguana.cc.storage.impl.CSVStorage;
 import org.aksw.iguana.cc.storage.impl.RDFFileStorage;
@@ -31,11 +26,6 @@ public class Stresstest implements Task {
         List<HttpWorker.Config> warmupWorkers,
         @JsonProperty(required = true) List<HttpWorker.Config> workers
     ) implements Task.Config {}
-
-    public record PhaseExecutionConfig(
-            String name,
-            List<HttpWorker.Config> workers
-    ) {}
 
     public record Result(
             List<HttpWorker.Result> workerResults,
@@ -101,9 +91,6 @@ public class Stresstest implements Task {
             }
 
             // TODO: language processor
-
-            // TODO: maybe add this to the configd
-            MetricManager.setMetrics(List.of(new QPS(), new AvgQPS(), new NoQPH(), new AggregatedExecutionStatistics()));
 
             // TODO: suiteID
             StresstestResultProcessor srp = new StresstestResultProcessor(

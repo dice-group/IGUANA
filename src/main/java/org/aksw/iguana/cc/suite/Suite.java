@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.config.elements.DatasetConfig;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
+import org.aksw.iguana.cc.metrics.Metric;
+import org.aksw.iguana.cc.metrics.MetricManager;
+import org.aksw.iguana.cc.metrics.impl.*;
 import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
@@ -36,6 +39,9 @@ public class Suite {
         this.config = config;
         long taskID = 0;
         responseBodyProcessorInstances = new ResponseBodyProcessorInstances();
+
+        // TODO: maybe add this to the configd
+        MetricManager.setMetrics(List.of(new QPS(), new AvgQPS(), new NoQPH(), new AggregatedExecutionStatistics(), new EachExecutionStatistic()));
 
         for (Task.Config task : config.tasks()) {
             if (task instanceof Stresstest.Config) {
