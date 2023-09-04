@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.aksw.iguana.cc.storage.impl.CSVStorage;
 import org.aksw.iguana.cc.storage.impl.RDFFileStorage;
 import org.aksw.iguana.cc.storage.impl.TriplestoreStorage;
 
