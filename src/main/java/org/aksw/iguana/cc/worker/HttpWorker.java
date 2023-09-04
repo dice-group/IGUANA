@@ -3,6 +3,8 @@ package org.aksw.iguana.cc.worker;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.aksw.iguana.cc.config.elements.ConnectionConfig;
+import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 
@@ -46,6 +48,12 @@ public abstract class HttpWorker {
          * @return true if the results should be parsed, false otherwise
          */
         boolean parseResults();
+
+        QueryHandler queries();
+
+        ConnectionConfig connection();
+
+        Duration timeout();
     }
 
     public record ExecutionStats(
@@ -58,7 +66,7 @@ public abstract class HttpWorker {
             Optional<Exception> error
     ) {
         public enum END_STATE {
-            SUCCESS(1), // values are the same as previous implementation for backwards compatibility
+            SUCCESS(1), // TODO: values are the same as previous implementation for backwards compatibility, I think descriptive String values would be better
             TIMEOUT(-1),
             HTTP_ERROR(-2),
             MISCELLANEOUS_EXCEPTION(0);
