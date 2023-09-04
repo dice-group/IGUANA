@@ -2,7 +2,6 @@ package org.aksw.iguana.cc.query.handler;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -24,6 +23,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * The QueryHandler is used by every worker that extends the AbstractWorker.
@@ -95,7 +95,7 @@ public class QueryHandler {
                         format.setSeparator(root.get("separator").textValue());
                         return format;
                     } else {
-                        return Format.valueOf(root.textValue());
+                        return Format.valueOf(root.textValue().trim().toUpperCase());
                     }
                 }
             }
@@ -154,6 +154,11 @@ public class QueryHandler {
         }
     }
 
+    public record QueryStringWrapper(int index, String query) {}
+    public record QueryStreamWrapper(int index, InputStream queryInputStream) {}
+    public record QueryStreamSupplierWrapper(int index, Supplier<InputStream> queryStreamSupplier) {}
+
+
     protected final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
 
     @JsonValue
@@ -186,20 +191,27 @@ public class QueryHandler {
         hashCode = queryList.hashCode();
     }
 
-    public record QueryStringWrapper(int index, String query) {
-    }
+
 
     public QueryStringWrapper getNextQuery() throws IOException {
         final var queryIndex = querySelector.getNextIndex();
         return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex));
     }
 
-    public record QueryStreamWrapper(int index, InputStream queryInputStream) {
+    public QueryStreamWrapper getNextQueryStream() throws IOException {
+        final var queryIndex = this.querySelector.getNextIndex();
+        return new QueryStreamWrapper(queryIndex, this.queryList.getQueryStream(queryIndex));
     }
 
-    public QueryStreamWrapper getNextQueryStream() throws IOException {
-        final int queryIndex = this.querySelector.getNextIndex();
-        return new QueryStreamWrapper(queryIndex, this.queryList.getQueryStream(queryIndex));
+    public QueryStreamSupplierWrapper getNextQueryStreamSupplier() {
+        final var queryIndex = this.querySelector.getNextIndex();
+        return new QueryStreamSupplierWrapper(queryIndex, () -> {
+            try {
+                return this.queryList.getQueryStream(queryIndex);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override

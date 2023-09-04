@@ -62,7 +62,6 @@ public class IPROP {
     public static final Property responseBodyHash = ResourceFactory.createProperty(NS, "responseBodyHash");
     public static final Property responseBody = ResourceFactory.createProperty(NS, "responseBody");
 
-    public static final Property experiment = ResourceFactory.createProperty(NS, "experiment");
     public static final Property dataset = ResourceFactory.createProperty(NS, "dataset");
     public static final Property task = ResourceFactory.createProperty(NS, "task");
     public static final Property connection = ResourceFactory.createProperty(NS, "connection");
