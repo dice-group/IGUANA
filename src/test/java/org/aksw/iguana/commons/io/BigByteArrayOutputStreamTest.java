@@ -24,12 +24,12 @@ class BigByteArrayOutputStreamTest {
         final var maxSize = Integer.MAX_VALUE - 8;
 
         final Supplier<byte[][]> sup1 = () -> getBigRandomBuffer(10, maxSize);
-        final Supplier<byte[][]> sup2 = () -> getBigRandomBuffer(maxSize * 2, maxSize);
+        final Supplier<byte[][]> sup2 = () -> getBigRandomBuffer(maxSize * 2L, maxSize);
 
         return List.of(
                 Arguments.of(Named.of(String.valueOf(10), sup1), 10, new int[] { 10 }),
-                Arguments.of(Named.of(String.valueOf(10), sup1), (long)maxSize * 2, new int[] { maxSize, maxSize, maxSize }), // small data, high initial capacity
-                Arguments.of(Named.of(String.valueOf((long)maxSize*2), sup2), (long)maxSize * 2, new int[] { maxSize, maxSize, maxSize })
+                Arguments.of(Named.of(String.valueOf(10), sup1), maxSize * 2L, new int[] { maxSize, maxSize, maxSize }), // small data, high initial capacity
+                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2), maxSize * 2L, new int[] { maxSize, maxSize, maxSize })
         );
     }
 
@@ -98,7 +98,7 @@ class BigByteArrayOutputStreamTest {
             assertThrows(IndexOutOfBoundsException.class, () -> bbaos.write(buffer, 0, -1));
             assertThrows(IndexOutOfBoundsException.class, () -> bbaos.write(buffer, 0, 11));
             assertThrows(NullPointerException.class, () -> bbaos.write(nullBuffer));
-        };
+        }
     }
 
 
