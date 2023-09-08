@@ -16,17 +16,18 @@ import java.util.stream.IntStream;
  * a large amount of data.
  * <p>
  * The BigByteArrayOutputStream works by using an ArrayList of ByteArrayOutputStreams to store
- * the byte data. When the current ByteArrayOutputStream fills up, a new one is created and
- * added to the list. Writing data to the stream involves writing to the current active
- * ByteArrayOutputStream. When the stream is reset, all the internal ByteArrayOutputStreams
- * are cleared and a new one is added to the list.
+ * the byte data. When the current ByteArrayOutputStream fills up, a new one is created with the
+ * maximum array size (<code>Integer.MAX_VALUE - 8</code>) as its initial capacity and added to the list.
+ * Writing data to the stream involves writing to the current active ByteArrayOutputStream. When
+ * the stream is cleared, all the internal ByteArrayOutputStreams are cleared and a new one is
+ * added to the list.
  */
 public class BigByteArrayOutputStream extends OutputStream {
 
     /**
      * The maximum size limit for an array. This is no limit to the amount of bytes {@code BigByteArrayOutputStream} can consume.
      */
-    public final static long ARRAY_SIZE_LIMIT = 2147483639;
+    public final static int ARRAY_SIZE_LIMIT = Integer.MAX_VALUE - 8;
 
     /**
      * Holds a list of ByteArrayOutputStream objects.
@@ -77,9 +78,9 @@ public class BigByteArrayOutputStream extends OutputStream {
             baosList = new ArrayList<>(1);
             baosList.add(new ByteArrayOutputStream((int) bufferSize));
         } else {
-            final var requiredBaoss = (int) (bufferSize / ARRAY_SIZE_LIMIT) + 1;
+            final var requiredBaoss = (int) (bufferSize / ARRAY_SIZE_LIMIT) + 1; // this might create a fully sized, but empty baos at the end if the buffer size is a multiple of ARRAY_SIZE_LIMIT
             baosList = new ArrayList<>(requiredBaoss);
-            IntStream.range(0, requiredBaoss).forEachOrdered(i -> baosList.add(new ByteArrayOutputStream((int) ARRAY_SIZE_LIMIT)));
+            IntStream.range(0, requiredBaoss).forEachOrdered(i -> baosList.add(new ByteArrayOutputStream(ARRAY_SIZE_LIMIT)));
         }
         reset();
     }
@@ -90,12 +91,7 @@ public class BigByteArrayOutputStream extends OutputStream {
     }
 
     public void write(BigByteArrayOutputStream bbaos) throws IOException {
-        for (byte[] bao : bbaos.toByteArray()) {
-            for (Byte b : bao) {
-                write(b);
-            }
-        }
-
+        write(bbaos.toByteArray());
     }
 
     public long size() {
@@ -123,23 +119,9 @@ public class BigByteArrayOutputStream extends OutputStream {
         }
     }
 
-    @Override
-    public void write(byte[] b) throws IOException {
-        final var space = ensureSpace();
-        final var writeLength = Math.min(b.length, space);
-        this.currentBaos.write(b, 0, writeLength);
-        final var remainingBytes = b.length - writeLength;
-        if (remainingBytes > 0) {
-            ensureSpace();
-            this.currentBaos.write(b, writeLength, remainingBytes);
-        }
-    }
-
     public void write(byte[][] byteArray) throws IOException {
         for (byte[] arr : byteArray) {
-            for (byte b : arr) {
-                write(b);
-            }
+            write(arr);
         }
     }
 
@@ -154,19 +136,14 @@ public class BigByteArrayOutputStream extends OutputStream {
         this.currentBaos.write(i);
     }
 
-    /**
-     * This method calculates and returns the available space in the current ByteArrayOutputStream.
-     * If the space is 0, it creates a new ByteArrayOutputStream or resets the next existing one.
-     *
-     * @return The available space in the ByteArrayOutputStream.
-     */
+
     private int ensureSpace() {
-        var space = (int) ARRAY_SIZE_LIMIT - currentBaos.size();
+        var space = ARRAY_SIZE_LIMIT - currentBaos.size();
         if (space == 0) {
-            space = (int) ARRAY_SIZE_LIMIT;
+            space = ARRAY_SIZE_LIMIT;
             if (baosListIndex == baosList.size() - 1) {
                 baosListIndex++;
-                currentBaos = new ByteArrayOutputStream((int) ARRAY_SIZE_LIMIT);
+                currentBaos = new ByteArrayOutputStream(ARRAY_SIZE_LIMIT);
                 baosList.add(currentBaos);
             } else {
                 baosListIndex++;
@@ -184,7 +161,9 @@ public class BigByteArrayOutputStream extends OutputStream {
      */
     public void reset() {
         currentBaos = baosList.get(baosListIndex = 0);
-        currentBaos.reset();
+        for (var baos : baosList) {
+            baos.reset();
+        }
     }
 
     /**
@@ -197,6 +176,6 @@ public class BigByteArrayOutputStream extends OutputStream {
         if (baosList.size() > 1)
             baosList.subList(1, this.baosList.size()).clear();
         currentBaos = baosList.get(baosListIndex = 0);
+        currentBaos.reset();
     }
-
 }
