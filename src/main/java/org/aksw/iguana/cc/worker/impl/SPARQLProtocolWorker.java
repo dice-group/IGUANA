@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker extends HttpWorker {
@@ -68,6 +69,21 @@ public class SPARQLProtocolWorker extends HttpWorker {
                                             ConnectionConfig connection,
                                             String requestHeader) throws URISyntaxException, IOException {
             HttpRequest.Builder request = HttpRequest.newBuilder().timeout(timeout);
+
+            class CustomStreamSupplier {
+                boolean used = false; // assume, that the stream will only be used again, if the first request failed, because of the client
+                public Supplier<InputStream> getStreamSupplier() {
+                    if (!used) {
+                        used = true;
+                        return () -> queryStream;
+                    }
+                    else
+                        return () -> null;
+                }
+            }
+
+            final var streamSupplier = new CustomStreamSupplier();
+
             if (requestHeader != null)
                 request.header("Accept", requestHeader);
             if (connection.user() != null)
@@ -93,7 +109,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 case POST_QUERY -> {
                     request.uri(connection.endpoint())
                             .header("Content-Type", "application/sparql-query")
-                            .POST(HttpRequest.BodyPublishers.ofByteArray(queryStream.readAllBytes())); // InputStream BodyPublisher won't work
+                            .POST(HttpRequest.BodyPublishers.ofInputStream(streamSupplier.getStreamSupplier()));
                 }
                 case POST_URL_ENC_UPDATE -> {
                     request.uri(connection.endpoint())
@@ -106,7 +122,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 case POST_UPDATE -> {
                     request.uri(connection.endpoint())
                             .header("Content-Type", "application/sparql-update")
-                            .POST(HttpRequest.BodyPublishers.ofByteArray(queryStream.readAllBytes()));
+                            .POST(HttpRequest.BodyPublishers.ofInputStream(streamSupplier.getStreamSupplier()));
                 }
             }
             return request.build();
@@ -264,12 +280,27 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
 
     private HttpExecutionResult executeHttpRequest(Duration timeout) {
-        final var queryHandle = config().queries().getNextQueryStreamSupplier();
+        final QueryHandler.QueryStreamWrapper queryHandle;
+        try {
+            queryHandle = config().queries().getNextQueryStream();
+        } catch (IOException e) {
+            return new HttpExecutionResult(
+                config().queries().getCurrentQueryID(),
+                Optional.empty(),
+                Instant.now(),
+                Duration.ZERO,
+                Optional.empty(),
+                OptionalLong.empty(),
+                OptionalLong.empty(),
+                Optional.of(e)
+            );
+        }
+
         final HttpRequest request;
 
         try {
             request = requestFactory.buildHttpRequest(
-                    queryHandle.queryStreamSupplier(),
+                    queryHandle.queryInputStream(),
                     timeout,
                     config().connection(),
                     config().acceptHeader()

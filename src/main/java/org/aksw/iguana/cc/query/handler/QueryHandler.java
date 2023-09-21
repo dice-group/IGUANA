@@ -156,7 +156,6 @@ public class QueryHandler {
 
     public record QueryStringWrapper(int index, String query) {}
     public record QueryStreamWrapper(int index, InputStream queryInputStream) {}
-    public record QueryStreamSupplierWrapper(int index, Supplier<InputStream> queryStreamSupplier) {}
 
 
     protected final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
