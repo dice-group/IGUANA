@@ -35,4 +35,9 @@ public class LinearQuerySelector extends QuerySelector {
     public int getCurrentIndex() {
         return index;
     }
+
+    @Override
+    public int getCurrentIndex() {
+        return threadLocalIndex.get();
+    }
 }
