@@ -26,4 +26,6 @@ public abstract class QuerySelector {
      * @return the next query index
      */
     public abstract int getNextIndex();
+
+    public abstract int getCurrentIndex();
 }

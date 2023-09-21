@@ -14,7 +14,7 @@ import java.util.Random;
 public class RandomQuerySelector extends QuerySelector {
 
     final protected Random indexGenerator;
-
+    int currentIndex;
 
     public RandomQuerySelector(int size, long seed) {
         super(size);
@@ -23,6 +23,11 @@ public class RandomQuerySelector extends QuerySelector {
 
     @Override
     public int getNextIndex() {
-        return this.indexGenerator.nextInt(this.size);
+        return currentIndex = this.indexGenerator.nextInt(this.size);
+    }
+
+    @Override
+    public int getCurrentIndex() {
+        return currentIndex;
     }
 }

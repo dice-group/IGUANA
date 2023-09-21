@@ -25,4 +25,9 @@ public class LinearQuerySelector extends QuerySelector { // TODO: check if worke
         this.threadLocalIndex.set(index + 1);
         return index;
     }
+
+    @Override
+    public int getCurrentIndex() {
+        return threadLocalIndex.get();
+    }
 }

@@ -203,20 +203,13 @@ public class QueryHandler {
         return new QueryStreamWrapper(queryIndex, this.queryList.getQueryStream(queryIndex));
     }
 
-    public QueryStreamSupplierWrapper getNextQueryStreamSupplier() {
-        final var queryIndex = this.querySelector.getNextIndex();
-        return new QueryStreamSupplierWrapper(queryIndex, () -> {
-            try {
-                return this.queryList.getQueryStream(queryIndex);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
     @Override
     public int hashCode() {
         return hashCode;
+    }
+
+    public int getCurrentQueryID() {
+        return this.querySelector.getCurrentIndex();
     }
 
     public int getQueryCount() {
