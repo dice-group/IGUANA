@@ -246,7 +246,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         }, executor);
     }
 
-    private ExecutionStats executeQuery(Duration timeout, boolean discardOnFailure)  {
+    private ExecutionStats executeQuery(Duration timeout, boolean discardOnFailure) {
         HttpExecutionResult result = executeHttpRequest(timeout);
         Optional<Integer> statuscode = Optional.empty();
         if (result.response().isPresent())
@@ -260,7 +260,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 this.responseBodybbaos = new BigByteArrayOutputStream();
             }
         }
-        this.responseBodybbaos.reset();
+
+        try {
+            this.responseBodybbaos.reset();
+        } catch (IOException e) {
+            this.responseBodybbaos = new BigByteArrayOutputStream();
+        }
 
         if (!result.completed() && discardOnFailure) {
             LOGGER.debug("{}\t:: Discarded execution, because the time limit has been reached: [queryID={}]", this, result.queryID);
