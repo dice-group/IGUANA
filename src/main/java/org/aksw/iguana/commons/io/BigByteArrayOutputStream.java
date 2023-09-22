@@ -44,13 +44,17 @@ public class BigByteArrayOutputStream extends OutputStream {
      */
     private ByteArrayOutputStream currentBaos;
 
+    private boolean closed = false;
+
     /**
      * Initializes a new instance of the BigByteArrayOutputStream class with default buffer size.
      */
     public BigByteArrayOutputStream() {
         baosList = new ArrayList<>();
         baosList.add(new ByteArrayOutputStream());
-        reset();
+        try {
+            reset();
+        } catch (IOException ignored) {}
     }
 
     /**
@@ -63,7 +67,9 @@ public class BigByteArrayOutputStream extends OutputStream {
             throw new IllegalArgumentException("Negative initial size: " + bufferSize);
         baosList = new ArrayList<>(1);
         baosList.add(new ByteArrayOutputStream(bufferSize));
-        reset();
+        try {
+            reset();
+        } catch (IOException ignored) {}
     }
 
     /**
@@ -77,12 +83,14 @@ public class BigByteArrayOutputStream extends OutputStream {
         if (bufferSize <= ARRAY_SIZE_LIMIT) {
             baosList = new ArrayList<>(1);
             baosList.add(new ByteArrayOutputStream((int) bufferSize));
-        } else {
+        } else { // TODO: fix the line below
             final var requiredBaoss = (int) (bufferSize / ARRAY_SIZE_LIMIT) + 1; // this might create a fully sized, but empty baos at the end if the buffer size is a multiple of ARRAY_SIZE_LIMIT
             baosList = new ArrayList<>(requiredBaoss);
             IntStream.range(0, requiredBaoss).forEachOrdered(i -> baosList.add(new ByteArrayOutputStream(ARRAY_SIZE_LIMIT)));
         }
-        reset();
+        try {
+            reset();
+        } catch (IOException ignored) {}
     }
 
 
@@ -108,6 +116,8 @@ public class BigByteArrayOutputStream extends OutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
+        if (closed) throw new IOException("Tried to write to a closed stream");
+
         Objects.checkFromIndexSize(off, len, b.length);
         final var space = ensureSpace();
         final var writeLength = Math.min(len, space);
@@ -126,12 +136,16 @@ public class BigByteArrayOutputStream extends OutputStream {
     }
 
     public void write(byte b) throws IOException {
+        if (closed) throw new IOException("Tried to write to a closed stream");
+
         ensureSpace();
         this.currentBaos.write(b);
     }
 
     @Override
     public void write(int i) throws IOException {
+        if (closed) throw new IOException("Tried to write to a closed stream");
+
         ensureSpace();
         this.currentBaos.write(i);
     }
@@ -159,7 +173,9 @@ public class BigByteArrayOutputStream extends OutputStream {
      * and assigning the first ByteArrayOutputStream in the baosList to the
      * currentBaos variable. No {@link ByteArrayOutputStream}s are actually removed.
      */
-    public void reset() {
+    public void reset() throws IOException {
+        if (closed) throw new IOException("Tried to reset to a closed stream");
+
         currentBaos = baosList.get(baosListIndex = 0);
         for (var baos : baosList) {
             baos.reset();
@@ -172,10 +188,17 @@ public class BigByteArrayOutputStream extends OutputStream {
      * and the currentBaos variable is reassigned to the first ByteArrayOutputStream
      * in the baosList.
      */
-    public void clear() {
+    public void clear() throws IOException {
+        if (closed) throw new IOException("Tried to clear to a closed stream");
+
         if (baosList.size() > 1)
             baosList.subList(1, this.baosList.size()).clear();
         currentBaos = baosList.get(baosListIndex = 0);
         currentBaos.reset();
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.closed = true;
     }
 }

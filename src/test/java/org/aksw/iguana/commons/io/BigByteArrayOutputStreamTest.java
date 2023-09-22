@@ -24,12 +24,13 @@ class BigByteArrayOutputStreamTest {
         final var maxSize = Integer.MAX_VALUE - 8;
 
         final Supplier<byte[][]> sup1 = () -> getBigRandomBuffer(10, maxSize);
-        final Supplier<byte[][]> sup2 = () -> getBigRandomBuffer(maxSize * 2L, maxSize);
+        final Supplier<byte[][]> sup2 = () -> getBigRandomBuffer((long) maxSize * 2L, maxSize);
 
         return List.of(
                 Arguments.of(Named.of(String.valueOf(10), sup1), 10, new int[] { 10 }),
                 Arguments.of(Named.of(String.valueOf(10), sup1), maxSize * 2L, new int[] { maxSize, maxSize, maxSize }), // small data, high initial capacity
-                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2), maxSize * 2L, new int[] { maxSize, maxSize, maxSize })
+                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2), maxSize * 2L, new int[] { maxSize, maxSize, maxSize }),
+                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2), 0, new int[] { maxSize, maxSize })
         );
     }
 
@@ -43,7 +44,7 @@ class BigByteArrayOutputStreamTest {
     public static byte[][] getBigRandomBuffer(long size, int maxSingleBufferSize) {
         if (size < 1)
             return new byte[0][0];
-        final var bufferField = new byte[(int) (size - 1) / maxSingleBufferSize + 1][];
+        final var bufferField = new byte[(int) ((size - 1) / maxSingleBufferSize) + 1][];
         for (int i = 0; i < bufferField.length; i++) {
             final var bufferSize = (size > maxSingleBufferSize) ? maxSingleBufferSize : (int) size;
             bufferField[i] = new byte[bufferSize];
@@ -51,6 +52,26 @@ class BigByteArrayOutputStreamTest {
             size -= bufferSize;
         }
         return bufferField;
+    }
+
+    @Test
+    public void testClose() throws IOException {
+        final var bbaos = new BigByteArrayOutputStream();
+        final var testData = "test123".getBytes(StandardCharsets.UTF_8);
+        bbaos.write(testData);
+        bbaos.close();
+        assertThrows(IOException.class, () -> bbaos.clear());
+        assertThrows(IOException.class, () -> bbaos.reset());
+        assertThrows(IOException.class, () -> bbaos.write(1));
+        assertThrows(IOException.class, () -> bbaos.write((byte) 1));
+        assertThrows(IOException.class, () -> bbaos.write(new byte[][] {{1}}) );
+        assertThrows(IOException.class, () -> bbaos.write(new byte[] {1}, 0, 1));
+        assertThrows(IOException.class, () -> bbaos.write(new byte[] {1}));
+        assertThrows(IOException.class, () -> bbaos.write((new BigByteArrayOutputStream(10))));
+        assertEquals(testData.length, bbaos.size());
+        assertArrayEquals(new byte[][] {testData} , bbaos.toByteArray());
+        assertEquals(1, bbaos.getBaos().size());
+        assertArrayEquals(testData, bbaos.getBaos().get(0).toByteArray());
     }
 
     @Test
@@ -233,7 +254,7 @@ class BigByteArrayOutputStreamTest {
                 assertArrayEquals(buffer[i], bbaos.getBaos().get(i).toByteArray()); // expected content
                 assertEquals(baosSizes[i], bbaos.getBaos().get(i).getBuffer().length); // expected baos sizes
             }
-            assertEquals(Arrays.stream(buffer).mapToInt(x -> x.length).sum(), bbaos.size());
+            assertEquals(Arrays.stream(buffer).mapToLong(x -> x.length).sum(), bbaos.size());
 
             bbaos.reset();
 
@@ -245,7 +266,7 @@ class BigByteArrayOutputStreamTest {
 
             // after clear, a new write should result same expected content and state
             bbaos.write(buffer);
-            assertEquals(Arrays.stream(buffer).mapToInt(x -> x.length).sum(), bbaos.size());
+            assertEquals(Arrays.stream(buffer).mapToLong(x -> x.length).sum(), bbaos.size());
             for (int i = 0; i < buffer.length; i++) {
                 assertArrayEquals(buffer[i], bbaos.getBaos().get(i).toByteArray()); // expected content
             }
@@ -269,7 +290,7 @@ class BigByteArrayOutputStreamTest {
                 assertArrayEquals(buffer[i], bbaos.getBaos().get(i).toByteArray()); // expected content
                 assertEquals(baosSizes[i], bbaos.getBaos().get(i).getBuffer().length); // expected baos sizes
             }
-            assertEquals(Arrays.stream(buffer).mapToInt(x -> x.length).sum(), bbaos.size());
+            assertEquals(Arrays.stream(buffer).mapToLong(x -> x.length).sum(), bbaos.size());
 
             bbaos.clear();
             assertEquals(0, bbaos.size());
@@ -281,7 +302,7 @@ class BigByteArrayOutputStreamTest {
             for (int i = 0; i < buffer.length; i++) {
                 assertArrayEquals(buffer[i], bbaos.getBaos().get(i).toByteArray()); // expected content
             }
-            assertEquals(Arrays.stream(buffer).mapToInt(x -> x.length).sum(), bbaos.size());
+            assertEquals(Arrays.stream(buffer).mapToLong(x -> x.length).sum(), bbaos.size());
         }
     }
 }
