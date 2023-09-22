@@ -21,16 +21,16 @@ class BigByteArrayOutputStreamTest {
     final static Random rng = new Random(0);
 
     public static List<Arguments> data() {
-        final var maxSize = Integer.MAX_VALUE - 8;
+        final long maxSize = Integer.MAX_VALUE - 8;
 
-        final Supplier<byte[][]> sup1 = () -> getBigRandomBuffer(10, maxSize);
-        final Supplier<byte[][]> sup2 = () -> getBigRandomBuffer((long) maxSize * 2L, maxSize);
+        final Supplier<byte[][]> sup1 = () -> getBigRandomBuffer(10L, (int) maxSize);
+        final Supplier<byte[][]> sup2 = () -> getBigRandomBuffer(maxSize * 2L, (int) maxSize);
 
         return List.of(
                 Arguments.of(Named.of(String.valueOf(10), sup1), 10, new int[] { 10 }),
-                Arguments.of(Named.of(String.valueOf(10), sup1), maxSize * 2L, new int[] { maxSize, maxSize, maxSize }), // small data, high initial capacity
-                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2), maxSize * 2L, new int[] { maxSize, maxSize, maxSize }),
-                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2), 0, new int[] { maxSize, maxSize })
+                Arguments.of(Named.of(String.valueOf(10), sup1), maxSize * 2L, new int[] {(int) maxSize, (int) maxSize}), // small data, high initial capacity
+                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2), maxSize * 2L, new int[] {(int) maxSize, (int) maxSize}),
+                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2), 0, new int[] {(int) maxSize, (int) maxSize})
         );
     }
 

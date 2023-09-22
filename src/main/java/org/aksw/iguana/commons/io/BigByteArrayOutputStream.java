@@ -83,8 +83,8 @@ public class BigByteArrayOutputStream extends OutputStream {
         if (bufferSize <= ARRAY_SIZE_LIMIT) {
             baosList = new ArrayList<>(1);
             baosList.add(new ByteArrayOutputStream((int) bufferSize));
-        } else { // TODO: fix the line below
-            final var requiredBaoss = (int) (bufferSize / ARRAY_SIZE_LIMIT) + 1; // this might create a fully sized, but empty baos at the end if the buffer size is a multiple of ARRAY_SIZE_LIMIT
+        } else {
+            final var requiredBaoss = (int) ((bufferSize - 1) / ARRAY_SIZE_LIMIT) + 1; // -1 to prevent creating a fully sized, but empty baos at the end if the buffer size is a multiple of ARRAY_SIZE_LIMIT
             baosList = new ArrayList<>(requiredBaoss);
             IntStream.range(0, requiredBaoss).forEachOrdered(i -> baosList.add(new ByteArrayOutputStream(ARRAY_SIZE_LIMIT)));
         }

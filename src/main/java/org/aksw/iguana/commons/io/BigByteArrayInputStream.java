@@ -102,8 +102,6 @@ public class BigByteArrayInputStream extends InputStream {
         return copyLength1 + copyLength2;
     }
 
-    // TODO: skip and skipn
-
     @Override
     public byte[] readAllBytes() throws IOException {
         throw new IOException("Reading all bytes from a BigByteArrayInputStream is prohibited because it might exceed the array capacity");
