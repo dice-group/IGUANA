@@ -14,4 +14,5 @@ public interface Task {
     interface Config {}
 
     void run();
+    String getTaskName();
 }

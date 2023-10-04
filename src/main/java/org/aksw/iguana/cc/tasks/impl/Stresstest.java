@@ -103,4 +103,9 @@ public class Stresstest implements Task {
         }
         return new Result(results, startTime, endTime);
     }
+
+    @Override
+    public String getTaskName() {
+        return "stresstest";
+    }
 }

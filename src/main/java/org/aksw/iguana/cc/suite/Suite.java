@@ -15,6 +15,8 @@ import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,8 @@ public class Suite {
     private final long suiteId;
     private final Config config;
     private final ResponseBodyProcessorInstances responseBodyProcessorInstances;
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(Suite.class);
 
     private final List<Task> tasks = new ArrayList<>();
 
@@ -86,7 +90,7 @@ public class Suite {
     public void run() {
         for (int i = 0; i < tasks.size(); i++) {
             tasks.get(i).run();
-            LOGGER.info("Task/{} {}  finished.", tasks.get(i).toString(), i);
+            LOGGER.info("Task/{} {}  finished.", tasks.get(i).getTaskName(), i);
         }
     }
 }
