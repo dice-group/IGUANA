@@ -63,7 +63,7 @@ public class SPARQLProtocolWorkerTest {
         final var processor = new ResponseBodyProcessor("application/sparql-results+json");
         final var queryHandlder = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
         final var datasetConfig = new DatasetConfig("TestDS", null);
-        final var connection = new ConnectionConfig("TestConn", uri, "1", "testUser", "password", null, datasetConfig);
+        final var connection = new ConnectionConfig("TestConn", "1", datasetConfig, uri, new ConnectionConfig.Authentication("user", "password"), null, null);
 
         final var workers = new ArrayDeque<Named<?>>();
         int i = 0;
@@ -143,7 +143,7 @@ public class SPARQLProtocolWorkerTest {
         final var processor = new ResponseBodyProcessor("application/sparql-results+json");
         final var queryHandlder = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
         final var datasetConfig = new DatasetConfig("TestDS", null);
-        final var connection = new ConnectionConfig("TestConn", uri, "1", "testUser", "password", null, datasetConfig);
+        final var connection = new ConnectionConfig("TestConn", "1", datasetConfig, uri, new ConnectionConfig.Authentication("user", "password"), null, null);
 
         final var config = new SPARQLProtocolWorker.Config(
                 1,

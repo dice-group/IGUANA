@@ -23,17 +23,19 @@ class ConnectionConfigTest {
         return Stream.of(
                 Arguments.of(new ConnectionConfig(
                         "endpoint01",
-                        URI.create("http://example.com/sparql"),
                         "0.1",
-                        null, null, null, null
+                        null,
+                        URI.create("http://example.com/sparql"),
+                        null, null, null
                 ), """
                         {"name":"endpoint01","endpoint":"http://example.com/sparql","version":"0.1","user":null,"password":null,"updateEndpoint":null,"dataset":null}
                         """),
                 Arguments.of(new ConnectionConfig(
                         "endpoint01",
-                        URI.create("http://example.com/sparql"),
                         "0.1",
-                        null, null, null, new DatasetConfig("MyData", "some.ttl")
+                        new DatasetConfig("MyData", "some.ttl"),
+                        URI.create("http://example.com/sparql"),
+                        null, null, null
                 ), """
                         {"name":"endpoint01","endpoint":"http://example.com/sparql","version":"0.1","user":null,"password":null,"updateEndpoint":null,"dataset":{"name":"MyData","file":"some.ttl"}}
                         """));

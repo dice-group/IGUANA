@@ -86,10 +86,10 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             if (requestHeader != null)
                 request.header("Accept", requestHeader);
-            if (connection.user() != null)
+            if (connection.authentication().user() != null)
                 request.header("Authorization",
-                               HttpWorker.basicAuth(connection.user(),
-                                                    Optional.ofNullable(connection.password()).orElse("")));
+                               HttpWorker.basicAuth(connection.authentication().user(),
+                                                    Optional.ofNullable(connection.authentication().password()).orElse("")));
             switch (this.requestType) {
                 case GET_QUERY -> {
                     request.uri(new URIBuilder(connection.endpoint())
