@@ -36,16 +36,14 @@ public class MainController {
     }
 
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(MainController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
     /**
      * The main method for executing IGUANA
      *
      * @param argc The command line arguments that are passed to the program.
-     * @throws IOException If an I/O exception occurs.
      */
-    public static void main(String[] argc) throws IOException {
+    public static void main(String[] argc) {
         var args = new Args();
         JCommander jc = JCommander.newBuilder()
                 .addObject(args)
@@ -61,9 +59,14 @@ public class MainController {
             jc.usage();
             System.exit(1);
         }
-        // TODO: a bit of error handling
-        Suite parse = IguanaSuiteParser.parse(args.suitePath);
-        parse.run();
+
+        try {
+            Suite parse = IguanaSuiteParser.parse(args.suitePath);
+            parse.run();
+        } catch (IOException e) {
+            LOGGER.error("Error while reading the configuration file.", e);
+            System.exit(0);
+        }
         System.exit(0);
     }
 
