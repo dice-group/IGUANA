@@ -61,6 +61,8 @@ public class IPROP {
     public static final Property time;
     public static final Property responseBodyHash = ResourceFactory.createProperty(NS, "responseBodyHash");
     public static final Property responseBody = ResourceFactory.createProperty(NS, "responseBody");
+    public static final Property startTime = ResourceFactory.createProperty(NS, "startTime");
+    public static final Property httpCode = ResourceFactory.createProperty(NS, "httpCode");
 
     public static final Property dataset = ResourceFactory.createProperty(NS, "dataset");
     public static final Property task = ResourceFactory.createProperty(NS, "task");

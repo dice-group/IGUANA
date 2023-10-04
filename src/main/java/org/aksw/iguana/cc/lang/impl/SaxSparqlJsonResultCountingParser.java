@@ -58,7 +58,7 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         }
 
         @Override
-        public List<Storable.CSVFileData> toCSV() {
+        public CSVData toCSV() {
             String variablesString = "";
             String exceptionString = "";
             if (variables != null)
@@ -69,7 +69,10 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
             String[] header = new String[]{ "responseBodyHash", "results", "bindings", "variables", "exception" };
             String[] content = new String[]{ String.valueOf(hash), String.valueOf(results), String.valueOf(bindings), variablesString, exceptionString};
             String[][] data = new String[][]{ header, content };
-            return List.of(new Storable.CSVFileData("sax-sparql-result-data.csv", data));
+
+            String folderName = "application-sparql+json";
+            List<CSVData.CSVFileData> files = List.of(new CSVData.CSVFileData("sax-sparql-result-data.csv", data));
+            return new Storable.CSVData(folderName, files);
         }
 
         @Override

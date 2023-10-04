@@ -9,5 +9,5 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public record DatasetConfig(
         @JsonProperty(required = true) String name,
-        @JsonProperty String file) {
-}
+        @JsonProperty String file
+) {}

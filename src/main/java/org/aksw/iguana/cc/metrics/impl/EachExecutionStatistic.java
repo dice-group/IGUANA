@@ -34,6 +34,7 @@ public class EachExecutionStatistic extends Metric implements ModelWritingMetric
                     Resource runRes = iresFactory.getWorkerQueryRunResource(worker, i, run);
                     m.add(workerQueryResource, IPROP.queryExecution, runRes);
                     m.add(runRes, IPROP.time, TimeUtils.createTypedDurationLiteral(exec.duration()));
+                    m.add(runRes, IPROP.startTime, TimeUtils.createTypedInstantLiteral(exec.startTime()));
                     m.add(runRes, IPROP.success, ResourceFactory.createTypedLiteral(exec.successful()));
                     m.add(runRes, IPROP.run, ResourceFactory.createTypedLiteral(run));
                     m.add(runRes, IPROP.code, ResourceFactory.createTypedLiteral(exec.endState().value));
@@ -44,8 +45,11 @@ public class EachExecutionStatistic extends Metric implements ModelWritingMetric
                         m.add(runRes, IPROP.responseBody, responseBodyRes);
                         m.add(responseBodyRes, IPROP.responseBodyHash, ResourceFactory.createTypedLiteral(exec.responseBodyHash().getAsLong()));
                     }
-                    // TODO: maybe add http status code and qps
-
+                    if (exec.error().isPresent())
+                        m.add(runRes, IPROP.exception, ResourceFactory.createTypedLiteral(exec.error().get().toString()));
+                    if (exec.httpStatusCode().isPresent())
+                        m.add(runRes, IPROP.httpCode, ResourceFactory.createTypedLiteral(exec.httpStatusCode().get().toString()));
+                    // TODO: qps maybe
                     run = run.add(BigInteger.ONE);
                 }
             }

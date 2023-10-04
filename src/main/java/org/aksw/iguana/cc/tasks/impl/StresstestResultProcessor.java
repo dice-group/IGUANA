@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.tasks.impl;
 
+import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.metrics.*;
 import org.aksw.iguana.cc.storage.Storage;
 import org.aksw.iguana.cc.worker.HttpWorker;
@@ -13,25 +14,25 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class StresstestResultProcessor {
 
     private final List<Metric> metrics;
-
     private final List<HttpWorker> workers;
     private final List<String> queryIDs;
     private final List<Storage> storages;
+    private final Supplier<Map<LanguageProcessor, List<LanguageProcessor.LanguageProcessingData>>> lpResults;
 
     /**
      * This array contains each query execution, grouped by each worker and each query.
      */
-    private List<HttpWorker.ExecutionStats>[][] workerQueryExecutions;
+    private final List<HttpWorker.ExecutionStats>[][] workerQueryExecutions;
 
     /**
      * This map contains each query execution, grouped by each query of the task.
      */
-    private Map<String, List<HttpWorker.ExecutionStats>> taskQueryExecutions;
-
+    private final Map<String, List<HttpWorker.ExecutionStats>> taskQueryExecutions;
 
     private final IRES.Factory iresFactory;
 
@@ -40,16 +41,18 @@ public class StresstestResultProcessor {
                                      long taskID,
                                      List<HttpWorker> worker,
                                      List<String> queryIDs,
-                                     List<Storage> storages) {
+                                     List<Metric> metrics,
+                                     List<Storage> storages,
+                                     Supplier<Map<LanguageProcessor, List<LanguageProcessor.LanguageProcessingData>>> lpResults) {
         this.workers = worker;
         this.queryIDs = queryIDs;
         this.storages = storages;
+        this.metrics = metrics;
+        this.lpResults = lpResults;
 
-        this.metrics = MetricManager.getMetrics(); // TODO: change this
-
-        this.workerQueryExecutions = new List[workers.size()][];
+        this.workerQueryExecutions = new ArrayList[workers.size()][];
         for (int i = 0; i < workers.size(); i++) {
-            this.workerQueryExecutions[i] = new List[workers.get(i).config().queries().getQueryCount()];
+            this.workerQueryExecutions[i] = new ArrayList[workers.get(i).config().queries().getQueryCount()];
             for (int j = 0; j < workers.get(i).config().queries().getQueryCount(); j++) {
                 this.workerQueryExecutions[i][j] = new ArrayList<>();
             }
@@ -85,8 +88,8 @@ public class StresstestResultProcessor {
      * @param start the start date of the task
      * @param end the end date of the task
      */
-    public void calculateAndSaveMetrics(Calendar start, Calendar end, Model triplestats) {
-        Model m = ModelFactory.createDefaultModel();
+    public void calculateAndSaveMetrics(Calendar start, Calendar end) {
+        Model m = ModelFactory.createDefaultModel().setNsPrefixes(IGUANA_BASE.PREFIX_MAP);
         Resource suiteRes = iresFactory.getSuiteResource();
         Resource taskRes = iresFactory.getTaskResource();
 
@@ -101,7 +104,7 @@ public class StresstestResultProcessor {
 
             Resource workerRes = iresFactory.getWorkerResource(worker);
             Resource connectionRes = IRES.getResource(config.connection().name());
-            Resource datasetRes = IRES.getResource(config.connection().dataset().name()); // TODO: check if each connection only has one dataset
+            Resource datasetRes = IRES.getResource(config.connection().dataset().name());
 
             m.add(taskRes, IPROP.workerResult, workerRes);
             m.add(workerRes, RDF.type, IONT.worker);
@@ -122,11 +125,9 @@ public class StresstestResultProcessor {
             }
             m.add(connectionRes, IPROP.dataset, datasetRes);
 
-            m.add(datasetRes, RDFS.label, ResourceFactory.createTypedLiteral(config.connection().dataset().name())); // TODO: is this always correct? only one dataset per connection?
+            m.add(datasetRes, RDFS.label, ResourceFactory.createTypedLiteral(config.connection().dataset().name()));
             m.add(datasetRes, RDF.type, IONT.dataset);
         }
-
-        // TODO: language processor thingy
 
         // Connect task and workers to the Query nodes, that store the triple stats.
         for (var worker : workers) {
@@ -139,9 +140,9 @@ public class StresstestResultProcessor {
             }
 
             var taskQueryIDs = this.queryIDs.toArray(String[]::new); // make elements accessible by index
-            for (int i = 0; i < taskQueryIDs.length; i++) {
-                Resource taskQueryRes = iresFactory.getTaskQueryResource(taskQueryIDs[i]);
-                Resource queryRes = IRES.getResource(taskQueryIDs[i]);
+            for (String taskQueryID : taskQueryIDs) {
+                Resource taskQueryRes = iresFactory.getTaskQueryResource(taskQueryID);
+                Resource queryRes = IRES.getResource(taskQueryID);
                 m.add(taskQueryRes, IPROP.queryID, queryRes); // TODO: check this as well
             }
         }
@@ -166,10 +167,17 @@ public class StresstestResultProcessor {
         m.add(taskRes, IPROP.startDate, ResourceFactory.createTypedLiteral(start));
         m.add(taskRes, IPROP.endDate, ResourceFactory.createTypedLiteral(end));
 
-        m.setNsPrefixes(IGUANA_BASE.PREFIX_MAP);
-
         for (var storage : storages) {
             storage.storeResult(m);
+        }
+
+        // Store results of language processors
+        for (var languageProcessor: lpResults.get().keySet()) {
+            for (var data : lpResults.get().get(languageProcessor)) {
+                for (var storage : storages) {
+                    storage.storeData(data);
+                }
+            }
         }
     }
 

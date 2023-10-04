@@ -3,7 +3,6 @@ package org.aksw.iguana.cc.tasks.storage.impl;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import org.aksw.iguana.cc.metrics.Metric;
-import org.aksw.iguana.cc.metrics.MetricManager;
 import org.aksw.iguana.cc.metrics.impl.AggregatedExecutionStatistics;
 import org.aksw.iguana.cc.metrics.impl.NoQ;
 import org.aksw.iguana.cc.metrics.impl.NoQPH;
@@ -150,11 +149,8 @@ public class CSVStorageTest {
     @DisplayName("Test CSVStorage")
     public void testCSVStorage(Suite suite) throws IOException {
         for (Model m : suite.taskResults) {
-            // Metrics need to be set here, because the CSVStorage uses the manager to store the results
-            MetricManager.setMetrics(suite.metrics);
-
             // Test Initialisation
-            assertDoesNotThrow(() -> storage = new CSVStorage(this.folder.toAbsolutePath().toString()), "Initialisation failed");
+            assertDoesNotThrow(() -> storage = new CSVStorage(this.folder.toAbsolutePath().toString(), suite.metrics, 0L), "Initialisation failed");
             assertTrue(Files.exists(this.suiteFolder), String.format("Result folder (%s) doesn't exist", this.suiteFolder));
             storage.storeResult(m);
 

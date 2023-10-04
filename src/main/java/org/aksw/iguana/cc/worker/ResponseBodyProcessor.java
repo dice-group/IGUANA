@@ -14,22 +14,32 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class ResponseBodyProcessor {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseBodyProcessor.class);
-
-    public ResponseBodyProcessor(String contentType) {
-        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1); // TODO: make configurable
-        this.languageProcessor = LanguageProcessor.getInstance(contentType);
+    public record Config(String contentType, Integer threads) {
+        public Config(String contentType, Integer threads) {
+            this.contentType = contentType;
+            this.threads = threads == null ? 1 : threads;
+        }
     }
 
-    public record Key(long contentLength, long xxh64) { }
+    public record Key(long contentLength, long xxh64) {}
+
+    public ResponseBodyProcessor(Config config) {
+        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(config.threads == null ? 1 : config.threads);
+        this.languageProcessor = LanguageProcessor.getInstance(config.contentType);
+    }
+
+    public ResponseBodyProcessor(String contentType) {
+        this(new Config(contentType, null));
+    }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseBodyProcessor.class);
 
     private final ConcurrentHashMap.KeySetView<Key, Boolean> seenResponseBodies = ConcurrentHashMap.newKeySet();
 
     private final List<LanguageProcessor.LanguageProcessingData> responseDataMetrics = Collections.synchronizedList(new ArrayList<>());
     private final LanguageProcessor languageProcessor;
 
-    ThreadPoolExecutor executor;
-
+    private final ThreadPoolExecutor executor;
 
     public boolean add(long contentLength, long xxh64, BigByteArrayOutputStream bbaos) {
         final var key = new Key(contentLength, xxh64);
@@ -67,5 +77,9 @@ public class ResponseBodyProcessor {
         if (noTimeout) LOGGER.info("ResponseBodyProcessor completed.");
         else LOGGER.warn("ResponseBodyProcessor timed out.");
         return responseDataMetrics;
+    }
+
+    public LanguageProcessor getLanguageProcessor() {
+        return this.languageProcessor;
     }
 }

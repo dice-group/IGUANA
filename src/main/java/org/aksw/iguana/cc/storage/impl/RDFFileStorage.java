@@ -2,11 +2,7 @@ package org.aksw.iguana.cc.storage.impl;
 
 import com.github.jsonldjava.shaded.com.google.common.base.Supplier;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
-import org.aksw.iguana.cc.lang.LanguageProcessor;
-import org.aksw.iguana.cc.storage.Storable;
 import org.aksw.iguana.cc.storage.Storage;
-import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
-import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -20,7 +16,7 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
-import java.util.Map;
+import java.util.Optional;
 
 public class RDFFileStorage implements Storage {
     public record Config(String path) implements StorageConfig {}
@@ -41,46 +37,33 @@ public class RDFFileStorage implements Storage {
     final private Lang lang;
     final private Path path;
 
+    public RDFFileStorage(Config config) {
+        this(config.path());
+    }
+
     /**
      * Uses a generated file called results_{DD}-{MM}-{YYYY}_{HH}-{mm}.ttl
      */
-    public RDFFileStorage(Config config) {
-        if (config.path() == null)
-            path = Paths.get("").resolve(defaultFileNameSupplier.get() + ".ttl");
-        else
-            path = Paths.get(config.path());
-        this.lang = RDFLanguages.filenameToLang(path.toString(), Lang.TTL);
-    }
-
     public RDFFileStorage() {
-        // TODO: remove
-        path = Paths.get("").resolve(defaultFileNameSupplier.get() + ".ttl");
-        this.lang = RDFLanguages.filenameToLang(path.toString(), Lang.TTL);
+        this("");
     }
 
     /**
-     * Uses the provided filename
+     * Uses the provided filename. If the filename is null or empty, a generated file called
+     * results_{DD}-{MM}-{YYYY}_{HH}-{mm}.ttl is used. The file extension determines the file format.
      *
-     * @param fileName
+     * @param fileName the filename to use
      */
-    public RDFFileStorage(String fileName) {
-        // TODO: remove
-        path = Paths.get(fileName);
+    public RDFFileStorage(String fileName) { // TODO: consider removing this constructor
+        if (fileName == null || Optional.of(fileName).orElse("").isBlank())
+            path = Paths.get("").resolve(defaultFileNameSupplier.get() + ".ttl"); // TODO: test this
+        else
+            path = Paths.get(fileName); // TODO: test path for proper pathname before running tasks
         this.lang = RDFLanguages.filenameToLang(path.toString(), Lang.TTL);
     }
 
     @Override
     public void storeResult(Model data){
-        Map<String, ResponseBodyProcessor> rbpMap = ResponseBodyProcessorInstances.getEveryProcessor();
-        for (String responseType : rbpMap.keySet()) {
-            var responseDataMetrics = rbpMap.get(responseType).getResponseDataMetrics();
-            for (LanguageProcessor.LanguageProcessingData singleData : responseDataMetrics) {
-                if (singleData instanceof Storable.AsRDF) {
-                    data.add(((Storable.AsRDF) singleData).toRDF());
-                }
-            }
-        }
-
         try (OutputStream os = new FileOutputStream(path.toString(), true)) {
             RDFDataMgr.write(os, data, this.lang);
         } catch (IOException e) {

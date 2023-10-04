@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.lang;
 
 import org.aksw.iguana.cc.lang.impl.SaxSparqlJsonResultCountingParser;
+import org.aksw.iguana.cc.storage.Storable;
 
 import java.io.InputStream;
 import java.lang.annotation.ElementType;
@@ -25,7 +26,7 @@ public abstract class LanguageProcessor {
         String value();
     }
 
-    public interface LanguageProcessingData {
+    public interface LanguageProcessingData extends Storable {
         long hash();
         Class<? extends LanguageProcessor> processor();
     }

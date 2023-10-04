@@ -6,10 +6,12 @@ import java.util.List;
 
 public interface Storable {
 
-    record CSVFileData (
-        String filename,
-        String[][] data
-    ) {}
+    record CSVData (
+            String folderName,
+            List<CSVFileData> files
+    ) {
+        public record CSVFileData(String filename, String[][] data) {}
+    }
 
     interface AsCSV {
 
@@ -18,7 +20,7 @@ public interface Storable {
          *
          * @return CSVFileData list which contains all the files and their data that should be created and stored
          */
-        List<CSVFileData> toCSV();
+        CSVData toCSV();
     }
 
     interface AsRDF {

@@ -1,19 +1,15 @@
 package org.aksw.iguana.cc.storage.impl;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
-import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.metrics.*;
 import org.aksw.iguana.cc.metrics.impl.AggregatedExecutionStatistics;
 import org.aksw.iguana.cc.metrics.impl.EachExecutionStatistic;
 import org.aksw.iguana.cc.storage.Storable;
 import org.aksw.iguana.cc.storage.Storage;
-import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
-import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
 import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.apache.jena.arq.querybuilder.SelectBuilder;
@@ -27,20 +23,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.function.Predicate;
 
 public class CSVStorage implements Storage {
 
-    public record Config(
-            @JsonProperty String path
-    ) implements StorageConfig {}
+    public record Config(String path) implements StorageConfig {}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSVStorage.class);
+
+    private final List<Metric> metrics;
 
     private final Path suiteFolder;
     private Path currentFolder;
@@ -51,12 +44,13 @@ public class CSVStorage implements Storage {
     private String connection;
     private String dataset;
 
-    public CSVStorage(Config config) {
-        this(config.path());
+    public CSVStorage(Config config, List<Metric> metrics, long suiteID) {
+        this(config.path(), metrics, suiteID);
     }
 
-    // TODO: better error handling
-    public CSVStorage(String folderPath) {
+    public CSVStorage(String folderPath, List<Metric> metrics, long suiteID) {
+        this.metrics = metrics;
+
         Path parentFolder;
         try {
             parentFolder = Paths.get(folderPath);
@@ -67,15 +61,14 @@ public class CSVStorage implements Storage {
             return;
         }
 
-        // TODO: add the id suite back
-        this.suiteFolder = parentFolder.resolve(String.valueOf(UUID.randomUUID()));
+        this.suiteFolder = parentFolder.resolve(String.valueOf(suiteID));
         this.taskFile = this.suiteFolder.resolve("suite-summary.csv");
 
         if (Files.notExists(parentFolder)) {
             try {
                 Files.createDirectory(parentFolder);
             } catch (IOException e) {
-                LOGGER.error("Can't store csv files, directory couldn't be created.", e);
+                LOGGER.error("Can't store csv files, directory could not be created.", e);
                 return;
             }
         }
@@ -84,7 +77,7 @@ public class CSVStorage implements Storage {
             try {
                 Files.createDirectory(suiteFolder);
             } catch (IOException e) {
-                LOGGER.error("Can't store csv files, directory couldn't be created.", e);
+                LOGGER.error("Can't store csv files, directory could not be created.", e);
                 return;
             }
         }
@@ -98,7 +91,7 @@ public class CSVStorage implements Storage {
 
         // write headers for the tasks.csv file
         try (CSVWriter csvWriter = getCSVWriter(taskFile)) {
-            Metric[] taskMetrics = MetricManager.getMetrics().stream().filter(x -> TaskMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
+            Metric[] taskMetrics = metrics.stream().filter(x -> TaskMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
             List<String> headerList = new LinkedList<>();
             headerList.addAll(List.of("connection", "dataset", "startDate", "endDate", "noOfWorkers"));
             headerList.addAll(Arrays.stream(taskMetrics).map(Metric::getAbbreviation).toList());
@@ -127,7 +120,7 @@ public class CSVStorage implements Storage {
         try {
             Files.createDirectory(this.currentFolder);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("Error while storing the task result in a csv file.", e);
         }
 
         try {
@@ -140,14 +133,14 @@ public class CSVStorage implements Storage {
 
         try {
             Path temp = createCSVFile("worker", "summary");
-            storeWorkerResults(this.taskRes, temp, data);
+            storeWorkerResults(this.taskRes, temp, data, this.metrics);
             for (Resource workerRes : workerResources) {
                 String workerID = data.listObjectsOfProperty(workerRes, IPROP.workerID).next().asLiteral().getLexicalForm();
                 try {
                     Path file = createCSVFile("query", "summary", "worker", workerID);
                     Path file2 = createCSVFile("each", "execution", "worker", workerID);
-                    storeSummarizedQueryResults(workerRes, file, data);
-                    storeEachQueryResults(workerRes, file2, data);
+                    storeSummarizedQueryResults(workerRes, file, data, this.metrics);
+                    storeEachQueryResults(workerRes, file2, data, this.metrics);
                 } catch (IOException e) {
                     LOGGER.error("Error while storing the query results of a worker in a csv file.", e);
                 } catch (NoSuchElementException e) {
@@ -162,57 +155,54 @@ public class CSVStorage implements Storage {
 
         try {
             Path file = createCSVFile("query", "summary", "task");
-            storeSummarizedQueryResults(taskRes, file, data);
+            storeSummarizedQueryResults(taskRes, file, data, this.metrics);
         } catch (IOException e) {
             LOGGER.error("Error while storing the query results of a task result in a csv file.", e);
         } catch (NoSuchElementException e) {
             LOGGER.error("Error while storing the query results of a task result in a csv file. The given model is probably incorrect.", e);
         }
-
-        try {
-            createLanguageProcessorFiles();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
-    private void createLanguageProcessorFiles() throws IOException {
-        Map<String, ResponseBodyProcessor> rbpMap = ResponseBodyProcessorInstances.getEveryProcessor();
-        for (String responseType : rbpMap.keySet()) {
-            var responseDataMetrics = rbpMap.get(responseType).getResponseDataMetrics();
-            if (responseDataMetrics.isEmpty()) {
-                continue;
+    @Override
+    public void storeData(Storable data) {
+        if (!(data instanceof Storable.AsCSV)) return; // dismiss data if it can't be stored as csv
+        Storable.CSVData csvdata = ((Storable.AsCSV) data).toCSV();
+
+        Path responseTypeDir = Path.of(csvdata.folderName());
+        responseTypeDir = this.currentFolder.resolve(responseTypeDir);
+
+        try {
+            Files.createDirectory(responseTypeDir);
+        } catch (FileAlreadyExistsException ignored) {
+        } catch (IOException e) {
+            LOGGER.error("Error while creating the directory for the language processor results. ", e);
+            return;
+        }
+
+        for (var csvFile : csvdata.files()) {
+            // check for file extension
+            String filename = csvFile.filename().endsWith(".csv") ? csvFile.filename() : csvFile.filename() + ".csv";
+            Path file = responseTypeDir.resolve(filename);
+
+            int i = 1; // skip the header by default
+
+            if (Files.notExists(file)) {
+                try {
+                    Files.createFile(file);
+                } catch (IOException e) {
+                    LOGGER.error("Error while creating a csv file for language processor results. The storing of language processor results will be skipped.", e);
+                    return;
+                }
+                i = 0; // include header if file is new
             }
 
-            Path langProcDir = Path.of(responseDataMetrics.get(0).processor().getSimpleName().replaceAll("\\W+", "-")); // sanitize filename
-            langProcDir = this.currentFolder.resolve(langProcDir);
-            Files.createDirectory(langProcDir);
-            for (LanguageProcessor.LanguageProcessingData singleData : responseDataMetrics) {
-                List<Storable.CSVFileData> csvDataList;
-                if (singleData instanceof Storable.AsCSV) {
-                    csvDataList = ((Storable.AsCSV) singleData).toCSV();
-                } else {
-                    continue;
+            try (CSVWriter writer = getCSVWriter(file)) {
+                for (; i < csvFile.data().length; i++) {
+                    writer.writeNext(csvFile.data()[i], true);
                 }
-
-                for (var csvData : csvDataList) {
-                    // check for file extension
-                    String filename = csvData.filename().endsWith(".csv") ? csvData.filename() : csvData.filename() + ".csv";
-                    Path file = langProcDir.resolve(filename);
-
-                    int i = 1; // skip the header by default
-
-                    if (Files.notExists(file)) {
-                        Files.createFile(file);
-                        i = 0; // include header if file is new
-                    }
-
-                    try (CSVWriter writer = getCSVWriter(file)) {
-                        for (; i < csvData.data().length; i++) {
-                            writer.writeNext(csvData.data()[i], true);
-                        }
-                    }
-                }
+            } catch (IOException e) {
+                LOGGER.error("Error while writing the data into a csv file for language processor results. The storing of language processor results will be skipped.", e);
+                return;
             }
         }
     }
@@ -274,9 +264,9 @@ public class CSVStorage implements Storage {
         return file;
     }
 
-    private static void storeSummarizedQueryResults(Resource parentRes, Path file, Model data) throws IOException, NoSuchElementException {
-        boolean containsAggrStats = !MetricManager.getMetrics().stream().filter(AggregatedExecutionStatistics.class::isInstance).toList().isEmpty();
-        Metric[] queryMetrics = MetricManager.getMetrics().stream().filter(x -> QueryMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
+    private static void storeSummarizedQueryResults(Resource parentRes, Path file, Model data, List<Metric> metrics) throws IOException, NoSuchElementException {
+        boolean containsAggrStats = !metrics.stream().filter(AggregatedExecutionStatistics.class::isInstance).toList().isEmpty();
+        Metric[] queryMetrics = metrics.stream().filter(x -> QueryMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
 
         SelectBuilder sb = new SelectBuilder();
         sb.addWhere(parentRes, IPROP.query, "?eQ");
@@ -289,8 +279,8 @@ public class CSVStorage implements Storage {
         executeAndStoreQuery(sb, file, data);
     }
 
-    private static void storeEachQueryResults(Resource parentRes, Path file, Model data) throws IOException {
-        boolean containsEachStats = !MetricManager.getMetrics().stream().filter(EachExecutionStatistic.class::isInstance).toList().isEmpty();
+    private static void storeEachQueryResults(Resource parentRes, Path file, Model data, List<Metric> metrics) throws IOException {
+        boolean containsEachStats = !metrics.stream().filter(EachExecutionStatistic.class::isInstance).toList().isEmpty();
         if (!containsEachStats) {
             return;
         }
@@ -298,14 +288,16 @@ public class CSVStorage implements Storage {
         SelectBuilder sb = new SelectBuilder();
         sb.addWhere(parentRes, IPROP.query, "?eQ") // variable name should be different from property names
                 .addWhere("?eQ", IPROP.queryExecution, "?exec")
-                .addOptional(new WhereBuilder().addWhere("?exec", IPROP.responseBody, "?rb").addWhere("?rb", IPROP.responseBodyHash, "?responseBodyHash"));
-        queryProperties(sb, "?exec", IPROP.queryID, IPROP.run, IPROP.success, IPROP.time, IPROP.resultSize, IPROP.code);
-        sb.addVar("responseBodyHash");
+                .addOptional(new WhereBuilder().addWhere("?exec", IPROP.responseBody, "?rb").addWhere("?rb", IPROP.responseBodyHash, "?responseBodyHash"))
+                .addOptional(new WhereBuilder().addWhere("?exec", IPROP.exception, "?exception"))
+                .addOptional(new WhereBuilder().addWhere("?exec", IPROP.httpCode, "?httpCode"));
+        queryProperties(sb, "?exec", IPROP.queryID, IPROP.run, IPROP.success, IPROP.startTime, IPROP.time, IPROP.resultSize, IPROP.code);
+        sb.addVar("httpCode").addVar("exception").addVar("responseBodyHash");
         executeAndStoreQuery(sb, file, data);
     }
 
     private void storeTaskResults(Model data) throws IOException, NoSuchElementException, ParseException {
-        Metric[] taskMetrics = MetricManager.getMetrics().stream().filter(x -> TaskMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
+        Metric[] taskMetrics = metrics.stream().filter(x -> TaskMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
 
         SelectBuilder sb = new SelectBuilder();
         queryProperties(sb, String.format("<%s>", this.taskRes.toString()), IPROP.startDate, IPROP.endDate, IPROP.noOfWorkers);
@@ -335,8 +327,8 @@ public class CSVStorage implements Storage {
         }
     }
 
-    private static void storeWorkerResults(Resource taskRes, Path file, Model data) throws IOException, NoSuchElementException {
-        Metric[] workerMetrics = MetricManager.getMetrics().stream().filter(x -> WorkerMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
+    private static void storeWorkerResults(Resource taskRes, Path file, Model data, List<Metric> metrics) throws IOException, NoSuchElementException {
+        Metric[] workerMetrics = metrics.stream().filter(x -> WorkerMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
 
         SelectBuilder sb = new SelectBuilder();
         sb.addWhere(taskRes, IPROP.workerResult, "?worker");
