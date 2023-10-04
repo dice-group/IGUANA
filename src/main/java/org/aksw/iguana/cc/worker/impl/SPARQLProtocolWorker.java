@@ -138,7 +138,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             Duration timeout,
             String acceptHeader /* e.g. application/sparql-results+json */,
             RequestFactory.RequestType requestType,
-            boolean parseResults
+            Boolean parseResults
     ) implements HttpWorker.Config {
         public Config(Integer number,
                       @JsonProperty(required = true) QueryHandler queries,
@@ -147,7 +147,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                       @JsonProperty(required = true) Duration timeout,
                       String acceptHeader,
                       RequestFactory.RequestType requestType,
-                      boolean parseResults) {
+                      Boolean parseResults) {
             this.number = number == null ? 1 : number;
             this.queries = queries;
             this.completionTarget = completionTarget;
@@ -155,7 +155,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             this.timeout = timeout;
             this.acceptHeader = acceptHeader;
             this.requestType = requestType == null ? RequestFactory.RequestType.GET_QUERY : requestType;
-            this.parseResults = parseResults;
+            this.parseResults = parseResults == null || parseResults;
         }
     }
 
@@ -193,7 +193,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private BigByteArrayOutputStream responseBodybbaos = new BigByteArrayOutputStream();
 
     // used to read the http response body
-    private byte[] buffer = new byte[4096];
+    private final byte[] buffer = new byte[4096];
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SPARQLProtocolWorker.class);
 

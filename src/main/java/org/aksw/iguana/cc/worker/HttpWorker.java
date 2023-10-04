@@ -49,7 +49,7 @@ public abstract class HttpWorker {
          *
          * @return true if the results should be parsed, false otherwise
          */
-        boolean parseResults();
+        Boolean parseResults();
 
         QueryHandler queries();
 
