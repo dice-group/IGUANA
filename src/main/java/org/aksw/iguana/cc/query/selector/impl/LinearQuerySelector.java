@@ -10,7 +10,7 @@ import org.aksw.iguana.cc.query.selector.QuerySelector;
  *
  * @author frensing
  */
-public class LinearQuerySelector extends QuerySelector { // TODO: check if worker should have a query selector or if it should be in the query handler
+public class LinearQuerySelector extends QuerySelector {
 
     public LinearQuerySelector(int size) {
         super(size);
@@ -18,16 +18,14 @@ public class LinearQuerySelector extends QuerySelector { // TODO: check if worke
 
     @Override
     public int getNextIndex() {
-        int index = threadLocalIndex.get();
         if (index >= this.size) {
-            this.threadLocalIndex.set(0);
+            index = 0;
         }
-        this.threadLocalIndex.set(index + 1);
-        return index;
+        return index++;
     }
 
     @Override
     public int getCurrentIndex() {
-        return threadLocalIndex.get();
+        return index;
     }
 }

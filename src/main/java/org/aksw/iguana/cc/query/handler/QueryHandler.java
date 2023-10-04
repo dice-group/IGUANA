@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * The QueryHandler is used by every worker that extends the AbstractWorker.
@@ -55,13 +54,13 @@ public class QueryHandler {
         }
     }
 
-    public record Config(
-        String path,
-        Format format,
-        Boolean caching,
-        Order order,
-        Long seed,
-        Language lang
+    public record Config (
+            String path,
+            Format format,
+            Boolean caching,
+            Order order,
+            Long seed,
+            Language lang
     ) {
         public Config(@JsonProperty(required = true) String path, Format format, Boolean caching, Order order, Long seed, Language lang) {
             this.path = path;
@@ -163,8 +162,6 @@ public class QueryHandler {
     @JsonValue
     final protected Config config;
 
-    final protected QuerySelector querySelector;
-
     final protected QueryList queryList;
 
     final protected int hashCode;
@@ -181,34 +178,36 @@ public class QueryHandler {
                 new InMemQueryList(querySource) :
                 new FileBasedQueryList(querySource);
 
-        querySelector = switch (config.order()) {
-            case LINEAR -> new LinearQuerySelector(queryList.size());
-            case RANDOM -> new RandomQuerySelector(queryList.size(), config.seed());
-        };
-
         this.config = config;
         hashCode = queryList.hashCode();
     }
 
+    public QuerySelector getQuerySelectorInstance() {
+        class countWorker {
+            public static int count = 0; // give every worker inside the same worker config an offset seed
+        }
 
+        switch (config.order()) {
+            case LINEAR -> { return new LinearQuerySelector(queryList.size()); }
+            case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + countWorker.count++); }
+        }
 
-    public QueryStringWrapper getNextQuery() throws IOException {
+        throw new IllegalStateException("Unknown query selection order: " + config.order());
+    }
+
+    public QueryStringWrapper getNextQuery(QuerySelector querySelector) throws IOException {
         final var queryIndex = querySelector.getNextIndex();
         return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex));
     }
 
-    public QueryStreamWrapper getNextQueryStream() throws IOException {
-        final var queryIndex = this.querySelector.getNextIndex();
+    public QueryStreamWrapper getNextQueryStream(QuerySelector querySelector) throws IOException {
+        final var queryIndex = querySelector.getNextIndex();
         return new QueryStreamWrapper(queryIndex, this.queryList.getQueryStream(queryIndex));
     }
 
     @Override
     public int hashCode() {
         return hashCode;
-    }
-
-    public int getCurrentQueryID() {
-        return this.querySelector.getCurrentIndex();
     }
 
     public int getQueryCount() {

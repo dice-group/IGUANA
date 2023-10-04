@@ -287,10 +287,10 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private HttpExecutionResult executeHttpRequest(Duration timeout) {
         final QueryHandler.QueryStreamWrapper queryHandle;
         try {
-            queryHandle = config().queries().getNextQueryStream();
+            queryHandle = config().queries().getNextQueryStream(this.querySelector);
         } catch (IOException e) {
             return new HttpExecutionResult(
-                config().queries().getCurrentQueryID(),
+                this.querySelector.getCurrentIndex(),
                 Optional.empty(),
                 Instant.now(),
                 Duration.ZERO,

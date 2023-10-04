@@ -10,7 +10,7 @@ import static java.text.MessageFormat.format;
  */
 public abstract class QuerySelector {
 
-    protected ThreadLocal<Integer> threadLocalIndex = ThreadLocal.withInitial(() -> 0); // TODO: moving the queryselector to the workers is probably better
+    protected int index = 0;
 
     protected final int size;
 

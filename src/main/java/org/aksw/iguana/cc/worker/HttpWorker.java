@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
+import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 
@@ -139,11 +140,13 @@ public abstract class HttpWorker {
     final protected long workerID;
     final protected Config config;
     final protected ResponseBodyProcessor responseBodyProcessor;
+    final protected QuerySelector querySelector;
 
     public HttpWorker(long workerID, ResponseBodyProcessor responseBodyProcessor, Config config) {
         this.workerID = workerID;
         this.responseBodyProcessor = responseBodyProcessor;
         this.config = config;
+        this.querySelector = this.config.queries().getQuerySelectorInstance();
     }
 
     public static String basicAuth(String username, String password) {

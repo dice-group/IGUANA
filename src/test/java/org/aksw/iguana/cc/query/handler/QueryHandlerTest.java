@@ -52,7 +52,7 @@ public class QueryHandlerTest {
         final var mapper = new ObjectMapper();
         QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
         assertEquals(queries.size(), queryHandler.getQueryCount());
-        QueryHandler.QueryStringWrapper nextQuery = queryHandler.getNextQuery();
+        QueryHandler.QueryStringWrapper nextQuery = queryHandler.getNextQuery(queryHandler.getQuerySelectorInstance());
         assertEquals(0, nextQuery.index());
         assertEquals(nextQuery.query(), queries.get(0).content());
 
