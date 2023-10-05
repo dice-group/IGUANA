@@ -3,7 +3,6 @@ package org.aksw.iguana.cc.metrics.impl;
 import org.aksw.iguana.cc.metrics.Metric;
 import org.aksw.iguana.cc.metrics.QueryMetric;
 import org.aksw.iguana.cc.worker.HttpWorker;
-import org.aksw.iguana.commons.annotation.Shorthand;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -11,7 +10,6 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.List;
 
-@Shorthand("QPS")
 public class QPS extends Metric implements QueryMetric {
 
     public QPS() {

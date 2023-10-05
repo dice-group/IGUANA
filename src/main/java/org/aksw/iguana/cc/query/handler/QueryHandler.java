@@ -67,7 +67,7 @@ public class QueryHandler {
             this.format = format == null ? Format.ONE_PER_LINE : format;
             this.caching = caching == null || caching;
             this.order = order == null ? Order.LINEAR : order;
-            this.seed = seed == null ? 0 : seed; // TODO: every worker should maybe have different seeds, based on their workerid
+            this.seed = seed == null ? 0 : seed;
             this.lang = lang == null ? Language.SPARQL : lang;
         }
 

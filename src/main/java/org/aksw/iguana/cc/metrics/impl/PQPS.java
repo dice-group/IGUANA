@@ -1,9 +1,9 @@
 package org.aksw.iguana.cc.metrics.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.metrics.Metric;
 import org.aksw.iguana.cc.metrics.QueryMetric;
 import org.aksw.iguana.cc.worker.HttpWorker;
-import org.aksw.iguana.commons.annotation.Shorthand;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -11,12 +11,11 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.List;
 
-@Shorthand("PQPS")
 public class PQPS extends Metric implements QueryMetric {
 
     private final int penalty;
 
-    public PQPS(Integer penalty) {
+    public PQPS(@JsonProperty("penalty") Integer penalty) {
         super("Penalized Queries per Second", "PQPS", "This metric calculates for each query the amount of executions per second. Failed executions receive a time penalty.");
         this.penalty = penalty;
     }

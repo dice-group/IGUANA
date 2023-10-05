@@ -31,7 +31,7 @@ public class Suite {
             @JsonProperty(required = true)
             List<Task.Config> tasks,
             List<StorageConfig> storages,
-            // @JsonProperty List<Metric> metrics
+            List<Metric> metrics,
             @JsonProperty List<ResponseBodyProcessor.Config> responseBodyProcessors
     ) {}
 
@@ -50,7 +50,7 @@ public class Suite {
         long taskID = 0;
 
         responseBodyProcessorInstances = new ResponseBodyProcessorInstances(config.responseBodyProcessors);
-        List<Metric> metrics = initialiseMetrics();
+        List<Metric> metrics = initialiseMetrics(this.config.metrics);
         List<Storage> storages = initialiseStorages(this.config.storages, metrics, this.suiteId);
 
         for (Task.Config task : config.tasks()) {
@@ -60,14 +60,19 @@ public class Suite {
         }
     }
 
-    private static List<Metric> initialiseMetrics() {
+    private static List<Metric> initialiseMetrics(List<Metric> metrics) {
+        if (metrics != null && !metrics.isEmpty()) {
+            return metrics;
+        }
+
         final List<Metric> out = new ArrayList<>();
-        // TODO: make this configurable
         out.add(new QPS());
         out.add(new AvgQPS());
         out.add(new NoQPH());
         out.add(new AggregatedExecutionStatistics());
         out.add(new EachExecutionStatistic());
+        out.add(new NoQ());
+        out.add(new QMPH());
         return out;
     }
 

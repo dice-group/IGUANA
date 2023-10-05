@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.metrics.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.metrics.Metric;
 import org.aksw.iguana.cc.metrics.TaskMetric;
 import org.aksw.iguana.cc.metrics.WorkerMetric;
@@ -13,7 +14,7 @@ public class PAvgQPS extends Metric implements TaskMetric, WorkerMetric {
 
     private final int penalty;
 
-    public PAvgQPS(Integer penalty) {
+    public PAvgQPS(@JsonProperty("penalty") Integer penalty) {
         super("Penalized Average Queries per Second", "PAvgQPS", "This metric calculates the average QPS between all queries. Failed executions receive a time penalty.");
         this.penalty = penalty;
     }
