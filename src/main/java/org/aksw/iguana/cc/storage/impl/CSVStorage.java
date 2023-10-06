@@ -29,7 +29,18 @@ import java.util.function.Predicate;
 
 public class CSVStorage implements Storage {
 
-    public record Config(String path) implements StorageConfig {}
+    public record Config(String directory) implements StorageConfig {
+        public Config(String directory) {
+            if (directory == null) {
+                directory = "results";
+            }
+            Path path = Paths.get(directory);
+            if (Files.exists(path) && !Files.isDirectory(path)) {
+                throw new IllegalArgumentException("The given path is not a directory.");
+            }
+            this.directory = directory;
+        }
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSVStorage.class);
 
@@ -45,7 +56,7 @@ public class CSVStorage implements Storage {
     private String dataset;
 
     public CSVStorage(Config config, List<Metric> metrics, long suiteID) {
-        this(config.path(), metrics, suiteID);
+        this(config.directory(), metrics, suiteID);
     }
 
     public CSVStorage(String folderPath, List<Metric> metrics, long suiteID) {

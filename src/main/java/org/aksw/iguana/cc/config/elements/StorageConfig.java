@@ -15,8 +15,8 @@ import org.aksw.iguana.cc.storage.impl.TriplestoreStorage;
         property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = TriplestoreStorage.Config.class, name = "triplestore"),
-        @JsonSubTypes.Type(value = RDFFileStorage.Config.class, name = "rdf"),
-        @JsonSubTypes.Type(value = CSVStorage.Config.class, name = "csv")
+        @JsonSubTypes.Type(value = RDFFileStorage.Config.class, name = "rdf file"),
+        @JsonSubTypes.Type(value = CSVStorage.Config.class, name = "csv file")
 })
 public interface StorageConfig {}
 

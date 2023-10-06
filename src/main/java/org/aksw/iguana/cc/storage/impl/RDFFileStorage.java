@@ -13,13 +13,29 @@ import org.slf4j.LoggerFactory;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Optional;
 
 public class RDFFileStorage implements Storage {
-    public record Config(String path) implements StorageConfig {}
+    public record Config(String path) implements StorageConfig {
+        public Config(String path) {
+            if (path == null) {
+                this.path = path; // get's set to default in RDFFileStorage
+                return;
+            }
+
+            Path filePath = Paths.get(path);
+            if (Files.exists(filePath) && Files.isDirectory(filePath)) {
+                throw new IllegalArgumentException("Path for rdf file storage is a directory: " + path);
+            } else if (Files.exists(filePath)) {
+                path += "_" + defaultFileNameSupplier.get(); // we're just going to assume that that's enough to make it unique
+            }
+            this.path = path;
+        }
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDFFileStorage.class.getName());
 
@@ -54,11 +70,11 @@ public class RDFFileStorage implements Storage {
      *
      * @param fileName the filename to use
      */
-    public RDFFileStorage(String fileName) { // TODO: consider removing this constructor
+    public RDFFileStorage(String fileName) {
         if (fileName == null || Optional.of(fileName).orElse("").isBlank())
-            path = Paths.get("").resolve(defaultFileNameSupplier.get() + ".ttl"); // TODO: test this
+            path = Paths.get("").resolve(defaultFileNameSupplier.get() + ".ttl");
         else
-            path = Paths.get(fileName); // TODO: test path for proper pathname before running tasks
+            path = Paths.get(fileName);
         this.lang = RDFLanguages.filenameToLang(path.toString(), Lang.TTL);
     }
 
