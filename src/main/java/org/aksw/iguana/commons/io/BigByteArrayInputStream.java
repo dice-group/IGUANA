@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import static java.lang.Math.min;
 
-// TODO: has slow skip implementation
 public class BigByteArrayInputStream extends InputStream {
 
     final private BigByteArrayOutputStream bbaos;
