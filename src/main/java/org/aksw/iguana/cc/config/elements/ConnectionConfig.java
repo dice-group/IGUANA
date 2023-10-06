@@ -16,7 +16,6 @@ public record ConnectionConfig(
         @JsonProperty(required = true)
         String name,
         String version,
-        @JsonProperty(required = true)
         DatasetConfig dataset,
         @JsonProperty(required = true)
         @JsonDeserialize(using = URIDeserializer.class)
