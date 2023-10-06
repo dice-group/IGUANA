@@ -136,14 +136,14 @@ public class StresstestResultProcessor {
             for (int i = 0; i < config.queries().getQueryCount(); i++) {
                 Resource workerQueryRes = iresFactory.getWorkerQueryResource(worker, i);
                 Resource queryRes = IRES.getResource(workerQueryIDs[i]);
-                m.add(workerQueryRes, IPROP.queryID, queryRes); // TODO: check this, (seems to be right)
+                m.add(workerQueryRes, IPROP.queryID, queryRes);
             }
 
             var taskQueryIDs = this.queryIDs.toArray(String[]::new); // make elements accessible by index
             for (String taskQueryID : taskQueryIDs) {
                 Resource taskQueryRes = iresFactory.getTaskQueryResource(taskQueryID);
                 Resource queryRes = IRES.getResource(taskQueryID);
-                m.add(taskQueryRes, IPROP.queryID, queryRes); // TODO: check this as well
+                m.add(taskQueryRes, IPROP.queryID, queryRes);
             }
         }
 

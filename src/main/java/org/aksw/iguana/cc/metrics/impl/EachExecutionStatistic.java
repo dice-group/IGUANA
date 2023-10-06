@@ -49,7 +49,6 @@ public class EachExecutionStatistic extends Metric implements ModelWritingMetric
                         m.add(runRes, IPROP.exception, ResourceFactory.createTypedLiteral(exec.error().get().toString()));
                     if (exec.httpStatusCode().isPresent())
                         m.add(runRes, IPROP.httpCode, ResourceFactory.createTypedLiteral(exec.httpStatusCode().get().toString()));
-                    // TODO: qps maybe
                     run = run.add(BigInteger.ONE);
                 }
             }

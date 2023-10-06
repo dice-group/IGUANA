@@ -21,7 +21,7 @@ public class InMemQueryList extends QueryList {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemQueryList.class);
 
-    final private List<byte[]> queries; // TODO: make final
+    private final List<byte[]> queries;
 
     public InMemQueryList(QuerySource querySource) throws IOException {
         super(querySource);

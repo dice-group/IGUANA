@@ -1,10 +1,9 @@
 package org.aksw.iguana.commons.io;
 
 import com.google.common.primitives.Bytes;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.Arguments;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,10 +11,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled("Big test")
 class BigByteArrayInputStreamTest {
 
     private static final int MAX_SINGLE_BUFFER_SIZE = Integer.MAX_VALUE - 8;

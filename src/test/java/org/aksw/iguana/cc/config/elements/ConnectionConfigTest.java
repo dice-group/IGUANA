@@ -1,24 +1,17 @@
 package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.xml.crypto.Data;
 import java.net.URI;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConnectionConfigTest {
-    private final PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder() // TODO: remove?
-            .allowIfSubType("com.baeldung.jackson.inheritance")
-            .allowIfSubType("java.util.ArrayList")
-            .build();
     private final ObjectMapper mapper = new ObjectMapper();
 
     private static Stream<Arguments> testData() {

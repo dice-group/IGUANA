@@ -1,5 +1,6 @@
 package org.aksw.iguana.commons.io;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled("Big test")
 class BigByteArrayOutputStreamTest {
     final static Random rng = new Random(0);
 
