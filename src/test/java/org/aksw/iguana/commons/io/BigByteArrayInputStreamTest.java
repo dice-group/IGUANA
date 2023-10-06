@@ -41,18 +41,6 @@ class BigByteArrayInputStreamTest {
         return bufferField;
     }
 
-    public static List<Arguments> data() {
-        final var maxSize = Integer.MAX_VALUE - 8;
-
-        final Supplier<byte[][]> sup1 = () -> getBigRandomBuffer(10, maxSize);
-        final Supplier<byte[][]> sup2 = () -> getBigRandomBuffer(maxSize * 2L, maxSize);
-
-        return List.of(
-                Arguments.of(Named.of(String.valueOf(10), sup1)),
-                Arguments.of(Named.of(String.valueOf(maxSize * 2L), sup2))
-        );
-    }
-
     @Test
     @DisplayName("Test illegal arguments")
     public void testIllegalArguments() throws IOException {
@@ -82,7 +70,7 @@ class BigByteArrayInputStreamTest {
     @DisplayName("Test read method with big data")
     public void testBigRead() throws IOException {
         final var bbaos = new BigByteArrayOutputStream();
-        final var buffer = getBigRandomBuffer((long) MAX_SINGLE_BUFFER_SIZE + 1000L, MAX_SINGLE_BUFFER_SIZE - 1);
+        final var buffer = getBigRandomBuffer(((long) MAX_SINGLE_BUFFER_SIZE) + 1000L, MAX_SINGLE_BUFFER_SIZE - 1);
         bbaos.write(buffer);
         final var bbais = new BigByteArrayInputStream(bbaos);
 
@@ -206,5 +194,32 @@ class BigByteArrayInputStreamTest {
         assertEquals(4, bbais.read());
         assertEquals(-1, bbais.read());
         assertThrows(IOException.class, () -> bbaos.write("test".getBytes()));
+    }
+
+    @Test
+    @DisplayName("Test skip() method with small data")
+    public void testSmallSkip() throws IOException {
+        final var bigBuffer = getBigRandomBuffer(400, MAX_SINGLE_BUFFER_SIZE);
+        final var bbaos = new BigByteArrayOutputStream();
+        bbaos.write(bigBuffer);
+        final var bbais = new BigByteArrayInputStream(bbaos);
+        assertEquals(100, bbais.skip(100));
+        assertArrayEquals(Arrays.copyOfRange(bigBuffer[0], 100, 200), bbais.readNBytes(100));
+        assertEquals(200, bbais.skip(200));
+        assertEquals(-1, bbais.read());
+        assertEquals(0, bbais.skip(100));
+    }
+
+    @Test
+    @DisplayName("Test skip() method with big data")
+    public void testBigSkip() throws IOException {
+        final var bigBuffer = getBigRandomBuffer(((long) MAX_SINGLE_BUFFER_SIZE) * 2L, MAX_SINGLE_BUFFER_SIZE);
+        final var bbaos = new BigByteArrayOutputStream();
+        bbaos.write(bigBuffer);
+        final var bbais = new BigByteArrayInputStream(bbaos);
+        assertEquals((MAX_SINGLE_BUFFER_SIZE * 2L) - 4, bbais.skip((MAX_SINGLE_BUFFER_SIZE * 2L) - 4));
+        assertArrayEquals(Arrays.copyOfRange(bigBuffer[1], MAX_SINGLE_BUFFER_SIZE - 4, MAX_SINGLE_BUFFER_SIZE - 2), bbais.readNBytes(2));
+        assertEquals(2, bbais.skip(200));
+        assertEquals(-1, bbais.read());
     }
 }

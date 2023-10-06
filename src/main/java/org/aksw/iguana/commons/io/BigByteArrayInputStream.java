@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import static java.lang.Math.min;
 
+// TODO: has slow skip implementation
 public class BigByteArrayInputStream extends InputStream {
 
     final private BigByteArrayOutputStream bbaos;
@@ -107,6 +108,21 @@ public class BigByteArrayInputStream extends InputStream {
         throw new IOException("Reading all bytes from a BigByteArrayInputStream is prohibited because it might exceed the array capacity");
     }
 
+    @Override
+    public long skip(long n) throws IOException {
+        if (n <= 0) return 0;
+        long skipped = 0;
+        while (skipped < n) {
+            long thisSkip = min(availableBytes(), n - skipped);
+            skipped += thisSkip;
+            posInCurrentBuffer += (int) thisSkip; // conversion to int is lossless, because skipped is at maximum INT_MAX big
+            if (availableBytes() == 0)
+                if (!activateNextBuffer())
+                    return skipped;
+        }
+        return skipped;
+    }
+
     /**
      * Activate the next buffer the underlying BigByteArrayOutputStream.
      *
@@ -114,8 +130,13 @@ public class BigByteArrayInputStream extends InputStream {
      */
     private boolean activateNextBuffer() {
         // check if another buffer is available
-        if (bbaos.getBaos().isEmpty())
-            return ended = true;
+        if (bbaos.getBaos().isEmpty()) {
+            currentBuffer = null; // release memory
+            currentBufferSize = 0;
+            posInCurrentBuffer = 0;
+            ended = true;
+            return false;
+        }
 
         // activate next buffer
         currentBuffer = bbaos.getBaos().get(0).getBuffer();
@@ -128,7 +149,8 @@ public class BigByteArrayInputStream extends InputStream {
         // check if the new buffer contains anything
         if (currentBuffer.length == 0)
             return ended = activateNextBuffer();
-        return ended = false;
+        ended = false;
+        return true;
     }
 
     /**
