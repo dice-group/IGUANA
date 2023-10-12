@@ -164,6 +164,8 @@ public class QueryHandler {
 
     final protected QueryList queryList;
 
+    private int workerCount = 0; // give every worker inside the same worker config an offset seed
+
     final protected int hashCode;
 
     @JsonCreator
@@ -183,13 +185,9 @@ public class QueryHandler {
     }
 
     public QuerySelector getQuerySelectorInstance() {
-        class countWorker {
-            public static int count = 0; // give every worker inside the same worker config an offset seed
-        }
-
         switch (config.order()) {
             case LINEAR -> { return new LinearQuerySelector(queryList.size()); }
-            case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + countWorker.count++); }
+            case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + workerCount++); }
         }
 
         throw new IllegalStateException("Unknown query selection order: " + config.order());
