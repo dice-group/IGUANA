@@ -104,7 +104,12 @@ public class StresstestResultProcessor {
 
             Resource workerRes = iresFactory.getWorkerResource(worker);
             Resource connectionRes = IRES.getResource(config.connection().name());
-            Resource datasetRes = IRES.getResource(config.connection().dataset().name());
+            if (config.connection().dataset() != null) {
+                Resource datasetRes = IRES.getResource(config.connection().dataset().name());
+                m.add(connectionRes, IPROP.dataset, datasetRes);
+                m.add(datasetRes, RDFS.label, ResourceFactory.createTypedLiteral(config.connection().dataset().name()));
+                m.add(datasetRes, RDF.type, IONT.dataset);
+            }
 
             m.add(taskRes, IPROP.workerResult, workerRes);
             m.add(workerRes, RDF.type, IONT.worker);
@@ -123,10 +128,6 @@ public class StresstestResultProcessor {
             if (config.connection().version() != null) {
                 m.add(connectionRes, IPROP.version, ResourceFactory.createTypedLiteral(config.connection().version()));
             }
-            m.add(connectionRes, IPROP.dataset, datasetRes);
-
-            m.add(datasetRes, RDFS.label, ResourceFactory.createTypedLiteral(config.connection().dataset().name()));
-            m.add(datasetRes, RDF.type, IONT.dataset);
         }
 
         // Connect task and workers to the Query nodes, that store the triple stats.
@@ -171,7 +172,7 @@ public class StresstestResultProcessor {
             storage.storeResult(m);
         }
 
-        // Store results of language processors
+        // Store results of language processors (this shouldn't throw an error if the map is empty)
         for (var languageProcessor: lpResults.get().keySet()) {
             for (var data : lpResults.get().get(languageProcessor)) {
                 for (var storage : storages) {
