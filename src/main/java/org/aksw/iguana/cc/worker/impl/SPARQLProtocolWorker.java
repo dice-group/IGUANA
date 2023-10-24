@@ -25,7 +25,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -210,7 +209,16 @@ public class SPARQLProtocolWorker extends HttpWorker {
         this.httpClient = buildHttpClient();
     }
 
-
+    /**
+     *  Starts the worker and returns a CompletableFuture, which will be completed, when the worker has finished the
+     *  completion target. The CompletableFuture will contain a Result object, which contains the execution stats of the
+     *  worker. The execution stats contain the execution time, the http status code, the content length and the hash of
+     *  the response body. If the worker failed to execute a query, the execution stats will contain an exception.
+     *  If the worker failed to execute a query, because of a set time limit in the worker configuration, the result
+     *  of that execution will be discarded.
+     *
+     * @return the CompletableFuture the contains the results of the worker.
+     */
     public CompletableFuture<Result> start() {
         return CompletableFuture.supplyAsync(() -> {
             List<ExecutionStats> executionStats = new ArrayList<>();
@@ -218,10 +226,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 for (int i = 0; i < queryMixes.number(); i++) {
                     for (int j = 0; j < config().queries().getQueryCount(); j++) {
                         ExecutionStats execution = executeQuery(config().timeout(), false);
-                        if (execution != null) {
-                            logExecution(execution);
-                            executionStats.add(execution);
-                        }
+                        if (execution == null) throw new RuntimeException("Execution returned null at a place, where it should have never been null.");
+                        logExecution(execution);
+                        executionStats.add(execution);
                     }
                     LOGGER.info("{}\t:: Completed {} out of {} querymixes", this, i + 1, queryMixes.number());
                 }
@@ -230,11 +237,10 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 Instant now;
                 while ((now = Instant.now()).isBefore(endTime)) {
                     final Duration timeToEnd = Duration.between(now, endTime);
-                    final boolean timeoutBeforeEnd = config().timeout().compareTo(timeToEnd) < 0;
-                    final Duration thisQueryTimeOut = (timeoutBeforeEnd) ? config().timeout() : timeToEnd;
-                    // If timeoutBeforeEnd is false, fail shouldn't be counted as timeout
-                    ExecutionStats execution = executeQuery(thisQueryTimeOut, !timeoutBeforeEnd);
-                    if (execution != null){
+                    final boolean reducedTimeout = config().timeout().compareTo(timeToEnd) > 0;
+                    final Duration thisQueryTimeOut = (reducedTimeout) ? timeToEnd : config().timeout();
+                    ExecutionStats execution = executeQuery(thisQueryTimeOut, reducedTimeout);
+                    if (execution != null){ // If timeout is reduced, the execution result might be discarded if it failed and executeQuery returns null.
                         logExecution(execution);
                         executionStats.add(execution);
                     }
@@ -245,6 +251,15 @@ public class SPARQLProtocolWorker extends HttpWorker {
         }, executor);
     }
 
+    /**
+     * Executes the next query given by the query selector from the query handler. If the execution fails and
+     * discardOnFailure is true, the execution will be discarded and null will be returned. If the execution fails and
+     * discardOnFailure is false, the execution statistic with the failed results will be returned.
+     *
+     * @param timeout           the timeout for the execution
+     * @param discardOnFailure  if true, this method will return null, if the execution fails
+     * @return                  the execution statistic of the execution
+     */
     private ExecutionStats executeQuery(Duration timeout, boolean discardOnFailure) {
         HttpExecutionResult result = executeHttpRequest(timeout);
         Optional<Integer> statuscode = Optional.empty();
@@ -252,9 +267,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
             statuscode = Optional.of(result.response().get().statusCode());
 
         if (result.successful() && this.config.parseResults()) { // 2xx
+            if (result.actualContentLength.isEmpty() || result.hash.isEmpty() || result.outputStream.isEmpty()) {
+                throw new RuntimeException("Response body is null, but execution was successful."); // This should never happen
+            }
+
             // process result
-            if (!responseBodyProcessor.add(result.actualContentLength().getAsLong(), result.hash().getAsLong(), result.outputStream().get())) {
-                this.responseBodybbaos = result.outputStream().get();
+            if (!responseBodyProcessor.add(result.actualContentLength().orElse(-1), result.hash().orElse(-1), result.outputStream().orElse(new BigByteArrayOutputStream()))) {
+                this.responseBodybbaos = result.outputStream().orElse(new BigByteArrayOutputStream());
             } else {
                 this.responseBodybbaos = new BigByteArrayOutputStream();
             }
@@ -266,7 +285,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
             this.responseBodybbaos = new BigByteArrayOutputStream();
         }
 
-        if (!result.completed() && discardOnFailure) {
+        // This is not explicitly checking for a timeout, instead it just checks if the execution was successful or not.
+        // TODO: This might cause problems if the query actually fails before the timeout and discardOnFailure is true.
+        if (!result.successful() && discardOnFailure) {
             LOGGER.debug("{}\t:: Discarded execution, because the time limit has been reached: [queryID={}]", this, result.queryID);
             return null;
         }
@@ -322,8 +343,17 @@ public class SPARQLProtocolWorker extends HttpWorker {
             );
         }
 
-        if (((ThreadPoolExecutor) this.httpClient.executor().get()).getActiveCount() != 0) {
+        // check if the last execution task is stuck
+        if (this.httpClient.executor().isPresent() && ((ThreadPoolExecutor) this.httpClient.executor().get()).getActiveCount() != 0) {
             ((ThreadPoolExecutor) this.httpClient.executor().get()).shutdownNow();
+            final var waitStart = Instant.now();
+            try {
+                while (((ThreadPoolExecutor) this.httpClient.executor().get()).awaitTermination(100, TimeUnit.MILLISECONDS)) {
+                    LOGGER.warn("{}\t:: {}\t:: Waiting for the http client to shutdown. Elapsed time: {}", this, Thread.currentThread().getId(), Duration.between(waitStart, Instant.now()));
+                }
+            } catch (InterruptedException ignored) {
+                LOGGER.warn("{}\t:: Http client never shutdown. Continuing with the creation of a new http client.", this);
+            }
             this.httpClient = buildHttpClient();
         }
 
@@ -398,7 +428,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private void logExecution(ExecutionStats execution) {
         switch (execution.endState()) {
             case SUCCESS -> LOGGER.debug("{}\t:: Successfully executed query: [queryID={}].", this, execution.queryID());
-            case TIMEOUT -> LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, execution.queryID(), execution.duration()); // TODO: look for a possibility to add the query string for logging
+            case TIMEOUT -> LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, execution.queryID(), execution.duration()); // TODO: look for a possibility to add the query string for better logging
             case HTTP_ERROR -> LOGGER.warn("{}\t:: HTTP Error occurred during query execution: [queryID={}, httpError={}].", this, execution.queryID(), execution.httpStatusCode().get());
             case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, execution.queryID(), execution.error().get());
         }
