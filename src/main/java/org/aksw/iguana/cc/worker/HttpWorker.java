@@ -69,10 +69,10 @@ public abstract class HttpWorker {
             Optional<Exception> error
     ) {
         public enum END_STATE {
-            SUCCESS(1), // TODO: values are the same as previous implementation for backwards compatibility, I think descriptive String values would be better
-            TIMEOUT(-1),
-            HTTP_ERROR(-2),
-            MISCELLANEOUS_EXCEPTION(0);
+            SUCCESS(0),
+            TIMEOUT(110),   // ETIMEDOUT - Connection timed out
+            HTTP_ERROR(111), // ECONNREFUSED - Connection refused
+            MISCELLANEOUS_EXCEPTION(1);
 
             public final int value;
             END_STATE(int value) {
