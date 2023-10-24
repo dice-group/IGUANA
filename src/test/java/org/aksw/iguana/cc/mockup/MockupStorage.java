@@ -1,14 +1,18 @@
-package org.aksw.iguana.cc.tasks;
+package org.aksw.iguana.cc.mockup;
 
 import org.aksw.iguana.cc.storage.Storage;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
 public class MockupStorage implements Storage {
-    private Model m = ModelFactory.createDefaultModel();
+    private Model resultModel = ModelFactory.createDefaultModel();
 
     @Override
     public void storeResult(Model data) {
-        m.add(data);
+        resultModel = data;
+    }
+
+    public Model getResultModel() {
+        return resultModel;
     }
 }

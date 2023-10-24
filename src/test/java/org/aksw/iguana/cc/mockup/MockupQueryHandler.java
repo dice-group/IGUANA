@@ -1,0 +1,43 @@
+package org.aksw.iguana.cc.mockup;
+
+import org.aksw.iguana.cc.query.handler.QueryHandler;
+import org.aksw.iguana.cc.query.selector.QuerySelector;
+import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
+
+
+public class MockupQueryHandler extends QueryHandler {
+    private static int queryHandlerCount = 0;
+
+    private final int id;
+    private final int queryNumber;
+
+    public MockupQueryHandler(int queryNumber) {
+        super();
+        this.queryNumber = queryNumber;
+        this.id = queryHandlerCount++;
+    }
+
+    @Override
+    public String getQueryId(int i) {
+        return "MockQueryHandler" + this.id + ":" + i;
+    }
+
+    @Override
+    public String[] getAllQueryIds() {
+        String[] out = new String[queryNumber];
+        for (int i = 0; i < queryNumber; i++) {
+            out[i] = getQueryId(i);
+        }
+        return out;
+    }
+
+    @Override
+    public int getQueryCount() {
+        return queryNumber;
+    }
+
+    @Override
+    public QuerySelector getQuerySelectorInstance() {
+        return new LinearQuerySelector(queryNumber);
+    }
+}

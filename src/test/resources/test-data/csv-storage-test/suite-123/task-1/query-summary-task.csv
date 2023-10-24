@@ -1,0 +1,11 @@
+queryID,succeeded,failed,totalTime,resultSize,wrongCodes,timeOuts,unknownException,PQPS,QPS
+http://iguana-benchmark.eu/resource/MockQueryHandler2:1,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler2:2,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler3:2,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler3:3,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler2:3,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler3:0,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler3:4,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler2:4,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler3:1,2,4,PT15S,1000,2,0,2,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler2:0,2,4,PT15S,1000,2,0,2,0.75,0.5

@@ -24,4 +24,4 @@ metrics:
   - className: "org.aksw.iguana.cc.tasks.stresstest.metrics.impl.QPS"
 
 storages:
-  - className: "org.aksw.iguana.cc.tasks.MockupStorage"
+  - className: "org.aksw.iguana.cc.mockup.MockupStorage"

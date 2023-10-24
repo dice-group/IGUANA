@@ -24,4 +24,4 @@ metrics:
   - className: "org.aksw.iguana.rp.metrics.impl.NoQMetric"
 
 storages:
-  - className: "org.aksw.iguana.cc.tasks.MockupStorage"
+  - className: "org.aksw.iguana.cc.mockup.MockupStorage"

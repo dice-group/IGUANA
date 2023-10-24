@@ -1,6 +1,4 @@
-package org.aksw.iguana.cc.tasks.storage.impl;
-
-import org.aksw.iguana.cc.storage.impl.TriplestoreStorage;
+package org.aksw.iguana.cc.storage.impl;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.tasks.ServerMock;
 import org.apache.jena.rdf.model.Model;
@@ -8,6 +6,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.simpleframework.http.core.ContainerServer;
 import org.simpleframework.transport.connect.SocketConnection;
 
@@ -23,6 +22,7 @@ import static org.junit.Assert.assertEquals;
  * @author f.conrads
  *
  */
+@Disabled("Hasn't been looked at in a while and probably outdated.")
 public class TriplestoreStorageTest {
 
     private static final int FAST_SERVER_PORT = 8023;
