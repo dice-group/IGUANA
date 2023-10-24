@@ -176,7 +176,7 @@ public class QPSMetric extends AbstractMetric {
 			if(map!=null)
 				mergeResults(map, queryID, resArr);
 			Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
-			Double pqps = (long)resArr[1]*1.0/((double)resArr[7]/1000.0);
+			Double pqps = ((long)resArr[1] + (long)resArr[2]) * 1.0 / ((double)resArr[7]/1000.0);
 
 			Resource query = ResourceFactory.createResource(subjectParent.getURI()+"/"+queryID);
 			m.add(subjectParent, queryProperty, query);
