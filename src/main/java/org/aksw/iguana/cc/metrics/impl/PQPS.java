@@ -22,10 +22,10 @@ public class PQPS extends Metric implements QueryMetric {
 
     @Override
     public Number calculateQueryMetric(List<HttpWorker.ExecutionStats> data) {
-        BigDecimal successes = BigDecimal.ZERO;
+        BigDecimal numberOfExecutions = BigDecimal.ZERO;
         Duration totalTime = Duration.ZERO;
         for (HttpWorker.ExecutionStats exec : data) {
-            successes = successes.add(BigDecimal.ONE);
+            numberOfExecutions = numberOfExecutions.add(BigDecimal.ONE);
             if (exec.successful()) {
                 totalTime = totalTime.plus(exec.duration());
             } else {
@@ -35,7 +35,7 @@ public class PQPS extends Metric implements QueryMetric {
         BigDecimal tt = (new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 9));
 
         try {
-            return successes.divide(tt, 10, RoundingMode.HALF_UP);
+            return numberOfExecutions.divide(tt, 10, RoundingMode.HALF_UP);
         } catch (ArithmeticException e) {
             return BigDecimal.ZERO;
         }
