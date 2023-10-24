@@ -29,6 +29,8 @@ import java.util.function.Predicate;
 
 public class CSVStorage implements Storage {
 
+    private record ConnectionInfo(String connection, String version, String dataset) {}
+
     public record Config(String directory) implements StorageConfig {
         public Config(String directory) {
             if (directory == null) {
@@ -49,11 +51,11 @@ public class CSVStorage implements Storage {
     private final Path suiteFolder;
     private Path currentFolder;
     private final Path taskFile;
+    private final Path taskConfigFile;
 
     private List<Resource> workerResources;
     private Resource taskRes;
-    private String connection;
-    private String dataset;
+    List<ConnectionInfo> connections;
 
     public CSVStorage(Config config, List<Metric> metrics, long suiteID) {
         this(config.directory(), metrics, suiteID);
@@ -69,24 +71,17 @@ public class CSVStorage implements Storage {
             LOGGER.error("Can't store csv files, the given path is invalid.", e);
             this.suiteFolder = null;
             this.taskFile = null;
+            this.taskConfigFile = null;
             return;
         }
 
-        this.suiteFolder = parentFolder.resolve(String.valueOf(suiteID));
+        this.suiteFolder = parentFolder.resolve("suite-" + suiteID);
         this.taskFile = this.suiteFolder.resolve("suite-summary.csv");
-
-        if (Files.notExists(parentFolder)) {
-            try {
-                Files.createDirectory(parentFolder);
-            } catch (IOException e) {
-                LOGGER.error("Can't store csv files, directory could not be created.", e);
-                return;
-            }
-        }
+        this.taskConfigFile = this.suiteFolder.resolve("task-configuration.csv");
 
         if (Files.notExists(suiteFolder)) {
             try {
-                Files.createDirectory(suiteFolder);
+                Files.createDirectories(suiteFolder);
             } catch (IOException e) {
                 LOGGER.error("Can't store csv files, directory could not be created.", e);
                 return;
@@ -100,16 +95,31 @@ public class CSVStorage implements Storage {
             return;
         }
 
-        // write headers for the tasks.csv file
+        try {
+            Files.createFile(taskConfigFile);
+        } catch (IOException e) {
+            LOGGER.error("Couldn't create the file: " + taskFile.toAbsolutePath(), e);
+            return;
+        }
+
+        // write headers for the suite-summary.csv file
         try (CSVWriter csvWriter = getCSVWriter(taskFile)) {
             Metric[] taskMetrics = metrics.stream().filter(x -> TaskMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
             List<String> headerList = new LinkedList<>();
-            headerList.addAll(List.of("connection", "dataset", "startDate", "endDate", "noOfWorkers"));
+            // headerList.addAll(List.of("connection", "dataset", "startDate", "endDate", "noOfWorkers"));
+            headerList.addAll(List.of("taskID", "startDate", "endDate", "noOfWorkers"));
             headerList.addAll(Arrays.stream(taskMetrics).map(Metric::getAbbreviation).toList());
             String[] header = headerList.toArray(String[]::new);
             csvWriter.writeNext(header, true);
         } catch (IOException e) {
             LOGGER.error("Error while writing to file: " + taskFile.toAbsolutePath(), e);
+        }
+
+        // write headers for the task-configuration.csv file
+        try (CSVWriter csvWriter = getCSVWriter(taskConfigFile)) {
+            csvWriter.writeNext(new String[]{"taskID", "connection", "version", "dataset"}, true);
+        } catch (IOException e) {
+            LOGGER.error("Error while writing to file: " + taskConfigFile.toAbsolutePath(), e);
         }
     }
 
@@ -127,7 +137,7 @@ public class CSVStorage implements Storage {
             return;
         }
 
-        this.currentFolder = this.suiteFolder.resolve(this.connection + "-" + this.dataset);
+        this.currentFolder = this.suiteFolder.resolve("task-" + retrieveTaskID(this.taskRes));
         try {
             Files.createDirectory(this.currentFolder);
         } catch (IOException e) {
@@ -135,6 +145,7 @@ public class CSVStorage implements Storage {
         }
 
         try {
+            storeTaskInfo();
             storeTaskResults(data);
         } catch (IOException e) {
             LOGGER.error("Error while storing the task result in a csv file.", e);
@@ -225,35 +236,35 @@ public class CSVStorage implements Storage {
      * @throws NoSuchElementException might be thrown if the model is incorrect
      */
     private void setObjectAttributes(Model data) throws NoSuchElementException {
-        List<String> datasets = new ArrayList<>();
-        ResIterator resIterator = data.listSubjectsWithProperty(RDF.type, IONT.dataset);
-        while (resIterator.hasNext()) {
-            Resource datasetRes = resIterator.nextResource();
-            NodeIterator nodeIterator = data.listObjectsOfProperty(datasetRes, RDFS.label);
-            datasets.add(nodeIterator.next().asLiteral().getLexicalForm());
-        }
-        this.dataset = String.join(";", datasets);
-
-        List<String> connections = new ArrayList<>();
-        resIterator = data.listSubjectsWithProperty(RDF.type, IONT.connection);
+        // obtain connection information of task
+        this.connections = new ArrayList<>();
+        ResIterator resIterator = data.listSubjectsWithProperty(RDF.type, IONT.connection);
         while (resIterator.hasNext()) {
             Resource connectionRes = resIterator.nextResource();
             NodeIterator nodeIterator = data.listObjectsOfProperty(connectionRes, RDFS.label);
             String conString = nodeIterator.next().asLiteral().getLexicalForm();
+
+            // obtain connection version
+            String conVersionString = "";
             nodeIterator = data.listObjectsOfProperty(connectionRes, IPROP.version);
             if (nodeIterator.hasNext()) {
-                String conVersionString = nodeIterator.next().toString();
-                connections.add(conString + "#" + conVersionString);
-            } else {
-                connections.add(conString);
+                conVersionString = nodeIterator.next().toString();
             }
 
+            // obtain dataset
+            String conDatasetString = "";
+            nodeIterator = data.listObjectsOfProperty(connectionRes, IPROP.dataset);
+            if (nodeIterator.hasNext()) {
+                conDatasetString = nodeIterator.next().toString();
+            }
+            this.connections.add(new ConnectionInfo(conString, conVersionString, conDatasetString));
         }
-        this.connection = String.join(";", connections);
 
+        // obtain task type
         resIterator = data.listSubjectsWithProperty(RDF.type, IONT.task);
         this.taskRes = resIterator.nextResource();
 
+        // obtain worker resources
         NodeIterator nodeIterator = data.listObjectsOfProperty(this.taskRes, IPROP.workerResult);
         this.workerResources = nodeIterator.toList().stream().map(RDFNode::asResource).toList();
     }
@@ -307,6 +318,19 @@ public class CSVStorage implements Storage {
         executeAndStoreQuery(sb, file, data);
     }
 
+    /**
+     * Stores the current task information into the task configuration file.
+     */
+    private void storeTaskInfo() {
+        try (CSVWriter csvWriter = getCSVWriter(taskConfigFile)) {
+            for (ConnectionInfo connectionInfo : connections) {
+                csvWriter.writeNext(new String[]{this.taskRes.toString(), connectionInfo.connection(), connectionInfo.version(), connectionInfo.dataset()}, true);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error while writing to file: " + taskConfigFile.toAbsolutePath(), e);
+        }
+    }
+
     private void storeTaskResults(Model data) throws IOException, NoSuchElementException, ParseException {
         Metric[] taskMetrics = metrics.stream().filter(x -> TaskMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
 
@@ -314,7 +338,7 @@ public class CSVStorage implements Storage {
         queryProperties(sb, String.format("<%s>", this.taskRes.toString()), IPROP.startDate, IPROP.endDate, IPROP.noOfWorkers);
         queryMetrics(sb, String.format("<%s>", this.taskRes.toString()), taskMetrics);
 
-        try(QueryExecution exec = QueryExecutionFactory.create(sb.build(), data);
+        try (QueryExecution exec = QueryExecutionFactory.create(sb.build(), data);
             CSVWriter csvWriter = getCSVWriter(taskFile);
             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             ResultSet results = exec.execSelect();
@@ -327,10 +351,11 @@ public class CSVStorage implements Storage {
 
                 // inject connection and dataset information
                 String[] row = reader.readNext();
-                String[] newRow = new String[row.length + 2];
-                newRow[0] = connection;
-                newRow[1] = dataset;
-                System.arraycopy(row, 0, newRow, 2, row.length);
+                String[] newRow = new String[row.length + 1];
+                newRow[0] = this.taskRes.getURI();
+                // newRow[0] = connection;
+                // newRow[1] = dataset;
+                System.arraycopy(row, 0, newRow, 1, row.length);
                 csvWriter.writeNext(newRow, true);
             } catch (CsvValidationException ignored) {
                 // shouldn't happen
@@ -376,5 +401,16 @@ public class CSVStorage implements Storage {
             ResultSet results = exec.execSelect();
             ResultSetFormatter.outputAsCSV(fos, results);
         }
+    }
+
+    /**
+     * Retrieves the task ID from the given task resource. The current model doesn't save the task ID as a property of
+     * the task resource. Therefore, the task ID is extracted from the URI of the task resource.
+     *
+     * @param taskRes the task resource
+     * @return the task ID
+     */
+    private static String retrieveTaskID(Resource taskRes) {
+        return taskRes.getURI().substring(taskRes.getURI().lastIndexOf("/") + 1);
     }
 }
