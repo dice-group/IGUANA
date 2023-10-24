@@ -1,5 +1,4 @@
 package org.aksw.iguana.cc.storage.impl;
-import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.cc.tasks.ServerMock;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -22,7 +21,7 @@ import static org.junit.Assert.assertEquals;
  * @author f.conrads
  *
  */
-@Disabled("Hasn't been looked at in a while and probably outdated.")
+@Disabled("TriplestoreStorage hasn't been looked at in a while and the test is outdated.")
 public class TriplestoreStorageTest {
 
     private static final int FAST_SERVER_PORT = 8023;
@@ -73,7 +72,7 @@ public class TriplestoreStorageTest {
         TriplestoreStorage store = new TriplestoreStorage(host);
 
 	    Model m = ModelFactory.createDefaultModel();
-	    m.add(ResourceFactory.createResource(COMMON.RES_BASE_URI+"a"), ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"b") , "c");
+	    // m.add(ResourceFactory.createResource(COMMON.RES_BASE_URI+"a"), ResourceFactory.createProperty(COMMON.PROP_BASE_URI+"b") , "c");
 	    store.storeResult(m);
         assertEquals(dataExp.trim(),fastServerContainer.getActualContent().trim());
 	}

@@ -8,9 +8,6 @@ public class IPROP {
     public static final String NS = IGUANA_BASE.NS + "properties" + "/";
     public static final String PREFIX = "iprop";
 
-    private IPROP() {
-    }
-
     /**
      * The RDF-friendly version of the IPROP namespace
      * with trailing / character.
@@ -82,7 +79,6 @@ public class IPROP {
     public static final Property endDate = ResourceFactory.createProperty(NS, "endDate");
 
     // Language Processor
-    public static final Property hash = ResourceFactory.createProperty(NS, "hash");
     public static final Property results = ResourceFactory.createProperty(NS, "results");
     public static final Property bindings = ResourceFactory.createProperty(NS, "bindings");
     public static final Property variable = ResourceFactory.createProperty(NS, "variable");

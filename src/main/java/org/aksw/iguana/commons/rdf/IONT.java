@@ -9,7 +9,6 @@ public class IONT {
     public static final String PREFIX = "iont";
 
     public static final Resource suite = ResourceFactory.createResource(NS + "Suite");
-    public static final Resource experiment = ResourceFactory.createResource(NS + "Experiment");
     public static final Resource dataset = ResourceFactory.createResource(NS + "Dataset");
     public static final Resource task = ResourceFactory.createResource(NS + "Task");
     public static final Resource connection = ResourceFactory.createResource(NS + "Connection");
@@ -20,11 +19,7 @@ public class IONT {
     public static final Resource metric = ResourceFactory.createResource(NS + "Metric");
 
     public static Resource getMetricClass(Metric metric) {
-        // TODO: compare with stresstest class
+        // TODO: compare with stresstest class (stresstest class as a subclass of Task is iont:Stresstest while QPS for example is iont:metric/QPS)
         return ResourceFactory.createResource(NS + "metric/" + metric.getAbbreviation());
-    }
-
-    public static Resource getClass(String classname) {
-        return ResourceFactory.createResource(NS + classname);
     }
 }
