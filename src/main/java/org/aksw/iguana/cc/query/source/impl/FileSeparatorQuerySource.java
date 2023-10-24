@@ -49,7 +49,7 @@ public class FileSeparatorQuerySource extends QuerySource {
     }
 
     private static IndexedQueryReader getIqr(Path path, String separator) throws IOException {
-        return (separator.isBlank()) ? IndexedQueryReader.makeWithEmptyLines(path) : IndexedQueryReader.makeWithStringSeparator(path, separator);
+        return (separator.isEmpty()) ? IndexedQueryReader.makeWithEmptyLines(path) : IndexedQueryReader.makeWithStringSeparator(path, separator);
     }
 
     @Override
