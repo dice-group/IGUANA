@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -82,8 +83,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 }
             }
 
-            final var streamSupplier = new CustomStreamSupplier();
-
             if (requestHeader != null)
                 request.header("Accept", requestHeader);
             if (connection.authentication() != null && connection.authentication().user() != null)
@@ -109,7 +108,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 case POST_QUERY -> {
                     request.uri(connection.endpoint())
                             .header("Content-Type", "application/sparql-query")
-                            .POST(HttpRequest.BodyPublishers.ofInputStream(streamSupplier.getStreamSupplier()));
+                            .POST(HttpRequest.BodyPublishers.ofInputStream(new CustomStreamSupplier().getStreamSupplier()));
                 }
                 case POST_URL_ENC_UPDATE -> {
                     request.uri(connection.endpoint())
@@ -122,7 +121,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 case POST_UPDATE -> {
                     request.uri(connection.endpoint())
                             .header("Content-Type", "application/sparql-update")
-                            .POST(HttpRequest.BodyPublishers.ofInputStream(streamSupplier.getStreamSupplier()));
+                            .POST(HttpRequest.BodyPublishers.ofInputStream(new CustomStreamSupplier().getStreamSupplier()));
                 }
             }
             return request.build();
@@ -174,7 +173,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         }
 
         public boolean successful() {
-            if (completed() && exception.isEmpty())
+            if (response.isPresent() && exception.isEmpty())
                 return (response.get().statusCode() / 100) == 2;
             return false;
         }

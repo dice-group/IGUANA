@@ -97,11 +97,7 @@ public abstract class HttpWorker {
         }
 
         public boolean successful() {
-            if (completed() && error().isEmpty()) {
-                return httpStatusCode().get() / 100 == 2;
-            } else {
-                return false;
-            }
+            return error.isEmpty() && httpStatusCode.orElse(0) / 100 == 2;
         }
 
         public boolean timeout() {
@@ -109,18 +105,18 @@ public abstract class HttpWorker {
             if (!successful() && error().isPresent()) {
                 timeout |= error().get() instanceof java.util.concurrent.TimeoutException;
                 if (error().get() instanceof ExecutionException exec) {
-                    timeout |= exec.getCause() instanceof HttpTimeoutException;
+                    timeout = exec.getCause() instanceof HttpTimeoutException;
                 }
             }
             return timeout;
         }
 
         public boolean httpError() {
-            return httpStatusCode().isPresent() && httpStatusCode().orElse(200) / 100 != 2;
+            return httpStatusCode().orElse(0) / 100 != 2;
         }
 
         public boolean miscellaneousException() {
-            return error().isPresent() && !timeout() && !httpError() && !successful();
+            return error().isPresent() && !timeout() && !httpError();
         }
     }
 
