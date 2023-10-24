@@ -43,12 +43,9 @@ public class ResponseBodyProcessor {
 
     public boolean add(long contentLength, long xxh64, BigByteArrayOutputStream bbaos) {
         final var key = new Key(contentLength, xxh64);
-        if (!seenResponseBodies.contains(key)) {
-            final var added = seenResponseBodies.add(key);
-            if (added) {
-                submit(key, bbaos);
-                return true;
-            }
+        if (seenResponseBodies.add(key)) {
+            submit(key, bbaos);
+            return true;
         }
         return false;
     }
