@@ -21,6 +21,7 @@ class QueryHandlerConfigTest {
         return Stream.of(
                 Arguments.of(new QueryHandler.Config("some.queries",
                                 QueryHandler.Config.Format.FOLDER,
+                                "",
                                 true,
                                 QueryHandler.Config.Order.LINEAR,
                                 100L,
@@ -32,6 +33,7 @@ class QueryHandlerConfigTest {
                 ),
                 Arguments.of(new QueryHandler.Config("some.queries",
                                 QueryHandler.Config.Format.ONE_PER_LINE,
+                                "",
                                 true,
                                 QueryHandler.Config.Order.LINEAR,
                                 0L,
@@ -43,6 +45,7 @@ class QueryHandlerConfigTest {
                 ),
                 Arguments.of(new QueryHandler.Config("some.queries",
                                 QueryHandler.Config.Format.FOLDER,
+                                "",
                                 true,
                                 QueryHandler.Config.Order.RANDOM,
                                 42L,
@@ -50,6 +53,18 @@ class QueryHandlerConfigTest {
                         ),
                         """
                             {"path":"some.queries","format":"folder","caching":true,"order":"random","seed":42,"lang":"SPARQL"}
+                        """
+                ),
+                Arguments.of(new QueryHandler.Config("some.queries",
+                                QueryHandler.Config.Format.SEPARATOR,
+                                "\n",
+                                true,
+                                QueryHandler.Config.Order.RANDOM,
+                                42L,
+                                QueryHandler.Config.Language.SPARQL
+                        ),
+                        """
+                            {"path":"some.queries","format":"separator", "separator": "\\n", "caching":true,"order":"random","seed":42,"lang":"SPARQL"}
                         """
                 )
         );

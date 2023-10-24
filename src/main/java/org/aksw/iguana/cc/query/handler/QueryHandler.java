@@ -57,61 +57,31 @@ public class QueryHandler {
     public record Config (
             String path,
             Format format,
+            String separator,
             Boolean caching,
             Order order,
             Long seed,
             Language lang
     ) {
-        public Config(@JsonProperty(required = true) String path, Format format, Boolean caching, Order order, Long seed, Language lang) {
+        public Config(@JsonProperty(required = true) String path, Format format, String separator, Boolean caching, Order order, Long seed, Language lang) {
             this.path = path;
-            this.format = format == null ? Format.ONE_PER_LINE : format;
-            this.caching = caching == null || caching;
-            this.order = order == null ? Order.LINEAR : order;
-            this.seed = seed == null ? 0 : seed;
-            this.lang = lang == null ? Language.SPARQL : lang;
+            this.format = (format == null ? Format.ONE_PER_LINE : format);
+            this.caching = (caching == null || caching);
+            this.order = (order == null ? Order.LINEAR : order);
+            this.seed = (seed == null ? 0 : seed);
+            this.lang = (lang == null ? Language.SPARQL : lang);
+            this.separator = (separator == null ? "" : separator);
         }
 
-        @JsonDeserialize(using = Format.Deserializer.class)
         public enum Format {
             @JsonEnumDefaultValue ONE_PER_LINE("one-per-line"),
             SEPARATOR("separator"),
             FOLDER("folder");
 
-            static class Deserializer extends StdDeserializer<Config.Format> {
-                protected Deserializer(Class<?> vc) {
-                    super(vc);
-                }
-
-                protected Deserializer() {
-                    this(null);
-                }
-
-                @Override
-                public Format deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-                    JsonNode root = deserializationContext.readTree(jsonParser);
-                    if (root.has("separator")) {
-                        Format format = Format.SEPARATOR;
-                        format.setSeparator(root.get("separator").textValue());
-                        return format;
-                    } else {
-                        return Format.valueOf(root.textValue().trim().toUpperCase());
-                    }
-                }
-            }
-
             final String value;
-            String separator;
 
             Format(String value) {
                 this.value = Objects.requireNonNullElse(value, "one-per-line");
-            }
-
-            public void setSeparator(String separator) {
-                this.separator = separator;
-            }
-
-            public String getSeparator() {
-                return this.separator;
             }
 
             @JsonValue
@@ -168,11 +138,21 @@ public class QueryHandler {
 
     final protected int hashCode;
 
+    /**
+     * Empty Constructor for Testing purposes.
+     * TODO: look for an alternative
+     */
+    protected QueryHandler() {
+        config = null;
+        queryList = null;
+        hashCode = 0;
+    }
+
     @JsonCreator
     public QueryHandler(Config config) throws IOException {
         final var querySource = switch (config.format()) {
             case ONE_PER_LINE -> new FileLineQuerySource(Path.of(config.path()));
-            case SEPARATOR -> new FileSeparatorQuerySource(Path.of(config.path()), config.format.separator);
+            case SEPARATOR -> new FileSeparatorQuerySource(Path.of(config.path()), config.separator);
             case FOLDER -> new FolderQuerySource(Path.of(config.path()));
         };
 
