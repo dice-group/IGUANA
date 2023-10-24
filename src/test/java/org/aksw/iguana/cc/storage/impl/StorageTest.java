@@ -65,7 +65,7 @@ public abstract class StorageTest {
     protected static TaskResult createTaskResult(List<List<HttpWorker>> workers, int taskID) {
         final var queryIDs = new ArrayList<String>();
         for (var list : workers) {
-            queryIDs.addAll(List.of(list.get(0).config().queries().getAllQueryIds())); // I'm not going to check for empty lists
+            queryIDs.addAll(List.of(list.get(0).config().queries().getAllQueryIds()));
         }
 
         final var metrics = getMetrics();

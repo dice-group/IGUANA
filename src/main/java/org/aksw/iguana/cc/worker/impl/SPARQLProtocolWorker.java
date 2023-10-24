@@ -86,7 +86,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             if (requestHeader != null)
                 request.header("Accept", requestHeader);
-            if (connection.authentication().user() != null)
+            if (connection.authentication() != null && connection.authentication().user() != null)
                 request.header("Authorization",
                                HttpWorker.basicAuth(connection.authentication().user(),
                                                     Optional.ofNullable(connection.authentication().password()).orElse("")));
