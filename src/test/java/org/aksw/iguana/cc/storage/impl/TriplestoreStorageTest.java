@@ -2,10 +2,9 @@ package org.aksw.iguana.cc.storage.impl;
 import org.aksw.iguana.cc.tasks.ServerMock;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.simpleframework.http.core.ContainerServer;
 import org.simpleframework.transport.connect.SocketConnection;
 
@@ -52,7 +51,7 @@ public class TriplestoreStorageTest {
 	/**
 	 * @throws IOException
 	 */
-	@After
+	@AfterAll
 	public void close() throws IOException {
 		fastConnection.close();
 	}
