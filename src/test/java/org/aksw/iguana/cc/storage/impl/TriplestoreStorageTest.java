@@ -26,7 +26,7 @@ public class TriplestoreStorageTest {
     private static final int FAST_SERVER_PORT = 8023;
 	private ServerMock fastServerContainer;
 	private ContainerServer fastServer;
-	private SocketConnection fastConnection;
+	private static SocketConnection fastConnection;
 
 	private String metaExp = "INSERT DATA {\n" +
 			"  <http://iguana-benchmark.eu/resource/1/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Experiment> .\n" +
@@ -52,7 +52,7 @@ public class TriplestoreStorageTest {
 	 * @throws IOException
 	 */
 	@AfterAll
-	public void close() throws IOException {
+	public static void close() throws IOException {
 		fastConnection.close();
 	}
 
@@ -60,7 +60,7 @@ public class TriplestoreStorageTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void dataTest() throws IOException{
+	public void dataTest() throws IOException {
 		fastServerContainer = new ServerMock();
         fastServer = new ContainerServer(fastServerContainer);
         fastConnection = new SocketConnection(fastServer);
