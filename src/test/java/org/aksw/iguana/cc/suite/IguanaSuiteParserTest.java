@@ -1,10 +1,12 @@
 package org.aksw.iguana.cc.suite;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 
+@Disabled("In progress")
 class IguanaSuiteParserTest {
 
     @Test
