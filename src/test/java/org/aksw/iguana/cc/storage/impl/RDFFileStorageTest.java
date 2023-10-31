@@ -38,7 +38,7 @@ public class RDFFileStorageTest extends StorageTest {
 
 		// test file appending
 		Model concatenatedModel = ModelFactory.createDefaultModel().add(task1.resultModel()).add(task2.resultModel());
-		arguments.add(Arguments.of(tempDir.resolve("rdf-file-storage-test2.ttl"), List.of(task1, task2), concatenatedModel));
+		arguments.add(Arguments.of(tempDir.resolve("rdf-file-storage-test2.ttl").toString(), List.of(task1, task2), concatenatedModel));
 		return arguments;
 	}
 
