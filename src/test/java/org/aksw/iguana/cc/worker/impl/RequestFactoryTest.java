@@ -1,16 +1,12 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.mockup.MockupConnection;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
