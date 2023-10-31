@@ -47,8 +47,8 @@ public class AvgQPSMetric extends QPSMetric {
             Double penalizedAvgQps=0.0;
             for(Object queryID : value.keySet()){
                 Object[] resArr = (Object[]) value.get(queryID);
-                Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
-                Double penalizedQPS = ((long)resArr[1] + (long)resArr[2]) *1.0/((double)resArr[7]/1000.0);
+                Double qps = (long) resArr[1]/*success*/ / (double) resArr[0]/*time*/ / 1000.0/*ms to s*/;
+                Double penalizedQPS = ((long) resArr[1]/*success*/ + (long) resArr[2]/*failure*/) / (double) resArr[7]/*penalizedTime*/ / 1000.0/*ms to s*/;
                 map.putIfAbsent(queryID, new Number[]{Double.valueOf(0), Long.valueOf(0), Long.valueOf(0), Double.valueOf(0)});
 
                 Number[] current =map.get(queryID);
