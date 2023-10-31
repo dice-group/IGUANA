@@ -90,7 +90,8 @@ public class QPSMetric extends AbstractMetric {
 		Properties tmp = getDataFromContainer(extra);
 		if(tmp!=null && tmp.containsKey(queryID)){
 			Object[] oldArr = (Object[]) tmp.get(queryID);
-			oldArr[0] = (double) oldArr[0] + time;
+			if (success > 0)
+				oldArr[0] = (double) oldArr[0] + time;
 			oldArr[1] = (long) oldArr[1] + success;
 			oldArr[2] = (long) oldArr[2] + failure;
 			if((long)oldArr[3]<size) {
