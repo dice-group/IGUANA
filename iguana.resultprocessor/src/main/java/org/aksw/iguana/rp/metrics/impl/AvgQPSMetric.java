@@ -47,15 +47,16 @@ public class AvgQPSMetric extends QPSMetric {
             Double penalizedAvgQps=0.0;
             for(Object queryID : value.keySet()){
                 Object[] resArr = (Object[]) value.get(queryID);
-                Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
-                Double penalizedQPS = (long)resArr[1]*1.0/((double)resArr[7]/1000.0);
-                map.putIfAbsent(queryID, new Number[]{Double.valueOf(0), Long.valueOf(0), Double.valueOf(0)});
+                Double qps = (long) resArr[1]/*success*/ / (double) resArr[0]/*time*/ / 1000.0/*ms to s*/;
+                Double penalizedQPS = ((long) resArr[1]/*success*/ + (long) resArr[2]/*failure*/) / (double) resArr[7]/*penalizedTime*/ / 1000.0/*ms to s*/;
+                map.putIfAbsent(queryID, new Number[]{Double.valueOf(0), Long.valueOf(0), Long.valueOf(0), Double.valueOf(0)});
 
                 Number[] current =map.get(queryID);
                 Long succ = (long)resArr[1]+(Long)current[1];
+                Long fail = (long)resArr[2]+(Long)current[2];
                 Double time = (double)resArr[0]+(Double)current[0];
-                Double penTime = (double)resArr[7]+(Double)current[2];
-                map.put(queryID, new Number[]{time, succ, penTime});
+                Double penTime = (double)resArr[7]+(Double)current[3];
+                map.put(queryID, new Number[]{time, succ, fail, penTime});
                 avgQps+=qps;
                 penalizedAvgQps+=penalizedQPS;
             }
@@ -71,7 +72,7 @@ public class AvgQPSMetric extends QPSMetric {
         Double penalizedAvgQps=0.0;
         for(Object queryID : map.keySet()) {
             Double qps = (Long)map.get(queryID)[1]*1.0/((Double)map.get(queryID)[0]/1000.0);
-            Double penalizedQPS = (long)map.get(queryID)[1]*1.0/((double)map.get(queryID)[2]/1000.0);
+            Double penalizedQPS = ((long)map.get(queryID)[1] + (long)map.get(queryID)[2]) *1.0/((double)map.get(queryID)[3]/1000.0);
             avgQps+=qps;
             penalizedAvgQps+=penalizedQPS;
         }

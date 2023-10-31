@@ -90,7 +90,8 @@ public class QPSMetric extends AbstractMetric {
 		Properties tmp = getDataFromContainer(extra);
 		if(tmp!=null && tmp.containsKey(queryID)){
 			Object[] oldArr = (Object[]) tmp.get(queryID);
-			oldArr[0] = (double) oldArr[0] + time;
+			if (success > 0)
+				oldArr[0] = (double) oldArr[0] + time;
 			oldArr[1] = (long) oldArr[1] + success;
 			oldArr[2] = (long) oldArr[2] + failure;
 			if((long)oldArr[3]<size) {
@@ -102,7 +103,7 @@ public class QPSMetric extends AbstractMetric {
 			oldArr[7] = (double) oldArr[7] + penalizedTime;
 		}
 		else if(tmp!=null){
-			Object[] resArr = {time, success, failure, size, timeout, unknown, wrongCode, penalizedTime, queryHash};
+			Object[] resArr = {time/*0*/, success/*1*/, failure/*2*/, size/*3*/, timeout/*4*/, unknown/*5*/, wrongCode/*6*/, penalizedTime/*7*/, queryHash/*8*/};
 			tmp.put(queryID, resArr);
 		}
 		else{
@@ -175,8 +176,8 @@ public class QPSMetric extends AbstractMetric {
 			Object[] resArr = (Object[]) value.get(queryID);
 			if(map!=null)
 				mergeResults(map, queryID, resArr);
-			Double qps = (long)resArr[1]*1.0/((double)resArr[0]/1000.0);
-			Double pqps = (long)resArr[1]*1.0/((double)resArr[7]/1000.0);
+			Double qps = (long) resArr[1]/*success*/ / (double) resArr[0]/*time*/ / 1000.0/*ms to s*/;
+			Double pqps = ((long)resArr[1]/*success*/ + (long)resArr[2]/*failure*/) / ((double)resArr[7]/*penalizedTime*//1000.0/*ms to s*/);
 
 			Resource query = ResourceFactory.createResource(subjectParent.getURI()+"/"+queryID);
 			m.add(subjectParent, queryProperty, query);

@@ -41,7 +41,7 @@
         <major.minor.version>${major.version}.${minor.version}</major.minor.version>
         <major.version>3</major.version>
         <minor.version>3</minor.version>
-        <build.version>2</build.version>
+        <build.version>3</build.version>
     </properties>
     <distributionManagement>
         <repository>
