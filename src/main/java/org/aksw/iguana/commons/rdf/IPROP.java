@@ -20,42 +20,8 @@ public class IPROP {
         return ResourceFactory.createProperty(NS + metric.getAbbreviation());
     }
 
-    /*
-     * SPARQL query properties
-     */
-    public static final Property aggregations;
-    public static final Property filter;
-    public static final Property groupBy;
-    public static final Property having;
-    public static final Property offset;
-    public static final Property optional;
-    public static final Property orderBy;
-    public static final Property triples;
-    public static final Property union;
-
-    /*
-     * Query Stats
-     */
-    public static final Property failed;
-    public static final Property penalizedQPS;
-    public static final Property QPS;
-    public static final Property queryExecution;
-    public static final Property timeOuts;
-
-    public static final Property totalTime;
-    public static final Property unknownException;
-    public static final Property wrongCodes;
     public static final Property succeeded = ResourceFactory.createProperty(NS, "succeeded");
 
-    /*
-     * Each Query Stats
-     */
-    public static final Property code;
-    public static final Property queryID;
-    public static final Property resultSize;
-    public static final Property run;
-    public static final Property success;
-    public static final Property time;
     public static final Property responseBodyHash = ResourceFactory.createProperty(NS, "responseBodyHash");
     public static final Property responseBody = ResourceFactory.createProperty(NS, "responseBody");
     public static final Property startTime = ResourceFactory.createProperty(NS, "startTime");
@@ -84,34 +50,32 @@ public class IPROP {
     public static final Property variable = ResourceFactory.createProperty(NS, "variable");
     public static final Property exception = ResourceFactory.createProperty(NS, "exception");
 
-    static {
+    // SPARQL query properties
+    public static final Property aggregations = ResourceFactory.createProperty(NS, "aggregations");
+    public static final Property filter = ResourceFactory.createProperty(NS, "filter");
+    public static final Property groupBy = ResourceFactory.createProperty(NS, "groupBy");
+    public static final Property having = ResourceFactory.createProperty(NS, "having");
+    public static final Property offset = ResourceFactory.createProperty(NS, "offset");
+    public static final Property optional = ResourceFactory.createProperty(NS, "optional");
+    public static final Property orderBy = ResourceFactory.createProperty(NS, "orderBy");
+    public static final Property triples = ResourceFactory.createProperty(NS, "triples");
+    public static final Property union = ResourceFactory.createProperty(NS, "union");
 
-        // SPARQL query properties
-        aggregations = ResourceFactory.createProperty(NS, "aggregations");
-        filter = ResourceFactory.createProperty(NS, "filter");
-        groupBy = ResourceFactory.createProperty(NS, "groupBy");
-        having = ResourceFactory.createProperty(NS, "having");
-        offset = ResourceFactory.createProperty(NS, "offset");
-        optional = ResourceFactory.createProperty(NS, "optional");
-        orderBy = ResourceFactory.createProperty(NS, "orderBy");
-        triples = ResourceFactory.createProperty(NS, "triples");
-        union = ResourceFactory.createProperty(NS, "union");
-        // Query Stats
-        failed = ResourceFactory.createProperty(NS, "failed");
-        penalizedQPS = ResourceFactory.createProperty(NS, "penalizedQPS");
-        QPS = ResourceFactory.createProperty(NS, "QPS");
-        queryExecution = ResourceFactory.createProperty(NS, "queryExecution");
-        timeOuts = ResourceFactory.createProperty(NS, "timeOuts");
+    // Query Stats
+    public static final Property failed = ResourceFactory.createProperty(NS, "failed");
+    public static final Property penalizedQPS = ResourceFactory.createProperty(NS, "penalizedQPS");
+    public static final Property QPS = ResourceFactory.createProperty(NS, "QPS");
+    public static final Property queryExecution = ResourceFactory.createProperty(NS, "queryExecution");
+    public static final Property timeOuts = ResourceFactory.createProperty(NS, "timeOuts");
+    public static final Property totalTime = ResourceFactory.createProperty(NS, "totalTime");
+    public static final Property unknownException = ResourceFactory.createProperty(NS, "unknownException");
+    public static final Property wrongCodes = ResourceFactory.createProperty(NS, "wrongCodes");
 
-        totalTime = ResourceFactory.createProperty(NS, "totalTime");
-        unknownException = ResourceFactory.createProperty(NS, "unknownException");
-        wrongCodes = ResourceFactory.createProperty(NS, "wrongCodes");
-        // Each Query Stats
-        code = ResourceFactory.createProperty(NS, "code");
-        queryID = ResourceFactory.createProperty(NS, "queryID");
-        resultSize = ResourceFactory.createProperty(NS, "resultSize");
-        run = ResourceFactory.createProperty(NS, "run");
-        success = ResourceFactory.createProperty(NS, "success");
-        time = ResourceFactory.createProperty(NS, "time");
-    }
+    // Each Query Stats
+    public static final Property code = ResourceFactory.createProperty(NS, "code");
+    public static final Property queryID = ResourceFactory.createProperty(NS, "queryID");
+    public static final Property resultSize = ResourceFactory.createProperty(NS, "resultSize");
+    public static final Property run = ResourceFactory.createProperty(NS, "run");
+    public static final Property success = ResourceFactory.createProperty(NS, "success");
+    public static final Property time = ResourceFactory.createProperty(NS, "time");
 }
