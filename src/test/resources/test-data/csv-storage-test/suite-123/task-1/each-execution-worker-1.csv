@@ -1,16 +1,16 @@
 queryID,run,success,startTime,time,resultSize,code,httpCode,exception,responseBodyHash
-http://iguana-benchmark.eu/resource/MockQueryHandler2:0,3,false,2023-10-21T20:50:24.399Z,PT5S,-1,0,200,java.lang.Exception: io_exception,456
-http://iguana-benchmark.eu/resource/MockQueryHandler2:0,2,false,2023-10-21T20:50:23.399Z,PT0.5S,-1,-2,404,java.lang.Exception: httperror,
-http://iguana-benchmark.eu/resource/MockQueryHandler2:0,1,true,2023-10-21T20:50:22.399Z,PT2S,1000,1,200,,123
-http://iguana-benchmark.eu/resource/MockQueryHandler2:3,3,false,2023-10-21T20:50:33.399Z,PT5S,-1,0,200,java.lang.Exception: io_exception,456
-http://iguana-benchmark.eu/resource/MockQueryHandler2:3,1,true,2023-10-21T20:50:31.399Z,PT2S,1000,1,200,,123
-http://iguana-benchmark.eu/resource/MockQueryHandler2:3,2,false,2023-10-21T20:50:32.399Z,PT0.5S,-1,-2,404,java.lang.Exception: httperror,
-http://iguana-benchmark.eu/resource/MockQueryHandler2:1,1,true,2023-10-21T20:50:25.399Z,PT2S,1000,1,200,,123
-http://iguana-benchmark.eu/resource/MockQueryHandler2:1,2,false,2023-10-21T20:50:26.399Z,PT0.5S,-1,-2,404,java.lang.Exception: httperror,
-http://iguana-benchmark.eu/resource/MockQueryHandler2:1,3,false,2023-10-21T20:50:27.399Z,PT5S,-1,0,200,java.lang.Exception: io_exception,456
-http://iguana-benchmark.eu/resource/MockQueryHandler2:4,2,false,2023-10-21T20:50:35.399Z,PT0.5S,-1,-2,404,java.lang.Exception: httperror,
-http://iguana-benchmark.eu/resource/MockQueryHandler2:4,3,false,2023-10-21T20:50:36.399Z,PT5S,-1,0,200,java.lang.Exception: io_exception,456
-http://iguana-benchmark.eu/resource/MockQueryHandler2:4,1,true,2023-10-21T20:50:34.399Z,PT2S,1000,1,200,,123
-http://iguana-benchmark.eu/resource/MockQueryHandler2:2,1,true,2023-10-21T20:50:28.399Z,PT2S,1000,1,200,,123
-http://iguana-benchmark.eu/resource/MockQueryHandler2:2,2,false,2023-10-21T20:50:29.399Z,PT0.5S,-1,-2,404,java.lang.Exception: httperror,
-http://iguana-benchmark.eu/resource/MockQueryHandler2:2,3,false,2023-10-21T20:50:30.399Z,PT5S,-1,0,200,java.lang.Exception: io_exception,456
+http://iguana-benchmark.eu/resource/MockQueryHandler2:0,3,false,2023-10-21T20:50:24.399Z,PT5S,-1,1,200,java.lang.Exception: io_exception,456
+http://iguana-benchmark.eu/resource/MockQueryHandler2:0,2,false,2023-10-21T20:50:23.399Z,PT0.5S,-1,111,404,java.lang.Exception: httperror,
+http://iguana-benchmark.eu/resource/MockQueryHandler2:0,1,true,2023-10-21T20:50:22.399Z,PT2S,1000,0,200,,123
+http://iguana-benchmark.eu/resource/MockQueryHandler2:3,3,false,2023-10-21T20:50:33.399Z,PT5S,-1,1,200,java.lang.Exception: io_exception,456
+http://iguana-benchmark.eu/resource/MockQueryHandler2:3,1,true,2023-10-21T20:50:31.399Z,PT2S,1000,0,200,,123
+http://iguana-benchmark.eu/resource/MockQueryHandler2:3,2,false,2023-10-21T20:50:32.399Z,PT0.5S,-1,111,404,java.lang.Exception: httperror,
+http://iguana-benchmark.eu/resource/MockQueryHandler2:1,1,true,2023-10-21T20:50:25.399Z,PT2S,1000,0,200,,123
+http://iguana-benchmark.eu/resource/MockQueryHandler2:1,2,false,2023-10-21T20:50:26.399Z,PT0.5S,-1,111,404,java.lang.Exception: httperror,
+http://iguana-benchmark.eu/resource/MockQueryHandler2:1,3,false,2023-10-21T20:50:27.399Z,PT5S,-1,1,200,java.lang.Exception: io_exception,456
+http://iguana-benchmark.eu/resource/MockQueryHandler2:4,2,false,2023-10-21T20:50:35.399Z,PT0.5S,-1,111,404,java.lang.Exception: httperror,
+http://iguana-benchmark.eu/resource/MockQueryHandler2:4,3,false,2023-10-21T20:50:36.399Z,PT5S,-1,1,200,java.lang.Exception: io_exception,456
+http://iguana-benchmark.eu/resource/MockQueryHandler2:4,1,true,2023-10-21T20:50:34.399Z,PT2S,1000,0,200,,123
+http://iguana-benchmark.eu/resource/MockQueryHandler2:2,1,true,2023-10-21T20:50:28.399Z,PT2S,1000,0,200,,123
+http://iguana-benchmark.eu/resource/MockQueryHandler2:2,2,false,2023-10-21T20:50:29.399Z,PT0.5S,-1,111,404,java.lang.Exception: httperror,
+http://iguana-benchmark.eu/resource/MockQueryHandler2:2,3,false,2023-10-21T20:50:30.399Z,PT5S,-1,1,200,java.lang.Exception: io_exception,456
