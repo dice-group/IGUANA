@@ -348,8 +348,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
             ((ThreadPoolExecutor) this.httpClient.executor().get()).shutdownNow();
             final var waitStart = Instant.now();
             try {
-                while (((ThreadPoolExecutor) this.httpClient.executor().get()).awaitTermination(100, TimeUnit.MILLISECONDS)) {
-                    LOGGER.warn("{}\t:: {}\t:: Waiting for the http client to shutdown. Elapsed time: {}", this, Thread.currentThread().getId(), Duration.between(waitStart, Instant.now()));
+                while (!((ThreadPoolExecutor) this.httpClient.executor().get()).awaitTermination(1, TimeUnit.SECONDS)) {
+                    LOGGER.warn("{}\t:: [Thread-ID: {}]\t:: Waiting for the http client to shutdown. Elapsed time: {}", this, Thread.currentThread().getId(), Duration.between(waitStart, Instant.now()));
                 }
             } catch (InterruptedException ignored) {
                 LOGGER.warn("{}\t:: Http client never shutdown. Continuing with the creation of a new http client.", this);
@@ -429,8 +429,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
         switch (execution.endState()) {
             case SUCCESS -> LOGGER.debug("{}\t:: Successfully executed query: [queryID={}].", this, execution.queryID());
             case TIMEOUT -> LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, execution.queryID(), execution.duration()); // TODO: look for a possibility to add the query string for better logging
-            case HTTP_ERROR -> LOGGER.warn("{}\t:: HTTP Error occurred during query execution: [queryID={}, httpError={}].", this, execution.queryID(), execution.httpStatusCode().get());
-            case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, execution.queryID(), execution.error().get());
+            case HTTP_ERROR -> LOGGER.warn("{}\t:: HTTP Error occurred during query execution: [queryID={}, httpError={}].", this, execution.queryID(), execution.httpStatusCode().orElse(-1));
+            case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, execution.queryID(), execution.error().orElse(null));
         }
     }
 

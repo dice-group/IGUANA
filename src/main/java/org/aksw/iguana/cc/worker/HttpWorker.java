@@ -112,6 +112,8 @@ public abstract class HttpWorker {
         }
 
         public boolean httpError() {
+            if (httpStatusCode.isEmpty())
+                return false;
             return httpStatusCode().orElse(0) / 100 != 2;
         }
 
