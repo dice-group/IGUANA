@@ -6,15 +6,13 @@ import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 
 
 public class MockupQueryHandler extends QueryHandler {
-    private static int queryHandlerCount = 0;
-
     private final int id;
     private final int queryNumber;
 
-    public MockupQueryHandler(int queryNumber) {
+    public MockupQueryHandler(int id, int queryNumber) {
         super();
         this.queryNumber = queryNumber;
-        this.id = queryHandlerCount++;
+        this.id = id;
     }
 
     @Override

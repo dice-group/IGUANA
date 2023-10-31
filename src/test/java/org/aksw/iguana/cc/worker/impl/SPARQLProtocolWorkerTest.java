@@ -205,13 +205,9 @@ public class SPARQLProtocolWorkerTest {
 
         final HttpWorker.Result result = worker.start().join();
 
-        int i = 0;
         for (var stat : result.executionStats()) {
             assertTrue(stat.successful());
             assertTrue(stat.error().isEmpty());
-            System.out.println(i++);
-            System.out.println(stat.duration());
-            System.out.println(stat.duration().toNanos());
             assertEquals(200, stat.httpStatusCode().orElseThrow());
             assertTrue(stat.contentLength().orElseThrow() > 0);
             assertTrue(stat.duration().compareTo(Duration.ZERO) > 0);
@@ -223,7 +219,6 @@ public class SPARQLProtocolWorkerTest {
                     .reduce(Duration::plus)
                     .get();
 
-            System.out.println(totalDuration);
             assertTrue(totalDuration.compareTo(((HttpWorker.TimeLimit) target).duration()) <= 0);
         } else {
             assertEquals(((HttpWorker.QueryMixes) target).number(), result.executionStats().size());

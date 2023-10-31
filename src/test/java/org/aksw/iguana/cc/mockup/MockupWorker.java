@@ -64,13 +64,10 @@ public class MockupWorker extends HttpWorker {
 
     private static Instant someTime = Instant.parse("2023-10-21T20:48:06.399Z");
 
-    private static Instant retrieveTime() {
-        someTime = someTime.plusSeconds(1);
-        return someTime;
-    }
-
     public static List<Result> createWorkerResults(QueryHandler queries, List<HttpWorker> workers) {
         final var queryNumber = queries.getQueryCount();
+
+        Instant time = Instant.parse("2023-10-21T20:48:06.399Z");
 
         final var results = new ArrayList<Result>();
         for (var worker : workers) {
@@ -81,7 +78,8 @@ public class MockupWorker extends HttpWorker {
                 final var sucDuration = Duration.ofSeconds(2);
                 final var sucLength = OptionalLong.of(1000);
                 final var responseBodyHash = OptionalLong.of(123);
-                exectutionStats.add(new ExecutionStats(queryID, retrieveTime(), sucDuration, sucHttpCode, sucLength, responseBodyHash, Optional.empty()));
+                time = time.plusSeconds(1);
+                exectutionStats.add(new ExecutionStats(queryID, time, sucDuration, sucHttpCode, sucLength, responseBodyHash, Optional.empty()));
 
                 // failed execution (http error)
                 var failHttpCode = Optional.of(404);
@@ -89,7 +87,8 @@ public class MockupWorker extends HttpWorker {
                 var failLength = OptionalLong.empty();
                 var failResponseBodyHash = OptionalLong.empty();
                 var failException = new Exception("httperror");
-                exectutionStats.add(new ExecutionStats(queryID, retrieveTime(), failDuration, failHttpCode, failLength, failResponseBodyHash, Optional.of(failException)));
+                time = time.plusSeconds(1);
+                exectutionStats.add(new ExecutionStats(queryID, time, failDuration, failHttpCode, failLength, failResponseBodyHash, Optional.of(failException)));
 
                 // failed execution
                 failHttpCode = Optional.of(200);
@@ -97,7 +96,8 @@ public class MockupWorker extends HttpWorker {
                 failLength = OptionalLong.empty();
                 failResponseBodyHash = OptionalLong.of(456);
                 failException = new Exception("io_exception");
-                exectutionStats.add(new ExecutionStats(queryID, retrieveTime(), failDuration, failHttpCode, failLength, failResponseBodyHash, Optional.of(failException)));
+                time = time.plusSeconds(1);
+                exectutionStats.add(new ExecutionStats(queryID, time, failDuration, failHttpCode, failLength, failResponseBodyHash, Optional.of(failException)));
             }
             results.add(new Result(worker.getWorkerID(), exectutionStats));
         }

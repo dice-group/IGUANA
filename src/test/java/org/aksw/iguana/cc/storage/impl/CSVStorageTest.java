@@ -24,16 +24,16 @@ public class CSVStorageTest extends StorageTest {
 
     public static List<Arguments> data() {
         final var workersTask1 = List.of(
-                MockupWorker.createWorkers(0, 2, new MockupQueryHandler(10), "test-connection-1", "v1.0.0", "test-dataset-1"),
-                MockupWorker.createWorkers(2, 2, new MockupQueryHandler(10), "test-connection-2", "v1.1.0", "test-dataset-2")
+                MockupWorker.createWorkers(0, 2, new MockupQueryHandler(0, 10), "test-connection-1", "v1.0.0", "test-dataset-1"),
+                MockupWorker.createWorkers(2, 2, new MockupQueryHandler(1, 10), "test-connection-2", "v1.1.0", "test-dataset-2")
         );
 
         final var workersTask2 = List.of(
-                MockupWorker.createWorkers(0, 2, new MockupQueryHandler(5), "test-connection-3", "v1.2.0", "test-dataset-3"),
-                MockupWorker.createWorkers(2, 2, new MockupQueryHandler(5), "test-connection-4", "v1.3.0", "test-dataset-4")
+                MockupWorker.createWorkers(0, 2, new MockupQueryHandler(2, 5), "test-connection-3", "v1.2.0", "test-dataset-3"),
+                MockupWorker.createWorkers(2, 2, new MockupQueryHandler(3, 5), "test-connection-4", "v1.3.0", "test-dataset-4")
         );
 
-        return List.of(Arguments.of(List.of(createTaskResult(workersTask1, 0), createTaskResult(workersTask2, 1))));
+        return List.of(Arguments.of(List.of(createTaskResult(workersTask1, 0, 123), createTaskResult(workersTask2, 1, 123))));
     }
 
     @ParameterizedTest
@@ -56,6 +56,20 @@ public class CSVStorageTest extends StorageTest {
                         }
                     }
             );
+        }
+
+        storage.storeData(new TestStorable());
+        final var path = tempDir.resolve("suite-123").resolve("task-1").resolve("csv-folder").toFile();
+        assertTrue(path.exists());
+        assertTrue(path.isDirectory());
+        assertEquals(2, path.listFiles().length);
+        for (var file : path.listFiles()) {
+            if (file.getName().equals("csv-file-1.csv"))
+                assertEquals(2, Files.readAllLines(file.toPath()).size());
+            else if (file.getName().equals("csv-file-2.csv"))
+                assertEquals(3, Files.readAllLines(file.toPath()).size());
+            else
+                throw new RuntimeException("Unexpected file name: " + file.getName());
         }
     }
 
@@ -82,6 +96,7 @@ public class CSVStorageTest extends StorageTest {
     }
 
     private void compareCSVFiles(Path expected, Path actual) throws IOException {
+        System.out.println("Comparing " + expected + " and " + actual);
         try (CSVReader readerExpected = new CSVReader(new FileReader(expected.toFile()));
              CSVReader readerActual = new CSVReader(new FileReader(actual.toFile()))) {
 

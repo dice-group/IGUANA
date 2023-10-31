@@ -1,5 +1,5 @@
 workerID,workerType,noOfQueries,timeOut,AvgQPS,NoQ,NoQPH,PAvgQPS,QMPH
 0,MockupWorker,10,PT2S,0.5,10,1800,0.75,180
-3,MockupWorker,10,PT2S,0.5,10,1800,0.75,180
 2,MockupWorker,10,PT2S,0.5,10,1800,0.75,180
+3,MockupWorker,10,PT2S,0.5,10,1800,0.75,180
 1,MockupWorker,10,PT2S,0.5,10,1800,0.75,180

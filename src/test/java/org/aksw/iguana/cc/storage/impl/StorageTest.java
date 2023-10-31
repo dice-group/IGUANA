@@ -4,14 +4,17 @@ import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.metrics.Metric;
 import org.aksw.iguana.cc.metrics.impl.*;
 import org.aksw.iguana.cc.mockup.MockupWorker;
+import org.aksw.iguana.cc.storage.Storable;
 import org.aksw.iguana.cc.storage.Storage;
 import org.aksw.iguana.cc.mockup.MockupStorage;
 import org.aksw.iguana.cc.tasks.impl.StresstestResultProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,12 +33,40 @@ public abstract class StorageTest {
     public static void deleteFolder() throws IOException {
         FileUtils.deleteDirectory(tempDir.toFile());
     }
+
+    public static class TestStorable implements Storable, Storable.AsCSV, Storable.AsRDF {
+
+        @Override
+        public Storable.CSVData toCSV() {
+            final var data = new Storable.CSVData("csv-folder", List.of(
+                    new Storable.CSVData.CSVFileData("csv-file-1", new String[][]{{"header-1", "header-2"}, {"randomString", "100"}}),
+                    new Storable.CSVData.CSVFileData("csv-file-2", new String[][]{{"header-1", "header-2"}, {"randomString-2", "200"}, {"randomString-3", "300"}})
+            ));
+            return data;
+        }
+
+        @Override
+        public Model toRDF() {
+            Model m = ModelFactory.createDefaultModel();
+            m.add(m.createResource("http://example.org/subject"), m.createProperty("http://example.org/predicate"), m.createResource("http://example.org/object"));
+            return m;
+        }
+    }
+
+    @BeforeEach
+    public void resetDate() {
+        someDateTime = new Calendar.Builder()
+                .setDate(2023, 10, 21)
+                .setTimeOfDay(20, 48, 6, 399)
+                .setLocale(Locale.GERMANY)
+                .build();
+    }
+
     protected record TaskResult(Model resultModel, List<HttpWorker.Result> workerResults) {}
 
-    protected static final long suiteID = 0;
     protected static Path tempDir;
 
-    private static final Calendar someDateTime = new Calendar.Builder()
+    private static Calendar someDateTime = new Calendar.Builder()
             .setDate(2023, 10, 21)
             .setTimeOfDay(20, 48, 6, 399)
             .setLocale(Locale.GERMANY)
@@ -62,7 +93,7 @@ public abstract class StorageTest {
     }
 
     // Argument is a List that contains lists of workers with the same configuration.
-    protected static TaskResult createTaskResult(List<List<HttpWorker>> workers, int taskID) {
+    protected static TaskResult createTaskResult(List<List<HttpWorker>> workers, int taskID, int suiteID) {
         final var queryIDs = new ArrayList<String>();
         for (var list : workers) {
             queryIDs.addAll(List.of(list.get(0).config().queries().getAllQueryIds()));
