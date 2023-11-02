@@ -357,20 +357,18 @@ public class SPARQLProtocolWorker extends HttpWorker {
             this.httpClient = buildHttpClient();
         }
 
-        final Instant requestStart = Instant.now();
-        BiFunction<HttpResponse<InputStream>, Exception, HttpExecutionResult> createFailedResult = (response, e) -> {
-            final Duration requestDuration = Duration.between(requestStart, Instant.now());
-            return new HttpExecutionResult(
-                    queryHandle.index(),
-                    Optional.ofNullable(response),
-                    requestStart,
-                    requestDuration,
-                    Optional.empty(),
-                    OptionalLong.empty(),
-                    OptionalLong.empty(),
-                    Optional.ofNullable(e)
-            );
-        };
+        final Instant timeStamp = Instant.now();
+        final var requestStart = System.nanoTime();
+        BiFunction<HttpResponse<InputStream>, Exception, HttpExecutionResult> createFailedResult = (response, e) -> new HttpExecutionResult(
+                queryHandle.index(),
+                Optional.ofNullable(response),
+                timeStamp,
+                Duration.ofNanos(System.nanoTime() - requestStart),
+                Optional.empty(),
+                OptionalLong.empty(),
+                OptionalLong.empty(),
+                Optional.ofNullable(e)
+        );
 
         try {
             return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
@@ -381,7 +379,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                                 try (var hasher = hasherFactory.newStreamingHash64(0)) {
                                     int readBytes;
                                     while ((readBytes = bodyStream.readNBytes(this.buffer, 0, this.buffer.length)) != 0) {
-                                        if (Duration.between(requestStart, requestStart.plus(timeout)).isNegative()) {
+                                        if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
                                             return createFailedResult.apply(httpResponse, new TimeoutException());
                                         }
                                         hasher.update(this.buffer, 0, readBytes);
@@ -397,8 +395,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
                                     return new HttpExecutionResult(
                                             queryHandle.index(),
                                             Optional.of(httpResponse),
-                                            requestStart,
-                                            Duration.between(requestStart, Instant.now()),
+                                            timeStamp,
+                                            Duration.ofNanos(System.nanoTime() - requestStart),
                                             Optional.of(this.responseBodybbaos),
                                             OptionalLong.of(this.responseBodybbaos.size()),
                                             OptionalLong.of(hasher.getValue()),
