@@ -51,6 +51,7 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
             List<String> variables,
             Exception exception
     ) implements LanguageProcessingData, Storable.AsCSV, Storable.AsRDF {
+        final static String[] header = new String[]{ "responseBodyHash", "results", "bindings", "variables", "exception" };
 
         @Override
         public Class<? extends LanguageProcessor> processor() {
@@ -66,7 +67,6 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
             if (exception != null)
                 exceptionString = exception().toString();
 
-            String[] header = new String[]{ "responseBodyHash", "results", "bindings", "variables", "exception" };
             String[] content = new String[]{ String.valueOf(hash), String.valueOf(results), String.valueOf(bindings), variablesString, exceptionString};
             String[][] data = new String[][]{ header, content };
 
