@@ -1,367 +1,334 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/root",
   "definitions": {
-    "connection": {
+    "root": {
+      "title": "root",
       "type": "object",
+      "additionalProperties": false,
       "properties": {
-        "endpoint": {"type": "string"},
-        "updateEndpoint": {"type": "string"},
-        "user": {"type": "string"},
-        "password": {"type": "string"},
-        "version": {"type": "string"}
-      },
-      "required": ["endpoint"]
-    },
-
-    "queries": {
-      "type": "object",
-      "properties": {
-        "location": {"type": "string"},
-        "format": {
-          "oneOf": [
-            {"type": "string"},
-            {
-              "type": "object",
-              "properties": {
-                "separator": {"type": "string"}
-              }
-            }
-          ]
-        },
-        "caching": {"type": "boolean"},
-        "order": {
-          "oneOf": [
-            {"type": "string"},
-            {
-              "type": "object",
-              "properties": {
-                "random": {
-                  "type": "object",
-                  "properties": {
-                    "seed": {"type": "integer"}
-                  },
-                  "required": ["seed"]
-                }
-              }
-            }
-          ]
-        },
-        "pattern": {
-          "type": "object",
-          "properties": {
-            "endpoint": {"type": "string"},
-            "outputFolder": {"type": "string"},
-            "limit": {"type": "integer"}
-          },
-          "required": ["endpoint"]
-        },
-        "lang": {"type": "string"}
-      },
-      "required": ["location"]
-    },
-
-    "warmup": {
-      "type": "object",
-      "properties": {
-        "timeLimit": {"type": "integer"},
-        "workers": {
+        "datasets": {
           "type": "array",
           "items": {
-            "oneOf": [{"$ref": "#/definitions/AbstractWorker"}]
-          }
-        }
-      },
-      "required": ["workers", "timeLimit"]
-    },
-
-    "stresstest": {
-      "type": "object",
-      "properties": {
-        "timeLimit": {"type": "integer"},
-        "noOfQueryMixes": {"type": "integer"},
-        "warmup": {"$ref": "#/definitions/warmup"},
-        "workers": {
+            "$ref": "#/definitions/Dataset"
+          },
+          "minItems": 1
+        },
+        "connections": {
           "type": "array",
           "items": {
-            "oneOf": [{"$ref": "#/definitions/AbstractWorker"}]
+            "$ref": "#/definitions/Connection"
+          },
+          "minItems": 1
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Task"
+          },
+          "minItems": 1
+        },
+        "storages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Storage"
+          },
+          "minItems": 1
+        },
+        "responseBodyProcessors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResponseBodyProcessor"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Metric"
           }
         }
       },
-      "required": ["workers"]
-    },
-
-    "AbstractWorker": {
-      "type": "object",
-      "properties": {
-        "className": {"type": "string"}
-      },
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "className" : {
-                "oneOf": [ {"const": "SPARQLWorker"},{"const": "org.aksw.iguana.cc.worker.impl.SPARQLWorker"}]
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "className": {"type": "string"},
-              "threads": {"type": "integer"},
-              "timeOut": {"type": "integer"},
-              "fixedLatency": {"type": "integer"},
-              "gaussianLatency": {"type": "integer"},
-              "responseType": {"type": "string"},
-              "parameterName": {"type": "string"},
-              "queries": {"$ref": "#/definitions/queries"}
-            },
-            "additionalProperties": {"type": "null"},
-            "required": ["className", "threads", "queries"]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "className" : {
-                "oneOf": [{"const": "UPDATEWorker"},{"const": "org.aksw.iguana.cc.worker.impl.UPDATEWorker"}]
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "className": {"type": "string"},
-              "threads": {"type": "integer"},
-              "timeOut": {"type": "integer"},
-              "fixedLatency": {"type": "integer"},
-              "gaussianLatency": {"type": "integer"},
-              "timerStrategy": {"type": "string"},
-              "queries": {"$ref": "#/definitions/queries"}
-            },
-            "additionalProperties": {"type": "null"},
-            "required": ["className", "threads", "queries"]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "className" : {
-                "oneOf": [{"const": "MultipleCLIInputWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.MultipleCLIInputWorker"}]
-              }
-            }},
-          "then": {
-            "properties": {
-              "className": {"type": "string"},
-              "threads": {"type": "integer"},
-              "timeOut": {"type": "integer"},
-              "fixedLatency": {"type": "integer"},
-              "gaussianLatency": {"type": "integer"},
-              "queryError": {"type": "string"},
-              "queryFinished": {"type": "string"},
-              "initFinished": {"type": "string"},
-              "numberOfProcesses": {"type": "integer"},
-              "queries": {"$ref": "#/definitions/queries"}
-            },
-            "additionalProperties": {"type": "null"},
-            "required": ["className", "threads", "queryError", "queryFinished", "initFinished", "queries"]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "className" : {
-                "oneOf": [{"const": "CLIInputWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.CLIInputWorker"}]
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "className": {"type": "string"},
-              "threads": {"type": "integer"},
-              "timeOut": {"type": "integer"},
-              "fixedLatency": {"type": "integer"},
-              "gaussianLatency": {"type": "integer"},
-              "queryError": {"type": "string"},
-              "queryFinished": {"type": "string"},
-              "initFinished": {"type": "string"},
-              "queries": {"$ref": "#/definitions/queries"}
-            },
-            "additionalProperties": {"type": "null"},
-            "required": ["className", "threads", "queryError", "queryFinished", "initFinished", "queries"]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "className": {
-                "oneOf": [{"const": "CLIPrefixWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.CLIPrefixWorker"}]
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "className": {"type": "string"},
-              "threads": {"type": "integer"},
-              "timeOut": {"type": "integer"},
-              "fixedLatency": {"type": "integer"},
-              "gaussianLatency": {"type": "integer"},
-              "numberOfProcesses": {"type": "integer"},
-              "queryError": {"type": "string"},
-              "queryFinished": {"type": "string"},
-              "initFinished": {"type": "string"},
-              "querySuffix": {"type": "string"},
-              "queryPrefix": {"type": "string"},
-              "queries": {"$ref": "#/definitions/queries"}
-            },
-            "additionalProperties": {"type": "null"},
-            "required": [
-              "className",
-              "threads",
-              "queryError",
-              "queryFinished",
-              "initFinished",
-              "queryPrefix",
-              "querySuffix",
-              "queries"
-            ]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "className": {
-                "oneOf": [{"const": "MultipleCLIInputFileWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.MultipleCLIInputFileWorker"}]
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "className": {"type": "string"},
-              "threads": {"type": "integer"},
-              "timeOut": {"type": "integer"},
-              "fixedLatency": {"type": "integer"},
-              "gaussianLatency": {"type": "integer"},
-              "queryError": {"type": "string"},
-              "queryFinished": {"type": "string"},
-              "initFinished": {"type": "string"},
-              "directory": {"type": "string"},
-              "numberOfProcesses": {"type": "integer"},
-              "queries": {"$ref": "#/definitions/queries"}
-            },
-            "additionalProperties": {"type": "null"},
-            "required": [
-              "className",
-              "threads",
-              "directory",
-              "queryError",
-              "queryFinished",
-              "initFinished",
-              "queries"
-            ]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "className": {
-                "oneOf": [{"const": "CLIInputFileWorker"}, {"const": "org.aksw.iguana.cc.worker.impl.CLIInputFileWorker"}]
-              }
-            }
-          },
-          "then": {
-            "allOf": [
-              {
-                "properties": {
-                  "className": {"type": "string"},
-                  "threads": {"type": "integer"},
-                  "timeOut": {"type": "integer"},
-                  "fixedLatency": {"type": "integer"},
-                  "gaussianLatency": {"type": "integer"},
-                  "queryError": {"type": "string"},
-                  "queryFinished": {"type": "string"},
-                  "initFinished": {"type": "string"},
-                  "directory": {"type":  "string"},
-                  "queries": {"$ref": "#/definitions/queries"}
-                },
-                "additionalProperties": {"type": "null"}
-              },
-              {
-                "required": [
-                  "className",
-                  "threads",
-                  "directory",
-                  "queryError",
-                  "queryFinished",
-                  "initFinished",
-                  "queries"
-                ]
-              }
-            ]
-          }
-        }
+      "required": [
+        "connections",
+        "datasets",
+        "storages",
+        "tasks"
       ]
     },
 
-    "task": {
+    "Connection": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
-        "className": {"type": "string"},
-        "configuration": {
-          "oneOf": [{"$ref": "#/definitions/stresstest"}]
-        }
-      },
-      "required": ["className", "configuration"]
-    },
-
-    "genericClassObject": {
-      "type": "object",
-      "properties": {
-        "className": {"type": "string"},
-        "configuration": {
-          "type": "object"
-        }
-      },
-      "required": ["className"]
-    }
-  },
-
-  "type": "object",
-  "properties": {
-    "connections": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/connection"
-      }
-    },
-    "datasets": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name" : {"type": "string"}
+        "name": {
+          "type": "string"
         },
-        "required": ["name"]
-      }
+        "version": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "updateEndpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "authentication": {
+          "$ref": "#/definitions/Authentication"
+        },
+        "updateAuthentication": {
+          "$ref": "#/definitions/Authentication"
+        },
+        "dataset": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "endpoint",
+        "name"
+      ],
+      "title": "Connection"
     },
-    "tasks": {
-      "type": "array",
-      "items": {
-        "$ref":"#/definitions/task"
-      }
+    "Authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "password",
+        "user"
+      ],
+      "title": "Authentication"
     },
-    "preScriptHook": {"type": "string"},
-    "postScriptHook": {"type": "string"},
-    "metrics": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/genericClassObject"
-      }
+    "Dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Dataset"
     },
-    "storages": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/genericClassObject"
-      }
+    "Metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [ "AES", "AvgQPS", "EachQuery", "NoQ", "NoQPH", "PAvgQPS", "PQPS", "QMPH", "QPS" ]
+        },
+        "penalty": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Metric"
+    },
+    "ResponseBodyProcessor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contentType": {
+          "type": "string"
+        },
+        "threads": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "contentType",
+        "threads"
+      ],
+      "title": "ResponseBodyProcessor"
+    },
+    "Storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [ "triplestore", "rdf file", "csv file" ]
+        },
+        "directory": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Storage"
+    },
+    "Task": {
+      "type": "object",
+      "oneOf": [ { "$ref": "#/definitions/Stresstest" } ],
+      "title": "Task"
+    },
+    "Stresstest": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "stresstest"
+        },
+        "warmupWorkers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Worker"
+          }
+        },
+        "workers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Worker"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "type",
+        "workers"
+      ],
+      "title": "Stresstest"
+    },
+    "Worker": {
+      "type": "object",
+      "oneOf": [ { "$ref": "#/definitions/SPARQLWorker" } ],
+      "title": "Worker"
+    },
+    "SPARQLWorker" : {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "SPARQLProtocolWorker"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requestType": {
+          "type": "string",
+          "enum": [ "post query", "get query", "post url-enc query", "post url-enc update", "post update" ]
+        },
+        "queries": {
+          "$ref": "#/definitions/Queries"
+        },
+        "timeout": {
+          "type": "string"
+        },
+        "connection": {
+          "type": "string"
+        },
+        "completionTarget": {
+          "$ref": "#/definitions/CompletionTarget"
+        },
+        "parseResults": {
+          "type": "boolean"
+        },
+        "acceptHeader": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "completionTarget",
+        "connection",
+        "queries",
+        "timeout"
+      ],
+      "title": "SPARQLWorker"
+    },
+    "CompletionTarget": {
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/TimeLimit" },
+        { "$ref": "#/definitions/QueryMixes" }
+      ],
+      "title": "CompletionTarget"
+    },
+    "TimeLimit": {
+      "properties": {
+        "duration": {
+          "type": "string"
+        }
+      },
+      "title": "TimeLimit",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+          "duration"
+      ]
+    },
+    "QueryMixes": {
+      "properties": {
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "title": "QueryMixes",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "number"
+      ]
+    },
+    "Queries": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": [ "one-per-line", "separator", "folder" ]
+        },
+        "separator": {
+          "type": "string"
+        },
+        "caching": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "string",
+          "enum": [ "random", "linear" ]
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "lang": {
+          "type": "string",
+          "enum": [ "", "SPARQL" ]
+        }
+      },
+      "required": [
+        "path"
+
+      ],
+      "title": "Queries"
     }
   }
 }
