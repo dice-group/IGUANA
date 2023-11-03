@@ -33,7 +33,6 @@ public abstract class HttpWorker {
             @JsonSubTypes.Type(value = SPARQLProtocolWorker.Config.class, name = "SPARQLProtocolWorker"),
     })
     public interface Config {
-        // TODO: add delay or complete after
         CompletionTarget completionTarget();
 
         String acceptHeader();

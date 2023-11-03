@@ -151,7 +151,7 @@ public class IguanaSuiteParser {
                     if (datasets.containsKey(datasetConfig.name()))
                         assert datasets.get(datasetConfig.name()) == datasetConfig;
                     else datasets.put(datasetConfig.name(), datasetConfig);
-                    return datasetConfig; // TODO: double check if this really works
+                    return datasetConfig;
                 }
             }
         }
@@ -183,7 +183,7 @@ public class IguanaSuiteParser {
                     if (connections.containsKey(connectionConfig.name()))
                         assert connections.get(connectionConfig.name()) == connectionConfig;
                     else connections.put(connectionConfig.name(), connectionConfig);
-                    return connectionConfig; // TODO: double check if this really works
+                    return connectionConfig;
                 }
             }
         }
@@ -243,8 +243,7 @@ public class IguanaSuiteParser {
      */
     private static Map<String, DatasetConfig> preparseDataset(ObjectMapper mapper, String input) throws JsonProcessingException {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        record PreparsingDatasets(@JsonProperty(required = true) List<DatasetConfig> datasets) {
-        }
+        record PreparsingDatasets(@JsonProperty(required = true) List<DatasetConfig> datasets) {}
         final var preparsingDatasets = mapper.readValue(input, PreparsingDatasets.class);
 
         return preparsingDatasets.datasets().stream().collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
