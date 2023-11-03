@@ -18,8 +18,8 @@ public class NoQ extends Metric implements TaskMetric, WorkerMetric {
     @Override
     public Number calculateTaskMetric(List<HttpWorker> workers, List<HttpWorker.ExecutionStats>[][] data) {
         final var sum = workers.stream()
-                .map(worker -> (BigDecimal) this.calculateWorkerMetric(worker.config(), data[(int) worker.getWorkerID()]))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(worker -> (BigInteger) this.calculateWorkerMetric(worker.config(), data[(int) worker.getWorkerID()]))
+                .reduce(BigInteger.ZERO, BigInteger::add);
         return sum;
     }
 
