@@ -21,8 +21,6 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Interface for the Worker Thread used in the {@link Stresstest}
- *
- * @author f.conrads
  */
 public abstract class HttpWorker {
 
