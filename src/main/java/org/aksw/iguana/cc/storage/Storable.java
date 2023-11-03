@@ -4,6 +4,10 @@ import org.apache.jena.rdf.model.Model;
 
 import java.util.List;
 
+/**
+ * This interface provides the functionality to store data in different formats. The data can be stored in CSV files
+ * or in RDF models.
+ */
 public interface Storable {
 
     record CSVData (
@@ -13,7 +17,7 @@ public interface Storable {
         public record CSVFileData(String filename, String[][] data) {}
     }
 
-    interface AsCSV {
+    interface AsCSV extends Storable {
 
         /**
          * Converts the data into CSV files. The key of the map contains the file name for the linked entries.
@@ -23,7 +27,7 @@ public interface Storable {
         CSVData toCSV();
     }
 
-    interface AsRDF {
+    interface AsRDF extends Storable {
 
         /**
          * Converts the data into an RDF model, which will be added to the appropriate storages.

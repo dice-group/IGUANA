@@ -37,7 +37,7 @@ public abstract class StorageTest {
         FileUtils.deleteDirectory(tempDir.toFile());
     }
 
-    public static class TestStorable implements Storable, Storable.AsCSV, Storable.AsRDF {
+    public static class TestStorable implements Storable.AsCSV, Storable.AsRDF {
 
         @Override
         public Storable.CSVData toCSV() {
