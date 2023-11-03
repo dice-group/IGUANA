@@ -123,6 +123,9 @@ public class CSVStorageTest extends StorageTest {
                 throw new RuntimeException(String.format("CSV format in file %s is malformed.", expected), e);
             }
 
+            // print all lines that are in actual
+            System.out.println("Actual lines:" + actualValues.stream().map(x -> "[" + String.join(", ", x) + "]").collect(Collectors.joining("\n")));
+
             for (String[] expectedLine : expectedValues) {
                 List<String[]> sameLines = actualValues.stream().filter(x -> {
                     for (int i = 0; i < expectedLine.length; i++) {
