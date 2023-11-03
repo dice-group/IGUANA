@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 
 public class CSVStorage implements Storage {
 
+    /** This private record is used to store information about the connections used in a task. */
     private record ConnectionInfo(String connection, String version, String dataset) {}
 
     public record Config(String directory) implements StorageConfig {
@@ -57,11 +58,11 @@ public class CSVStorage implements Storage {
     private Resource taskRes;
     List<ConnectionInfo> connections;
 
-    public CSVStorage(Config config, List<Metric> metrics, long suiteID) {
+    public CSVStorage(Config config, List<Metric> metrics, String suiteID) {
         this(config.directory(), metrics, suiteID);
     }
 
-    public CSVStorage(String folderPath, List<Metric> metrics, long suiteID) {
+    public CSVStorage(String folderPath, List<Metric> metrics, String suiteID) {
         this.metrics = metrics;
 
         Path parentFolder;

@@ -28,10 +28,10 @@ public class IRES {
 
     public static class Factory {
 
-        private final long suiteID;
+        private final String suiteID;
         private final String taskURI;
 
-        public Factory(long suiteID, long taskID) {
+        public Factory(String suiteID, long taskID) {
             this.suiteID = suiteID;
             this.taskURI = NS + suiteID + "/" + taskID;
         }

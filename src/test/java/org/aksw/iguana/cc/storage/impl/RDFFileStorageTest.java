@@ -28,8 +28,8 @@ public class RDFFileStorageTest extends StorageTest {
 				MockupWorker.createWorkers(0, 2, queryHandler1, "test-connection-1", "v1.0.0", "test-dataset-1"),
 				MockupWorker.createWorkers(2, 2, queryHandler2, "test-connection-1", "v1.0.0", "test-dataset-1")
 		);
-		final var task1 = createTaskResult(workers, 0, 0);
-		final var task2 = createTaskResult(workers, 1, 0);
+		final var task1 = createTaskResult(workers, 0, "0");
+		final var task2 = createTaskResult(workers, 1, "0");
 
 		// test file creation
 		for (String path : paths) {

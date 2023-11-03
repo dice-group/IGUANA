@@ -11,7 +11,7 @@ class IguanaSuiteParserTest {
 
     @Test
     public void testDeserialization() throws Exception {
-        Suite parse = IguanaSuiteParser.parse(Path.of("/home/bigerl/IdeaProjects/IGUANA/example-suite.yml"));
+        Suite parse = IguanaSuiteParser.parse(Path.of("/home/bigerl/IdeaProjects/IGUANA/example-suite.yml"), true);
         Assertions.assertNotNull(parse);
     }
 }

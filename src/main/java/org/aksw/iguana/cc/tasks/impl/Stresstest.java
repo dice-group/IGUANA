@@ -40,7 +40,7 @@ public class Stresstest implements Task {
     private final StresstestResultProcessor srp;
 
 
-    public Stresstest(long suiteID, long stresstestID, Config config, ResponseBodyProcessorInstances responseBodyProcessorInstances, List<Storage> storages, List<Metric> metrics) {
+    public Stresstest(String suiteID, long stresstestID, Config config, ResponseBodyProcessorInstances responseBodyProcessorInstances, List<Storage> storages, List<Metric> metrics) {
 
         // initialize workers
         long workerId = 0;

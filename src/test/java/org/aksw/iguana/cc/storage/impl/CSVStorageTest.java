@@ -33,13 +33,13 @@ public class CSVStorageTest extends StorageTest {
                 MockupWorker.createWorkers(2, 2, new MockupQueryHandler(3, 5), "test-connection-4", "v1.3.0", "test-dataset-4")
         );
 
-        return List.of(Arguments.of(List.of(createTaskResult(workersTask1, 0, 123), createTaskResult(workersTask2, 1, 123))));
+        return List.of(Arguments.of(List.of(createTaskResult(workersTask1, 0, "123"), createTaskResult(workersTask2, 1, "123"))));
     }
 
     @ParameterizedTest
     @MethodSource("data")
     protected void testCSVStorage(List<TaskResult> results) throws IOException {
-        final var storage = new CSVStorage(tempDir.toString(), getMetrics(), 123L);
+        final var storage = new CSVStorage(tempDir.toString(), getMetrics(), "123");
         for (var result : results)
             storage.storeResult(result.resultModel());
 

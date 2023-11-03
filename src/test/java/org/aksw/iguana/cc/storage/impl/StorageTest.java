@@ -93,7 +93,7 @@ public abstract class StorageTest {
     }
 
     // Argument is a List that contains lists of workers with the same configuration.
-    protected static TaskResult createTaskResult(List<List<HttpWorker>> workers, int taskID, int suiteID) {
+    protected static TaskResult createTaskResult(List<List<HttpWorker>> workers, int taskID, String suiteID) {
         final var queryIDs = new ArrayList<String>();
         for (var list : workers) {
             queryIDs.addAll(List.of(list.get(0).config().queries().getAllQueryIds()));

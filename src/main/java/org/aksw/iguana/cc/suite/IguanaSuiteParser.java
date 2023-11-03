@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,12 +36,9 @@ import java.util.stream.Collectors;
  * Creates an IguanaConfig from a given JSON or YAML file, and validates the config using a JSON schema file
  */
 public class IguanaSuiteParser {
-
-    record SuiteConfigWithID(long id, Suite.Config config) {}
-
     private static final Logger LOGGER = LoggerFactory.getLogger(IguanaSuiteParser.class);
 
-    private static final String schemaFile = "iguana-schema.json";
+    private static final String SCHEMA_FILE = "./schema/iguana-schema.json";
 
     enum DataFormat {
         YAML, JSON;
@@ -59,38 +57,43 @@ public class IguanaSuiteParser {
         }
     }
 
-
-    public static Suite parse(Path config) throws IOException {
-        return parse(new FileInputStream(config.toFile()), DataFormat.getFormat(config), true); // TODO: validate
-    }
-
-    public static Suite parse(InputStream stream, DataFormat format) throws IOException {
-        return parse(stream, format, true);
-    }
-
-
-    public static Suite parse(InputStream inputStream, DataFormat format, Boolean validate) throws IOException {
+    /**
+     * Parses an IGUANA configuration file and optionally validates it against a JSON schema file, before parsing.
+     *
+     * @param config       the path to the configuration file.
+     * @param validate     whether to validate the configuration file against the JSON schema file.
+     * @return             a Suite object containing the parsed configuration.
+     * @throws IOException if there is an error during IO.
+     */
+    public static Suite parse(Path config, boolean validate) throws IOException {
+        final var format = DataFormat.getFormat(config);
         JsonFactory factory = switch (format) {
             case YAML -> new YAMLFactory();
             case JSON -> new JsonFactory();
         };
-        SuiteConfigWithID configWithID = parse(inputStream, factory, validate);
-        return new Suite(configWithID.id(), configWithID.config());
+
+        if (validate && !validateConfig(config, SCHEMA_FILE, new ObjectMapper(factory))) {
+            throw new IllegalStateException("Invalid config file");
+        }
+
+        try (var stream = new FileInputStream(config.toFile())) {
+            return parse(stream, factory);
+        }
     }
 
-
     /**
-     * Parses a IGUANA configuration file.
-     * <p>
-     * This involves two steps: First, datasets and connections are parsed and stored. In a second step, the rest of the file is parsed. If the names of datasets and connections are used , they are replaced with the respective configurations that were parsed in the first step.
+     * Parses an IGUANA configuration file. <p>
      *
-     * @param inputStream
-     * @param factory
-     * @param validate
-     * @return
-     * @throws IOException
+     * This involves two steps: First, datasets and connections are parsed and stored. In a second step, the rest of the
+     * file is parsed. If the names of datasets and connections are used, they are replaced with the respective
+     * configurations that were parsed in the first step.
+     *
+     * @param inputStream  the input stream containing the configuration file content.
+     * @param factory      the JsonFactory instance used for parsing the configuration file.
+     * @return             a Suite object containing the parsed configuration.
+     * @throws IOException if there is an error during IO.
      */
-    private static SuiteConfigWithID parse(InputStream inputStream, JsonFactory factory, Boolean validate) throws IOException {
+    private static Suite parse(InputStream inputStream, JsonFactory factory) throws IOException {
         ObjectMapper mapper = new ObjectMapper(factory);
 
         final var input = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
@@ -168,6 +171,7 @@ public class IguanaSuiteParser {
             @Override
             public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
                 var durationString = jp.getValueAsString()
+                        .toLowerCase()
                         .replaceAll("\\s+", "")
                         .replace("years", "y")
                         .replace("year", "y")
@@ -194,12 +198,9 @@ public class IguanaSuiteParser {
                         .addDeserializer(DatasetConfig.class, new DatasetDeserializer())
                         .addDeserializer(ConnectionConfig.class, new ConnectionDeserializer())
                         .addDeserializer(Duration.class, new HumanReadableDurationDeserializer()));
-        // TODO: update validator and reactivate
-//        if(validate && !validateConfig(config, schemaFile, mapper)){
-//            return null;
-//        }
-        // TODO: use date or something random as source for the suite ID
-        return new SuiteConfigWithID(input.hashCode(), mapper.readValue(input, Suite.Config.class));
+
+        final String suiteID = Instant.now().getEpochSecond() + "-" + Integer.toUnsignedString(input.hashCode()); // convert to unsigned, so that there is no double -- minus in the string
+        return new Suite(suiteID, mapper.readValue(input, Suite.Config.class));
     }
 
     /**
@@ -228,9 +229,8 @@ public class IguanaSuiteParser {
     }
 
     private static boolean validateConfig(Path config, String schemaFile, ObjectMapper mapper) throws IOException {
-        // TODO: update
-        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(schemaFile);
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V6);
+        InputStream is = new FileInputStream(schemaFile);
         JsonSchema schema = factory.getSchema(is);
         JsonNode node = mapper.readTree(config.toFile());
         Set<ValidationMessage> errors = schema.validate(node);

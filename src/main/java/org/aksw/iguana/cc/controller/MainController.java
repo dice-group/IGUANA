@@ -61,7 +61,7 @@ public class MainController {
         }
 
         try {
-            Suite parse = IguanaSuiteParser.parse(args.suitePath);
+            Suite parse = IguanaSuiteParser.parse(args.suitePath, !args.ignoreShema);
             parse.run();
         } catch (IOException e) {
             LOGGER.error("Error while reading the configuration file.", e);

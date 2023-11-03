@@ -36,7 +36,7 @@ public class Suite {
     ) {}
 
 
-    private final long suiteId;
+    private final String suiteId;
     private final Config config;
     private final ResponseBodyProcessorInstances responseBodyProcessorInstances;
 
@@ -44,7 +44,7 @@ public class Suite {
 
     private final List<Task> tasks = new ArrayList<>();
 
-    Suite(long suiteId, Config config) {
+    Suite(String suiteId, Config config) {
         this.suiteId = suiteId;
         this.config = config;
         long taskID = 0;
@@ -76,7 +76,7 @@ public class Suite {
         return out;
     }
 
-    private static List<Storage> initialiseStorages(List<StorageConfig> configs, List<Metric> metrics, long suiteID) {
+    private static List<Storage> initialiseStorages(List<StorageConfig> configs, List<Metric> metrics, String suiteID) {
         List<Storage> out = new ArrayList<>();
         for (var storageConfig : configs) {
             if (storageConfig instanceof CSVStorage.Config) {

@@ -37,7 +37,7 @@ public class StresstestResultProcessor {
     private final IRES.Factory iresFactory;
 
 
-    public StresstestResultProcessor(long suiteID,
+    public StresstestResultProcessor(String suiteID,
                                      long taskID,
                                      List<HttpWorker> worker,
                                      List<String> queryIDs,
