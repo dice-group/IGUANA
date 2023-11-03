@@ -19,6 +19,9 @@ import org.junit.jupiter.api.BeforeEach;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -66,11 +69,7 @@ public abstract class StorageTest {
 
     protected static Path tempDir;
 
-    private static Calendar someDateTime = new Calendar.Builder()
-            .setDate(2023, 10, 21)
-            .setTimeOfDay(20, 48, 6, 399)
-            .setLocale(Locale.GERMANY)
-            .build();
+    private static Calendar someDateTime = GregorianCalendar.from(ZonedDateTime.ofInstant(Instant.parse("2023-10-21T20:48:06.399Z"), ZoneId.of("Europe/Berlin")));
 
     private static Calendar getDateTime() {
         someDateTime.add(Calendar.MINUTE, 1);

@@ -96,7 +96,6 @@ public class CSVStorageTest extends StorageTest {
     }
 
     private void compareCSVFiles(Path expected, Path actual) throws IOException {
-        System.out.println("Comparing " + expected + " and " + actual);
         try (CSVReader readerExpected = new CSVReader(new FileReader(expected.toFile()));
              CSVReader readerActual = new CSVReader(new FileReader(actual.toFile()))) {
 

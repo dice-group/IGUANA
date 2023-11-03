@@ -62,8 +62,6 @@ public class MockupWorker extends HttpWorker {
         return null;
     }
 
-    private static Instant someTime = Instant.parse("2023-10-21T20:48:06.399Z");
-
     public static List<Result> createWorkerResults(QueryHandler queries, List<HttpWorker> workers) {
         final var queryNumber = queries.getQueryCount();
 

@@ -67,7 +67,6 @@ public class RequestFactoryTest {
                     p.subscribe(flowSubscriber);
                     return bodySubscriber.getBody().toCompletableFuture().join();
                 }).get();
-                System.out.println(body);
                 assertEquals(content, body);
             }
             case POST_UPDATE -> {
@@ -80,7 +79,6 @@ public class RequestFactoryTest {
                     p.subscribe(flowSubscriber);
                     return bodySubscriber.getBody().toCompletableFuture().join();
                 }).get();
-                System.out.println(body);
                 assertEquals(content, body);
             }
             case POST_URL_ENC_QUERY -> {
@@ -93,7 +91,6 @@ public class RequestFactoryTest {
                     p.subscribe(flowSubscriber);
                     return bodySubscriber.getBody().toCompletableFuture().join();
                 }).get();
-                System.out.println(body);
                 assertEquals("query=" + URLEncoder.encode(content, StandardCharsets.UTF_8), body);
             }
             case POST_URL_ENC_UPDATE -> {
@@ -106,7 +103,6 @@ public class RequestFactoryTest {
                     p.subscribe(flowSubscriber);
                     return bodySubscriber.getBody().toCompletableFuture().join();
                 }).get();
-                System.out.println(body);
                 assertEquals("update=" + URLEncoder.encode(content, StandardCharsets.UTF_8), body);
             }
         }
