@@ -58,11 +58,7 @@ public abstract class StorageTest {
 
     @BeforeEach
     public void resetDate() {
-        someDateTime = new Calendar.Builder()
-                .setDate(2023, 10, 21)
-                .setTimeOfDay(20, 48, 6, 399)
-                .setLocale(Locale.GERMANY)
-                .build();
+        someDateTime = GregorianCalendar.from(ZonedDateTime.ofInstant(Instant.parse("2023-10-21T20:48:06.399Z"), ZoneId.of("Europe/Berlin")));
     }
 
     protected record TaskResult(Model resultModel, List<HttpWorker.Result> workerResults) {}
