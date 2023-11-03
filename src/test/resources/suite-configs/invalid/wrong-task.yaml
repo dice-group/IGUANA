@@ -1,0 +1,82 @@
+datasets:
+  - name: "sp2b"
+    file: "testFile"
+
+connections:
+  - name: "fuseki"
+    version: "v2"
+    endpoint: "http://localhost:3030/sp2b"
+    updateEndpoint: "http://localhost:3030/sp2b/update"
+    authentication:
+      user: "test"
+      password: "test"
+    updateAuthentication:
+      user: "test"
+      password: "test"
+    dataset: "sp2b"
+  - name: "fuseki2"
+    endpoint: "http://localhost:3030/sp2b"
+    dataset: "sp2b"
+
+tasks:
+  - type: test # invalid type
+    warmupWorkers:
+      - type: "SPARQLProtocolWorker"
+        queries:
+          path: "./"
+        completionTarget:
+          duration: "2S"
+        connection: "fuseki"
+        timeout: "2S"
+    workers:
+      - number: 1
+        requestType: "post query"
+        type: "SPARQLProtocolWorker"
+        queries:
+          path: "./"
+          format: "folder"
+          separator: " "
+          caching: true
+          order: "random"
+          seed: 1
+          lang: "SPARQL"
+        timeout: "2S"
+        connection: "fuseki"
+        completionTarget:
+          duration: "2S"
+        parseResults: true
+        acceptHeader: "application/sparql-results+json"
+      - number: 1
+        requestType: post query
+        type: "SPARQLProtocolWorker"
+        queries:
+          path: "./example/suite/queries/"
+          format: "folder"
+          order: "random"
+        timeout: 2S
+        connection: fuseki
+        completionTarget:
+          duration: 5S
+        parseResults: true
+        acceptHeader: "application/sparql-results+json"
+
+storages:
+  - type: "csv file"
+    directory: "result/"
+  - type: rdf file
+    path: "result/result.nt"
+  - type: "triplestore"
+    endpoint: "http://localhost:3030/ds/sparql"
+    user: "test"
+    password: "123"
+    baseUri: "http://example.org/"
+
+responseBodyProcessors:
+  - contentType: "application/sparql-results+json"
+    threads: 2
+
+metrics:
+  - type: "PQPS"
+    penalty: 1000
+  - type: "QPS"
+  - type: "QMPH"

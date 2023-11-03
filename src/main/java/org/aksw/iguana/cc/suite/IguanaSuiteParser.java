@@ -60,10 +60,11 @@ public class IguanaSuiteParser {
     /**
      * Parses an IGUANA configuration file and optionally validates it against a JSON schema file, before parsing.
      *
-     * @param config       the path to the configuration file.
-     * @param validate     whether to validate the configuration file against the JSON schema file.
-     * @return             a Suite object containing the parsed configuration.
-     * @throws IOException if there is an error during IO.
+     * @param config                 the path to the configuration file.
+     * @param validate               whether to validate the configuration file against the JSON schema file.
+     * @return                       a Suite object containing the parsed configuration.
+     * @throws IOException           if there is an error during IO.
+     * @throws IllegalStateException if the configuration file is invalid.
      */
     public static Suite parse(Path config, boolean validate) throws IOException {
         final var format = DataFormat.getFormat(config);
@@ -72,13 +73,42 @@ public class IguanaSuiteParser {
             case JSON -> new JsonFactory();
         };
 
-        if (validate && !validateConfig(config, SCHEMA_FILE, new ObjectMapper(factory))) {
+        if (validate && !validateConfig(config)) {
             throw new IllegalStateException("Invalid config file");
         }
 
         try (var stream = new FileInputStream(config.toFile())) {
             return parse(stream, factory);
         }
+    }
+
+    /**
+     * Validates an IGUANA configuration file against a JSON schema file.
+     *
+     * @param config       the path to the configuration file.
+     * @return             true if the configuration file is valid, false otherwise.
+     * @throws IOException if there is an error during IO.
+     */
+    public static boolean validateConfig(Path config) throws IOException {
+        final var format = DataFormat.getFormat(config);
+        JsonFactory factory = switch (format) {
+            case YAML -> new YAMLFactory();
+            case JSON -> new JsonFactory();
+        };
+        final var mapper = new ObjectMapper(factory);
+
+        JsonSchemaFactory schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V6);
+        InputStream is = new FileInputStream(SCHEMA_FILE);
+        JsonSchema schema = schemaFactory.getSchema(is);
+        JsonNode node = mapper.readTree(config.toFile());
+        Set<ValidationMessage> errors = schema.validate(node);
+        if (!errors.isEmpty()) {
+            LOGGER.error("Found {} errors in configuration file.", errors.size());
+        }
+        for (ValidationMessage message : errors) {
+            LOGGER.error(message.getMessage());
+        }
+        return errors.isEmpty();
     }
 
     /**
@@ -226,21 +256,6 @@ public class IguanaSuiteParser {
         final var preparsingConnections = mapper.readValue(input, PreparsingConnections.class);
 
         return preparsingConnections.connections().stream().collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
-    }
-
-    private static boolean validateConfig(Path config, String schemaFile, ObjectMapper mapper) throws IOException {
-        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V6);
-        InputStream is = new FileInputStream(schemaFile);
-        JsonSchema schema = factory.getSchema(is);
-        JsonNode node = mapper.readTree(config.toFile());
-        Set<ValidationMessage> errors = schema.validate(node);
-        if (!errors.isEmpty()) {
-            LOGGER.error("Found {} errors in configuration file.", errors.size());
-        }
-        for (ValidationMessage message : errors) {
-            LOGGER.error(message.getMessage());
-        }
-        return errors.isEmpty();
     }
 
 }

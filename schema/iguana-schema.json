@@ -132,7 +132,8 @@
           "enum": [ "AES", "AvgQPS", "EachQuery", "NoQ", "NoQPH", "PAvgQPS", "PQPS", "QMPH", "QPS" ]
         },
         "penalty": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 0
         }
       },
       "required": [
@@ -160,23 +161,77 @@
     },
     "Storage": {
       "type": "object",
-      "additionalProperties": false,
+      "oneOf": [
+        { "$ref": "#/definitions/CSVStorage" },
+        { "$ref": "#/definitions/RDFFileStorage" },
+        { "$ref": "#/definitions/TriplestoreStorage" }
+      ],
+      "title": "Storage"
+    },
+    "CSVStorage": {
+      "type": "object",
+      "unevaluatedProperties": false,
       "properties": {
         "type": {
           "type": "string",
-          "enum": [ "triplestore", "rdf file", "csv file" ]
+          "const": "csv file"
         },
         "directory": {
           "type": "string"
+        }
+      },
+      "required": [
+          "type",
+          "directory"
+      ],
+      "title": "CSVStorage"
+    },
+    "RDFFileStorage": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "rdf file"
         },
         "path": {
           "type": "string"
         }
       },
       "required": [
-        "type"
+        "type",
+        "path"
       ],
-      "title": "Storage"
+      "title": "RDFFileStorage"
+    },
+    "TriplestoreStorage": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "triplestore"
+        },
+        "endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "user": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "baseUri": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "type",
+        "endpoint"
+      ],
+      "title": "TriplestoreStorage"
     },
     "Task": {
       "type": "object",
