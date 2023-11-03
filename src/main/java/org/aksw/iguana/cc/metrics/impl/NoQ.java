@@ -5,6 +5,7 @@ import org.aksw.iguana.cc.metrics.TaskMetric;
 import org.aksw.iguana.cc.metrics.WorkerMetric;
 import org.aksw.iguana.cc.worker.HttpWorker;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -16,10 +17,9 @@ public class NoQ extends Metric implements TaskMetric, WorkerMetric {
 
     @Override
     public Number calculateTaskMetric(List<HttpWorker> workers, List<HttpWorker.ExecutionStats>[][] data) {
-        BigInteger sum = BigInteger.ZERO;
-        for (var worker : workers) {
-            sum = sum.add((BigInteger) this.calculateWorkerMetric(worker.config(), data[(int) worker.getWorkerID()]));
-        }
+        final var sum = workers.stream()
+                .map(worker -> (BigDecimal) this.calculateWorkerMetric(worker.config(), data[(int) worker.getWorkerID()]))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         return sum;
     }
 

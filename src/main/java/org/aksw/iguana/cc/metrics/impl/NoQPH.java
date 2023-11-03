@@ -18,10 +18,9 @@ public class NoQPH extends Metric implements TaskMetric, WorkerMetric {
     }
     @Override
     public Number calculateTaskMetric(List<HttpWorker> workers, List<HttpWorker.ExecutionStats>[][] data) {
-        BigDecimal sum = BigDecimal.ZERO;
-        for (var worker : workers) {
-            sum = sum.add((BigDecimal) this.calculateWorkerMetric(worker.config(), data[(int) worker.getWorkerID()]));
-        }
+        final var sum = workers.stream()
+                .map(worker -> (BigDecimal) this.calculateWorkerMetric(worker.config(), data[(int) worker.getWorkerID()]))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         return sum;
     }
 
