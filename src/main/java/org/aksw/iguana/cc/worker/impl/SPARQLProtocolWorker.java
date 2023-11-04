@@ -23,6 +23,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
@@ -221,6 +222,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
      */
     public CompletableFuture<Result> start() {
         return CompletableFuture.supplyAsync(() -> {
+            ZonedDateTime startTime = ZonedDateTime.now();
             List<ExecutionStats> executionStats = new ArrayList<>();
             if (config().completionTarget() instanceof QueryMixes queryMixes) {
                 for (int i = 0; i < queryMixes.number(); i++) {
@@ -247,7 +249,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 }
                 LOGGER.info("{}\t:: Reached time limit of {}.", this, timeLimit.duration());
             }
-            return new Result(this.workerID, executionStats);
+            ZonedDateTime endTime = ZonedDateTime.now();
+            return new Result(this.workerID, executionStats, startTime, endTime);
         }, executor);
     }
 

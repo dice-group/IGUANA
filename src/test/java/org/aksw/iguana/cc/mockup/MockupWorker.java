@@ -7,6 +7,8 @@ import org.aksw.iguana.cc.worker.HttpWorker;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,6 +65,9 @@ public class MockupWorker extends HttpWorker {
     }
 
     public static List<Result> createWorkerResults(QueryHandler queries, List<HttpWorker> workers) {
+        final var startTime = ZonedDateTime.of(2023, 10, 11, 14, 14, 10, 0, ZoneId.of("UTC"));
+        final var endTime = ZonedDateTime.of(2023, 10, 12, 15, 15, 15, 0, ZoneId.of("UTC"));
+
         final var queryNumber = queries.getQueryCount();
 
         Instant time = Instant.parse("2023-10-21T20:48:06.399Z");
@@ -97,7 +102,7 @@ public class MockupWorker extends HttpWorker {
                 time = time.plusSeconds(1);
                 exectutionStats.add(new ExecutionStats(queryID, time, failDuration, failHttpCode, failLength, failResponseBodyHash, Optional.of(failException)));
             }
-            results.add(new Result(worker.getWorkerID(), exectutionStats));
+            results.add(new Result(worker.getWorkerID(), exectutionStats, startTime, endTime));
         }
         return results;
     }

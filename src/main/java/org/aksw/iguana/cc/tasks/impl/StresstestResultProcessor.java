@@ -13,6 +13,7 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -24,15 +25,17 @@ public class StresstestResultProcessor {
     private final List<Storage> storages;
     private final Supplier<Map<LanguageProcessor, List<LanguageProcessor.LanguageProcessingData>>> lpResults;
 
-    /**
-     * This array contains each query execution, grouped by each worker and each query.
-     */
+    /** This array contains each query execution, grouped by each worker and each query. */
     private final List<HttpWorker.ExecutionStats>[][] workerQueryExecutions;
 
-    /**
-     * This map contains each query execution, grouped by each query of the task.
-     */
+    /** This map contains each query execution, grouped by each query of the task. */
     private final Map<String, List<HttpWorker.ExecutionStats>> taskQueryExecutions;
+
+    /**
+     * Stores for each workerID an array with two items, that contains the start and end time for the respective
+     * worker. First item in the array is the start time, second item is the end time.
+     */
+    private Map<Long, ZonedDateTime[]> workerStartEndTime;
 
     private final IRES.Factory iresFactory;
 
@@ -64,6 +67,7 @@ public class StresstestResultProcessor {
         }
 
         this.iresFactory = new IRES.Factory(suiteID, taskID);
+        this.workerStartEndTime = new HashMap<>();
     }
 
     /**
@@ -78,6 +82,7 @@ public class StresstestResultProcessor {
                 String queryID = workers.get((int) result.workerID()).config().queries().getQueryId(stat.queryID());
                 taskQueryExecutions.get(queryID).add(stat);
             }
+            workerStartEndTime.put(result.workerID(), new ZonedDateTime[]{ result.startTime(), result.endTime() });
         }
     }
 
@@ -157,12 +162,18 @@ public class StresstestResultProcessor {
             m.add(taskRes, IPROP.query, iresFactory.getTaskQueryResource(queryID));
         }
 
-        // Worker to queries
         for (var worker : workers) {
+            Resource workerRes = iresFactory.getWorkerResource(worker);
+
+            // Worker to queries
             for (int i = 0; i < worker.config().queries().getAllQueryIds().length; i++) {
-                Resource workerRes = iresFactory.getWorkerResource(worker);
                 m.add(workerRes, IPROP.query, iresFactory.getWorkerQueryResource(worker, i));
             }
+
+            // start and end times for the workers
+            final var times = workerStartEndTime.get(worker.getWorkerID());
+            m.add(workerRes, IPROP.startDate, TimeUtils.createTypedZonedDateTimeLiteral(times[0]));
+            m.add(workerRes, IPROP.endDate, TimeUtils.createTypedZonedDateTimeLiteral(times[1]));
         }
 
         m.add(taskRes, IPROP.startDate, ResourceFactory.createTypedLiteral(start));

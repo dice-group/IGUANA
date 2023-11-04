@@ -12,6 +12,7 @@ import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -119,7 +120,7 @@ public abstract class HttpWorker {
         }
     }
 
-    public record Result(long workerID, List<ExecutionStats> executionStats) {}
+    public record Result(long workerID, List<ExecutionStats> executionStats, ZonedDateTime startTime, ZonedDateTime endTime) {}
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
     @JsonSubTypes({

@@ -369,7 +369,7 @@ public class CSVStorage implements Storage {
 
         SelectBuilder sb = new SelectBuilder();
         sb.addWhere(taskRes, IPROP.workerResult, "?worker");
-        queryProperties(sb, "?worker", IPROP.workerID, IPROP.workerType, IPROP.noOfQueries, IPROP.timeOut);
+        queryProperties(sb, "?worker", IPROP.workerID, IPROP.workerType, IPROP.noOfQueries, IPROP.timeOut, IPROP.startDate, IPROP.endDate);
         queryMetrics(sb, "?worker", workerMetrics);
 
         executeAndStoreQuery(sb, file, data);
