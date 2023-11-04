@@ -44,7 +44,7 @@ class QueryListTest {
 
     @BeforeAll
     public static void createFolder() throws IOException {
-        tempDir = Files.createTempDirectory("folder-query-source-test-dir");
+        tempDir = Files.createTempDirectory("iguana-folder-query-source-test-dir");
     }
 
     @AfterAll

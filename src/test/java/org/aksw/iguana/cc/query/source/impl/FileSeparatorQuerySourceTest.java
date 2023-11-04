@@ -82,7 +82,7 @@ public class FileSeparatorQuerySourceTest {
 
     @BeforeAll
     public static void createTempDirectory() throws IOException {
-        directory = Files.createTempDirectory("file-line-query-source-test-dir");
+        directory = Files.createTempDirectory("iguana-file-line-query-source-test-dir");
     }
 
     @AfterAll
