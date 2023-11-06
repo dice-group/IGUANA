@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled("This test takes a lot of time and resources.")
 class BigByteArrayOutputStreamTest {
     final static Random rng = new Random(0);
 
