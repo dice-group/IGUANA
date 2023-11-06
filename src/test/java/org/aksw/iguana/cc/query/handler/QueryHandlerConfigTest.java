@@ -16,7 +16,7 @@ class QueryHandlerConfigTest {
 
 
 
-    private static Stream<Arguments> testData() {
+    private static Stream<Arguments> testDeserializationData() {
         return Stream.of(
                 Arguments.of(new QueryHandler.Config("some.queries",
                                 QueryHandler.Config.Format.FOLDER,
@@ -67,13 +67,64 @@ class QueryHandlerConfigTest {
                         """
                 )
         );
+    }
 
+    private static Stream<Arguments> testSerializationData() {
+        return Stream.of(
+                Arguments.of(new QueryHandler.Config("some.queries",
+                                QueryHandler.Config.Format.FOLDER,
+                                "",
+                                true,
+                                QueryHandler.Config.Order.LINEAR,
+                                100L,
+                                QueryHandler.Config.Language.SPARQL
+                        ),
+                        """
+                            {"path":"some.queries","separator": "", "format":"folder","caching":true,"order":"linear","seed": 100, "lang":"SPARQL"}
+                        """
+                ),
+                Arguments.of(new QueryHandler.Config("some.queries",
+                                QueryHandler.Config.Format.ONE_PER_LINE,
+                                "",
+                                true,
+                                QueryHandler.Config.Order.LINEAR,
+                                0L,
+                                QueryHandler.Config.Language.SPARQL
+                        ),
+                        """
+                            {"path":"some.queries", "format":"one-per-line","separator":"","caching":true,"order":"linear","seed":0,"lang":"SPARQL"}
+                        """
+                ),
+                Arguments.of(new QueryHandler.Config("some.queries",
+                                QueryHandler.Config.Format.FOLDER,
+                                "",
+                                true,
+                                QueryHandler.Config.Order.RANDOM,
+                                42L,
+                                QueryHandler.Config.Language.SPARQL
+                        ),
+                        """
+                            {"path":"some.queries","format":"folder","separator":"","caching":true,"order":"random","seed":42,"lang":"SPARQL"}
+                        """
+                ),
+                Arguments.of(new QueryHandler.Config("some.queries",
+                                QueryHandler.Config.Format.SEPARATOR,
+                                "\n",
+                                true,
+                                QueryHandler.Config.Order.RANDOM,
+                                42L,
+                                QueryHandler.Config.Language.SPARQL
+                        ),
+                        """
+                            {"path":"some.queries","format":"separator", "separator": "\\n", "caching":true,"order":"random","seed":42,"lang":"SPARQL"}
+                        """
+                )
+        );
     }
 
     @ParameterizedTest
-    @MethodSource("testData")
-    @Disabled("Serialization isn't used")
-    public void testSerialization(QueryHandler.Config config, String expectedJson) throws Exception {
+    @MethodSource("testSerializationData")
+    public void testSerialisation(QueryHandler.Config config, String expectedJson) throws Exception {
 
         final String actual = mapper.writeValueAsString(config);
         System.out.println(actual);
@@ -81,7 +132,7 @@ class QueryHandlerConfigTest {
     }
 
     @ParameterizedTest
-    @MethodSource("testData")
+    @MethodSource("testDeserializationData")
     public void testDeserialization(QueryHandler.Config expected, String json) throws Exception {
         final var actual = mapper.readValue(json, QueryHandler.Config.class);
 
