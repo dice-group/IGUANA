@@ -348,6 +348,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
         // check if the last execution task is stuck
         if (this.httpClient.executor().isPresent() && ((ThreadPoolExecutor) this.httpClient.executor().get()).getActiveCount() != 0) {
+            // This might never cancel the task if the client that's connected to is broken. There also seems to be a
+            // bug where the httpClient never properly handles the interrupt from the shutdownNow method.
+            // See: https://bugs.openjdk.org/browse/JDK-8294047
             ((ThreadPoolExecutor) this.httpClient.executor().get()).shutdownNow();
             final var waitStart = Instant.now();
             try {
