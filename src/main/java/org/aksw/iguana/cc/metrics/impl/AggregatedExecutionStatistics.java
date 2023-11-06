@@ -12,7 +12,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
 
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.List;
@@ -28,7 +28,7 @@ public class AggregatedExecutionStatistics extends Metric implements ModelWritin
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public Model createMetricModel(List<HttpWorker> workers, List<HttpWorker.ExecutionStats>[][] data, IRES.Factory iresFactory) {
         Model m = ModelFactory.createDefaultModel();
         for (var worker : workers) {
@@ -41,7 +41,7 @@ public class AggregatedExecutionStatistics extends Metric implements ModelWritin
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public Model createMetricModel(List<HttpWorker> workers, Map<String, List<HttpWorker.ExecutionStats>> data, IRES.Factory iresFactory) {
         Model m = ModelFactory.createDefaultModel();
         for (String queryID : data.keySet()) {

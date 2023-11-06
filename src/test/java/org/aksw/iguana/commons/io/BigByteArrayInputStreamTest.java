@@ -14,7 +14,6 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("Big test")
 class BigByteArrayInputStreamTest {
 
     private static final int MAX_SINGLE_BUFFER_SIZE = Integer.MAX_VALUE - 8;

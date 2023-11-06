@@ -18,7 +18,6 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("Big test")
 class BigByteArrayOutputStreamTest {
     final static Random rng = new Random(0);
 
