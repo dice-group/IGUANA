@@ -1,23 +1,28 @@
 datasets:
   - name: "DatasetName"
-    #optional, will just be set in the pre & post script hooks by using {{dataset.file}}
     file: "src/test/resources/dataset.txt"
+
 connections:
   - name: "Virtuoso7"
-    user: "dba"
-    password: "dba"
+    authentication:
+      user: "dba"
+      password: "dba"
     endpoint: "http://localhost:8890/sparql"
     dataset: DatasetName
   - name: "Virtuoso6"
-    user: "dba"
-    password: "dba"
+    authentication:
+      user: "dba"
+      password: "dba"
     endpoint: "http://localhost:8891/sparql"
   - name: "Blazegraph"
     endpoint: "http://localhost:9999/blazegraph/sparql"
-  - name: "Fuseki"
-    user: "test"
-    endpoint: "http://127.0.0.1:3030/ds/sparql"
+    authentication:
+      user: "user"
+      password: "test"
     updateEndpoint: "http://localhost:3030/ds/update"
+    updateAuthentication:
+      user: "updateUser"
+      password: "password"
 
 tasks:
   # 1 hour (time Limit is in ms)
@@ -27,7 +32,7 @@ tasks:
     - type: SPARQLProtocolWorker
       number: 16
       queries:
-        path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+        path: "./example/queries"
       timeout: 0.02s
       connection: Virtuoso7
       completionTarget:
@@ -36,7 +41,7 @@ tasks:
       - type: "SPARQLProtocolWorker"
         number: 16
         queries:
-          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+          path: "./example/queries"
         timeout: 3m
         connection: Virtuoso7
         completionTarget:
@@ -48,7 +53,7 @@ tasks:
         completionTarget:
           duration: 1000s
         queries:
-          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+          path: "./example/queries"
         timeout: 100s
         acceptHeader: "application/sparql-results+json"
   - type: stresstest
@@ -58,7 +63,7 @@ tasks:
         number: 16
         requestType: get query
         queries:
-          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+          path: "./example/queries"
         timeout: 180s
         completionTarget:
           duration: 1000s
@@ -69,14 +74,18 @@ tasks:
           duration: 1000s
         type: "SPARQLProtocolWorker"
         queries:
-          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+          path: "./example/queries"
         timeout: 100s
         parseResults: true
         acceptHeader: "application/sparql-results+json"
 
-#optional otherwise an nt file will be used
+#optional otherwise a nt file will be used
 storages:
-  - type: "RDF file"
+  - type: "rdf file"
     path: "some.ttl"
     #configuration:
       #fileName: YOUR_RESULT_FILE_NAME.nt
+
+responseBodyProcessors:
+  - contentType: "application/sparql+json"
+    threads: 1
