@@ -33,7 +33,7 @@ public class StresstestResultProcessor {
     /**
      * This array contains each query execution. The outer array is indexed with the workerID and the inner array
      * with the numeric queryID that the query has inside that worker.
-     * */
+     */
     private final List<HttpWorker.ExecutionStats>[][] workerQueryExecutions;
 
     /** This map contains each query execution, grouped by each queryID of the task. */
