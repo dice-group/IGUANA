@@ -30,10 +30,13 @@ public class StresstestResultProcessor {
     private final List<Storage> storages;
     private final Supplier<Map<LanguageProcessor, List<LanguageProcessor.LanguageProcessingData>>> lpResults;
 
-    /** This array contains each query execution, grouped by each worker and each query. */
+    /**
+     * This array contains each query execution. The outer array is indexed with the workerID and the inner array
+     * with the numeric queryID that the query has inside that worker.
+     * */
     private final List<HttpWorker.ExecutionStats>[][] workerQueryExecutions;
 
-    /** This map contains each query execution, grouped by each query of the task. */
+    /** This map contains each query execution, grouped by each queryID of the task. */
     private final Map<String, List<HttpWorker.ExecutionStats>> taskQueryExecutions;
 
 
