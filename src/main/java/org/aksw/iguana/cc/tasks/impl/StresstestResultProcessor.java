@@ -31,8 +31,9 @@ public class StresstestResultProcessor {
     private final Supplier<Map<LanguageProcessor, List<LanguageProcessor.LanguageProcessingData>>> lpResults;
 
     /**
-     * This array contains each query execution. The outer array is indexed with the workerID and the inner array
-     * with the numeric queryID that the query has inside that worker.
+     * This array contains each query execution of a worker grouped to its queries.
+     * The outer array is indexed with the workerID and the inner array with the numeric queryID that the query has
+     * inside that worker.
      */
     private final List<HttpWorker.ExecutionStats>[][] workerQueryExecutions;
 
@@ -41,7 +42,7 @@ public class StresstestResultProcessor {
 
 
     /** Stores the start and end time for each workerID. */
-    private StartEndTimePair[] workerStartEndTime;
+    private final StartEndTimePair[] workerStartEndTime;
 
     private final IRES.Factory iresFactory;
 
