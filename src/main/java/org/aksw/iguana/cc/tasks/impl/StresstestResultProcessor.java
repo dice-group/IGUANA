@@ -41,7 +41,7 @@ public class StresstestResultProcessor {
 
 
     /** Stores the start and end time for each workerID. */
-    private Map<Long, StartEndTimePair> workerStartEndTime;
+    private StartEndTimePair[] workerStartEndTime;
 
     private final IRES.Factory iresFactory;
 
@@ -73,7 +73,7 @@ public class StresstestResultProcessor {
         }
 
         this.iresFactory = new IRES.Factory(suiteID, taskID);
-        this.workerStartEndTime = new HashMap<>();
+        this.workerStartEndTime = new StartEndTimePair[worker.size()];
     }
 
     /**
@@ -88,7 +88,7 @@ public class StresstestResultProcessor {
                 String queryID = workers.get((int) result.workerID()).config().queries().getQueryId(stat.queryID());
                 taskQueryExecutions.get(queryID).add(stat);
             }
-            workerStartEndTime.put(result.workerID(), new StartEndTimePair(result.startTime(), result.endTime()));
+            workerStartEndTime[Math.toIntExact(result.workerID())] = new StartEndTimePair(result.startTime(), result.endTime()); // Naively assumes that there won't be more than Integer.MAX workers
         }
     }
 
@@ -177,7 +177,7 @@ public class StresstestResultProcessor {
             }
 
             // start and end times for the workers
-            final var timePair = workerStartEndTime.get(worker.getWorkerID());
+            final var timePair = workerStartEndTime[Math.toIntExact(worker.getWorkerID())];
             m.add(workerRes, IPROP.startDate, TimeUtils.createTypedZonedDateTimeLiteral(timePair.startTime));
             m.add(workerRes, IPROP.endDate, TimeUtils.createTypedZonedDateTimeLiteral(timePair.endTime));
         }
