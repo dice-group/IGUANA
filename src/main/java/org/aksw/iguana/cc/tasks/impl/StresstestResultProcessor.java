@@ -19,6 +19,11 @@ import java.util.function.Supplier;
 
 public class StresstestResultProcessor {
 
+    private record StartEndTimePair (
+            ZonedDateTime startTime,
+            ZonedDateTime endTime
+    ) {}
+
     private final List<Metric> metrics;
     private final List<HttpWorker> workers;
     private final List<String> queryIDs;
@@ -31,11 +36,9 @@ public class StresstestResultProcessor {
     /** This map contains each query execution, grouped by each query of the task. */
     private final Map<String, List<HttpWorker.ExecutionStats>> taskQueryExecutions;
 
-    /**
-     * Stores for each workerID an array with two items, that contains the start and end time for the respective
-     * worker. First item in the array is the start time, second item is the end time.
-     */
-    private Map<Long, ZonedDateTime[]> workerStartEndTime;
+
+    /** Stores the start and end time for each workerID. */
+    private Map<Long, StartEndTimePair> workerStartEndTime;
 
     private final IRES.Factory iresFactory;
 
@@ -82,7 +85,7 @@ public class StresstestResultProcessor {
                 String queryID = workers.get((int) result.workerID()).config().queries().getQueryId(stat.queryID());
                 taskQueryExecutions.get(queryID).add(stat);
             }
-            workerStartEndTime.put(result.workerID(), new ZonedDateTime[]{ result.startTime(), result.endTime() });
+            workerStartEndTime.put(result.workerID(), new StartEndTimePair(result.startTime(), result.endTime()));
         }
     }
 
@@ -171,9 +174,9 @@ public class StresstestResultProcessor {
             }
 
             // start and end times for the workers
-            final var times = workerStartEndTime.get(worker.getWorkerID());
-            m.add(workerRes, IPROP.startDate, TimeUtils.createTypedZonedDateTimeLiteral(times[0]));
-            m.add(workerRes, IPROP.endDate, TimeUtils.createTypedZonedDateTimeLiteral(times[1]));
+            final var timePair = workerStartEndTime.get(worker.getWorkerID());
+            m.add(workerRes, IPROP.startDate, TimeUtils.createTypedZonedDateTimeLiteral(timePair.startTime));
+            m.add(workerRes, IPROP.endDate, TimeUtils.createTypedZonedDateTimeLiteral(timePair.endTime));
         }
 
         m.add(taskRes, IPROP.startDate, ResourceFactory.createTypedLiteral(start));
