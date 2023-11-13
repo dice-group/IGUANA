@@ -46,7 +46,6 @@ The following gives you an examples on how to work with the `data` parameter:
     }
 
     @Override
-    @Nonnull
     public Model createMetricModel(StresstestMetadata task, Map<String, List<QueryExecutionStats>> data) {
         for (String queryID : task.queryIDS()) {
             // This list contains every query execution statistics of one query from

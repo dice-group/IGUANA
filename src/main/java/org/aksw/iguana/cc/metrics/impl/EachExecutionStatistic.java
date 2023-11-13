@@ -11,7 +11,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -22,7 +21,6 @@ public class EachExecutionStatistic extends Metric implements ModelWritingMetric
     }
 
     @Override
-    @NotNull
     public Model createMetricModel(List<HttpWorker> workers, List<HttpWorker.ExecutionStats>[][] data, IRES.Factory iresFactory) {
         Model m = ModelFactory.createDefaultModel();
         for (var worker : workers) {
