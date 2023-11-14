@@ -1,55 +1,69 @@
 package org.aksw.iguana.cc.lang;
 
-import org.apache.http.Header;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.jena.rdf.model.Model;
-import org.json.simple.parser.ParseException;
-import org.xml.sax.SAXException;
+import org.aksw.iguana.cc.storage.Storable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.util.AnnotatedTypeScanner;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.TimeoutException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
- * Language Processor tells how to handle Http responses as well as how to analyze queries and generate stats.
+ * Interface for abstract language processors that work on InputStreams.
  */
-public interface LanguageProcessor {
+public abstract class LanguageProcessor {
 
     /**
-     * Returns the prefix used for the queries (e.g. sparql, query or document)
-     * @return
+     * Provides the content type that a LanguageProcessor consumes.
      */
-    String getQueryPrefix();
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface ContentType {
+        String value();
+    }
 
-    /**
-     * Method to generate Triple Statistics for provided queries
-     *
-     *
-     * @param taskID
-     * @return Model with the triples to add to the results
-     */
-    Model generateTripleStats(List<QueryWrapper> queries, String resourcePrefix, String taskID);
+    public interface LanguageProcessingData extends Storable {
+        long hash();
+        Class<? extends LanguageProcessor> processor();
+    }
 
+    public abstract LanguageProcessingData process(InputStream inputStream, long hash);
 
-    /**
-     * Gets the result size of a given HTTP response
-     *
-     * @param response
-     * @return
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws ParseException
-     * @throws IOException
-     */
-    Long getResultSize(CloseableHttpResponse response) throws ParserConfigurationException, SAXException, ParseException, IOException;
+    final private static Map<String, Class<? extends LanguageProcessor>> processors = new HashMap<>();
 
-    Long getResultSize(Header contentTypeHeader, ByteArrayOutputStream content, long contentLength) throws ParserConfigurationException, SAXException, ParseException, IOException;
+    final private static Logger LOGGER = LoggerFactory.getLogger(LanguageProcessor.class);
 
+    static {
+        final var scanner = new AnnotatedTypeScanner(false, ContentType.class);
+        final var langProcessors = scanner.findTypes("org.aksw.iguana.cc.lang");
+        for (Class<?> langProcessor : langProcessors) {
+            String contentType = langProcessor.getAnnotation(ContentType.class).value();
+            if (LanguageProcessor.class.isAssignableFrom(langProcessor)) {
+                processors.put(contentType, (Class<? extends LanguageProcessor>) langProcessor);
+            } else {
+                LOGGER.error("Found a class with the ContentType annotation, that doesn't inherit from the class LanguageProcessor: {}", langProcessor.getName());
+            }
+        }
+    }
 
-    long readResponse(InputStream inputStream, ByteArrayOutputStream responseBody) throws IOException, TimeoutException;
+    public static LanguageProcessor getInstance(String contentType) {
+        Class<? extends LanguageProcessor> processorClass = processors.get(contentType);
+        if (processorClass != null) {
+            try {
+                return processorClass.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new IllegalArgumentException("No LanguageProcessor for ContentType " + contentType);
+    }
 
 }

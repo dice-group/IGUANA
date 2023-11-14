@@ -1,0 +1,6 @@
+queryID,succeeded,failed,totalTime,resultSize,wrongCodes,timeOuts,unknownException,PQPS,QPS
+http://iguana-benchmark.eu/resource/MockQueryHandler2:2,1,2,PT7.5S,1000,1,0,1,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler2:4,1,2,PT7.5S,1000,1,0,1,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler2:1,1,2,PT7.5S,1000,1,0,1,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler2:3,1,2,PT7.5S,1000,1,0,1,0.75,0.5
+http://iguana-benchmark.eu/resource/MockQueryHandler2:0,1,2,PT7.5S,1000,1,0,1,0.75,0.5

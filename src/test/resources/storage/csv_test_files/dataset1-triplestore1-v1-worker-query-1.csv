@@ -1,2 +1,0 @@
-queryID,succeeded,failed,totalTime,resultSize,wrongCodes,timeOuts,unknownException,QPS
-http://iguana-benchmark.eu/resource/query1,1,2,100,98,3,4,5,10

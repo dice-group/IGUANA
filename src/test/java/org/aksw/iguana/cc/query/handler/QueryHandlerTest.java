@@ -1,152 +1,185 @@
 package org.aksw.iguana.cc.query.handler;
 
-import org.aksw.iguana.cc.utils.ServerMock;
-import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.simpleframework.http.core.ContainerServer;
-import org.simpleframework.transport.connect.SocketConnection;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
+import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
+import org.aksw.iguana.cc.query.source.QuerySource;
+import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
+import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
+import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
+import org.aksw.iguana.cc.query.source.impl.FolderQuerySourceTest;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 public class QueryHandlerTest {
 
-    private static final int FAST_SERVER_PORT = 8024;
-    private static final String CACHE_FOLDER = UUID.randomUUID().toString();
-    private static ContainerServer fastServer;
-    private static SocketConnection fastConnection;
+    static Path parentFolder;
+    static Path tempDir;
+    static Path tempFileSep;
+    static Path tempFileLine;
 
-    private final QueryHandler queryHandler;
-    private final Map<String, Object> config;
-    private final String[] expected;
+    static List<FolderQuerySourceTest.Query> queries;
+    static List<FolderQuerySourceTest.Query> folderQueries;
 
+    public static List<Arguments> data() {
+        final var out = new ArrayList<Arguments>();
+        final var caching = List.of(true, false);
 
-    public QueryHandlerTest(Map<String, Object> config, String[] expected) {
-        this.queryHandler = new QueryHandler(config, 0); // workerID 0 results in correct seed for RandomSelector
-        this.config = config;
-        this.expected = expected;
+        for (var cache : caching) {
+            out.add(Arguments.of(String.format("""
+                {"path":"%s","format":"folder","order":"linear","lang":"SPARQL", "caching": %s}
+                """, tempDir.toString().replaceAll("\\\\", "\\\\\\\\"), cache),
+                    FolderQuerySource.class));
+            out.add(Arguments.of(String.format("""
+                {"path":"%s","format":"one-per-line","order":"linear","lang":"SPARQL", "caching": %s}
+                """, tempFileLine.toString().replaceAll("\\\\", "\\\\\\\\"), cache),
+                    FileLineQuerySource.class));
+            out.add(Arguments.of(String.format("""
+                {"path":"%s","format":"separator", "separator": "\\n###\\n", "order":"linear","lang":"SPARQL", "caching": %s}
+                """, tempFileSep.toString().replaceAll("\\\\", "\\\\\\\\"), cache),
+                    FileSeparatorQuerySource.class));
+        }
+
+        return out;
     }
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() throws IOException {
-        String le = org.aksw.iguana.cc.utils.FileUtils.getLineEnding("src/test/resources/query/source/queries.txt");
+    @BeforeAll
+    public static void createFolder() throws IOException {
+        parentFolder = Files.createTempDirectory("iguana-query-handler-test");
+        tempDir = Files.createTempDirectory(parentFolder, "folder-query-source-test-dir");
+        tempFileSep = Files.createTempFile(parentFolder, "Query", ".txt");
+        tempFileLine = Files.createTempFile(parentFolder, "Query", ".txt");
 
-        String[] opl = new String[]{"QUERY 1 {still query 1}", "QUERY 2 {still query 2}", "QUERY 3 {still query 3}", "QUERY 1 {still query 1}"};
-        String[] folder = new String[]{"QUERY 1 {" + le + "still query 1" + le + "}", "QUERY 2 {" + le + "still query 2" + le + "}", "QUERY 3 {" + le + "still query 3" + le + "}", "QUERY 1 {" + le + "still query 1" + le + "}"};
-        String[] separator = new String[]{"QUERY 1 {" + le + "still query 1" + le + "}", "QUERY 2 {" + le + "still query 2" + le + "}", "QUERY 3 {" + le + "still query 3" + le + "}", "QUERY 1 {" + le + "still query 1" + le + "}"};
+        queries = new LinkedList<>();
+        folderQueries = new LinkedList<>();
 
-        Collection<Object[]> testData = new ArrayList<>();
-
-        // Defaults: one-per-line, caching, linear
-        Map<String, Object> config0 = new HashMap<>();
-        config0.put("location", "src/test/resources/query/source/queries.txt");
-        testData.add(new Object[]{config0, opl});
-
-        // Defaults: caching, linear
-        Map<String, Object> config1 = new HashMap<>();
-        config1.put("location", "src/test/resources/query/source/query-folder");
-        config1.put("format", "folder");
-        testData.add(new Object[]{config1, folder});
-
-        // Defaults: separator("###"), caching, linear
-        Map<String, Object> config2 = new HashMap<>();
-        config2.put("location", "src/test/resources/query/source/separated-queries-default.txt");
-        config2.put("format", "separator");
-        testData.add(new Object[]{config2, separator});
-
-        Map<String, Object> config3 = new HashMap<>();
-        config3.put("location", "src/test/resources/query/source/separated-queries-default.txt");
-        Map<String, Object> format3 = new HashMap<>();
-        format3.put("separator", "###");
-        config3.put("format", format3);
-        config3.put("caching", false);
-        config3.put("order", "random");
-        testData.add(new Object[]{config3, separator});
-
-        // Defaults: one-per-line, caching
-        Map<String, Object> config4 = new HashMap<>();
-        config4.put("location", "src/test/resources/query/source/queries.txt");
-        Map<String, Object> random4 = new HashMap<>();
-        random4.put("seed", 0);
-        Map<String, Object> order4 = new HashMap<>();
-        order4.put("random", random4);
-        config4.put("order", order4);
-        testData.add(new Object[]{config4, opl});
-
-        String[] expectedInstances = new String[]{"SELECT ?book {?book <http://example.org/book/book2> ?o}", "SELECT ?book {?book <http://example.org/book/book1> ?o}", "SELECT ?book {?book <http://example.org/book/book2> ?o}", "SELECT ?book {?book <http://example.org/book/book1> ?o}"};
-        Map<String, Object> config5 = new HashMap<>();
-        config5.put("location", "src/test/resources/query/pattern-query.txt");
-        Map<String, Object> pattern5 = new HashMap<>();
-        pattern5.put("endpoint", "http://localhost:8024");
-        pattern5.put("outputFolder", CACHE_FOLDER);
-        config5.put("pattern", pattern5);
-        testData.add(new Object[]{config5, expectedInstances});
-
-
-        return testData;
+        for (int i = 0; i < 10; i++) {
+            final Path queryFile = Files.createTempFile(tempDir, "Query", ".txt");
+            final String content = UUID.randomUUID().toString();
+            Files.writeString(queryFile, content);
+            Files.writeString(tempFileSep, content + "\n###\n", StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+            Files.writeString(tempFileLine, content + "\n", StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+            queries.add(new FolderQuerySourceTest.Query(queryFile, content));
+            folderQueries.add(new FolderQuerySourceTest.Query(queryFile, content));
+        }
+        // Queries in the folder are expected in alphabetic order of the file names.
+        Collections.sort(folderQueries);
     }
 
-    @BeforeClass
-    public static void startServer() throws IOException {
-        ServerMock fastServerContainer = new ServerMock();
-        fastServer = new ContainerServer(fastServerContainer);
-        fastConnection = new SocketConnection(fastServer);
-        SocketAddress address1 = new InetSocketAddress(FAST_SERVER_PORT);
-        fastConnection.connect(address1);
+    @AfterAll
+    public static void removeFolder() throws IOException {
+        org.apache.commons.io.FileUtils.deleteDirectory(parentFolder.toFile());
     }
 
-    @AfterClass
-    public static void stopServer() throws IOException {
-        fastConnection.close();
-        fastServer.stop();
-        FileUtils.deleteDirectory(new File(CACHE_FOLDER));
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testDeserialization(String json, Class<QuerySource> sourceType) throws Exception {
+        final var mapper = new ObjectMapper();
+        QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
+        final var selector = queryHandler.getQuerySelectorInstance();
+        assertTrue(selector instanceof LinearQuerySelector);
+        assertEquals(queries.size(), queryHandler.getQueryCount());
+        assertNotEquals(0, queryHandler.hashCode());
+        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+            final var wrapper = queryHandler.getNextQuery(selector);
+            assertEquals(i, selector.getCurrentIndex());
+            if (FolderQuerySource.class.isAssignableFrom(sourceType))
+                assertEquals(folderQueries.get(i).content(), wrapper.query());
+            else
+                assertEquals(queries.get(i).content(), wrapper.query());
+            assertEquals(i, wrapper.index());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testQueryStreamWrapper(String json, Class<QuerySource> sourceType) throws IOException {
+        final var mapper = new ObjectMapper();
+        QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
+        final var selector = queryHandler.getQuerySelectorInstance();
+        assertTrue(selector instanceof LinearQuerySelector);
+        assertEquals(queries.size(), queryHandler.getQueryCount());
+        assertNotEquals(0, queryHandler.hashCode());
+        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+            final var wrapper = queryHandler.getNextQueryStream(selector);
+            assertEquals(i, selector.getCurrentIndex());
+            final var acutalQuery = new String(wrapper.queryInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            if (FolderQuerySource.class.isAssignableFrom(sourceType))
+                assertEquals(folderQueries.get(i).content(), acutalQuery);
+            else
+                assertEquals(queries.get(i).content(), acutalQuery);
+            assertEquals(i, wrapper.index());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testQueryStringWrapper(String json, Class<QuerySource> sourceType) throws IOException {
+        final var mapper = new ObjectMapper();
+        QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
+        final var selector = queryHandler.getQuerySelectorInstance();
+        assertTrue(selector instanceof LinearQuerySelector);
+        assertEquals(queries.size(), queryHandler.getQueryCount());
+        assertNotEquals(0, queryHandler.hashCode());
+        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+            final var wrapper = queryHandler.getNextQuery(selector);
+            assertEquals(i, selector.getCurrentIndex());
+            if (FolderQuerySource.class.isAssignableFrom(sourceType))
+                assertEquals(folderQueries.get(i).content(), wrapper.query());
+            else
+                assertEquals(queries.get(i).content(), wrapper.query());
+            assertEquals(i, wrapper.index());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testQueryIDs(String json, Class<QuerySource> sourceType) {
+        final var mapper = new ObjectMapper();
+        QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
+        final var selector = queryHandler.getQuerySelectorInstance();
+        assertTrue(selector instanceof LinearQuerySelector);
+        assertEquals(queries.size(), queryHandler.getQueryCount());
+        assertNotEquals(0, queryHandler.hashCode());
+        final var allQueryIDs = queryHandler.getAllQueryIds();
+        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+            assertEquals(queryHandler.hashCode() + ":" + i, allQueryIDs[i]);
+            assertEquals(allQueryIDs[i], queryHandler.getQueryId(i));
+        }
     }
 
     @Test
-    public void getNextQueryTest() throws IOException {
-        // Assumes, that the order is correct has only stored values for random retrieval
-        Object order = config.getOrDefault("order", null);
-        if (order != null) {
-            Collection<String> queries = new HashSet<>();
-            for (int i = 0; i < 4; i++) {
-                StringBuilder query = new StringBuilder();
-                StringBuilder queryID = new StringBuilder();
-                this.queryHandler.getNextQuery(query, queryID);
-                queries.add(query.toString());
+    public void testRandomQuerySelectorSeedConsistency() throws IOException {
+        String[] json = new String[2];
+        json[0] = String.format("""
+                {"path":"%s","format":"folder","order":"random", "seed": 100,"lang":"SPARQL"}
+                """, tempDir.toString().replaceAll("\\\\", "\\\\\\\\")); // windows
+        json[1] = String.format("""
+                {"path":"%s","format":"one-per-line","order":"random", "seed": 100,"lang":"SPARQL"}
+                """, tempFileLine.toString().replaceAll("\\\\", "\\\\\\\\")); // this tests need to different configuration, because instances of the query handler are cached
+
+        final var mapper = new ObjectMapper();
+        List<Integer>[] indices = new ArrayList[2];
+        for (int i = 0; i < 2; i++) {
+            QueryHandler queryHandler = mapper.readValue(json[i], QueryHandler.class);
+            final var selector = queryHandler.getQuerySelectorInstance();
+            assertTrue(selector instanceof RandomQuerySelector);
+            indices[i] = new ArrayList<>();
+            for (int j = 0; j < 100000; j++) {
+                indices[i].add(selector.getNextIndex());
             }
-            assertTrue(Arrays.asList(this.expected).containsAll(queries));
-            return;
         }
-
-        StringBuilder query = new StringBuilder();
-        StringBuilder queryID = new StringBuilder();
-        this.queryHandler.getNextQuery(query, queryID);
-        assertEquals(this.expected[0], query.toString());
-
-        query = new StringBuilder();
-        queryID = new StringBuilder();
-        this.queryHandler.getNextQuery(query, queryID);
-        assertEquals(this.expected[1], query.toString());
-
-        query = new StringBuilder();
-        queryID = new StringBuilder();
-        this.queryHandler.getNextQuery(query, queryID);
-        assertEquals(this.expected[2], query.toString());
-
-        query = new StringBuilder();
-        queryID = new StringBuilder();
-        this.queryHandler.getNextQuery(query, queryID);
-        assertEquals(this.expected[3], query.toString());
+        assertEquals(indices[0], indices[1]);
     }
 }

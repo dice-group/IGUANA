@@ -2,14 +2,19 @@ package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.utils.FileUtils;
+import org.apache.commons.io.input.AutoCloseInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static java.text.MessageFormat.format;
 
 /**
  * The FileSeparatorQuerySource reads queries from a folder with query files.
@@ -21,30 +26,26 @@ public class FolderQuerySource extends QuerySource {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(FolderQuerySource.class);
 
-    protected File[] files;
+    protected Path[] files;
 
-    public FolderQuerySource(String path) {
+    public FolderQuerySource(Path path) throws IOException {
         super(path);
 
-        indexFolder();
-    }
-
-    private void indexFolder() {
-        File dir = new File(this.path);
-        if (!dir.exists()) {
-            LOGGER.error("Folder does not exist");
-            return;
-        }
-        if (!dir.isDirectory()) {
-            LOGGER.error("Path is not a folder");
-            return;
+        if (!Files.isDirectory(path)) {
+            final var message = format("Folder does not exist {0}.", path);
+            LOGGER.error(message);
+            throw new IOException(message);
         }
 
-        LOGGER.info("indexing folder {}", this.path);
-        this.files = dir.listFiles(File::isFile);
-        if (this.files == null)
-            this.files = new File[]{};
-        Arrays.sort(this.files);
+        LOGGER.info("Indexing folder {}.", path);
+
+        try (Stream<Path> pathStream = Files.list(path);) {
+            files = pathStream
+                    .filter(p -> Files.isReadable(p) && Files.isRegularFile(p))
+                    .sorted()
+                    .toArray(Path[]::new);
+        }
+
     }
 
     @Override
@@ -54,7 +55,12 @@ public class FolderQuerySource extends QuerySource {
 
     @Override
     public String getQuery(int index) throws IOException {
-        return FileUtils.readFile(files[index].getAbsolutePath());
+        return Files.readString(files[index], StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public InputStream getQueryStream(int index) throws IOException {
+        return new AutoCloseInputStream(new BufferedInputStream(new FileInputStream(files[index].toFile())));
     }
 
     @Override
@@ -68,6 +74,6 @@ public class FolderQuerySource extends QuerySource {
 
     @Override
     public int hashCode() {
-        return FileUtils.getHashcodeFromFileContent(this.files[0].getAbsolutePath());
+        return FileUtils.getHashcodeFromFileContent(this.files[0]);
     }
 }

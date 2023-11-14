@@ -66,7 +66,7 @@ implements the following methods:
 public class MyQuerySource extends QuerySource {
 	public MyQuerySource(String filepath) {
 		// your constructor
-		// filepath is the value, specified in the "location"-key inside the configuration file
+		// filepath is the value, specified in the "path"-key inside the configuration file
 	}
 	
 	@Override

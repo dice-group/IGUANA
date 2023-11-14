@@ -1,78 +1,38 @@
 package org.aksw.iguana.cc.config.elements;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import java.io.Serializable;
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * A connection configuration class
  */
-public class ConnectionConfig implements Serializable {
+public record ConnectionConfig(
+        @JsonProperty(required = true)
+        String name,
+        String version,
+        DatasetConfig dataset,
+        @JsonProperty(required = true)
+        @JsonDeserialize(using = URIDeserializer.class)
+        URI endpoint,
+        Authentication authentication,
+        @JsonDeserialize(using = URIDeserializer.class)
+        URI updateEndpoint,
+        Authentication updateAuthentication
 
-    @JsonProperty(required = true)
-    private String name;
-    @JsonProperty(required = false)
-    private String user;
-    @JsonProperty(required = false)
-    private String password;
-    @JsonProperty(required = true)
-    private String endpoint;
-    @JsonProperty(required = false)
-    private String updateEndpoint;
-    @JsonProperty(required = false)
-    private String version;
+) {
+    public static class URIDeserializer extends JsonDeserializer<URI> {
 
-    public String getVersion() {
-        return version;
+        @Override
+        public URI deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return URI.create(p.getValueAsString()); // verifying uri doesn't work here
+        }
     }
 
-    public String getVersion(String defaultValue) {
-        if(version!=null)
-            return version;
-        return defaultValue;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public String getUpdateEndpoint() {
-        return updateEndpoint;
-    }
-
-    public void setUpdateEndpoint(String updateEndpoint) {
-        this.updateEndpoint = updateEndpoint;
-    }
+    public record Authentication(String user, String password) {}
 }

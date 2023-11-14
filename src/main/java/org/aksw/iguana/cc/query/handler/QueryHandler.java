@@ -1,28 +1,28 @@
 package org.aksw.iguana.cc.query.handler;
 
-import org.aksw.iguana.cc.lang.LanguageProcessor;
-import org.aksw.iguana.cc.lang.QueryWrapper;
-import org.aksw.iguana.cc.query.pattern.PatternHandler;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
 import org.aksw.iguana.cc.query.list.QueryList;
 import org.aksw.iguana.cc.query.list.impl.FileBasedQueryList;
 import org.aksw.iguana.cc.query.list.impl.InMemQueryList;
-import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
-import org.aksw.iguana.commons.factory.TypedFactory;
-import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * The QueryHandler is used by every worker that extends the AbstractWorker.
@@ -32,185 +32,176 @@ import java.util.Map;
  *
  * @author frensing
  */
+@JsonDeserialize(using = QueryHandler.Deserializer.class)
 public class QueryHandler {
+    static class Deserializer extends StdDeserializer<QueryHandler> {
+        final HashMap<Config, QueryHandler> queryHandlers = new HashMap<>();
+        protected Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        protected Deserializer() {
+            this(null);
+        }
+
+        @Override
+        public QueryHandler deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+            QueryHandler.Config queryHandlerConfig = ctxt.readValue(jp, QueryHandler.Config.class);
+            if (!queryHandlers.containsKey(queryHandlerConfig))
+                queryHandlers.put(queryHandlerConfig, new QueryHandler(queryHandlerConfig));
+
+            return queryHandlers.get(queryHandlerConfig);
+        }
+    }
+
+    public record Config (
+            String path,
+            Format format,
+            String separator,
+            Boolean caching,
+            Order order,
+            Long seed,
+            Language lang
+    ) {
+        public Config(@JsonProperty(required = true) String path, Format format, String separator, Boolean caching, Order order, Long seed, Language lang) {
+            this.path = path;
+            this.format = (format == null ? Format.ONE_PER_LINE : format);
+            this.caching = (caching == null || caching);
+            this.order = (order == null ? Order.LINEAR : order);
+            this.seed = (seed == null ? 0 : seed);
+            this.lang = (lang == null ? Language.SPARQL : lang);
+            this.separator = (separator == null ? "" : separator);
+        }
+
+        public enum Format {
+            @JsonEnumDefaultValue ONE_PER_LINE("one-per-line"),
+            SEPARATOR("separator"),
+            FOLDER("folder");
+
+            final String value;
+
+            Format(String value) {
+                this.value = Objects.requireNonNullElse(value, "one-per-line");
+            }
+
+            @JsonValue
+            public String value() {
+                return value;
+            }
+        }
+
+        public enum Order {
+            @JsonEnumDefaultValue LINEAR("linear"),
+            RANDOM("random");
+
+            final String value;
+
+            Order(String value) {
+                this.value = value;
+            }
+
+            @JsonValue
+            public String value() {
+                return value;
+            }
+        }
+
+        public enum Language {
+            @JsonEnumDefaultValue SPARQL("SPARQL"),
+            UNSPECIFIED("unspecified");
+
+            final String value;
+
+            Language(String value) {
+                this.value = value;
+            }
+
+            @JsonValue
+            public String value() {
+                return value;
+            }
+        }
+    }
+
+    public record QueryStringWrapper(int index, String query) {}
+    public record QueryStreamWrapper(int index, InputStream queryInputStream) {}
+
 
     protected final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
 
-    protected Map<String, Object> config;
-    protected Integer workerID;
-    protected String location;
-    protected int hashcode;
+    @JsonValue
+    final protected Config config;
 
-    protected boolean caching;
+    final protected QueryList queryList;
 
-    protected QuerySelector querySelector;
+    private int workerCount = 0; // give every worker inside the same worker config an offset seed
 
-    protected QueryList queryList;
+    final protected int hashCode;
 
-    protected LanguageProcessor langProcessor;
+    /**
+     * Empty Constructor for Testing purposes.
+     * TODO: look for an alternative
+     */
+    protected QueryHandler() {
+        config = null;
+        queryList = null;
+        hashCode = 0;
+    }
 
-    public QueryHandler(Map<String, Object> config, Integer workerID) {
+    @JsonCreator
+    public QueryHandler(Config config) throws IOException {
+        final var querySource = switch (config.format()) {
+            case ONE_PER_LINE -> new FileLineQuerySource(Path.of(config.path()));
+            case SEPARATOR -> new FileSeparatorQuerySource(Path.of(config.path()), config.separator);
+            case FOLDER -> new FolderQuerySource(Path.of(config.path()));
+        };
+
+        queryList = (config.caching()) ?
+                new InMemQueryList(querySource) :
+                new FileBasedQueryList(querySource);
+
         this.config = config;
-        this.workerID = workerID;
-
-        this.location = (String) config.get("location");
-
-        initQuerySet();
-
-        initQuerySelector();
-        initLanguageProcessor();
-
-        this.hashcode = this.queryList.hashCode();
+        hashCode = queryList.hashCode();
     }
 
-    public void getNextQuery(StringBuilder queryStr, StringBuilder queryID) throws IOException {
-        int queryIndex = this.querySelector.getNextIndex();
-        queryStr.append(this.queryList.getQuery(queryIndex));
-        queryID.append(getQueryId(queryIndex));
-    }
-
-    public Model getTripleStats(String taskID) {
-        List<QueryWrapper> queries = new ArrayList<>(this.queryList.size());
-        for (int i = 0; i < this.queryList.size(); i++) {
-            try {
-                queries.add(new QueryWrapper(this.queryList.getQuery(i), getQueryId(i)));
-            } catch (Exception e) {
-                LOGGER.error("Could not parse query " + this.queryList.getName() + ":" + i, e);
-            }
+    public QuerySelector getQuerySelectorInstance() {
+        switch (config.order()) {
+            case LINEAR -> { return new LinearQuerySelector(queryList.size()); }
+            case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + workerCount++); }
         }
-        return this.langProcessor.generateTripleStats(queries, "" + this.hashcode, taskID);
+
+        throw new IllegalStateException("Unknown query selection order: " + config.order());
+    }
+
+    public QueryStringWrapper getNextQuery(QuerySelector querySelector) throws IOException {
+        final var queryIndex = querySelector.getNextIndex();
+        return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex));
+    }
+
+    public QueryStreamWrapper getNextQueryStream(QuerySelector querySelector) throws IOException {
+        final var queryIndex = querySelector.getNextIndex();
+        return new QueryStreamWrapper(queryIndex, this.queryList.getQueryStream(queryIndex));
     }
 
     @Override
     public int hashCode() {
-        return this.hashcode;
+        return hashCode;
     }
 
     public int getQueryCount() {
         return this.queryList.size();
     }
 
-    public LanguageProcessor getLanguageProcessor() {
-        return this.langProcessor;
-    }
-
-    /**
-     * This method initializes the PatternHandler if a pattern config is given, therefore
-     * <code>this.config.get("pattern")</code> should return an appropriate pattern configuration and not
-     * <code>null</code>. The PatternHandler uses the original query source to generate a new query source and list with
-     * the instantiated queries.
-     */
-    private void initPatternQuerySet() {
-        Map<String, Object> patternConfig = (Map<String, Object>) this.config.get("pattern");
-        PatternHandler patternHandler = new PatternHandler(patternConfig, createQuerySource());
-
-        initQuerySet(patternHandler.generateQuerySource());
-    }
-
-    /**
-     * Will initialize the QueryList.
-     * If caching is not set or set to true, the InMemQueryList will be used. Otherwise the FileBasedQueryList.
-     *
-     * @param querySource The QuerySource which contains the queries.
-     */
-    private void initQuerySet(QuerySource querySource) {
-        this.caching = (Boolean) this.config.getOrDefault("caching", true);
-
-        if (this.caching) {
-            this.queryList = new InMemQueryList(this.location, querySource);
-        } else {
-            this.queryList = new FileBasedQueryList(this.location, querySource);
-        }
-    }
-
-    /**
-     * This method initializes the QueryList for the QueryHandler. If a pattern configuration is specified, this method
-     * will execute <code>initPatternQuerySet</code> to create the QueryList.
-     */
-    private void initQuerySet() {
-        if(this.config.containsKey("pattern")) {
-            initPatternQuerySet();
-        }
-        else {
-            initQuerySet(createQuerySource());
-        }
-    }
-
-    /**
-     * Will initialize the QuerySource.
-     * Depending on the format configuration, the FileLineQuerySource,
-     * FileSeparatorQuerySource or FolderQuerySource will be used.
-     * The FileSeparatorQuerySource can be further configured with a separator.
-     *
-     * @return The QuerySource which contains the queries.
-     */
-    private QuerySource createQuerySource() {
-        Object formatObj = this.config.getOrDefault("format", "one-per-line");
-        if (formatObj instanceof Map) {
-            Map<String, Object> format = (Map<String, Object>) formatObj;
-            if (format.containsKey("separator")) {
-                return new FileSeparatorQuerySource(this.location, (String) format.get("separator"));
-            }
-        } else {
-            switch ((String) formatObj) {
-                case "one-per-line":
-                    return new FileLineQuerySource(this.location);
-                case "separator":
-                    return new FileSeparatorQuerySource(this.location);
-                case "folder":
-                    return new FolderQuerySource(this.location);
-            }
-        }
-        LOGGER.error("Could not create QuerySource for format {}", formatObj);
-        return null;
-    }
-
-    /**
-     * Will initialize the QuerySelector that provides the next query index during the benchmark execution.
-     * <p>
-     * currently linear or random (with seed) are implemented
-     */
-    private void initQuerySelector() {
-        Object orderObj = this.config.getOrDefault("order", "linear");
-
-        if (orderObj instanceof String) {
-            String order = (String) orderObj;
-            if (order.equals("linear")) {
-                this.querySelector = new LinearQuerySelector(this.queryList.size());
-                return;
-            }
-            if (order.equals("random")) {
-                this.querySelector = new RandomQuerySelector(this.queryList.size(), this.workerID);
-                return;
-            }
-
-            LOGGER.error("Unknown order: " + order);
-        }
-        if (orderObj instanceof Map) {
-            Map<String, Object> order = (Map<String, Object>) orderObj;
-            if (order.containsKey("random")) {
-                Map<String, Object> random = (Map<String, Object>) order.get("random");
-                Integer seed = (Integer) random.get("seed");
-                this.querySelector = new RandomQuerySelector(this.queryList.size(), seed);
-                return;
-            }
-            LOGGER.error("Unknown order: " + order);
-        }
-    }
-
-    private void initLanguageProcessor() {
-        Object langObj = this.config.getOrDefault("lang", "lang.SPARQL");
-        if (langObj instanceof String) {
-            this.langProcessor = new TypedFactory<LanguageProcessor>().create((String) langObj, new HashMap<>());
-        } else {
-            LOGGER.error("Unknown language: " + langObj);
-        }
-    }
-
     public String getQueryId(int i) {
-        return this.queryList.getName() + ":" + i;
+        return this.queryList.hashCode() + ":" + i;
     }
 
+    /**
+     * Returns every query id in the format: <code>queryListHash:index</code> <br/>
+     * The index of a query inside the returned array is the same as the index inside the string.
+     *
+     * @return String[] of query ids
+     */
     public String[] getAllQueryIds() {
         String[] out = new String[queryList.size()];
         for (int i = 0; i < queryList.size(); i++) {

@@ -3,7 +3,7 @@ package org.aksw.iguana.cc.utils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class FileUtils {
 
-	public static int getHashcodeFromFileContent(String filepath) {
+	public static int getHashcodeFromFileContent(Path filepath) {
 		int hashcode;
 		try {
 			String fileContents = readFile(filepath);
@@ -26,9 +26,8 @@ public class FileUtils {
 		return hashcode;
 	}
 
-	public static String readFile(String path) throws IOException {
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		return new String(encoded, StandardCharsets.UTF_8);
+	public static String readFile(Path path) throws IOException {
+		return Files.readString(path, StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -46,10 +45,8 @@ public class FileUtils {
 	 * @return the line ending used in the given file
 	 * @throws IOException
 	 */
-	public static String getLineEnding(String filepath) throws IOException {
-		try(FileInputStream fis = new FileInputStream(filepath);
-			InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-			BufferedReader br = new BufferedReader(isr)) {
+	public static String getLineEnding(Path filepath) throws IOException {
+		try(BufferedReader br = Files.newBufferedReader(filepath)) {
 			char c;
 			while ((c = (char) br.read()) != (char) -1) {
 				if (c == '\n')

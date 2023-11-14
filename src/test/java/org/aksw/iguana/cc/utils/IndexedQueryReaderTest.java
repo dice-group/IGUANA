@@ -1,99 +1,169 @@
 package org.aksw.iguana.cc.utils;
 
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Enclosed.class)
 public class IndexedQueryReaderTest {
 
-    @RunWith(Parameterized.class)
-    public static class ParameterizedTest {
+    private static Path tempDir;
 
-        IndexedQueryReader reader;
-
-        @Parameterized.Parameters
-        public static Collection<Object[]> data() {
-            return Arrays.asList(new Object[][]{
-                    {"src/test/resources/readLineTestFile1.txt"},
-                    {"src/test/resources/readLineTestFile2.txt"},
-                    {"src/test/resources/readLineTestFile3.txt"}
-            });
-        }
-
-        public ParameterizedTest(String path) throws IOException {
-            reader = IndexedQueryReader.make(path);
-        }
-
-        @Test
-        public void testIndexingWithLineEndings() throws IOException {
-            assertEquals("line 1", reader.readQuery(0));
-            assertEquals("line 2", reader.readQuery(1));
-            assertEquals("line 3", reader.readQuery(2));
-            assertEquals("line 4", reader.readQuery(3));
-        }
+    @BeforeAll
+    public static void createTestFolder() throws IOException {
+        tempDir = Files.createTempDirectory("iguana-indexed-query-reader-test");
     }
 
-    public static class NonParameterizedTest {
-        @Test
-        public void testIndexingWithBlankLines() throws IOException {
-            IndexedQueryReader reader = IndexedQueryReader.makeWithEmptyLines("src/test/resources/utils/indexingtestfile3.txt");
-            String le = FileUtils.getLineEnding("src/test/resources/utils/indexingtestfile3.txt");
-
-            assertEquals(" line 1" + le + "line 2", reader.readQuery(0));
-            assertEquals("line 3", reader.readQuery(1));
-            assertEquals("line 4" + le + "line 5", reader.readQuery(2));
-        }
+    @AfterAll
+    public static void removeData() throws IOException {
+        org.apache.commons.io.FileUtils.deleteDirectory(tempDir.toFile());
     }
 
-    @RunWith(Parameterized.class)
-    public static class TestCustomSeparator {
-        private static class TestData {
-            public String filepath;
-            public String separator;
-            public String[] expectedStrings;
+    private record TestData (
+            Path filepath,
+            String separator,
+            List<String> expectedStrings
+    ) {}
 
-            public TestData(String filepath, String separator, String[] expectedStrings) {
-                this.filepath = filepath;
-                this.separator = separator;
-                this.expectedStrings = expectedStrings;
+    private static TestData createTestFile(String content, String separator, boolean emptyBegin, boolean leadingEmptyLine, int number, int spacing) throws IOException {
+        final var file = Files.createTempFile(tempDir, "line",  "queries.txt");
+        final var writer = new StringWriter();
+        final var lines = new ArrayList<String>();
+        for (int i = (emptyBegin ? -1 : 0); i < (number * spacing) + 1; i++) {
+            if (i % spacing == 0) {
+                writer.append(content + i);
+                lines.add(content + i);
+            }
+            if (leadingEmptyLine || i != number * spacing) {
+                writer.append(separator);
+            }
+        }
+        Files.writeString(file, writer.toString());
+        return new TestData(file, separator, lines);
+    }
+
+    public static List<Arguments> indexWithLineEndingData() throws IOException {
+        final var out = new ArrayList<Arguments>();
+
+        final var numbers = List.of(1, 5, 10);
+        final var spacings = List.of(1, 2, 5, 10, 100, 1000000);
+        final var separators = List.of("\n", "\r\n", "\r");
+        final var emptyBegins = List.of(true, false);
+        final var leadingEmptyLines = List.of(true, false);
+
+        // cartesian product
+        for (var number : numbers) {
+            for (var spacing : spacings) {
+                for (var separator : separators) {
+                    for (var emptyBegin : emptyBegins) {
+                        for (var leadingEmptyLine : leadingEmptyLines) {
+                            out.add(Arguments.of(createTestFile("line: ", separator, emptyBegin, leadingEmptyLine, number, spacing)));
+                        }
+                    }
+                }
             }
         }
 
-        private TestData data;
+        return out;
+    }
 
-        public TestCustomSeparator(TestData data) {
-            this.data = data;
-        }
+    public static List<Arguments> indexWithBlankLinesData() throws IOException {
+        final var out = new ArrayList<Arguments>();
 
-        @Parameterized.Parameters
-        public static Collection<TestData> data() throws IOException {
-            // all the files should have the same line ending
-            String le = FileUtils.getLineEnding("src/test/resources/utils/indexingtestfile1.txt");
-            return List.of(
-                    new TestData("src/test/resources/utils/indexingtestfile1.txt", "#####" + le, new String[]{"line 1" + le, le + "line 2" + le}),
-                    new TestData("src/test/resources/utils/indexingtestfile2.txt", "#####" + le, new String[]{"line 0" + le, "line 1" + le + "#####"}),
-                    new TestData("src/test/resources/utils/indexingtestfile4.txt", "###$", new String[]{"a#", "b"}),
-                    new TestData("src/test/resources/utils/indexingtestfile5.txt", "211", new String[]{"a21", "b"})
-            );
-        }
+        final var numbers = List.of(1, 5, 10, 100, 10000);
+        final var spacings = List.of(2);
+        final var separators = List.of("\n", "\r\n", "\r");
+        final var emptyBegins = List.of(false);
+        final var leadingEmptyLines = List.of(false);
 
-        @Test
-        public void testIndexingWithCustomSeparator() throws IOException {
-            IndexedQueryReader reader = IndexedQueryReader.makeWithStringSeparator(this.data.filepath, this.data.separator);
-            for (int i = 0; i < this.data.expectedStrings.length; i++) {
-                String read = reader.readQuery(i);
-                assertEquals(this.data.expectedStrings[i], read);
+        // cartesian product
+        for (var number : numbers) {
+            for (var spacing : spacings) {
+                for (var separator : separators) {
+                    for (var emptyBegin : emptyBegins) {
+                        for (var leadingEmptyLine : leadingEmptyLines) {
+                            out.add(Arguments.of(createTestFile(String.format("this is %s line: ", separator), separator, emptyBegin, leadingEmptyLine, number, spacing)));
+                            out.add(Arguments.of(createTestFile("line: ", separator, emptyBegin, leadingEmptyLine, number, spacing)));
+                            out.add(Arguments.of(createTestFile(String.format("make this %s three lines %s long: ", separator, separator), separator, emptyBegin, leadingEmptyLine, number, spacing)));
+                        }
+                    }
+                }
             }
-            assertEquals(this.data.expectedStrings.length, reader.readQueries().size());
         }
+
+        return out;
+    }
+
+    public static List<Arguments> indexWithCustomSeparatorData() throws IOException {
+        final var out = new ArrayList<Arguments>();
+
+        final var numbers = List.of(1, 5, 10, 100, 10000);
+        final var spacings = List.of(1);
+        final var separators = List.of("\n", "\r\n", "\r", "\n+++\n", "\t\t\t", "test", "###$");
+        final var emptyBegins = List.of(false);
+        final var leadingEmptyLines = List.of(false);
+
+        // cartesian product
+        for (var number : numbers) {
+            for (var spacing : spacings) {
+                for (var separator : separators) {
+                    for (var emptyBegin : emptyBegins) {
+                        for (var leadingEmptyLine : leadingEmptyLines) {
+                            out.add(Arguments.of(createTestFile("line: ", separator, emptyBegin, leadingEmptyLine, number, spacing)));
+                        }
+                    }
+                }
+            }
+        }
+
+        final var file1 = Files.createTempFile(tempDir, "iguana", "queries.txt");
+        final var file2 = Files.createTempFile(tempDir, "iguana", "queries.txt");
+        Files.writeString(file1, "a####$b");
+        Files.writeString(file2, "a21212111b");
+
+        out.add(Arguments.of(new TestData(file1, "###$", List.of("a#", "b"))));
+        out.add(Arguments.of(new TestData(file2, "211", List.of("a2121", "1b"))));
+
+        return out;
+    }
+
+    @ParameterizedTest
+    @MethodSource("indexWithLineEndingData")
+    public void testIndexingWithLineEndings(TestData data) throws IOException {
+        var reader = IndexedQueryReader.make(data.filepath);
+        for (int i = 0; i < data.expectedStrings.size(); i++) {
+            assertEquals(data.expectedStrings.get(i), reader.readQuery(i));
+        }
+        assertEquals(data.expectedStrings.size(), reader.size());
+    }
+
+    @ParameterizedTest
+    @MethodSource("indexWithBlankLinesData")
+    public void testIndexingWithBlankLines(TestData data) throws IOException {
+        IndexedQueryReader reader = IndexedQueryReader.makeWithEmptyLines(data.filepath);
+        for (int i = 0; i < data.expectedStrings.size(); i++) {
+            assertEquals(data.expectedStrings.get(i), reader.readQuery(i));
+        }
+        assertEquals(data.expectedStrings.size(), reader.size());
+    }
+
+    @ParameterizedTest
+    @MethodSource("indexWithCustomSeparatorData")
+    public void testIndexingWithCustomSeparator(TestData data) throws IOException {
+        IndexedQueryReader reader = IndexedQueryReader.makeWithStringSeparator(data.filepath, data.separator);
+        for (int i = 0; i < data.expectedStrings.size(); i++) {
+            assertEquals(data.expectedStrings.get(i), reader.readQuery(i));
+        }
+        assertEquals(data.expectedStrings.size(), reader.size());
     }
 }

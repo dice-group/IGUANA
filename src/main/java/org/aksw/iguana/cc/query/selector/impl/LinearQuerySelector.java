@@ -10,21 +10,29 @@ import org.aksw.iguana.cc.query.selector.QuerySelector;
  *
  * @author frensing
  */
-public class LinearQuerySelector implements QuerySelector {
-
-    protected int querySelector;
-
-    private int size;
+public class LinearQuerySelector extends QuerySelector {
 
     public LinearQuerySelector(int size) {
-        this.size = size;
+        super(size);
+        index = -1;
     }
 
     @Override
     public int getNextIndex() {
-        if (this.querySelector >= this.size) {
-            this.querySelector = 0;
+        index++;
+        if (index >= this.size) {
+            index = 0;
         }
-        return this.querySelector++;
+        return index;
+    }
+
+    /**
+     * Return the current index. This is the index of the last returned query. If no query was returned yet, it returns
+     * -1.
+     * @return
+     */
+    @Override
+    public int getCurrentIndex() {
+        return index;
     }
 }

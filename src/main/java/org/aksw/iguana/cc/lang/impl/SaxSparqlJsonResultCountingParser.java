@@ -1,114 +1,223 @@
 package org.aksw.iguana.cc.lang.impl;
 
+import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.aksw.iguana.cc.storage.Storable;
+import org.aksw.iguana.commons.rdf.IPROP;
+import org.aksw.iguana.commons.rdf.IRES;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.json.simple.parser.ContentHandler;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
 
 /**
  * SAX Parser for SPARQL JSON Results.
- * For correct  SPARQL JSON Results it returns the correct size.
+ * For correct SPARQL JSON Results it returns the number of solutions, bound values and the names of the variables.
  * For malformed results it may or may not fail. For malformed JSON it fails if the underlying json.simple.parser fails.
  */
-class SaxSparqlJsonResultCountingParser implements ContentHandler {
-
-    private boolean headFound = false;
-
-    private int objectDepth = 0;
-    private boolean inResults = false;
-    private boolean inBindings = false;
-    private boolean inBindingsArray = false;
-
-    private long noBindings = 0;
-
-    public long getNoBindings() {
-        return noBindings;
-    }
+@LanguageProcessor.ContentType("application/sparql-results+json")
+public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
 
     @Override
-    public void startJSON() {
-    }
-
-    @Override
-    public void endJSON() throws ParseException {
-        if (inResults || inBindings || inBindingsArray || !headFound || objectDepth != 0)
-            throw new ParseException(ERROR_UNEXPECTED_EXCEPTION, "SPARQL Json Response was malformed.");
-    }
-
-    @Override
-    public boolean startObject() {
-        objectDepth += 1;
-        if (objectDepth == 3 && inBindingsArray) {
-            noBindings += 1;
+    public LanguageProcessingData process(InputStream inputStream, long hash) {
+        var parser = new JSONParser();
+        var handler = new SaxSparqlJsonResultContentHandler();
+        try {
+            parser.parse(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)), handler);
+            return new SaxSparqlJsonResultData(hash, handler.solutions(), handler.boundValues(), handler.variables(), null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
+            return new SaxSparqlJsonResultData(hash, -1, -1, null, e);
         }
-        return true;
     }
 
-    @Override
-    public boolean endObject() {
-        switch (objectDepth) {
-            case 1:
-                if (inResults)
-                    inResults = false;
-                break;
-            case 2:
-                if (inBindings) {
-                    inBindings = false;
+    record SaxSparqlJsonResultData(
+            long hash,
+            long results,
+            long bindings,
+            List<String> variables,
+            Exception exception
+    ) implements LanguageProcessingData, Storable.AsCSV, Storable.AsRDF {
+        final static String[] header = new String[]{ "responseBodyHash", "results", "bindings", "variables", "exception" };
+
+        @Override
+        public Class<? extends LanguageProcessor> processor() {
+            return SaxSparqlJsonResultCountingParser.class;
+        }
+
+        @Override
+        public CSVData toCSV() {
+            String variablesString = "";
+            String exceptionString = "";
+            if (variables != null)
+                variablesString = String.join("; ", variables);
+            if (exception != null)
+                exceptionString = exception().toString();
+
+            String[] content = new String[]{ String.valueOf(hash), String.valueOf(results), String.valueOf(bindings), variablesString, exceptionString};
+            String[][] data = new String[][]{ header, content };
+
+            String folderName = "application-sparql+json";
+            List<CSVData.CSVFileData> files = List.of(new CSVData.CSVFileData("sax-sparql-result-data.csv", data));
+            return new Storable.CSVData(folderName, files);
+        }
+
+        @Override
+        public Model toRDF() {
+            Model m = ModelFactory.createDefaultModel();
+            Resource responseBodyRes = IRES.getResponsebodyResource(this.hash);
+            m.add(responseBodyRes, IPROP.results, ResourceFactory.createTypedLiteral(this.results))
+                    .add(responseBodyRes, IPROP.bindings, ResourceFactory.createTypedLiteral(this.bindings));
+
+            if (this.variables != null) {
+                for (String variable : this.variables) {
+                    m.add(responseBodyRes, IPROP.variable, ResourceFactory.createTypedLiteral(variable));
                 }
-                break;
+            }
+            if (this.exception != null) {
+                m.add(responseBodyRes, IPROP.exception, ResourceFactory.createTypedLiteral(this.exception.toString()));
+            }
+
+            return m;
         }
-        objectDepth -= 1;
-        return true;
     }
 
-    @Override
-    public boolean startArray() {
-        if (objectDepth == 2 && inResults && inBindings && !inBindingsArray) {
-            inBindingsArray = true;
-        }
-        return true;
-    }
+    private static class SaxSparqlJsonResultContentHandler implements ContentHandler {
+        // TODO: add support for ask queries and link
+        // TODO: code is unnecessary complicated
 
-    @Override
-    public boolean endArray() {
-        if (objectDepth == 2 && inResults && inBindings && inBindingsArray) {
-            inBindingsArray = false;
-        }
-        return true;
-    }
+        private boolean headFound = false;
 
-    @Override
-    public boolean startObjectEntry(String key) {
-        switch (objectDepth) {
-            case 1:
-                switch (key) {
-                    case "head":
-                        headFound = true;
-                        break;
-                    case "results":
-                        if (headFound)
-                            inResults = true;
-                        break;
+        private int objectDepth = 0;
+        private boolean inResults = false;
+        private boolean inBindings = false;
+        private boolean inBindingsArray = false;
+        private boolean inVars = false;
+
+        private long boundValues = 0;
+
+        private long solutions = 0;
+
+        private final List<String> variables = new ArrayList<>();
+
+
+        @Override
+        public void startJSON() {
+        }
+
+        @Override
+        public void endJSON() throws ParseException {
+            if (inResults || inBindings || inBindingsArray || !headFound || objectDepth != 0)
+                throw new ParseException(ERROR_UNEXPECTED_EXCEPTION, "SPARQL Json Response was malformed.");
+        }
+
+        @Override
+        public boolean startObject() {
+            objectDepth += 1;
+            if (inBindingsArray) {
+                switch (objectDepth) {
+                    case 3 -> solutions += 1;
+                    case 4 -> boundValues += 1;
                 }
-                break;
-            case 2:
-                if ("bindings".compareTo(key) == 0) {
-                    inBindings = true;
-                }
-                break;
+            }
+            return true;
         }
-        return true;
+
+        @Override
+        public boolean endObject() {
+            switch (objectDepth) {
+                case 1:
+                    if (inResults)
+                        inResults = false;
+                    break;
+                case 2:
+                    if (inBindings) {
+                        inBindings = false;
+                    }
+                    break;
+            }
+            objectDepth -= 1;
+            return true;
+        }
+
+        @Override
+        public boolean startArray() {
+            if (objectDepth == 2 && inResults && inBindings && !inBindingsArray) {
+                inBindingsArray = true;
+            }
+            return true;
+        }
+
+        @Override
+        public boolean endArray() {
+            if (inVars)
+                inVars = false;
+            if (objectDepth == 2 && inResults && inBindings && inBindingsArray) {
+                inBindingsArray = false;
+            }
+            return true;
+        }
+
+
+        @Override
+        public boolean startObjectEntry(String key) {
+            switch (objectDepth) {
+                case 1 -> {
+                    switch (key) {
+                        case "head" -> headFound = true;
+                        case "results" -> {
+                            if (headFound)
+                                inResults = true;
+                        }
+                    }
+                }
+                case 2 -> {
+                    if ("bindings".compareTo(key) == 0) {
+                        inBindings = true;
+                    }
+                    if ("vars".compareTo(key) == 0) {
+                        inVars = true;
+                    }
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public boolean endObjectEntry() {
+            return true;
+        }
+
+        public boolean primitive(Object value) {
+            if (inVars)
+                variables.add(value.toString());
+
+            return true;
+        }
+
+        public long boundValues() {
+            return boundValues;
+        }
+
+        public long solutions() {
+            return solutions;
+        }
+
+        public List<String> variables() {
+            return variables;
+        }
     }
-
-    @Override
-    public boolean endObjectEntry() {
-        return true;
-    }
-
-    public boolean primitive(Object value) {
-        return true;
-    }
-
-
 }
