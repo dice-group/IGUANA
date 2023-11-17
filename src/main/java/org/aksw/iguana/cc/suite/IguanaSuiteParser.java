@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public class IguanaSuiteParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(IguanaSuiteParser.class);
 
-    private static final String SCHEMA_FILE = "./schema/iguana-schema.json";
+    private static final String SCHEMA_FILE = "/iguana-schema.json";
 
     enum DataFormat {
         YAML, JSON;
@@ -98,7 +98,7 @@ public class IguanaSuiteParser {
         final var mapper = new ObjectMapper(factory);
 
         JsonSchemaFactory schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V6);
-        InputStream is = new FileInputStream(SCHEMA_FILE);
+        InputStream is = IguanaSuiteParser.class.getResourceAsStream(SCHEMA_FILE);
         JsonSchema schema = schemaFactory.getSchema(is);
         JsonNode node = mapper.readTree(config.toFile());
         Set<ValidationMessage> errors = schema.validate(node);
