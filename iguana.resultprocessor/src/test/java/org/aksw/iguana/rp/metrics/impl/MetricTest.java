@@ -14,12 +14,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -62,6 +65,27 @@ public class MetricTest {
 		return testConfigs;
 	}
 
+	/**
+	 * Execute when the files in src/test/resources/nt no longer match the expected output of the metrics.
+	 */
+	public static void main(String[] args) throws IOException {
+		for (Object[] params: data()) {
+			String expectedFile = "iguana.resultprocessor/" + params[1];
+			EqualityStorage storage = new EqualityStorage(null);
+			MetricTest t = new MetricTest((Metric) params[0], expectedFile, (boolean) params[2]);
+			t.computeMetrics(t.m, storage);
+			Model actual = storage.getActualModel();
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			actual.write(baos, "N-TRIPLES");
+			// sort the content, easier to review with a simple diff when changes are required
+			List<String> lines = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8))
+					.lines()
+					.sorted(String::compareTo)
+					.collect(Collectors.toList());
+            Files.writeString(Paths.get(expectedFile), String.join("\n", lines));
+		}
+	}
 	
 	
 	public MetricTest(Metric m, String golden, boolean sendPenalty) throws FileNotFoundException {
@@ -74,7 +98,7 @@ public class MetricTest {
 	}
 
 	@Test
-	public void modelTest(){
+	public void modelTest() {
 		Model[] data = test(m, goldenModel);
 		//assert equals all triples in one are the same as the other
 		assertEquals(data[0].size(), data[1].size());
@@ -84,15 +108,21 @@ public class MetricTest {
 	}
 
 
-	public Model[] test(Metric metric, Model golden){
+	public Model[] test(Metric metric, Model golden) {
 
-		StorageManager smanager = new StorageManager();
 		EqualityStorage storage = new EqualityStorage(golden);
+		computeMetrics(metric, storage);
+		return new Model[]{storage.getExpectedModel(), storage.getActualModel()};
+
+	}
+
+	private void computeMetrics(Metric metric, EqualityStorage storage) {
+		StorageManager smanager = new StorageManager();
 		smanager.addStorage(storage);
 		metric.setStorageManager(smanager);
-	    metric.setMetaData(createMetaData());
-	    Properties extraMeta = new Properties();
-	    extraMeta.put(COMMON.WORKER_ID, "0");
+		metric.setMetaData(createMetaData());
+		Properties extraMeta = new Properties();
+		extraMeta.put(COMMON.WORKER_ID, "0");
 		extraMeta.put(COMMON.NO_OF_QUERIES, 2);
 		metric.receiveData(createData(200, "sparql1", "1123",120, 1, extraMeta));
 		metric.receiveData(createData(250, "sparql2", "1125",100,1, extraMeta));
@@ -101,12 +131,9 @@ public class MetricTest {
 		extraMeta.put(COMMON.NO_OF_QUERIES, 2);
 		metric.receiveData(createData(150, "sparql1", "1123", null, 1, extraMeta));
 		metric.receiveData(createData(100, "sparql2", "1125",null,-2L, extraMeta));
-		
 		metric.close();
-		return new Model[]{storage.getExpectedModel(), storage.getActualModel()};
-
 	}
-	
+
 	private Properties createData(double time, String queryID, String queryHash, Integer resultSize, long success, Properties extraMeta) {
 		Properties p = new Properties();
 		p.setProperty(COMMON.EXPERIMENT_TASK_ID_KEY, "1/1/1");

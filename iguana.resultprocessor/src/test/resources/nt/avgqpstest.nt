@@ -1,27 +1,22 @@
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/workerID> "0" .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/AvgQPS> .
 <http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/AvgQPS> "4.5"^^<http://www.w3.org/2001/XMLSchema#double> .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/penalizedAvgQPS> "4.5"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/AvgQPS> .
 <http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/noOfQueries> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
-
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/workerID> "1" .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/AvgQPS> .
+<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/penalizedAvgQPS> "4.5"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/workerID> "0" .
+<http://iguana-benchmark.eu/resource/1/1/1/0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/AvgQPS> "3.3333333333333335"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/AvgQPS> .
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/noOfQueries> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/penalizedAvgQPS> "3.3333333333333335"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/1> .
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/AvgQPS> .
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/0> .
+<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/workerID> "1" .
+<http://iguana-benchmark.eu/resource/1/1/1/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
 <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/AvgQPS> "4.285714285714286"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/AvgQPS> .
 <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/penalizedAvgQPS> "4.285714285714286"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-
-<http://iguana-benchmark.eu/resource/AvgQPS> <http://www.w3.org/2000/01/rdf-schema#label> "Average Queries Per Second" .
-<http://iguana-benchmark.eu/resource/AvgQPS> <http://www.w3.org/2000/01/rdf-schema#comment> "Will calculate the overall average queries Per second. Further on it will save the totaltime of each query, the failure and the success" .
+<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/0> .
+<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/1> .
 <http://iguana-benchmark.eu/resource/AvgQPS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Metric> .
 <http://iguana-benchmark.eu/resource/AvgQPS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/metric/AvgQPS> .
+<http://iguana-benchmark.eu/resource/AvgQPS> <http://www.w3.org/2000/01/rdf-schema#comment> "Will calculate the overall average queries Per second. Further on it will save the totaltime of each query, the failure and the success" .
+<http://iguana-benchmark.eu/resource/AvgQPS> <http://www.w3.org/2000/01/rdf-schema#label> "Average Queries Per Second" .
 <http://iguana-benchmark.eu/resource/AvgQPS> <http://www.w3.org/2000/01/rdf-schema#label> "AvgQPS" .

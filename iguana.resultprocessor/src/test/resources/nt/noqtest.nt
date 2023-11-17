@@ -1,22 +1,19 @@
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/workerID> "0" .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/NoQ> .
 <http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/NoQ> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/NoQ> .
 <http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/noOfQueries> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
-
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/workerID> "1" .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/NoQ> .
+<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/workerID> "0" .
+<http://iguana-benchmark.eu/resource/1/1/1/0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/NoQ> "1"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/NoQ> .
 <http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/noOfQueries> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
-
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/1> .
+<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/workerID> "1" .
+<http://iguana-benchmark.eu/resource/1/1/1/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
+<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/NoQ> "3"^^<http://www.w3.org/2001/XMLSchema#long> .
 <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/NoQ> .
 <http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/0> .
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/NoQ> "3"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://iguana-benchmark.eu/resource/NoQ> <http://www.w3.org/2000/01/rdf-schema#label> "Number Of Queries" .
-<http://iguana-benchmark.eu/resource/NoQ> <http://www.w3.org/2000/01/rdf-schema#comment> "Will calculate the number of queries which could be executed successfully." .
+<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/1> .
 <http://iguana-benchmark.eu/resource/NoQ> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Metric> .
 <http://iguana-benchmark.eu/resource/NoQ> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/metric/NoQ> .
+<http://iguana-benchmark.eu/resource/NoQ> <http://www.w3.org/2000/01/rdf-schema#comment> "Will calculate the number of queries which could be executed successfully." .
 <http://iguana-benchmark.eu/resource/NoQ> <http://www.w3.org/2000/01/rdf-schema#label> "NoQ" .
+<http://iguana-benchmark.eu/resource/NoQ> <http://www.w3.org/2000/01/rdf-schema#label> "Number Of Queries" .
