@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.lang;
 
 import org.aksw.iguana.cc.lang.impl.SPARQLLanguageProcessor;
+import org.apache.http.message.BasicHeader;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -140,5 +141,13 @@ public class SPARQLLanguageProcessorTest {
         expected.remove(actual);
         actual.write(new FileWriter("test2.nt"),  "N-TRIPLE");
         assertEquals(0, expected.size());
+    }
+
+    @Test
+    public void testGetContentTypeVal() {
+        assertEquals("application/sparql-results+json",
+                SPARQLLanguageProcessor.getContentTypeVal(new BasicHeader("content-type", "application/sparql-results+json;charset=utf-8")));
+        assertEquals("application/sparql-results+xml",
+                SPARQLLanguageProcessor.getContentTypeVal(new BasicHeader("content-type", "application/sparql-results+xml;charset=utf-8")));
     }
 }

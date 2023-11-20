@@ -7,11 +7,9 @@ import org.aksw.iguana.cc.utils.SPARQLQueryStatistics;
 import org.aksw.iguana.commons.annotation.Shorthand;
 import org.aksw.iguana.commons.constants.COMMON;
 import org.aksw.iguana.rp.vocab.Vocab;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.jena.ext.com.google.common.hash.HashCode;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
@@ -31,14 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -103,20 +99,9 @@ public class SPARQLLanguageProcessor extends AbstractLanguageProcessor implement
 
 
     public static String getContentTypeVal(Header header) {
-        for (HeaderElement el : header.getElements()) {
-            NameValuePair cTypePair = el.getParameterByName("Content-Type");
-
-            if (cTypePair != null && !cTypePair.getValue().isEmpty()) {
-                return cTypePair.getValue();
-            }
-        }
-        int index = header.toString().indexOf("Content-Type");
-        if (index >= 0) {
-            String ret = header.toString().substring(index + "Content-Type".length() + 1);
-            if (ret.contains(";")) {
-                return ret.substring(0, ret.indexOf(";")).trim();
-            }
-            return ret.trim();
+        final HeaderElement[] elements = header.getElements();
+        if (elements.length > 0) {
+            return elements[0].getName();
         }
         return "application/sparql-results+json";
     }
