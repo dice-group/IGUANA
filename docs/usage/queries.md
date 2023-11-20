@@ -110,6 +110,7 @@ or if you want to set the delimiter line
 ...
     queryHandler:
       className: "DelimInstancesQueryHandler"
-      delim: "###"
+      configuration:
+        delim: "###"
 ```
 
