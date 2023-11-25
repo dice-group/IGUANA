@@ -18,8 +18,16 @@ public abstract class QuerySource {
     /** This string represents the path of the file or folder, that contains the queries. */
     final protected Path path;
 
+    /**
+     * This integer represents the hashcode of the file or folder, that contains the queries. It is stored for
+     * performance reasons, so that the hashcode does not have to be calculated every time it is needed.
+     * (It's needed everytime the id of a query is requested.)
+     */
+    final protected int hashCode;
+
     public QuerySource(Path path) {
         this.path = path;
+        this.hashCode = FileUtils.getHashcodeFromFileContent(path);
     }
 
     /**
@@ -50,6 +58,6 @@ public abstract class QuerySource {
 
     @Override
     public int hashCode() {
-        return FileUtils.getHashcodeFromFileContent(this.path);
+        return hashCode;
     }
 }
