@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.aksw.iguana.commons.time.TimeUtils.createTypedDurationLiteral;
 import static org.aksw.iguana.commons.time.TimeUtils.toXSDDurationInSeconds;
 
 public class AggregatedExecutionStatistics extends Metric implements ModelWritingMetric {
@@ -80,7 +81,8 @@ public class AggregatedExecutionStatistics extends Metric implements ModelWritin
         m.add(queryRes, IPROP.timeOuts, ResourceFactory.createTypedLiteral(timeOuts));
         m.add(queryRes, IPROP.wrongCodes, ResourceFactory.createTypedLiteral(wrongCodes));
         m.add(queryRes, IPROP.unknownException, ResourceFactory.createTypedLiteral(unknownExceptions));
-        m.add(queryRes, IPROP.totalTime, ResourceFactory.createTypedLiteral(toXSDDurationInSeconds(totalTime)));
+        // m.add(queryRes, IPROP.totalTime, ResourceFactory.createTypedLiteral(toXSDDurationInSeconds(totalTime)));
+        m.add(queryRes, IPROP.totalTime, createTypedDurationLiteral(totalTime));
         m.add(queryRes, RDF.type, IONT.executedQuery);
 
         return m;

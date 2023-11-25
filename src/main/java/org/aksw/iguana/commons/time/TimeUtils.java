@@ -2,7 +2,6 @@ package org.aksw.iguana.commons.time;
 
 import org.apache.jena.datatypes.xsd.XSDDuration;
 import org.apache.jena.datatypes.xsd.impl.XSDDateTimeStampType;
-import org.apache.jena.datatypes.xsd.impl.XSDDateTimeType;
 import org.apache.jena.datatypes.xsd.impl.XSDDurationType;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -24,7 +23,7 @@ public class TimeUtils {
 	}
 
 	public static Literal createTypedDurationLiteral(Duration duration) {
-		return ResourceFactory.createTypedLiteral(new XSDDurationType().parse(duration.toString()));
+		return ResourceFactory.createTypedLiteral(duration.toString(), new DurationLiteral(duration));
 	}
 
 	public static Literal createTypedInstantLiteral(Instant time) {
