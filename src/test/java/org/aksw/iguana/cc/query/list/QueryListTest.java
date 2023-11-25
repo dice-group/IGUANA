@@ -7,6 +7,7 @@ import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Named;
@@ -100,9 +101,13 @@ class QueryListTest {
         return out;
     }
 
+    @Test
     public void testIllegalArguments() {
         assertThrows(NullPointerException.class, () -> new InMemQueryList(null));
-        assertThrows(NullPointerException.class, () -> new FileBasedQueryList(null));
+        assertThrows(NullPointerException.class, () -> {
+            final var ql = new FileBasedQueryList(null);
+            ql.size();
+        });
     }
 
     @ParameterizedTest(name = "[{index}] queryListClass={0}, querySourceConfig={1}")
