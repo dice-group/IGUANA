@@ -25,7 +25,7 @@ public class DurationLiteral implements RDFDatatype {
 
     @Override
     public String getURI() {
-        return XSD.getURI() + "#duration";
+        return XSD.getURI() + "duration";
     }
 
     @Override
