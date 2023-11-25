@@ -92,7 +92,7 @@ public class Stresstest implements Task {
         Calendar startTime = Calendar.getInstance(); // TODO: Calendar is outdated
         var futures = workers.stream().map(HttpWorker::start).toList();
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        Calendar endTime = Calendar.getInstance(); // TODO: add start and end time for each worker
+        Calendar endTime = Calendar.getInstance();
         for (CompletableFuture<HttpWorker.Result> future : futures) {
             try {
                 results.add(future.get());
