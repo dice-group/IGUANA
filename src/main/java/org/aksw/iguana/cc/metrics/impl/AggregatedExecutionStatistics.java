@@ -6,6 +6,7 @@ import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.aksw.iguana.commons.rdf.IRES;
+import org.aksw.iguana.commons.time.TimeUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -17,9 +18,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static org.aksw.iguana.commons.time.TimeUtils.createTypedDurationLiteral;
-import static org.aksw.iguana.commons.time.TimeUtils.toXSDDurationInSeconds;
 
 public class AggregatedExecutionStatistics extends Metric implements ModelWritingMetric {
 
@@ -81,8 +79,8 @@ public class AggregatedExecutionStatistics extends Metric implements ModelWritin
         m.add(queryRes, IPROP.timeOuts, ResourceFactory.createTypedLiteral(timeOuts));
         m.add(queryRes, IPROP.wrongCodes, ResourceFactory.createTypedLiteral(wrongCodes));
         m.add(queryRes, IPROP.unknownException, ResourceFactory.createTypedLiteral(unknownExceptions));
-        // m.add(queryRes, IPROP.totalTime, ResourceFactory.createTypedLiteral(toXSDDurationInSeconds(totalTime)));
-        m.add(queryRes, IPROP.totalTime, createTypedDurationLiteral(totalTime));
+        m.add(queryRes, IPROP.totalTime, TimeUtils.createTypedDurationLiteralInSeconds(totalTime));
+        // m.add(queryRes, IPROP.totalTime, TimeUtils.createTypedDurationLiteral(totalTime));
         m.add(queryRes, RDF.type, IONT.executedQuery);
 
         return m;

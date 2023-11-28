@@ -8,8 +8,8 @@ import org.apache.jena.vocabulary.XSD;
 import java.time.Duration;
 
 /**
- * Class related to the conversion of Java time objects to RDF literals. This class is used to convert a Java Duration
- * object to a typed RDF literal. The literal is typed as xsd:duration. This class temporarily fixes an issue with Jena.
+ * This class is used to convert a Java Duration object to a typed RDF literal. The literal is typed as xsd:duration.
+ * This class temporarily fixes an issue with Jena.
  */
 public class DurationLiteral implements RDFDatatype {
 

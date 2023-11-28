@@ -22,6 +22,11 @@ public class TimeUtils {
 		return (XSDDuration) new XSDDurationType().parse("PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S");
 	}
 
+	public static Literal createTypedDurationLiteralInSeconds(Duration duration) {
+		final var seconds = "PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S";
+		return ResourceFactory.createTypedLiteral(seconds, new DurationLiteral(duration));
+	}
+
 	public static Literal createTypedDurationLiteral(Duration duration) {
 		return ResourceFactory.createTypedLiteral(duration.toString(), new DurationLiteral(duration));
 	}
