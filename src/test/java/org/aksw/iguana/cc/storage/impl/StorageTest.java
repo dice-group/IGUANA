@@ -61,7 +61,7 @@ public abstract class StorageTest {
         someDateTime = GregorianCalendar.from(ZonedDateTime.ofInstant(Instant.parse("2023-10-21T20:48:06.399Z"), ZoneId.of("Europe/Berlin")));
     }
 
-    protected record TaskResult(Model resultModel, List<HttpWorker.Result> workerResults) {}
+    public record TaskResult(Model resultModel, List<HttpWorker.Result> workerResults) {}
 
     protected static Path tempDir;
 
