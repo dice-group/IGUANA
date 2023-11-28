@@ -23,7 +23,17 @@ public class TimeUtils {
 	}
 
 	public static Literal createTypedDurationLiteralInSeconds(Duration duration) {
-		final var seconds = "PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S";
+		var seconds = "PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S";
+
+		// cut trailing zeros
+		while (seconds.lastIndexOf("0") == seconds.length() - 2 /* The last character is S */) {
+			seconds = seconds.substring(0, seconds.length() - 2) + "S";
+		}
+
+		if (seconds.endsWith(".S")) {
+			seconds = seconds.substring(0, seconds.length() - 2) + "S";
+		}
+
 		return ResourceFactory.createTypedLiteral(seconds, new DurationLiteral(duration));
 	}
 
