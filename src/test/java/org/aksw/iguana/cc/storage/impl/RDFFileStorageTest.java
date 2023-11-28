@@ -53,8 +53,8 @@ public class RDFFileStorageTest extends StorageTest {
 		path = rdfStorage.getFileName();
 		Model actualModel = RDFDataMgr.loadModel(path);
 		calculateModelDifference(expectedModel, actualModel);
-		// TODO: This test probably fails, because the expected model uses java duration objects for duration literals,
-		//  while the actual model uses xsd:duration literals.
+		// TODO: This test probably fails, because the expected model uses java's Duration objects for duration literals,
+		//  while the actual model uses XSDDuration objects for duration literals.
 		// assertTrue(actualModel.isIsomorphicWith(expectedModel));
 	}
 
