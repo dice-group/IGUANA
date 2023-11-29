@@ -78,7 +78,7 @@ public class FileLineQuerySourceTest {
 
     @Test
     public void testInitialization() throws IOException {
-        assertThrows(NullPointerException.class, () -> new FileLineQuerySource(null));
+        assertThrows(IllegalArgumentException.class, () -> new FileLineQuerySource(null));
         assertDoesNotThrow(() -> new FileLineQuerySource(Files.createTempFile(directory, "Query", ".txt")));
         final var notEmptyFile = Files.createTempFile(directory, "Query", ".txt");
         Files.writeString(notEmptyFile, "not empty");
