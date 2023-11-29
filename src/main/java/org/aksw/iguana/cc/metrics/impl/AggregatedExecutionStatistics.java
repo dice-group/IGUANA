@@ -80,7 +80,6 @@ public class AggregatedExecutionStatistics extends Metric implements ModelWritin
         m.add(queryRes, IPROP.wrongCodes, ResourceFactory.createTypedLiteral(wrongCodes));
         m.add(queryRes, IPROP.unknownException, ResourceFactory.createTypedLiteral(unknownExceptions));
         m.add(queryRes, IPROP.totalTime, TimeUtils.createTypedDurationLiteralInSeconds(totalTime));
-        // m.add(queryRes, IPROP.totalTime, TimeUtils.createTypedDurationLiteral(totalTime));
         m.add(queryRes, RDF.type, IONT.executedQuery);
 
         return m;
