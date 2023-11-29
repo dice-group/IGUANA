@@ -46,6 +46,12 @@ public class FileUtils {
 	 * @throws IOException
 	 */
 	public static String getLineEnding(Path filepath) throws IOException {
+		if (filepath == null)
+			throw new IllegalArgumentException("Filepath must not be null.");
+		if (!Files.exists(filepath))
+			throw new IllegalArgumentException(String.format("The filepath %s doesn't exist.", filepath.toAbsolutePath()));
+		if (!Files.isReadable(filepath))
+			throw new IllegalArgumentException(String.format("The filepath %s is not readable.", filepath.toAbsolutePath()));
 		try(BufferedReader br = Files.newBufferedReader(filepath)) {
 			char c;
 			while ((c = (char) br.read()) != (char) -1) {
