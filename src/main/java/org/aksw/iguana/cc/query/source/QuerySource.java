@@ -29,10 +29,6 @@ public abstract class QuerySource {
     public QuerySource(Path path) {
         if (path == null)
             throw new IllegalArgumentException("Path for a query source must not be null.");
-        if (!Files.exists(path))
-            throw new IllegalArgumentException(String.format("The query source path %s doesn't exist.", path.toAbsolutePath()));
-        if (!Files.isReadable(path))
-            throw new IllegalArgumentException(String.format("The query source path %s is not readable.", path.toAbsolutePath()));
         this.path = path;
         this.hashCode = FileUtils.getHashcodeFromFileContent(path);
     }
