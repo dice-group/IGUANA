@@ -4,6 +4,7 @@ import org.aksw.iguana.cc.utils.FileUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -26,6 +27,12 @@ public abstract class QuerySource {
     final protected int hashCode;
 
     public QuerySource(Path path) {
+        if (path == null)
+            throw new IllegalArgumentException("Path for a query source must not be null.");
+        if (!Files.exists(path))
+            throw new IllegalArgumentException(String.format("The query source path %s doesn't exist.", path.toAbsolutePath()));
+        if (!Files.isReadable(path))
+            throw new IllegalArgumentException(String.format("The query source path %s is not readable.", path.toAbsolutePath()));
         this.path = path;
         this.hashCode = FileUtils.getHashcodeFromFileContent(path);
     }
@@ -42,7 +49,7 @@ public abstract class QuerySource {
      *
      * @param index the index of the query counted from the first query (in the first file)
      * @return String of the query
-     * @throws IOException
+     * @throws IOException if the query could not be read
      */
     public abstract String getQuery(int index) throws IOException;
 
@@ -52,7 +59,7 @@ public abstract class QuerySource {
      * This method returns all queries in the source as a list of Strings.
      *
      * @return List of Strings of all queries
-     * @throws IOException
+     * @throws IOException if the queries could not be read
      */
     public abstract List<String> getAllQueries() throws IOException;
 
