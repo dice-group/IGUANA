@@ -1,8 +1,6 @@
 package org.aksw.iguana.commons.time;
 
-import org.apache.jena.datatypes.xsd.XSDDuration;
 import org.apache.jena.datatypes.xsd.impl.XSDDateTimeStampType;
-import org.apache.jena.datatypes.xsd.impl.XSDDurationType;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.ResourceFactory;
 
@@ -17,10 +15,6 @@ import java.time.format.DateTimeFormatter;
  * Class related to the conversion of Java time objects to RDF literals.
  */
 public class TimeUtils {
-
-	public static XSDDuration toXSDDurationInSeconds(Duration duration) {
-		return (XSDDuration) new XSDDurationType().parse("PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S");
-	}
 
 	public static Literal createTypedDurationLiteralInSeconds(Duration duration) {
 		var seconds = "PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S";
