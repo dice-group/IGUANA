@@ -1,9 +1,6 @@
 package org.aksw.iguana.commons.time;
 
-import org.apache.jena.datatypes.xsd.XSDDuration;
 import org.apache.jena.datatypes.xsd.impl.XSDDateTimeStampType;
-import org.apache.jena.datatypes.xsd.impl.XSDDateTimeType;
-import org.apache.jena.datatypes.xsd.impl.XSDDurationType;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.ResourceFactory;
 
@@ -19,12 +16,23 @@ import java.time.format.DateTimeFormatter;
  */
 public class TimeUtils {
 
-	public static XSDDuration toXSDDurationInSeconds(Duration duration) {
-		return (XSDDuration) new XSDDurationType().parse("PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S");
+	public static Literal createTypedDurationLiteralInSeconds(Duration duration) {
+		var seconds = "PT" + new BigDecimal(BigInteger.valueOf(duration.toNanos()), 9).toPlainString() + "S";
+
+		// cut trailing zeros
+		while (seconds.lastIndexOf("0") == seconds.length() - 2 /* The last character is S */) {
+			seconds = seconds.substring(0, seconds.length() - 2) + "S";
+		}
+
+		if (seconds.endsWith(".S")) {
+			seconds = seconds.substring(0, seconds.length() - 2) + "S";
+		}
+
+		return ResourceFactory.createTypedLiteral(seconds, new DurationLiteral(duration));
 	}
 
 	public static Literal createTypedDurationLiteral(Duration duration) {
-		return ResourceFactory.createTypedLiteral(new XSDDurationType().parse(duration.toString()));
+		return ResourceFactory.createTypedLiteral(duration.toString(), new DurationLiteral(duration));
 	}
 
 	public static Literal createTypedInstantLiteral(Instant time) {

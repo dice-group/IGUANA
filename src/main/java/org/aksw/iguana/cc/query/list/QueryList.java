@@ -18,6 +18,8 @@ public abstract class QueryList {
     final protected QuerySource querySource;
 
     public QueryList(QuerySource querySource) {
+        if (querySource == null)
+            throw new IllegalArgumentException("QuerySource must not be null.");
         this.querySource = querySource;
     }
 

@@ -45,7 +45,6 @@ public class FileSeparatorQuerySource extends QuerySource {
     public FileSeparatorQuerySource(Path path, String separator) throws IOException {
         super(path);
         iqr = getIqr(path, separator);
-
     }
 
     private static IndexedQueryReader getIqr(Path path, String separator) throws IOException {

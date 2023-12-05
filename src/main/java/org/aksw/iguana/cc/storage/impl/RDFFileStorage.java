@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.storage.impl;
 
-import com.github.jsonldjava.shaded.com.google.common.base.Supplier;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
 import org.aksw.iguana.cc.storage.Storage;
 import org.apache.commons.io.FilenameUtils;
@@ -19,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class RDFFileStorage implements Storage {
     public record Config(String path) implements StorageConfig {}

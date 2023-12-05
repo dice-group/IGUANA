@@ -92,7 +92,7 @@ public class FileSeparatorQuerySourceTest {
 
     @Test
     public void testInitialization() throws IOException {
-        assertThrows(NullPointerException.class, () -> new FileSeparatorQuerySource(null));
+        assertThrows(IllegalArgumentException.class, () -> new FileSeparatorQuerySource(null));
         assertDoesNotThrow(() -> new FileSeparatorQuerySource(Files.createTempFile(directory, "Query", ".txt"), "###"));
         final var notEmptyFile = Files.createTempFile(directory, "Query", ".txt");
         Files.writeString(notEmptyFile, "not empty");

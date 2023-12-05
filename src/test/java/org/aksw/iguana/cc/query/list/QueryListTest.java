@@ -7,6 +7,7 @@ import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Named;
@@ -16,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -100,9 +102,10 @@ class QueryListTest {
         return out;
     }
 
+    @Test
     public void testIllegalArguments() {
-        assertThrows(NullPointerException.class, () -> new InMemQueryList(null));
-        assertThrows(NullPointerException.class, () -> new FileBasedQueryList(null));
+        assertThrows(IllegalArgumentException.class, () -> new InMemQueryList(null));
+        assertThrows(IllegalArgumentException.class, () -> new FileBasedQueryList(null));
     }
 
     @ParameterizedTest(name = "[{index}] queryListClass={0}, querySourceConfig={1}")
@@ -121,7 +124,7 @@ class QueryListTest {
         final var queryList = createQueryList(queryListClass, querySource);
         for (int i = 0; i < expectedQueries.size(); i++) {
             final var expectedQuery = expectedQueries.get(i);
-            final var queryString = new String(queryList.getQueryStream(i).readAllBytes(), "UTF-8");
+            final var queryString = new String(queryList.getQueryStream(i).readAllBytes(), StandardCharsets.UTF_8);
             assertEquals(expectedQuery, queryString);
         }
     }
