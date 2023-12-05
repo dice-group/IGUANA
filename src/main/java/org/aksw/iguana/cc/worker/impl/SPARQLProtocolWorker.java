@@ -232,11 +232,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         logExecution(execution);
                         executionStats.add(execution);
                     }
-                    LOGGER.info("{}\t:: Completed {} out of {} querymixes", this, i + 1, queryMixes.number());
+                    LOGGER.info("{}\t:: Completed {} out of {} querymixes.", this, i + 1, queryMixes.number());
                 }
             } else if (config().completionTarget() instanceof TimeLimit timeLimit) {
                 final Instant endTime = Instant.now().plus(timeLimit.duration());
                 Instant now;
+                long queryExecutionCount = 0;
+                int queryMixExecutionCount = 0;
+                int queryMixSize = config().queries().getQueryCount();
                 while ((now = Instant.now()).isBefore(endTime)) {
                     final Duration timeToEnd = Duration.between(now, endTime);
                     final boolean reducedTimeout = config().timeout().compareTo(timeToEnd) > 0;
@@ -245,6 +248,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     if (execution != null){ // If timeout is reduced, the execution result might be discarded if it failed and executeQuery returns null.
                         logExecution(execution);
                         executionStats.add(execution);
+                    }
+
+                    //
+                    if ((++queryExecutionCount) >= queryMixSize) {
+                        queryExecutionCount = 0;
+                        queryMixExecutionCount++;
+                        LOGGER.info("{}\t:: Completed {} querymixes.", this, queryMixExecutionCount);
                     }
                 }
                 LOGGER.info("{}\t:: Reached time limit of {}.", this, timeLimit.duration());
