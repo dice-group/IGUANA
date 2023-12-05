@@ -8,7 +8,8 @@ import org.apache.jena.vocabulary.XSD;
 import java.time.Duration;
 
 /**
- * This class is used to convert a Java Duration object to a typed RDF literal. The literal is typed as xsd:duration.<br/>
+ * This class is used to convert a Java Duration object to a typed RDF literal. The literal is typed as
+ * xsd:dayTimeDuration.<br/>
  * TODO: This class temporarily fixes an issue with Jena.
  */
 public class DurationLiteral implements RDFDatatype {
@@ -25,7 +26,7 @@ public class DurationLiteral implements RDFDatatype {
 
     @Override
     public String getURI() {
-        return XSD.getURI() + "duration";
+        return XSD.getURI() + "dayTimeDuration";
     }
 
     @Override
