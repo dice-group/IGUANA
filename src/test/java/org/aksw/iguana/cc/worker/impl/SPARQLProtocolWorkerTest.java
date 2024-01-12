@@ -16,6 +16,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -45,6 +47,8 @@ public class SPARQLProtocolWorkerTest {
     private final static String QUERY = "SELECT * WHERE { ?s ?p ?o }";
     private final static int QUERY_MIXES = 1;
     private static Path queryFile;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLProtocolWorker.class);
 
     @BeforeAll
     public static void setup() throws IOException {
@@ -183,13 +187,13 @@ public class SPARQLProtocolWorkerTest {
     public void testCompletionTargets(HttpWorker.CompletionTarget target) throws URISyntaxException, IOException {
         final var uri = new URI("http://localhost:" + wm.getPort() + "/ds/query");
         final var processor = new ResponseBodyProcessor("application/sparql-results+json");
-        final var queryHandlder = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, null, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
+        final var queryHandler = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, null, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
         final var datasetConfig = new DatasetConfig("TestDS", null);
         final var connection = new ConnectionConfig("TestConn", "1", datasetConfig, uri, new ConnectionConfig.Authentication("testUser", "password"), null, null);
 
         final var config = new SPARQLProtocolWorker.Config(
                 1,
-                queryHandlder,
+                queryHandler,
                 target,
                 connection,
                 Duration.parse("PT20S"),
@@ -201,13 +205,14 @@ public class SPARQLProtocolWorkerTest {
         SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
         wm.stubFor(post(urlPathEqualTo("/ds/query"))
                 .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
-                .withBasicAuth("testUser", "password")
+                // .withBasicAuth("testUser", "password")
                 .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
                 .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
 
         final HttpWorker.Result result = worker.start().join();
 
         for (var stat : result.executionStats()) {
+            stat.error().ifPresent(ex -> LOGGER.error(ex.getMessage(), ex));
             assertTrue(stat.successful());
             assertTrue(stat.error().isEmpty());
             assertEquals(200, stat.httpStatusCode().orElseThrow());

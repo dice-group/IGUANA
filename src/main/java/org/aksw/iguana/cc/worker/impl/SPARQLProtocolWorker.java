@@ -3,48 +3,48 @@ package org.aksw.iguana.cc.worker.impl;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.client5.http.async.methods.AbstractBinResponseConsumer;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.DefaultConnectionKeepAliveStrategy;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.nio.AsyncClientConnectionManager;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.concurrent.FutureCallback;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.nio.AsyncRequestProducer;
+import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder;
+import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.reactor.IOReactorConfig;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker extends HttpWorker {
@@ -82,58 +82,54 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     .collect(Collectors.joining("&"));
         }
 
-        public HttpUriRequest buildHttpRequest(InputStream queryStream,
-                                               Duration timeout,
-                                               ConnectionConfig connection,
-                                               String requestHeader) throws URISyntaxException, IOException {
-            final var requestConfig = RequestConfig.custom()
-                    .setConnectionRequestTimeout((int) timeout.toMillis())
-                    .setConnectTimeout((int) timeout.toMillis())
-                    .setSocketTimeout((int) timeout.toMillis())
-                    .build();
+        private static String urlEncode(String name, String value) {
+            return name + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8);
+        }
 
-            HttpUriRequest request;
+        public AsyncRequestProducer buildHttpRequest(InputStream queryStream,
+                                                     ConnectionConfig connection,
+                                                     String requestHeader) throws URISyntaxException, IOException {
+            AsyncRequestBuilder asyncRequestBuilder;
 
             switch (this.requestType) {
                 case GET_QUERY -> {
-                    request = new HttpGet(new URIBuilder(connection.endpoint())
-                            .setParameter("query",
-                                    new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
-                            .build());
+                    asyncRequestBuilder = AsyncRequestBuilder.get(new URIBuilder(connection.endpoint())
+                            .addParameter("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
+                            .build()
+                    );
                 }
                 case POST_URL_ENC_QUERY -> {
-                    request = new HttpPost(connection.endpoint());
-                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-                    final var params = List.of(new BasicNameValuePair("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
-                    ((HttpPost) request).setEntity(new UrlEncodedFormEntity(params));
+                    // entity will be automatically set to the url encoded parameters
+                    asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
+                            .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
+                            .setEntity(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
                 }
                 case POST_QUERY -> {
-                    request = new HttpPost(connection.endpoint());
-                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-query");
-                    ((HttpPost) request).setEntity(new InputStreamEntity(queryStream));
+                    asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
+                            .setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-query")
+                            .setEntity(queryStream.toString()); // TODO: find a way to stream it
                 }
                 case POST_URL_ENC_UPDATE -> {
-                    request = new HttpPost(connection.endpoint());
-                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-                    final var params = List.of(new BasicNameValuePair("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
-                    ((HttpPost) request).setEntity(new UrlEncodedFormEntity(params));
+                    asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
+                            .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
+                            .setEntity(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
                 }
                 case POST_UPDATE -> {
-                    request = new HttpPost(connection.endpoint());
-                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-update");
-                    ((HttpPost) request).setEntity(new InputStreamEntity(queryStream));
+                    asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
+                            .setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-update")
+                            .setEntity(queryStream.toString()); // TODO: find a way to stream it
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
             }
 
             if (requestHeader != null)
-                request.addHeader("Accept", requestHeader);
+                asyncRequestBuilder.addHeader("Accept", requestHeader);
             if (connection.authentication() != null && connection.authentication().user() != null)
-                request.addHeader("Authorization",
+                asyncRequestBuilder.addHeader("Authorization",
                         HttpWorker.basicAuth(connection.authentication().user(),
                                 Optional.ofNullable(connection.authentication().password()).orElse("")));
 
-            return request;
+            return asyncRequestBuilder.build();
         }
     }
 
@@ -169,7 +165,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     record HttpExecutionResult(
             int queryID,
-            Optional<CloseableHttpResponse> response,
+            Optional<HttpResponse> response,
             Instant requestStart,
             Duration duration,
             Optional<BigByteArrayOutputStream> outputStream,
@@ -183,13 +179,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
         public boolean successful() {
             if (response.isPresent() && exception.isEmpty())
-                return (response.get().getStatusLine().getStatusCode() / 100) == 2;
+                return (response.get().getCode() / 100) == 2;
             return false;
         }
     }
 
 
-    private static CloseableHttpClient httpClient;
+    private static CloseableHttpAsyncClient httpClient;
+    private static AsyncClientConnectionManager connectionManager;
     private final ThreadPoolExecutor executor;
 
     private final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
@@ -201,7 +198,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private BigByteArrayOutputStream responseBodybbaos = new BigByteArrayOutputStream();
 
     // used to read the http response body
-    private final byte[] buffer = new byte[4096];
+    private final byte[] buffer = new byte[BUFFER_SIZE];
+    private static final int BUFFER_SIZE = 4096;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SPARQLProtocolWorker.class);
 
@@ -218,19 +216,30 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
     public static void initHttpClient(int threadCount) {
-        final var connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(threadCount);
-        httpClient = HttpClientBuilder.create()
-                .setConnectionManager(connectionManager)
+        connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(threadCount)
-                .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy())
-                .disableContentCompression()
+                .setMaxConnPerRoute(threadCount)
                 .build();
+        final var ioReactorConfig = IOReactorConfig.custom()
+                .setTcpNoDelay(true)
+                .setIoThreadCount(threadCount)
+                .build();
+        httpClient = HttpAsyncClients.custom()
+                .setConnectionManager(connectionManager)
+                .setIOReactorConfig(ioReactorConfig)
+                .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy())
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setContentCompressionEnabled(false)
+                        .setHardCancellationEnabled(true)
+                        .build())
+                .build();
+        httpClient.start();
     }
 
     public static void closeHttpClient() {
         try {
             httpClient.close();
+            connectionManager.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -261,16 +270,16 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     LOGGER.info("{}\t:: Completed {} out of {} querymixes.", this, i + 1, queryMixes.number());
                 }
             } else if (config().completionTarget() instanceof TimeLimit timeLimit) {
-                final Instant endTime = Instant.now().plus(timeLimit.duration());
-                Instant now;
+                final var startNanos = System.nanoTime();
                 long queryExecutionCount = 0;
                 int queryMixExecutionCount = 0;
                 int queryMixSize = config().queries().getQueryCount();
-                while ((now = Instant.now()).isBefore(endTime)) {
-                    final Duration timeToEnd = Duration.between(now, endTime);
-                    final boolean reducedTimeout = config().timeout().compareTo(timeToEnd) > 0;
-                    final Duration thisQueryTimeOut = (reducedTimeout) ? timeToEnd : config().timeout();
-                    ExecutionStats execution = executeQuery(thisQueryTimeOut, reducedTimeout);
+                long now;
+                while ((now = System.nanoTime()) - startNanos < ((TimeLimit) config.completionTarget()).duration().toNanos()) {
+                    final var timeLeft = ((TimeLimit) config.completionTarget()).duration().toNanos() - (now - startNanos);
+                    final var reducedTimeout = timeLeft < config.timeout().toNanos();
+                    final Duration actualQueryTimeOut = reducedTimeout ? Duration.of(timeLeft, ChronoUnit.NANOS) : config.timeout();
+                    ExecutionStats execution = executeQuery(actualQueryTimeOut, reducedTimeout);
                     if (execution != null){ // If timeout is reduced, the execution result might be discarded if it failed and executeQuery returns null.
                         logExecution(execution);
                         executionStats.add(execution);
@@ -303,7 +312,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         HttpExecutionResult result = executeHttpRequest(timeout);
         Optional<Integer> statuscode = Optional.empty();
         if (result.response().isPresent())
-            statuscode = Optional.of(result.response().get().getStatusLine().getStatusCode());
+            statuscode = Optional.of(result.response().get().getCode());
 
         if (result.successful() && this.config.parseResults()) { // 2xx
             if (result.actualContentLength.isEmpty() || result.hash.isEmpty() || result.outputStream.isEmpty()) {
@@ -331,14 +340,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
             return null;
         }
 
-        result.response.ifPresent(r -> {
-            try {
-                r.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
         return new ExecutionStats(
                 result.queryID(),
                 result.requestStart(),
@@ -352,6 +353,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
 
     private HttpExecutionResult executeHttpRequest(Duration timeout) {
+        final var context = HttpClientContext.create();
+        context.setRequestConfig(RequestConfig.custom()
+                .setResponseTimeout(Timeout.DISABLED)
+                .setConnectionRequestTimeout(Timeout.DISABLED) // maybe make this one lower?
+                .build());
+
         final QueryHandler.QueryStreamWrapper queryHandle;
         try {
             queryHandle = config().queries().getNextQueryStream(this.querySelector);
@@ -368,12 +375,11 @@ public class SPARQLProtocolWorker extends HttpWorker {
             );
         }
 
-        final HttpUriRequest request;
+        final AsyncRequestProducer request;
 
         try {
             request = requestFactory.buildHttpRequest(
                     queryHandle.queryInputStream(),
-                    timeout,
                     config().connection(),
                     config().acceptHeader()
             );
@@ -392,7 +398,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
         final Instant timeStamp = Instant.now();
         final var requestStart = System.nanoTime();
-        BiFunction<CloseableHttpResponse, Exception, HttpExecutionResult> createFailedResult = (response, e) -> new HttpExecutionResult(
+        BiFunction<HttpResponse, Exception, HttpExecutionResult> createFailedResult = (response, e) -> new HttpExecutionResult(
                 queryHandle.index(),
                 Optional.ofNullable(response),
                 timeStamp,
@@ -403,46 +409,97 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 Optional.ofNullable(e)
         );
 
-        try {
-            final var httpResponse = httpClient.execute(request);
-            try (final var bodyStream = httpResponse.getEntity().getContent()) {
-                try (var hasher = hasherFactory.newStreamingHash64(0)) {
-                    int readBytes;
-                    while ((readBytes = bodyStream.readNBytes(this.buffer, 0, this.buffer.length)) != 0) {
-                        if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
-                            return createFailedResult.apply(httpResponse, new TimeoutException());
-                        }
-                        hasher.update(this.buffer, 0, readBytes);
-                        this.responseBodybbaos.write(this.buffer, 0, readBytes); // TODO: don't save if not further processing the response
-                    }
+        final var future = httpClient.execute(request, new AbstractBinResponseConsumer<HttpExecutionResult>() {
 
-                    final var contentLengthHeader = httpResponse.getFirstHeader("Content-Length");
-                    Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
-                    if (contentLength != null &&
-                            (this.responseBodybbaos.size() < contentLength ||
-                                    this.responseBodybbaos.size() > contentLength)) {
-                        return createFailedResult.apply(httpResponse, new HttpException("Content-Length header value doesn't match actual content length."));
-                    }
+            private HttpResponse response;
+            private StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
 
-                    if (httpResponse.getStatusLine().getStatusCode() / 100 != 2) {
-                        return createFailedResult.apply(httpResponse, null);
-                    }
-
-                    return new HttpExecutionResult(
-                            queryHandle.index(),
-                            Optional.of(httpResponse),
-                            timeStamp,
-                            Duration.ofNanos(System.nanoTime() - requestStart),
-                            Optional.of(this.responseBodybbaos),
-                            OptionalLong.of(this.responseBodybbaos.size()),
-                            OptionalLong.of(hasher.getValue()),
-                            Optional.empty()
-                    );
+            @Override
+            public void releaseResources() {
+                if (hasher != null) {
+                    hasher.reset();
+                    hasher = null;
                 }
-            } catch (IOException ex) {
-                return createFailedResult.apply(httpResponse, ex);
             }
-        } catch (IOException e) {
+
+            @Override
+            protected int capacityIncrement() {
+                return Integer.MAX_VALUE;
+            }
+
+            @Override
+            protected void data(ByteBuffer src, boolean endOfStream) throws IOException {
+                if (src.hasArray()) {
+                    LOGGER.debug("response is array backed");
+                    hasher.update(src.array(), src.position() + src.arrayOffset(), src.remaining());
+                    responseBodybbaos.write(src.array(), src.position() + src.arrayOffset(), src.remaining());
+                } else {
+                    int readCount;
+                    while (src.hasRemaining()) {
+                        readCount = Math.min(BUFFER_SIZE, src.remaining());
+                        src.get(buffer, 0, readCount);
+                        hasher.update(buffer, 0, readCount);
+                        responseBodybbaos.write(buffer, 0, readCount);
+                    }
+                }
+            }
+
+            @Override
+            protected void start(HttpResponse response, ContentType contentType) throws HttpException, IOException {
+                this.response = response;
+            }
+
+            @Override
+            protected HttpExecutionResult buildResult() {
+                if (response.getCode() / 100 != 2) {
+                    return createFailedResult.apply(response, null);
+                }
+                final var contentLengthHeader = response.getFirstHeader("Content-Length");
+                Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
+                if (contentLength != null &&
+                        (responseBodybbaos.size() < contentLength ||
+                                responseBodybbaos.size() > contentLength)) {
+                    return createFailedResult.apply(response, new HttpException("Content-Length header value doesn't match actual content length."));
+                }
+                if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
+                    return createFailedResult.apply(response, null);
+                }
+                if (config.parseResults()) {
+                    responseBodyProcessor.add(responseBodybbaos.size(), hasher.getValue(), responseBodybbaos);
+                }
+
+                return new HttpExecutionResult(
+                        queryHandle.index(),
+                        Optional.of(response),
+                        timeStamp,
+                        Duration.ofNanos(System.nanoTime() - requestStart),
+                        Optional.of(responseBodybbaos),
+                        OptionalLong.of(responseBodybbaos.size()),
+                        OptionalLong.of(hasher.getValue()),
+                        Optional.empty()
+                );
+            }
+        }, new FutureCallback<HttpExecutionResult>() {
+            @Override
+            public void completed(HttpExecutionResult result) {
+
+            }
+
+            @Override
+            public void failed(Exception ex) {
+                LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, queryHandle.index(), ex);
+            }
+
+            @Override
+            public void cancelled() {
+                LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, queryHandle.index(), Duration.of(System.nanoTime() - requestStart, ChronoUnit.NANOS));
+            }
+        });
+
+        try {
+            return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            future.cancel(true);
             return createFailedResult.apply(null, e);
         }
     }
