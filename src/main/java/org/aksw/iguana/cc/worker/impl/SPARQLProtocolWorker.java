@@ -462,7 +462,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     return createFailedResult.apply(response, new HttpException("Content-Length header value doesn't match actual content length."));
                 }
                 if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
-                    return createFailedResult.apply(response, null);
+                    return createFailedResult.apply(response, new TimeoutException());
                 }
                 if (config.parseResults()) {
                     responseBodyProcessor.add(responseBodybbaos.size(), hasher.getValue(), responseBodybbaos);
@@ -497,9 +497,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
         });
 
         try {
-            return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            future.cancel(true);
+            return future.get(timeout.toMillis() > 10 ? timeout.toMillis() : 10, TimeUnit.MILLISECONDS); // there needs to be a lower limit here for the timeout,
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {                       // because if the timeout is too low, the future will get
+            future.cancel(true);                                                       // immediately cancelled
             return createFailedResult.apply(null, e);
         }
     }
