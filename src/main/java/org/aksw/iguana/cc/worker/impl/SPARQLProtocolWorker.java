@@ -9,17 +9,34 @@ import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
+import org.apache.http.HttpException;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -65,66 +82,58 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     .collect(Collectors.joining("&"));
         }
 
-        public HttpRequest buildHttpRequest(InputStream queryStream,
-                                            Duration timeout,
-                                            ConnectionConfig connection,
-                                            String requestHeader) throws URISyntaxException, IOException {
-            HttpRequest.Builder request = HttpRequest.newBuilder().timeout(timeout);
+        public HttpUriRequest buildHttpRequest(InputStream queryStream,
+                                               Duration timeout,
+                                               ConnectionConfig connection,
+                                               String requestHeader) throws URISyntaxException, IOException {
+            final var requestConfig = RequestConfig.custom()
+                    .setConnectionRequestTimeout((int) timeout.toMillis())
+                    .setConnectTimeout((int) timeout.toMillis())
+                    .setSocketTimeout((int) timeout.toMillis())
+                    .build();
 
-            class CustomStreamSupplier {
-                boolean used = false; // assume, that the stream will only be used again, if the first request failed, because of the client
-                public Supplier<InputStream> getStreamSupplier() {
-                    if (!used) {
-                        used = true;
-                        return () -> queryStream;
-                    }
-                    else
-                        return () -> null;
+            HttpUriRequest request;
+
+            switch (this.requestType) {
+                case GET_QUERY -> {
+                    request = new HttpGet(new URIBuilder(connection.endpoint())
+                            .setParameter("query",
+                                    new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
+                            .build());
                 }
+                case POST_URL_ENC_QUERY -> {
+                    request = new HttpPost(connection.endpoint());
+                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+                    final var params = List.of(new BasicNameValuePair("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
+                    ((HttpPost) request).setEntity(new UrlEncodedFormEntity(params));
+                }
+                case POST_QUERY -> {
+                    request = new HttpPost(connection.endpoint());
+                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-query");
+                    ((HttpPost) request).setEntity(new InputStreamEntity(queryStream));
+                }
+                case POST_URL_ENC_UPDATE -> {
+                    request = new HttpPost(connection.endpoint());
+                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+                    final var params = List.of(new BasicNameValuePair("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
+                    ((HttpPost) request).setEntity(new UrlEncodedFormEntity(params));
+                }
+                case POST_UPDATE -> {
+                    request = new HttpPost(connection.endpoint());
+                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-update");
+                    ((HttpPost) request).setEntity(new InputStreamEntity(queryStream));
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
             }
 
             if (requestHeader != null)
-                request.header("Accept", requestHeader);
+                request.addHeader("Accept", requestHeader);
             if (connection.authentication() != null && connection.authentication().user() != null)
-                request.header("Authorization",
-                               HttpWorker.basicAuth(connection.authentication().user(),
-                                                    Optional.ofNullable(connection.authentication().password()).orElse("")));
-            switch (this.requestType) {
-                case GET_QUERY -> {
-                    request.uri(new URIBuilder(connection.endpoint())
-                                    .setParameter("query",
-                                            new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
-                                    .build())
-                            .GET();
-                }
-                case POST_URL_ENC_QUERY -> {
-                    request.uri(connection.endpoint())
-                            .header("Content-Type", "application/x-www-form-urlencoded")
-                            .POST(HttpRequest.BodyPublishers.ofString(
-                                    urlEncode(Collections.singletonList(
-                                            new String[]{"query" /* query is already URL encoded */,
-                                                    new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)}))));
-                }
-                case POST_QUERY -> {
-                    request.uri(connection.endpoint())
-                            .header("Content-Type", "application/sparql-query")
-                            .POST(HttpRequest.BodyPublishers.ofInputStream(new CustomStreamSupplier().getStreamSupplier()));
-                }
-                case POST_URL_ENC_UPDATE -> {
-                    request.uri(connection.endpoint())
-                            .header("Content-Type", "application/x-www-form-urlencoded")
-                            .POST(HttpRequest.BodyPublishers.ofString(
-                                    urlEncode(Collections.singletonList(
-                                            new String[]{"update" /* query is already URL encoded */,
-                                                    new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)}))));
-                }
-                case POST_UPDATE -> {
-                    request.uri(connection.endpoint())
-                            .header("Content-Type", "application/sparql-update")
-                            .POST(HttpRequest.BodyPublishers.ofInputStream(new CustomStreamSupplier().getStreamSupplier()));
-                }
-            }
-            return request.build();
+                request.addHeader("Authorization",
+                        HttpWorker.basicAuth(connection.authentication().user(),
+                                Optional.ofNullable(connection.authentication().password()).orElse("")));
+
+            return request;
         }
     }
 
@@ -160,7 +169,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     record HttpExecutionResult(
             int queryID,
-            Optional<HttpResponse<InputStream>> response,
+            Optional<CloseableHttpResponse> response,
             Instant requestStart,
             Duration duration,
             Optional<BigByteArrayOutputStream> outputStream,
@@ -174,13 +183,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
         public boolean successful() {
             if (response.isPresent() && exception.isEmpty())
-                return (response.get().statusCode() / 100) == 2;
+                return (response.get().getStatusLine().getStatusCode() / 100) == 2;
             return false;
         }
     }
 
 
-    private HttpClient httpClient;
+    private static CloseableHttpClient httpClient;
     private final ThreadPoolExecutor executor;
 
     private final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
@@ -201,13 +210,30 @@ public class SPARQLProtocolWorker extends HttpWorker {
         return (SPARQLProtocolWorker.Config) config;
     }
 
-
     public SPARQLProtocolWorker(long workerId, ResponseBodyProcessor responseBodyProcessor, Config config) {
         super(workerId, responseBodyProcessor, config);
         this.responseBodyProcessor = responseBodyProcessor;
         this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
         this.requestFactory = new RequestFactory(config().requestType());
-        this.httpClient = buildHttpClient();
+    }
+
+    public static void initHttpClient(int threadCount) {
+        final var connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(threadCount);
+        httpClient = HttpClientBuilder.create()
+                .setConnectionManager(connectionManager)
+                .setMaxConnTotal(threadCount)
+                .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy())
+                .disableContentCompression()
+                .build();
+    }
+
+    public static void closeHttpClient() {
+        try {
+            httpClient.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -277,7 +303,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         HttpExecutionResult result = executeHttpRequest(timeout);
         Optional<Integer> statuscode = Optional.empty();
         if (result.response().isPresent())
-            statuscode = Optional.of(result.response().get().statusCode());
+            statuscode = Optional.of(result.response().get().getStatusLine().getStatusCode());
 
         if (result.successful() && this.config.parseResults()) { // 2xx
             if (result.actualContentLength.isEmpty() || result.hash.isEmpty() || result.outputStream.isEmpty()) {
@@ -304,6 +330,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
             LOGGER.debug("{}\t:: Discarded execution, because the time limit has been reached: [queryID={}]", this, result.queryID);
             return null;
         }
+
+        result.response.ifPresent(r -> {
+            try {
+                r.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         return new ExecutionStats(
                 result.queryID(),
@@ -334,7 +368,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             );
         }
 
-        final HttpRequest request;
+        final HttpUriRequest request;
 
         try {
             request = requestFactory.buildHttpRequest(
@@ -356,26 +390,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
             );
         }
 
-        // check if the last execution task is stuck
-        if (this.httpClient.executor().isPresent() && ((ThreadPoolExecutor) this.httpClient.executor().get()).getActiveCount() != 0) {
-            // This might never cancel the task if the client that's connected to is broken. There also seems to be a
-            // bug where the httpClient never properly handles the interrupt from the shutdownNow method.
-            // See: https://bugs.openjdk.org/browse/JDK-8294047
-            ((ThreadPoolExecutor) this.httpClient.executor().get()).shutdownNow();
-            final var waitStart = Instant.now();
-            try {
-                while (!((ThreadPoolExecutor) this.httpClient.executor().get()).awaitTermination(1, TimeUnit.SECONDS)) {
-                    LOGGER.warn("{}\t:: [Thread-ID: {}]\t:: Waiting for the http client to shutdown. Elapsed time: {}", this, Thread.currentThread().getId(), Duration.between(waitStart, Instant.now()));
-                }
-            } catch (InterruptedException ignored) {
-                LOGGER.warn("{}\t:: Http client never shutdown. Continuing with the creation of a new http client.", this);
-            }
-            this.httpClient = buildHttpClient();
-        }
-
         final Instant timeStamp = Instant.now();
         final var requestStart = System.nanoTime();
-        BiFunction<HttpResponse<InputStream>, Exception, HttpExecutionResult> createFailedResult = (response, e) -> new HttpExecutionResult(
+        BiFunction<CloseableHttpResponse, Exception, HttpExecutionResult> createFailedResult = (response, e) -> new HttpExecutionResult(
                 queryHandle.index(),
                 Optional.ofNullable(response),
                 timeStamp,
@@ -387,56 +404,47 @@ public class SPARQLProtocolWorker extends HttpWorker {
         );
 
         try {
-            return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
-                    .thenApply(httpResponse -> {
-                        try (final var bodyStream = httpResponse.body()) {
-                            if (httpResponse.statusCode() / 100 == 2) { // Request was successful
-                                OptionalLong contentLength = httpResponse.headers().firstValueAsLong("Content-Length");
-                                try (var hasher = hasherFactory.newStreamingHash64(0)) {
-                                    int readBytes;
-                                    while ((readBytes = bodyStream.readNBytes(this.buffer, 0, this.buffer.length)) != 0) {
-                                        if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
-                                            return createFailedResult.apply(httpResponse, new TimeoutException());
-                                        }
-                                        hasher.update(this.buffer, 0, readBytes);
-                                        this.responseBodybbaos.write(this.buffer, 0, readBytes);
-                                    }
-
-                                    if (contentLength.isPresent() &&
-                                            (this.responseBodybbaos.size() < contentLength.getAsLong() ||
-                                             this.responseBodybbaos.size() > contentLength.getAsLong())) {
-                                        return createFailedResult.apply(httpResponse, new ProtocolException("Content-Length header value doesn't match actual content length."));
-                                    }
-
-                                    return new HttpExecutionResult(
-                                            queryHandle.index(),
-                                            Optional.of(httpResponse),
-                                            timeStamp,
-                                            Duration.ofNanos(System.nanoTime() - requestStart),
-                                            Optional.of(this.responseBodybbaos),
-                                            OptionalLong.of(this.responseBodybbaos.size()),
-                                            OptionalLong.of(hasher.getValue()),
-                                            Optional.empty()
-                                    );
-                                }
-                            } else {
-                                return createFailedResult.apply(httpResponse, null);
-                            }
-                        } catch (IOException ex) {
-                            return createFailedResult.apply(httpResponse, ex);
+            final var httpResponse = httpClient.execute(request);
+            try (final var bodyStream = httpResponse.getEntity().getContent()) {
+                try (var hasher = hasherFactory.newStreamingHash64(0)) {
+                    int readBytes;
+                    while ((readBytes = bodyStream.readNBytes(this.buffer, 0, this.buffer.length)) != 0) {
+                        if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
+                            return createFailedResult.apply(httpResponse, new TimeoutException());
                         }
-                    }).get(timeout.toNanos(), TimeUnit.NANOSECONDS);
-        } catch (CompletionException | InterruptedException | ExecutionException | TimeoutException e) {
+                        hasher.update(this.buffer, 0, readBytes);
+                        this.responseBodybbaos.write(this.buffer, 0, readBytes); // TODO: don't save if not further processing the response
+                    }
+
+                    final var contentLengthHeader = httpResponse.getFirstHeader("Content-Length");
+                    Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
+                    if (contentLength != null &&
+                            (this.responseBodybbaos.size() < contentLength ||
+                                    this.responseBodybbaos.size() > contentLength)) {
+                        return createFailedResult.apply(httpResponse, new HttpException("Content-Length header value doesn't match actual content length."));
+                    }
+
+                    if (httpResponse.getStatusLine().getStatusCode() / 100 != 2) {
+                        return createFailedResult.apply(httpResponse, null);
+                    }
+
+                    return new HttpExecutionResult(
+                            queryHandle.index(),
+                            Optional.of(httpResponse),
+                            timeStamp,
+                            Duration.ofNanos(System.nanoTime() - requestStart),
+                            Optional.of(this.responseBodybbaos),
+                            OptionalLong.of(this.responseBodybbaos.size()),
+                            OptionalLong.of(hasher.getValue()),
+                            Optional.empty()
+                    );
+                }
+            } catch (IOException ex) {
+                return createFailedResult.apply(httpResponse, ex);
+            }
+        } catch (IOException e) {
             return createFailedResult.apply(null, e);
         }
-    }
-
-    private HttpClient buildHttpClient() {
-        return HttpClient.newBuilder()
-                .executor(Executors.newFixedThreadPool(1))
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .connectTimeout(config().timeout())
-                .build();
     }
 
     private void logExecution(ExecutionStats execution) {

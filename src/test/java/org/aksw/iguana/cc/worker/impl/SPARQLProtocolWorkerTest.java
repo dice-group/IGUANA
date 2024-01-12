@@ -50,6 +50,7 @@ public class SPARQLProtocolWorkerTest {
     public static void setup() throws IOException {
         queryFile = Files.createTempFile("iguana-test-queries", ".tmp");
         Files.writeString(queryFile, QUERY, StandardCharsets.UTF_8);
+        SPARQLProtocolWorker.initHttpClient(1);
     }
 
     @BeforeEach
@@ -60,6 +61,7 @@ public class SPARQLProtocolWorkerTest {
     @AfterAll
     public static void cleanup() throws IOException {
         Files.deleteIfExists(queryFile);
+        SPARQLProtocolWorker.closeHttpClient();
     }
 
     public static Stream<Named<?>> requestFactoryData() throws IOException, URISyntaxException {
