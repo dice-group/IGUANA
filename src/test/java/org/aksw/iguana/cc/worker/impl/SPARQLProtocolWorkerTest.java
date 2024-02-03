@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
+import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -38,7 +39,7 @@ public class SPARQLProtocolWorkerTest {
 
     @RegisterExtension
     public static WireMockExtension wm = WireMockExtension.newInstance()
-            .options(new WireMockConfiguration().useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER).dynamicPort().notifier(new Slf4jNotifier(true)))
+            .options(new WireMockConfiguration().useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER).dynamicPort().notifier(new ConsoleNotifier(false)))
             .failOnUnmatchedRequests(true)
             .build();
 
@@ -113,7 +114,7 @@ public class SPARQLProtocolWorkerTest {
         switch (worker.config().requestType()) {
             case GET_QUERY -> wm.stubFor(get(urlPathEqualTo("/ds/query"))
                     .withQueryParam("query", equalTo(QUERY))
-                    .withBasicAuth("testUser", "password")
+                    // .withBasicAuth("testUser", "password")
                     .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
             case POST_QUERY -> {
                 wm.stubFor(post(urlPathEqualTo("/ds/query"))
@@ -122,7 +123,6 @@ public class SPARQLProtocolWorkerTest {
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo(QUERY))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-                return;
             }
             case POST_UPDATE -> {
                 wm.stubFor(post(urlPathEqualTo("/ds/query"))
@@ -172,6 +172,7 @@ public class SPARQLProtocolWorkerTest {
     public void testBadHttpCodeResponse() throws IOException, URISyntaxException {
         SPARQLProtocolWorker worker = (SPARQLProtocolWorker) requestFactoryData().toList().get(0).getPayload();
         wm.stubFor(get(urlPathEqualTo("/ds/query"))
+                .withQueryParam("query", equalTo(QUERY))
                 .willReturn(aResponse().withStatus(404)));
         final HttpWorker.Result result = worker.start().join();
         assertEquals(1, result.executionStats().size());
@@ -201,7 +202,7 @@ public class SPARQLProtocolWorkerTest {
         SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
         wm.stubFor(post(urlPathEqualTo("/ds/query"))
                 .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
-                .withBasicAuth("testUser", "password")
+                // .withBasicAuth("testUser", "password")
                 .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
                 .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
 

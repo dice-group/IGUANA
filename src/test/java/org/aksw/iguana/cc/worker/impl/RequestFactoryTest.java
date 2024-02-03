@@ -50,7 +50,6 @@ public class RequestFactoryTest {
         final var requestFactory = new SPARQLProtocolWorker.RequestFactory(type);
         final var request = requestFactory.buildHttpRequest(
                 stream,
-                duration,
                 connection,
                 requestHeader
         );

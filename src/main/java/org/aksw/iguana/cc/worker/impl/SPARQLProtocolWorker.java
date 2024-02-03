@@ -3,6 +3,16 @@ package org.aksw.iguana.cc.worker.impl;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.networknt.client.Http2Client;
+import io.undertow.UndertowOptions;
+import io.undertow.client.*;
+import io.undertow.protocols.ssl.UndertowXnioSsl;
+import io.undertow.server.DefaultByteBufferPool;
+import io.undertow.server.protocol.http.HttpAttachments;
+import io.undertow.util.Headers;
+import io.undertow.util.Methods;
+import io.undertow.util.StringWriteChannelListener;
+import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
@@ -10,41 +20,32 @@ import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.http.HttpException;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
+import org.xnio.*;
+import org.xnio.channels.StreamSourceChannel;
+import org.xnio.ssl.XnioSsl;
 
-import java.io.Closeable;
+import javax.net.ssl.SSLContext;
+import javax.xml.transform.stream.StreamSource;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
+import java.net.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker extends HttpWorker {
@@ -76,63 +77,62 @@ public class SPARQLProtocolWorker extends HttpWorker {
             this.requestType = requestType;
         }
 
-        private static String urlEncode(List<String[]> parameters) {
+        public static String urlEncode(List<String[]> parameters) {
             return parameters.stream()
                     .map(e -> e[0] + "=" + URLEncoder.encode(e[1], StandardCharsets.UTF_8))
                     .collect(Collectors.joining("&"));
         }
 
-        public HttpUriRequest buildHttpRequest(InputStream queryStream,
-                                               Duration timeout,
-                                               ConnectionConfig connection,
-                                               String requestHeader) throws URISyntaxException, IOException {
-            final var requestConfig = RequestConfig.custom()
-                    .setConnectionRequestTimeout((int) timeout.toMillis())
-                    .setConnectTimeout((int) timeout.toMillis())
-                    .setSocketTimeout((int) timeout.toMillis())
-                    .build();
+        public static String basicAuth(String username, String password) {
+            return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
+        }
 
-            HttpUriRequest request;
+        public ClientRequest buildHttpRequest(InputStream queryStream,
+                                              ConnectionConfig connection,
+                                              String requestHeader) throws URISyntaxException, IOException {
+            ClientRequest request;
 
             switch (this.requestType) {
                 case GET_QUERY -> {
-                    request = new HttpGet(new URIBuilder(connection.endpoint())
-                            .setParameter("query",
-                                    new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
-                            .build());
+                    request = new ClientRequest()
+                            .setPath(connection.endpoint().getPath() + "?" + urlEncode(Collections.singletonList(new String[] {"query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)})))
+                            .setMethod(Methods.GET);
+                    request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/sparql-query");
                 }
                 case POST_URL_ENC_QUERY -> {
-                    request = new HttpPost(connection.endpoint());
-                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-                    final var params = List.of(new BasicNameValuePair("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
-                    ((HttpPost) request).setEntity(new UrlEncodedFormEntity(params));
+                    request = new ClientRequest()
+                            .setPath(connection.endpoint().getPath())
+                            .setMethod(Methods.POST);
+                    request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/x-www-form-urlencoded");
                 }
                 case POST_QUERY -> {
-                    request = new HttpPost(connection.endpoint());
-                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-query");
-                    ((HttpPost) request).setEntity(new InputStreamEntity(queryStream));
+                    request = new ClientRequest()
+                            .setPath(connection.endpoint().getPath())
+                            .setMethod(Methods.POST);
+                    request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/sparql-query");
                 }
                 case POST_URL_ENC_UPDATE -> {
-                    request = new HttpPost(connection.endpoint());
-                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-                    final var params = List.of(new BasicNameValuePair("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
-                    ((HttpPost) request).setEntity(new UrlEncodedFormEntity(params));
+                    request = new ClientRequest()
+                            .setPath(connection.endpoint().getPath())
+                            .setMethod(Methods.POST);
+                    request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/x-www-form-urlencoded");
                 }
                 case POST_UPDATE -> {
-                    request = new HttpPost(connection.endpoint());
-                    request.addHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-update");
-                    ((HttpPost) request).setEntity(new InputStreamEntity(queryStream));
+                    request = new ClientRequest()
+                            .setPath(connection.endpoint().getPath())
+                            .setMethod(Methods.POST);
+                    request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/sparql-update");
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
             }
 
-            if (requestHeader != null)
-                request.addHeader("Accept", requestHeader);
-            if (connection.authentication() != null && connection.authentication().user() != null)
-                request.addHeader("Authorization",
-                        HttpWorker.basicAuth(connection.authentication().user(),
-                                Optional.ofNullable(connection.authentication().password()).orElse("")));
+            request.getRequestHeaders().put(Headers.HOST, "localhost:8080");
+            request.getRequestHeaders().put(Headers.ACCEPT, requestHeader);
 
+            // TODO: authentication
+            if (connection.authentication() != null) {
+                request.getRequestHeaders().add(Headers.AUTHORIZATION, basicAuth(connection.authentication().user(), connection.authentication().password()));
+            }
             return request;
         }
     }
@@ -169,7 +169,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     record HttpExecutionResult(
             int queryID,
-            Optional<CloseableHttpResponse> response,
+            Optional<ClientResponse> response,
             Instant requestStart,
             Duration duration,
             Optional<BigByteArrayOutputStream> outputStream,
@@ -183,13 +183,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
         public boolean successful() {
             if (response.isPresent() && exception.isEmpty())
-                return (response.get().getStatusLine().getStatusCode() / 100) == 2;
+                return (response.get().getResponseCode() / 100) == 2;
             return false;
         }
     }
 
 
-    private static CloseableHttpClient httpClient;
+    private ClientConnection httpConnection;
     private final ThreadPoolExecutor executor;
 
     private final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
@@ -218,22 +218,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
     public static void initHttpClient(int threadCount) {
-        final var connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(threadCount);
-        httpClient = HttpClientBuilder.create()
-                .setConnectionManager(connectionManager)
-                .setMaxConnTotal(threadCount)
-                .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy())
-                .disableContentCompression()
-                .build();
     }
 
     public static void closeHttpClient() {
-        try {
-            httpClient.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -247,6 +234,29 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * @return the CompletableFuture the contains the results of the worker.
      */
     public CompletableFuture<Result> start() {
+        var port = 8080; // TODO: öaskldfjöoasdjföasjdö fasdjn <--- O_o
+        // find open port
+        try {
+            final var s = new ServerSocket(0);
+            port = s.getLocalPort();
+            s.close();
+        } catch (IOException ignore) {}
+        try {
+            final var uri = config.connection().endpoint().toString().split(config.connection().endpoint().getPath())[0];
+            httpConnection = Http2Client
+                    .getInstance()
+                    .connectAsync(
+                            new InetSocketAddress("localhost", port),
+                            URI.create(uri),
+                            Http2Client.WORKER,
+                            null,
+                            new DefaultByteBufferPool(true, 8192),
+                            OptionMap.create(UndertowOptions.ALWAYS_SET_KEEP_ALIVE, true)
+                    ).get();
+        } catch (InterruptedException | ExecutionException e) {
+            return CompletableFuture.failedFuture(e);
+        }
+
         return CompletableFuture.supplyAsync(() -> {
             ZonedDateTime startTime = ZonedDateTime.now();
             List<ExecutionStats> executionStats = new ArrayList<>();
@@ -286,6 +296,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 LOGGER.info("{}\t:: Reached time limit of {}.", this, timeLimit.duration());
             }
             ZonedDateTime endTime = ZonedDateTime.now();
+            try {
+                final var latch = new CountDownLatch(1);
+                httpConnection.getCloseSetter().set(e -> latch.countDown());
+                httpConnection.close();
+                try {
+                    latch.await();
+                } catch (InterruptedException ignore) {}
+            } catch (IOException ignore) {}
             return new Result(this.workerID, executionStats, startTime, endTime);
         }, executor);
     }
@@ -303,7 +321,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         HttpExecutionResult result = executeHttpRequest(timeout);
         Optional<Integer> statuscode = Optional.empty();
         if (result.response().isPresent())
-            statuscode = Optional.of(result.response().get().getStatusLine().getStatusCode());
+            statuscode = Optional.of(result.response().get().getResponseCode());
 
         if (result.successful() && this.config.parseResults()) { // 2xx
             if (result.actualContentLength.isEmpty() || result.hash.isEmpty() || result.outputStream.isEmpty()) {
@@ -331,14 +349,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
             return null;
         }
 
-        result.response.ifPresent(r -> {
-            try {
-                r.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
         return new ExecutionStats(
                 result.queryID(),
                 result.requestStart(),
@@ -350,101 +360,235 @@ public class SPARQLProtocolWorker extends HttpWorker {
         );
     }
 
-
-    private HttpExecutionResult executeHttpRequest(Duration timeout) {
-        final QueryHandler.QueryStreamWrapper queryHandle;
-        try {
-            queryHandle = config().queries().getNextQueryStream(this.querySelector);
-        } catch (IOException e) {
-            return new HttpExecutionResult(
-                this.querySelector.getCurrentIndex(),
-                Optional.empty(),
-                Instant.now(),
-                Duration.ZERO,
-                Optional.empty(),
-                OptionalLong.empty(),
-                OptionalLong.empty(),
-                Optional.of(e)
-            );
-        }
-
-        final HttpUriRequest request;
-
-        try {
-            request = requestFactory.buildHttpRequest(
-                    queryHandle.queryInputStream(),
-                    timeout,
-                    config().connection(),
-                    config().acceptHeader()
-            );
-        } catch (IOException | URISyntaxException e) {
-            return new HttpExecutionResult(
-                    queryHandle.index(),
-                    Optional.empty(),
-                    Instant.now(),
-                    Duration.ZERO,
-                    Optional.empty(),
-                    OptionalLong.empty(),
-                    OptionalLong.empty(),
-                    Optional.of(e)
-            );
-        }
-
-        final Instant timeStamp = Instant.now();
-        final var requestStart = System.nanoTime();
-        BiFunction<CloseableHttpResponse, Exception, HttpExecutionResult> createFailedResult = (response, e) -> new HttpExecutionResult(
-                queryHandle.index(),
+    private static HttpExecutionResult createFailedResult(Instant timeStamp, long requestStart, long requestEnd, int queryID, ClientResponse response, Exception e) {
+        return new HttpExecutionResult(
+                queryID,
                 Optional.ofNullable(response),
                 timeStamp,
-                Duration.ofNanos(System.nanoTime() - requestStart),
+                Duration.ofNanos(requestEnd - requestStart),
                 Optional.empty(),
                 OptionalLong.empty(),
                 OptionalLong.empty(),
                 Optional.ofNullable(e)
         );
+    }
 
-        try {
-            final var httpResponse = httpClient.execute(request);
-            try (final var bodyStream = httpResponse.getEntity().getContent()) {
-                try (var hasher = hasherFactory.newStreamingHash64(0)) {
-                    int readBytes;
-                    while ((readBytes = bodyStream.readNBytes(this.buffer, 0, this.buffer.length)) != 0) {
-                        if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
-                            return createFailedResult.apply(httpResponse, new TimeoutException());
-                        }
-                        hasher.update(this.buffer, 0, readBytes);
-                        this.responseBodybbaos.write(this.buffer, 0, readBytes); // TODO: don't save if not further processing the response
-                    }
+    private static HttpExecutionResult createFailedResultBeforeRequest(Instant timeStamp, int queryID, Exception e) {
+        return new HttpExecutionResult(
+                queryID,
+                Optional.empty(),
+                timeStamp,
+                Duration.ZERO,
+                Optional.empty(),
+                OptionalLong.empty(),
+                OptionalLong.empty(),
+                Optional.ofNullable(e)
+        );
+    }
 
-                    final var contentLengthHeader = httpResponse.getFirstHeader("Content-Length");
-                    Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
-                    if (contentLength != null &&
-                            (this.responseBodybbaos.size() < contentLength ||
-                                    this.responseBodybbaos.size() > contentLength)) {
-                        return createFailedResult.apply(httpResponse, new HttpException("Content-Length header value doesn't match actual content length."));
-                    }
+    private HttpExecutionResult executeHttpRequest(Duration timeout) {
+        class ResponseReader implements ChannelListener<StreamSourceChannel> {
+            private final BigByteArrayOutputStream outputStream;
+            private final byte[] buffer = new byte[8192];
+            private final ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+            private final StreamingXXHash64 hasher;
+            private final int queryID;
+            private final Instant timeStamp;
+            private final long requestStart;
+            private final Duration timeout;
+            private final CountDownLatch latch = new CountDownLatch(1);
 
-                    if (httpResponse.getStatusLine().getStatusCode() / 100 != 2) {
-                        return createFailedResult.apply(httpResponse, null);
-                    }
+            private Exception exception;
+            private ClientResponse response;
+            private long responseEnd;
 
-                    return new HttpExecutionResult(
-                            queryHandle.index(),
-                            Optional.of(httpResponse),
-                            timeStamp,
-                            Duration.ofNanos(System.nanoTime() - requestStart),
-                            Optional.of(this.responseBodybbaos),
-                            OptionalLong.of(this.responseBodybbaos.size()),
-                            OptionalLong.of(hasher.getValue()),
-                            Optional.empty()
-                    );
+            public ResponseReader(BigByteArrayOutputStream outputStream, StreamingXXHash64 hasher, int queryID, Instant timeStamp, long requestStart, Duration timeout) {
+                this.outputStream = outputStream;
+                this.hasher = hasher;
+                this.queryID = queryID;
+                this.timeStamp = timeStamp;
+                this.requestStart = requestStart;
+                this.timeout = timeout;
+            }
+
+            /**
+             * Ends the response reading process and counts down the latch.
+             */
+            private void endResponse(Exception e, StreamSourceChannel channel) {
+                responseEnd = System.nanoTime();
+                this.exception = e;
+                IoUtils.safeClose(channel);
+                if (exception != null && config.parseResults())
+                    responseBodyProcessor.add(outputStream.size(), hasher.getValue(), outputStream);
+                latch.countDown();
+            }
+
+            public void setup(ClientExchange exchange) {
+                final var channel = exchange.getResponseChannel();
+                response = exchange.getResponse();
+                if (response.getResponseCode() / 100 != 2) {
+                    endResponse(null, channel);
+                    return;
                 }
-            } catch (IOException ex) {
-                return createFailedResult.apply(httpResponse, ex);
+
+                channel.getReadSetter().set(this);
+                byteBuffer.clear();
+                handleEvent(channel);
+            }
+
+            public void registerException(Exception e) {
+                this.exception = e;
+            }
+
+            @Override
+            public void handleEvent(StreamSourceChannel channel) {
+                try {
+                    int readBytes;
+                    while ((readBytes = channel.read(byteBuffer)) != 0) {
+                        if (Duration.of(System.nanoTime() - requestStart, ChronoUnit.NANOS).compareTo(timeout) > 0) {
+                            endResponse(new TimeoutException(), channel);
+                            return;
+                        }
+
+                        if (readBytes == -1) {
+                            endResponse(null, channel);
+                            return;
+                        } else {
+                            byteBuffer.flip();
+                            hasher.update(buffer, 0, readBytes);
+                            outputStream.write(buffer, 0, readBytes);
+                            byteBuffer.clear();
+                        }
+                    }
+                    channel.resumeReads();
+                } catch (IOException e) {
+                    endResponse(e, channel);
+                }
+            }
+
+            public HttpExecutionResult get() {
+                if (exception != null) {
+                    return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, exception);
+                }
+
+                try {
+                    latch.await();
+                } catch (InterruptedException ignore) {} // continue
+
+                if (response != null && response.getResponseCode() / 100 != 2) {
+                    return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, null);
+                } else if (response == null) {
+                    return createFailedResult(timeStamp, requestStart, responseEnd, queryID, null, new HttpException("Response is null."));
+                } else if (response.getResponseHeaders().get("Content-Length") != null &&
+                        (outputStream.size() < Long.parseLong(response.getResponseHeaders().get("Content-Length").getFirst()) ||
+                                outputStream.size() > Long.parseLong(response.getResponseHeaders().get("Content-Length").getFirst()))) {
+                    return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, new HttpException("Content-Length header value doesn't match actual content length."));
+                }
+
+                return new HttpExecutionResult(
+                        queryID,
+                        Optional.ofNullable(response),
+                        timeStamp,
+                        Duration.ofNanos(responseEnd - requestStart),
+                        Optional.of(outputStream),
+                        OptionalLong.of(outputStream.size()),
+                        OptionalLong.of(hasher.getValue()),
+                        Optional.empty()
+                );
+            }
+        }
+
+        final QueryHandler.QueryStreamWrapper queryHandle;
+        try {
+            queryHandle = config().queries().getNextQueryStream(this.querySelector);
+        } catch (IOException e) {
+            return createFailedResultBeforeRequest(Instant.now(), -1, e);
+        }
+
+        final ClientRequest request;
+        try {
+            request = requestFactory.buildHttpRequest(
+                    queryHandle.queryInputStream(),
+                    config().connection(),
+                    config().acceptHeader()
+            );
+        } catch (IOException | URISyntaxException e) {
+            return createFailedResultBeforeRequest(Instant.now(), queryHandle.index(), e);
+        }
+
+
+        String temp = null;
+        try {
+            switch (config().requestType) {
+                case POST_URL_ENC_QUERY -> temp = RequestFactory.urlEncode(Collections.singletonList(new String[] {"query", new String(queryHandle.queryInputStream().readAllBytes(), StandardCharsets.UTF_8)}));
+                case POST_URL_ENC_UPDATE -> temp = RequestFactory.urlEncode(Collections.singletonList(new String[] {"update", new String(queryHandle.queryInputStream().readAllBytes(), StandardCharsets.UTF_8)}));
+                case GET_QUERY -> temp = "";
             }
         } catch (IOException e) {
-            return createFailedResult.apply(null, e);
+            return createFailedResultBeforeRequest(Instant.now(), queryHandle.index(), e);
         }
+
+        if (temp != null) {
+            request.getRequestHeaders().add(Headers.CONTENT_LENGTH, String.valueOf(temp.getBytes(StandardCharsets.UTF_8).length));
+        }
+        final Instant timeStamp = Instant.now();
+        final var requestStart = System.nanoTime();
+        final var responseReader = new ResponseReader(this.responseBodybbaos, hasherFactory.newStreamingHash64(0), queryHandle.index(), timeStamp, requestStart, timeout);
+        final var finalRequestBody = temp;
+        httpConnection.sendRequest(request, new ClientCallback<ClientExchange>() {
+            @Override
+            public void completed(final ClientExchange result) {
+                result.getRequestChannel().resumeWrites();
+                // send the request body
+                if (finalRequestBody != null) {
+                    if (!finalRequestBody.isEmpty()) {
+                        new StringWriteChannelListener(finalRequestBody).setup(result.getRequestChannel());
+                    }
+                } else {
+                    final var requestBodyStream = new BufferedInputStream(queryHandle.queryInputStream());
+                    try {
+                        final var byteBuffer = ByteBuffer.wrap(buffer);
+                        int read;
+                        while ((read = requestBodyStream.read(buffer)) != -1) {
+                            byteBuffer.position(read);
+                            byteBuffer.flip();
+                            result.getRequestChannel().write(byteBuffer);
+                        }
+                    } catch (IOException e) {
+                        responseReader.registerException(e);
+                    }
+                }
+
+                // set response listener
+                result.setResponseListener(new ClientCallback<ClientExchange>() {
+                    @Override
+                    public void completed(ClientExchange result) {
+                        responseReader.setup(result);
+                    }
+
+                    @Override
+                    public void failed(IOException e) {
+                        responseReader.registerException(e);
+                    }
+                });
+
+                try {
+                    result.getRequestChannel().shutdownWrites();
+                    if (!result.getRequestChannel().flush()) {
+                        result.getRequestChannel().getWriteSetter().set(ChannelListeners.flushingChannelListener((ChannelListener) null, (ChannelExceptionHandler) null));
+                        result.getRequestChannel().resumeWrites();
+                    }
+                } catch (IOException var3) {
+                    responseReader.registerException(var3);
+                }
+            }
+
+            @Override
+            public void failed(IOException e) {
+                responseReader.registerException(e);
+            }
+        });
+        return responseReader.get();
     }
 
     private void logExecution(ExecutionStats execution) {
