@@ -29,6 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -165,6 +166,55 @@ public class SPARQLProtocolWorkerTest {
     }
 
     @Test
+    public void testConcurrency() throws URISyntaxException, IOException {
+        final var uri = new URI("http://localhost:" + wm.getPort() + "/ds/query");
+        final var processor = new ResponseBodyProcessor("application/sparql-results+json");
+        final var queryHandler = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, null, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
+        final var datasetConfig = new DatasetConfig("TestDS", null);
+        final var connection = new ConnectionConfig("TestConn", "1", datasetConfig, uri, new ConnectionConfig.Authentication("testUser", "password"), null, null);
+        final var target = new HttpWorker.QueryMixes(1);
+
+        final var number = 100;
+
+        final var config = new SPARQLProtocolWorker.Config(
+                number,
+                queryHandler,
+                target,
+                connection,
+                Duration.parse("PT100S"),
+                "application/sparql-results+json",
+                SPARQLProtocolWorker.RequestFactory.RequestType.POST_URL_ENC_QUERY,
+                false
+        );
+
+        wm.stubFor(post(urlPathEqualTo("/ds/query"))
+                .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
+                .withBasicAuth("testUser", "password")
+                .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
+                .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
+
+        final var workers = new ArrayList<SPARQLProtocolWorker>();
+        for (int i = 0; i < number; i++) {
+            workers.add(new SPARQLProtocolWorker(i, processor, config));
+        }
+
+        var futures = workers.stream().map(HttpWorker::start).toList();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        final var results = futures.stream().map(CompletableFuture::join).toList();
+
+        assertEquals(number, results.size());
+        for (var result : results) {
+            assertEquals(1, result.executionStats().size());
+            assertNull(result.executionStats().get(0).error().orElse(null));
+            assertEquals(200, result.executionStats().get(0).httpStatusCode().get());
+            assertNotEquals(0, result.executionStats().get(0).responseBodyHash().getAsLong());
+            assertEquals("Non-Empty-Body".getBytes(StandardCharsets.UTF_8).length, result.executionStats().get(0).contentLength().getAsLong());
+            assertNotEquals(Duration.ZERO, result.executionStats().get(0).duration());
+        }
+    }
+
+    @Test
     public void testBadHttpCodeResponse() throws IOException, URISyntaxException {
         SPARQLProtocolWorker worker = (SPARQLProtocolWorker) requestFactoryData().toList().get(0).getPayload();
         wm.stubFor(get(urlPathEqualTo("/ds/query"))
@@ -221,7 +271,7 @@ public class SPARQLProtocolWorkerTest {
                 queryHandlder,
                 target,
                 connection,
-                Duration.parse("PT20S"),
+                Duration.parse("PT5S"),
                 "application/sparql-results+json",
                 SPARQLProtocolWorker.RequestFactory.RequestType.POST_URL_ENC_QUERY,
                 false

@@ -3,9 +3,8 @@ package org.aksw.iguana.cc.worker.impl;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.networknt.client.Http2Client;
-import io.undertow.UndertowOptions;
 import io.undertow.client.*;
+import io.undertow.client.http.HttpClientProvider;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.util.Headers;
 import io.undertow.util.Methods;
@@ -222,19 +221,55 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * @return the CompletableFuture the contains the results of the worker.
      */
     public CompletableFuture<Result> start() {
+        XnioWorker worker;
         try {
+            final OptionMap workerOptions = OptionMap.builder()
+                    .set(Options.WORKER_IO_THREADS, 4)
+                    .set(Options.TCP_NODELAY, true)
+                    .set(Options.KEEP_ALIVE, true)
+                    .set(Options.WORKER_NAME, "Client").getMap();
+            worker = Xnio.getInstance().createWorker(workerOptions);
             final var uri = config.connection().endpoint().toString().split(config.connection().endpoint().getPath())[0];
-            httpConnection = Http2Client
-                    .getInstance()
-                    .connectAsync(
-                            null,
+            final var callback = new ClientCallback<ClientConnection>() {
+                private final CountDownLatch latch = new CountDownLatch(1);
+                private ClientConnection connection;
+                private IOException exception;
+
+                public ClientConnection get() throws IOException {
+                    try {
+                        latch.await();
+                    } catch (InterruptedException ignored) {}
+                    if (exception != null) {
+                        throw exception;
+                    }
+                    return connection;
+                }
+
+                @Override
+                public void completed(ClientConnection result) {
+                    connection = result;
+                    latch.countDown();
+                }
+
+                @Override
+                public void failed(IOException e) {
+                    LOGGER.error("{}\t:: Failed to connect to server: [uri={}].", SPARQLProtocolWorker.this, uri, e);
+                    exception = e;
+                    latch.countDown();
+                }
+            };
+
+            new HttpClientProvider()
+                    .connect(
+                            callback,
                             URI.create(uri),
-                            Http2Client.WORKER,
+                            worker,
                             null,
                             new DefaultByteBufferPool(true, 8192),
-                            OptionMap.create(UndertowOptions.ALWAYS_SET_KEEP_ALIVE, true)
-                    ).get();
-        } catch (InterruptedException | ExecutionException e) {
+                            OptionMap.EMPTY
+            );
+            httpConnection = callback.get();
+        } catch (IOException e) {
             return CompletableFuture.failedFuture(e);
         }
 
@@ -277,11 +312,22 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 LOGGER.info("{}\t:: Reached time limit of {}.", this, timeLimit.duration());
             }
             ZonedDateTime endTime = ZonedDateTime.now();
+            return new Result(this.workerID, executionStats, startTime, endTime);
+        }, executor).handle((result, e) -> {
             try {
                 httpConnection.close();
+                worker.shutdown();
+                try {
+                    if (!worker.awaitTermination(10, TimeUnit.SECONDS))
+                        worker.shutdownNow();
+                } catch (InterruptedException ignored) {}
             } catch (IOException ignore) {}
-            return new Result(this.workerID, executionStats, startTime, endTime);
-        }, executor);
+            if (e != null) {
+                LOGGER.error("{}\t:: Unexpected error during execution of worker.", this, e);
+                return new Result(this.workerID, new ArrayList<>(), ZonedDateTime.now(), ZonedDateTime.now());
+            }
+            return result;
+        });
     }
 
     /**
