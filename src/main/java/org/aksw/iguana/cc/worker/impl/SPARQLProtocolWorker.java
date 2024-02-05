@@ -6,9 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.networknt.client.Http2Client;
 import io.undertow.UndertowOptions;
 import io.undertow.client.*;
-import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.server.DefaultByteBufferPool;
-import io.undertow.server.protocol.http.HttpAttachments;
 import io.undertow.util.Headers;
 import io.undertow.util.Methods;
 import io.undertow.util.StringWriteChannelListener;
@@ -25,27 +23,19 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 import org.xnio.*;
 import org.xnio.channels.StreamSourceChannel;
-import org.xnio.ssl.XnioSsl;
 
-import javax.net.ssl.SSLContext;
-import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker extends HttpWorker {
@@ -99,34 +89,31 @@ public class SPARQLProtocolWorker extends HttpWorker {
                             .setMethod(Methods.GET);
                     request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/sparql-query");
                 }
-                case POST_URL_ENC_QUERY -> {
-                    request = new ClientRequest()
-                            .setPath(connection.endpoint().getPath())
-                            .setMethod(Methods.POST);
-                    request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/x-www-form-urlencoded");
-                }
                 case POST_QUERY -> {
                     request = new ClientRequest()
                             .setPath(connection.endpoint().getPath())
                             .setMethod(Methods.POST);
                     request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/sparql-query");
-                }
-                case POST_URL_ENC_UPDATE -> {
-                    request = new ClientRequest()
-                            .setPath(connection.endpoint().getPath())
-                            .setMethod(Methods.POST);
-                    request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/x-www-form-urlencoded");
+                    request.getRequestHeaders().put(Headers.TRANSFER_ENCODING, "chunked");
                 }
                 case POST_UPDATE -> {
                     request = new ClientRequest()
                             .setPath(connection.endpoint().getPath())
                             .setMethod(Methods.POST);
                     request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/sparql-update");
+                    request.getRequestHeaders().put(Headers.TRANSFER_ENCODING, "chunked");
+                }
+                case POST_URL_ENC_QUERY, POST_URL_ENC_UPDATE -> {
+                    request = new ClientRequest()
+                            .setPath(connection.endpoint().getPath())
+                            .setMethod(Methods.POST);
+                    request.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/x-www-form-urlencoded");
+                    request.getRequestHeaders().put(Headers.TRANSFER_ENCODING, "chunked");
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
             }
 
-            request.getRequestHeaders().put(Headers.HOST, "localhost:8080");
+            request.getRequestHeaders().put(Headers.HOST, connection.endpoint().getHost() + ":" + connection.endpoint().getPort());
             request.getRequestHeaders().put(Headers.ACCEPT, requestHeader);
 
             // TODO: authentication
@@ -190,6 +177,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
 
     private ClientConnection httpConnection;
+
     private final ThreadPoolExecutor executor;
 
     private final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
@@ -234,19 +222,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * @return the CompletableFuture the contains the results of the worker.
      */
     public CompletableFuture<Result> start() {
-        var port = 8080; // TODO: öaskldfjöoasdjföasjdö fasdjn <--- O_o
-        // find open port
-        try {
-            final var s = new ServerSocket(0);
-            port = s.getLocalPort();
-            s.close();
-        } catch (IOException ignore) {}
         try {
             final var uri = config.connection().endpoint().toString().split(config.connection().endpoint().getPath())[0];
             httpConnection = Http2Client
                     .getInstance()
                     .connectAsync(
-                            new InetSocketAddress("localhost", port),
+                            null,
                             URI.create(uri),
                             Http2Client.WORKER,
                             null,
@@ -297,12 +278,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             }
             ZonedDateTime endTime = ZonedDateTime.now();
             try {
-                final var latch = new CountDownLatch(1);
-                httpConnection.getCloseSetter().set(e -> latch.countDown());
                 httpConnection.close();
-                try {
-                    latch.await();
-                } catch (InterruptedException ignore) {}
             } catch (IOException ignore) {}
             return new Result(this.workerID, executionStats, startTime, endTime);
         }, executor);
@@ -402,6 +378,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
             private ClientResponse response;
             private long responseEnd;
 
+            private StreamSourceChannel channel;
+
             public ResponseReader(BigByteArrayOutputStream outputStream, StreamingXXHash64 hasher, int queryID, Instant timeStamp, long requestStart, Duration timeout) {
                 this.outputStream = outputStream;
                 this.hasher = hasher;
@@ -424,20 +402,31 @@ public class SPARQLProtocolWorker extends HttpWorker {
             }
 
             public void setup(ClientExchange exchange) {
-                final var channel = exchange.getResponseChannel();
+                channel = exchange.getResponseChannel();
                 response = exchange.getResponse();
                 if (response.getResponseCode() / 100 != 2) {
                     endResponse(null, channel);
                     return;
                 }
 
+                channel.getCloseSetter().set((c) -> endResponse(new IOException("Channel closed."), channel));
+                if (!channel.isOpen())
+                    endResponse(new IOException("Channel closed."), channel);
+
                 channel.getReadSetter().set(this);
+
                 byteBuffer.clear();
                 handleEvent(channel);
             }
 
+            /**
+             * Registers exceptions that occurred before the response reading process started and counts down the latch.
+             *
+             * @param e the exception that occurred
+             */
             public void registerException(Exception e) {
                 this.exception = e;
+                latch.countDown();
             }
 
             @Override
@@ -467,15 +456,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
             }
 
             public HttpExecutionResult get() {
+                try {
+                    if (!latch.await(config.timeout().toMillis(), TimeUnit.MILLISECONDS)) {
+                        endResponse(new TimeoutException(), channel);
+                    }
+                } catch (InterruptedException ignore) {} // continue
                 if (exception != null) {
                     return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, exception);
-                }
-
-                try {
-                    latch.await();
-                } catch (InterruptedException ignore) {} // continue
-
-                if (response != null && response.getResponseCode() / 100 != 2) {
+                } else if (response != null && response.getResponseCode() / 100 != 2) {
                     return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, null);
                 } else if (response == null) {
                     return createFailedResult(timeStamp, requestStart, responseEnd, queryID, null, new HttpException("Response is null."));
@@ -520,22 +508,27 @@ public class SPARQLProtocolWorker extends HttpWorker {
         String temp = null;
         try {
             switch (config().requestType) {
-                case POST_URL_ENC_QUERY -> temp = RequestFactory.urlEncode(Collections.singletonList(new String[] {"query", new String(queryHandle.queryInputStream().readAllBytes(), StandardCharsets.UTF_8)}));
-                case POST_URL_ENC_UPDATE -> temp = RequestFactory.urlEncode(Collections.singletonList(new String[] {"update", new String(queryHandle.queryInputStream().readAllBytes(), StandardCharsets.UTF_8)}));
+                case POST_URL_ENC_QUERY -> {
+                    try (var is = queryHandle.queryInputStream()) {
+                        temp = RequestFactory.urlEncode(Collections.singletonList(new String[]{"query", new String(is.readAllBytes(), StandardCharsets.UTF_8)}));
+                    }
+                }
+                case POST_URL_ENC_UPDATE -> {
+                    try (var is = queryHandle.queryInputStream()) {
+                        temp = RequestFactory.urlEncode(Collections.singletonList(new String[]{"update", new String(is.readAllBytes(), StandardCharsets.UTF_8)}));
+                    }
+                }
                 case GET_QUERY -> temp = "";
             }
         } catch (IOException e) {
             return createFailedResultBeforeRequest(Instant.now(), queryHandle.index(), e);
         }
 
-        if (temp != null) {
-            request.getRequestHeaders().add(Headers.CONTENT_LENGTH, String.valueOf(temp.getBytes(StandardCharsets.UTF_8).length));
-        }
         final Instant timeStamp = Instant.now();
         final var requestStart = System.nanoTime();
         final var responseReader = new ResponseReader(this.responseBodybbaos, hasherFactory.newStreamingHash64(0), queryHandle.index(), timeStamp, requestStart, timeout);
         final var finalRequestBody = temp;
-        httpConnection.sendRequest(request, new ClientCallback<ClientExchange>() {
+        httpConnection.sendRequest(request, new ClientCallback<>() {
             @Override
             public void completed(final ClientExchange result) {
                 result.getRequestChannel().resumeWrites();
@@ -560,7 +553,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 }
 
                 // set response listener
-                result.setResponseListener(new ClientCallback<ClientExchange>() {
+                result.setResponseListener(new ClientCallback<>() {
                     @Override
                     public void completed(ClientExchange result) {
                         responseReader.setup(result);
@@ -575,7 +568,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 try {
                     result.getRequestChannel().shutdownWrites();
                     if (!result.getRequestChannel().flush()) {
-                        result.getRequestChannel().getWriteSetter().set(ChannelListeners.flushingChannelListener((ChannelListener) null, (ChannelExceptionHandler) null));
+                        result.getRequestChannel().getWriteSetter().set(ChannelListeners.flushingChannelListener(null, null));
                         result.getRequestChannel().resumeWrites();
                     }
                 } catch (IOException var3) {

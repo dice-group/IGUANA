@@ -1,7 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
-import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.http.Fault;
@@ -114,25 +113,22 @@ public class SPARQLProtocolWorkerTest {
         switch (worker.config().requestType()) {
             case GET_QUERY -> wm.stubFor(get(urlPathEqualTo("/ds/query"))
                     .withQueryParam("query", equalTo(QUERY))
-                    // .withBasicAuth("testUser", "password")
+                    .withBasicAuth("testUser", "password")
                     .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-            case POST_QUERY -> {
+            case POST_QUERY ->
                 wm.stubFor(post(urlPathEqualTo("/ds/query"))
                         .withHeader("Content-Type", equalTo("application/sparql-query"))
                         .withHeader("Transfer-Encoding", equalTo("chunked"))
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo(QUERY))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-            }
-            case POST_UPDATE -> {
+            case POST_UPDATE ->
                 wm.stubFor(post(urlPathEqualTo("/ds/query"))
                         .withHeader("Content-Type", equalTo("application/sparql-update"))
                         .withHeader("Transfer-Encoding", equalTo("chunked"))
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo(QUERY))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-                return; // TODO: wiremock behaves really weirdly when the request body is streamed
-            }
 
             case POST_URL_ENC_QUERY -> wm.stubFor(post(urlPathEqualTo("/ds/query"))
                     .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
@@ -179,6 +175,38 @@ public class SPARQLProtocolWorkerTest {
         assertTrue(result.executionStats().get(0).httpError());
     }
 
+    @Test
+    public void testTimeout() throws IOException, URISyntaxException {
+        final var uri = new URI("http://localhost:" + wm.getPort() + "/ds/query");
+        final var processor = new ResponseBodyProcessor("application/sparql-results+json");
+        final var queryHandlder = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, null, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
+        final var datasetConfig = new DatasetConfig("TestDS", null);
+        final var connection = new ConnectionConfig("TestConn", "1", datasetConfig, uri, new ConnectionConfig.Authentication("testUser", "password"), null, null);
+        final var target = new HttpWorker.TimeLimit(Duration.of(1, ChronoUnit.SECONDS));
+
+        final var config = new SPARQLProtocolWorker.Config(
+                1,
+                queryHandlder,
+                target,
+                connection,
+                Duration.parse("PT1S"),
+                "application/sparql-results+json",
+                SPARQLProtocolWorker.RequestFactory.RequestType.POST_URL_ENC_QUERY,
+                false
+        );
+
+        SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
+        wm.stubFor(post(urlPathEqualTo("/ds/query"))
+                .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
+                .withBasicAuth("testUser", "password")
+                .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
+                .willReturn(aResponse().withFixedDelay(5000).withStatus(200).withBody("Non-Empty-Body")));
+
+        final HttpWorker.Result result = worker.start().join();
+        assertEquals(1, result.executionStats().size());
+        assertTrue(result.executionStats().get(0).timeout());
+    }
+
     @ParameterizedTest
     @MethodSource("completionTargets")
     public void testCompletionTargets(HttpWorker.CompletionTarget target) throws URISyntaxException, IOException {
@@ -202,7 +230,7 @@ public class SPARQLProtocolWorkerTest {
         SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
         wm.stubFor(post(urlPathEqualTo("/ds/query"))
                 .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
-                // .withBasicAuth("testUser", "password")
+                .withBasicAuth("testUser", "password")
                 .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
                 .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
 
