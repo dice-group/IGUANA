@@ -297,7 +297,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     final boolean reducedTimeout = config().timeout().compareTo(timeToEnd) > 0;
                     final Duration thisQueryTimeOut = (reducedTimeout) ? timeToEnd : config().timeout();
                     ExecutionStats execution = executeQuery(thisQueryTimeOut, reducedTimeout);
-                    if (execution != null){ // If timeout is reduced, the execution result might be discarded if it failed and executeQuery returns null.
+                    if (execution != null) { // If timeout is reduced, the execution result might be discarded if it failed and executeQuery returns null.
                         logExecution(execution);
                         executionStats.add(execution);
                     }
