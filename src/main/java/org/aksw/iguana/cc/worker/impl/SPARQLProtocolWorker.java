@@ -465,7 +465,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     return createFailedResult.apply(response, new TimeoutException());
                 }
                 if (config.parseResults()) {
-                    responseBodyProcessor.add(responseBodybbaos.size(), hasher.getValue(), responseBodybbaos);
+                    // responseBodyProcessor.add(responseBodybbaos.size(), hasher.getValue(), responseBodybbaos);
                 }
 
                 return new HttpExecutionResult(
