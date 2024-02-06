@@ -32,7 +32,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -191,6 +190,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private final byte[] buffer = new byte[4096];
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SPARQLProtocolWorker.class);
+
+    private final ResponseReader responseReader = new ResponseReader();
 
     @Override
     public Config config() {
@@ -408,129 +409,164 @@ public class SPARQLProtocolWorker extends HttpWorker {
         );
     }
 
-    private HttpExecutionResult executeHttpRequest(Duration timeout) {
-        class ResponseReader implements ChannelListener<StreamSourceChannel> {
-            private final BigByteArrayOutputStream outputStream;
-            private final byte[] buffer = new byte[8192];
-            private final ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-            private final StreamingXXHash64 hasher;
-            private final int queryID;
-            private final Instant timeStamp;
-            private final long requestStart;
-            private final Duration timeout;
-            private final CountDownLatch latch = new CountDownLatch(1);
+    private static class ResponseReader implements ChannelListener<StreamSourceChannel> {
+        private BigByteArrayOutputStream outputStream;
+        private final byte[] buffer = new byte[8192];
+        private final ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+        private StreamingXXHash64 hasher;
+        private int queryID;
+        private Instant timeStamp;
+        private long requestStart;
+        private Duration timeout;
 
-            private Exception exception;
-            private ClientResponse response;
-            private long responseEnd;
 
-            private StreamSourceChannel channel;
+        private CountDownLatch latch = new CountDownLatch(1);
+        private Exception exception;
+        private long responseEnd;
+        private boolean ended = false;
 
-            public ResponseReader(BigByteArrayOutputStream outputStream, StreamingXXHash64 hasher, int queryID, Instant timeStamp, long requestStart, Duration timeout) {
-                this.outputStream = outputStream;
-                this.hasher = hasher;
-                this.queryID = queryID;
-                this.timeStamp = timeStamp;
-                this.requestStart = requestStart;
-                this.timeout = timeout;
-            }
+        private ClientResponse response;
 
-            /**
-             * Ends the response reading process and counts down the latch.
-             */
-            private void endResponse(Exception e, StreamSourceChannel channel) {
+
+        public void init(BigByteArrayOutputStream outputStream, StreamingXXHash64 hasher, int queryID, Instant timeStamp, long requestStart, Duration timeout) {
+            this.outputStream = outputStream;
+            this.queryID = queryID;
+            this.timeStamp = timeStamp;
+            this.requestStart = requestStart;
+            this.timeout = timeout;
+            this.hasher = hasher;
+            this.exception = null;
+            this.response = null;
+            this.responseEnd = 0;
+            this.ended = false;
+            this.latch = new CountDownLatch(1);
+            byteBuffer.clear();
+        }
+
+        /**
+         * Registers exceptions that occurred before the response reading process started and counts down the latch.
+         *
+         * @param e the exception that occurred
+         */
+        public void registerException(Exception e) {
+            this.exception = e;
+            this.ended = true;
+            latch.countDown();
+        }
+
+        public void setup(ClientExchange exchange) {
+            final var channel = exchange.getResponseChannel();
+            response = exchange.getResponse();
+
+            // check for http error
+            if (response.getResponseCode() / 100 != 2) {
+                ended = true;
                 responseEnd = System.nanoTime();
-                this.exception = e;
+                latch.countDown();
+                return;
+            }
+
+            channel.getReadSetter().set(this);
+
+            byteBuffer.clear();
+            readChannel(channel, true);
+        }
+
+        @Override
+        public void handleEvent(StreamSourceChannel channel) {
+            readChannel(channel, false);
+        }
+
+        private void readChannel(StreamSourceChannel channel, boolean setListenerIfFirstReadIsEmpty) {
+            if (ended) {
+                try {
+                    channel.shutdownReads();
+                } catch (IOException ignore) {}
                 IoUtils.safeClose(channel);
-                if (exception != null && config.parseResults())
-                    responseBodyProcessor.add(outputStream.size(), hasher.getValue(), outputStream);
-                latch.countDown();
+                return;
             }
 
-            public void setup(ClientExchange exchange) {
-                channel = exchange.getResponseChannel();
-                response = exchange.getResponse();
-                if (response.getResponseCode() / 100 != 2) {
-                    endResponse(null, channel);
-                    return;
-                }
-
-                channel.getCloseSetter().set((c) -> endResponse(new IOException("Channel closed."), channel));
-                if (!channel.isOpen())
-                    endResponse(new IOException("Channel closed."), channel);
-
-                channel.getReadSetter().set(this);
-
+            try {
+                int readBytes;
                 byteBuffer.clear();
-                handleEvent(channel);
-            }
+                do {
+                    readBytes = channel.read(byteBuffer);
 
-            /**
-             * Registers exceptions that occurred before the response reading process started and counts down the latch.
-             *
-             * @param e the exception that occurred
-             */
-            public void registerException(Exception e) {
-                this.exception = e;
+                    // check timeout
+                    if (Duration.ofNanos(System.nanoTime() - requestStart).compareTo(timeout) > 0) {
+                        responseEnd = System.nanoTime();
+                        exception = new TimeoutException();
+                        ended = true;
+                        IoUtils.safeClose(channel);
+                        latch.countDown();
+                        return;
+                    }
+
+                    if (readBytes == 0) {
+                        if (setListenerIfFirstReadIsEmpty) {
+                            channel.getReadSetter().set(this);
+                            channel.resumeReads();
+                        }
+                        return;
+                    }
+
+                    // check end of stream
+                    if (readBytes == -1) {
+                        responseEnd = System.nanoTime();
+                        ended = true;
+                        IoUtils.safeClose(channel);
+                        latch.countDown();
+                        return;
+                    }
+
+                    // normal write, write to output stream and update hash
+                    hasher.update(buffer, 0, readBytes);
+                    outputStream.write(buffer, 0, readBytes);
+                    byteBuffer.clear();
+                } while (readBytes > 0);
+            } catch (IOException e) {
+                responseEnd = System.nanoTime();
+                exception = e;
+                ended = true;
+                IoUtils.safeClose(channel);
                 latch.countDown();
-            }
-
-            @Override
-            public void handleEvent(StreamSourceChannel channel) {
-                try {
-                    int readBytes;
-                    while ((readBytes = channel.read(byteBuffer)) != 0) {
-                        if (Duration.of(System.nanoTime() - requestStart, ChronoUnit.NANOS).compareTo(timeout) > 0) {
-                            endResponse(new TimeoutException(), channel);
-                            return;
-                        }
-
-                        if (readBytes == -1) {
-                            endResponse(null, channel);
-                            return;
-                        } else {
-                            byteBuffer.flip();
-                            hasher.update(buffer, 0, readBytes);
-                            outputStream.write(buffer, 0, readBytes);
-                            byteBuffer.clear();
-                        }
-                    }
-                    channel.resumeReads();
-                } catch (IOException e) {
-                    endResponse(e, channel);
-                }
-            }
-
-            public HttpExecutionResult get() {
-                try {
-                    if (!latch.await(config.timeout().toMillis(), TimeUnit.MILLISECONDS)) {
-                        endResponse(new TimeoutException(), channel);
-                    }
-                } catch (InterruptedException ignore) {} // continue
-                if (exception != null) {
-                    return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, exception);
-                } else if (response != null && response.getResponseCode() / 100 != 2) {
-                    return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, null);
-                } else if (response == null) {
-                    return createFailedResult(timeStamp, requestStart, responseEnd, queryID, null, new HttpException("Response is null."));
-                } else if (response.getResponseHeaders().get("Content-Length") != null &&
-                        (outputStream.size() < Long.parseLong(response.getResponseHeaders().get("Content-Length").getFirst()) ||
-                                outputStream.size() > Long.parseLong(response.getResponseHeaders().get("Content-Length").getFirst()))) {
-                    return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, new HttpException("Content-Length header value doesn't match actual content length."));
-                }
-
-                return new HttpExecutionResult(
-                        queryID,
-                        Optional.ofNullable(response),
-                        timeStamp,
-                        Duration.ofNanos(responseEnd - requestStart),
-                        Optional.of(outputStream),
-                        OptionalLong.of(outputStream.size()),
-                        OptionalLong.of(hasher.getValue()),
-                        Optional.empty()
-                );
             }
         }
+
+        public HttpExecutionResult get(Duration timeout) {
+            try {
+                if (!latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                    return createFailedResult(timeStamp, requestStart, System.nanoTime(), queryID, response, new TimeoutException());
+                }
+            } catch (InterruptedException ignore) {} // continue
+
+            if (exception != null) {
+                return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, exception);
+            } else if (response != null && response.getResponseCode() / 100 != 2) {
+                return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, null);
+            } else if (response == null) {
+                return createFailedResult(timeStamp, requestStart, responseEnd, queryID, null, new HttpException("Response is null."));
+            } else if (response.getResponseHeaders().get("Content-Length") != null &&
+                    (outputStream.size() < Long.parseLong(response.getResponseHeaders().get("Content-Length").getFirst()) ||
+                            outputStream.size() > Long.parseLong(response.getResponseHeaders().get("Content-Length").getFirst()))) {
+                return createFailedResult(timeStamp, requestStart, responseEnd, queryID, response, new HttpException("Content-Length header value doesn't match actual content length."));
+            }
+
+            return new HttpExecutionResult(
+                    queryID,
+                    Optional.ofNullable(response),
+                    timeStamp,
+                    Duration.ofNanos(responseEnd - requestStart),
+                    Optional.of(outputStream),
+                    OptionalLong.of(outputStream.size()),
+                    OptionalLong.of(hasher.getValue()),
+                    Optional.empty()
+            );
+        }
+    }
+
+
+    private HttpExecutionResult executeHttpRequest(Duration timeout) {
 
         final QueryHandler.QueryStreamWrapper queryHandle;
         try {
@@ -572,8 +608,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
         final Instant timeStamp = Instant.now();
         final var requestStart = System.nanoTime();
-        final var responseReader = new ResponseReader(this.responseBodybbaos, hasherFactory.newStreamingHash64(0), queryHandle.index(), timeStamp, requestStart, timeout);
         final var finalRequestBody = temp;
+
+        responseReader.init(responseBodybbaos, hasherFactory.newStreamingHash64(0), queryHandle.index(), timeStamp, requestStart, timeout);
         httpConnection.sendRequest(request, new ClientCallback<>() {
             @Override
             public void completed(final ClientExchange result) {
@@ -627,7 +664,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 responseReader.registerException(e);
             }
         });
-        return responseReader.get();
+        return responseReader.get(timeout);
     }
 
     private void logExecution(ExecutionStats execution) {
