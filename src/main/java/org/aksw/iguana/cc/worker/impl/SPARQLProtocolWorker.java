@@ -460,13 +460,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             // check for http error
             if (response.getResponseCode() / 100 != 2) {
-                ended = true;
                 responseEnd = System.nanoTime();
-                latch.countDown();
-                return;
             }
-
-            channel.getReadSetter().set(this);
 
             byteBuffer.clear();
             readChannel(channel, true);
@@ -483,6 +478,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     channel.shutdownReads();
                 } catch (IOException ignore) {}
                 IoUtils.safeClose(channel);
+                latch.countDown();
                 return;
             }
 
