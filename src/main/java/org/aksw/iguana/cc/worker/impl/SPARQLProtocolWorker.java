@@ -429,6 +429,10 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             @Override
             protected void data(ByteBuffer src, boolean endOfStream) throws IOException {
+                if (endOfStream) {
+                    return;
+                }
+
                 if (src.hasArray()) {
                     LOGGER.debug("response is array backed");
                     hasher.update(src.array(), src.position() + src.arrayOffset(), src.remaining());
@@ -451,6 +455,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             @Override
             protected HttpExecutionResult buildResult() {
+                final var requestEnd = System.nanoTime();
+
                 if (response.getCode() / 100 != 2) {
                     return createFailedResult.apply(response, null);
                 }
@@ -472,7 +478,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         queryHandle.index(),
                         Optional.of(response),
                         timeStamp,
-                        Duration.ofNanos(System.nanoTime() - requestStart),
+                        Duration.ofNanos(requestEnd - requestStart),
                         Optional.of(responseBodybbaos),
                         OptionalLong.of(responseBodybbaos.size()),
                         OptionalLong.of(hasher.getValue()),
