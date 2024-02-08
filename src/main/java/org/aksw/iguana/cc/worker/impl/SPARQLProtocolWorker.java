@@ -107,7 +107,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 case POST_QUERY -> {
                     asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
                             .setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-query")
-                            .setEntity(queryStream.toString()); // TODO: find a way to stream it
+                            .setEntity(new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)); // TODO: find a way to stream it
                 }
                 case POST_URL_ENC_UPDATE -> {
                     asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
@@ -117,7 +117,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 case POST_UPDATE -> {
                     asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
                             .setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-update")
-                            .setEntity(queryStream.toString()); // TODO: find a way to stream it
+                            .setEntity(new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)); // TODO: find a way to stream it
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
             }
