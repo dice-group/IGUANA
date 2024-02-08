@@ -24,6 +24,9 @@ import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
+import org.apache.hc.core5.http.nio.StreamChannel;
+import org.apache.hc.core5.http.nio.entity.AbstractBinAsyncEntityProducer;
+import org.apache.hc.core5.http.nio.entity.StringAsyncEntityProducer;
 import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.hc.core5.reactor.IOReactorConfig;
@@ -86,6 +89,60 @@ public class SPARQLProtocolWorker extends HttpWorker {
             return name + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8);
         }
 
+        private static class StreamEntityProducer extends AbstractBinAsyncEntityProducer {
+
+            private final byte[] buffer = new byte[8192];
+            private final InputStream stream;
+
+            public StreamEntityProducer(InputStream stream, ContentType contentType) {
+                super(8192, contentType);
+                this.stream = stream;
+            }
+
+            @Override
+            protected int availableData() {
+                try {
+                    return stream.available();
+                } catch (IOException ignore) {} // TODO: log
+                return 0;
+            }
+
+            @Override
+            protected void produceData(StreamChannel<ByteBuffer> channel) throws IOException {
+                int read;
+                if ((read = stream.read(buffer)) != -1) {
+                    channel.write(ByteBuffer.wrap(buffer, 0, read));
+                } else {
+                    channel.endStream();
+                }
+            }
+
+            @Override
+            public boolean isRepeatable() {
+                return false;
+            }
+
+            @Override
+            public void failed(Exception cause) {
+                // TODO: log
+            }
+
+            @Override
+            public boolean isChunked() {
+                return true;
+            }
+
+            @Override
+            public long getContentLength() {
+                return super.getContentLength();
+            }
+
+            @Override
+            public void releaseResources() {
+                super.releaseResources();
+            }
+        }
+
         public AsyncRequestProducer buildHttpRequest(InputStream queryStream,
                                                      ConnectionConfig connection,
                                                      String requestHeader) throws URISyntaxException, IOException {
@@ -102,22 +159,22 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     // entity will be automatically set to the url encoded parameters
                     asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
                             .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
-                            .setEntity(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
+                            .setEntity(new StringAsyncEntityProducer(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))));
                 }
                 case POST_QUERY -> {
                     asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
                             .setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-query")
-                            .setEntity(new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)); // TODO: find a way to stream it
+                            .setEntity(new StreamEntityProducer(queryStream, ContentType.create("application/sparql-query")));
                 }
                 case POST_URL_ENC_UPDATE -> {
                     asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
                             .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
-                            .setEntity(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)));
+                            .setEntity(new StringAsyncEntityProducer(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))));
                 }
                 case POST_UPDATE -> {
                     asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
                             .setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-update")
-                            .setEntity(new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)); // TODO: find a way to stream it
+                            .setEntity(new StreamEntityProducer(queryStream, ContentType.create("application/sparql-update")));
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
             }
