@@ -120,7 +120,6 @@ public class SPARQLProtocolWorkerTest {
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo(QUERY))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-                return;
             }
             case POST_UPDATE -> {
                 wm.stubFor(post(urlPathEqualTo("/ds/query"))
@@ -129,7 +128,6 @@ public class SPARQLProtocolWorkerTest {
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo(QUERY))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-                return; // TODO: wiremock behaves really weirdly when the request body is streamed
             }
 
             case POST_URL_ENC_QUERY -> wm.stubFor(post(urlPathEqualTo("/ds/query"))

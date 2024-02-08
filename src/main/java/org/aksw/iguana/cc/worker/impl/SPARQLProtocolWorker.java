@@ -124,6 +124,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                             .POST(HttpRequest.BodyPublishers.ofInputStream(new CustomStreamSupplier().getStreamSupplier()));
                 }
             }
+
             return request.build();
         }
     }
@@ -423,6 +424,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     private HttpClient buildHttpClient() {
         return HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
                 .executor(Executors.newFixedThreadPool(1))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(config().timeout())
