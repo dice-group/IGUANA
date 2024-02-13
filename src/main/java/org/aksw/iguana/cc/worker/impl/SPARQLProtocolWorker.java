@@ -470,6 +470,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             private HttpResponse response;
             private StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
+            private long responseSize = 0;
 
             @Override
             public void releaseResources() {
@@ -490,18 +491,21 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     return;
                 }
 
-                if (src.hasArray()) {
-                    LOGGER.debug("response is array backed");
-                    hasher.update(src.array(), src.position() + src.arrayOffset(), src.remaining());
-                    responseBodybbaos.write(src.array(), src.position() + src.arrayOffset(), src.remaining());
-                } else {
-                    int readCount;
-                    while (src.hasRemaining()) {
-                        readCount = Math.min(BUFFER_SIZE, src.remaining());
-                        src.get(buffer, 0, readCount);
-                        hasher.update(buffer, 0, readCount);
-                        responseBodybbaos.write(buffer, 0, readCount);
+                if (config.parseResults()) {
+                    if (src.hasArray()) {
+                        hasher.update(src.array(), src.position() + src.arrayOffset(), src.remaining());
+                        responseBodybbaos.write(src.array(), src.position() + src.arrayOffset(), src.remaining());
+                    } else {
+                        int readCount;
+                        while (src.hasRemaining()) {
+                            readCount = Math.min(BUFFER_SIZE, src.remaining());
+                            src.get(buffer, 0, readCount);
+                            hasher.update(buffer, 0, readCount);
+                            responseBodybbaos.write(buffer, 0, readCount);
+                        }
                     }
+                } else {
+                    responseSize += src.remaining();
                 }
             }
 
@@ -519,16 +523,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 }
                 final var contentLengthHeader = response.getFirstHeader("Content-Length");
                 Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
-                if (contentLength != null &&
-                        (responseBodybbaos.size() < contentLength ||
-                                responseBodybbaos.size() > contentLength)) {
+                if (config.parseResults() && contentLength != null && responseBodybbaos.size() != contentLength) {
+                    return createFailedResult.apply(response, new HttpException("Content-Length header value doesn't match actual content length."));
+                }
+                if (!config.parseResults() && contentLength != null && responseSize != contentLength) {
                     return createFailedResult.apply(response, new HttpException("Content-Length header value doesn't match actual content length."));
                 }
                 if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
                     return createFailedResult.apply(response, new TimeoutException());
-                }
-                if (config.parseResults()) {
-                    // responseBodyProcessor.add(responseBodybbaos.size(), hasher.getValue(), responseBodybbaos);
                 }
 
                 return new HttpExecutionResult(
@@ -537,8 +539,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         timeStamp,
                         Duration.ofNanos(requestEnd - requestStart),
                         Optional.of(responseBodybbaos),
-                        OptionalLong.of(responseBodybbaos.size()),
-                        OptionalLong.of(hasher.getValue()),
+                        OptionalLong.of(config.parseResults() ? responseBodybbaos.size() : responseSize),
+                        OptionalLong.of(config.parseResults() ? hasher.getValue() : 0),
                         Optional.empty()
                 );
             }
