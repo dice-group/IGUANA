@@ -69,8 +69,8 @@ public class HttpClient {
                 }
 
                 // find content length
-                offset += readBytes;
                 responseString.append(new String(buffer, offset, readBytes));
+                offset += readBytes;
                 if (!contentLengthFound) {
                     matcher = contentLengthPattern.matcher(responseString.toString());
                 }
@@ -106,8 +106,8 @@ public class HttpClient {
                     if (readBytes == -1) {
                         return -1;
                     }
-                    offset += readBytes;
                     responseString.append(new String(buffer, offset, readBytes));
+                    offset += readBytes;
 
                     // buffer is full
                     if (offset == buffer.length) {
