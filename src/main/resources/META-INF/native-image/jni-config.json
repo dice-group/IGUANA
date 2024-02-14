@@ -1,0 +1,10 @@
+[
+{
+  "name":"java.lang.Boolean",
+  "methods":[{"name":"getBoolean","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"org.aksw.iguana.cc.controller.MainController",
+  "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
+}
+]

@@ -1,0 +1,25 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/services/org.apache.jena.sys.JenaSubsystemLifecycle\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\Qiguana-schema.json\\E"
+  }, {
+    "pattern":"\\Qmozilla/public-suffix-list.txt\\E"
+  }, {
+    "pattern":"\\Qorg/apache/hc/client5/version.properties\\E"
+  }, {
+    "pattern":"\\Qorg/apache/jena/arq/arq-properties.xml\\E"
+  }, {
+    "pattern":"\\Qorg/apache/jena/jena-properties.xml\\E"
+  }]},
+  "bundles":[{
+    "name":"jsv-messages",
+    "locales":[""]
+  }, {
+    "name":"org.apache.jena.ext.xerces.impl.xpath.regex.message",
+    "locales":[""]
+  }]
+}
