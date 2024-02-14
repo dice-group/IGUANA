@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
-import org.aksw.iguana.cc.utils.FileUtils;
+import org.aksw.iguana.cc.utils.files.FileUtils;
 import org.apache.commons.io.input.AutoCloseInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

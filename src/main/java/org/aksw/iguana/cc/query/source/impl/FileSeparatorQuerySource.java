@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
-import org.aksw.iguana.cc.utils.IndexedQueryReader;
+import org.aksw.iguana.cc.utils.files.IndexedQueryReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

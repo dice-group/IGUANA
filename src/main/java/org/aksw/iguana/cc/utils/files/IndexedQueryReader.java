@@ -1,4 +1,4 @@
-package org.aksw.iguana.cc.utils;
+package org.aksw.iguana.cc.utils.files;
 
 import org.apache.commons.io.input.AutoCloseInputStream;
 import org.apache.commons.io.input.BoundedInputStream;

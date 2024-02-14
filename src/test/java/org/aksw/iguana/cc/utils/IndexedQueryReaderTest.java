@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.utils;
 
+import org.aksw.iguana.cc.utils.files.IndexedQueryReader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
