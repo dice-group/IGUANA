@@ -10,6 +10,12 @@ import java.nio.ByteBuffer;
 import java.util.Set;
 import java.util.function.Supplier;
 
+/**
+ * An entity producer that produces the entity data from an input stream supplier.
+ * The entity data can optionally be sent in chunks.
+ * If the entity data is supposed to be sent non-chunked, the whole stream will be read into a byte buffer.
+ * The stream supplier should be repeatable, as the entity data might be produced multiple times.
+ */
 public class StreamEntityProducer implements AsyncEntityProducer {
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StreamEntityProducer.class);
@@ -21,9 +27,15 @@ public class StreamEntityProducer implements AsyncEntityProducer {
 
     private final static int BUFFER_SIZE = 8192;
     private final byte[] buffer = new byte[BUFFER_SIZE];
-    
+
     private InputStream currentStream;
 
+    /**
+     * Creates a new entity producer that produces the entity data from the given input stream supplier.
+     *
+     * @param streamSupplier the input stream supplier, should be repeatable
+     * @param chunked        whether the entity data should be sent in chunks
+     */
     public StreamEntityProducer(Supplier<InputStream> streamSupplier, boolean chunked) throws IOException {
         this.streamSupplier = streamSupplier;
         this.chunked = chunked;
