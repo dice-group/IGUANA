@@ -7,6 +7,7 @@ import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
+import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.utils.http.StreamEntityProducer;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
@@ -255,6 +256,23 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
     /**
+     * Builds every request once, so that the requests can be loaded into the cache, if the queries themselves are
+     * cached.
+     * This is done to avoid the overhead of building (url-encoding) the requests during the benchmark.
+     */
+    private void preloadRequests() {
+        final var selector = new LinearQuerySelector(config().queries().getQueryCount());
+        for (int i = 0; i < config().queries().getQueryCount(); i++) {
+            try {
+                // build request and discard it
+                requestFactory.buildHttpRequest(config().queries().getNextQueryStream(selector), config().connection(), config().acceptHeader());
+            } catch (IOException | URISyntaxException e) {
+                LOGGER.error("Failed to preload request.", e);
+            }
+        }
+    }
+
+    /**
      *  Starts the worker and returns a CompletableFuture, which will be completed, when the worker has finished the
      *  completion target. The CompletableFuture will contain a Result object, which contains the execution stats of the
      *  worker. The execution stats contain the execution time, the http status code, the content length and the hash of
@@ -265,6 +283,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * @return the CompletableFuture the contains the results of the worker.
      */
     public CompletableFuture<Result> start() {
+        preloadRequests();
         return CompletableFuture.supplyAsync(() -> {
             ZonedDateTime startTime = ZonedDateTime.now();
             List<ExecutionStats> executionStats = new ArrayList<>();
