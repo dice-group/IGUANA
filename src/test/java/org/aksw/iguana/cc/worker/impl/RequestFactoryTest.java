@@ -1,6 +1,7 @@
 package org.aksw.iguana.cc.worker.impl;
 
 import org.aksw.iguana.cc.mockup.MockupConnection;
+import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -49,7 +50,7 @@ public class RequestFactoryTest {
 
         final var requestFactory = new SPARQLProtocolWorker.RequestFactory(type);
         final var request = requestFactory.buildHttpRequest(
-                stream,
+                new QueryHandler.QueryStreamWrapper(0, true, () -> stream),
                 connection,
                 requestHeader
         );

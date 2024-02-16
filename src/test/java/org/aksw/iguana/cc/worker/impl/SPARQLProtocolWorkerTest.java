@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
+import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.http.Fault;
@@ -40,7 +40,7 @@ public class SPARQLProtocolWorkerTest {
 
     @RegisterExtension
     public static WireMockExtension wm = WireMockExtension.newInstance()
-            .options(new WireMockConfiguration().useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER).dynamicPort().notifier(new Slf4jNotifier(true)))
+            .options(new WireMockConfiguration().useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER).dynamicPort().notifier(new ConsoleNotifier(true)))
             .failOnUnmatchedRequests(true)
             .build();
 
@@ -115,36 +115,37 @@ public class SPARQLProtocolWorkerTest {
     @DisplayName("Test Request Factory")
     public void testRequestFactory(SPARQLProtocolWorker worker) {
         switch (worker.config().requestType()) {
-            case GET_QUERY -> wm.stubFor(get(urlPathEqualTo("/ds/query"))
+            case GET_QUERY ->
+                    wm.stubFor(get(urlPathEqualTo("/ds/query"))
                     .withQueryParam("query", equalTo(QUERY))
                     .withBasicAuth("testUser", "password")
                     .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-            case POST_QUERY -> {
-                wm.stubFor(post(urlPathEqualTo("/ds/query"))
-                        .withHeader("Content-Type", equalTo("application/sparql-query"))
-                        .withHeader("Transfer-Encoding", equalTo("chunked"))
-                        .withBasicAuth("testUser", "password")
-                        .withRequestBody(equalTo(QUERY))
-                        .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-                // return;
-            }
-            case POST_UPDATE -> {
-                wm.stubFor(post(urlPathEqualTo("/ds/query"))
-                        .withHeader("Content-Type", equalTo("application/sparql-update"))
-                        .withHeader("Transfer-Encoding", equalTo("chunked"))
-                        .withBasicAuth("testUser", "password")
-                        .withRequestBody(equalTo(QUERY))
-                        .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-                // return; // TODO: wiremock behaves really weirdly when the request body is streamed
-            }
+            case POST_QUERY ->
+                    wm.stubFor(post(urlPathEqualTo("/ds/query"))
+                    .withHeader("Content-Type", equalTo("application/sparql-query"))
+                    .withHeader("Content-Length", equalTo("27"))
+                    .withBasicAuth("testUser", "password")
+                    .withRequestBody(equalTo(QUERY))
+                    .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
+            case POST_UPDATE ->
+                    wm.stubFor(post(urlPathEqualTo("/ds/query"))
+                    .withHeader("Content-Type", equalTo("application/sparql-update"))
+                    .withHeader("Content-Length", equalTo("27"))
+                    .withBasicAuth("testUser", "password")
+                    .withRequestBody(equalTo(QUERY))
+                    .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
 
-            case POST_URL_ENC_QUERY -> wm.stubFor(post(urlPathEqualTo("/ds/query"))
+            case POST_URL_ENC_QUERY ->
+                    wm.stubFor(post(urlPathEqualTo("/ds/query"))
                     .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
+                    .withHeader("Content-Length", equalTo("43"))
                     .withBasicAuth("testUser", "password")
                     .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
                     .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
-            case POST_URL_ENC_UPDATE -> wm.stubFor(post(urlPathEqualTo("/ds/query"))
+            case POST_URL_ENC_UPDATE ->
+                    wm.stubFor(post(urlPathEqualTo("/ds/query"))
                     .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
+                    .withHeader("Content-Length", equalTo("44"))
                     .withBasicAuth("testUser", "password")
                     .withRequestBody(equalTo("update=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
                     .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
@@ -155,7 +156,8 @@ public class SPARQLProtocolWorkerTest {
         assertEquals(result.executionStats().size(), QUERY_MIXES, "Worker should have executed only 1 query");
         assertNull(result.executionStats().get(0).error().orElse(null), "Worker threw an exception, during execution");
         assertEquals(200, result.executionStats().get(0).httpStatusCode().get(), "Worker returned wrong status code");
-        assertNotEquals(0, result.executionStats().get(0).responseBodyHash().getAsLong(), "Worker didn't return a response body hash");
+        // If "parseResults" is false, then the response body hash should be 0
+        assertEquals(0, result.executionStats().get(0).responseBodyHash().getAsLong(), "Worker didn't return a response body hash");
         assertEquals("Non-Empty-Body".getBytes(StandardCharsets.UTF_8).length, result.executionStats().get(0).contentLength().getAsLong(), "Worker returned wrong content length");
         assertNotEquals(Duration.ZERO, result.executionStats().get(0).duration(), "Worker returned zero duration");
     }

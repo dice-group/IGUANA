@@ -18,8 +18,6 @@ import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.nio.AsyncClientConnectionManager;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -29,7 +27,6 @@ import org.apache.hc.core5.http.nio.entity.BasicAsyncEntityProducer;
 import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.hc.core5.reactor.IOReactorConfig;
-import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -46,7 +43,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker extends HttpWorker {
@@ -253,7 +250,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             httpClient.close();
             connectionManager.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("Failed to close http client.", e);
         }
     }
 
@@ -345,8 +342,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
             this.responseBodybbaos = new BigByteArrayOutputStream();
         }
 
-        // This is not explicitly checking for a timeout, instead it just checks if the execution was successful or not.
-        // TODO: This might cause problems if the query actually fails before the timeout and discardOnFailure is true.
         if (!result.successful() && discardOnFailure) {
             LOGGER.debug("{}\t:: Discarded execution, because the time limit has been reached: [queryID={}]", this, result.queryID);
             return null;
@@ -363,77 +358,37 @@ public class SPARQLProtocolWorker extends HttpWorker {
         );
     }
 
-
     private HttpExecutionResult executeHttpRequest(Duration timeout) {
-        final var context = HttpClientContext.create();
-        context.setRequestConfig(RequestConfig.custom()
-                .setResponseTimeout(Timeout.DISABLED)
-                .setConnectionRequestTimeout(Timeout.DISABLED) // maybe make this one lower?
-                .build());
-
         final QueryHandler.QueryStreamWrapper queryHandle;
         try {
             queryHandle = config().queries().getNextQueryStream(this.querySelector);
         } catch (IOException e) {
-            return new HttpExecutionResult(
-                this.querySelector.getCurrentIndex(),
-                Optional.empty(),
-                Instant.now(),
-                Duration.ZERO,
-                Optional.empty(),
-                OptionalLong.empty(),
-                OptionalLong.empty(),
-                Optional.of(e)
-            );
+            return createFailedResultBeforeRequest(this.querySelector.getCurrentIndex(), e);
         }
 
         final AsyncRequestProducer request;
-
         try {
             request = requestFactory.buildHttpRequest(
-                    queryHandle.queryInputStream(),
+                    queryHandle,
                     config().connection(),
                     config().acceptHeader()
             );
         } catch (IOException | URISyntaxException e) {
-            return new HttpExecutionResult(
-                    queryHandle.index(),
-                    Optional.empty(),
-                    Instant.now(),
-                    Duration.ZERO,
-                    Optional.empty(),
-                    OptionalLong.empty(),
-                    OptionalLong.empty(),
-                    Optional.of(e)
-            );
+            return createFailedResultBeforeRequest(queryHandle.index(), e);
         }
 
         final Instant timeStamp = Instant.now();
         final var requestStart = System.nanoTime();
-        BiFunction<HttpResponse, Exception, HttpExecutionResult> createFailedResult = (response, e) -> new HttpExecutionResult(
-                queryHandle.index(),
-                Optional.ofNullable(response),
-                timeStamp,
-                Duration.ofNanos(System.nanoTime() - requestStart),
-                Optional.empty(),
-                OptionalLong.empty(),
-                OptionalLong.empty(),
-                Optional.ofNullable(e)
-        );
-
         final var future = httpClient.execute(request, new AbstractBinResponseConsumer<HttpExecutionResult>() {
 
             private HttpResponse response;
             private StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
             private long responseSize = 0;
+            private long responseEnd = 0;
+
 
             @Override
-            public void releaseResources() {
-                if (hasher != null) {
-                    hasher.reset();
-                    hasher = null;
-                }
-            }
+            public void releaseResources() {}
 
             @Override
             protected int capacityIncrement() {
@@ -443,6 +398,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             @Override
             protected void data(ByteBuffer src, boolean endOfStream) throws IOException {
                 if (endOfStream) {
+                    responseEnd = System.nanoTime();
                     return;
                 }
 
@@ -471,57 +427,80 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             @Override
             protected HttpExecutionResult buildResult() {
-                final var requestEnd = System.nanoTime();
+                if (responseEnd == 0)
+                    responseEnd = System.nanoTime();
+                final var duration = Duration.ofNanos(responseEnd - requestStart);
 
+                // http error
                 if (response.getCode() / 100 != 2) {
-                    return createFailedResult.apply(response, null);
+                    return createFailedResultDuringResponse(queryHandle.index(), response, timeStamp, duration, null);
                 }
+
+                // check content length
                 final var contentLengthHeader = response.getFirstHeader("Content-Length");
                 Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
                 if (config.parseResults() && contentLength != null && responseBodybbaos.size() != contentLength) {
-                    return createFailedResult.apply(response, new HttpException("Content-Length header value doesn't match actual content length."));
+                    return createFailedResultDuringResponse(queryHandle.index(), response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
                 }
                 if (!config.parseResults() && contentLength != null && responseSize != contentLength) {
-                    return createFailedResult.apply(response, new HttpException("Content-Length header value doesn't match actual content length."));
+                    return createFailedResultDuringResponse(queryHandle.index(), response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
                 }
-                if (Duration.between(Instant.now(), timeStamp.plus(timeout)).isNegative()) {
-                    return createFailedResult.apply(response, new TimeoutException());
+
+                // check timeout
+                if (duration.compareTo(timeout) > 0) {
+                    return createFailedResultDuringResponse(queryHandle.index(), response, timeStamp, duration, new TimeoutException());
                 }
 
                 return new HttpExecutionResult(
                         queryHandle.index(),
                         Optional.of(response),
                         timeStamp,
-                        Duration.ofNanos(requestEnd - requestStart),
+                        Duration.ofNanos(responseEnd - requestStart),
                         Optional.of(responseBodybbaos),
                         OptionalLong.of(config.parseResults() ? responseBodybbaos.size() : responseSize),
                         OptionalLong.of(config.parseResults() ? hasher.getValue() : 0),
                         Optional.empty()
                 );
             }
-        }, new FutureCallback<HttpExecutionResult>() {
-            @Override
-            public void completed(HttpExecutionResult result) {
-
-            }
-
-            @Override
-            public void failed(Exception ex) {
-                LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, queryHandle.index(), ex);
-            }
-
-            @Override
-            public void cancelled() {
-                LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, queryHandle.index(), Duration.of(System.nanoTime() - requestStart, ChronoUnit.NANOS));
-            }
-        });
+        }, null);
 
         try {
-            return future.get(timeout.toMillis() > 10 ? timeout.toMillis() : 10, TimeUnit.MILLISECONDS); // there needs to be a lower limit here for the timeout,
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {                       // because if the timeout is too low, the future will get
-            future.cancel(true);                                                       // immediately cancelled
-            return createFailedResult.apply(null, e);
+            return future.get(config.timeout().toNanos(), TimeUnit.NANOSECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            future.cancel(true);
+            return createFailedResultBeforeRequest(queryHandle.index(), e);
         }
+    }
+
+    private static HttpExecutionResult createFailedResultBeforeRequest(int queryIndex, Exception e) {
+        return new HttpExecutionResult(
+                queryIndex,
+                Optional.empty(),
+                Instant.now(),
+                Duration.ZERO,
+                Optional.empty(),
+                OptionalLong.empty(),
+                OptionalLong.empty(),
+                Optional.ofNullable(e)
+        );
+    }
+
+    private static HttpExecutionResult createFailedResultDuringResponse(
+            int queryIndex,
+            HttpResponse response,
+            Instant timestamp,
+            Duration duration,
+            Exception e) {
+        return new HttpExecutionResult(
+                queryIndex,
+                Optional.ofNullable(response),
+                timestamp,
+                duration,
+                Optional.empty(),
+                OptionalLong.empty(),
+                OptionalLong.empty(),
+                Optional.ofNullable(e)
+        );
     }
 
     private void logExecution(ExecutionStats execution) {
