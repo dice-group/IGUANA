@@ -129,7 +129,7 @@ public class QueryHandlerTest {
         final var mapper = new ObjectMapper();
         QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
         final var selector = queryHandler.getQuerySelectorInstance();
-        assertTrue(selector instanceof LinearQuerySelector);
+        assertInstanceOf(LinearQuerySelector.class, selector);
         assertEquals(queries.size(), queryHandler.getQueryCount());
         assertNotEquals(0, queryHandler.hashCode());
         for (int i = 0; i < queryHandler.getQueryCount(); i++) {
@@ -149,7 +149,7 @@ public class QueryHandlerTest {
         final var mapper = new ObjectMapper();
         QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
         final var selector = queryHandler.getQuerySelectorInstance();
-        assertTrue(selector instanceof LinearQuerySelector);
+        assertInstanceOf(LinearQuerySelector.class, selector);
         assertEquals(queries.size(), queryHandler.getQueryCount());
         assertNotEquals(0, queryHandler.hashCode());
         final var allQueryIDs = queryHandler.getAllQueryIds();
@@ -174,7 +174,7 @@ public class QueryHandlerTest {
         for (int i = 0; i < 2; i++) {
             QueryHandler queryHandler = mapper.readValue(json[i], QueryHandler.class);
             final var selector = queryHandler.getQuerySelectorInstance();
-            assertTrue(selector instanceof RandomQuerySelector);
+            assertInstanceOf(RandomQuerySelector.class, selector);
             indices[i] = new ArrayList<>();
             for (int j = 0; j < 100000; j++) {
                 indices[i].add(selector.getNextIndex());

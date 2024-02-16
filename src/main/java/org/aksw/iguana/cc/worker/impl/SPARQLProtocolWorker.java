@@ -401,7 +401,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         final var future = httpClient.execute(request, new AbstractBinResponseConsumer<HttpExecutionResult>() {
 
             private HttpResponse response;
-            private StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
+            private final StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
             private long responseSize = 0;
             private long responseEnd = 0;
 
@@ -440,7 +440,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             }
 
             @Override
-            protected void start(HttpResponse response, ContentType contentType) throws HttpException, IOException {
+            protected void start(HttpResponse response, ContentType contentType) {
                 this.response = response;
             }
 
