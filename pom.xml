@@ -285,6 +285,11 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <buildArgs>
+                                --gc=G1
+                                --pgo=/mnt/d/arbeit/iguana/src/main/resources/default.iprof
+                                -march=native
+                            </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
                             </metadataRepository>
