@@ -112,20 +112,20 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 );
                 case POST_URL_ENC_QUERY ->
                         asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
+                                // manually set content type, because otherwise the
+                                // entity producer would set it to "application/x-www-form-urlencoded; charset=ISO-8859-1"
                                 .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
-                                .setEntity(new BasicAsyncEntityProducer(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), ContentType.APPLICATION_FORM_URLENCODED, !queryHandle.cached()));
+                                .setEntity(new BasicAsyncEntityProducer(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, !queryHandle.cached()));
                 case POST_QUERY ->
                         asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                        .setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-query")
-                        .setEntity(new StreamEntityProducer(queryStreamSupplier, !queryHandle.cached()));
+                                .setEntity(new StreamEntityProducer(queryStreamSupplier, !queryHandle.cached(), "application/sparql-query"));
                 case POST_URL_ENC_UPDATE ->
                         asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                        .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
-                                .setEntity(new BasicAsyncEntityProducer(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), ContentType.APPLICATION_FORM_URLENCODED, !queryHandle.cached()));
+                                .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
+                                .setEntity(new BasicAsyncEntityProducer(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, !queryHandle.cached()));
                 case POST_UPDATE ->
                         asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                        .setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-update")
-                        .setEntity(new StreamEntityProducer(queryStreamSupplier, !queryHandle.cached()));
+                                .setEntity(new StreamEntityProducer(queryStreamSupplier, !queryHandle.cached(), "application/sparql-update"));
                 default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
             }
 
@@ -140,6 +140,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 cache.put(queryHandle.index(), asyncRequestBuilder.build());
 
             return asyncRequestBuilder.build();
+        }
+
+        public AsyncRequestProducer getCachedRequest(int index) {
+            if (!cache.containsKey(index))
+                throw new IllegalArgumentException("No request with index " + index + " found in cache.");
+            return cache.get(index);
         }
     }
 
@@ -378,22 +384,31 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
     private HttpExecutionResult executeHttpRequest(Duration timeout) {
-        final QueryHandler.QueryStreamWrapper queryHandle;
-        try {
-            queryHandle = config().queries().getNextQueryStream(this.querySelector);
-        } catch (IOException e) {
-            return createFailedResultBeforeRequest(this.querySelector.getCurrentIndex(), e);
-        }
-
         final AsyncRequestProducer request;
-        try {
-            request = requestFactory.buildHttpRequest(
-                    queryHandle,
-                    config().connection(),
-                    config().acceptHeader()
-            );
-        } catch (IOException | URISyntaxException e) {
-            return createFailedResultBeforeRequest(queryHandle.index(), e);
+        final int queryIndex;
+        if (config().queries().getConfig().caching()) {
+            queryIndex = querySelector.getNextIndex();
+            request = requestFactory.getCachedRequest(queryIndex);
+        } else {
+            final QueryHandler.QueryStreamWrapper queryHandle;
+            try {
+                queryHandle = config().queries().getNextQueryStream(this.querySelector);
+            } catch (IOException e) {
+                return createFailedResultBeforeRequest(this.querySelector.getCurrentIndex(), e);
+            }
+
+            try {
+                request = requestFactory.buildHttpRequest(
+                        queryHandle,
+                        config().connection(),
+                        config().acceptHeader()
+                );
+            } catch (IOException | URISyntaxException e) {
+                return createFailedResultBeforeRequest(queryHandle.index(), e);
+            }
+
+            // set queryIndex to the index of the queryHandle, so that the result can be associated with the query
+            queryIndex = queryHandle.index();
         }
 
         final Instant timeStamp = Instant.now();
@@ -452,26 +467,26 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
                 // http error
                 if (response.getCode() / 100 != 2) {
-                    return createFailedResultDuringResponse(queryHandle.index(), response, timeStamp, duration, null);
+                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, null);
                 }
 
                 // check content length
                 final var contentLengthHeader = response.getFirstHeader("Content-Length");
                 Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
                 if (config.parseResults() && contentLength != null && responseBodybbaos.size() != contentLength) {
-                    return createFailedResultDuringResponse(queryHandle.index(), response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
+                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
                 }
                 if (!config.parseResults() && contentLength != null && responseSize != contentLength) {
-                    return createFailedResultDuringResponse(queryHandle.index(), response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
+                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
                 }
 
                 // check timeout
                 if (duration.compareTo(timeout) > 0) {
-                    return createFailedResultDuringResponse(queryHandle.index(), response, timeStamp, duration, new TimeoutException());
+                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new TimeoutException());
                 }
 
                 return new HttpExecutionResult(
-                        queryHandle.index(),
+                        queryIndex,
                         Optional.of(response),
                         timeStamp,
                         Duration.ofNanos(responseEnd - requestStart),
@@ -487,7 +502,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             return future.get(config.timeout().toNanos(), TimeUnit.NANOSECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             future.cancel(true);
-            return createFailedResultBeforeRequest(queryHandle.index(), e);
+            return createFailedResultBeforeRequest(queryIndex, e);
         }
     }
 

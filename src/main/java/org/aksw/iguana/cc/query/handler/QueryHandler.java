@@ -215,4 +215,13 @@ public class QueryHandler {
         }
         return out;
     }
+
+    /**
+     * Returns the configuration of the QueryHandler.
+     *
+     * @return the configuration of the QueryHandler
+     */
+    public Config getConfig() {
+        return config;
+    }
 }

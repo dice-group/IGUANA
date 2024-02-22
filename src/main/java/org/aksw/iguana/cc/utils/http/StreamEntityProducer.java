@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.utils.http;
 import org.apache.hc.core5.http.nio.AsyncEntityProducer;
 import org.apache.hc.core5.http.nio.DataStreamChannel;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,21 +15,22 @@ import java.util.function.Supplier;
  * An entity producer that produces the entity data from an input stream supplier.
  * The entity data can optionally be sent in chunks.
  * If the entity data is supposed to be sent non-chunked, the whole stream will be read into a byte buffer.
- * The stream supplier should be repeatable, as the entity data might be produced multiple times.
+ * The stream supplier should be repeatable, as this producer might be reused multiple times to create the entity data.
  */
 public class StreamEntityProducer implements AsyncEntityProducer {
 
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StreamEntityProducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(StreamEntityProducer.class);
 
     private final Supplier<InputStream> streamSupplier;
     private final boolean chunked;
+    private final String contentType;
 
-    private ByteBuffer content;
+    private ByteBuffer content; // used for non-chunked request, stores the whole content in reusable buffer
 
     private final static int BUFFER_SIZE = 8192;
     private final byte[] buffer = new byte[BUFFER_SIZE];
 
-    private InputStream currentStream;
+    private InputStream currentStream; // used for chunked request, stores the current stream to read from
 
     /**
      * Creates a new entity producer that produces the entity data from the given input stream supplier.
@@ -36,9 +38,10 @@ public class StreamEntityProducer implements AsyncEntityProducer {
      * @param streamSupplier the input stream supplier, should be repeatable
      * @param chunked        whether the entity data should be sent in chunks
      */
-    public StreamEntityProducer(Supplier<InputStream> streamSupplier, boolean chunked) throws IOException {
+    public StreamEntityProducer(Supplier<InputStream> streamSupplier, boolean chunked, String contentType) throws IOException {
         this.streamSupplier = streamSupplier;
         this.chunked = chunked;
+        this.contentType = contentType;
 
         if (!chunked) {
             content = ByteBuffer.wrap(streamSupplier.get().readAllBytes());
@@ -85,7 +88,7 @@ public class StreamEntityProducer implements AsyncEntityProducer {
 
     @Override
     public String getContentType() {
-        return null;
+        return contentType;
     }
 
     @Override
@@ -106,9 +109,15 @@ public class StreamEntityProducer implements AsyncEntityProducer {
 
     @Override
     public int available() {
+        // If content is not null, it means the whole entity data has been read into the buffer from a stream that was
+        // taken from the stream supplier and that the content will be sent non-chunked.
+        // In this case, the remaining bytes in the buffer are returned.
         if (content != null) {
             return content.remaining();
         }
+
+        // Otherwise, the data is sent in chunks. If there is currently a stream open, from which the data is being read
+        // from, the available bytes from that stream are returned.
         if (currentStream != null) {
             try {
                 return currentStream.available();
