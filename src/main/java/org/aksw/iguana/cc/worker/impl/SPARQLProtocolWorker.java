@@ -334,7 +334,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             @Override
             protected int capacityIncrement() {
-                return Integer.MAX_VALUE; // get as much data in as possible
+                return Integer.MAX_VALUE - 8; // get as much data in as possible
             }
 
             /**
