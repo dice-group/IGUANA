@@ -330,13 +330,19 @@ public class SPARQLProtocolWorker extends HttpWorker {
             private long responseEnd = 0;  // time in nanos
 
             @Override
-            public void releaseResources() {}
+            public void releaseResources() {} // nothing to release
 
             @Override
             protected int capacityIncrement() {
                 return Integer.MAX_VALUE; // get as much data in as possible
             }
 
+            /**
+             * Triggered to pass incoming data packet to the data consumer.
+             *
+             * @param src the data packet.
+             * @param endOfStream flag indicating whether this data packet is the last in the data stream.
+             */
             @Override
             protected void data(ByteBuffer src, boolean endOfStream) throws IOException {
                 if (endOfStream) {
@@ -363,11 +369,23 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 }
             }
 
+            /**
+             * Triggered to signal the beginning of response processing.
+             *
+             * @param response the response message head
+             * @param contentType the content type of the response body,
+             *                    or {@code null} if the response does not enclose a response entity.
+             */
             @Override
             protected void start(HttpResponse response, ContentType contentType) {
                 this.response = response;
             }
 
+            /**
+             * Triggered to generate an object that represents a result of response message processing.
+             *
+             * @return the result of response message processing
+             */
             @Override
             protected HttpExecutionResult buildResult() {
                 // if the responseEnd hasn't been set yet, set it to the current time
