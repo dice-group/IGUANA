@@ -1,14 +1,12 @@
 package org.aksw.iguana.cc.worker.impl;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
-import org.aksw.iguana.cc.utils.http.StreamEntityProducer;
+import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
@@ -21,134 +19,24 @@ import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBu
 import org.apache.hc.client5.http.nio.AsyncClientConnectionManager;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
-import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
-import org.apache.hc.core5.http.nio.entity.BasicAsyncEntityProducer;
-import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder;
-import org.apache.hc.core5.net.URIBuilder;
 import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class SPARQLProtocolWorker extends HttpWorker {
-
-    public final static class RequestFactory {
-        public enum RequestType {
-            GET_QUERY("get query"),
-            POST_URL_ENC_QUERY("post url-enc query"),
-            POST_QUERY("post query"),
-            POST_URL_ENC_UPDATE("post url-enc update"),
-            POST_UPDATE("post update");
-
-            private final String value;
-
-            @JsonCreator
-            RequestType(String value) {
-                this.value = Objects.requireNonNullElse(value, "get query");
-            }
-
-            @JsonValue
-            public String value() {
-                return value;
-            }
-        }
-
-        private final RequestType requestType;
-        private final Map<Integer, AsyncRequestProducer> cache = new HashMap<>();
-
-        public RequestFactory(RequestType requestType) {
-            this.requestType = requestType;
-        }
-
-        private static String urlEncode(List<String[]> parameters) {
-            return parameters.stream()
-                    .map(e -> e[0] + "=" + URLEncoder.encode(e[1], StandardCharsets.UTF_8))
-                    .collect(Collectors.joining("&"));
-        }
-
-        private static String urlEncode(String name, String value) {
-            return name + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8);
-        }
-
-        public AsyncRequestProducer buildHttpRequest(QueryHandler.QueryStreamWrapper queryHandle,
-                                                     ConnectionConfig connection,
-                                                     String requestHeader) throws URISyntaxException, IOException {
-            if (queryHandle.cached() && cache.containsKey(queryHandle.index()))
-                return cache.get(queryHandle.index());
-
-            AsyncRequestBuilder asyncRequestBuilder;
-            Supplier<InputStream> queryStreamSupplier;
-            InputStream queryStream;
-
-            try {
-                queryStreamSupplier = queryHandle.queryInputStreamSupplier();
-                queryStream = queryStreamSupplier.get();
-            } catch (RuntimeException e) {
-                throw new IOException(e);
-            }
-
-            switch (this.requestType) {
-                case GET_QUERY ->
-                        asyncRequestBuilder = AsyncRequestBuilder.get(new URIBuilder(connection.endpoint())
-                        .addParameter("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
-                        .build()
-                );
-                case POST_URL_ENC_QUERY ->
-                        asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                                // manually set content type, because otherwise the
-                                // entity producer would set it to "application/x-www-form-urlencoded; charset=ISO-8859-1"
-                                .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
-                                .setEntity(new BasicAsyncEntityProducer(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, !queryHandle.cached()));
-                case POST_QUERY ->
-                        asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                                .setEntity(new StreamEntityProducer(queryStreamSupplier, !queryHandle.cached(), "application/sparql-query"));
-                case POST_URL_ENC_UPDATE ->
-                        asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                                .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
-                                .setEntity(new BasicAsyncEntityProducer(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, !queryHandle.cached()));
-                case POST_UPDATE ->
-                        asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                                .setEntity(new StreamEntityProducer(queryStreamSupplier, !queryHandle.cached(), "application/sparql-update"));
-                default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
-            }
-
-            if (requestHeader != null)
-                asyncRequestBuilder.addHeader("Accept", requestHeader);
-            if (connection.authentication() != null && connection.authentication().user() != null)
-                asyncRequestBuilder.addHeader("Authorization",
-                        HttpWorker.basicAuth(connection.authentication().user(),
-                                Optional.ofNullable(connection.authentication().password()).orElse("")));
-
-            if (queryHandle.cached())
-                cache.put(queryHandle.index(), asyncRequestBuilder.build());
-
-            return asyncRequestBuilder.build();
-        }
-
-        public AsyncRequestProducer getCachedRequest(int index) {
-            if (!cache.containsKey(index))
-                throw new IllegalArgumentException("No request with index " + index + " found in cache.");
-            return cache.get(index);
-        }
-    }
-
 
     public record Config(
             Integer number,
@@ -231,6 +119,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
         this.requestFactory = new RequestFactory(config().requestType());
     }
 
+    /**
+     * Initializes the http client with the given thread count.
+     * All workers will use the same http client instance.
+     *
+     * @param threadCount the number of threads to be used by the http client
+     */
     public static void initHttpClient(int threadCount) {
         connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(threadCount)
@@ -252,6 +146,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
         httpClient.start();
     }
 
+    /**
+     * Closes the http client and the connection manager.
+     */
     public static void closeHttpClient() {
         try {
             httpClient.close();
@@ -343,14 +240,17 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * @return                  the execution statistic of the execution
      */
     private ExecutionStats executeQuery(Duration timeout, boolean discardOnFailure) {
+        // execute the request
         HttpExecutionResult result = executeHttpRequest(timeout);
+
+        // process result
         Optional<Integer> statuscode = Optional.empty();
         if (result.response().isPresent())
             statuscode = Optional.of(result.response().get().getCode());
 
         if (result.successful() && this.config.parseResults()) { // 2xx
             if (result.actualContentLength.isEmpty() || result.hash.isEmpty() || result.outputStream.isEmpty()) {
-                throw new RuntimeException("Response body is null, but execution was successful."); // This should never happen
+                throw new RuntimeException("Response body is null, but execution was successful."); // This should never happen, just here for fixing the warning.
             }
 
             // process result
@@ -383,7 +283,15 @@ public class SPARQLProtocolWorker extends HttpWorker {
         );
     }
 
+    /**
+     * Executes the next query given by the query selector from the query handler.
+     * It uses the http client to execute the request and returns the result of the execution.
+     *
+     * @param timeout the timeout for the execution
+     * @return        the execution result of the execution
+     */
     private HttpExecutionResult executeHttpRequest(Duration timeout) {
+        // get the next query and request
         final AsyncRequestProducer request;
         final int queryIndex;
         if (config().queries().getConfig().caching()) {
@@ -411,22 +319,22 @@ public class SPARQLProtocolWorker extends HttpWorker {
             queryIndex = queryHandle.index();
         }
 
+        // execute the request
         final Instant timeStamp = Instant.now();
         final var requestStart = System.nanoTime();
         final var future = httpClient.execute(request, new AbstractBinResponseConsumer<HttpExecutionResult>() {
 
             private HttpResponse response;
             private final StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
-            private long responseSize = 0;
-            private long responseEnd = 0;
-
+            private long responseSize = 0; // will be used if parseResults is false
+            private long responseEnd = 0;  // time in nanos
 
             @Override
             public void releaseResources() {}
 
             @Override
             protected int capacityIncrement() {
-                return Integer.MAX_VALUE;
+                return Integer.MAX_VALUE; // get as much data in as possible
             }
 
             @Override
@@ -437,10 +345,11 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 }
 
                 if (config.parseResults()) {
+                    // if the buffer uses an array, use the array directly
                     if (src.hasArray()) {
                         hasher.update(src.array(), src.position() + src.arrayOffset(), src.remaining());
                         responseBodybbaos.write(src.array(), src.position() + src.arrayOffset(), src.remaining());
-                    } else {
+                    } else { // otherwise, copy the buffer to an array
                         int readCount;
                         while (src.hasRemaining()) {
                             readCount = Math.min(BUFFER_SIZE, src.remaining());
@@ -461,11 +370,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
             @Override
             protected HttpExecutionResult buildResult() {
+                // if the responseEnd hasn't been set yet, set it to the current time
                 if (responseEnd == 0)
                     responseEnd = System.nanoTime();
+
+                // duration of the execution
                 final var duration = Duration.ofNanos(responseEnd - requestStart);
 
-                // http error
+                // check for http error
                 if (response.getCode() / 100 != 2) {
                     return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, null);
                 }
@@ -473,11 +385,11 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 // check content length
                 final var contentLengthHeader = response.getFirstHeader("Content-Length");
                 Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
-                if (config.parseResults() && contentLength != null && responseBodybbaos.size() != contentLength) {
-                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
-                }
-                if (!config.parseResults() && contentLength != null && responseSize != contentLength) {
-                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
+                if (contentLength != null) {
+                    if ((!config.parseResults() && responseSize != contentLength) // if parseResults is false, the responseSize will be used
+                            || (config.parseResults() && responseBodybbaos.size() != contentLength)) { // if parseResults is true, the size of the bbaos will be used
+                        return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
+                    }
                 }
 
                 // check timeout
@@ -485,6 +397,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new TimeoutException());
                 }
 
+                // return successful result
                 return new HttpExecutionResult(
                         queryIndex,
                         Optional.of(response),
@@ -496,16 +409,28 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         Optional.empty()
                 );
             }
-        }, null);
+        }, null); // the callback is used to handle the end state of the request, but it's not needed here
 
         try {
+            // Wait for the request to finish, but don't wait longer than the timeout.
+            // The timeout from the configuration is used instead of the timeout from the parameter.
+            // The timeout from the parameter might be reduced if the end of the time limit is near
+            // and it might be so small that it causes issues.
             return future.get(config.timeout().toNanos(), TimeUnit.NANOSECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            // This will close the connection and cancel the request if it's still running.
             future.cancel(true);
             return createFailedResultBeforeRequest(queryIndex, e);
         }
     }
 
+    /**
+     * Creates a failed result for a query execution that failed before the request.
+     *
+     * @param queryIndex the index of the query
+     * @param e          the exception that caused the error
+     * @return           the failed result
+     */
     private static HttpExecutionResult createFailedResultBeforeRequest(int queryIndex, Exception e) {
         return new HttpExecutionResult(
                 queryIndex,
@@ -519,6 +444,16 @@ public class SPARQLProtocolWorker extends HttpWorker {
         );
     }
 
+    /**
+     * Creates a failed result for a query execution that failed during the response.
+     *
+     * @param queryIndex the index of the query
+     * @param response   the response of the query
+     * @param timestamp  the start time of the query
+     * @param duration   the duration of the query until error
+     * @param e          the exception that caused the error, can be null
+     * @return           the failed result
+     */
     private static HttpExecutionResult createFailedResultDuringResponse(
             int queryIndex,
             HttpResponse response,
