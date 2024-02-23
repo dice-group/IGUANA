@@ -98,6 +98,10 @@ public class StreamEntityProducer implements AsyncEntityProducer {
 
     @Override
     public void releaseResources() {
+        if (content != null) {
+            content.clear();
+        }
+
         if (currentStream != null) {
             try {
                 currentStream.close();
