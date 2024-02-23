@@ -12,7 +12,7 @@ Configuration:
       name: STDOUT
       target: SYSTEM_OUT
       PatternLayout:
-        Pattern: "%highlight{%d [%t] %p [%c] - <%m>%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=green bold, TRACE=blue}"
+        Pattern: "%highlight{%d [%t] \t %-5p [%c{1}] - <%m>%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=green bold, TRACE=blue}"
         disableAnsi: false
     File:
       name: File
@@ -32,7 +32,7 @@ Configuration:
           - ref: STDOUT
           - ref: File
       - name: org.reflections.Reflections
-        level: info
+        level: error
         additivity: true
         AppenderRef:
           - ref: STDOUT

@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.utils;
 
+import org.aksw.iguana.cc.utils.files.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

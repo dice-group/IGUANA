@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.source.impl;
 
-import org.aksw.iguana.cc.utils.FileUtils;
+import org.aksw.iguana.cc.utils.files.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -80,8 +80,15 @@ public class Stresstest implements Task {
     }
 
     public void run() {
-        var warmupResults = executeWorkers(warmupWorkers); // warmup results will be dismissed
+        if (!warmupWorkers.isEmpty()) {
+            SPARQLProtocolWorker.initHttpClient(warmupWorkers.size());
+            var warmupResults = executeWorkers(warmupWorkers); // warmup results will be dismissed
+            SPARQLProtocolWorker.closeHttpClient();
+        }
+
+        SPARQLProtocolWorker.initHttpClient(workers.size());
         var results = executeWorkers(workers);
+        SPARQLProtocolWorker.closeHttpClient();
 
         srp.process(results.workerResults);
         srp.calculateAndSaveMetrics(results.startTime, results.endTime);

@@ -94,6 +94,7 @@ public class Suite {
 
     public void run() {
         for (int i = 0; i < tasks.size(); i++) {
+            LOGGER.info("Task/{} {}  starting.", tasks.get(i).getTaskName(), i);
             tasks.get(i).run();
             LOGGER.info("Task/{} {}  finished.", tasks.get(i).getTaskName(), i);
         }

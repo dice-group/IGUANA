@@ -1,4 +1,4 @@
-package org.aksw.iguana.cc.utils;
+package org.aksw.iguana.cc.utils.files;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
