@@ -117,14 +117,14 @@ The `resultSize` is the size of the HTTP response in bytes and is an exception t
 ### EachQuery (Each Execution Statistic)
 This metric collects statistics for each execution of a query. 
 
-| Name           | Description                                                                                                       |
-|----------------|-------------------------------------------------------------------------------------------------------------------|
-| `run`          | The number of the execution.                                                                                      |
-| `startTime`    | The time stamp where the execution started.                                                                       |
-| `time`         | The time it took to execute the query.                                                                            |
-| `success`      | If the execution was successful.                                                                                  |
-| `code`         | Numerical value of the end state of the execution.<br/> (success=0, timeout=110, http_error=111, exception=1)     |
-| `resultSize`   | The size of the HTTP response.                                                                                    |
-| `exception`    | The exception that occurred during execution. (if any occurred)                                                   |
-| `httpCode`     | The HTTP status code received. (if any was received)                                                              |
-| `responseBody` | The hash of the HTTP response body. <br/>(only if `validateResults` inside the stresstest has been set to `true`) |
+| Name           | Description                                                                                                    |
+|----------------|----------------------------------------------------------------------------------------------------------------|
+| `run`          | The number of the execution.                                                                                   |
+| `startTime`    | The time stamp where the execution started.                                                                    |
+| `time`         | The time it took to execute the query.                                                                         |
+| `success`      | If the execution was successful.                                                                               |
+| `code`         | Numerical value of the end state of the execution.<br/> (success=0, timeout=110, http_error=111, exception=1)  |
+| `resultSize`   | The size of the HTTP response.                                                                                 |
+| `exception`    | The exception that occurred during execution. (if any occurred)                                                |
+| `httpCode`     | The HTTP status code received. (if any was received)                                                           |
+| `responseBody` | The hash of the HTTP response body. <br/>(only if `parseResults` inside the stresstest has been set to `true`) |

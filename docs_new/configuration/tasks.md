@@ -14,30 +14,36 @@ tasks:
 ```
 
 ## Stresstest
-The `stresstest`-task queries the specified endpoints in rapid succession with the queries.
+The `stresstest`-task queries the specified endpoints in rapid succession with the given queries.
 It measures the time it takes to execute each query and calculates the required metrics based
-on the measurements.
+on the measurements. 
+The task is used to measure the performance of the endpoint for each query.
+The task is configured with the following properties:
 
-### Properties
-| property      | required | description                                   |
-|---------------|----------|-----------------------------------------------|
-| workers       | yes      | An array that contains worker configurations. | 
-| warmupworkers | no       | An array that contains worker configurations. |
+| property      | required | description                                                  |
+|---------------|----------|--------------------------------------------------------------|
+| workers       | yes      | An array that contains worker configurations.                | 
+| warmupworkers | no       | An array that contains worker configurations for the warmup. |
 
-### Workers
 The stresstest uses workers to execute the queries.
 Each worker has its own set of queries and executes them parallel to the other workers.
 
-Warmup workers have the same functionality as normal workers, 
+Warmup workers have the same functionality as normal workers,
 but their results won't be processed and stored.
 The stresstest runs the warmup workers before the actual workers.
 They're used to warm up the system before the actual benchmarking starts.
 
-Iguana supports multiple worker types, but currently only the `SPARQLProtocolWorker` is implemented.
+For more information about the worker configuration, see [here](./workers.md).
 
-### SPARQLProtocolWorker Properties
-| property | default | required | description                                                         |
-|----------|---------|----------|---------------------------------------------------------------------|
-| type     |         | yes      | The type of the worker. Only type available: `SPARQLProtocolWorker` |
-|number    |        | yes      | The number of workers with that same configuration.                 |
-| queries  |         | yes      | An array that contains the queries that the worker should execute.  |
+### Example
+```yaml
+tasks:
+  - type: "stresstest"
+    workers:
+    - type: "SPARQLProtocolWorker"
+      # ... worker properties
+    warmupworkers:
+    - type: "SPARQLProtocolWorker"
+      # ...
+```
+
