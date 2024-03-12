@@ -1,7 +1,7 @@
 # Queries
 
 Benchmarks often involve running a series of queries against a database and measuring their performances.
-The query handler in Iguana is responsible for storing, selecting and loading queries for the benchmarking process.
+The query handler in Iguana is responsible for loading and selecting queries for the benchmarking process.
 
 Inside the stresstest task, the query handler is configured with the `queries` property.
 Every worker instance of the same worker configuration will use the same query handler.
@@ -24,7 +24,7 @@ Iguana will then split the file into queries based on the separator.
 If the `separator` property is set to an empty string `""` (default) the queries will be separated by an empty line.
 The separator string can also contain escape sequences like `\n` or `\t`.
 
-In this example, the queries inside this file are separated by the string `###`:
+In this example, the queries inside this file are separated by a line consisting of the string `###`:
 ```
 SELECT DISTINCT * 
 WHERE { 
@@ -37,3 +37,20 @@ WHERE {
 }
 ```
 The `separator` property should be set to `"\n###\n"`. (be aware of different line endings on different operating systems)
+
+## Example
+```yaml
+tasks:
+  - type: "stresstest"
+    workers:
+    - type: "SPARQLProtocolWorker"
+      queries:
+        path: "./example/suite/queries.txt"
+        format: "separator"
+        separator: "\n###\n"
+        caching: false
+        order: "random"
+        seed: 12345
+        lang: "SPARQL"
+      # ... additional worker properties
+```
