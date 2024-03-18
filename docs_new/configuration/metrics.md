@@ -7,9 +7,6 @@ Task metrics are calculated for the query executions of the whole task.
 Worker metrics are calculated for the query executions of each worker.
 Query metrics are calculated for each query and its executions inside the task or worker.
 
-## TODO
-- Examples for storage of the metrics.
-
 ## Configuration
 
 The metrics are configured in the `metrics` section of the configuration file.

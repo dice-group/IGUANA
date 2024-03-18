@@ -69,11 +69,23 @@ datasets:
 ```
 
 As already mentioned, the datasets are only used as documentation.
-For example, the resulting `task-configuration.csv`-file from the CSVStorage might look this with the configuration above:
+For example, 
+the resulting `task-configuration.csv`-file from the csv storage might look this with the configuration above:
 
 | taskID                                                      | connection | version | dataset |
 |-------------------------------------------------------------|------------|---------|---------|
 | http://iguana-benchmark.eu/resource/1699354119-3273189568/0 | fuseki     | v2      | sp2b    | 
+
+The resulting triples for the rdf file storage might look like this:
+
+```turtle
+ires:fuseki a iont:Connection ;
+    rdfs:label      "fuseki" ;
+    iprop:dataset   ires:sp2b .
+    
+ires:sp2b a iont:Dataset ;
+    rdfs:label  "sp2b" .
+```
 
 ## Connections
 The connections are used to define the endpoints for the triplestores.
@@ -81,15 +93,15 @@ The defined connections can later be used in the tasks-configuration to specify 
 
 ### Properties
 
-| property             | required | description                                                                                                                                                                                  | example                           |
-|----------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
-| name                 | yes      | This is a descriptive name for the connection. **(needs to be unique)**                                                                                                                      | `"fuseki"`                        |
-| version              | no       | This serves to document the version of the connection. <br/>It has no functional property.                                                                                                   | `"v1.0.1"`                        |
+| property             | required | description                                                                                                                                                                                    | example                           |
+|----------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
+| name                 | yes      | This is a descriptive name for the connection. **(needs to be unique)**                                                                                                                        | `"fuseki"`                        |
+| version              | no       | This serves to document the version of the connection. <br/>It has no functional property.                                                                                                     | `"v1.0.1"`                        |
 | dataset              | no       | This serves to document the dataset, that has been loaded into the specified connection. It has no functional property.<br/> **(needs to reference an already defined dataset in `datasets`)** | `"sp2b"`                          |
-| endpoint             | yes      | An URI at which the connection is located.                                                                                                                                                   | `"https://localhost:3030/query"`  |
-| authentication       | no       | Basic authentication data for the connection.                                                                                                                                                | _see below_                       |
-| updateEndpoint       | no       | An URI at which an additional update-endpoint might be located. <br/>This is useful for triplestores that have separate endpoints for update queries.                                        | `"https://localhost:3030/update"` |
-| updateAuthentication | no       | Basic Authentication data for the updateEndpoint.                                                                                                                                            | _see below_                       |
+| endpoint             | yes      | An URI at which the connection is located.                                                                                                                                                     | `"https://localhost:3030/query"`  |
+| authentication       | no       | Basic authentication data for the connection.                                                                                                                                                  | _see below_                       |
+| updateEndpoint       | no       | An URI at which an additional update-endpoint might be located. <br/>This is useful for triplestores that have separate endpoints for update queries.                                          | `"https://localhost:3030/update"` |
+| updateAuthentication | no       | Basic Authentication data for the updateEndpoint.                                                                                                                                              | _see below_                       |
 
 Iguana only supports the HTTP basic authentication for now.
 The authentication properties are objects that are defined as follows:
@@ -99,7 +111,8 @@ The authentication properties are objects that are defined as follows:
 | user     | yes      | The user name.            | `"admin"`    |
 | password | yes      | The password of the user. | `"password"` |
 
-This is what a full connection configuration might look like:
+### Example
+
 ```yaml
 datasets:
   - name: "wikidata"
@@ -128,27 +141,16 @@ At the moment, there is only one type of task, the `stresstest`.
 The `stresstest`-task queries specified endpoints with the given queries and measures the performance of the endpoint
 for each query and calculates the required metrics.
 
-The tasks will be explained in more detail in the [Tasks](tasks.md) documentation.
+The tasks are explained in more detail in the [Tasks](tasks.md) documentation.
 
 ## ResponseBodyProcessor
 The response body processors are used
 to process the response bodies that are received for each query from the benchmarked endpoints.
 The processors extract relevant information from the response bodies and store them in the results.
 Processors are defined by the content type of the response body they process.
-At the moment, only the `application/sparql-results+json` content type is supported.
+At the moment, only the `application/sparql-results+json` content type is supported
 
-### Properties
-| property    | required | description                                                                        | example                             |
-|-------------|----------|------------------------------------------------------------------------------------|-------------------------------------|
-| contentType | yes      | The content type of the response body.                                             | `"application/sparql-results+json"` |
-| threads     | no       | The number of threads that are used to process the response bodies. (default is 1) | `2`                                 |
-
-### Example
-```yaml
-responseBodyProcessors:
-  - contentType: "application/sparql-results+json"
-    threads: 2
-```
+The response body processors are explained in more detail in the [ResponseBodyProcessor](responsebodyprocessor.md) documentation.
 
 ## Metrics
 Metrics are used to calculate the performance of the benchmarked endpoints.
