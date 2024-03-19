@@ -4,9 +4,9 @@ They define the actual process of the benchmarking suite
 and are executed from top to bottom in the order they are defined in the configuration.
 At the moment, the `stresstest` is the only implemented task.
 
-Tasks are defined in the `tasks` section of the configuration by the `type` property.
+Tasks are defined in the `tasks` section of the configuration and are distinguished by the `type` property.
 
-Example:
+## Example
 ```yaml
 tasks:
   - type: "stresstest"

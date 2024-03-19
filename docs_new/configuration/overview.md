@@ -50,6 +50,24 @@ metrics:
   - # ...
 ```
 
+The order of the sections is not important.
+
+Durations are used to define time spans in the configuration.
+They can be used for the `timeout`-property of the workers or for the `completionTarget`-property of the tasks.
+Duration values can be defined as a XSD duration string or as a string with a number and a unit.
+The following units are supported:
+- `s` or `sec`or `secs` for seconds
+- `m` or `min` or `mins` for minutes
+- `h` or `hr` or `hrs` for hours
+- `d` or `day` or `days` for days
+
+Some examples for duration values:
+```yaml
+timeout: "2S" # 2 seconds
+timeout: "10s" # 10 seconds
+timeout: "PT10S" # 10 seconds
+```
+
 ## Tasks
 The tasks are the core of the benchmark suite.
 They define the actual process of the benchmarking suite
