@@ -11,4 +11,5 @@ Currently only the `SaxSparqlJsonResultCountingParser` language processor is sup
 ## SaxSparqlJsonResultCountingParser
 
 The `SaxSparqlJsonResultCountingParser` is a language processor used to extract simple information from the responses of SPARQL endpoints that are in the `application/sparql-results+json` format.
-It counts the number of results, the number of variables, and the number of bindings in the response body.
+It counts the number of results, the number of variables, 
+and the number of bindings from the response of a `SELECT` or `ASK` query.
