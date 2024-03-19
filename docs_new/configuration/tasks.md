@@ -2,9 +2,10 @@
 The tasks are the core of the benchmark suite.
 They define the actual process of the benchmarking suite
 and are executed from top to bottom in the order they are defined in the configuration.
-At the moment, there is only one type of task, the `stresstest`.
+At the moment, the `stresstest` is the only implemented task.
 
 Tasks are defined in the `tasks` section of the configuration by the `type` property.
+
 Example:
 ```yaml
 tasks:
@@ -25,7 +26,7 @@ The task is configured with the following properties:
 | workers       | yes      | An array that contains worker configurations.                | 
 | warmupworkers | no       | An array that contains worker configurations for the warmup. |
 
-The stresstest uses workers to execute the queries.
+The stresstest uses workers to execute the queries, which are supposed to simulate users.
 Each worker has its own set of queries and executes them parallel to the other workers.
 
 Warmup workers have the same functionality as normal workers,

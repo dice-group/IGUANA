@@ -118,14 +118,14 @@ The `requestType` property is a string that can be one of the following values:
 ### Accept Header
 
 The `acceptHeader` property defines the value for the `Accept` header of the HTTP requests that a worker sends to the defined endpoint.
-This property also affects the [ResponseBodyProcessors](./overview#responsebodyprocessor)
+This property also affects the [Response-Body-Processors](./overview#responsebodyprocessor)
 that are used to process the response bodies.
 
 ### Parse Results
 
 The `parseResults` property defines whether the worker should parse the results of the queries.
 If the property is set to `true`,
-the worker will send the response body to the [ResponseBodyProcessors](./overview#responsebodyprocessor) for processing
+the worker will send the response body to the [Response-Body-Processors](./overview#responsebodyprocessor) for processing
 and calculate hash values for the response bodies.
 If the property is set to `false`,
 the worker will not parse the response bodies and will not calculate hash values for the response bodies.
