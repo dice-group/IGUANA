@@ -1,83 +1,74 @@
-# IGUANA
-
 [![ci](https://github.com/dice-group/IGUANA/actions/workflows/ci.yml/badge.svg)](https://github.com/dice-group/IGUANA/actions/workflows/ci.yml)
 
 <p align="center">
     <img src="https://github.com/dice-group/IGUANA/raw/develop/images/IGUANA_logo.png" alt="IGUANA Logo" width="200">
 </p>
-Iguana is an integrated suite for benchmarking the read/write performance of HTTP endpoints and CLI Applications.
 
-It provides an environment which ...
+# IGUANA
+Iguana is a benchmarking framework for testing the read performances of HTTP endpoints.
+It is mostly designed for benchmarking triplestores by using the SPARQL protocol.
+Iguana stresstests endpoints by simulating users which send a set of queries independently of each other.
 
-* is highly configurable
-* provides a realistic scenario benchmark
-* works on every dataset
-* works on SPARQL HTTP endpoints
-* works on HTTP Get & Post endpoints
-* works on CLI applications
-* and is easily extendable
+Benchmarks are configured using a YAML-file, this allows them to be easily repeated and adjustable.
+Results are stored in RDF-files or in easier to read CSV-files.
 
-For further information visit:
-- [iguana-benchmark.eu](http://iguana-benchmark.eu)
-- [Documentation](http://iguana-benchmark.eu/docs/3.3/)
+## Features
+- Benchmarking of (SPARQL) HTTP endpoints
+- Easy configuration
+- Calculation of various metrics for better comparisons
+- Processing of HTTP responses (e.g., results counting)
 
-### Available metrics
-
-Per run metrics:
-* Query Mixes Per Hour (QMPH)
-* Number of Queries Per Hour (NoQPH)
-* Number of Queries (NoQ)
-* Average Queries Per Second (AvgQPS)
-* Penalized Average Queries Per Second (PAvgQPS)
-
-Per query metrics:
-* Queries Per Second (QPS)
-* Penalized Queries Per Second (PQPS)
-* Number of successful and failed queries
-* result size
-* queries per second
-* sum of execution times
-
-## Setup Iguana
+## Usage
 
 ### Prerequisites
+You need to have `Java 17` or higher installed.
+On Ubuntu it can be installed by executing the following command:
 
-In order to run Iguana, you need to have `Java 17`, or greater, installed on your system.
+```bash
+sudo apt install java
+``` 
 
 ### Download
-Download the newest release of Iguana [here](https://github.com/dice-group/IGUANA/releases/latest), or run on a unix shell:
+The latest release can be downloaded at https://github.com/dice-group/IGUANA/releases/latest.
+The zip file contains three files:
 
-```sh
-wget https://github.com/dice-group/IGUANA/releases/download/v4.0.0/iguana-4.0.0.zip
-unzip iguana-4.0.0.zip
-```
-
-The zip file contains the following files:
-
-* `iguana-X.Y.Z.jar`
-* `start-iguana.sh`
+* `iguana-4.0.0.jar`
 * `example-suite.yml`
+* `start-iguana.sh`
 
-### Create a Configuration
+### Configuration
+The `example-suite.yml` file contains a basic configuration for a benchmark suite.
+It can be used as a starting point for your own benchmark suite.
+For a detailed explanation of the configuration, see the [configuration](docs_new/configuration/overview.md) documentation.
 
-You can use the provided example configuration and modify it to your needs.
-For further information please visit our [configuration](http://iguana-benchmark.eu/docs/3.2/usage/configuration/) and [Stresstest](http://iguana-benchmark.eu/docs/3.0/usage/stresstest/) wiki pages.
+### Run Iguana
+Start Iguana with a benchmark suite (e.g., the `example-suite.yml`) either by using the start script:
 
-For a detailed, step-by-step instruction through a benchmarking example, please visit our [tutorial](http://iguana-benchmark.eu/docs/3.2/usage/tutorial/).
-
-### Execute the Benchmark
-
-Start Iguana with a benchmark suite (e.g. the example-suite.yml) either by using the start script:
-
-```sh
+```bash
 ./start-iguana.sh example-suite.yml
 ```
 
 or by directly executing the jar-file:
 
-```sh
-java -jar iguana-x-y-z.jar example-suite.yml
+```bash
+java -jar iguana-4.0.0.jar example-suite.yml
 ```
+
+If you're using the script, you can use JVM arguments by setting the environment variable `IGUANA_JVM`.
+For example, to let Iguana use 4GB of RAM you can set `IGUANA_JVM` as follows:
+
+```bash
+export IGUANA_JVM=-Xmx4g
+```
+
+### Configuration
+The provided `example-suite.yml` file contains an extensive configuration for a benchmark suite.
+For further information,
+please visit our [configuration](http://iguana-benchmark.eu/docs/3.2/usage/configuration/) and [Stresstest](http://iguana-benchmark.eu/docs/3.0/usage/stresstest/) wiki pages.
+
+
+
+For a detailed, step-by-step instruction through a benchmarking example, please visit our [tutorial](http://iguana-benchmark.eu/docs/3.2/usage/tutorial/).
 
 # How to Cite
 
