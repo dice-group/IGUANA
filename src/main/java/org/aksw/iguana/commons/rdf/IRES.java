@@ -26,10 +26,6 @@ public class IRES {
         return ResourceFactory.createResource(NS + "responseBody" + "/" + hash);
     }
 
-    public static Resource getResponsebodyResource(long hash) {
-        return ResourceFactory.createResource(NS + "responseBody" + "/" + hash);
-    }
-
     public static class Factory {
 
         private final String suiteID;

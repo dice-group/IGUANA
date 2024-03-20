@@ -3,9 +3,6 @@ package org.aksw.iguana.cc.utils.files;
 import org.apache.commons.io.input.AutoCloseInputStream;
 import org.apache.commons.io.input.BoundedInputStream;
 
-import org.apache.commons.io.input.AutoCloseInputStream;
-import org.apache.commons.io.input.BoundedInputStream;
-
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -116,16 +113,6 @@ public class IndexedQueryReader {
                                         FileChannel.open(path, StandardOpenOption.READ)
                                                 .position(this.indices.get(index)[0] /* offset */)),
                                 this.indices.get(index)[1] /* length */)));
-    }
-
-    public InputStream streamQuery(int index) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(this.file, "r");
-        raf.seek(this.indices.get(index)[0] /* offset */);
-
-        FileInputStream fis = new FileInputStream(raf.getFD());
-        BoundedInputStream bis = new BoundedInputStream(fis, this.indices.get(index)[1] /* length */);
-        BufferedInputStream buis = new BufferedInputStream(bis);
-        return new AutoCloseInputStream(buis);
     }
 
     /**
