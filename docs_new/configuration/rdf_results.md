@@ -1,8 +1,6 @@
-# Results
-The differences between task, worker, and query metrics can be seen in the following example.
-The following excerpt is from the RDF file storage
-and shows the results that are calculated for the QPS and AES metrics.
-
+# RDF Results
+The differences between task, worker, and query metrics will be explained in more detail with the following examples.
+The results shown have been generated with the `rdf file` storage type.
 
 ## Task and Worker Metrics
 The first excerpt shows the results for the task `ires:1710247002-3043500295/0` and its worker
@@ -18,7 +16,7 @@ The first excerpt shows the results for the task `ires:1710247002-3043500295/0` 
         iprop:endDate         "2024-03-12T12:36:48.323Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         iprop:metric          ires:QMPH , ires:NoQPH , ires:AvgQPS , ires:NoQ ;
         iprop:noOfWorkers     "1"^^<http://www.w3.org/2001/XMLSchema#int> ;
-        iprop:query           (id of every query inside the task) ;
+        iprop:query           (iri of every query that has been executed inside the task) ;
         iprop:startDate       "2024-03-12T12:36:42.636Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         iprop:workerResult    <http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0> .
 
@@ -33,7 +31,7 @@ The first excerpt shows the results for the task `ires:1710247002-3043500295/0` 
         iprop:metric       ires:NoQ , ires:NoQPH , ires:QMPH , ires:AvgQPS ;
         iprop:noOfQueries  "17"^^<http://www.w3.org/2001/XMLSchema#int> ;
         iprop:noOfQueryMixes  "1"^^<http://www.w3.org/2001/XMLSchema#int> ;
-        iprop:query        (id of every query the worker has) ;
+        iprop:query        (iri of every query the worker has executed) ;
         iprop:startDate    "2024-03-12T12:36:42.6457629Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         iprop:timeOut      "PT10S"^^<http://www.w3.org/2001/XMLSchema#dayTimeDuration> ;
         iprop:workerID     "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
@@ -111,18 +109,17 @@ segments:
 The suite id is made up of the timestamp and the hash value of the suite configuration in this pattern:
 `ires:<timestamp>-<hash>`.
 
-The subject `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0>` represents the query
-`ires:1181728761:0` that the first worker of the task `1710247002-3043500295/0` has executed.
+The subject `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0>` represents the results of the query
+`ires:1181728761:0` from first worker of the task `1710247002-3043500295/0`.
 
-The subject `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/1181728761:0>` represents the query
-`ires:1181728761:0` that the whole task `1710247002-3043500295/0` has executed.
-This might include the executions of the same query by different workers.
+The subject `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/1181728761:0>` represents the results of the query
+`ires:1181728761:0` from every worker across the whole task `1710247002-3043500295/0`.
 
 Results of query metrics, like the `QPS` metric (also the `AES` metric),
-are stored in the `ExecutedQuery` class and are calculated for each query.
-Results are calculated for each worker and for every worker with the same query across the task.
+are therefore calculated for each query of each worker and for each query of the whole task.
 
-The `iprop:queryExecution` property of the worker query info contains the IRIs of the executions of that query.
+The `iprop:queryExecution` property of `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0>` 
+contains the IRIs of the executions of that query from that worker.
 These will be explained in the next section.
 
 ## Each Execution Statistic

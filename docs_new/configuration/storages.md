@@ -2,13 +2,13 @@
 
 Storages are used to store the results of the benchmark suite. 
 It is possible to use multiple storages at the same time.
-They can be configured with the `storage` property in the configuration file
+They can be configured with the `storages` property in the configuration file
 by providing a list of storage configurations.
 
 ## Example
 
 ```yaml
-storage:
+storages:
   - type: "csv file"
     directory: "./results"
   - type: "rdf file"
@@ -32,9 +32,11 @@ It only has a single property, `directory`,
 which defines the path to the directory where the csv files should be written to.
 
 Inside the directory, a new directory for the execution of the benchmark suite will be created.
-The name of the directory is `suite-` followed by the timestamp of the execution and the hash value of the suite-configuration.
+The name of the directory is `suite-<timestamp>-<config-hash>` where
+the `timestamp` is the benchmark's time of execution and `config-hash` the hash value of the benchmark configuration.
 
-The following gives an example of the directory structure and the files that are created.
+The following shows an example of the directory structure and created files of the csv storage:
+
 ```text
 suite-1710241608-1701417056/
 ├── suite-summary.csv

@@ -1,11 +1,14 @@
 # Metrics
 
-Metrics are used to measure the performance of the system during the stresstest.
+Metrics are used to measure and compare the performance of the system during the stresstest.
 They are divided into Task metrics, Worker metrics, and Query metrics.
 
-Task metrics are calculated for the query executions of the whole task.
-Worker metrics are calculated for the query executions of each worker.
-Query metrics are calculated for each query and its executions inside the task or worker.
+Task metrics are calculated for every query execution across the whole task.
+Worker metrics are calculated for every query execution of one worker.
+Query metrics are calculated for every execution of one query across one worker and across every worker.
+
+The differences between the task, worker and query metrics will be more apparent with the
+exploratory explanation for the rdf results [here](./rdf_results.md).
 
 ## Configuration
 
@@ -22,8 +25,7 @@ metrics:
     penalty: 180000 # in milliseconds
 ```
 
-If the `metrics` section is not present in the configuration file, the default configuration is used.
-
+If the `metrics` section is not present in the configuration file, the following **default** configuration is used:
 ```yaml
 metrics:
   - type: "AES"
@@ -37,59 +39,71 @@ metrics:
 
 ## Available metrics
 
+The following metric types are available:
+- `QPS`
+- `AvgQPS`
+- `NoQ`
+- `QMPH`
+- `NoQPH`
+- `PQPS`
+- `PAvgQPS`
+- `AES`
+- `EachQuery`
+
 ### QPS
 Queries per second.
-The number of queries executed per second.
-This metric is calculated for each query.
 
-This metric is calculated by dividing the number of successfully executed queries 
-by their sum of time (in seconds) it took to execute them.
+The number of successfully executed queries per second.
+This metric is calculated for each query.
+It is calculated by dividing the number of successfully executed queries 
+by the sum of time (in seconds) it took to execute them.
 
 ### AvgQPS
 Average queries per second. 
+
 The average number of queries executed per second.
 This metric is calculated for each worker and for the whole task.
-
-This metric is calculated by dividing the sum of the QPS values of every query the task or worker 
+It is calculated by dividing the sum of the QPS values of every query the task or worker 
 has by the number of queries.
 
 ### NoQ
 Number of queries.
+
 The number of successfully executed queries.
 This metrics is calculated for each worker and for the whole task.
 
 ### NoQPH
 Number of queries per hour.
+
 The number of successfully executed queries per hour.
 This metric is calculated for each worker and for the whole task.
-
-This metric is calculated by dividing the number of successfully executed queries
+It is calculated by dividing the number of successfully executed queries
 by their sum of time (in hours) it took to execute them.
 The metric value for the task is the sum of the metric for each worker.
 
 ### PQPS
 Penalized queries per second.
+
 The number of queries executed per second, penalized by the number of failed queries.
 This metric is calculated for each query.
-
-This metric is calculated by dividing the number of successful and failed query executions 
+It is calculated by dividing the number of successful and failed query executions 
 by their sum of time (in seconds) it took to execute them. 
 If a query fails, the time it took to execute it is set to the given `penalty` value.
 
 ### PAvgQPS
 Penalized average queries per second.
+
 The average number of queries executed per second, penalized by the number of failed queries.
 This metric is calculated for each worker and for the whole task.
-
-This metric is calculated by dividing the sum of the PQPS of each query the task or worker
+It is calculated by dividing the sum of the PQPS of each query the task or worker
 has executed by the number of queries.
 
 ### QMPH
 Query mixes per hour.
+
 The number of query mixes executed per hour.
 A query mix is the set of queries executed by a worker, or the whole task.
 This metric is calculated for each worker and for the whole task.
-
 It is calculated by dividing the number of successfully executed queries by the number of queries inside the query mix
 and by their sum of time (in hours) it took to execute them.
 
