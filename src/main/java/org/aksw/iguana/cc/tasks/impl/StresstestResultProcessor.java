@@ -130,9 +130,9 @@ public class StresstestResultProcessor {
             m.add(workerRes, IPROP.noOfQueries, ResourceFactory.createTypedLiteral(config.queries().getQueryCount()));
             m.add(workerRes, IPROP.timeOut, TimeUtils.createTypedDurationLiteral(config.timeout()));
             if (config.completionTarget() instanceof HttpWorker.QueryMixes)
-                m.add(taskRes, IPROP.noOfQueryMixes, ResourceFactory.createTypedLiteral(((HttpWorker.QueryMixes) config.completionTarget()).number()));
+                m.add(workerRes, IPROP.noOfQueryMixes, ResourceFactory.createTypedLiteral(((HttpWorker.QueryMixes) config.completionTarget()).number()));
             if (config.completionTarget() instanceof HttpWorker.TimeLimit)
-                m.add(taskRes, IPROP.timeLimit, TimeUtils.createTypedDurationLiteral(((HttpWorker.TimeLimit) config.completionTarget()).duration()));
+                m.add(workerRes, IPROP.timeLimit, TimeUtils.createTypedDurationLiteral(((HttpWorker.TimeLimit) config.completionTarget()).duration()));
             m.add(workerRes, IPROP.connection, connectionRes);
 
             m.add(connectionRes, RDF.type, IONT.connection);

@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.config.elements.DatasetConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
+import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.junit.jupiter.api.*;
@@ -87,7 +88,7 @@ public class SPARQLProtocolWorkerTest {
         final var connection = new ConnectionConfig("TestConn", "1", datasetConfig, uri, new ConnectionConfig.Authentication("testUser", "password"), null, null);
         final var workers = new ArrayDeque<Arguments>();
         int i = 0;
-        for (var requestType : SPARQLProtocolWorker.RequestFactory.RequestType.values()) {
+        for (var requestType : RequestFactory.RequestType.values()) {
             for (var cached : List.of(true, false)) {
                 final var config = new SPARQLProtocolWorker.Config(
                         1,
@@ -227,7 +228,7 @@ public class SPARQLProtocolWorkerTest {
                 connection,
                 Duration.parse("PT20S"),
                 "application/sparql-results+json",
-                SPARQLProtocolWorker.RequestFactory.RequestType.POST_URL_ENC_QUERY,
+                RequestFactory.RequestType.POST_URL_ENC_QUERY,
                 false
         );
 
@@ -277,7 +278,7 @@ public class SPARQLProtocolWorkerTest {
                 connection,
                 Duration.parse("PT20S"),
                 "application/sparql-results+json",
-                SPARQLProtocolWorker.RequestFactory.RequestType.POST_URL_ENC_QUERY,
+                RequestFactory.RequestType.POST_URL_ENC_QUERY,
                 false
         );
 
