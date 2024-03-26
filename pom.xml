@@ -287,8 +287,8 @@
                         <configuration>
                             <buildArgs>
                                 --gc=G1
-                                --pgo=/mnt/d/arbeit/iguana/src/main/resources/default.iprof
-                                -march=native
+                                -march=x86-64-v3
+                                -O2
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
