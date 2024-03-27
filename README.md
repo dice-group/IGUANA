@@ -18,14 +18,14 @@ Results are stored in RDF-files and can also be exported as CSV-files.
 - Calculation of various metrics for better comparisons
 - Processing of HTTP responses (e.g., results counting)
 
-## Usage
+## Setup
 
 ### Prerequisites
 You need to have `Java 17` or higher installed.
 On Ubuntu it can be installed by executing the following command:
 
 ```bash
-sudo apt install java
+sudo apt install openjdk-17-jre
 ``` 
 
 ### Download
@@ -37,11 +37,11 @@ The zip file contains three files:
 * `start-iguana.sh`
 
 ### Configuration
-The `example-suite.yml` file contains a basic configuration for a benchmark suite.
+The `example-suite.yml` file contains an extensive configuration for a benchmark suite.
 It can be used as a starting point for your own benchmark suite.
-For a detailed explanation of the configuration, see the [configuration](docs_new/configuration/overview.md) documentation.
+For a detailed explanation of the configuration, see the [configuration](./configuration/overview.md) documentation.
 
-### Run Iguana
+## Usage
 Start Iguana with a benchmark suite (e.g., the `example-suite.yml`) either by using the start script:
 
 ```bash
@@ -60,15 +60,6 @@ For example, to let Iguana use 4GB of RAM you can set `IGUANA_JVM` as follows:
 ```bash
 export IGUANA_JVM=-Xmx4g
 ```
-
-### Configuration
-The provided `example-suite.yml` file contains an extensive configuration for a benchmark suite.
-For further information,
-please visit our [configuration](http://iguana-benchmark.eu/docs/3.2/usage/configuration/) and [Stresstest](http://iguana-benchmark.eu/docs/3.0/usage/stresstest/) wiki pages.
-
-
-
-For a detailed, step-by-step instruction through a benchmarking example, please visit our [tutorial](http://iguana-benchmark.eu/docs/3.2/usage/tutorial/).
 
 # How to Cite
 

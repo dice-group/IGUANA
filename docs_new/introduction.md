@@ -31,7 +31,7 @@ The zip file contains three files:
 * `start-iguana.sh`
 
 ### Configuration
-The `example-suite.yml` file contains a basic configuration for a benchmark suite.
+The `example-suite.yml` file contains an extensive configuration for a benchmark suite.
 It can be used as a starting point for your own benchmark suite.
 For a detailed explanation of the configuration, see the [configuration](./configuration/overview.md) documentation.
 
