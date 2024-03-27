@@ -1,3 +1,5 @@
+# This file showcases the configuration of most IGUANA features.
+
 datasets:
   - name: "DatasetName"
     file: "src/test/resources/dataset.txt"
