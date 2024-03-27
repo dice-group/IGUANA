@@ -285,10 +285,11 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <imageName>iguana-${revision}</imageName>
                             <buildArgs>
                                 --gc=G1
                                 -march=x86-64-v3
-                                -O2
+                                -O3
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
