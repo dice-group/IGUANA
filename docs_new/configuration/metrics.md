@@ -1,14 +1,13 @@
 # Metrics
 
 Metrics are used to measure and compare the performance of the system during the stresstest.
-They are divided into Task metrics, Worker metrics, and Query metrics.
+They are divided into task metrics, worker metrics, and query metrics.
 
 Task metrics are calculated for every query execution across the whole task.
 Worker metrics are calculated for every query execution of one worker.
 Query metrics are calculated for every execution of one query across one worker and across every worker.
 
-The differences between the task, worker and query metrics will be more apparent with the
-exploratory explanation for the rdf results [here](./rdf_results.md).
+For a detailed description how results for tasks, workers and queries are reported in the RDF result file, please refer to the section (RDF results](rdf_results.md).
 
 ## Configuration
 

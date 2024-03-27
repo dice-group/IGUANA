@@ -82,7 +82,7 @@ similar to the rdf file storage.
 
 It has the following properties:
 
-- `endpoint`: The endpoint of the triplestore.
+- `endpoint`: The update endpoint of the triplestore.
 - `username`: The username for the authentication of the triplestore.
 - `password`: The password for the authentication of the triplestore.
 

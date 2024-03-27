@@ -2,8 +2,7 @@
 
 ## Structure
 
-The configuration file for a benchmark suite can either be `yaml`-file or a `json`-file. 
-We would recommend creating the configuration with a `yaml`-file as it is more human-readable and easier to write.
+The configuration file for a benchmark suite can either be `yaml`-file or a `json`-file. YAML is recommended and all examples will be presented as YAML. 
 
 The configuration file consists of the following six sections:
 - [Datasets](#Datasets)

@@ -10,11 +10,11 @@ It is mostly designed for benchmarking triplestores by using the SPARQL protocol
 Iguana stresstests endpoints by simulating users which send a set of queries independently of each other.
 
 Benchmarks are configured using a YAML-file, this allows them to be easily repeated and adjustable.
-Results are stored in RDF-files or in easier to read CSV-files.
+Results are stored in RDF-files and can also be exported as CSV-files.
 
 ## Features
 - Benchmarking of (SPARQL) HTTP endpoints
-- Easy configuration
+- Reusable configuration
 - Calculation of various metrics for better comparisons
 - Processing of HTTP responses (e.g., results counting)
 
