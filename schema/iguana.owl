@@ -104,7 +104,7 @@
     </owl:Class>
 
     <owl:Class rdf:about="&iont;metric/AvgQPS">
-	    <rdfs:label>Average QPS Metric</rdfs:label>
+	    <rdfs:label>AvgQPS Metric</rdfs:label>
 	    <rdfs:comment xml:lang="en">Average Queries Per Second.</rdfs:comment>
         <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
@@ -116,25 +116,25 @@
     </owl:Class>
 
     <owl:Class rdf:about="&iont;metric/AES">
-        <rdfs:label>NoQ Metric</rdfs:label>
+        <rdfs:label>AES Metric</rdfs:label>
         <rdfs:comment xml:lang="en">Aggregated Execution Statistics.</rdfs:comment>
         <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
 
     <owl:Class rdf:about="&iont;metric/EachQuery">
-        <rdfs:label>NoQ Metric</rdfs:label>
+        <rdfs:label>EachQuery Metric</rdfs:label>
         <rdfs:comment xml:lang="en">Each query execution statistics.</rdfs:comment>
         <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
 
     <owl:Class rdf:about="&iont;metric/PQPS">
-        <rdfs:label>NoQ Metric</rdfs:label>
+        <rdfs:label>PQPS Metric</rdfs:label>
         <rdfs:comment xml:lang="en">Penalized Queries Per Second.</rdfs:comment>
         <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
 
     <owl:Class rdf:about="&iont;metric/PAvgQPS">
-        <rdfs:label>NoQ Metric</rdfs:label>
+        <rdfs:label>PAvgQPS Metric</rdfs:label>
         <rdfs:comment xml:lang="en">Penalized Average Queries Per Second.</rdfs:comment>
         <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
