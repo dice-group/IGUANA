@@ -12,14 +12,14 @@ Results are stored in RDF-files or in easier to read CSV-files.
 - Calculation of various metrics for better comparisons
 - Processing of HTTP responses (e.g., results counting)
 
-## Usage
+## Setup
 
 ### Prerequisites
 You need to have `Java 17` or higher installed.
 On Ubuntu it can be installed by executing the following command:
 
 ```bash
-sudo apt install java
+sudo apt install openjdk-17-jre
 ``` 
 
 ### Download
@@ -35,7 +35,7 @@ The `example-suite.yml` file contains a basic configuration for a benchmark suit
 It can be used as a starting point for your own benchmark suite.
 For a detailed explanation of the configuration, see the [configuration](./configuration/overview.md) documentation.
 
-### Run Iguana
+## Usage
 
 Start Iguana with a benchmark suite (e.g., the `example-suite.yml`) either by using the start script:
 
