@@ -53,6 +53,7 @@ public class Stresstest implements Task {
             }
         }
 
+        workerId = 0;
         for (HttpWorker.Config workerConfig : config.workers()) {
             for (int i = 0; i < workerConfig.number(); i++) {
                 var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;

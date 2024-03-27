@@ -1,9 +1,9 @@
 package org.aksw.iguana.cc.controller;
 
+import ch.qos.logback.classic.Level;
 import com.beust.jcommander.*;
 import org.aksw.iguana.cc.suite.IguanaSuiteParser;
 import org.aksw.iguana.cc.suite.Suite;
-import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,9 @@ public class MainController {
     public static void main(String[] argc) {
         // Apparently, there is something weird going on, where the apache jena library already configures log4j2 for
         // some reason. That's why you have to call reconfigure here.
-        Configurator.reconfigure(URI.create("log4j2.yml"));
+        // Configurator.reconfigure(URI.create("log4j2.yml"));
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.INFO);
 
         var args = new Args();
         JCommander jc = JCommander.newBuilder()

@@ -17,6 +17,8 @@ import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.StringWriter;
 
@@ -28,6 +30,8 @@ import java.io.StringWriter;
  *
  */
 public class TriplestoreStorage implements Storage {
+
+	Logger logger = LoggerFactory.getLogger(TriplestoreStorage.class);
 
 	public record Config(
 			@JsonProperty(required = true) String endpoint,
@@ -75,7 +79,11 @@ public class TriplestoreStorage implements Storage {
 		//submit Block to Triple Store
 		UpdateProcessor processor = UpdateExecutionFactory
 				.createRemote(blockRequest, endpoint, createHttpClient());
-		processor.execute();
+		try {
+			processor.execute();
+		} catch (Exception e) {
+			logger.error("Error while storing data in triplestore: " + e.getMessage());
+		}
 		blockRequest = new UpdateRequest();
 	}
 
