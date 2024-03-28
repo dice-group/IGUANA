@@ -7,7 +7,7 @@ Task metrics are calculated for every query execution across the whole task.
 Worker metrics are calculated for every query execution of one worker.
 Query metrics are calculated for every execution of one query across one worker and across every worker.
 
-For a detailed description how results for tasks, workers and queries are reported in the RDF result file, please refer to the section (RDF results](rdf_results.md).
+For a detailed description of how results for tasks, workers and queries are reported in the RDF result file, please refer to the section [RDF results](rdf_results.md).
 
 ## Configuration
 
@@ -38,77 +38,21 @@ metrics:
 
 ## Available metrics
 
-The following metric types are available:
-- `QPS`
-- `AvgQPS`
-- `NoQ`
-- `QMPH`
-- `NoQPH`
-- `PQPS`
-- `PAvgQPS`
-- `AES`
-- `EachQuery`
-
-### QPS
-Queries per second.
-
-The number of successfully executed queries per second.
-This metric is calculated for each query.
-It is calculated by dividing the number of successfully executed queries 
-by the sum of time (in seconds) it took to execute them.
-
-### AvgQPS
-Average queries per second. 
-
-The average number of queries executed per second.
-This metric is calculated for each worker and for the whole task.
-It is calculated by dividing the sum of the QPS values of every query the task or worker 
-has by the number of queries.
-
-### NoQ
-Number of queries.
-
-The number of successfully executed queries.
-This metrics is calculated for each worker and for the whole task.
-
-### NoQPH
-Number of queries per hour.
-
-The number of successfully executed queries per hour.
-This metric is calculated for each worker and for the whole task.
-It is calculated by dividing the number of successfully executed queries
-by their sum of time (in hours) it took to execute them.
-The metric value for the task is the sum of the metric for each worker.
-
-### PQPS
-Penalized queries per second.
-
-The number of queries executed per second, penalized by the number of failed queries.
-This metric is calculated for each query.
-It is calculated by dividing the number of successful and failed query executions 
-by their sum of time (in seconds) it took to execute them. 
-If a query fails, the time it took to execute it is set to the given `penalty` value.
-
-### PAvgQPS
-Penalized average queries per second.
-
-The average number of queries executed per second, penalized by the number of failed queries.
-This metric is calculated for each worker and for the whole task.
-It is calculated by dividing the sum of the PQPS of each query the task or worker
-has executed by the number of queries.
-
-### QMPH
-Query mixes per hour.
-
-The number of query mixes executed per hour.
-A query mix is the set of queries executed by a worker, or the whole task.
-This metric is calculated for each worker and for the whole task.
-It is calculated by dividing the number of successfully executed queries by the number of queries inside the query mix
-and by their sum of time (in hours) it took to execute them.
+| Name                                 | Configuration type | Additional parameters       | Scope        | Description                                                                                                                                                                                                                                                                                                                                                                   |
+|--------------------------------------|--------------------|-----------------------------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Queries per second                   | `QPS`              |                             | query        | The number of successfully executed queries per second. It is calculated by dividing the number of successfully executed queries                                                                                                                                                                                                                                              |
+| Average queries per second           | `AvgQPS`           |                             | task, worker | The average number of queries successfully executed per second. It is calculated by dividing the sum of the QPS values of every query the task or worker has by the number of queries.                                                                                                                                                                                        |
+| Number of queries                    | `NoQ`              |                             | task, worker | The number of successfully executed queries. This metric is calculated for each worker and for the whole task.                                                                                                                                                                                                                                                                |
+| Number of queries per hour           | `NoQPH`            |                             | task, worker | The number of successfully executed queries per hour. It is calculated by dividing the number of successfully executed queries by their sum of time (in hours) it took to execute them. The metric value for the task is the sum of the metric for each worker.                                                                                                               |
+| Query mixes per hour                 | `QMPH`             |                             | task, worker | The number of query mixes executed per hour. A query mix is the set of queries executed by a worker, or the whole task. This metric is calculated for each worker and for the whole task. It is calculated by dividing the number of successfully executed queries by the number of queries inside the query mix and by their sum of time (in hours) it took to execute them. |
+| Penalized queries per second         | `PQPS`             | `penalty` (in milliseconds) | query        | The number of queries executed per second, penalized by the number of failed queries. It is calculated by dividing the number of successful and failed query executions by their sum of time (in seconds) it took to execute them. If a query fails, the time it took to execute it is set to the given `penalty` value.                                                      |
+| Penalized average queries per second | `PAvgQPS`          | `penalty` (in milliseconds) | task, worker | The average number of queries executed per second, penalized by the number of failed queries. It is calculated by dividing the sum of the PQPS of each query the task or worker has executed by the number of queries.                                                                                                                                                        |
+| Aggregated execution statistics      | `AES`              |                             | task, worker | _see below_                                                                                                                                                                                                                                                                                                                                                                   |
+| Each execution statistic             | `EachQuery`        |                             | query        | _see below_                                                                                                                                                                                                                                                                                                                                                                   |
 
 ## Other metrics
 
-### AES (Aggregated Execution Statistics)
+### Aggregated Execution Statistics (AES)
 This metric collects for each query that belongs to a worker or a task a number of statistics
 that are aggregated for each execution.
 
@@ -124,17 +68,17 @@ that are aggregated for each execution.
 
 The `resultSize` is the size of the HTTP response in bytes and is an exception to the aggregation.
 
-### EachQuery (Each Execution Statistic)
+### Each Execution Statistic (EachQuery)
 This metric collects statistics for each execution of a query. 
 
-| Name           | Description                                                                                                    |
-|----------------|----------------------------------------------------------------------------------------------------------------|
-| `run`          | The number of the execution.                                                                                   |
-| `startTime`    | The time stamp where the execution started.                                                                    |
-| `time`         | The time it took to execute the query.                                                                         |
-| `success`      | If the execution was successful.                                                                               |
-| `code`         | Numerical value of the end state of the execution.<br/> (success=0, timeout=110, http_error=111, exception=1)  |
-| `resultSize`   | The size of the HTTP response.                                                                                 |
-| `exception`    | The exception that occurred during execution. (if any occurred)                                                |
-| `httpCode`     | The HTTP status code received. (if any was received)                                                           |
-| `responseBody` | The hash of the HTTP response body. <br/>(only if `parseResults` inside the stresstest has been set to `true`) |
+| Name           | Description                                                                                               |
+|----------------|-----------------------------------------------------------------------------------------------------------|
+| `run`          | The number of the execution.                                                                              |
+| `startTime`    | The time stamp where the execution started.                                                               |
+| `time`         | The time it took to execute the query.                                                                    |
+| `success`      | If the execution was successful.                                                                          |
+| `code`         | Numerical value of the end state of the execution. (success=0, timeout=110, http_error=111, exception=1)  |
+| `resultSize`   | The size of the HTTP response.                                                                            |
+| `exception`    | The exception that occurred during execution. (if any occurred)                                           |
+| `httpCode`     | The HTTP status code received. (if any was received)                                                      |
+| `responseBody` | The hash of the HTTP response body. (only if `parseResults` inside the stresstest has been set to `true`) |
