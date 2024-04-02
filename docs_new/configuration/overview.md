@@ -49,7 +49,7 @@ metrics:
   - # ...
 ```
 
-The order of the sections is not important.
+## Durations
 
 Durations are used to define time spans in the configuration.
 They can be used for the `timeout`-property of the workers or for the `completionTarget`-property of the tasks.
