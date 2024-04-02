@@ -243,9 +243,9 @@ public class IguanaSuiteParser {
      */
     private static Map<String, DatasetConfig> preparseDataset(ObjectMapper mapper, String input) throws JsonProcessingException {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        record PreparsingDatasets(@JsonProperty(required = true) List<DatasetConfig> datasets) {}
+        record PreparsingDatasets(@JsonProperty(required = false) List<DatasetConfig> datasets) {}
         final var preparsingDatasets = mapper.readValue(input, PreparsingDatasets.class);
-
+        if (preparsingDatasets.datasets() == null) return new HashMap<>();
         return preparsingDatasets.datasets().stream().collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
     }
 

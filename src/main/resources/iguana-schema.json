@@ -11,8 +11,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/Dataset"
-          },
-          "minItems": 1
+          }
         },
         "connections": {
           "type": "array",
@@ -50,7 +49,6 @@
       },
       "required": [
         "connections",
-        "datasets",
         "storages",
         "tasks"
       ]
