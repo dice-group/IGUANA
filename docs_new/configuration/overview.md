@@ -1,8 +1,59 @@
 # Configuration
 
-## Structure
+The configuration file for a benchmark suite can either be `.yaml`-file or a `.json`-file.
+YAML is recommended and all examples will be presented as YAML. 
 
-The configuration file for a benchmark suite can either be `yaml`-file or a `json`-file. YAML is recommended and all examples will be presented as YAML. 
+## Example
+The following example shows a basic configuration for a benchmark suite as an introduction.
+
+```yaml
+connections:
+  - name: "fuseki"
+    endpoint: "http://localhost:3030/sparql"
+
+tasks:
+  - type: "stresstest"                                  # stresstest the endpoint
+    workers:
+    - type: "SPARQLProtocolWorker"                      # this worker type sends SPARQL queries over HTTP with the SPARQL protocol
+      number: 2                                         # generate 2 workers with the same configuration
+      connection: "fuseki"                              # the endpoint to which the workers are sending the queries to
+      queries:
+        path: "./example/suite/queries.txt"             # the file with the queries
+        format: "one-per-line"                          # the format of the queries
+      completionTarget:
+        number: 1                                       # each worker stops after executing all queries once
+      timeout: "3 min"                                  # a query will time out after 3 minutes
+      acceptHeader: "application/sparql-results+json"   # the expected content type of the HTTP response (HTTP Accept header)
+      parseResults: false
+    
+# calculate queries per second only for successful queries and the queries per second with a penalty for failed queries
+metrics:
+  - type: "PQPS"
+    penalty: 180000   # in milliseconds (3 minutes)
+  - type: "QPS"
+      
+# store the results in an n-triples file and in CSV files
+storages:
+  - type: "rdf file"             
+    path: "./results/result.nt"
+  - type: "csv file"
+    directory: "./results/"
+```
+
+This configuration defines a benchmark suite that stresstests a triplestore with two workers.
+
+The triplestore is named `fuseki` and is located at `http://localhost:3030/sparql`.
+During the stresstest the workers will send SPARQL queries
+that are located in the file `./example/suite/queries.txt` to the triplestore.
+They will stop after they have executed all queries once, which is defined by the `completionTarget`-property.
+
+After the queries have been executed, two metrics are calculated based on the results.
+The first metric is the `PQPS`-metric, which calculates the queries per second with a penalty for failed queries.
+The second metric is the `QPS`-metric, which calculates the queries per second only for successful queries.
+
+The results are stored in an RDF file at `./results/result.nt` and in CSV files in the directory `./results/`.
+
+## Structure
 
 The configuration file consists of the following six sections:
 - [Datasets](#Datasets)
@@ -14,6 +65,7 @@ The configuration file consists of the following six sections:
 
 Each section holds an array of their respective items.
 Each item type will be defined further in this documentation.
+The order of the sections is not important.
 The general structure of a suite configuration may look like this:
 
 ```yaml
