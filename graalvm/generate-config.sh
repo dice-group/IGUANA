@@ -24,6 +24,10 @@ while getopts ":hs:" opt; do
   esac
 done
 
+if [ ! -f ./target/iguana-4.0.0.jar ]; then
+  mvn -DskipTests package
+fi
+
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-output-dir=./src/main/resources/META-INF/native-image -jar ./target/iguana-4.0.0.jar --help      > /dev/null
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=./src/main/resources/META-INF/native-image -jar ./target/iguana-4.0.0.jar -is "$SUITE" > /dev/null
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=./src/main/resources/META-INF/native-image -jar ./target/iguana-4.0.0.jar "$SUITE"     > /dev/null
