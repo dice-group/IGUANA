@@ -7,7 +7,7 @@ on:
 
 jobs:
   find_version:
-    name: Find IGUANA version number
+    name: Find IGUANA version
     runs-on: ubuntu-latest
     outputs:
       iguana_version: ${{ steps.step_find.outputs.iguana_version }}
@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: 'iguana-jar'
-          path: 'target/iguana-${{ needs.find_version.outputs.iguana_version }}.jar'
+          path: 'target/'
 
   compile_native:
     name: Compile Native executable
