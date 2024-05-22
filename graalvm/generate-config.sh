@@ -5,13 +5,13 @@ if [ -z "$GRAALVM_HOME" ]; then
   exit 1
 fi
 
-SUITE=./graal-config/suite.yml
+SUITE=./graalvm/suite.yml
 while getopts ":hs:" opt; do
   case ${opt} in
     h)
       echo "Usage: $0 [-h] [-s <SUITE>]"
       echo "  -h:         Display this help message."
-      echo "  -s <SUITE>: The path to the suite.yml file. Default: ./graal-config/suite.yml"
+      echo "  -s <SUITE>: The path to the suite.yml file. Default: ./graalvm/suite.yml"
       exit 0
       ;;
     s)
@@ -32,4 +32,4 @@ done
 sed 's/\\\\E//g' ./src/main/resources/META-INF/native-image/resource-config.json | sed 's/\\\\//g' > ./src/main/resources/META-INF/native-image/resource-config.json.tmp
 mv ./src/main/resources/META-INF/native-image/resource-config.json.tmp ./src/main/resources/META-INF/native-image/resource-config.json
 
-rm -r ./graal-config/results/
+rm -r ./graalvm/results/

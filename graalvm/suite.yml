@@ -17,9 +17,9 @@ connections:
 
 storages:
   - type: "rdf file"
-    path: "graal-config/results/some.ttl"
+    path: "graalvm/results/some.ttl"
   - type: "csv file"
-    directory: "graal-config/results/"
+    directory: "graalvm/results/"
   - type: "triplestore"
     endpoint: "http://localhost:9999/blazegraph/sparql"
     user: "user"
@@ -52,7 +52,7 @@ tasks:
       - type: SPARQLProtocolWorker
         number: 1
         queries:
-          path: "./graal-config/queries.txt"
+          path: "./graalvm/queries.txt"
           format: "separator"
           separator: ";"
           caching: true
@@ -70,7 +70,7 @@ tasks:
       - type: "SPARQLProtocolWorker"
         number: 1
         queries:
-          path: "./graal-config/queries.txt"
+          path: "./graalvm/queries.txt"
         timeout: 3m
         connection: Blazegraph
         completionTarget:
@@ -83,6 +83,6 @@ tasks:
         completionTarget:
           number: 1
         queries:
-          path: "./graal-config/queries.txt"
+          path: "./graalvm/queries.txt"
         timeout: 100s
         acceptHeader: "application/sparql-results+json"
