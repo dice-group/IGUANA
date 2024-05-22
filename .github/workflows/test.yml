@@ -17,9 +17,9 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: 'maven'
-      - name: 'Compile jar.'
+      - name: 'Compile jar'
         run: 'mvn -DskipTests package'
-      - name: 'Upload artifact.'
+      - name: 'Upload artifact'
         uses: actions/upload-artifact@v4
         with:
           name: 'iguana-jar'
@@ -36,11 +36,11 @@ jobs:
         with:
           java-version: '21'
           cache: 'maven'
-      - name: 'Generate configuration files.'
+      - name: 'Generate configuration files'
         run: './graalvm/generate-config.sh'
-      - name: 'Compile native-binary.'
+      - name: 'Compile native-binary'
         run: 'mvn -DskipTests package -Pnative'
-      - name: 'Upload artifact.'
+      - name: 'Upload artifact'
         uses: actions/upload-artifact@v4
         with:
           name: 'iguana-jar'
