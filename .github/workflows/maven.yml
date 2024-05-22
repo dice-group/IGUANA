@@ -11,6 +11,7 @@ on:
       
 jobs:
   tests:
+    name: Compile and Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
