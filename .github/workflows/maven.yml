@@ -10,7 +10,7 @@ on:
       - main
       
 jobs:
-  deploy:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -26,4 +26,22 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Testing the Java code
-        run:  mvn install
+        run:  mvn package
+
+  # Only run for pull request on main or if pushed to develop
+  compile_native:
+    if: github.base_ref == "main" || github.event_name == "push"
+    name: Test Native Executable Compilation
+    runs-on: ubuntu-latest
+    needs: find_version
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          cache: 'maven'
+      - name: 'Generate configuration files'
+        run: './graalvm/generate-config.sh'
+      - name: 'Compile native-binary'
+        run: 'mvn -DskipTests package -Pnative'
