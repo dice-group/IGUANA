@@ -30,7 +30,7 @@ jobs:
 
   # Only run for pull request on main or if pushed to develop
   compile_native:
-    if: github.base_ref == "main" || github.event_name == "push"
+    if: github.base_ref == 'main' || github.event_name == 'push'
     name: Test Native Executable Compilation
     runs-on: ubuntu-latest
     needs: find_version
