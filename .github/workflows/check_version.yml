@@ -1,5 +1,4 @@
-# Check if version number has been updated 
-
+# Checks if version number has been updated 
 name: Version Check
 on: pull_request
 
