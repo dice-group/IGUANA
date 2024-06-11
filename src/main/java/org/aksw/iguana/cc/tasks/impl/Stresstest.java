@@ -43,8 +43,8 @@ public class Stresstest implements Task {
     public Stresstest(String suiteID, long stresstestID, Config config, ResponseBodyProcessorInstances responseBodyProcessorInstances, List<Storage> storages, List<Metric> metrics) {
 
         // initialize workers
-        long workerId = 0;
         if (config.warmupWorkers() != null) {
+            long workerId = 0;
             for (HttpWorker.Config workerConfig : config.warmupWorkers()) {
                 for (int i = 0; i < workerConfig.number(); i++) {
                     var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
@@ -53,8 +53,8 @@ public class Stresstest implements Task {
             }
         }
 
-        workerId = 0;
         for (HttpWorker.Config workerConfig : config.workers()) {
+            long workerId = 0;
             for (int i = 0; i < workerConfig.number(); i++) {
                 var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
                 workers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
