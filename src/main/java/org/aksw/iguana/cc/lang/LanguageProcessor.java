@@ -16,6 +16,9 @@ import java.util.Map;
 
 /**
  * Interface for abstract language processors that work on InputStreams.
+ * LanguageProcessors are used to process the content of an InputStream and extract relevant information.
+ * They are used by the Worker to process the response of a request. <br>
+ * LanguageProcessors must be registered in the static block of this class.
  */
 public abstract class LanguageProcessor {
 
@@ -39,6 +42,7 @@ public abstract class LanguageProcessor {
 
     final private static Logger LOGGER = LoggerFactory.getLogger(LanguageProcessor.class);
 
+    // Register all available LanguageProcessors here.
     static {
         processors.put("application/sparql-results+json", org.aksw.iguana.cc.lang.impl.SaxSparqlJsonResultCountingParser.class);
     }
