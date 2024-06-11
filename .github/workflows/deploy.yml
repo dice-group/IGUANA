@@ -81,6 +81,8 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: 'maven'
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
           python-version: 3.x
           cache: 'pip'
