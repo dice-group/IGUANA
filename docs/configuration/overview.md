@@ -104,7 +104,7 @@ metrics:
 ## Durations
 
 Durations are used to define time spans in the configuration.
-They can be used for the `timeout`-property of the workers or for the `completionTarget`-property of the tasks.
+They can be used for the `timeout`-property of the workers or the response body processors or for the `completionTarget`-property of the tasks.
 Duration values can be defined as a XSD duration string or as a string with a number and a unit.
 The following units are supported:
 - `s` or `sec`or `secs` for seconds

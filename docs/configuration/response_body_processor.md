@@ -18,7 +18,8 @@ To use a response body processor, it needs to be defined in the configuration fi
 in the `responseBodyProcessors` list.
 
 ## Properties
-| property    | required | description                                                                        | example                             |
-|-------------|----------|------------------------------------------------------------------------------------|-------------------------------------|
-| contentType | yes      | The content type of the response body.                                             | `"application/sparql-results+json"` |
-| threads     | no       | The number of threads that are used to process the response bodies. (default is 1) | `2`                                 |
+| property    | required | description                                                                                                        | example                             |
+|-------------|----------|--------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| contentType | yes      | The content type of the response body.                                                                             | `"application/sparql-results+json"` |
+| threads     | no       | The number of threads that are used to process the response bodies. (default is 1)                                 | `2`                                 |
+| timeout     | no       | The maximum duration that the response body processor can take to process a response body. (default is 10 minutes) | `10s`                               |
