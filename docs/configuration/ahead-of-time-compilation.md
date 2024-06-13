@@ -15,8 +15,8 @@ To compile IGUANA with GraalVM, you need to have [GraalVM](https://www.graalvm.o
 The `native-image` tool also requires some additional libraries to be installed on your system.
 The further prerequisites can be found [here](https://www.graalvm.org/latest/reference-manual/native-image/#prerequisites).
 
-The default target architecture for the native binary is `x86-64-v3`. 
-This and other settings can be adjusted in the `pom.xml` file of this project.
+The default target architecture for the native binary is `x86-64-v3` (Intel Haswell and AMD Excavator or newer).
+This and other settings can be adjusted in the `pom.xml` file.
 
 ## Compilation
 
