@@ -20,7 +20,7 @@ Results are stored in RDF-files and can also be exported as CSV-files.
 
 ### Prerequisites
 
-If you're using the native version of IGUANA, you need to have at least a `x86-64-v3` system that is running Linux.
+If you're using the native version of IGUANA, you need to have at least a `x86-64-v3` (Intel Haswell and AMD Excavator or newer) system that is running Linux.
 
 If you're using the Java version of IGUANA, you need to have `Java 17` or higher installed.
 On Ubuntu it can be installed by executing the following command:
