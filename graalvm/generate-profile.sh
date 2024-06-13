@@ -40,7 +40,7 @@ if [ -z "$SUITE" ]; then
 fi
 
 # Instrument the application
-"$GRAALVM_HOME"/bin/native-image --pgo-instrument $ARGUMENTS -jar ./target/iguana-4.0.0.jar -o "./target/iguana-4.0.0-instrumented"
+"$GRAALVM_HOME"/bin/native-image --pgo-instrument "$ARGUMENTS" -jar ./target/iguana.jar -o "./target/iguana-4.0.0-instrumented"
 if [ $? -ne 0 ]; then
   echo "Error while instrumenting the application."
   exit 1
@@ -54,7 +54,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Compile the application with the profile
-"$GRAALVM_HOME"/bin/native-image --pgo=custom.iprof $ARGUMENTS -jar ./target/iguana-4.0.0.jar -o "./target/iguana-4.0.0-pgo"
+"$GRAALVM_HOME"/bin/native-image --pgo=custom.iprof "$ARGUMENTS" -jar ./target/iguana.jar -o "./target/iguana-4.0.0-pgo"
 if [ $? -ne 0 ]; then
   echo "Error while compiling the application."
   exit 1
