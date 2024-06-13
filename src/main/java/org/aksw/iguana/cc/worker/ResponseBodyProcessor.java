@@ -14,10 +14,11 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class ResponseBodyProcessor {
-    public record Config(String contentType, Integer threads) {
-        public Config(String contentType, Integer threads) {
+    public record Config(String contentType, Integer threads, Duration timeout) {
+        public Config(String contentType, Integer threads, Duration timeout) {
             this.contentType = contentType;
             this.threads = threads == null ? 1 : threads;
+            this.timeout = timeout == null ? Duration.ofMinutes(10) : timeout;
         }
     }
 
@@ -26,13 +27,16 @@ public class ResponseBodyProcessor {
     public ResponseBodyProcessor(Config config) {
         this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(config.threads == null ? 1 : config.threads);
         this.languageProcessor = LanguageProcessor.getInstance(config.contentType);
+        this.timeout = config.timeout;
     }
 
     public ResponseBodyProcessor(String contentType) {
-        this(new Config(contentType, null));
+        this(new Config(contentType, null, null));
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseBodyProcessor.class);
+
+    private final Duration timeout;
 
     private final ConcurrentHashMap.KeySetView<Key, Boolean> seenResponseBodies = ConcurrentHashMap.newKeySet();
 
@@ -40,6 +44,7 @@ public class ResponseBodyProcessor {
     private final LanguageProcessor languageProcessor;
 
     private final ThreadPoolExecutor executor;
+    private final ScheduledExecutorService executorHandler = Executors.newScheduledThreadPool(1);
 
     public boolean add(long contentLength, long xxh64, BigByteArrayOutputStream bbaos) {
         final var key = new Key(contentLength, xxh64);
@@ -51,10 +56,16 @@ public class ResponseBodyProcessor {
     }
 
     private void submit(Key key, BigByteArrayOutputStream bigByteArrayOutputStream) {
-        executor.execute(() -> {
+        final var future = executor.submit(() -> {
             var processingResult = languageProcessor.process(new BigByteArrayInputStream(bigByteArrayOutputStream), key.xxh64);
             responseDataMetrics.add(processingResult);
         });
+        executorHandler.schedule(() -> {
+            if (!future.isDone()) {
+                future.cancel(true);
+                LOGGER.warn("ResponseBodyProcessor timed out for key: {}", key);
+            }
+        }, timeout.toSeconds(), TimeUnit.SECONDS);
     }
 
     public List<LanguageProcessor.LanguageProcessingData> getResponseDataMetrics() {
@@ -62,12 +73,11 @@ public class ResponseBodyProcessor {
             return responseDataMetrics;
         }
 
-        final var timeout = Duration.ofMinutes(10);
-        LOGGER.info(MessageFormat.format("Shutting down ResponseBodyProcessor with {0}min timeout to finish processing. {1} tasks remaining.", timeout.toMinutes(), executor.getQueue().size()));
+        LOGGER.info(MessageFormat.format("Shutting down ResponseBodyProcessor with {0} min timeout to finish processing. {1} tasks remaining.", timeout.toMinutes() + "." + (timeout.toSecondsPart() / (double) 60), executor.getQueue().size()));
         boolean noTimeout;
         try {
             executor.shutdown();
-            noTimeout = executor.awaitTermination(10, TimeUnit.MINUTES);
+            noTimeout = executor.awaitTermination(timeout.toSeconds(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

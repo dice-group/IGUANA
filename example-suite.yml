@@ -1,82 +1,108 @@
+# This file showcases the configuration of most IGUANA features.
+
+# Datasets are optional and have no functionality.
 datasets:
   - name: "DatasetName"
-    #optional, will just be set in the pre & post script hooks by using {{dataset.file}}
     file: "src/test/resources/dataset.txt"
+
+# Connections that will be used by the workers for the benchmark.
 connections:
   - name: "Virtuoso7"
-    user: "dba"
-    password: "dba"
+    authentication:
+      user: "dba"
+      password: "dba"
     endpoint: "http://localhost:8890/sparql"
-    dataset: DatasetName
+    dataset: "DatasetName" # optional
   - name: "Virtuoso6"
-    user: "dba"
-    password: "dba"
+    authentication:
+      user: "dba"
+      password: "dba"
     endpoint: "http://localhost:8891/sparql"
   - name: "Blazegraph"
     endpoint: "http://localhost:9999/blazegraph/sparql"
-  - name: "Fuseki"
-    user: "test"
-    endpoint: "http://127.0.0.1:3030/ds/sparql"
+    authentication:
+      user: "user"
+      password: "test"
     updateEndpoint: "http://localhost:3030/ds/update"
+    updateAuthentication:
+      user: "updateUser"
+      password: "password"
 
+# The tasks that will be executed by the benchmark. They will be executed in the order they are defined.
 tasks:
-  # 1 hour (time Limit is in ms)
-  - type: stresstest
-    warmupWorkers:
-      # 1 minutes (is in ms)
+  - type: stresstest # Stresstests are used to test the performance of the system by sending a large number of requests.
+    warmupWorkers:   # Warmup workers are used to warm up the system before the actual stresstest.
     - type: SPARQLProtocolWorker
-      number: 16
+      requestType: post update    # Send POST requests with application/sparql-update content type to the endpoint.
+      number: 16                  # Initialize 16 workers with the same configuration.
       queries:
-        path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+        path: "./example/queries"
+        format: "folder"          # Queries are stored in a folder.
+        order: "linear"
       timeout: 0.02s
       connection: Virtuoso7
+      parseResults: false
       completionTarget:
-        duration: 1000s
+        number: 50                # Execute each query 50 times.
     workers:
       - type: "SPARQLProtocolWorker"
         number: 16
         queries:
-          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+          path: "./example/queries.txt"
+          order: "random"
+          seed: 42
         timeout: 3m
         connection: Virtuoso7
+        parseResults: false
         completionTarget:
-          duration: 1000s
-        requestType: get query
+          duration: 1000s         # Execute the queries for 1000 seconds.
+        requestType: post url-enc query   # Send url-encoded POST request to endpoint.
       - number: 4
         type: "SPARQLProtocolWorker"
         connection: Virtuoso7
+        requestType: post url-enc update
         completionTarget:
           duration: 1000s
         queries:
-          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+          path: "./example/queries.txt"
         timeout: 100s
-        acceptHeader: "application/sparql-results+json"
+        acceptHeader: "application/sparql-results+json" # Accept header for the request.
   - type: stresstest
     workers:
       - type: "SPARQLProtocolWorker"
         connection: Virtuoso7
         number: 16
-        requestType: get query
+        requestType: post query
         queries:
-          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+          path: "./example/queries.txt"
         timeout: 180s
         completionTarget:
           duration: 1000s
+        parseResults: false
       - number: 4
-        requestType: get query
+        requestType: get query  # Send GET request with the query as the parameter to the endpoint.
         connection: Virtuoso7
         completionTarget:
           duration: 1000s
         type: "SPARQLProtocolWorker"
         queries:
-          path: "/home/bigerl/IdeaProjects/IGUANA/LICENSE"
+          path: "./example/queries.txt"
         timeout: 100s
         parseResults: true
         acceptHeader: "application/sparql-results+json"
 
-#optional otherwise an nt file will be used
+# Define how the results will be stored.
 storages:
-  - type: "RDF file"
+  - type: "rdf file"
     path: "some.ttl"
-    #configuration:
-      #fileName: YOUR_RESULT_FILE_NAME.nt
+  - type: "csv file"
+    directory: "results/"
+  - type: "triplestore"
+    username: "dba"
+    password: "dba"
+    endpoint: "http://localhost:8890/update"
+
+responseBodyProcessors:
+  - contentType: "application/sparql-results+json"
+    threads: 1
+    timeout: 1 min
