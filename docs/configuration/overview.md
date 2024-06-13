@@ -7,9 +7,13 @@ YAML is recommended and all examples will be presented as YAML.
 The following example shows a basic configuration for a benchmark suite as an introduction.
 
 ```yaml
+dataset:
+  - name: "sp2b"                                        # for documentation purposes
+    
 connections:
   - name: "fuseki"
     endpoint: "http://localhost:3030/sparql"
+    dataset: "sp2b"
 
 tasks:
   - type: "stresstest"                                  # stresstest the endpoint
@@ -43,6 +47,7 @@ storages:
 This configuration defines a benchmark suite that stresstests a triplestore with two workers.
 
 The triplestore is named `fuseki` and is located at `http://localhost:3030/sparql`.
+The dataset, that is used for the benchmark, is named `sp2b`.
 During the stresstest the workers will send SPARQL queries
 that are located in the file `./example/suite/queries.txt` to the triplestore.
 They will stop after they have executed all queries once, which is defined by the `completionTarget`-property.
