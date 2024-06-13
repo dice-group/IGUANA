@@ -22,4 +22,4 @@ in the `responseBodyProcessors` list.
 |-------------|----------|--------------------------------------------------------------------------------------------------------------------|-------------------------------------|
 | contentType | yes      | The content type of the response body.                                                                             | `"application/sparql-results+json"` |
 | threads     | no       | The number of threads that are used to process the response bodies. (default is 1)                                 | `2`                                 |
-| timeout     | no       | The maximum duration that the response body processor can take to process a response body. (default is 10 minutes) | `10s`                               |
+| timeout     | no       | The maximum duration that the response body processor can take to process a response body. (default is 10 minutes) | `10m`                               |
