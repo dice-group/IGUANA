@@ -110,7 +110,7 @@ public class StresstestResultProcessor {
         m.add(suiteRes, IPROP.task, taskRes);
         m.add(taskRes, RDF.type, IONT.task);
         m.add(taskRes, RDF.type, IONT.stresstest);
-        m.add(taskRes, IPROP.noOfWorkers, toInfinitePrecisionLiteral(workers.size()));
+        m.add(taskRes, IPROP.noOfWorkers, toInfinitePrecisionIntegerLiteral(workers.size()));
 
         for (HttpWorker worker : workers) {
             HttpWorker.Config config = worker.config();
@@ -126,12 +126,12 @@ public class StresstestResultProcessor {
 
             m.add(taskRes, IPROP.workerResult, workerRes);
             m.add(workerRes, RDF.type, IONT.worker);
-            m.add(workerRes, IPROP.workerID, toInfinitePrecisionLiteral(worker.getWorkerID()));
+            m.add(workerRes, IPROP.workerID, toInfinitePrecisionIntegerLiteral(worker.getWorkerID()));
             m.add(workerRes, IPROP.workerType, ResourceFactory.createTypedLiteral(worker.getClass().getSimpleName()));
-            m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionLiteral(config.queries().getQueryCount()));
+            m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(config.queries().getQueryCount()));
             m.add(workerRes, IPROP.timeOut, TimeUtils.createTypedDurationLiteral(config.timeout()));
             if (config.completionTarget() instanceof HttpWorker.QueryMixes)
-                m.add(workerRes, IPROP.noOfQueryMixes, toInfinitePrecisionLiteral(((HttpWorker.QueryMixes) config.completionTarget()).number()));
+                m.add(workerRes, IPROP.noOfQueryMixes, toInfinitePrecisionIntegerLiteral(((HttpWorker.QueryMixes) config.completionTarget()).number()));
             if (config.completionTarget() instanceof HttpWorker.TimeLimit)
                 m.add(workerRes, IPROP.timeLimit, TimeUtils.createTypedDurationLiteral(((HttpWorker.TimeLimit) config.completionTarget()).duration()));
             m.add(workerRes, IPROP.connection, connectionRes);
@@ -279,7 +279,7 @@ public class StresstestResultProcessor {
         return m;
     }
 
-    private static Literal toInfinitePrecisionLiteral(long value) {
+    private static Literal toInfinitePrecisionIntegerLiteral(long value) {
         return ResourceFactory.createTypedLiteral(BigInteger.valueOf(value));
     }
 }
