@@ -13,6 +13,7 @@ import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -40,6 +41,7 @@ import java.util.stream.Stream;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisabledInNativeImage // WireMock is not supported in native image
 public class SPARQLProtocolWorkerTest {
 
     @RegisterExtension
