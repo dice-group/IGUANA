@@ -216,14 +216,14 @@
   	<rdfs:label>noOfQueryMixes</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of query mixes a Worker has to execute.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   </owl:DatatypeProperty>  
   
   <owl:DatatypeProperty rdf:about="&iprop;noOfWorkers">
   	<rdfs:label>noOfWorkers</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of Workers the stresstest utilized.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Stresstest"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   </owl:DatatypeProperty>  
   
   <owl:DatatypeProperty rdf:about="&iprop;startDate">
@@ -246,7 +246,7 @@
     <rdfs:label>workerID</rdfs:label>
 	<rdfs:comment xml:lang="en">The worked ID assigned to the worker</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   </owl:DatatypeProperty>    
   
   <owl:DatatypeProperty rdf:about="&iprop;workerType">
@@ -260,7 +260,7 @@
     <rdfs:label>noOfQueries</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of queries assigned to the worker.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   </owl:DatatypeProperty>     
 
   <owl:DatatypeProperty rdf:about="&iprop;timeOut">
