@@ -41,7 +41,5 @@ jobs:
         with:
           java-version: '21'
           cache: 'maven'
-      - name: 'Generate configuration files'
-        run: './graalvm/generate-config.sh'
-      - name: 'Compile native-binary'
-        run: 'mvn -DskipTests package -Pnative'
+      - name: 'Compile native-binary and run tests'
+        run: 'mvn -Pnative -Dagent=true package'
