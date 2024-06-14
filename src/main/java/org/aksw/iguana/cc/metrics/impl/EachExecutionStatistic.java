@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.metrics.impl;
 import org.aksw.iguana.cc.metrics.Metric;
 import org.aksw.iguana.cc.metrics.ModelWritingMetric;
 import org.aksw.iguana.cc.worker.HttpWorker;
+import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.aksw.iguana.commons.rdf.IRES;
 import org.aksw.iguana.commons.time.TimeUtils;
@@ -10,6 +11,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.RDF;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -31,6 +33,7 @@ public class EachExecutionStatistic extends Metric implements ModelWritingMetric
                 for (HttpWorker.ExecutionStats exec : data[(int) worker.getWorkerID()][i]) {
                     Resource runRes = iresFactory.getWorkerQueryRunResource(worker, i, run);
                     m.add(workerQueryResource, IPROP.queryExecution, runRes);
+                    m.add(runRes, RDF.type, IONT.queryExecution);
                     m.add(runRes, IPROP.time, TimeUtils.createTypedDurationLiteral(exec.duration()));
                     m.add(runRes, IPROP.startTime, TimeUtils.createTypedInstantLiteral(exec.startTime()));
                     m.add(runRes, IPROP.success, ResourceFactory.createTypedLiteral(exec.successful()));
@@ -41,12 +44,13 @@ public class EachExecutionStatistic extends Metric implements ModelWritingMetric
                     if (exec.responseBodyHash().isPresent()) {
                         Resource responseBodyRes = IRES.getResponsebodyResource(exec.responseBodyHash().getAsLong());
                         m.add(runRes, IPROP.responseBody, responseBodyRes);
+                        m.add(responseBodyRes, RDF.type, IONT.responseBody);
                         m.add(responseBodyRes, IPROP.responseBodyHash, ResourceFactory.createTypedLiteral(exec.responseBodyHash().getAsLong()));
                     }
                     if (exec.error().isPresent())
                         m.add(runRes, IPROP.exception, ResourceFactory.createTypedLiteral(exec.error().get().toString()));
                     if (exec.httpStatusCode().isPresent())
-                        m.add(runRes, IPROP.httpCode, ResourceFactory.createTypedLiteral(exec.httpStatusCode().get().toString()));
+                        m.add(runRes, IPROP.httpCode, ResourceFactory.createTypedLiteral(exec.httpStatusCode().get()));
                     run = run.add(BigInteger.ONE);
                 }
             }

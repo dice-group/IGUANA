@@ -15,11 +15,12 @@ public class IONT {
     public static final Resource stresstest = ResourceFactory.createResource(NS + "Stresstest");
     public static final Resource worker = ResourceFactory.createResource(NS + "Worker");
     public static final Resource executedQuery = ResourceFactory.createResource(NS + "ExecutedQuery");
+    public static final Resource queryExecution = ResourceFactory.createResource(NS + "QueryExecution");
+    public static final Resource responseBody = ResourceFactory.createResource(NS + "ResponseBody");
     public static final Resource query = ResourceFactory.createResource(NS + "Query");
     public static final Resource metric = ResourceFactory.createResource(NS + "Metric");
 
     public static Resource getMetricClass(Metric metric) {
-        // TODO: compare with stresstest class (stresstest class as a subclass of Task is iont:Stresstest while QPS for example is iont:metric/QPS)
         return ResourceFactory.createResource(NS + "metric/" + metric.getAbbreviation());
     }
 }
