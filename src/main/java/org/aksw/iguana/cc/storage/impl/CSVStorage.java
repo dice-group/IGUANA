@@ -162,7 +162,7 @@ public class CSVStorage implements Storage {
                 try {
                     Path file = createCSVFile("query", "summary", "worker", workerID);
                     Path file2 = createCSVFile("each", "execution", "worker", workerID);
-                    storeSummarizedQueryResults(workerRes, file, data, this.metrics);
+                    storeSummarizedQueryResults(workerRes, file, data, this.metrics, false);
                     storeEachQueryResults(workerRes, file2, data, this.metrics);
                 } catch (IOException e) {
                     LOGGER.error("Error while storing the query results of a worker in a csv file.", e);
@@ -178,7 +178,7 @@ public class CSVStorage implements Storage {
 
         try {
             Path file = createCSVFile("query", "summary", "task");
-            storeSummarizedQueryResults(taskRes, file, data, this.metrics);
+            storeSummarizedQueryResults(taskRes, file, data, this.metrics, true);
         } catch (IOException e) {
             LOGGER.error("Error while storing the query results of a task result in a csv file.", e);
         } catch (NoSuchElementException e) {
@@ -287,13 +287,24 @@ public class CSVStorage implements Storage {
         return file;
     }
 
-    private static void storeSummarizedQueryResults(Resource parentRes, Path file, Model data, List<Metric> metrics) throws IOException, NoSuchElementException {
+    /**
+     * Store the summarized query results for the given rdf resource into a CSV file.
+     *
+     * @param parentRes        the parent resource inside the model that contains the query results
+     * @param file             the file where the results should be stored
+     * @param data             the model that contains the data
+     * @param metrics          the metrics that should be stored
+     * @param summarizeForTask if true, the query results will be summarized for a task, therefore, for each query
+     *                         its full ID will be used (otherwise the query ids could clash with each other)
+     */
+    private static void storeSummarizedQueryResults(Resource parentRes, Path file, Model data, List<Metric> metrics, boolean summarizeForTask) throws IOException, NoSuchElementException {
         boolean containsAggrStats = !metrics.stream().filter(AggregatedExecutionStatistics.class::isInstance).toList().isEmpty();
         Metric[] queryMetrics = metrics.stream().filter(x -> QueryMetric.class.isAssignableFrom(x.getClass())).toArray(Metric[]::new);
 
         SelectBuilder sb = new SelectBuilder();
         sb.addWhere(parentRes, IPROP.query, "?eQ");
-        queryProperties(sb, "?eQ", IPROP.queryID);
+        sb.addWhere("?eQ", IPROP.queryID, "?query");
+        sb.addVar("queryID").addWhere("?query", summarizeForTask ? IPROP.fullID : IPROP.id, "?queryID");
         if (containsAggrStats) {
             queryProperties(sb, "?eQ", IPROP.succeeded, IPROP.failed, IPROP.totalTime, IPROP.resultSize, IPROP.wrongCodes, IPROP.timeOuts, IPROP.unknownException);
         }
@@ -314,7 +325,9 @@ public class CSVStorage implements Storage {
                 .addOptional(new WhereBuilder().addWhere("?exec", IPROP.responseBody, "?rb").addWhere("?rb", IPROP.responseBodyHash, "?responseBodyHash"))
                 .addOptional(new WhereBuilder().addWhere("?exec", IPROP.exception, "?exception"))
                 .addOptional(new WhereBuilder().addWhere("?exec", IPROP.httpCode, "?httpCode"));
-        queryProperties(sb, "?exec", IPROP.queryID, IPROP.run, IPROP.success, IPROP.startTime, IPROP.time, IPROP.resultSize, IPROP.code);
+        sb.addWhere("?eQ", IPROP.queryID, "?query");
+        sb.addVar("queryID").addWhere("?query", IPROP.id, "?queryID");
+        queryProperties(sb, "?exec", IPROP.run, IPROP.success, IPROP.startTime, IPROP.time, IPROP.resultSize, IPROP.code);
         sb.addVar("httpCode").addVar("exception").addVar("responseBodyHash");
         executeAndStoreQuery(sb, file, data);
     }

@@ -143,6 +143,14 @@ public class StresstestResultProcessor {
             }
         }
 
+        // Create Query nodes with their respective queryIDs
+        for (String queryID : queryIDs) {
+            Resource queryRes = IRES.getResource(queryID);
+            m.add(queryRes, RDF.type, IONT.query);
+            m.add(queryRes, IPROP.fullID, ResourceFactory.createTypedLiteral(queryID));
+            m.add(queryRes, IPROP.id, ResourceFactory.createTypedLiteral(BigInteger.valueOf(Long.parseLong(queryID.split(":")[1]))));
+        }
+
         // Connect task and workers to the Query nodes, that store the triple stats.
         for (var worker : workers) {
             var config = worker.config();

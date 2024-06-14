@@ -70,6 +70,8 @@ public class IPROP {
     public static final Property totalTime = ResourceFactory.createProperty(NS, "totalTime");
     public static final Property unknownException = ResourceFactory.createProperty(NS, "unknownException");
     public static final Property wrongCodes = ResourceFactory.createProperty(NS, "wrongCodes");
+    public static final Property fullID = ResourceFactory.createProperty(NS, "fullID");
+    public static final Property id = ResourceFactory.createProperty(NS, "id");
 
     // Each Query Stats
     public static final Property code = ResourceFactory.createProperty(NS, "code");
