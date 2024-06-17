@@ -42,6 +42,7 @@ if [ -f "$TARGET_DIR"/native/agent-output/test/resource-config.json ]; then
   mv "$TARGET_DIR"/native/agent-output/test/* src/main/resources/META-INF/native-image/
 fi
 
+# Run thorugh multiple different execution paths, so that the tracing agent can generate complete configuration files.  
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar --help      > /dev/null
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar -is "$SUITE" > /dev/null
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar "$SUITE"     > /dev/null
