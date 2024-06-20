@@ -13,7 +13,7 @@
     <!ENTITY iont "http://iguana-benchmark.eu/class/">
 ]>
 
-<rdf:RDF 
+<rdf:RDF
     xmlns:owl="http://www.w3.org/2002/07/owl#"
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:xml="http://www.w3.org/XML/1998/namespace"
@@ -25,7 +25,7 @@
     xmlns:iprop="http://iguana-benchmark.eu/properties/"
     xmlns:iont="http://iguana-benchmark.eu/class/"
     >
-    
+
 <owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/4.0.0/iguana.owl">
         <rdfs:label xml:lang="en">Iguana results ontology</rdfs:label>
         <owl:versionInfo>4.0.0</owl:versionInfo>
@@ -35,27 +35,27 @@
         <rdfs:comment xml:lang="en">The Iguana results ontology explains the rdf results of an Iguana benchmark.</rdfs:comment>
         <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
     </owl:Ontology>
-    
+
     <!-- Class definitions -->
-    
+
     <owl:Class rdf:about="&iont;Suite">
-    	<rdfs:label>Suite</rdfs:label>    
+    	<rdfs:label>Suite</rdfs:label>
 	    <rdfs:comment xml:lang="en">A suite is a collection of benchmarks.</rdfs:comment>
     </owl:Class>
-    
+
     <owl:Class rdf:about="&iont;Worker">
       	<rdfs:label>Worker</rdfs:label>
 	    <rdfs:comment xml:lang="en">A Worker is a thread that executes a set of queries against a Connection. It simulates a user.</rdfs:comment>
     </owl:Class>
-    
+
     <owl:Class rdf:about="&iont;ExecutedQuery">
 	    <rdfs:comment xml:lang="en">An ExecutedQuery is a query which was executed one or more times against a Connection using either one Worker or the aggregation of several ExecutedQueries which are assigned to a Task. It provides several Metric results. The ExecutedQuery is assigned to a worker or a Task.</rdfs:comment>
-    	<rdfs:label>ExecutedQuery</rdfs:label>    
+    	<rdfs:label>ExecutedQuery</rdfs:label>
     </owl:Class>
-    
+
     <owl:Class rdf:about="&iont;Query">
 	    <rdfs:comment xml:lang="en">A Query is the query string of a given query (most likely a sparql query) together with a collection of statistics. The query is Suite independent.</rdfs:comment>
-    	<rdfs:label>Query</rdfs:label>    
+    	<rdfs:label>Query</rdfs:label>
     </owl:Class>
 
     <owl:Class rdf:about="&iont;QueryExecution">
@@ -67,17 +67,17 @@
         <rdfs:label>ResponseBody</rdfs:label>
         <rdfs:comment xml:lang="en">The ResponseBody represents the response body of an executed query.</rdfs:comment>
     </owl:Class>
-    
+
     <owl:Class rdf:about="&iont;Metric">
-    	<rdfs:label>Metric</rdfs:label>    
+    	<rdfs:label>Metric</rdfs:label>
 	    <rdfs:comment xml:lang="en">A Metric is the abstract class providing a result metric.</rdfs:comment>
     </owl:Class>
 
     <owl:Class rdf:about="&iont;Task">
-    	<rdfs:label>Task</rdfs:label>    
+    	<rdfs:label>Task</rdfs:label>
 	    <rdfs:comment xml:lang="en">Abstract class for various tasks.</rdfs:comment>
     </owl:Class>
-    
+
     <owl:Class rdf:about="&iont;Stresstest">
        	<rdfs:label>Stresstest</rdfs:label>
 	    <rdfs:comment xml:lang="en">The Stresstest Task benchmarks a system by stresstesting it.</rdfs:comment>
@@ -118,7 +118,7 @@
 	    <rdfs:comment xml:lang="en">Average Queries Per Second.</rdfs:comment>
         <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
-    
+
     <owl:Class rdf:about="&iont;metric/NoQ">
 	    <rdfs:label>NoQ Metric</rdfs:label>
 	    <rdfs:comment xml:lang="en">Number of successfully executed Queries.</rdfs:comment>
@@ -149,7 +149,7 @@
         <rdfs:subClassOf rdf:resource="&iont;Metric" />
     </owl:Class>
 
-        
+
   <!-- ObjectProperty definitions -->
 
   <owl:ObjectProperty rdf:about="&iprop;queryExecution">
@@ -186,40 +186,58 @@
     <rdfs:domain rdf:resource="&iont;Suite"/>
     <rdfs:range rdf:resource="&iont;Task"/>
   </owl:ObjectProperty>
-  
+
 
   <owl:ObjectProperty rdf:about="&iprop;workerResult">
     <rdfs:label>workerResult</rdfs:label>
 	<rdfs:comment xml:lang="en">Assigns a Worker to an Task. (mostly a Stresstest)</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:range rdf:resource="&iont;Worker"/>
-  </owl:ObjectProperty>  
+  </owl:ObjectProperty>
 
 
   <owl:ObjectProperty rdf:about="&iprop;metric">
     <rdfs:label>metric</rdfs:label>
 	<rdfs:comment xml:lang="en">Annotates a Task, Worker or ExecutedQuery with a Metric. The Metric itself is provided using the Property, this just annotates the subject to provide these results.</rdfs:comment>
-    <rdfs:domain rdf:resource="&iont;Worker"/>
-    <rdfs:domain rdf:resource="&iont;Task"/>
-    <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
+    <rdfs:domain>
+      <rdfs:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="&iont;Task"/>
+          <owl:Class rdf:about="&iont;Worker"/>
+          <owl:Class rdf:about="&iont;ExecutedQuery"/>
+        </owl:unionOf>
+      </rdfs:Class>
+    </rdfs:domain>
     <rdfs:range rdf:resource="&iont;Metric"/>
-  </owl:ObjectProperty>  
-  
+  </owl:ObjectProperty>
+
   <owl:ObjectProperty rdf:about="&iprop;query">
     <rdfs:label>query</rdfs:label>
 	<rdfs:comment xml:lang="en">Assigns an ExecutedQuery to a Worker or Task. The ExecutedQuery provides further metrics and statistics.</rdfs:comment>
-    <rdfs:domain rdf:resource="&iont;Worker"/>
-    <rdfs:domain rdf:resource="&iont;Task"/>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="&iont;Worker"/>
+          <owl:Class rdf:about="&iont;Task"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
     <rdfs:range rdf:resource="&iont;ExecutedQuery"/>
-  </owl:ObjectProperty>  
-  
+  </owl:ObjectProperty>
+
   <owl:ObjectProperty rdf:about="&iprop;queryID">
     <rdfs:label>queryID</rdfs:label>
 	<rdfs:comment xml:lang="en">Assigns a Query and its statistics, as well as the string of the query to an ExecutedQuery.</rdfs:comment>
-    <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
-    <rdfs:domain rdf:resource="&iont;QueryExecution"/>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="&iont;ExecutedQuery"/>
+          <owl:Class rdf:about="&iont;QueryExecution"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
     <rdfs:range rdf:resource="&iont;Query"/>
-  </owl:ObjectProperty>  
+  </owl:ObjectProperty>
 
     <!-- DatatypeProperty definitions -->
 
@@ -327,51 +345,51 @@
 	<rdfs:comment xml:lang="en">The number of query mixes a Worker has to execute.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>  
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;noOfWorkers">
   	<rdfs:label>noOfWorkers</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of Workers the stresstest utilized.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Stresstest"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>  
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;startDate">
   	<rdfs:label>startDate</rdfs:label>
 	<rdfs:comment xml:lang="en">The date and time at which the Task or Worker started.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
-  </owl:DatatypeProperty>  
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;endDate">
     	<rdfs:label>endDate</rdfs:label>
 	<rdfs:comment xml:lang="en">The date and time at which the Task or Worker ended.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
-  </owl:DatatypeProperty>  
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;workerID">
     <rdfs:label>workerID</rdfs:label>
 	<rdfs:comment xml:lang="en">The worked ID assigned to the worker</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>    
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;workerType">
     <rdfs:label>workerType</rdfs:label>
 	<rdfs:comment xml:lang="en">The worker class name.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-  </owl:DatatypeProperty>  
-    
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;noOfQueries">
     <rdfs:label>noOfQueries</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of queries assigned to the worker.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>     
+  </owl:DatatypeProperty>
 
   <owl:DatatypeProperty rdf:about="&iprop;timeOut">
     <rdfs:label>timeOut</rdfs:label>
@@ -393,17 +411,17 @@
     <rdfs:domain rdf:resource="&iont;Query"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   </owl:DatatypeProperty>
-  
+
   <owl:DatatypeProperty rdf:about="&iprop;totalTime">
     <rdfs:label>totalTime</rdfs:label>
-	<rdfs:comment xml:lang="en">The summed up execution time of all executions of the ExecutedQuery in milliseconds.</rdfs:comment>  
+	<rdfs:comment xml:lang="en">The summed up execution time of all executions of the ExecutedQuery in milliseconds.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dayTimeDuration"/>
-  </owl:DatatypeProperty>   
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;QPS">
     <rdfs:label>QPS</rdfs:label>
-	<rdfs:comment xml:lang="en">The queries per second value.</rdfs:comment>    
+	<rdfs:comment xml:lang="en">The queries per second value.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
   </owl:DatatypeProperty>
@@ -417,62 +435,62 @@
 
   <owl:DatatypeProperty rdf:about="&iprop;failed">
     <rdfs:label>failed</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery.</rdfs:comment>    
+	<rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>   
+  </owl:DatatypeProperty>
 
   <owl:DatatypeProperty rdf:about="&iprop;succeeded">
     <rdfs:label>succeeded</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of succeeded executions of the ExecutedQuery.</rdfs:comment>    
+	<rdfs:comment xml:lang="en">The number of succeeded executions of the ExecutedQuery.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>   
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;unknownExceptions">
     <rdfs:label>unknownExceptions</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was unknown.</rdfs:comment>    
+	<rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was unknown.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>   
-    
+  </owl:DatatypeProperty>
+
    <owl:DatatypeProperty rdf:about="&iprop;resultSize">
     <rdfs:label>resultSize</rdfs:label>
-	<rdfs:comment xml:lang="en">The result size of a ExecutedQuery.</rdfs:comment>     
+	<rdfs:comment xml:lang="en">The result size of a ExecutedQuery.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>   
-  
+  </owl:DatatypeProperty>
+
    <owl:DatatypeProperty rdf:about="&iprop;wrongCodes">
     <rdfs:label>wrongCodes</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a wrong result code (e.g 400)</rdfs:comment>  
+	<rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a wrong result code (e.g 400)</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty> 
-  
+  </owl:DatatypeProperty>
+
    <owl:DatatypeProperty rdf:about="&iprop;timeOuts">
     <rdfs:label>timeOuts</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a time out</rdfs:comment>  
+	<rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a time out</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;ExecutedQuery"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty> 
- 
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;QMPH">
     <rdfs:label>QMPH</rdfs:label>
-	<rdfs:comment xml:lang="en">The query mixes per hour value</rdfs:comment>  
+	<rdfs:comment xml:lang="en">The query mixes per hour value</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-  </owl:DatatypeProperty>     
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;NoQPH">
     <rdfs:label>NoQPH</rdfs:label>
 	<rdfs:comment xml:lang="en">The number of queries per hour value.</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-  </owl:DatatypeProperty>     
-  
+  </owl:DatatypeProperty>
+
   <owl:DatatypeProperty rdf:about="&iprop;AvgQPS">
     <rdfs:label>AvgQPS</rdfs:label>
 	<rdfs:comment xml:lang="en">The average number of queries answered successfully per second value.</rdfs:comment>
@@ -488,15 +506,15 @@
       <rdfs:domain rdf:resource="&iont;Task"/>
       <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
     </owl:DatatypeProperty>
-  
-    
+
+
   <owl:DatatypeProperty rdf:about="&iprop;NoQ">
     <rdfs:label>NoQ</rdfs:label>
-	<rdfs:comment xml:lang="en">The number of successfully executed queries value</rdfs:comment>  
+	<rdfs:comment xml:lang="en">The number of successfully executed queries value</rdfs:comment>
     <rdfs:domain rdf:resource="&iont;Worker"/>
     <rdfs:domain rdf:resource="&iont;Task"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  </owl:DatatypeProperty>     
-  
+  </owl:DatatypeProperty>
+
 </rdf:RDF>
 
