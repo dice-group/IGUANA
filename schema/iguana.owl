@@ -46,11 +46,17 @@
     <owl:Class rdf:about="&iont;Worker">
       	<rdfs:label>Worker</rdfs:label>
 	    <rdfs:comment xml:lang="en">A Worker is a thread that executes a set of queries against a Connection. It simulates a user.</rdfs:comment>
+        <owl:disjointWith rdf:resource="&iont;ExecutedQuery"/>
+        <owl:disjointWith rdf:resource="&iont;Task"/>
     </owl:Class>
 
     <owl:Class rdf:about="&iont;ExecutedQuery">
 	    <rdfs:comment xml:lang="en">An ExecutedQuery is a query which was executed one or more times against a Connection using either one Worker or the aggregation of several ExecutedQueries which are assigned to a Task. It provides several Metric results. The ExecutedQuery is assigned to a worker or a Task.</rdfs:comment>
     	<rdfs:label>ExecutedQuery</rdfs:label>
+    	<owl:disjointWith rdf:resource="&iont;QueryExecution"/>
+    	<owl:disjointWith rdf:resource="&iont;Query"/>
+    	<owl:disjointWith rdf:resource="&iont;Task"/>
+    	<owl:disjointWith rdf:resource="&iont;Worker"/>
     </owl:Class>
 
     <owl:Class rdf:about="&iont;Query">
@@ -61,6 +67,7 @@
     <owl:Class rdf:about="&iont;QueryExecution">
         <rdfs:label>QueryExecution</rdfs:label>
         <rdfs:comment xml:lang="en">A QueryExecution is the single execution of a query against a Connection.</rdfs:comment>
+        <owl:disjointWith rdf:resource="&iont;ExecutedQuery"/>
     </owl:Class>
 
     <owl:Class rdf:about="&iont;ResponseBody">
@@ -76,6 +83,8 @@
     <owl:Class rdf:about="&iont;Task">
     	<rdfs:label>Task</rdfs:label>
 	    <rdfs:comment xml:lang="en">Abstract class for various tasks.</rdfs:comment>
+        <owl:disjointWith rdf:resource="&iont;ExecutedQuery"/>
+        <owl:disjointWith rdf:resource="&iont;Worker"/>
     </owl:Class>
 
     <owl:Class rdf:about="&iont;Stresstest">
