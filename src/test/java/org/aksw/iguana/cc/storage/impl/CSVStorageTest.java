@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import org.aksw.iguana.cc.mockup.MockupQueryHandler;
 import org.aksw.iguana.cc.mockup.MockupWorker;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -23,6 +24,7 @@ public class CSVStorageTest extends StorageTest {
     private static final String EXPECTED_FILES_DIR = "src/test/resources/test-data/csv-storage-test/";
 
     public static List<Arguments> data() {
+        resetDate();
         final var workersTask1 = List.of(
                 MockupWorker.createWorkers(0, 2, new MockupQueryHandler(0, 10), "test-connection-1", "v1.0.0", "test-dataset-1"),
                 MockupWorker.createWorkers(2, 2, new MockupQueryHandler(1, 10), "test-connection-2", "v1.1.0", "test-dataset-2")
@@ -38,6 +40,7 @@ public class CSVStorageTest extends StorageTest {
 
     @ParameterizedTest
     @MethodSource("data")
+    @Order(1)
     protected void testCSVStorage(List<TaskResult> results) throws IOException {
         final var storage = new CSVStorage(tempDir.toString(), getMetrics(), "123");
         for (var result : results)
@@ -45,6 +48,7 @@ public class CSVStorageTest extends StorageTest {
 
         final var expectedFiles = Path.of(EXPECTED_FILES_DIR);
         final var actualFiles = tempDir;
+        System.out.println(tempDir);
 
         try (var files = Files.list(expectedFiles)) {
             files.forEach(

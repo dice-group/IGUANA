@@ -56,8 +56,12 @@ public abstract class StorageTest {
         }
     }
 
-    @BeforeEach
-    public void resetDate() {
+    /**
+     * This method resets the date to a fixed date.
+     * This is necessary to ensure that the tests are deterministic.
+     * The method needs to be called manually before retrieving the test data.
+     */
+    public static void resetDate() {
         someDateTime = GregorianCalendar.from(ZonedDateTime.ofInstant(Instant.parse("2023-10-21T20:48:06.399Z"), ZoneId.of("Europe/Berlin")));
     }
 

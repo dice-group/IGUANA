@@ -36,6 +36,7 @@ public class TriplestoreStorageTest extends StorageTest {
 
 	@Test
 	public void dataTest() throws URISyntaxException {
+		resetDate();
 		final var uuid = UUID.randomUUID();
 		wm.stubFor(post(urlEqualTo("/ds/sparql"))
 						.willReturn(aResponse()
