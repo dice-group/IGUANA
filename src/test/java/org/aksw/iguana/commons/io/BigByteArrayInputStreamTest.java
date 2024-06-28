@@ -1,9 +1,9 @@
 package org.aksw.iguana.commons.io;
 
 import com.google.common.primitives.Bytes;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +14,7 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("This test takes a lot of time and resources.")
+@EnabledIfEnvironmentVariable(named = "RUN_LARGE_TESTS", matches = "true")
 class BigByteArrayInputStreamTest {
 
     private static final int MAX_SINGLE_BUFFER_SIZE = Integer.MAX_VALUE - 8;
