@@ -42,13 +42,13 @@ if [ -f "$TARGET_DIR"/native/agent-output/test/resource-config.json ]; then
   mv "$TARGET_DIR"/native/agent-output/test/* src/main/resources/META-INF/native-image/
 fi
 
-# Run thorugh multiple different execution paths, so that the tracing agent can generate complete configuration files.  
+# Run through multiple different execution paths, so that the tracing agent can generate complete configuration files.
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar --help      > /dev/null
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar -is "$SUITE" > /dev/null
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar "$SUITE"     > /dev/null
 
 # there is a bug in the tracing agent that outputs wrong formatted lines in the resource-config.json file (https://github.com/oracle/graal/issues/7985)
-sed 's/\\\\E//g' src/main/resources/META-INF/native-image/resource-config.json | sed 's/\\\\//g' > src/main/resources/META-INF/native-image/resource-config.json.tmp
+sed 's/\\\\E//g' src/main/resources/META-INF/native-image/resource-config.json | sed 's/\\\\Q//g' > src/main/resources/META-INF/native-image/resource-config.json.tmp
 mv src/main/resources/META-INF/native-image/resource-config.json.tmp src/main/resources/META-INF/native-image/resource-config.json
 
 rm -r ./graalvm/results/

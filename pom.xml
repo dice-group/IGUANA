@@ -274,7 +274,7 @@
                                     <executable>bash</executable>
                                     <arguments>
                                         <argument>-c</argument>
-                                        <argument>if [ -f ${project.build.directory}/native/agent-output/test/*/resource-config.json ]; then sed "s/\\\\E//g" ${project.build.directory}/native/agent-output/test/*/resource-config.json | sed "s/\\\\//g" > ${project.build.directory}/resource-config.json.tmp &amp;&amp; cp ${project.build.directory}/resource-config.json.tmp ${project.build.directory}/native/agent-output/test/*/resource-config.json; fi</argument>
+                                        <argument>if [ -f ${project.build.directory}/native/agent-output/test/*/resource-config.json ]; then sed "s/\\\\\\\\E//g" ${project.build.directory}/native/agent-output/test/*/resource-config.json | sed "s/\\\\\\\\Q//g" > ${project.build.directory}/resource-config.json.tmp &amp;&amp; cp ${project.build.directory}/resource-config.json.tmp ${project.build.directory}/native/agent-output/test/*/resource-config.json; fi</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
