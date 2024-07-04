@@ -98,9 +98,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     private final ResponseBodyProcessor responseBodyProcessor;
 
-    // declared here, so it can be reused across multiple method calls
-    private BigByteArrayOutputStream responseBodybbaos = new BigByteArrayOutputStream();
-
     // used to read the http response body
     private final byte[] buffer = new byte[BUFFER_SIZE];
     private static final int BUFFER_SIZE = 4096;
@@ -253,17 +250,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             }
 
             // process result
-            if (!responseBodyProcessor.add(result.actualContentLength().orElse(-1), result.hash().orElse(-1), result.outputStream().orElse(new BigByteArrayOutputStream()))) {
-                this.responseBodybbaos = result.outputStream().orElse(new BigByteArrayOutputStream());
-            } else {
-                this.responseBodybbaos = new BigByteArrayOutputStream();
-            }
-        }
-
-        try {
-            this.responseBodybbaos.reset();
-        } catch (IOException e) {
-            this.responseBodybbaos = new BigByteArrayOutputStream();
+            responseBodyProcessor.add(result.actualContentLength().orElse(-1), result.hash().orElse(-1), result.outputStream().orElse(new BigByteArrayOutputStream()));
         }
 
         if (!result.successful() && discardOnFailure) {
@@ -327,6 +314,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             private final StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
             private long responseSize = 0; // will be used if parseResults is false
             private long responseEnd = 0;  // time in nanos
+            private BigByteArrayOutputStream responseBodybbaos = null;
 
             @Override
             public void releaseResources() {} // nothing to release
@@ -344,10 +332,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
              */
             @Override
             protected void data(ByteBuffer src, boolean endOfStream) throws IOException {
-                if (endOfStream) {
+                if (endOfStream)
                     responseEnd = System.nanoTime();
-                }
 
+                if (responseBodybbaos == null)
+                    responseBodybbaos = new BigByteArrayOutputStream();
+
+                responseSize += src.remaining();
                 if (config.parseResults()) {
                     // if the buffer uses an array, use the array directly
                     if (src.hasArray()) {
@@ -362,8 +353,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
                             responseBodybbaos.write(buffer, 0, readCount);
                         }
                     }
-                } else {
-                    responseSize += src.remaining();
                 }
             }
 
@@ -377,6 +366,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
             @Override
             protected void start(HttpResponse response, ContentType contentType) {
                 this.response = response;
+                final var contentLengthHeader = response.getFirstHeader("Content-Length");
+                Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
+                // if the content length is known, create a BigByteArrayOutputStream with the known length
+                if (contentLength != null && responseBodybbaos == null && config.parseResults()) {
+                    responseBodybbaos = new BigByteArrayOutputStream(contentLength);
+                }
             }
 
             /**
@@ -404,7 +399,10 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 if (contentLength != null) {
                     if ((!config.parseResults() && responseSize != contentLength) // if parseResults is false, the responseSize will be used
                             || (config.parseResults() && responseBodybbaos.size() != contentLength)) { // if parseResults is true, the size of the bbaos will be used
-                        return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
+                        if (responseSize != responseBodybbaos.size())
+                            LOGGER.error("Error during copying the response data. (expected written data size = {}, actual written data size = {}, Content-Length-Header = {})", responseSize, responseBodybbaos.size(), contentLengthHeader.getValue());
+                        final var exception = new HttpException(String.format("Content-Length header value doesn't match actual content length. (Content-Length-Header = %s, written data size = %s)", contentLength, config.parseResults() ? responseBodybbaos.size() : responseSize));
+                        return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, exception);
                     }
                 }
 
