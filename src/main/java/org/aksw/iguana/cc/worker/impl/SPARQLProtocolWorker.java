@@ -22,8 +22,10 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
+import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -128,6 +130,11 @@ public class SPARQLProtocolWorker extends HttpWorker {
         connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(threadCount * 1000)
                 .setMaxConnPerRoute(threadCount * 1000)
+                .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
+                .setDefaultConnectionConfig(org.apache.hc.client5.http.config.ConnectionConfig.custom()
+                        .setConnectTimeout(Timeout.ofSeconds(5))
+                        .setValidateAfterInactivity(TimeValue.ofSeconds(5))
+                        .build())
                 .build();
         final var ioReactorConfig = IOReactorConfig.custom()
                 .setTcpNoDelay(true)
@@ -144,6 +151,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         .setHardCancellationEnabled(true)
                         .build())
                 .evictExpiredConnections()
+                .evictIdleConnections(TimeValue.ofSeconds(1))
                 .setRetryStrategy(DefaultHttpRequestRetryStrategy.INSTANCE)
                 .build();
         httpClient.start();
