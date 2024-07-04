@@ -23,6 +23,7 @@ import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
+import org.apache.hc.core5.pool.PoolReusePolicy;
 import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
@@ -131,6 +132,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 .setMaxConnTotal(threadCount * 1000)
                 .setMaxConnPerRoute(threadCount * 1000)
                 .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
+                .setConnPoolPolicy(PoolReusePolicy.LIFO)
                 .setDefaultConnectionConfig(org.apache.hc.client5.http.config.ConnectionConfig.custom()
                         .setConnectTimeout(Timeout.ofSeconds(5))
                         .setValidateAfterInactivity(TimeValue.ofSeconds(5))
@@ -146,6 +148,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 .setConnectionManager(connectionManager)
                 .setIOReactorConfig(ioReactorConfig)
                 .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy())
+                .setConnectionManagerShared(false)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setContentCompressionEnabled(false)
                         .setHardCancellationEnabled(true)
