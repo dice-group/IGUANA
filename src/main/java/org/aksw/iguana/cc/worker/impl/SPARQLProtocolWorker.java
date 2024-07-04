@@ -21,9 +21,9 @@ import org.apache.hc.client5.http.nio.AsyncClientConnectionManager;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.impl.DefaultAddressResolver;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.reactor.IOReactorConfig;
+import org.apache.hc.core5.util.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -126,12 +126,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
      */
     public static void initHttpClient(int threadCount) {
         connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
-                .setMaxConnTotal((threadCount * 2) + 1)
-                .setMaxConnPerRoute((threadCount * 2) + 1)
+                .setMaxConnTotal(threadCount * 1000)
+                .setMaxConnPerRoute(threadCount * 1000)
                 .build();
         final var ioReactorConfig = IOReactorConfig.custom()
                 .setTcpNoDelay(true)
                 .setIoThreadCount((threadCount * 2) + 1)
+                .setSelectInterval(TimeValue.ofMilliseconds(100))
+                .setSoKeepAlive(true)
                 .build();
         httpClient = HttpAsyncClients.custom()
                 .setConnectionManager(connectionManager)
