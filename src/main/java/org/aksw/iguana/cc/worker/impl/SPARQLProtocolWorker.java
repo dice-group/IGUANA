@@ -13,6 +13,7 @@ import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.apache.hc.client5.http.async.methods.AbstractBinResponseConsumer;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultConnectionKeepAliveStrategy;
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
@@ -20,6 +21,7 @@ import org.apache.hc.client5.http.nio.AsyncClientConnectionManager;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.impl.DefaultAddressResolver;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.slf4j.Logger;
@@ -139,6 +141,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         .setContentCompressionEnabled(false)
                         .setHardCancellationEnabled(true)
                         .build())
+                .evictExpiredConnections()
+                .setRetryStrategy(DefaultHttpRequestRetryStrategy.INSTANCE)
                 .build();
         httpClient.start();
     }
