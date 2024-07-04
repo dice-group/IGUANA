@@ -437,6 +437,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
             return future.get(config.timeout().toNanos(), TimeUnit.NANOSECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             // This will close the connection and cancel the request if it's still running.
+            if (future.isDone()) {
+                LOGGER.warn("Request was already done after timeout.");
+                try {
+                    return future.get();
+                } catch (InterruptedException | ExecutionException ex) {
+                    return createFailedResultBeforeRequest(queryIndex, ex);
+                }
+            }
             future.cancel(true);
             return createFailedResultBeforeRequest(queryIndex, e);
         }
