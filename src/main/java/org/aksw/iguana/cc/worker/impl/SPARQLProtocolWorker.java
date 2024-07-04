@@ -127,12 +127,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
      */
     public static void initHttpClient(int threadCount) {
         connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
-                .setMaxConnTotal(threadCount)
-                .setMaxConnPerRoute(threadCount)
+                .setMaxConnTotal((threadCount * 2) + 1)
+                .setMaxConnPerRoute((threadCount * 2) + 1)
                 .build();
         final var ioReactorConfig = IOReactorConfig.custom()
                 .setTcpNoDelay(true)
-                .setIoThreadCount(threadCount)
+                .setIoThreadCount((threadCount * 2) + 1)
                 .build();
         httpClient = HttpAsyncClients.custom()
                 .setConnectionManager(connectionManager)
@@ -216,7 +216,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         executionStats.add(execution);
                     }
 
-                    //
                     if ((++queryExecutionCount) >= queryMixSize) {
                         queryExecutionCount = 0;
                         queryMixExecutionCount++;
@@ -347,7 +346,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
             protected void data(ByteBuffer src, boolean endOfStream) throws IOException {
                 if (endOfStream) {
                     responseEnd = System.nanoTime();
-                    return;
                 }
 
                 if (config.parseResults()) {
