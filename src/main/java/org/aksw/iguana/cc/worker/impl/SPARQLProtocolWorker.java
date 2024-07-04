@@ -435,8 +435,11 @@ public class SPARQLProtocolWorker extends HttpWorker {
             // The timeout from the parameter might be reduced if the end of the time limit is near
             // and it might be so small that it causes issues.
             return future.get(config.timeout().toNanos(), TimeUnit.NANOSECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             // This will close the connection and cancel the request if it's still running.
+            future.cancel(true);
+            return createFailedResultBeforeRequest(queryIndex, e);
+        } catch (TimeoutException e) {
             if (future.isDone()) {
                 LOGGER.warn("Request was already done after timeout.");
                 try {
@@ -444,9 +447,10 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 } catch (InterruptedException | ExecutionException ex) {
                     return createFailedResultBeforeRequest(queryIndex, ex);
                 }
+            } else {
+                future.cancel(true);
+                return createFailedResultBeforeRequest(queryIndex, e);
             }
-            future.cancel(true);
-            return createFailedResultBeforeRequest(queryIndex, e);
         }
     }
 
