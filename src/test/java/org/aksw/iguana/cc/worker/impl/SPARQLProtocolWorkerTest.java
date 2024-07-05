@@ -55,7 +55,7 @@ public class SPARQLProtocolWorkerTest {
                     .containerThreads(8)
                     .asynchronousResponseEnabled(false)
                     .asynchronousResponseThreads(8)
-                    .timeout(50000))
+                    .timeout(5000))
             .failOnUnmatchedRequests(true)
             .build();
 
@@ -69,7 +69,7 @@ public class SPARQLProtocolWorkerTest {
     public static void setup() throws IOException {
         queryFile = Files.createTempFile("iguana-test-queries", ".tmp");
         Files.writeString(queryFile, QUERY, StandardCharsets.UTF_8);
-        wm.setGlobalFixedDelay(1);
+        wm.setGlobalFixedDelay(2);
     }
 
     @BeforeEach
@@ -113,7 +113,7 @@ public class SPARQLProtocolWorkerTest {
                         queryHandlderSupplier.apply(cached),
                         new HttpWorker.QueryMixes(QUERY_MIXES),
                         connection,
-                        Duration.parse("PT100S"),
+                        Duration.parse("PT6S"),
                         "application/sparql-results+json",
                         requestType,
                         true
