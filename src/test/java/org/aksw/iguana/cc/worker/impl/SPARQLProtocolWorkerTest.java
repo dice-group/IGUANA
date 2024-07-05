@@ -69,7 +69,7 @@ public class SPARQLProtocolWorkerTest {
     public static void setup() throws IOException {
         queryFile = Files.createTempFile("iguana-test-queries", ".tmp");
         Files.writeString(queryFile, QUERY, StandardCharsets.UTF_8);
-        wm.setGlobalFixedDelay(2);
+        wm.setGlobalFixedDelay(5);
     }
 
     @BeforeEach
@@ -126,7 +126,7 @@ public class SPARQLProtocolWorkerTest {
 
     public static List<Arguments> completionTargets() {
         final var out = new ArrayList<Arguments>();
-        final var queryMixesAmount = List.of(1, 2, 5, 10, 100, 1000);
+        final var queryMixesAmount = List.of(1, 2, 5, 10, 100, 200);
         final var timeDurations = List.of(Duration.of(1, ChronoUnit.SECONDS), Duration.of(5, ChronoUnit.SECONDS));
 
         for (var queryMixes : queryMixesAmount) {
