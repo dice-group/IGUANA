@@ -47,7 +47,7 @@ public class SPARQLProtocolWorkerTest {
     @RegisterExtension
     public static WireMockExtension wm = WireMockExtension.newInstance()
             .options(new WireMockConfiguration()
-                    // .useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
+                    .useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
                     .dynamicPort()
                     .maxRequestJournalEntries(1000)
                     .maxLoggedResponseSize(1000)
@@ -69,6 +69,7 @@ public class SPARQLProtocolWorkerTest {
     public static void setup() throws IOException {
         queryFile = Files.createTempFile("iguana-test-queries", ".tmp");
         Files.writeString(queryFile, QUERY, StandardCharsets.UTF_8);
+        wm.setGlobalFixedDelay(1);
     }
 
     @BeforeEach
