@@ -49,13 +49,13 @@ public class SPARQLProtocolWorkerTest {
             .options(new WireMockConfiguration()
                     .useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
                     .dynamicPort()
-                    .maxRequestJournalEntries(100000)
-                    .maxLoggedResponseSize(100000)
+                    .maxRequestJournalEntries(1000000)
+                    .maxLoggedResponseSize(1000000)
                     .notifier(new ConsoleNotifier(false))
                     .containerThreads(10)
                     .asynchronousResponseEnabled(true)
                     .asynchronousResponseThreads(10)
-                    .timeout(10000))
+                    .timeout(1000))
             .failOnUnmatchedRequests(true)
             .build();
 
