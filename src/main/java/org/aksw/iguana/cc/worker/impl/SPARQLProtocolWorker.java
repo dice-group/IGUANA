@@ -132,7 +132,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 .setMaxConnTotal(threadCount * 1000)
                 .setMaxConnPerRoute(threadCount * 1000)
                 .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
-                .setConnPoolPolicy(PoolReusePolicy.LIFO)
+                .setConnPoolPolicy(PoolReusePolicy.FIFO)
                 .setDefaultConnectionConfig(org.apache.hc.client5.http.config.ConnectionConfig.custom()
                         .setConnectTimeout(Timeout.ofSeconds(5))
                         .setValidateAfterInactivity(TimeValue.ofSeconds(5))

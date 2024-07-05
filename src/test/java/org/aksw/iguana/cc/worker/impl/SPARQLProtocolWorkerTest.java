@@ -46,7 +46,14 @@ public class SPARQLProtocolWorkerTest {
 
     @RegisterExtension
     public static WireMockExtension wm = WireMockExtension.newInstance()
-            .options(new WireMockConfiguration().useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER).dynamicPort().notifier(new ConsoleNotifier(false)))
+            .options(new WireMockConfiguration()
+                    .useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
+                    .dynamicPort()
+                    .notifier(new ConsoleNotifier(false))
+                    .containerThreads(10)
+                    .asynchronousResponseEnabled(true)
+                    .asynchronousResponseThreads(10)
+                    .timeout(10000))
             .failOnUnmatchedRequests(true)
             .build();
 
@@ -228,7 +235,7 @@ public class SPARQLProtocolWorkerTest {
                 queryHandler,
                 target,
                 connection,
-                Duration.parse("PT20S"),
+                Duration.parse("PT360S"),
                 "application/sparql-results+json",
                 RequestFactory.RequestType.POST_URL_ENC_QUERY,
                 false
