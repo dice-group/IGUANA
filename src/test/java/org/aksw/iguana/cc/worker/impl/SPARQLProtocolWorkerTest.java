@@ -69,17 +69,23 @@ public class SPARQLProtocolWorkerTest {
     public static void setup() throws IOException {
         queryFile = Files.createTempFile("iguana-test-queries", ".tmp");
         Files.writeString(queryFile, QUERY, StandardCharsets.UTF_8);
-        SPARQLProtocolWorker.initHttpClient(1);
     }
 
     @BeforeEach
     public void reset() {
+        SPARQLProtocolWorker.initHttpClient(1);
         wm.resetMappings(); // reset stubbing maps after each test
     }
 
     @AfterAll
     public static void cleanup() throws IOException {
         Files.deleteIfExists(queryFile);
+        SPARQLProtocolWorker.closeHttpClient();
+    }
+
+    @AfterEach
+    public void verify() {
+        wm.resetAll();
         SPARQLProtocolWorker.closeHttpClient();
     }
 

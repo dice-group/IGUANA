@@ -27,11 +27,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Testing the Java code
-        run:  mvn package & { sleep 20; jstack -l -e  $(jps | grep surefire | awk -F ' ' '{print $1}') > jstack.log; }
-      - uses: actions/upload-artifact@v4
-        with:
-          name: thread-dump
-          path: jstack.log
+        run:  mvn package
 
   # Only run for pull request on main or if pushed to develop
   compile_native:
