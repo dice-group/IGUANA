@@ -55,7 +55,7 @@ public class SPARQLProtocolWorkerTest {
                     .containerThreads(10)
                     .asynchronousResponseEnabled(true)
                     .asynchronousResponseThreads(10)
-                    .timeout(1000))
+                    .timeout(50000))
             .failOnUnmatchedRequests(true)
             .build();
 
