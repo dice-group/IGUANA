@@ -135,12 +135,11 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 .setConnPoolPolicy(PoolReusePolicy.FIFO)
                 .setDefaultConnectionConfig(org.apache.hc.client5.http.config.ConnectionConfig.custom()
                         .setConnectTimeout(Timeout.ofSeconds(5))
-                        .setValidateAfterInactivity(TimeValue.ofSeconds(5))
                         .build())
                 .build();
         final var ioReactorConfig = IOReactorConfig.custom()
                 .setTcpNoDelay(true)
-                .setIoThreadCount((threadCount * 2) + 1)
+                .setIoThreadCount(threadCount + 1)
                 .setSelectInterval(TimeValue.ofMilliseconds(100))
                 .setSoKeepAlive(true)
                 .build();
@@ -153,8 +152,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         .setContentCompressionEnabled(false)
                         .setHardCancellationEnabled(true)
                         .build())
-                .evictExpiredConnections()
-                .evictIdleConnections(TimeValue.ofSeconds(1))
                 .setRetryStrategy(DefaultHttpRequestRetryStrategy.INSTANCE)
                 .build();
         httpClient.start();
