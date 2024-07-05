@@ -4,7 +4,6 @@ import org.aksw.iguana.cc.mockup.MockupQueryHandler;
 import org.aksw.iguana.cc.mockup.MockupWorker;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,7 +46,6 @@ public class RDFFileStorageTest extends StorageTest {
 
 	@ParameterizedTest
 	@MethodSource("data")
-	@Order(2)
 	public void testRDFFileStorage(String path, List<TaskResult> results, Model expectedModel) {
 		final var rdfStorage = new RDFFileStorage(path);
 		for (var result : results) {
