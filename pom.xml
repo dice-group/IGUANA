@@ -313,6 +313,7 @@
                                 -march=x86-64-v3
                                 --no-fallback
                                 -O3
+                                -H:-UseCompressedReferences
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
