@@ -1,905 +1,1392 @@
 <?xml version="1.0"?>
-<rdf:RDF xmlns="https://iguana-benchmark.eu/ontology/4.0.0/iguana.owl#"
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
      xml:base="https://iguana-benchmark.eu/ontology/4.0.0/iguana.owl"
-     xmlns:dc="http://purl.org/dc/elements/1.1/"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:dcam="http://purl.org/dc/dcam/"
-     xmlns:iont="http://iguana-benchmark.eu/class/"
-     xmlns:ires="http://iguana-benchmark.eu/resource/"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-     xmlns:iprop="http://iguana-benchmark.eu/properties/"
-     xmlns:schor="https://w3id.org/scholarlydata/role/"
-     xmlns:dcterms="http://purl.org/dc/terms/"
-     xmlns:data-view="http://www.w3.org/2003/g/data-view#">
-    <owl:Ontology rdf:about="https://iguana-benchmark.eu/ontology/4.0.0/iguana.owl">
-        <owl:imports rdf:resource="http://purl.org/dc/elements/1.1/"/>
-        <owl:imports rdf:resource="http://purl.org/dc/terms/"/>
-        <owl:imports rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
-        <owl:imports rdf:resource="http://www.w3.org/2000/01/rdf-schema#"/>
-        <owl:imports rdf:resource="http://www.w3.org/2002/07/owl"/>
-        <dc:title xml:lang="en">Iguana results ontology</dc:title>
-        <dcterms:created>2020/09/18</dcterms:created>
-        <dcterms:lastModified>2024/03/20</dcterms:lastModified>
-        <dcterms:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
-        <rdfs:comment xml:lang="en">The Iguana results ontology explains the rdf results of an Iguana benchmark.</rdfs:comment>
-        <rdfs:label xml:lang="en">Iguana results ontology</rdfs:label>
-        <owl:versionInfo>4.0.0</owl:versionInfo>
-    </owl:Ontology>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Annotation properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://purl.org/dc/terms/lastModified -->
-
-    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/lastModified"/>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Object Properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/connection -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/connection">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/Connection"/>
-        <rdfs:comment xml:lang="en">Assigns a Connection to a Worker.</rdfs:comment>
-        <rdfs:label>connection</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/dataset -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/dataset">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Connection"/>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/Dataset"/>
-        <rdfs:comment xml:lang="en">Assigns a Dataset to a Connection.</rdfs:comment>
-        <rdfs:label>dataset</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/executionTook -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/executionTook">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dayTimeDuration"/>
-        <rdfs:comment>The time duration of the execution of a query.</rdfs:comment>
-        <rdfs:label>executionTook</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/metric -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/metric">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Annotates a Task, Worker or ExecutedQuery with a Metric. The Metric itself is provided using the Property, this just annotates the subject to provide these results.</rdfs:comment>
-        <rdfs:label>metric</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/query -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/query">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:comment xml:lang="en">Assigns an ExecutedQuery to a Worker or Task. The ExecutedQuery provides further metrics and statistics.</rdfs:comment>
-        <rdfs:label>query</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/queryExecution -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/queryExecution">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <rdfs:comment xml:lang="en">Assigns a QueryExecution to an ExecutedQuery.</rdfs:comment>
-        <rdfs:label>queryExecution</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/queryID -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/queryID">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/QueryExecution"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/Query"/>
-        <rdfs:comment xml:lang="en">Assigns a Query and its statistics, as well as the string of the query to an ExecutedQuery.</rdfs:comment>
-        <rdfs:label>queryID</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/responseBody -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/responseBody">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/ResponseBody"/>
-        <rdfs:comment xml:lang="en">Assigns a ResponseBody to a QueryExecution.</rdfs:comment>
-        <rdfs:label>responseBody</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/task -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/task">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Suite"/>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/Task"/>
-        <rdfs:comment xml:lang="en">Assigns a Task to an Suite.</rdfs:comment>
-        <rdfs:label>task</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/timeLimit -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/timeLimit">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dayTimeDuration"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/timeOut -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/timeOut">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dayTimeDuration"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/totalTime -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/totalTime">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dayTimeDuration"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/workerResult -->
-
-    <owl:ObjectProperty rdf:about="http://iguana-benchmark.eu/properties/workerResult">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Task"/>
-        <rdfs:range rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:comment xml:lang="en">Assigns a Worker to an Task. (mostly a Stresstest)</rdfs:comment>
-        <rdfs:label>workerResult</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Data properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/AvgQPS -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/AvgQPS">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-        <rdfs:comment xml:lang="en">The average number of queries answered successfully per second value.</rdfs:comment>
-        <rdfs:label>AvgQPS</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/ID -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/ID">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Query"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:label>ID</rdfs:label>
-        <rdfs:label>The numeric query ID.</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/NoQ -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/NoQ">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of successfully executed queries value</rdfs:comment>
-        <rdfs:label>NoQ</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/NoQPH -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/NoQPH">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-        <rdfs:comment xml:lang="en">The number of queries per hour value.</rdfs:comment>
-        <rdfs:label>NoQPH</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/QMPH -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/QMPH">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-        <rdfs:comment xml:lang="en">The query mixes per hour value</rdfs:comment>
-        <rdfs:label>QMPH</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/QPS -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/QPS">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-        <rdfs:comment xml:lang="en">The queries per second value.</rdfs:comment>
-        <rdfs:label>QPS</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/bindings -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/bindings">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ResponseBody"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-        <rdfs:comment xml:lang="en">The number of bindings the query received.</rdfs:comment>
-        <rdfs:label>bindings</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/code -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/code">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-        <rdfs:comment xml:lang="en">The result code of the execution of a query. </rdfs:comment>
-        <rdfs:label>code</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/endDate -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/endDate">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
-        <rdfs:comment xml:lang="en">The date and time at which the Task or Worker ended.</rdfs:comment>
-        <rdfs:label>endDate</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/exception -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/exception">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/QueryExecution"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/ResponseBody"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-        <rdfs:comment xml:lang="en">The exception, if any occurred, during the execution of the query or the processing of its response body.</rdfs:comment>
-        <rdfs:label>exception</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/failed -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/failed">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery.</rdfs:comment>
-        <rdfs:label>failed</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/fullID -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/fullID">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Query"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-        <rdfs:comment>The full query ID consists of the hashcode of its query handler and the query&apos;s id inside of the query handler in this format: &lt;queryhandler_hashg;:&lt;id&gt;.</rdfs:comment>
-        <rdfs:label>fullID</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/httpCode -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/httpCode">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The http response code of the query execution.</rdfs:comment>
-        <rdfs:label>httpCode</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/noOfQueries -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/noOfQueries">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of queries assigned to the worker.</rdfs:comment>
-        <rdfs:label>noOfQueries</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/noOfQueryMixes -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/noOfQueryMixes">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of query mixes a Worker has to execute.</rdfs:comment>
-        <rdfs:label>noOfQueryMixes</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/noOfWorkers -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/noOfWorkers">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Stresstest"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of Workers the stresstest utilized.</rdfs:comment>
-        <rdfs:label>noOfWorkers</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/penalizedAvgQPS -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/penalizedAvgQPS">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-        <rdfs:comment xml:lang="en">The average number of queries answered successfully per second value using the penaltyQPS.</rdfs:comment>
-        <rdfs:label>penalizedAvgQPS</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/penalizedQPS -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/penalizedQPS">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-        <rdfs:comment xml:lang="en">The queries per second value where failed queries are rated using a penalty (default is the timeOut of a Task).</rdfs:comment>
-        <rdfs:label>penalizedQPS</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/responseBodyHash -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/responseBodyHash">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ResponseBody"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-        <rdfs:comment xml:lang="en">The hashcode of the response body.</rdfs:comment>
-        <rdfs:label>responseBodyHash</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/resultSize -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/resultSize">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The result size of a ExecutedQuery.</rdfs:comment>
-        <rdfs:comment xml:lang="en">The result size of the query&apos;s response body. The value is -1 if there wasn&apos;t any response body received.</rdfs:comment>
-        <rdfs:label>resultSize</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/results -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/results">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ResponseBody"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-        <rdfs:comment xml:lang="en">The number of results the query received.</rdfs:comment>
-        <rdfs:label>results</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/run -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/run">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of execution for this query.</rdfs:comment>
-        <rdfs:label>run</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/startDate -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/startDate">
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/QueryExecution"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Task"/>
-                    <rdf:Description rdf:about="http://iguana-benchmark.eu/class/Worker"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
-        <rdfs:comment xml:lang="en">The date and time at which the Task or Worker started.</rdfs:comment>
-        <rdfs:label>startDate</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/succeeded -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/succeeded">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of succeeded executions of the ExecutedQuery.</rdfs:comment>
-        <rdfs:label>succeeded</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/success -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/success">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
-        <rdfs:comment xml:lang="en">If the query has been successful or not.</rdfs:comment>
-        <rdfs:label>success</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/time -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/time"/>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/timeLimit -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/timeLimit"/>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/timeOut -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/timeOut"/>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/timeOuts -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/timeOuts">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a time out</rdfs:comment>
-        <rdfs:label>timeOuts</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/totalTime -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/totalTime"/>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/unknownExceptions -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/unknownExceptions">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was unknown.</rdfs:comment>
-        <rdfs:label>unknownExceptions</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/variable -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/variable">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ResponseBody"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-        <rdfs:comment xml:lang="en">A variable that the query contains.</rdfs:comment>
-        <rdfs:label>variable</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/version -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/version">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Connection"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-        <rdfs:comment xml:lang="en">Version of the triplestore tested.</rdfs:comment>
-        <rdfs:label>version</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/workerID -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/workerID">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The worked ID assigned to the worker</rdfs:comment>
-        <rdfs:label>workerID</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/workerType -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/workerType">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-        <rdfs:comment xml:lang="en">The worker class name.</rdfs:comment>
-        <rdfs:label>workerType</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://iguana-benchmark.eu/properties/wrongCodes -->
-
-    <owl:DatatypeProperty rdf:about="http://iguana-benchmark.eu/properties/wrongCodes">
-        <rdfs:domain rdf:resource="http://iguana-benchmark.eu/class/ExecutedQuery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-        <rdfs:comment xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a wrong result code (e.g 400)</rdfs:comment>
-        <rdfs:label>wrongCodes</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Classes
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/Connection -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/Connection">
-        <rdfs:comment xml:lang="en">A Connection represents a benchmarked endpoint.</rdfs:comment>
-        <rdfs:label>Connection</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/Dataset -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/Dataset">
-        <rdfs:comment xml:lang="en">A Dataset represents the dataset used for a benchmarked endpoint.</rdfs:comment>
-        <rdfs:label>Dataset</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/ExecutedQuery -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/ExecutedQuery">
-        <owl:disjointWith rdf:resource="http://iguana-benchmark.eu/class/Query"/>
-        <owl:disjointWith rdf:resource="http://iguana-benchmark.eu/class/QueryExecution"/>
-        <owl:disjointWith rdf:resource="http://iguana-benchmark.eu/class/Task"/>
-        <owl:disjointWith rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:comment xml:lang="en">An ExecutedQuery is a query which was executed one or more times against a Connection using either one Worker or the aggregation of several ExecutedQueries which are assigned to a Task. It provides several Metric results. The ExecutedQuery is assigned to a worker or a Task.</rdfs:comment>
-        <rdfs:label>ExecutedQuery</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/Metric -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/Metric">
-        <rdfs:comment xml:lang="en">A Metric is the abstract class providing a result metric.</rdfs:comment>
-        <rdfs:label>Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/Query -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/Query">
-        <rdfs:comment xml:lang="en">A Query is the query string of a given query (most likely a sparql query) together with a collection of statistics. The query is Suite independent.</rdfs:comment>
-        <rdfs:label>Query</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/QueryExecution -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/QueryExecution">
-        <owl:disjointWith rdf:resource="http://iguana-benchmark.eu/class/ResponseBody"/>
-        <rdfs:comment xml:lang="en">A QueryExecution is the single execution of a query against a Connection.</rdfs:comment>
-        <rdfs:label>QueryExecution</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/ResponseBody -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/ResponseBody">
-        <rdfs:comment xml:lang="en">The ResponseBody represents the response body of an executed query.</rdfs:comment>
-        <rdfs:label>ResponseBody</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/Stresstest -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/Stresstest">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Task"/>
-        <rdfs:comment xml:lang="en">The Stresstest Task benchmarks a system by stresstesting it.</rdfs:comment>
-        <rdfs:label>Stresstest</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/Suite -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/Suite">
-        <rdfs:comment xml:lang="en">A suite is a collection of benchmarks.</rdfs:comment>
-        <rdfs:label>Suite</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/Task -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/Task">
-        <owl:disjointWith rdf:resource="http://iguana-benchmark.eu/class/Worker"/>
-        <rdfs:comment xml:lang="en">Abstract class for various tasks.</rdfs:comment>
-        <rdfs:label>Task</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/Worker -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/Worker">
-        <rdfs:comment xml:lang="en">A Worker is a thread that executes a set of queries against a Connection. It simulates a user.</rdfs:comment>
-        <rdfs:label>Worker</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/AES -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/AES">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Aggregated Execution Statistics.</rdfs:comment>
-        <rdfs:label>AES Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/AvgQPS -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/AvgQPS">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Average Queries Per Second.</rdfs:comment>
-        <rdfs:label>AvgQPS Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/EachQuery -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/EachQuery">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Each query execution statistics.</rdfs:comment>
-        <rdfs:label>EachQuery Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/NoQ -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/NoQ">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Number of successfully executed Queries.</rdfs:comment>
-        <rdfs:label>NoQ Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/NoQPH -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/NoQPH">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Number of Queries Per Hour.</rdfs:comment>
-        <rdfs:label>NoQPH Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/PAvgQPS -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/PAvgQPS">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Penalized Average Queries Per Second.</rdfs:comment>
-        <rdfs:label>PAvgQPS Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/PQPS -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/PQPS">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Penalized Queries Per Second.</rdfs:comment>
-        <rdfs:label>PQPS Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/QMPH -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/QMPH">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Query Mixes Per Hour.</rdfs:comment>
-        <rdfs:label>QMPH Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://iguana-benchmark.eu/class/metric/QPS -->
-
-    <owl:Class rdf:about="http://iguana-benchmark.eu/class/metric/QPS">
-        <rdfs:subClassOf rdf:resource="http://iguana-benchmark.eu/class/Metric"/>
-        <rdfs:comment xml:lang="en">Queries Per Second Metric.</rdfs:comment>
-        <rdfs:label>QPS Metric</rdfs:label>
-    </owl:Class>
-    
-
-
-    <!-- http://www.w3.org/2001/XMLSchema#dayTimeDuration -->
-
-    <owl:Class rdf:about="http://www.w3.org/2001/XMLSchema#dayTimeDuration"/>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Annotations
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    <rdf:Description rdf:about="http://iguana-benchmark.eu/properties/timeLimit">
-        <rdfs:comment xml:lang="en">The time limit after which a Worker stops its execution of queries.</rdfs:comment>
-        <rdfs:label>timeLimit</rdfs:label>
-    </rdf:Description>
-    <rdf:Description rdf:about="http://iguana-benchmark.eu/properties/timeOut">
-        <rdfs:comment xml:lang="en">The timeout set for this worker.</rdfs:comment>
-        <rdfs:label>timeOut</rdfs:label>
-    </rdf:Description>
-    <rdf:Description rdf:about="http://iguana-benchmark.eu/properties/totalTime">
-        <rdfs:comment xml:lang="en">The summed up execution time of all executions of the ExecutedQuery in milliseconds.</rdfs:comment>
-        <rdfs:label>totalTime</rdfs:label>
-    </rdf:Description>
-</rdf:RDF>
+     ontologyIRI="https://iguana-benchmark.eu/ontology/4.0.0/iguana.owl">
+    <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1/"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="iont" IRI="http://iguana-benchmark.eu/class/"/>
+    <Prefix name="ires" IRI="http://iguana-benchmark.eu/resource/"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="skos" IRI="http://www.w3.org/2004/02/skos/core#"/>
+    <Prefix name="iprop" IRI="http://iguana-benchmark.eu/properties/"/>
+    <Prefix name="schor" IRI="https://w3id.org/scholarlydata/role/"/>
+    <Prefix name="dcterms" IRI="http://purl.org/dc/terms/"/>
+    <Import>http://purl.org/dc/elements/1.1/</Import>
+    <Import>http://purl.org/dc/terms/</Import>
+    <Import>http://www.w3.org/1999/02/22-rdf-syntax-ns#</Import>
+    <Import>http://www.w3.org/2000/01/rdf-schema#</Import>
+    <Import>http://www.w3.org/2002/07/owl</Import>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dc:title"/>
+        <Literal xml:lang="en">Iguana results ontology</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dcterms:created"/>
+        <Literal>2020/09/18</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dcterms:lastModified"/>
+        <Literal>2024/03/20</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dcterms:license"/>
+        <IRI>http://creativecommons.org/licenses/by/3.0/</IRI>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <Literal xml:lang="en">The Iguana results ontology explains the rdf results of an Iguana benchmark.</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <Literal xml:lang="en">Iguana results ontology</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="owl:versionInfo"/>
+        <Literal>4.0.0</Literal>
+    </Annotation>
+    <Declaration>
+        <Class abbreviatedIRI="iont:Connection"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:Dataset"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:Query"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:ResponseBody"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:Stresstest"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:Suite"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:Task"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/AES"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/AvgQPS"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/EachQuery"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/NoQ"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/NoQPH"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/PAvgQPS"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/PQPS"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/QMPH"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/QPS"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:connection"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:dataset"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:executionTook"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:metric"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:query"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:queryExecution"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:queryID"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:responseBody"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:task"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="iprop:workerResult"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:AvgQPS"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:ID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:NoQ"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:NoQPH"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:QMPH"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:QPS"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:bindings"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:code"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:endDate"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:exception"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:failed"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:fullID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:httpCode"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:noOfQueries"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:noOfQueryMixes"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:noOfWorkers"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:penalizedAvgQPS"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:penalizedQPS"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:responseBodyHash"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:resultSize"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:results"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:run"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:startDate"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:succeeded"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:success"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:time"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:timeLimit"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:timeOut"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:timeOuts"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:totalTime"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:unknownExceptions"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:variable"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:version"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:workerID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:workerType"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:wrongCodes"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dc:title"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dcterms:created"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dcterms:lastModified"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dcterms:license"/>
+    </Declaration>
+    <SubClassOf>
+        <Class abbreviatedIRI="iont:Stresstest"/>
+        <Class abbreviatedIRI="iont:Task"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/AES"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/AvgQPS"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/EachQuery"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/NoQ"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/NoQPH"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/PAvgQPS"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/PQPS"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/QMPH"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://iguana-benchmark.eu/class/metric/QPS"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <DisjointClasses>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+        <Class abbreviatedIRI="iont:Query"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+        <Class abbreviatedIRI="iont:Task"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+        <Class abbreviatedIRI="iont:ResponseBody"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class abbreviatedIRI="iont:Task"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </DisjointClasses>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:connection"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:dataset"/>
+        <Class abbreviatedIRI="iont:Connection"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:executionTook"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:metric"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:ExecutedQuery"/>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:query"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:queryExecution"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:queryID"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:ExecutedQuery"/>
+            <Class abbreviatedIRI="iont:QueryExecution"/>
+        </ObjectUnionOf>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:responseBody"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:task"/>
+        <Class abbreviatedIRI="iont:Suite"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:timeLimit"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:timeOut"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:totalTime"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="iprop:workerResult"/>
+        <Class abbreviatedIRI="iont:Task"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:connection"/>
+        <Class abbreviatedIRI="iont:Connection"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:dataset"/>
+        <Class abbreviatedIRI="iont:Dataset"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:executionTook"/>
+        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:metric"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:query"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:queryExecution"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:queryID"/>
+        <Class abbreviatedIRI="iont:Query"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:responseBody"/>
+        <Class abbreviatedIRI="iont:ResponseBody"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:task"/>
+        <Class abbreviatedIRI="iont:Task"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:timeLimit"/>
+        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:timeOut"/>
+        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:totalTime"/>
+        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="iprop:workerResult"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </ObjectPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:AvgQPS"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:ID"/>
+        <Class abbreviatedIRI="iont:Query"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:NoQ"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:NoQPH"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:QMPH"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:QPS"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:bindings"/>
+        <Class abbreviatedIRI="iont:ResponseBody"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:code"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:endDate"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:exception"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:QueryExecution"/>
+            <Class abbreviatedIRI="iont:ResponseBody"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:failed"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:fullID"/>
+        <Class abbreviatedIRI="iont:Query"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:httpCode"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:noOfQueries"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:noOfQueryMixes"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:noOfWorkers"/>
+        <Class abbreviatedIRI="iont:Stresstest"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:penalizedAvgQPS"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:penalizedQPS"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:responseBodyHash"/>
+        <Class abbreviatedIRI="iont:ResponseBody"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:resultSize"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:resultSize"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:results"/>
+        <Class abbreviatedIRI="iont:ResponseBody"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:run"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:startDate"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:QueryExecution"/>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:succeeded"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:success"/>
+        <Class abbreviatedIRI="iont:QueryExecution"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:timeOuts"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:unknownExceptions"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:variable"/>
+        <Class abbreviatedIRI="iont:ResponseBody"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:version"/>
+        <Class abbreviatedIRI="iont:Connection"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:workerID"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:workerType"/>
+        <Class abbreviatedIRI="iont:Worker"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:wrongCodes"/>
+        <Class abbreviatedIRI="iont:ExecutedQuery"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:AvgQPS"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:ID"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:NoQ"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:NoQPH"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:QMPH"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:QPS"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:bindings"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:code"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:endDate"/>
+        <Datatype abbreviatedIRI="xsd:dateTime"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:exception"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:failed"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:fullID"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:httpCode"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:noOfQueries"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:noOfQueryMixes"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:noOfWorkers"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:penalizedAvgQPS"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:penalizedQPS"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:responseBodyHash"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:resultSize"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:resultSize"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:results"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:run"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:startDate"/>
+        <Datatype abbreviatedIRI="xsd:dateTime"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:succeeded"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:success"/>
+        <Datatype abbreviatedIRI="xsd:boolean"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:timeOuts"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:unknownExceptions"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:variable"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:version"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:workerID"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:workerType"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:wrongCodes"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:Connection</AbbreviatedIRI>
+        <Literal xml:lang="en">A Connection represents a benchmarked endpoint.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:Connection</AbbreviatedIRI>
+        <Literal>Connection</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:Dataset</AbbreviatedIRI>
+        <Literal xml:lang="en">A Dataset represents the dataset used for a benchmarked endpoint.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:Dataset</AbbreviatedIRI>
+        <Literal>Dataset</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:ExecutedQuery</AbbreviatedIRI>
+        <Literal xml:lang="en">An ExecutedQuery is a query which was executed one or more times against a Connection using either one Worker or the aggregation of several ExecutedQueries which are assigned to a Task. It provides several Metric results. The ExecutedQuery is assigned to a worker or a Task.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:ExecutedQuery</AbbreviatedIRI>
+        <Literal>ExecutedQuery</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:Metric</AbbreviatedIRI>
+        <Literal xml:lang="en">A Metric is the abstract class providing a result metric.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:Metric</AbbreviatedIRI>
+        <Literal>Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:Query</AbbreviatedIRI>
+        <Literal xml:lang="en">A Query is the query string of a given query (most likely a sparql query) together with a collection of statistics. The query is Suite independent.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:Query</AbbreviatedIRI>
+        <Literal>Query</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:QueryExecution</AbbreviatedIRI>
+        <Literal xml:lang="en">A QueryExecution is the single execution of a query against a Connection.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:QueryExecution</AbbreviatedIRI>
+        <Literal>QueryExecution</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:ResponseBody</AbbreviatedIRI>
+        <Literal xml:lang="en">The ResponseBody represents the response body of an executed query.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:ResponseBody</AbbreviatedIRI>
+        <Literal>ResponseBody</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:Stresstest</AbbreviatedIRI>
+        <Literal xml:lang="en">The Stresstest Task benchmarks a system by stresstesting it.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:Stresstest</AbbreviatedIRI>
+        <Literal>Stresstest</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:Suite</AbbreviatedIRI>
+        <Literal xml:lang="en">A suite is a collection of benchmarks.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:Suite</AbbreviatedIRI>
+        <Literal>Suite</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:Task</AbbreviatedIRI>
+        <Literal xml:lang="en">Abstract class for various tasks.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:Task</AbbreviatedIRI>
+        <Literal>Task</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iont:Worker</AbbreviatedIRI>
+        <Literal xml:lang="en">A Worker is a thread that executes a set of queries against a Connection. It simulates a user.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iont:Worker</AbbreviatedIRI>
+        <Literal>Worker</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/AES</IRI>
+        <Literal xml:lang="en">Aggregated Execution Statistics.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/AES</IRI>
+        <Literal>AES Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/AvgQPS</IRI>
+        <Literal xml:lang="en">Average Queries Per Second.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/AvgQPS</IRI>
+        <Literal>AvgQPS Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/EachQuery</IRI>
+        <Literal xml:lang="en">Each query execution statistics.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/EachQuery</IRI>
+        <Literal>EachQuery Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/NoQ</IRI>
+        <Literal xml:lang="en">Number of successfully executed Queries.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/NoQ</IRI>
+        <Literal>NoQ Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/NoQPH</IRI>
+        <Literal xml:lang="en">Number of Queries Per Hour.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/NoQPH</IRI>
+        <Literal>NoQPH Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/PAvgQPS</IRI>
+        <Literal xml:lang="en">Penalized Average Queries Per Second.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/PAvgQPS</IRI>
+        <Literal>PAvgQPS Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/PQPS</IRI>
+        <Literal xml:lang="en">Penalized Queries Per Second.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/PQPS</IRI>
+        <Literal>PQPS Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/QMPH</IRI>
+        <Literal xml:lang="en">Query Mixes Per Hour.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/QMPH</IRI>
+        <Literal>QMPH Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/QPS</IRI>
+        <Literal xml:lang="en">Queries Per Second Metric.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://iguana-benchmark.eu/class/metric/QPS</IRI>
+        <Literal>QPS Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:AvgQPS</AbbreviatedIRI>
+        <Literal xml:lang="en">The average number of queries answered successfully per second value.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:AvgQPS</AbbreviatedIRI>
+        <Literal>AvgQPS</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:ID</AbbreviatedIRI>
+        <Literal>ID</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:ID</AbbreviatedIRI>
+        <Literal>The numeric query ID.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:NoQ</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of successfully executed queries value</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:NoQ</AbbreviatedIRI>
+        <Literal>NoQ</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:NoQPH</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of queries per hour value.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:NoQPH</AbbreviatedIRI>
+        <Literal>NoQPH</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:QMPH</AbbreviatedIRI>
+        <Literal xml:lang="en">The query mixes per hour value</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:QMPH</AbbreviatedIRI>
+        <Literal>QMPH</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:QPS</AbbreviatedIRI>
+        <Literal xml:lang="en">The queries per second value.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:QPS</AbbreviatedIRI>
+        <Literal>QPS</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:bindings</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of bindings the query received.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:bindings</AbbreviatedIRI>
+        <Literal>bindings</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:code</AbbreviatedIRI>
+        <Literal xml:lang="en">The result code of the execution of a query. </Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:code</AbbreviatedIRI>
+        <Literal>code</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:connection</AbbreviatedIRI>
+        <Literal xml:lang="en">Assigns a Connection to a Worker.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:connection</AbbreviatedIRI>
+        <Literal>connection</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:dataset</AbbreviatedIRI>
+        <Literal xml:lang="en">Assigns a Dataset to a Connection.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:dataset</AbbreviatedIRI>
+        <Literal>dataset</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:endDate</AbbreviatedIRI>
+        <Literal xml:lang="en">The date and time at which the Task or Worker ended.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:endDate</AbbreviatedIRI>
+        <Literal>endDate</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:exception</AbbreviatedIRI>
+        <Literal xml:lang="en">The exception, if any occurred, during the execution of the query or the processing of its response body.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:exception</AbbreviatedIRI>
+        <Literal>exception</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:executionTook</AbbreviatedIRI>
+        <Literal>The time duration of the execution of a query.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:executionTook</AbbreviatedIRI>
+        <Literal>executionTook</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:failed</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of failed executions of the ExecutedQuery.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:failed</AbbreviatedIRI>
+        <Literal>failed</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:fullID</AbbreviatedIRI>
+        <Literal>The full query ID consists of the hashcode of its query handler and the query&apos;s id inside of the query handler in this format: &lt;queryhandler_hashg;:&lt;id&gt;.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:fullID</AbbreviatedIRI>
+        <Literal>fullID</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:httpCode</AbbreviatedIRI>
+        <Literal xml:lang="en">The http response code of the query execution.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:httpCode</AbbreviatedIRI>
+        <Literal>httpCode</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:metric</AbbreviatedIRI>
+        <Literal xml:lang="en">Annotates a Task, Worker or ExecutedQuery with a Metric. The Metric itself is provided using the Property, this just annotates the subject to provide these results.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:metric</AbbreviatedIRI>
+        <Literal>metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:noOfQueries</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of queries assigned to the worker.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:noOfQueries</AbbreviatedIRI>
+        <Literal>noOfQueries</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:noOfQueryMixes</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of query mixes a Worker has to execute.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:noOfQueryMixes</AbbreviatedIRI>
+        <Literal>noOfQueryMixes</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:noOfWorkers</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of Workers the stresstest utilized.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:noOfWorkers</AbbreviatedIRI>
+        <Literal>noOfWorkers</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:penalizedAvgQPS</AbbreviatedIRI>
+        <Literal xml:lang="en">The average number of queries answered successfully per second value using the penaltyQPS.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:penalizedAvgQPS</AbbreviatedIRI>
+        <Literal>penalizedAvgQPS</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:penalizedQPS</AbbreviatedIRI>
+        <Literal xml:lang="en">The queries per second value where failed queries are rated using a penalty (default is the timeOut of a Task).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:penalizedQPS</AbbreviatedIRI>
+        <Literal>penalizedQPS</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:query</AbbreviatedIRI>
+        <Literal xml:lang="en">Assigns an ExecutedQuery to a Worker or Task. The ExecutedQuery provides further metrics and statistics.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:query</AbbreviatedIRI>
+        <Literal>query</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:queryExecution</AbbreviatedIRI>
+        <Literal xml:lang="en">Assigns a QueryExecution to an ExecutedQuery.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:queryExecution</AbbreviatedIRI>
+        <Literal>queryExecution</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:queryID</AbbreviatedIRI>
+        <Literal xml:lang="en">Assigns a Query and its statistics, as well as the string of the query to an ExecutedQuery.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:queryID</AbbreviatedIRI>
+        <Literal>queryID</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:responseBody</AbbreviatedIRI>
+        <Literal xml:lang="en">Assigns a ResponseBody to a QueryExecution.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:responseBody</AbbreviatedIRI>
+        <Literal>responseBody</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:responseBodyHash</AbbreviatedIRI>
+        <Literal xml:lang="en">The hashcode of the response body.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:responseBodyHash</AbbreviatedIRI>
+        <Literal>responseBodyHash</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:resultSize</AbbreviatedIRI>
+        <Literal xml:lang="en">The result size of a ExecutedQuery.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:resultSize</AbbreviatedIRI>
+        <Literal xml:lang="en">The result size of the query&apos;s response body. The value is -1 if there wasn&apos;t any response body received.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:resultSize</AbbreviatedIRI>
+        <Literal>resultSize</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:results</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of results the query received.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:results</AbbreviatedIRI>
+        <Literal>results</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:run</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of execution for this query.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:run</AbbreviatedIRI>
+        <Literal>run</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:startDate</AbbreviatedIRI>
+        <Literal xml:lang="en">The date and time at which the Task or Worker started.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:startDate</AbbreviatedIRI>
+        <Literal>startDate</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:succeeded</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of succeeded executions of the ExecutedQuery.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:succeeded</AbbreviatedIRI>
+        <Literal>succeeded</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:success</AbbreviatedIRI>
+        <Literal xml:lang="en">If the query has been successful or not.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:success</AbbreviatedIRI>
+        <Literal>success</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:task</AbbreviatedIRI>
+        <Literal xml:lang="en">Assigns a Task to an Suite.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:task</AbbreviatedIRI>
+        <Literal>task</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:timeLimit</AbbreviatedIRI>
+        <Literal xml:lang="en">The time limit after which a Worker stops its execution of queries.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:timeLimit</AbbreviatedIRI>
+        <Literal>timeLimit</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:timeOut</AbbreviatedIRI>
+        <Literal xml:lang="en">The timeout set for this worker.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:timeOut</AbbreviatedIRI>
+        <Literal>timeOut</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:timeOuts</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a time out</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:timeOuts</AbbreviatedIRI>
+        <Literal>timeOuts</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:totalTime</AbbreviatedIRI>
+        <Literal xml:lang="en">The summed up execution time of all executions of the ExecutedQuery in milliseconds.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:totalTime</AbbreviatedIRI>
+        <Literal>totalTime</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:unknownExceptions</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was unknown.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:unknownExceptions</AbbreviatedIRI>
+        <Literal>unknownExceptions</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:variable</AbbreviatedIRI>
+        <Literal xml:lang="en">A variable that the query contains.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:variable</AbbreviatedIRI>
+        <Literal>variable</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:version</AbbreviatedIRI>
+        <Literal xml:lang="en">Version of the triplestore tested.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:version</AbbreviatedIRI>
+        <Literal>version</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:workerID</AbbreviatedIRI>
+        <Literal xml:lang="en">The worked ID assigned to the worker</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:workerID</AbbreviatedIRI>
+        <Literal>workerID</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:workerResult</AbbreviatedIRI>
+        <Literal xml:lang="en">Assigns a Worker to an Task. (mostly a Stresstest)</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:workerResult</AbbreviatedIRI>
+        <Literal>workerResult</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:workerType</AbbreviatedIRI>
+        <Literal xml:lang="en">The worker class name.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:workerType</AbbreviatedIRI>
+        <Literal>workerType</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:wrongCodes</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of failed executions of the ExecutedQuery whereas the Reason was a wrong result code (e.g 400)</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:wrongCodes</AbbreviatedIRI>
+        <Literal>wrongCodes</Literal>
+    </AnnotationAssertion>
+</Ontology>
 
 
 
