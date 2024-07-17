@@ -1,21 +1,22 @@
 <?xml version="1.0"?>
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
-     xml:base="https://iguana-benchmark.eu/ontology/4.0.0/iguana.owl"
+     xml:base="https://iguana-benchmark.eu/ontology/"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     ontologyIRI="https://iguana-benchmark.eu/ontology/4.0.0/iguana.owl">
+     ontologyIRI="https://iguana-benchmark.eu/ontology/"
+     versionIRI="https://iguana-benchmark.eu/ontology/4.0.0/">
     <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1/"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
     <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
-    <Prefix name="iont" IRI="http://iguana-benchmark.eu/class/"/>
-    <Prefix name="ires" IRI="http://iguana-benchmark.eu/resource/"/>
+    <Prefix name="iont" IRI="https://iguana-benchmark.eu/ontology/class/"/>
+    <Prefix name="ires" IRI="https://iguana-benchmark.eu/ontology/resource/"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
     <Prefix name="skos" IRI="http://www.w3.org/2004/02/skos/core#"/>
-    <Prefix name="iprop" IRI="http://iguana-benchmark.eu/properties/"/>
+    <Prefix name="iprop" IRI="https://iguana-benchmark.eu/ontology/properties/"/>
     <Prefix name="schor" IRI="https://w3id.org/scholarlydata/role/"/>
     <Prefix name="dcterms" IRI="http://purl.org/dc/terms/"/>
     <Import>http://purl.org/dc/elements/1.1/</Import>
@@ -85,31 +86,31 @@
         <Class abbreviatedIRI="iont:Worker"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/AES"/>
+        <Class abbreviatedIRI="iont:metric/AES"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/AvgQPS"/>
+        <Class abbreviatedIRI="iont:metric/AvgQPS"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/EachQuery"/>
+        <Class abbreviatedIRI="iont:metric/EachQuery"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/NoQ"/>
+        <Class abbreviatedIRI="iont:metric/NoQ"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/NoQPH"/>
+        <Class abbreviatedIRI="iont:metric/NoQPH"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/PAvgQPS"/>
+        <Class abbreviatedIRI="iont:metric/PAvgQPS"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/PQPS"/>
+        <Class abbreviatedIRI="iont:metric/PQPS"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/QMPH"/>
+        <Class abbreviatedIRI="iont:metric/QMPH"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/QPS"/>
+        <Class abbreviatedIRI="iont:metric/QPS"/>
     </Declaration>
     <Declaration>
         <Class abbreviatedIRI="xsd:dayTimeDuration"/>
@@ -269,39 +270,39 @@
         <Class abbreviatedIRI="iont:Task"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/AES"/>
+        <Class abbreviatedIRI="iont:metric/AES"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/AvgQPS"/>
+        <Class abbreviatedIRI="iont:metric/AvgQPS"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/EachQuery"/>
+        <Class abbreviatedIRI="iont:metric/EachQuery"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/NoQ"/>
+        <Class abbreviatedIRI="iont:metric/NoQ"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/NoQPH"/>
+        <Class abbreviatedIRI="iont:metric/NoQPH"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/PAvgQPS"/>
+        <Class abbreviatedIRI="iont:metric/PAvgQPS"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/PQPS"/>
+        <Class abbreviatedIRI="iont:metric/PQPS"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/QMPH"/>
+        <Class abbreviatedIRI="iont:metric/QMPH"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://iguana-benchmark.eu/class/metric/QPS"/>
+        <Class abbreviatedIRI="iont:metric/QPS"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <DisjointClasses>
