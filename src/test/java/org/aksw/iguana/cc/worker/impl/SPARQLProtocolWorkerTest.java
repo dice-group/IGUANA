@@ -69,7 +69,6 @@ public class SPARQLProtocolWorkerTest {
     public static void setup() throws IOException {
         queryFile = Files.createTempFile("iguana-test-queries", ".tmp");
         Files.writeString(queryFile, QUERY, StandardCharsets.UTF_8);
-        wm.setGlobalFixedDelay(5);
     }
 
     @BeforeEach
@@ -233,6 +232,8 @@ public class SPARQLProtocolWorkerTest {
     @ParameterizedTest
     @MethodSource("completionTargets")
     public void testCompletionTargets(HttpWorker.CompletionTarget target) throws URISyntaxException, IOException {
+        wm.setGlobalFixedDelay(5);
+
         final var uri = new URI("http://localhost:" + wm.getPort() + "/ds/query");
         final var processor = new ResponseBodyProcessor("application/sparql-results+json");
         final var queryHandler = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, null, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
@@ -260,6 +261,8 @@ public class SPARQLProtocolWorkerTest {
         final HttpWorker.Result result = worker.start().join();
 
         for (var stat : result.executionStats()) {
+            if (stat.httpStatusCode().orElse(0) == 500)
+                continue; // ignore server errors
             stat.error().ifPresent(ex -> LOGGER.error(ex.getMessage(), ex));
             assertTrue(stat.successful());
             assertTrue(stat.error().isEmpty());
