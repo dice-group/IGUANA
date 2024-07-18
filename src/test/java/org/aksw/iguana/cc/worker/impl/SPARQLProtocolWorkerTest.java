@@ -50,6 +50,8 @@ public class SPARQLProtocolWorkerTest {
                     .useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
                     .dynamicPort()
                     .notifier(new ConsoleNotifier(false))
+                    .jettyIdleTimeout(2000L)
+                    .jettyStopTimeout(2000L)
                     .timeout(2000))
             .failOnUnmatchedRequests(true)
             .build();
