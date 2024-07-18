@@ -232,7 +232,7 @@ public class SPARQLProtocolWorkerTest {
     @ParameterizedTest
     @MethodSource("completionTargets")
     public void testCompletionTargets(HttpWorker.CompletionTarget target) throws URISyntaxException, IOException {
-        wm.setGlobalFixedDelay(5);
+        // wm.setGlobalFixedDelay(5);
 
         final var uri = new URI("http://localhost:" + wm.getPort() + "/ds/query");
         final var processor = new ResponseBodyProcessor("application/sparql-results+json");
@@ -245,7 +245,7 @@ public class SPARQLProtocolWorkerTest {
                 queryHandler,
                 target,
                 connection,
-                Duration.parse("PT360S"),
+                Duration.parse("PT2S"),
                 "application/sparql-results+json",
                 RequestFactory.RequestType.POST_URL_ENC_QUERY,
                 false
