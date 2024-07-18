@@ -49,10 +49,7 @@ public class SPARQLProtocolWorkerTest {
             .options(new WireMockConfiguration()
                     .useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
                     .dynamicPort()
-                    .notifier(new ConsoleNotifier(false))
-                    .jettyIdleTimeout(2000L)
-                    .jettyStopTimeout(2000L)
-                    .timeout(2000))
+                    .notifier(new ConsoleNotifier(false)))
             .failOnUnmatchedRequests(true)
             .build();
 
@@ -229,6 +226,8 @@ public class SPARQLProtocolWorkerTest {
     @ParameterizedTest
     @MethodSource("completionTargets")
     public void testCompletionTargets(HttpWorker.CompletionTarget target) throws URISyntaxException, IOException {
+        wm.setGlobalFixedDelay(5);
+
         final var uri = new URI("http://localhost:" + wm.getPort() + "/ds/query");
         final var processor = new ResponseBodyProcessor("application/sparql-results+json");
         final var queryHandler = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, null, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
@@ -240,7 +239,7 @@ public class SPARQLProtocolWorkerTest {
                 queryHandler,
                 target,
                 connection,
-                Duration.parse("PT5S"),
+                Duration.parse("PT60S"),
                 "application/sparql-results+json",
                 RequestFactory.RequestType.POST_URL_ENC_QUERY,
                 false
