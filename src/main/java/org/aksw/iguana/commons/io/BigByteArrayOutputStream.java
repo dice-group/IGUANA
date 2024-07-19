@@ -3,7 +3,7 @@ package org.aksw.iguana.commons.io;
 import org.apache.hadoop.hbase.io.ByteArrayOutputStream;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
  * the stream is cleared, all the internal ByteArrayOutputStreams are cleared and a new one is
  * added to the list.
  */
-public class BigByteArrayOutputStream extends OutputStream {
+public class BigByteArrayOutputStream extends ReversibleOutputStream {
 
     /**
      * The maximum size limit for an array. This is no limit to the amount of bytes {@code BigByteArrayOutputStream} can consume.
@@ -102,6 +102,7 @@ public class BigByteArrayOutputStream extends OutputStream {
         write(bbaos.toByteArray());
     }
 
+    @Override
     public long size() {
         return baosList.stream().mapToLong(ByteArrayOutputStream::size).sum();
     }
@@ -200,5 +201,10 @@ public class BigByteArrayOutputStream extends OutputStream {
     @Override
     public void close() throws IOException {
         this.closed = true;
+    }
+
+    @Override
+    public InputStream toInputStream() {
+        return new BigByteArrayInputStream(this);
     }
 }
