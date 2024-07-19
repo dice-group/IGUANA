@@ -85,7 +85,7 @@ public class ByteArrayListOutputStream extends ReversibleOutputStream {
         for (var buffer : bufferList) {
             sum += buffer.length;
         }
-        return sum;
+        return sum + (currentBuffer == null ? 0 : currentBuffer.position());
     }
 
     public List<byte[]> getBuffers() {
