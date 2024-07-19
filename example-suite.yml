@@ -105,3 +105,4 @@ storages:
 responseBodyProcessors:
   - contentType: "application/sparql-results+json"
     threads: 1
+    timeout: 1 min

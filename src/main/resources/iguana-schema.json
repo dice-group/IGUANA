@@ -151,11 +151,13 @@
         "threads": {
           "type": "integer",
           "minimum": 1
+        },
+        "timeout" : {
+          "type": "string"
         }
       },
       "required": [
-        "contentType",
-        "threads"
+        "contentType"
       ],
       "title": "ResponseBodyProcessor"
     },
