@@ -55,7 +55,7 @@ public class ResponseBodyProcessor {
     }
 
     private void submit(Key key, InputStream responseBodyStream) {
-        executor.execute(() -> {
+        final var future = executor.submit(() -> {
             var processingResult = languageProcessor.process(responseBodyStream, key.xxh64);
             responseDataMetrics.add(processingResult);
         });
