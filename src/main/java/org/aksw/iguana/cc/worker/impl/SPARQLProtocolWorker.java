@@ -131,28 +131,19 @@ public class SPARQLProtocolWorker extends HttpWorker {
         connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(threadCount * 1000)
                 .setMaxConnPerRoute(threadCount * 1000)
-                .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
-                .setConnPoolPolicy(PoolReusePolicy.FIFO)
-                .setDefaultConnectionConfig(org.apache.hc.client5.http.config.ConnectionConfig.custom()
-                        .setConnectTimeout(Timeout.ofSeconds(5))
-                        .build())
                 .build();
         final var ioReactorConfig = IOReactorConfig.custom()
                 .setTcpNoDelay(true)
-                .setIoThreadCount(threadCount + 1)
-                .setSelectInterval(TimeValue.ofMilliseconds(100))
                 .setSoKeepAlive(true)
                 .build();
         httpClient = HttpAsyncClients.custom()
                 .setConnectionManager(connectionManager)
                 .setIOReactorConfig(ioReactorConfig)
                 .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy())
-                .setConnectionManagerShared(false)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setContentCompressionEnabled(false)
                         .setHardCancellationEnabled(true)
                         .build())
-                .setRetryStrategy(DefaultHttpRequestRetryStrategy.INSTANCE)
                 .build();
         httpClient.start();
     }
