@@ -20,7 +20,11 @@ public class ByteArrayListInputStream extends InputStream {
     ByteArrayListInputStream(List<byte[]> data) {
         this.data = data;
         this.iterator = data.iterator();
-        this.currentBuffer = ByteBuffer.wrap(data.get(0));
+        if (iterator.hasNext()) {
+            this.currentBuffer = ByteBuffer.wrap(iterator.next());
+        } else {
+            this.currentBuffer = null;
+        }
     }
 
     private void updateAvailable(long n) {
@@ -30,12 +34,13 @@ public class ByteArrayListInputStream extends InputStream {
     }
 
     private boolean checkBuffer() {
-        if (currentBuffer == null) {
-            if (!iterator.hasNext()) {
-                return false;
-            }
-            currentBuffer = ByteBuffer.wrap(iterator.next());
+        if (currentBuffer != null && currentBuffer.hasRemaining()) {
+            return true;
         }
+        if (!iterator.hasNext()) {
+            return false;
+        }
+        currentBuffer = ByteBuffer.wrap(iterator.next());
         return true;
     }
 
@@ -53,20 +58,18 @@ public class ByteArrayListInputStream extends InputStream {
         int read = 0;
         int remaining = len;
         int bufferRemaining;
-        while (remaining > 0) {
-            if (!checkBuffer())
-                break;
+        while (remaining > 0 && checkBuffer()) {
             bufferRemaining = currentBuffer.remaining();
 
             // current buffer has enough bytes
             if (bufferRemaining >= remaining) {
-                currentBuffer.get(b, off, remaining);
+                currentBuffer.get(b, off + read, remaining);
                 read += remaining;
                 break;
             }
 
             // else
-            currentBuffer.get(b, off, bufferRemaining);
+            currentBuffer.get(b, off + read, bufferRemaining);
             currentBuffer = null;
             read += bufferRemaining;
             remaining -= bufferRemaining;
