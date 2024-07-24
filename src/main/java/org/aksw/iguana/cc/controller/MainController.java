@@ -28,14 +28,15 @@ public class MainController {
         @Parameter(names = {"--ignore-schema", "-is"}, description = "Do not check the schema before parsing the suite file.")
         private boolean ignoreShema = false;
 
+        @Parameter(names = {"--dry-run", "-d"}, hidden = true)
+        public static boolean dryRun = false;
+
         @Parameter(names = "--help", help = true)
         private boolean help;
 
         @Parameter(description = "suite file {yml,yaml,json}", arity = 1, required = true, converter = PathConverter.class)
         private Path suitePath;
     }
-
-    public static boolean dryRun = false;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
@@ -45,13 +46,6 @@ public class MainController {
      * @param argc The command line arguments that are passed to the program.
      */
     public static void main(String[] argc) {
-        for (String arg : argc) {
-            if (arg.equals("--dry")) {
-                dryRun = true;
-                break;
-            }
-        }
-
         // Configurator.reconfigure(URI.create("log4j2.yml"));
 
         var args = new Args();

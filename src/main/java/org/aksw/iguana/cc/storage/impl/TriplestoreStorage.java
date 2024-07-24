@@ -81,7 +81,7 @@ public class TriplestoreStorage implements Storage {
 		//submit Block to Triple Store
 		UpdateProcessor processor = UpdateExecutionFactory
 				.createRemote(blockRequest, endpoint, createHttpClient());
-		if (MainController.dryRun) {
+		if (MainController.Args.dryRun) {
 			try {
 				processor.execute();
 			} catch (Exception e) {
