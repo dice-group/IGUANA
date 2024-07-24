@@ -7,17 +7,31 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * An OutputStream that writes to a list of byte arrays.
+ * The buffers have a minimum size.
+ * If a write operation is smaller than the minimum size, the data is stored in a separate buffer.
+ * This buffer will be filled up by subsequent writings to the minimum size before another buffer is created.
+ */
 public class ByteArrayListOutputStream extends ReversibleOutputStream {
 
-    final int MIN_BUFFER_SIZE;
-    ByteBuffer currentBuffer;
+    private final int MIN_BUFFER_SIZE;
+    private ByteBuffer currentBuffer;
     private final LinkedList<byte[]> bufferList = new LinkedList<>();
-    boolean closed = false;
+    private boolean closed = false;
 
+    /**
+     * Creates a new ByteArrayListOutputStream with a minimum buffer size of 4096 bytes.
+     */
     public ByteArrayListOutputStream() {
         MIN_BUFFER_SIZE = 4096;
     }
 
+    /**
+     * Creates a new ByteArrayListOutputStream with the given minimum buffer size.
+     *
+     * @param minBufferSize the minimum buffer size
+     */
     public ByteArrayListOutputStream(int minBufferSize) {
         if (minBufferSize < 1) {
             throw new IllegalArgumentException("minBufferSize must be bigger than 1");
@@ -88,6 +102,13 @@ public class ByteArrayListOutputStream extends ReversibleOutputStream {
         return sum + (currentBuffer == null ? 0 : currentBuffer.position());
     }
 
+    /**
+     * Returns the list of buffers.
+     * The list does not contain the current buffer.
+     * If the stream is closed, the current buffer is trimmed to the actual size and then added to the list.
+     *
+     * @return the list of buffers
+     */
     public List<byte[]> getBuffers() {
         return bufferList;
     }

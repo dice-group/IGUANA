@@ -8,15 +8,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * An InputStream that reads from a list of byte arrays.
+ */
 public class ByteArrayListInputStream extends InputStream {
 
-    final List<byte[]> data;
-    Iterator<byte[]> iterator;
-    ByteBuffer currentBuffer;
-    boolean closed = false;
+    private final List<byte[]> data;
+    private Iterator<byte[]> iterator;
+    private ByteBuffer currentBuffer;
+    private boolean closed = false;
 
-
-    ByteArrayListInputStream(List<byte[]> data) {
+    /**
+     * Creates a new ByteArrayListInputStream that reads from the given list of byte arrays.
+     * The list is not copied, so it should not be modified while the stream is in use.
+     *
+     * @param data the list of byte arrays to read from
+     */
+    public ByteArrayListInputStream(List<byte[]> data) {
         this.data = data;
         this.iterator = data.iterator();
         if (iterator.hasNext()) {
