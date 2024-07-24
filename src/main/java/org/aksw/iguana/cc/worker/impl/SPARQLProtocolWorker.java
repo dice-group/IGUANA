@@ -439,7 +439,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             return createFailedResultBeforeRequest(queryIndex, e);
         } catch (TimeoutException e) {
             if (future.isDone()) {
-                LOGGER.warn("Request was already done after timeout.");
+                LOGGER.warn("Request finished immediately after timeout but will still be counted as timed out.");
                 try {
                     return future.get();
                 } catch (InterruptedException | ExecutionException ex) {
