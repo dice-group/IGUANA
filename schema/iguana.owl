@@ -113,7 +113,7 @@
         <Class abbreviatedIRI="iont:metric/QPS"/>
     </Declaration>
     <Declaration>
-        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+        <Class abbreviatedIRI="xsd:duration"/>
     </Declaration>
     <Declaration>
         <ObjectProperty abbreviatedIRI="iprop:connection"/>
@@ -401,7 +401,7 @@
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty abbreviatedIRI="iprop:executionTook"/>
-        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+        <Class abbreviatedIRI="xsd:duration"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty abbreviatedIRI="iprop:metric"/>
@@ -429,15 +429,15 @@
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty abbreviatedIRI="iprop:timeLimit"/>
-        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+        <Class abbreviatedIRI="xsd:duration"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty abbreviatedIRI="iprop:timeOut"/>
-        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+        <Class abbreviatedIRI="xsd:duration"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty abbreviatedIRI="iprop:totalTime"/>
-        <Class abbreviatedIRI="xsd:dayTimeDuration"/>
+        <Class abbreviatedIRI="xsd:duration"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty abbreviatedIRI="iprop:workerResult"/>
