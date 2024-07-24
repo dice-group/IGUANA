@@ -81,6 +81,11 @@ public class TriplestoreStorage implements Storage {
 		//submit Block to Triple Store
 		UpdateProcessor processor = UpdateExecutionFactory
 				.createRemote(blockRequest, endpoint, createHttpClient());
+
+		// If dry run is enabled, the data will not be send to an existing triplestore,
+		// therefore we catch the exception and log it instead of letting the program crash.
+		// The dry run is used for generating the configuration files for the native compilation with GraalVM.
+		// For normal runs, exceptions will be thrown normally.
 		if (MainController.Args.dryRun) {
 			try {
 				processor.execute();
