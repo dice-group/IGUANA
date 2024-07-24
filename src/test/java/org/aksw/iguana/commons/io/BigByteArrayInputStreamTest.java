@@ -27,7 +27,7 @@ class BigByteArrayInputStreamTest {
      * @param maxSingleBufferSize maximum size of a single array
      * @return 2d-array buffer
      */
-    public static byte[][] getBigRandomBuffer(long size, int maxSingleBufferSize) {
+    private static byte[][] getBigRandomBuffer(long size, int maxSingleBufferSize) {
         if (size < 1)
             return new byte[0][0];
         final var bufferField = new byte[(int) ((size - 1) / maxSingleBufferSize) + 1][];
