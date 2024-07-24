@@ -15,9 +15,7 @@
     <Prefix name="iont" IRI="https://iguana-benchmark.eu/ontology/class/"/>
     <Prefix name="ires" IRI="https://iguana-benchmark.eu/ontology/resource/"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Prefix name="skos" IRI="http://www.w3.org/2004/02/skos/core#"/>
     <Prefix name="iprop" IRI="https://iguana-benchmark.eu/ontology/properties/"/>
-    <Prefix name="schor" IRI="https://w3id.org/scholarlydata/role/"/>
     <Prefix name="dcterms" IRI="http://purl.org/dc/terms/"/>
     <Import>http://purl.org/dc/elements/1.1/</Import>
     <Import>http://purl.org/dc/terms/</Import>
