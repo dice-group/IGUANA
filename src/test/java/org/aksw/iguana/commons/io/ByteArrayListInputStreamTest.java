@@ -143,8 +143,7 @@ class ByteArrayListInputStreamTest {
         final var data = createByteArrayListInputStream(BUFFER_SIZE, NUM_BUFFERS);
         final var stream = new ByteArrayListInputStream(data);
         assertEquals(BUFFER_SIZE * NUM_BUFFERS, stream.availableLong());
-        assertThrows(UnsupportedOperationException.class, stream::available);
-        assertEquals(BUFFER_SIZE * NUM_BUFFERS, stream.availableLong());
+        assertEquals(BUFFER_SIZE * NUM_BUFFERS, stream.available());
     }
 
     @Test
@@ -160,5 +159,16 @@ class ByteArrayListInputStreamTest {
         assertThrows(IOException.class, () -> stream.skipNBytes(1));
         assertThrows(IOException.class, stream::availableLong);
 
+    }
+
+    @Test
+    void testAvailableLong() throws IOException {
+        final var data1 = createByteArrayListInputStream(Integer.MAX_VALUE - 8, 1);
+        final var data2 = createByteArrayListInputStream(BUFFER_SIZE, 1);
+        final var combined = new ArrayList<>(data1);
+        combined.addAll(data2);
+        final var stream = new ByteArrayListInputStream(combined);
+        assertEquals(Integer.MAX_VALUE - 8 + (long) BUFFER_SIZE, stream.availableLong());
+        assertEquals(Integer.MAX_VALUE, stream.available());
     }
 }

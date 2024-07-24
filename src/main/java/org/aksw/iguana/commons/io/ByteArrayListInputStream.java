@@ -13,7 +13,6 @@ public class ByteArrayListInputStream extends InputStream {
     final List<byte[]> data;
     Iterator<byte[]> iterator;
     ByteBuffer currentBuffer;
-    Long available;
     boolean closed = false;
 
 
@@ -24,12 +23,6 @@ public class ByteArrayListInputStream extends InputStream {
             this.currentBuffer = ByteBuffer.wrap(iterator.next());
         } else {
             this.currentBuffer = null;
-        }
-    }
-
-    private void updateAvailable(long n) {
-        if (available != null) {
-            available -= n;
         }
     }
 
@@ -74,7 +67,6 @@ public class ByteArrayListInputStream extends InputStream {
             read += bufferRemaining;
             remaining -= bufferRemaining;
         }
-        updateAvailable(read);
         return read;
     }
 
@@ -113,7 +105,6 @@ public class ByteArrayListInputStream extends InputStream {
             skipped += bufferRemaining;
             remaining -= bufferRemaining;
         }
-        updateAvailable(skipped);
         return skipped;
     }
 
@@ -127,19 +118,26 @@ public class ByteArrayListInputStream extends InputStream {
 
     @Override
     public int available() throws IOException {
-        throw new UnsupportedOperationException();
+        return (int) Math.min(Integer.MAX_VALUE, availableLong());
     }
 
     public long availableLong() throws IOException {
         checkNotClosed();
-        if (available == null) {
-            long sum = 0;
-            for (byte[] arr : data) {
+        if (!checkBuffer())
+            return 0;
+        long sum = 0;
+        boolean foundCurrentBuffer = false;
+        for (byte[] arr : data) {
+            if (foundCurrentBuffer) {
                 sum += arr.length;
+            } else {
+                if (arr == currentBuffer.array()) {
+                    foundCurrentBuffer = true;
+                }
             }
-            available = sum;
         }
-        return available;
+        sum += currentBuffer != null ? currentBuffer.remaining() : 0;
+        return sum;
     }
 
     @Override
@@ -152,7 +150,6 @@ public class ByteArrayListInputStream extends InputStream {
         checkNotClosed();
         if (!checkBuffer())
             return -1;
-        updateAvailable(1);
         return currentBuffer.get() & 0xFF;
     }
 }
