@@ -132,5 +132,6 @@ If the property is set to `false`,
 the worker will not parse the response bodies and will not calculate hash values for the response bodies.
 
 Setting the property to `false` can improve the performance of the worker. 
+This means that the worker is able to measure the performance more accurately.
 If the property is set to `true`, the worker will temporarily store the whole response bodies in memory for processing.
 If the property is set to `false`, the worker will discard any received bytes from the response.
