@@ -31,7 +31,7 @@ jobs:
 
   # Only run for pull request on main or if pushed to develop
   compile_native:
-    if: github.base_ref == 'main' || github.event_name == 'push'
+    # if: github.base_ref == 'main' || github.event_name == 'push'
     name: Test Native Executable Compilation
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +39,9 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
+          java-version: '17'
+          graalvm-version: 22.0.2
+          native-image: true
           cache: 'maven'
       - name: 'Compile native-binary and run tests'
         run: 'mvn -Pnative -Dagent=true package'
