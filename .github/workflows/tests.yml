@@ -31,7 +31,7 @@ jobs:
 
   # Only run for pull request on main or if pushed to develop
   compile_native:
-    # if: github.base_ref == 'main' || github.event_name == 'push'
+    if: github.base_ref == 'main' || github.event_name == 'push'
     name: Test Native Executable Compilation
     runs-on: ubuntu-latest
     steps:
@@ -44,3 +44,9 @@ jobs:
           cache: maven
       - name: 'Compile native-binary and run tests'
         run: 'mvn -Pnative -Dagent=true package'
+      - name: 'Upload artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'iguana-native'
+          path: 'target/iguana'
+          if-no-files-found: error
