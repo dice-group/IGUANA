@@ -54,8 +54,9 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
-          cache: 'maven'
+          java-version: 22
+          components: native-image
+          cache: maven
       - name: 'Compile native-binary'
         run: 'mvn -Dagent=true -Pnative package'
       - name: 'Upload artifact'
