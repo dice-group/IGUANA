@@ -315,8 +315,6 @@
                                 -O3
                                 -H:-UseCompressedReferences
                                 -H:+UnlockExperimentalVMOptions
-                                --initialize-at-run-time=org.junit.platform.launcher.core
-                                --trace-class-initialization=org.junit.platform.launcher.core.EngineIdValidator
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
