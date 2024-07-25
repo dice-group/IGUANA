@@ -39,7 +39,6 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '17'
           graalvm-version: 22.0.2
           native-image: true
           cache: 'maven'
