@@ -57,7 +57,7 @@ jobs:
           java-version: '21'
           cache: 'maven'
       - name: 'Compile native-binary'
-        run: 'mvn -DskipTests -Pnative package'
+        run: 'mvn -Dagent=true -Pnative package'
       - name: 'Upload artifact'
         uses: actions/upload-artifact@v4
         with:
