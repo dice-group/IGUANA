@@ -3,7 +3,6 @@ package org.aksw.iguana.cc.lang;
 import org.aksw.iguana.cc.storage.Storable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.AnnotatedTypeScanner;
 
 import java.io.InputStream;
 import java.lang.annotation.ElementType;
@@ -17,6 +16,9 @@ import java.util.Map;
 
 /**
  * Interface for abstract language processors that work on InputStreams.
+ * LanguageProcessors are used to process the content of an InputStream and extract relevant information.
+ * They are used by the Worker to process the response of a request. <br>
+ * LanguageProcessors must be registered in the static block of this class.
  */
 public abstract class LanguageProcessor {
 
@@ -40,17 +42,9 @@ public abstract class LanguageProcessor {
 
     final private static Logger LOGGER = LoggerFactory.getLogger(LanguageProcessor.class);
 
+    // Register all available LanguageProcessors here.
     static {
-        final var scanner = new AnnotatedTypeScanner(false, ContentType.class);
-        final var langProcessors = scanner.findTypes("org.aksw.iguana.cc.lang");
-        for (Class<?> langProcessor : langProcessors) {
-            String contentType = langProcessor.getAnnotation(ContentType.class).value();
-            if (LanguageProcessor.class.isAssignableFrom(langProcessor)) {
-                processors.put(contentType, (Class<? extends LanguageProcessor>) langProcessor);
-            } else {
-                LOGGER.error("Found a class with the ContentType annotation, that doesn't inherit from the class LanguageProcessor: {}", langProcessor.getName());
-            }
-        }
+        processors.put("application/sparql-results+json", org.aksw.iguana.cc.lang.impl.SaxSparqlJsonResultCountingParser.class);
     }
 
     public static LanguageProcessor getInstance(String contentType) {

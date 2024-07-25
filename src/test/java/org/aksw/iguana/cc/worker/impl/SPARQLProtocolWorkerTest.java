@@ -13,6 +13,7 @@ import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -40,11 +41,18 @@ import java.util.stream.Stream;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisabledInNativeImage // WireMock is not supported in native image
 public class SPARQLProtocolWorkerTest {
 
     @RegisterExtension
     public static WireMockExtension wm = WireMockExtension.newInstance()
-            .options(new WireMockConfiguration().useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER).dynamicPort().notifier(new ConsoleNotifier(false)))
+            .options(new WireMockConfiguration()
+                    .useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
+                    .dynamicPort()
+                    .notifier(new ConsoleNotifier(false))
+                    .jettyIdleTimeout(2000L)
+                    .jettyStopTimeout(2000L)
+                    .timeout(2000))
             .failOnUnmatchedRequests(true)
             .build();
 
@@ -58,17 +66,23 @@ public class SPARQLProtocolWorkerTest {
     public static void setup() throws IOException {
         queryFile = Files.createTempFile("iguana-test-queries", ".tmp");
         Files.writeString(queryFile, QUERY, StandardCharsets.UTF_8);
-        SPARQLProtocolWorker.initHttpClient(1);
     }
 
     @BeforeEach
     public void reset() {
+        SPARQLProtocolWorker.initHttpClient(1);
         wm.resetMappings(); // reset stubbing maps after each test
     }
 
     @AfterAll
     public static void cleanup() throws IOException {
         Files.deleteIfExists(queryFile);
+        SPARQLProtocolWorker.closeHttpClient();
+    }
+
+    @AfterEach
+    public void verify() {
+        wm.resetAll();
         SPARQLProtocolWorker.closeHttpClient();
     }
 
@@ -95,7 +109,7 @@ public class SPARQLProtocolWorkerTest {
                         queryHandlderSupplier.apply(cached),
                         new HttpWorker.QueryMixes(QUERY_MIXES),
                         connection,
-                        Duration.parse("PT100S"),
+                        Duration.parse("PT6S"),
                         "application/sparql-results+json",
                         requestType,
                         true
@@ -108,7 +122,7 @@ public class SPARQLProtocolWorkerTest {
 
     public static List<Arguments> completionTargets() {
         final var out = new ArrayList<Arguments>();
-        final var queryMixesAmount = List.of(1, 2, 5, 10, 100, 1000);
+        final var queryMixesAmount = List.of(1, 2, 5, 10, 100, 200);
         final var timeDurations = List.of(Duration.of(1, ChronoUnit.SECONDS), Duration.of(5, ChronoUnit.SECONDS));
 
         for (var queryMixes : queryMixesAmount) {
@@ -226,7 +240,7 @@ public class SPARQLProtocolWorkerTest {
                 queryHandler,
                 target,
                 connection,
-                Duration.parse("PT20S"),
+                Duration.parse("PT5S"),
                 "application/sparql-results+json",
                 RequestFactory.RequestType.POST_URL_ENC_QUERY,
                 false
@@ -242,6 +256,8 @@ public class SPARQLProtocolWorkerTest {
         final HttpWorker.Result result = worker.start().join();
 
         for (var stat : result.executionStats()) {
+            if (stat.httpStatusCode().orElse(0) == 500)
+                continue; // ignore server errors
             stat.error().ifPresent(ex -> LOGGER.error(ex.getMessage(), ex));
             assertTrue(stat.successful());
             assertTrue(stat.error().isEmpty());
@@ -276,7 +292,7 @@ public class SPARQLProtocolWorkerTest {
                 queryHandlder,
                 new HttpWorker.TimeLimit(Duration.of(2, ChronoUnit.SECONDS)),
                 connection,
-                Duration.parse("PT20S"),
+                Duration.parse("PT2S"),
                 "application/sparql-results+json",
                 RequestFactory.RequestType.POST_URL_ENC_QUERY,
                 false

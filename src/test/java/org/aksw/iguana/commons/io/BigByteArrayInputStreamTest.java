@@ -1,9 +1,9 @@
 package org.aksw.iguana.commons.io;
 
 import com.google.common.primitives.Bytes;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +14,7 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("This test takes a lot of time and resources.")
+@EnabledIfEnvironmentVariable(named = "RUN_LARGE_TESTS", matches = "true")
 class BigByteArrayInputStreamTest {
 
     private static final int MAX_SINGLE_BUFFER_SIZE = Integer.MAX_VALUE - 8;
@@ -27,7 +27,7 @@ class BigByteArrayInputStreamTest {
      * @param maxSingleBufferSize maximum size of a single array
      * @return 2d-array buffer
      */
-    public static byte[][] getBigRandomBuffer(long size, int maxSingleBufferSize) {
+    private static byte[][] getBigRandomBuffer(long size, int maxSingleBufferSize) {
         if (size < 1)
             return new byte[0][0];
         final var bufferField = new byte[(int) ((size - 1) / maxSingleBufferSize) + 1][];

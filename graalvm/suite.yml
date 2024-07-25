@@ -1,0 +1,88 @@
+datasets:
+  - name: "DatasetName"
+    file: "src/test/resources/dataset.txt"
+
+connections:
+  - name: "Blazegraph"
+    version: "1.1.1"
+    dataset: "DatasetName"
+    endpoint: "http://localhost:9999/blazegraph/sparql"
+    authentication:
+      user: "user"
+      password: "test"
+    updateEndpoint: "http://localhost:3030/ds/update"
+    updateAuthentication:
+      user: "updateUser"
+      password: "password"
+
+storages:
+  - type: "rdf file"
+    path: "graalvm/results/some.ttl"
+  - type: "csv file"
+    directory: "graalvm/results/"
+  - type: "triplestore"
+    endpoint: "http://localhost:9999/blazegraph/sparql"
+    user: "user"
+    password: "test"
+    baseUri: "http://example.org"
+
+responseBodyProcessors:
+  - contentType: "application/sparql-results+json"
+    threads: 1
+
+metrics:
+  - type: "AES"
+  - type: "EachQuery"
+  - type: "QPS"
+  - type: "AvgQPS"
+  - type: "NoQ"
+  - type: "NoQPH"
+  - type: "QMPH"
+  - type: "PAvgQPS"
+    penalty: 100
+  - type: "PQPS"
+    penalty: 100
+
+
+tasks:
+  # 1 hour (time Limit is in ms)
+  - type: stresstest
+    warmupWorkers:
+      # 1 minutes (is in ms)
+      - type: SPARQLProtocolWorker
+        number: 1
+        queries:
+          path: "./graalvm/queries.txt"
+          format: "separator"
+          separator: ";"
+          caching: true
+          order: "random"
+          seed: 123
+          lang: "SPARQL"
+        timeout: 2s
+        connection: Blazegraph
+        completionTarget:
+          duration: 1s
+        acceptHeader: "application/sparql-results+json"
+        requestType: get query
+        parseResults: true
+    workers:
+      - type: "SPARQLProtocolWorker"
+        number: 1
+        queries:
+          path: "./graalvm/queries.txt"
+        timeout: 3m
+        connection: Blazegraph
+        completionTarget:
+          duration: 1s
+        requestType: get query
+        acceptHeader: "application/sparql-results+json"
+      - number: 1
+        type: "SPARQLProtocolWorker"
+        connection: Blazegraph
+        completionTarget:
+          number: 1
+        queries:
+          path: "./graalvm/queries.txt"
+        timeout: 100s
+        acceptHeader: "application/sparql-results+json"

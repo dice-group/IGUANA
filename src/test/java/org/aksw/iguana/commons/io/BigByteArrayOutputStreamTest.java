@@ -1,9 +1,9 @@
 package org.aksw.iguana.commons.io;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("This test takes a lot of time and resources.")
+@EnabledIfEnvironmentVariable(named = "RUN_LARGE_TESTS", matches = "true")
 class BigByteArrayOutputStreamTest {
     final static Random rng = new Random(0);
 

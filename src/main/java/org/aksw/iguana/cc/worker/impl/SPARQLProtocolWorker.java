@@ -10,6 +10,8 @@ import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
+import org.aksw.iguana.commons.io.ByteArrayListOutputStream;
+import org.aksw.iguana.commons.io.ReversibleOutputStream;
 import org.apache.hc.client5.http.async.methods.AbstractBinResponseConsumer;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultConnectionKeepAliveStrategy;
@@ -72,7 +74,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             Optional<HttpResponse> response,
             Instant requestStart,
             Duration duration,
-            Optional<BigByteArrayOutputStream> outputStream,
+            Optional<ReversibleOutputStream> outputStream,
             OptionalLong actualContentLength,
             OptionalLong hash,
             Optional<Exception> exception
@@ -97,9 +99,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private final RequestFactory requestFactory;
 
     private final ResponseBodyProcessor responseBodyProcessor;
-
-    // declared here, so it can be reused across multiple method calls
-    private BigByteArrayOutputStream responseBodybbaos = new BigByteArrayOutputStream();
 
     // used to read the http response body
     private final byte[] buffer = new byte[BUFFER_SIZE];
@@ -127,12 +126,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
      */
     public static void initHttpClient(int threadCount) {
         connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
-                .setMaxConnTotal(threadCount)
-                .setMaxConnPerRoute(threadCount)
+                .setMaxConnTotal(threadCount * 1000)
+                .setMaxConnPerRoute(threadCount * 1000)
                 .build();
         final var ioReactorConfig = IOReactorConfig.custom()
                 .setTcpNoDelay(true)
-                .setIoThreadCount(threadCount)
+                .setSoKeepAlive(true)
                 .build();
         httpClient = HttpAsyncClients.custom()
                 .setConnectionManager(connectionManager)
@@ -216,7 +215,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         executionStats.add(execution);
                     }
 
-                    //
                     if ((++queryExecutionCount) >= queryMixSize) {
                         queryExecutionCount = 0;
                         queryMixExecutionCount++;
@@ -254,17 +252,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             }
 
             // process result
-            if (!responseBodyProcessor.add(result.actualContentLength().orElse(-1), result.hash().orElse(-1), result.outputStream().orElse(new BigByteArrayOutputStream()))) {
-                this.responseBodybbaos = result.outputStream().orElse(new BigByteArrayOutputStream());
-            } else {
-                this.responseBodybbaos = new BigByteArrayOutputStream();
-            }
-        }
-
-        try {
-            this.responseBodybbaos.reset();
-        } catch (IOException e) {
-            this.responseBodybbaos = new BigByteArrayOutputStream();
+            responseBodyProcessor.add(result.actualContentLength().getAsLong(), result.hash().getAsLong(), result.outputStream.get().toInputStream());
         }
 
         if (!result.successful() && discardOnFailure) {
@@ -328,6 +316,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             private final StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
             private long responseSize = 0; // will be used if parseResults is false
             private long responseEnd = 0;  // time in nanos
+            private ReversibleOutputStream responseBody = null;
 
             @Override
             public void releaseResources() {} // nothing to release
@@ -345,27 +334,27 @@ public class SPARQLProtocolWorker extends HttpWorker {
              */
             @Override
             protected void data(ByteBuffer src, boolean endOfStream) throws IOException {
-                if (endOfStream) {
+                if (endOfStream)
                     responseEnd = System.nanoTime();
-                    return;
-                }
 
+                if (responseBody == null)
+                    responseBody = new ByteArrayListOutputStream();
+
+                responseSize += src.remaining();
                 if (config.parseResults()) {
                     // if the buffer uses an array, use the array directly
                     if (src.hasArray()) {
                         hasher.update(src.array(), src.position() + src.arrayOffset(), src.remaining());
-                        responseBodybbaos.write(src.array(), src.position() + src.arrayOffset(), src.remaining());
+                        responseBody.write(src.array(), src.position() + src.arrayOffset(), src.remaining());
                     } else { // otherwise, copy the buffer to an array
                         int readCount;
                         while (src.hasRemaining()) {
                             readCount = Math.min(BUFFER_SIZE, src.remaining());
                             src.get(buffer, 0, readCount);
                             hasher.update(buffer, 0, readCount);
-                            responseBodybbaos.write(buffer, 0, readCount);
+                            responseBody.write(buffer, 0, readCount);
                         }
                     }
-                } else {
-                    responseSize += src.remaining();
                 }
             }
 
@@ -379,6 +368,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
             @Override
             protected void start(HttpResponse response, ContentType contentType) {
                 this.response = response;
+                final var contentLengthHeader = response.getFirstHeader("Content-Length");
+                Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
+                // if the content length is known, create a BigByteArrayOutputStream with the known length
+                if (contentLength != null && responseBody == null && config.parseResults()) {
+                    responseBody = new BigByteArrayOutputStream(contentLength);
+                }
             }
 
             /**
@@ -405,8 +400,11 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
                 if (contentLength != null) {
                     if ((!config.parseResults() && responseSize != contentLength) // if parseResults is false, the responseSize will be used
-                            || (config.parseResults() && responseBodybbaos.size() != contentLength)) { // if parseResults is true, the size of the bbaos will be used
-                        return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new HttpException("Content-Length header value doesn't match actual content length."));
+                            || (config.parseResults() && responseBody.size() != contentLength)) { // if parseResults is true, the size of the bbaos will be used
+                        if (responseSize != responseBody.size())
+                            LOGGER.error("Error during copying the response data. (expected written data size = {}, actual written data size = {}, Content-Length-Header = {})", responseSize, responseBody.size(), contentLengthHeader.getValue());
+                        final var exception = new HttpException(String.format("Content-Length header value doesn't match actual content length. (Content-Length-Header = %s, written data size = %s)", contentLength, config.parseResults() ? responseBody.size() : responseSize));
+                        return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, exception);
                     }
                 }
 
@@ -421,8 +419,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         Optional.of(response),
                         timeStamp,
                         Duration.ofNanos(responseEnd - requestStart),
-                        Optional.of(responseBodybbaos),
-                        OptionalLong.of(config.parseResults() ? responseBodybbaos.size() : responseSize),
+                        Optional.of(responseBody),
+                        OptionalLong.of(config.parseResults() ? responseBody.size() : responseSize),
                         OptionalLong.of(config.parseResults() ? hasher.getValue() : 0),
                         Optional.empty()
                 );
@@ -435,10 +433,22 @@ public class SPARQLProtocolWorker extends HttpWorker {
             // The timeout from the parameter might be reduced if the end of the time limit is near
             // and it might be so small that it causes issues.
             return future.get(config.timeout().toNanos(), TimeUnit.NANOSECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             // This will close the connection and cancel the request if it's still running.
             future.cancel(true);
             return createFailedResultBeforeRequest(queryIndex, e);
+        } catch (TimeoutException e) {
+            if (future.isDone()) {
+                LOGGER.warn("Request finished immediately after timeout but will still be counted as timed out.");
+                try {
+                    return future.get();
+                } catch (InterruptedException | ExecutionException ex) {
+                    return createFailedResultBeforeRequest(queryIndex, ex);
+                }
+            } else {
+                future.cancel(true);
+                return createFailedResultBeforeRequest(queryIndex, e);
+            }
         }
     }
 

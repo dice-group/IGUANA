@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class RDFFileStorageTest extends StorageTest {
 	public static List<Arguments> data() {
+		resetDate();
 		final var arguments = new ArrayList<Arguments>();
 
         final var paths = new ArrayList<>(List.of("rdf-file-storage-test1.ttl", "rdf-file-storage-test1.nt", "rdf-file-storage-test1.nt", ""));

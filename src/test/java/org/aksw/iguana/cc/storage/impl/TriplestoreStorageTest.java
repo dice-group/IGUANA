@@ -12,6 +12,7 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.StringWriter;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisabledInNativeImage // WireMock is not supported in native image
 public class TriplestoreStorageTest extends StorageTest {
 
 	@RegisterExtension
@@ -34,6 +36,7 @@ public class TriplestoreStorageTest extends StorageTest {
 
 	@Test
 	public void dataTest() throws URISyntaxException {
+		resetDate();
 		final var uuid = UUID.randomUUID();
 		wm.stubFor(post(urlEqualTo("/ds/sparql"))
 						.willReturn(aResponse()
