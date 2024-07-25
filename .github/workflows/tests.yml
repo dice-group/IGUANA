@@ -39,8 +39,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: 21
-          version: 22.3.3
+          java-version: 22
           components: native-image
           cache: maven
       - name: 'Compile native-binary and run tests'
