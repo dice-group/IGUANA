@@ -1,11 +1,10 @@
 package org.aksw.iguana.cc.worker;
 
 import org.aksw.iguana.cc.lang.LanguageProcessor;
-import org.aksw.iguana.commons.io.BigByteArrayInputStream;
-import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -46,18 +45,18 @@ public class ResponseBodyProcessor {
     private final ThreadPoolExecutor executor;
     private final ScheduledExecutorService executorHandler = Executors.newScheduledThreadPool(1);
 
-    public boolean add(long contentLength, long xxh64, BigByteArrayOutputStream bbaos) {
+    public boolean add(long contentLength, long xxh64, InputStream responseBodyStream) {
         final var key = new Key(contentLength, xxh64);
         if (seenResponseBodies.add(key)) {
-            submit(key, bbaos);
+            submit(key, responseBodyStream);
             return true;
         }
         return false;
     }
 
-    private void submit(Key key, BigByteArrayOutputStream bigByteArrayOutputStream) {
+    private void submit(Key key, InputStream responseBodyStream) {
         final var future = executor.submit(() -> {
-            var processingResult = languageProcessor.process(new BigByteArrayInputStream(bigByteArrayOutputStream), key.xxh64);
+            var processingResult = languageProcessor.process(responseBodyStream, key.xxh64);
             responseDataMetrics.add(processingResult);
         });
         executorHandler.schedule(() -> {

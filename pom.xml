@@ -60,11 +60,6 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.jena</groupId>
-            <artifactId>jena-iri</artifactId>
-            <version>${jena.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
             <version>${jena.version}</version>
         </dependency>
@@ -79,19 +74,9 @@
             <version>${jena.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.14</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -146,28 +131,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-            <version>3.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>6.0.11</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
             <version>5.3</version>
         </dependency>
-
     </dependencies>
-
 
     <build>
         <plugins>
@@ -204,7 +172,7 @@
                 <version>3.4.1</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <finalName>iguana-${revision}</finalName>
+                    <finalName>iguana</finalName>
                 </configuration>
                 <executions>
                     <execution>
@@ -262,4 +230,99 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <dependencies>
+                <dependency>
+                    <!-- needs to be correct version fitting to junit-jupiter -->
+                    <groupId>org.junit.platform</groupId>
+                    <artifactId>junit-platform-launcher</artifactId>
+                    <version>1.9.2</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <id>run-script</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${project.basedir}/graalvm/generate-config.sh</executable>
+                                    <arguments>
+                                        <argument>-t</argument>
+                                        <argument>${project.build.directory}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cleanup-files</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>if [ -f ${project.build.directory}/native/agent-output/test/*/resource-config.json ]; then sed "s/\\\\\\\\E//g" ${project.build.directory}/native/agent-output/test/*/resource-config.json | sed "s/\\\\\\\\Q//g" > ${project.build.directory}/resource-config.json.tmp &amp;&amp; cp ${project.build.directory}/resource-config.json.tmp ${project.build.directory}/native/agent-output/test/*/resource-config.json; fi</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.1.2</version>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.10.1</version>
+                        <extensions>true</extensions>
+                        <executions>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>compile-no-fork</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                            <execution>
+                                <id>test-native</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <imageName>iguana</imageName>
+                            <buildArgs>
+                                --gc=G1
+                                -march=x86-64-v3
+                                --no-fallback
+                                -O3
+                                -H:-UseCompressedReferences
+                            </buildArgs>
+                            <metadataRepository>
+                                <enabled>true</enabled>
+                            </metadataRepository>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

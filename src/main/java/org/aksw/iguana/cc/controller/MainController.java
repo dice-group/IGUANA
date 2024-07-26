@@ -3,12 +3,10 @@ package org.aksw.iguana.cc.controller;
 import com.beust.jcommander.*;
 import org.aksw.iguana.cc.suite.IguanaSuiteParser;
 import org.aksw.iguana.cc.suite.Suite;
-import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 
 
@@ -30,13 +28,15 @@ public class MainController {
         @Parameter(names = {"--ignore-schema", "-is"}, description = "Do not check the schema before parsing the suite file.")
         private boolean ignoreShema = false;
 
+        @Parameter(names = {"--dry-run", "-d"}, hidden = true)
+        public static boolean dryRun = false;
+
         @Parameter(names = "--help", help = true)
         private boolean help;
 
         @Parameter(description = "suite file {yml,yaml,json}", arity = 1, required = true, converter = PathConverter.class)
         private Path suitePath;
     }
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
@@ -46,9 +46,7 @@ public class MainController {
      * @param argc The command line arguments that are passed to the program.
      */
     public static void main(String[] argc) {
-        // Apparently, there is something weird going on, where the apache jena library already configures log4j2 for
-        // some reason. That's why you have to call reconfigure here.
-        Configurator.reconfigure(URI.create("log4j2.yml"));
+        // Configurator.reconfigure(URI.create("log4j2.yml"));
 
         var args = new Args();
         JCommander jc = JCommander.newBuilder()

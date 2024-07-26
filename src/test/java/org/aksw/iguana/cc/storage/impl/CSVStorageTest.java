@@ -23,6 +23,7 @@ public class CSVStorageTest extends StorageTest {
     private static final String EXPECTED_FILES_DIR = "src/test/resources/test-data/csv-storage-test/";
 
     public static List<Arguments> data() {
+        resetDate();
         final var workersTask1 = List.of(
                 MockupWorker.createWorkers(0, 2, new MockupQueryHandler(0, 10), "test-connection-1", "v1.0.0", "test-dataset-1"),
                 MockupWorker.createWorkers(2, 2, new MockupQueryHandler(1, 10), "test-connection-2", "v1.1.0", "test-dataset-2")
