@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/dice-group/IGUANA/raw/develop/images/IGUANA_logo.png" alt="IGUANA Logo" width="200">
+    <img src="https://github.com/dice-group/IGUANA/raw/main/images/IGUANA_logo.png" alt="IGUANA Logo" width="200">
 </p>
 
 # IGUANA
