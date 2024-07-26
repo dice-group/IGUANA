@@ -86,38 +86,37 @@ jobs:
           cache: 'pip'
       - run: pip install mkdocs-material
       - run: pip install mkdocs-macros-plugin
-      - run: sed -i "s/\$VERSION/${{ env.RELEASE_VERSION }}/g" mkdocs.yml
       - run: sed -i "s/\$RELEASE_VERSION/${{ env.RELEASE_VERSION }}/g" mkdocs.yml
+
       - run: mkdocs build -d site/${{ env.RELEASE_VERSION }}
       - run: mvn javadoc:javadoc
-      - run: sed -i "s/\$VERSION/${{ env.RELEASE_VERSION }}/g" .github/pages/latest.html
-      - run: sed -i "s/\$VERSION/${{ env.RELEASE_VERSION }}/g" .github/pages/javadoc-latest.html
+
       - name: Deploy Site
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site/${{ env.RELEASE_VERSION }}
           destination_dir: ./docs/${{ env.RELEASE_VERSION }}
+      - name: Deploy Site
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site/${{ env.RELEASE_VERSION }}
+          destination_dir: ./docs/latest
+
       - name: Deploy Javadoc
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./javadoc/${{ env.RELEASE_VERSION }}
+          publish_dir: ./javadoc/${{ env.RELEASE_VERSION }}/apidocs
           destination_dir: ./javadoc/${{ env.RELEASE_VERSION }}
-      - name: Deploy latest.html
+      - name: Deploy Javadoc
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .github/pages/
-          keep_files: true
-          destination_dir: ./docs/
-      - name: Deploy latest.html
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .github/pages/
-          keep_files: true
-          destination_dir: ./docs/
+          publish_dir: ./javadoc/${{ env.RELEASE_VERSION }}/apidocs
+          destination_dir: ./javadoc/latest
+
 
   deploy_gh_release:
     runs-on: ubuntu-latest
