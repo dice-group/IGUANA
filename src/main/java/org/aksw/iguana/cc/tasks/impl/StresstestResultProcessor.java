@@ -13,6 +13,7 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Supplier;
@@ -109,7 +110,7 @@ public class StresstestResultProcessor {
         m.add(suiteRes, IPROP.task, taskRes);
         m.add(taskRes, RDF.type, IONT.task);
         m.add(taskRes, RDF.type, IONT.stresstest);
-        m.add(taskRes, IPROP.noOfWorkers, ResourceFactory.createTypedLiteral(workers.size()));
+        m.add(taskRes, IPROP.noOfWorkers, toInfinitePrecisionIntegerLiteral(workers.size()));
 
         for (HttpWorker worker : workers) {
             HttpWorker.Config config = worker.config();
@@ -125,12 +126,12 @@ public class StresstestResultProcessor {
 
             m.add(taskRes, IPROP.workerResult, workerRes);
             m.add(workerRes, RDF.type, IONT.worker);
-            m.add(workerRes, IPROP.workerID, ResourceFactory.createTypedLiteral(worker.getWorkerID()));
+            m.add(workerRes, IPROP.workerID, toInfinitePrecisionIntegerLiteral(worker.getWorkerID()));
             m.add(workerRes, IPROP.workerType, ResourceFactory.createTypedLiteral(worker.getClass().getSimpleName()));
-            m.add(workerRes, IPROP.noOfQueries, ResourceFactory.createTypedLiteral(config.queries().getQueryCount()));
+            m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(config.queries().getQueryCount()));
             m.add(workerRes, IPROP.timeOut, TimeUtils.createTypedDurationLiteral(config.timeout()));
             if (config.completionTarget() instanceof HttpWorker.QueryMixes)
-                m.add(workerRes, IPROP.noOfQueryMixes, ResourceFactory.createTypedLiteral(((HttpWorker.QueryMixes) config.completionTarget()).number()));
+                m.add(workerRes, IPROP.noOfQueryMixes, toInfinitePrecisionIntegerLiteral(((HttpWorker.QueryMixes) config.completionTarget()).number()));
             if (config.completionTarget() instanceof HttpWorker.TimeLimit)
                 m.add(workerRes, IPROP.timeLimit, TimeUtils.createTypedDurationLiteral(((HttpWorker.TimeLimit) config.completionTarget()).duration()));
             m.add(workerRes, IPROP.connection, connectionRes);
@@ -140,6 +141,14 @@ public class StresstestResultProcessor {
             if (config.connection().version() != null) {
                 m.add(connectionRes, IPROP.version, ResourceFactory.createTypedLiteral(config.connection().version()));
             }
+        }
+
+        // Create Query nodes with their respective queryIDs
+        for (String queryID : queryIDs) {
+            Resource queryRes = IRES.getResource(queryID);
+            m.add(queryRes, RDF.type, IONT.query);
+            m.add(queryRes, IPROP.fullID, ResourceFactory.createTypedLiteral(queryID));
+            m.add(queryRes, IPROP.id, ResourceFactory.createTypedLiteral(BigInteger.valueOf(Long.parseLong(queryID.split(":")[1]))));
         }
 
         // Connect task and workers to the Query nodes, that store the triple stats.
@@ -276,5 +285,9 @@ public class StresstestResultProcessor {
         m.add(metricRes, RDF.type, IONT.metric);
 
         return m;
+    }
+
+    private static Literal toInfinitePrecisionIntegerLiteral(long value) {
+        return ResourceFactory.createTypedLiteral(BigInteger.valueOf(value));
     }
 }

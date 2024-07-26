@@ -50,26 +50,16 @@ public class IPROP {
     public static final Property variable = ResourceFactory.createProperty(NS, "variable");
     public static final Property exception = ResourceFactory.createProperty(NS, "exception");
 
-    // SPARQL query properties
-    public static final Property aggregations = ResourceFactory.createProperty(NS, "aggregations");
-    public static final Property filter = ResourceFactory.createProperty(NS, "filter");
-    public static final Property groupBy = ResourceFactory.createProperty(NS, "groupBy");
-    public static final Property having = ResourceFactory.createProperty(NS, "having");
-    public static final Property offset = ResourceFactory.createProperty(NS, "offset");
-    public static final Property optional = ResourceFactory.createProperty(NS, "optional");
-    public static final Property orderBy = ResourceFactory.createProperty(NS, "orderBy");
-    public static final Property triples = ResourceFactory.createProperty(NS, "triples");
-    public static final Property union = ResourceFactory.createProperty(NS, "union");
 
     // Query Stats
     public static final Property failed = ResourceFactory.createProperty(NS, "failed");
-    public static final Property penalizedQPS = ResourceFactory.createProperty(NS, "penalizedQPS");
-    public static final Property QPS = ResourceFactory.createProperty(NS, "QPS");
     public static final Property queryExecution = ResourceFactory.createProperty(NS, "queryExecution");
     public static final Property timeOuts = ResourceFactory.createProperty(NS, "timeOuts");
     public static final Property totalTime = ResourceFactory.createProperty(NS, "totalTime");
     public static final Property unknownException = ResourceFactory.createProperty(NS, "unknownException");
     public static final Property wrongCodes = ResourceFactory.createProperty(NS, "wrongCodes");
+    public static final Property fullID = ResourceFactory.createProperty(NS, "fullID");
+    public static final Property id = ResourceFactory.createProperty(NS, "id");
 
     // Each Query Stats
     public static final Property code = ResourceFactory.createProperty(NS, "code");
