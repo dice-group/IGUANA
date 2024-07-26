@@ -314,6 +314,7 @@
                                 --no-fallback
                                 -O3
                                 -H:-UseCompressedReferences
+                                -H:+UnlockExperimentalVMOptions
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
