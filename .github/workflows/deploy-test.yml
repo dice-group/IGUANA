@@ -88,7 +88,7 @@ jobs:
       - run: mkdocs build -d site/${{ env.RELEASE_VERSION }}
       - run: mvn javadoc:javadoc
 
-      - run: ls
+      - run: ls schema
 
       - name: Find Ontology Version
         run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' schema/iguana.owl | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
