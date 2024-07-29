@@ -89,7 +89,7 @@ jobs:
       - run: mvn javadoc:javadoc
 
       - name: Find Ontology Version
-        run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
+        run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' iguana.owl | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
         id: find_ontology_version
 
       - name: Fetch Ontologies
@@ -97,9 +97,9 @@ jobs:
         with:
           ref: gh-pages
           sparse-checkout: ontology
-      - run: mkdir ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}
-      - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
-      - run: cp schema/iguana.owx ontology/iguana.owx
+      - run: mkdir -p ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}
+      - run: cp schema/iguana.owl ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
+      - run: cp schema/iguana.owl ontology/iguana.owx
 
       - name: 'Upload artifact'
         uses: actions/upload-artifact@v4
