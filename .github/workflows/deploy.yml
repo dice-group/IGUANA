@@ -117,6 +117,23 @@ jobs:
           publish_dir: ./javadoc/${{ env.RELEASE_VERSION }}/apidocs
           destination_dir: ./javadoc/latest
 
+      - name: Find Ontology Version
+        run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
+        id: find_ontology_version
+
+      - name: Deploy Ontology
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./schema/
+          destination_dir: ./ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/
+      - name: Deploy Ontology
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./schema/
+          destination_dir: ./ontology/
+
 
   deploy_gh_release:
     runs-on: ubuntu-latest
