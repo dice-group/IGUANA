@@ -121,17 +121,20 @@ jobs:
         run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
         id: find_ontology_version
 
+      - name: Fetch Ontologies
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          sparse-checkout: ontology
+      - run: mkdir ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}
+      - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
+      - run: cp schema/iguana.owx ontology/iguana.owx
+
       - name: Deploy Ontology
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./schema/
-          destination_dir: ./ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/
-      - name: Deploy Ontology
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./schema/
+          publish_dir: ./ontology/
           destination_dir: ./ontology/
 
 

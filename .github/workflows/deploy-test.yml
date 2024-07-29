@@ -52,7 +52,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
+          java-version: '22'
           cache: 'maven'
       - name: 'Compile native-binary'
         run: 'mvn -Dagent=true -Pnative package'
@@ -89,8 +89,24 @@ jobs:
       - run: mvn javadoc:javadoc
 
       - name: Find Ontology Version
-        run: echo "$(grep 'versionIRI' iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')"
+        run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
         id: find_ontology_version
+
+      - name: Fetch Ontologies
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          sparse-checkout: ontology
+      - run: mkdir ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}
+      - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
+      - run: cp schema/iguana.owx ontology/iguana.owx
+
+      - name: 'Upload artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'ontology'
+          path: 'ontology/'
+          if-no-files-found: error
 
       - name: 'Upload artifact'
         uses: actions/upload-artifact@v4
