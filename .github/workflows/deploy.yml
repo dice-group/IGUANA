@@ -118,7 +118,7 @@ jobs:
           destination_dir: ./javadoc/latest
 
       - name: Find Ontology Version
-        run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
+        run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' schema/iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
         id: find_ontology_version
 
       - name: Fetch Ontologies
