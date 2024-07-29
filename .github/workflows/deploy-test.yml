@@ -95,7 +95,7 @@ jobs:
         id: find_ontology_version
 
       - name: Fetch Ontologies
-        run: git fetch && git checkout gh-pages ontology/
+        run: git checkout origin/gh-pages ontology/
       - run: mkdir -p ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}
       - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
       - run: cp schema/iguana.owx ontology/iguana.owx
