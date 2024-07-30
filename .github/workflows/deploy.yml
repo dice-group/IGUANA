@@ -136,7 +136,7 @@ jobs:
 
   deploy_gh_release:
     runs-on: ubuntu-latest
-    needs: [compile-jar, deploy_to_maven, find_version]
+    needs: [compile_native, deploy_to_maven, find_version]
     env:
       RELEASE_VERSION: ${{ needs.find_version.outputs.RELEASE_VERSION }}
 
