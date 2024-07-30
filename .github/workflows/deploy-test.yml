@@ -121,6 +121,7 @@ jobs:
           if-no-files-found: error
 
   deploy_gh_release:
+    name: Publish GitHub Release
     runs-on: ubuntu-latest
     needs: [compile_native, deploy_to_maven, find_version]
     env:
@@ -132,6 +133,7 @@ jobs:
         with:
           path: artifacts/
           merge-multiple: true
+      - uses: actions/checkout@v4
       - name: Prepare files
         run: |
           mkdir iguana
