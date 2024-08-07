@@ -1,0 +1,11 @@
+# Checks if version number has been updated 
+name: Version Check
+on: pull_request
+
+jobs:
+  lint:
+    name: Release Tag existence Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: .github/scripts/tagcheck.sh v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)

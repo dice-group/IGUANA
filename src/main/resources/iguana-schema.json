@@ -1,0 +1,391 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/root",
+  "definitions": {
+    "root": {
+      "title": "root",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "datasets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Dataset"
+          },
+          "minItems": 1
+        },
+        "connections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Connection"
+          },
+          "minItems": 1
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Task"
+          },
+          "minItems": 1
+        },
+        "storages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Storage"
+          },
+          "minItems": 1
+        },
+        "responseBodyProcessors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResponseBodyProcessor"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Metric"
+          }
+        }
+      },
+      "required": [
+        "connections",
+        "datasets",
+        "storages",
+        "tasks"
+      ]
+    },
+
+    "Connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "updateEndpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "authentication": {
+          "$ref": "#/definitions/Authentication"
+        },
+        "updateAuthentication": {
+          "$ref": "#/definitions/Authentication"
+        },
+        "dataset": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "endpoint",
+        "name"
+      ],
+      "title": "Connection"
+    },
+    "Authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "password",
+        "user"
+      ],
+      "title": "Authentication"
+    },
+    "Dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Dataset"
+    },
+    "Metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [ "AES", "AvgQPS", "EachQuery", "NoQ", "NoQPH", "PAvgQPS", "PQPS", "QMPH", "QPS" ]
+        },
+        "penalty": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Metric"
+    },
+    "ResponseBodyProcessor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contentType": {
+          "type": "string"
+        },
+        "threads": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "timeout" : {
+          "type": "string"
+        }
+      },
+      "required": [
+        "contentType"
+      ],
+      "title": "ResponseBodyProcessor"
+    },
+    "Storage": {
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/CSVStorage" },
+        { "$ref": "#/definitions/RDFFileStorage" },
+        { "$ref": "#/definitions/TriplestoreStorage" }
+      ],
+      "title": "Storage"
+    },
+    "CSVStorage": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "csv file"
+        },
+        "directory": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "directory"
+      ],
+      "title": "CSVStorage"
+    },
+    "RDFFileStorage": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "rdf file"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "path"
+      ],
+      "title": "RDFFileStorage"
+    },
+    "TriplestoreStorage": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "triplestore"
+        },
+        "endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "user": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "baseUri": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "type",
+        "endpoint"
+      ],
+      "title": "TriplestoreStorage"
+    },
+    "Task": {
+      "type": "object",
+      "oneOf": [ { "$ref": "#/definitions/Stresstest" } ],
+      "title": "Task"
+    },
+    "Stresstest": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "stresstest"
+        },
+        "warmupWorkers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Worker"
+          }
+        },
+        "workers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Worker"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "type",
+        "workers"
+      ],
+      "title": "Stresstest"
+    },
+    "Worker": {
+      "type": "object",
+      "oneOf": [ { "$ref": "#/definitions/SPARQLWorker" } ],
+      "title": "Worker"
+    },
+    "SPARQLWorker" : {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "SPARQLProtocolWorker"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requestType": {
+          "type": "string",
+          "enum": [ "post query", "get query", "post url-enc query", "post url-enc update", "post update" ]
+        },
+        "queries": {
+          "$ref": "#/definitions/Queries"
+        },
+        "timeout": {
+          "type": "string"
+        },
+        "connection": {
+          "type": "string"
+        },
+        "completionTarget": {
+          "$ref": "#/definitions/CompletionTarget"
+        },
+        "parseResults": {
+          "type": "boolean"
+        },
+        "acceptHeader": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "completionTarget",
+        "connection",
+        "queries",
+        "timeout"
+      ],
+      "title": "SPARQLWorker"
+    },
+    "CompletionTarget": {
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/TimeLimit" },
+        { "$ref": "#/definitions/QueryMixes" }
+      ],
+      "title": "CompletionTarget"
+    },
+    "TimeLimit": {
+      "properties": {
+        "duration": {
+          "type": "string"
+        }
+      },
+      "title": "TimeLimit",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "duration"
+      ]
+    },
+    "QueryMixes": {
+      "properties": {
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "title": "QueryMixes",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "number"
+      ]
+    },
+    "Queries": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": [ "one-per-line", "separator", "folder" ]
+        },
+        "separator": {
+          "type": "string"
+        },
+        "caching": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "string",
+          "enum": [ "random", "linear" ]
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "lang": {
+          "type": "string",
+          "enum": [ "", "SPARQL" ]
+        }
+      },
+      "required": [
+        "path"
+
+      ],
+      "title": "Queries"
+    }
+  }
+}

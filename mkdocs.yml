@@ -1,24 +1,20 @@
 site_name: Iguana $VERSION Documentation
-#repo_url: https://github.com/dice-group/Iguana/
-
-#google_analytics: ['UA-179945559-1', 'iguana-benchmark.eu']
 
 extra:
-  version: $VERSION
+  version: $RELEASE_VERSION
   release_version: $RELEASE_VERSION
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/dice-group/Iguana
+      link: https://github.com/dice-group/IGUANA
 
-repo_url: https://github.com/dice-group/Iguana
-repo_name: dice-group/Iguana
+repo_url: https://github.com/dice-group/IGUANA
+repo_name: dice-group/IGUANA
 
 edit_uri: ""
 
-
 theme: 
   #name: 'readthedocs'
-  custom_dir: 'customs/'
+  custom_dir: 'images/'
   name: material 
   features:
     - navigation.tabs
@@ -32,11 +28,11 @@ theme:
   font:
     text: Roboto
     code: Roboto Mono
-  logo: images/logo_white.png
-  favicon: images/Iguana_new_logo6.png
+  logo: logo_white.png
+  favicon: IGUANA_logo.png
   icon:
     logo: logo
-    repo: fontawesome/brands/git-alt
+    repo: fontawesome/brands/github
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -62,33 +58,17 @@ color: "#82BDC3"
 
 nav:
   - "General":
-    - "About": "about.md"
-    - "Architecture": "architecture.md"
-
-  - "Quick Start Guide":
-    - "Download": "download.md"
-    - "Quick Configuration": "quick-config.md"
-    - "Run Iguana": "run-iguana.md"
+    - "About": "README.md"
   
-  - "Usage":
-    - "Workflow": "usage/workflow.md"
-    - "Configuration": "usage/configuration.md" 
-    - "Stresstest" : "usage/stresstest.md"
-    - "Supported Workers": "usage/workers.md" 
-    - "Supported Queries": "usage/queries.md" 
-    - "Supported Languages": "usage/languages.md" 
-    - "Metrics": "usage/metrics.md"
-    - "Benchmark Results": "usage/results.md"
-    - "Tutorial": "usage/tutorial.md"
-  - "Development":
-    - "Overview": "develop/overview.md"
-    - "Extend": 
-      - "Tasks": "develop/extend-task.md"
-      - "Workers": "develop/extend-workers.md"
-      - "Query Handling": "develop/extend-queryhandling.md"
-      - "Languages": "develop/extend-lang.md"
-      - "Result storage": "develop/extend-result-storages.md"
-      - "Metrics": "develop/extend-metrics.md"
-    - "Use Iguana":
-      - "Maven": "develop/maven.md"
-      - "Javadoc": "http://iguana-benchmark.eu/javadoc/$VERSION/index.html"
+  - "Configuration":
+      - "Overview": "configuration/overview.md"
+      - "Tasks": "configuration/tasks.md"
+      - "Workers": "configuration/workers.md"
+      - "Queries": "configuration/queries.md"
+      - "Response Body Processing": "configuration/response_body_processor.md"
+      - "Language Processor": "configuration/language_processor.md"
+      - "Result Storage": "configuration/storages.md"
+      - "Metrics": "configuration/metrics.md"
+      - "RDF Results": "configuration/rdf_results.md"
+  - "Javadocs":
+    - "Javadocs": "http://iguana-benchmark.eu/javadoc/latest/"

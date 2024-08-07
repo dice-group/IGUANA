@@ -1,68 +1,108 @@
+# This file showcases the configuration of most IGUANA features.
+
+# Datasets are optional and have no functionality.
 datasets:
   - name: "DatasetName"
-    #optional, will just be set in the pre & post script hooks by using {{dataset.file}}
     file: "src/test/resources/dataset.txt"
+
+# Connections that will be used by the workers for the benchmark.
 connections:
   - name: "Virtuoso7"
-    user: "dba"
-    password: "dba"
+    authentication:
+      user: "dba"
+      password: "dba"
     endpoint: "http://localhost:8890/sparql"
+    dataset: "DatasetName" # optional
   - name: "Virtuoso6"
-    user: "dba"
-    password: "dba"
+    authentication:
+      user: "dba"
+      password: "dba"
     endpoint: "http://localhost:8891/sparql"
   - name: "Blazegraph"
     endpoint: "http://localhost:9999/blazegraph/sparql"
-  - name: "Fuseki"
-    user: "test"
-    endpoint: "http://127.0.0.1:3030/ds/sparql"
+    authentication:
+      user: "user"
+      password: "test"
     updateEndpoint: "http://localhost:3030/ds/update"
+    updateAuthentication:
+      user: "updateUser"
+      password: "password"
 
+# The tasks that will be executed by the benchmark. They will be executed in the order they are defined.
 tasks:
-  - className: "org.aksw.iguana.cc.tasks.impl.Stresstest"
-    configuration:
-      # 1 hour (time Limit is in ms)
-      timeLimit: 360000
-      # warmup is optional
-      warmup:
-        # 1 minutes (is in ms)
-        timeLimit: 600000
-        # queryHandler could be set too, same as in the stresstest configuration, otherwise the same queryHandler will be use.
-        # workers are set the same way as in the configuration part
-        workers:
-          - threads: 1
-            className: "SPARQLWorker"
-            queriesFile: "queries_warmup.txt"
-            timeOut: 180000
-      queryHandler:
-        className: "InstancesQueryHandler"
-      workers:
-        - threads: 16
-          className: "SPARQLWorker"
-          queriesFile: "queries_easy.txt"
-          timeOut: 180000
-        - threads: 4
-          className: "SPARQLWorker"
-          queriesFile: "queries_complex.txt"
-          fixedLatency: 100
-          gaussianLatency: 50
-          parameterName: "query"
-          responseType: "application/sparql-results+json"
+  - type: stresstest # Stresstests are used to test the performance of the system by sending a large number of requests.
+    warmupWorkers:   # Warmup workers are used to warm up the system before the actual stresstest.
+    - type: SPARQLProtocolWorker
+      requestType: post update    # Send POST requests with application/sparql-update content type to the endpoint.
+      number: 16                  # Initialize 16 workers with the same configuration.
+      queries:
+        path: "./example/queries"
+        format: "folder"          # Queries are stored in a folder.
+        order: "linear"
+      timeout: 0.02s
+      connection: Virtuoso7
+      parseResults: false
+      completionTarget:
+        number: 50                # Execute each query 50 times.
+    workers:
+      - type: "SPARQLProtocolWorker"
+        number: 16
+        queries:
+          path: "./example/queries.txt"
+          order: "random"
+          seed: 42
+        timeout: 3m
+        connection: Virtuoso7
+        parseResults: false
+        completionTarget:
+          duration: 1000s         # Execute the queries for 1000 seconds.
+        requestType: post url-enc query   # Send url-encoded POST request to endpoint.
+      - number: 4
+        type: "SPARQLProtocolWorker"
+        connection: Virtuoso7
+        requestType: post url-enc update
+        completionTarget:
+          duration: 1000s
+        queries:
+          path: "./example/queries.txt"
+        timeout: 100s
+        acceptHeader: "application/sparql-results+json" # Accept header for the request.
+  - type: stresstest
+    workers:
+      - type: "SPARQLProtocolWorker"
+        connection: Virtuoso7
+        number: 16
+        requestType: post query
+        queries:
+          path: "./example/queries.txt"
+        timeout: 180s
+        completionTarget:
+          duration: 1000s
+        parseResults: false
+      - number: 4
+        requestType: get query  # Send GET request with the query as the parameter to the endpoint.
+        connection: Virtuoso7
+        completionTarget:
+          duration: 1000s
+        type: "SPARQLProtocolWorker"
+        queries:
+          path: "./example/queries.txt"
+        timeout: 100s
+        parseResults: true
+        acceptHeader: "application/sparql-results+json"
 
-# both are optional and can be used to load and start as well as stop the connection before and after every task
-preScriptHook: "./triplestores/{{connection}}/start.sh {{dataset.file}} {{dataset.name}} {{taskID}}"
-postScriptHook: "./triplestores/{{connection}}/stop.sh"
-
-#optional otherwise the same metrics will be used as default
-metrics:
-  - className: "QMPH"
-  - className: "QPS"
-  - className: "NoQPH"
-  - className: "AvgQPS"
-  - className: "NoQ"
-
-#optional otherwise an nt file will be used
+# Define how the results will be stored.
 storages:
-  - className: "NTFileStorage"
-    #configuration:
-      #fileName: YOUR_RESULT_FILE_NAME.nt
+  - type: "rdf file"
+    path: "some.ttl"
+  - type: "csv file"
+    directory: "results/"
+  - type: "triplestore"
+    user: "dba"
+    password: "dba"
+    endpoint: "http://localhost:8890/update"
+
+responseBodyProcessors:
+  - contentType: "application/sparql-results+json"
+    threads: 1
+    timeout: 1 min
