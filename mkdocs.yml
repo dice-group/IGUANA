@@ -1,4 +1,4 @@
-site_name: Iguana $VERSION Documentation
+site_name: Iguana $RELEASE_VERSION Documentation
 
 extra:
   version: $RELEASE_VERSION
