@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.utils;
 
+import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.utils.files.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -8,6 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,13 +76,35 @@ public class FileUtilsTest {
 
     @Test
     public void getHashTest() throws IOException {
+        final var hasherFactory = XXHashFactory.fastestJavaInstance();
         for (int i = 0; i < 10; i++) {
             String content = UUID.randomUUID().toString();
             final var file = createTestFileWithContent(content);
-            final int expected = Math.abs(content.hashCode());
-            final int actual = FileUtils.getHashcodeFromFileContent(file);
-            assertTrue(actual >= 0);
+            final var data = content.getBytes(StandardCharsets.UTF_8);
+            final var hasher = hasherFactory.hash64();
+            final int expected = (int) hasher.hash(data, 0, data.length, 0);
+
+            final int actual = FileUtils.getHashcodeFromFileContent(file, true);
             assertEquals(expected, actual);
+
+            final int actual2 = FileUtils.getHashcodeFromFileContent(file, true);
+            assertEquals(expected, actual2);
+
+            final var hashFile = file.resolveSibling(file.getFileName() + ".hash");
+            assertTrue(Files.exists(hashFile));
+
+            final int actual3 = Integer.parseInt(Files.readString(hashFile));
+            assertEquals(expected, actual3);
         }
+
+        final var directory = Files.createTempDirectory("getHashTest");
+        for (int i = 0; i < 10; i++) {
+            final var file = createTestFileWithContent(UUID.randomUUID().toString());
+            Files.move(file, directory.resolve(file.getFileName()));
+        }
+        final int actual = FileUtils.getHashcodeFromDirectory(directory, true);
+        final int actual2 = FileUtils.getHashcodeFromDirectory(directory, true);
+        assertEquals(actual, actual2);
+        org.apache.commons.io.FileUtils.deleteDirectory(directory.toFile());
     }
 }
