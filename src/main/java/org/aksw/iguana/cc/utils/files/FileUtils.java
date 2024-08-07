@@ -1,5 +1,8 @@
 package org.aksw.iguana.cc.utils.files;
 
+import net.jpountz.xxhash.StreamingXXHash64;
+import net.jpountz.xxhash.XXHashFactory;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,20 +17,90 @@ import java.util.List;
  *
  */
 public class FileUtils {
+	private static final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
+	private static final int BUFFER_SIZE = 8192;
 
-	public static int getHashcodeFromFileContent(Path filepath) {
-		int hashcode;
-		try {
-			String fileContents = readFile(filepath);
-			hashcode = Math.abs(fileContents.hashCode());
-		} catch (IOException e) {
-			hashcode = 0;
+	/**
+	 * This method calculates the hashcode of the content of a file. <br/>
+	 * The hashcode is calculated using the XXHash64 algorithm.
+	 * If saveHash is true, the hashcode is saved in a file with the same name as the original file,
+	 * but with the extension ".hash".
+	 *
+	 * @param filepath the path of the file
+	 * @param saveHash if true, the hashcode is saved in a file with the same name as the original file
+	 * @return 		   the hashcode of the file content
+	 */
+	public static int getHashcodeFromFileContent(Path filepath, boolean saveHash) {
+		final var hashFile = filepath.resolveSibling(filepath.getFileName() + ".hash");
+		if (saveHash && Files.exists(hashFile)) {
+			try {
+				return Integer.parseInt(Files.readString(hashFile));
+			} catch (IOException ignored) {}
 		}
+
+		int hashcode;
+		try (StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
+			 InputStream is = new BufferedInputStream(Files.newInputStream(filepath), BUFFER_SIZE)) {
+			byte[] buffer = new byte[BUFFER_SIZE];
+			int bytesRead;
+			while ((bytesRead = (is.read(buffer))) != -1) {
+				hasher.update(buffer, 0, bytesRead);
+			}
+			hashcode = (int) hasher.getValue();
+		} catch (IOException e) {
+			return 0;
+		}
+
+		if (saveHash) {
+            try {
+                Files.writeString(hashFile, String.valueOf(hashcode));
+            } catch (IOException ignored) {} // the hash won't be saved, but it's not critical
+        }
 		return hashcode;
 	}
 
-	public static String readFile(Path path) throws IOException {
-		return Files.readString(path, StandardCharsets.UTF_8);
+	/**
+	 * This method calculated the hashcode of a directory by hashing the content of all files in the directory. <br/>
+	 * Only top-level files are considered, subdirectories are ignored. <br/>
+	 * The hashcode is calculated using the XXHash64 algorithm.
+	 * If saveHash is true, the hashcode is saved in a file with the name "hashcode" in the directory.
+	 *
+	 * @param directory the path of the directory
+	 * @param saveHash  if true, the hashcode is saved in a file with the name "hashcode" in the directory
+	 * @return			the hashcode of the directory content
+	 */
+	public static int getHashcodeFromDirectory(Path directory, boolean saveHash) {
+		final var hashFile = directory.resolve(directory.resolve("hashcode"));
+		if (saveHash && Files.exists(hashFile)) {
+			try {
+				return Integer.parseInt(Files.readString(hashFile));
+			} catch (IOException ignored) {}
+		}
+
+		int hashcode;
+		try (StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0)) {
+			for (Path file : Files.list(directory).sorted().toArray(Path[]::new)) {
+				if (Files.isRegularFile(file)) {
+					try (InputStream is = new BufferedInputStream(Files.newInputStream(file), BUFFER_SIZE)) {
+						byte[] buffer = new byte[BUFFER_SIZE];
+						int bytesRead;
+						while ((bytesRead = (is.read(buffer))) != -1) {
+							hasher.update(buffer, 0, bytesRead);
+						}
+					}
+				}
+			}
+			hashcode = (int) hasher.getValue();
+		} catch (IOException e) {
+			return 0;
+		}
+
+		if (saveHash) {
+			try {
+				Files.writeString(hashFile, String.valueOf(hashcode));
+			} catch (IOException ignored) {} // the hash won't be saved, but it's not critical
+		}
+		return hashcode;
 	}
 
 	/**

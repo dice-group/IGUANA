@@ -29,7 +29,7 @@ public abstract class QuerySource {
         if (path == null)
             throw new IllegalArgumentException("Path for a query source must not be null.");
         this.path = path;
-        this.hashCode = FileUtils.getHashcodeFromFileContent(path);
+        this.hashCode = FileUtils.getHashcodeFromFileContent(path, true);
     }
 
     /**
