@@ -98,7 +98,7 @@ storages:
   - type: "csv file"
     directory: "results/"
   - type: "triplestore"
-    username: "dba"
+    user: "dba"
     password: "dba"
     endpoint: "http://localhost:8890/update"
 
