@@ -72,7 +72,7 @@ public class ResponseBodyProcessor {
             return responseDataMetrics;
         }
 
-        LOGGER.info(MessageFormat.format("Shutting down ResponseBodyProcessor with {0} min timeout to finish processing. {1} tasks remaining.", timeout.toMinutes() + "." + (timeout.toSecondsPart() / (double) 60), executor.getQueue().size()));
+        LOGGER.info(MessageFormat.format("Shutting down ResponseBodyProcessor with {0} min timeout to finish processing. {1} tasks remaining.", timeout.toMinutes() + "." + (timeout.toSecondsPart() / 6), executor.getQueue().size()));
         boolean noTimeout;
         try {
             executor.shutdown();
