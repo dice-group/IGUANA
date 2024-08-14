@@ -67,10 +67,11 @@ public class FileUtilsTest {
     @ParameterizedTest
     @MethodSource("data")
     public void testIndexingStrings(IndexTestData data) throws IOException {
-        List<long[]> index = FileUtils.indexStream(data.separator, new ByteArrayInputStream(data.content.getBytes()));
+        List<FileUtils.QueryIndex> index = FileUtils.indexStream(data.separator, new ByteArrayInputStream(data.content.getBytes()));
         assertEquals(data.indices.size(), index.size());
         for (int i = 0; i < index.size(); i++) {
-            assertArrayEquals(data.indices.get(i), index.get(i));
+            assertEquals(data.indices.get(i)[0], index.get(i).filePosition());
+            assertEquals(data.indices.get(i)[1], index.get(i).queryLength());
         }
     }
 
