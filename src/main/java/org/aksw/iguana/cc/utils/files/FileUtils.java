@@ -17,6 +17,8 @@ import java.util.List;
  *
  */
 public class FileUtils {
+	public record QueryIndex(long filePosition, long queryLength) {}
+
 	private static final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
 	private static final int BUFFER_SIZE = 8192;
 
@@ -157,9 +159,9 @@ public class FileUtils {
 		return prefixTable;
 	}
 
-	public static List<long[]> indexStream(String separator, InputStream is) throws IOException {
+	public static List<QueryIndex> indexStream(String separator, InputStream is) throws IOException {
 		// basically Knuth-Morris-Pratt
-		List<long[]> indices = new ArrayList<>();
+		List<QueryIndex> indices = new ArrayList<>();
 
 
 		final byte[] sepArray = separator.getBytes(StandardCharsets.UTF_8);
@@ -184,7 +186,7 @@ public class FileUtils {
 					patternIndex = 0;
 					final long itemEnd = byteOffset - sepArray.length + 1;
 					final long len = itemEnd - itemStart;
-					indices.add(new long[]{itemStart, len});
+					indices.add(new QueryIndex(itemStart, len));
 
 					itemStart = byteOffset + 1;
 				}
@@ -195,7 +197,7 @@ public class FileUtils {
 
 		final long itemEnd = byteOffset;
 		final long len = itemEnd - itemStart;
-		indices.add(new long[]{itemStart, len});
+		indices.add(new QueryIndex(itemStart, len));
 
 		return indices;
 	}
