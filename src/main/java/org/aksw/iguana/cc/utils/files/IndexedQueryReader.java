@@ -27,7 +27,7 @@ public class IndexedQueryReader {
     /**
      * This list stores the start position and the length of each indexed content.
      */
-    private final List<FileUtils.QueryIndex> indices;
+    private final List<QueryIndex> indices;
 
     /**
      * The file whose content should be indexed.
@@ -153,7 +153,7 @@ public class IndexedQueryReader {
      * @return the Indexes
      * @throws IOException
      */
-    private static List<FileUtils.QueryIndex> indexFile(Path filepath, String separator) throws IOException {
+    private static List<QueryIndex> indexFile(Path filepath, String separator) throws IOException {
         try (InputStream fi = Files.newInputStream(filepath, StandardOpenOption.READ);
              BufferedInputStream bis = new BufferedInputStream(fi)) {
             return FileUtils.indexStream(separator, bis)

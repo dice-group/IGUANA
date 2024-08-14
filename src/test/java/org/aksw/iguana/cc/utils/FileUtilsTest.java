@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.utils;
 
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.utils.files.FileUtils;
+import org.aksw.iguana.cc.utils.files.QueryIndex;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -67,7 +68,7 @@ public class FileUtilsTest {
     @ParameterizedTest
     @MethodSource("data")
     public void testIndexingStrings(IndexTestData data) throws IOException {
-        List<FileUtils.QueryIndex> index = FileUtils.indexStream(data.separator, new ByteArrayInputStream(data.content.getBytes()));
+        List<QueryIndex> index = FileUtils.indexStream(data.separator, new ByteArrayInputStream(data.content.getBytes()));
         assertEquals(data.indices.size(), index.size());
         for (int i = 0; i < index.size(); i++) {
             assertEquals(data.indices.get(i)[0], index.get(i).filePosition());

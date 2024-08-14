@@ -17,8 +17,6 @@ import java.util.List;
  *
  */
 public class FileUtils {
-	public record QueryIndex(long filePosition, long queryLength) {}
-
 	private static final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
 	private static final int BUFFER_SIZE = 8192;
 
