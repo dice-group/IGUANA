@@ -96,12 +96,19 @@ public class IndexedQueryReader {
      * @throws IOException
      */
     public String readQuery(int index) throws IOException {
+        final int size;
+        try {
+            size = Math.toIntExact(indices.get(index)[1]);
+        } catch (Exception e) {
+            throw new OutOfMemoryError("Can't read a Query to a string, that's bigger than 2^31 Bytes (~2GB)");
+        }
         // Indexed queries can't be larger than ~2GB
         try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-            final ByteBuffer buffer = ByteBuffer.allocate((int) indices.get(index)[1]);
-            final var read = channel.read(buffer, indices.get(index)[0]);
+            final byte[] buffer = new byte[size]; // it's supposedly faster to manually create a byte array than a ByteBuffer
+            final ByteBuffer bufferWrapper = ByteBuffer.wrap(buffer);
+            final var read = channel.read(bufferWrapper, indices.get(index)[0]);
             assert read == indices.get(index)[1];
-            return new String(buffer.array(), StandardCharsets.UTF_8);
+            return new String(buffer, StandardCharsets.UTF_8);
         }
     }
 
