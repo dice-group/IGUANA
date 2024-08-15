@@ -222,6 +222,7 @@ public class BigByteArrayOutputStream extends ReversibleOutputStream {
             object.close();
         } catch (IOException ignored) {} // doesn't throw
         BigByteArrayOutputStream copy = new BigByteArrayOutputStream();
+        copy.baosList.clear();
         copy.baosList.addAll(object.baosList);
         copy.baosListIndex = object.baosListIndex;
         copy.currentBaos = object.currentBaos;
