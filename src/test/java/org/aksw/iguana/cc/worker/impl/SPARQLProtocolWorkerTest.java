@@ -12,6 +12,7 @@ import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
+import org.apache.commons.lang3.function.TriFunction;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -34,7 +35,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -140,8 +140,8 @@ public class SPARQLProtocolWorkerTest {
     @MethodSource("requestFactoryData")
     @DisplayName("Test Request Factory")
     public void testRequestFactory(SPARQLProtocolWorker worker, boolean cached) {
-        BiFunction<MappingBuilder, Integer, MappingBuilder> encoding = (builder, size) -> {
-            if (!cached) {
+        TriFunction<MappingBuilder, Integer, Boolean, MappingBuilder> encoding = (builder, size, chunked) -> {
+            if (chunked) {
                 return builder.withHeader("Transfer-Encoding", equalTo("chunked"));
             } else {
                 return builder.withHeader("Content-Length", equalTo(String.valueOf(size)));
@@ -161,7 +161,7 @@ public class SPARQLProtocolWorkerTest {
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo(QUERY))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body"));
-                encoding.apply(temp, QUERY.length());
+                encoding.apply(temp, QUERY.length(), !cached);
                 wm.stubFor(temp);
             }
             case POST_UPDATE -> {
@@ -170,7 +170,7 @@ public class SPARQLProtocolWorkerTest {
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo(QUERY))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body"));
-                encoding.apply(temp, QUERY.length());
+                encoding.apply(temp, QUERY.length(), !cached);
                 wm.stubFor(temp);
             }
 
@@ -180,7 +180,7 @@ public class SPARQLProtocolWorkerTest {
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body"));
-                encoding.apply(temp, 43);
+                encoding.apply(temp, 43, false);
                 wm.stubFor(temp);
             }
             case POST_URL_ENC_UPDATE -> {
@@ -189,7 +189,7 @@ public class SPARQLProtocolWorkerTest {
                         .withBasicAuth("testUser", "password")
                         .withRequestBody(equalTo("update=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
                         .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body"));
-                encoding.apply(temp, 44);
+                encoding.apply(temp, 44, false);
                 wm.stubFor(temp);
             }
         }
