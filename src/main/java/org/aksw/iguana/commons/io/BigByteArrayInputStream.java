@@ -154,7 +154,7 @@ public class BigByteArrayInputStream extends InputStream {
 
     @Override
     public int available() {
-        return (int) Math.max(availableLong(), Integer.MAX_VALUE);
+        return (int) Math.min(availableLong(), Integer.MAX_VALUE);
     }
 
     public long availableLong() {
