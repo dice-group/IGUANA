@@ -5,7 +5,6 @@ import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
-import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
@@ -115,7 +114,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         super(workerId, responseBodyProcessor, config);
         this.responseBodyProcessor = responseBodyProcessor;
         this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-        this.requestFactory = new RequestFactory(config().requestType());
+        this.requestFactory = new RequestFactory(this.config());
     }
 
     /**
@@ -157,22 +156,6 @@ public class SPARQLProtocolWorker extends HttpWorker {
         }
     }
 
-    /**
-     * Builds every request once, so that the requests can be loaded into the cache, if the queries themselves are
-     * cached.
-     * This is done to avoid the overhead of building (url-encoding) the requests during the benchmark.
-     */
-    private void preloadRequests() {
-        final var selector = new LinearQuerySelector(config().queries().getQueryCount());
-        for (int i = 0; i < config().queries().getQueryCount(); i++) {
-            try {
-                // build request and discard it
-                requestFactory.buildHttpRequest(config().queries().getNextQueryStream(selector), config().connection(), config().acceptHeader());
-            } catch (IOException | URISyntaxException e) {
-                LOGGER.error("Failed to preload request.", e);
-            }
-        }
-    }
 
     /**
      *  Starts the worker and returns a CompletableFuture, which will be completed, when the worker has finished the
@@ -185,7 +168,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * @return the CompletableFuture the contains the results of the worker.
      */
     public CompletableFuture<Result> start() {
-        preloadRequests();
+        requestFactory.preloadRequests(config().queries());
         return CompletableFuture.supplyAsync(() -> {
             ZonedDateTime startTime = ZonedDateTime.now();
             List<ExecutionStats> executionStats = new ArrayList<>();
@@ -280,31 +263,14 @@ public class SPARQLProtocolWorker extends HttpWorker {
      */
     private HttpExecutionResult executeHttpRequest(Duration timeout) {
         // get the next query and request
+        final var queryHandle = config().queries().getNextQueryStream(querySelector);
+        final int queryIndex = queryHandle.index();
+
         final AsyncRequestProducer request;
-        final int queryIndex;
-        if (config().queries().getConfig().caching()) {
-            queryIndex = querySelector.getNextIndex();
-            request = requestFactory.getCachedRequest(queryIndex);
-        } else {
-            final QueryHandler.QueryStreamWrapper queryHandle;
-            try {
-                queryHandle = config().queries().getNextQueryStream(this.querySelector);
-            } catch (IOException e) {
-                return createFailedResultBeforeRequest(this.querySelector.getCurrentIndex(), e);
-            }
-
-            try {
-                request = requestFactory.buildHttpRequest(
-                        queryHandle,
-                        config().connection(),
-                        config().acceptHeader()
-                );
-            } catch (IOException | URISyntaxException e) {
-                return createFailedResultBeforeRequest(queryHandle.index(), e);
-            }
-
-            // set queryIndex to the index of the queryHandle, so that the result can be associated with the query
-            queryIndex = queryHandle.index();
+        try {
+            request = requestFactory.buildHttpRequest(queryHandle);
+        } catch (IOException | URISyntaxException e) {
+            return createFailedResultBeforeRequest(config.queries().getQuerySelectorInstance().getCurrentIndex(), e);
         }
 
         // execute the request

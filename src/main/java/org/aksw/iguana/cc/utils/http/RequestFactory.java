@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
+import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
+import org.aksw.iguana.commons.io.BigByteArrayInputStream;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.http.nio.entity.BasicAsyncEntityProducer;
 import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder;
 import org.apache.hc.core5.net.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +30,7 @@ import java.util.stream.Collectors;
  * The factory can create requests for different types of HTTP methods and different types of SPARQL queries.
  * The factory can also cache requests to avoid creating the same request multiple times.
  */
-public final class RequestFactory {
+public class RequestFactory {
     public enum RequestType {
         GET_QUERY("get query"),
         POST_URL_ENC_QUERY("post url-enc query"),
@@ -47,11 +51,19 @@ public final class RequestFactory {
         }
     }
 
+    Logger LOGGER = LoggerFactory.getLogger(RequestFactory.class);
+
+    private final ConnectionConfig connectionConfig;
+    private final String acceptHeader;
     private final RequestType requestType;
+    private final boolean caching;
     private final Map<Integer, AsyncRequestProducer> cache = new HashMap<>();
 
-    public RequestFactory(RequestType requestType) {
-        this.requestType = requestType;
+    public RequestFactory(SPARQLProtocolWorker.Config workerConfig) {
+        this.connectionConfig = workerConfig.connection();
+        this.acceptHeader = workerConfig.acceptHeader();
+        this.requestType = workerConfig.requestType();
+        this.caching = workerConfig.queries().getConfig().caching();
     }
 
     private static String urlEncode(List<String[]> parameters) {
@@ -72,18 +84,17 @@ public final class RequestFactory {
      * If the query has not been cached by the query handler, the entity producer will use the query stream supplier to
      * send the query in chunks.
      *
-     * @param queryHandle   the query handle containing the query and its index
-     * @param connection    the connection to send the request to
-     * @param requestHeader the request header
+     * @param queryHandle the query handle to build the request for
      * @return              the request as an AsyncRequestProducer
      * @throws URISyntaxException if the URI is invalid
      * @throws IOException        if the query stream cannot be read
      */
-    public AsyncRequestProducer buildHttpRequest(QueryHandler.QueryStreamWrapper queryHandle,
-                                                 ConnectionConfig connection,
-                                                 String requestHeader) throws URISyntaxException, IOException {
-        if (queryHandle.cached() && cache.containsKey(queryHandle.index()))
-            return cache.get(queryHandle.index());
+    public AsyncRequestProducer buildHttpRequest(QueryHandler.QueryStreamWrapper queryHandle) throws IOException, URISyntaxException {
+        final var index = queryHandle.index();
+
+        // get cached request
+        if (caching && cache.containsKey(index))
+            return cache.get(index);
 
         AsyncRequestBuilder asyncRequestBuilder;
         Supplier<InputStream> queryStreamSupplier;
@@ -96,49 +107,64 @@ public final class RequestFactory {
             throw new IOException(e);
         }
 
-        switch (this.requestType) {
-            case GET_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.get(new URIBuilder(connection.endpoint())
+        long queryLength = queryStream instanceof BigByteArrayInputStream ? ((BigByteArrayInputStream) queryStream).availableLong() : -1;
+        if (queryLength > Integer.MAX_VALUE- 8 && requestType != RequestType.POST_UPDATE && requestType != RequestType.POST_QUERY) {
+            LOGGER.error("Query is too large to be sent with the current request type {}.", requestType);
+            return null;
+        }
+
+        switch (requestType) {
+            case GET_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.get(new URIBuilder(connectionConfig.endpoint())
                     .addParameter("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
                     .build()
             );
-            case POST_URL_ENC_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
+            case POST_URL_ENC_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.post(connectionConfig.endpoint())
                     // manually set content type, because otherwise the
                     // entity producer would set it to "application/x-www-form-urlencoded; charset=ISO-8859-1"
                     .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
-                    .setEntity(new BasicAsyncEntityProducer(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, !queryHandle.cached()));
-            case POST_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                    .setEntity(new StreamEntityProducer(queryStreamSupplier, !queryHandle.cached(), "application/sparql-query"));
-            case POST_URL_ENC_UPDATE -> asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
+                    .setEntity(new BasicAsyncEntityProducer(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, false));
+            case POST_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.post(connectionConfig.endpoint())
+                    .setEntity(new StreamEntityProducer(queryStreamSupplier, !caching, "application/sparql-query"));
+            case POST_URL_ENC_UPDATE -> asyncRequestBuilder = AsyncRequestBuilder.post(connectionConfig.endpoint())
                     .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
-                    .setEntity(new BasicAsyncEntityProducer(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, !queryHandle.cached()));
-            case POST_UPDATE -> asyncRequestBuilder = AsyncRequestBuilder.post(connection.endpoint())
-                    .setEntity(new StreamEntityProducer(queryStreamSupplier, !queryHandle.cached(), "application/sparql-update"));
-            default -> throw new IllegalStateException("Unexpected value: " + this.requestType);
+                    .setEntity(new BasicAsyncEntityProducer(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, false));
+            case POST_UPDATE -> asyncRequestBuilder = AsyncRequestBuilder.post(connectionConfig.endpoint())
+                    .setEntity(new StreamEntityProducer(queryStreamSupplier, !caching, "application/sparql-update"));
+            default -> throw new IllegalStateException("Unexpected value: " + requestType);
         }
 
-        if (requestHeader != null)
-            asyncRequestBuilder.addHeader("Accept", requestHeader);
-        if (connection.authentication() != null && connection.authentication().user() != null)
+        // set additional headers
+        if (acceptHeader != null)
+            asyncRequestBuilder.addHeader("Accept", acceptHeader);
+        if (connectionConfig.authentication() != null && connectionConfig.authentication().user() != null)
             asyncRequestBuilder.addHeader("Authorization",
-                    HttpWorker.basicAuth(connection.authentication().user(),
-                            Optional.ofNullable(connection.authentication().password()).orElse("")));
+                    HttpWorker.basicAuth(connectionConfig.authentication().user(),
+                            Optional.ofNullable(connectionConfig.authentication().password()).orElse("")));
 
-        if (queryHandle.cached())
-            cache.put(queryHandle.index(), asyncRequestBuilder.build());
+        // cache request
+        if (caching)
+            cache.put(index, asyncRequestBuilder.build());
 
         return asyncRequestBuilder.build();
     }
 
     /**
-     * Get a cached request by the index of the query.
-     * If the request is not in the cache, an IllegalArgumentException is thrown.
+     * Builds every request once, so that the requests can be loaded into the cache, if the queries themselves are
+     * cached.
+     * This is done to avoid the overhead of building (url-encoding) the requests during the benchmark.
      *
-     * @param index the index of the query
-     * @return      the request as an AsyncRequestProducer
+     * @param queryHandler the query handler to preload requests for
      */
-    public AsyncRequestProducer getCachedRequest(int index) {
-        if (!cache.containsKey(index))
-            throw new IllegalArgumentException("No request with index " + index + " found in cache.");
-        return cache.get(index);
+    public void preloadRequests(QueryHandler queryHandler) {
+        final var selector = new LinearQuerySelector(queryHandler.getQueryCount());
+        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+            try {
+                // build request and discard it
+                buildHttpRequest(queryHandler.getNextQueryStream(selector));
+            } catch (IOException | URISyntaxException e) {
+                LOGGER.error("Failed to preload request.", e);
+            }
+        }
+
     }
 }
