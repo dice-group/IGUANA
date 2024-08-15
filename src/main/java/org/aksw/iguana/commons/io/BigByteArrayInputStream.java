@@ -152,6 +152,15 @@ public class BigByteArrayInputStream extends InputStream {
         return true;
     }
 
+    @Override
+    public int available() {
+        return (int) Math.max(availableLong(), Integer.MAX_VALUE);
+    }
+
+    public long availableLong() {
+        return bbaos.size() + availableBytes();
+    }
+
     /**
      * Returns the number of available bytes in the current buffer.
      *
