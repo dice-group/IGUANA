@@ -207,4 +207,25 @@ public class BigByteArrayOutputStream extends ReversibleOutputStream {
     public InputStream toInputStream() {
         return new BigByteArrayInputStream(this);
     }
+
+    /**
+     * Creates a shallow copy of the BigByteArrayOutputStream object.
+     * Both streams will be closed.
+     * Used to create a copy of the stream for reading purposes.
+     *
+     * @param object the BigByteArrayOutputStream object to copy
+     * @return a shallow copy of the BigByteArrayOutputStream object
+     */
+    public static BigByteArrayOutputStream shallowCopy(BigByteArrayOutputStream object) {
+        // close the original stream to prevent inconsistencies
+        try {
+            object.close();
+        } catch (IOException ignored) {} // doesn't throw
+        BigByteArrayOutputStream copy = new BigByteArrayOutputStream();
+        copy.baosList.addAll(object.baosList);
+        copy.baosListIndex = object.baosListIndex;
+        copy.currentBaos = object.currentBaos;
+        copy.closed = object.closed;
+        return copy;
+    }
 }
