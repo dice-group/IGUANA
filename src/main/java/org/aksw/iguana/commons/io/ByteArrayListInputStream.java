@@ -86,13 +86,28 @@ public class ByteArrayListInputStream extends InputStream {
 
     @Override
     public byte[] readAllBytes() throws IOException {
-        throw new UnsupportedOperationException();
+        checkNotClosed();
+        if (availableLong() > Integer.MAX_VALUE - 8) {
+            throw new OutOfMemoryError("Data is too large to be read into a byte array");
+        }
+        return readNBytes(Integer.MAX_VALUE - 8);
     }
 
     @Override
     public int readNBytes(byte[] b, int off, int len) throws IOException {
         checkNotClosed();
         return read(b, off, len, 0);
+    }
+
+    public byte[] readNBytes(int len) throws IOException {
+        checkNotClosed();
+        if (len < 0) {
+            throw new IllegalArgumentException("len < 0");
+        }
+        final var actualLength = Math.min(len, this.available());
+        byte[] b = new byte[actualLength];
+        read(b, 0, actualLength, 0);
+        return b;
     }
 
     @Override
@@ -125,12 +140,11 @@ public class ByteArrayListInputStream extends InputStream {
     }
 
     @Override
-    public int available() throws IOException {
+    public int available() {
         return (int) Math.min(Integer.MAX_VALUE, availableLong());
     }
 
-    public long availableLong() throws IOException {
-        checkNotClosed();
+    public long availableLong() {
         if (!checkBuffer())
             return 0;
         long sum = 0;
@@ -159,5 +173,12 @@ public class ByteArrayListInputStream extends InputStream {
         if (!checkBuffer())
             return -1;
         return currentBuffer.get() & 0xFF;
+    }
+
+    public ByteBuffer getCurrentBuffer() {
+        if (!checkBuffer()) {
+            return null;
+        }
+        return currentBuffer;
     }
 }
