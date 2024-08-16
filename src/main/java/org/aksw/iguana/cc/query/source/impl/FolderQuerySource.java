@@ -74,6 +74,6 @@ public class FolderQuerySource extends QuerySource {
 
     @Override
     public int hashCode() {
-        return FileUtils.getHashcodeFromDirectory(this.path, true);
+        return FileUtils.getHashcodeFromDirectory(this.path);
     }
 }

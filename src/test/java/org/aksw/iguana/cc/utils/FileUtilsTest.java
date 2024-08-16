@@ -86,10 +86,10 @@ public class FileUtilsTest {
             final var hasher = hasherFactory.hash64();
             final int expected = (int) hasher.hash(data, 0, data.length, 0);
 
-            final int actual = FileUtils.getHashcodeFromFileContent(file, true);
+            final int actual = FileUtils.getHashcodeFromFileContent(file);
             assertEquals(expected, actual);
 
-            final int actual2 = FileUtils.getHashcodeFromFileContent(file, true);
+            final int actual2 = FileUtils.getHashcodeFromFileContent(file);
             assertEquals(expected, actual2);
 
             final var hashFile = file.resolveSibling(file.getFileName() + ".hash");
@@ -104,8 +104,8 @@ public class FileUtilsTest {
             final var file = createTestFileWithContent(UUID.randomUUID().toString());
             Files.move(file, directory.resolve(file.getFileName()));
         }
-        final int actual = FileUtils.getHashcodeFromDirectory(directory, true);
-        final int actual2 = FileUtils.getHashcodeFromDirectory(directory, true);
+        final int actual = FileUtils.getHashcodeFromDirectory(directory);
+        final int actual2 = FileUtils.getHashcodeFromDirectory(directory);
         assertEquals(actual, actual2);
         org.apache.commons.io.FileUtils.deleteDirectory(directory.toFile());
     }

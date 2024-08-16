@@ -4,6 +4,7 @@ import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,21 +24,11 @@ public class FileUtils {
 	/**
 	 * This method calculates the hashcode of the content of a file. <br/>
 	 * The hashcode is calculated using the XXHash64 algorithm.
-	 * If saveHash is true, the hashcode is saved in a file with the same name as the original file,
-	 * but with the extension ".hash".
 	 *
 	 * @param filepath the path of the file
-	 * @param saveHash if true, the hashcode is saved in a file with the same name as the original file
 	 * @return 		   the hashcode of the file content
 	 */
-	public static int getHashcodeFromFileContent(Path filepath, boolean saveHash) {
-		final var hashFile = filepath.resolveSibling(filepath.getFileName() + ".hash");
-		if (saveHash && Files.exists(hashFile)) {
-			try {
-				return Integer.parseInt(Files.readString(hashFile));
-			} catch (IOException ignored) {}
-		}
-
+	public static int getHashcodeFromFileContent(Path filepath) {
 		int hashcode;
 		try (StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0);
 			 InputStream is = new BufferedInputStream(Files.newInputStream(filepath), BUFFER_SIZE)) {
@@ -51,11 +42,6 @@ public class FileUtils {
 			return 0;
 		}
 
-		if (saveHash) {
-            try {
-                Files.writeString(hashFile, String.valueOf(hashcode));
-            } catch (IOException ignored) {} // the hash won't be saved, but it's not critical
-        }
 		return hashcode;
 	}
 
@@ -63,19 +49,11 @@ public class FileUtils {
 	 * This method calculated the hashcode of a directory by hashing the content of all files in the directory. <br/>
 	 * Only top-level files are considered, subdirectories are ignored. <br/>
 	 * The hashcode is calculated using the XXHash64 algorithm.
-	 * If saveHash is true, the hashcode is saved in a file with the name "hashcode" in the directory.
 	 *
 	 * @param directory the path of the directory
-	 * @param saveHash  if true, the hashcode is saved in a file with the name "hashcode" in the directory
 	 * @return			the hashcode of the directory content
 	 */
-	public static int getHashcodeFromDirectory(Path directory, boolean saveHash) {
-		final var hashFile = directory.resolve(directory.resolve("hashcode"));
-		if (saveHash && Files.exists(hashFile)) {
-			try {
-				return Integer.parseInt(Files.readString(hashFile));
-			} catch (IOException ignored) {}
-		}
+	public static int getHashcodeFromDirectory(Path directory) {
 
 		int hashcode;
 		try (StreamingXXHash64 hasher = hasherFactory.newStreamingHash64(0)) {
@@ -95,11 +73,6 @@ public class FileUtils {
 			return 0;
 		}
 
-		if (saveHash) {
-			try {
-				Files.writeString(hashFile, String.valueOf(hashcode));
-			} catch (IOException ignored) {} // the hash won't be saved, but it's not critical
-		}
 		return hashcode;
 	}
 
