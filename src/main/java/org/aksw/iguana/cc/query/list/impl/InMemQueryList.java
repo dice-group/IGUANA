@@ -2,7 +2,8 @@ package org.aksw.iguana.cc.query.list.impl;
 
 import org.aksw.iguana.cc.query.list.QueryList;
 import org.aksw.iguana.cc.query.source.QuerySource;
-import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
+import org.aksw.iguana.commons.io.ByteArrayListInputStream;
+import org.aksw.iguana.commons.io.ByteArrayListOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,20 +23,21 @@ public class InMemQueryList extends QueryList {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemQueryList.class);
 
-    private final List<BigByteArrayOutputStream> queries = new ArrayList<>();
+    private final List<ByteArrayListOutputStream> queries = new ArrayList<>();
 
     public InMemQueryList(QuerySource querySource) throws IOException {
         super(querySource);
+        LOGGER.info("Reading queries from the source with the hash code {} into memory.", querySource.hashCode());
         for (int i = 0; i < querySource.size(); i++) {
             try (InputStream queryStream = querySource.getQueryStream(i)) {
-                BigByteArrayOutputStream baos = new BigByteArrayOutputStream();
-                byte[] buffer = new byte[8192];
-                int len;
-                while ((len = queryStream.read(buffer)) != -1) {
-                    baos.write(buffer, 0, len);
-                }
-                baos.close();
-                queries.add(baos);
+                ByteArrayListOutputStream balos = new ByteArrayListOutputStream();
+                byte[] currentBuffer;
+                do {
+                    currentBuffer = queryStream.readNBytes(Integer.MAX_VALUE / 2);
+                    balos.write(currentBuffer);
+                } while (currentBuffer.length == Integer.MAX_VALUE / 2);
+                balos.close();
+                queries.add(balos);
             }
         }
     }
@@ -46,13 +48,20 @@ public class InMemQueryList extends QueryList {
         if (queryStream.size() > Integer.MAX_VALUE - 8) {
             throw new OutOfMemoryError("Query is too large to be read into a string object.");
         }
-        return new String(queryStream.toByteArray()[0], StandardCharsets.UTF_8);
+
+        byte[] buffer;
+        try {
+            buffer = queryStream.toInputStream().readNBytes(Integer.MAX_VALUE - 8);
+        } catch (IOException ignored) {
+            LOGGER.error("Could not read query into string.");
+            return "";
+        }
+        return new String(buffer, StandardCharsets.UTF_8);
     }
 
     @Override
     public InputStream getQueryStream(int index) {
-        final var stream = BigByteArrayOutputStream.shallowCopy(queries.get(index));
-        return stream.toInputStream();
+        return new ByteArrayListInputStream(queries.get(index).getBuffers());
     }
 
     @Override

@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.utils.http;
 
-import org.aksw.iguana.commons.io.BigByteArrayInputStream;
+import org.aksw.iguana.commons.io.ByteArrayListInputStream;
 import org.apache.hc.core5.http.nio.AsyncEntityProducer;
 import org.apache.hc.core5.http.nio.DataStreamChannel;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class StreamEntityProducer implements AsyncEntityProducer {
     private final byte[] buffer = new byte[BUFFER_SIZE];
 
     private InputStream currentStream;
-    private BigByteArrayInputStream content;
+    private ByteArrayListInputStream content;
 
     /**
      * Creates a new entity producer that produces the entity data from the given input stream supplier.
@@ -43,7 +43,7 @@ public class StreamEntityProducer implements AsyncEntityProducer {
         this.chunked = chunked;
         this.contentType = contentType;
         if (!chunked) {
-            content = (streamSupplier.get() instanceof BigByteArrayInputStream) ? (BigByteArrayInputStream) streamSupplier.get() : null;
+            content = (streamSupplier.get() instanceof ByteArrayListInputStream) ? (ByteArrayListInputStream) streamSupplier.get() : null;
         }
     }
 
