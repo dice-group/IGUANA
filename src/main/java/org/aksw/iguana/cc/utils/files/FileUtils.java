@@ -5,6 +5,7 @@ import net.jpountz.xxhash.XXHashFactory;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -94,16 +95,22 @@ public class FileUtils {
 	public static String getLineEnding(Path filepath) throws IOException {
 		if (filepath == null)
 			throw new IllegalArgumentException("Filepath must not be null.");
-		try(BufferedReader br = Files.newBufferedReader(filepath)) {
+		try (BufferedReader br = Files.newBufferedReader(filepath)) {
+			CharBuffer buffer = CharBuffer.allocate(8192);
 			char c;
-			while ((c = (char) br.read()) != (char) -1) {
-				if (c == '\n')
-					return "\n";
-				else if (c == '\r') {
-					if ((char) br.read() == '\n')
-						return "\r\n";
-					return "\r";
+			while (br.read(buffer) != -1) {
+				buffer.flip();
+				while (buffer.hasRemaining()) {
+					c = buffer.get();
+					if (c == '\n')
+						return "\n";
+					else if (c == '\r') {
+						if ((char) br.read() == '\n')
+							return "\r\n";
+						return "\r";
+					}
 				}
+				buffer.clear();
 			}
 		}
 
