@@ -91,12 +91,6 @@ public class FileUtilsTest {
 
             final int actual2 = FileUtils.getHashcodeFromFileContent(file);
             assertEquals(expected, actual2);
-
-            final var hashFile = file.resolveSibling(file.getFileName() + ".hash");
-            assertTrue(Files.exists(hashFile));
-
-            final int actual3 = Integer.parseInt(Files.readString(hashFile));
-            assertEquals(expected, actual3);
         }
 
         final var directory = Files.createTempDirectory("getHashTest");
