@@ -166,32 +166,43 @@ public class FileUtils {
 		final int[] prefixTable = computePrefixTable(sepArray);
 
 		long itemStart = 0;
-
 		long byteOffset = 0;
 		int patternIndex = 0;
-		byte[] currentByte = new byte[1];
-		while (is.read(currentByte) == 1) {
-			// skipping fast-forward with the prefixTable
-			while (patternIndex > 0 && currentByte[0] != sepArray[patternIndex]) {
-				patternIndex = prefixTable[patternIndex - 1];
-			}
+
+		// read from the stream in chunks, because the BufferedInputStream is synchronized, so single byte reads are
+		// slow, which is especially bad for large files
+		byte[] buffer = new byte[8192];
+		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+		byte currentByte;
+		int bytesRead;
+		while ((bytesRead = is.read(buffer)) != -1) {
+			byteBuffer.limit(bytesRead);
+            while (byteBuffer.hasRemaining()) {
+				currentByte = byteBuffer.get();
+                // skipping fast-forward with the prefixTable
+                while (patternIndex > 0 && currentByte != sepArray[patternIndex]) {
+                    patternIndex = prefixTable[patternIndex - 1];
+                }
 
 
-			if (currentByte[0] == sepArray[patternIndex]) {
-				patternIndex++;
+                if (currentByte == sepArray[patternIndex]) {
+                    patternIndex++;
 
-				if (patternIndex == sepArray.length) { // match found
-					patternIndex = 0;
-					final long itemEnd = byteOffset - sepArray.length + 1;
-					final long len = itemEnd - itemStart;
-					indices.add(new QueryIndex(itemStart, len));
+                    if (patternIndex == sepArray.length) { // match found
+                        patternIndex = 0;
+                        final long itemEnd = byteOffset - sepArray.length + 1;
+                        final long len = itemEnd - itemStart;
+                        indices.add(new QueryIndex(itemStart, len));
 
-					itemStart = byteOffset + 1;
-				}
-			}
+                        itemStart = byteOffset + 1;
+                    }
+                }
 
-			byteOffset++;
-		}
+                byteOffset++;
+            }
+			byteBuffer.clear();
+
+        }
 
 		final long itemEnd = byteOffset;
 		final long len = itemEnd - itemStart;
