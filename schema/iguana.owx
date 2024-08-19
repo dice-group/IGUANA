@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
-     xml:base="https://iguana-benchmark.eu/ontology/"
+     xml:base="https://vocab.dice-research.org/iguana/ontology.owx"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     ontologyIRI="https://iguana-benchmark.eu/ontology/"
-     versionIRI="https://iguana-benchmark.eu/ontology/4.0.0/">
+     ontologyIRI="https://vocab.dice-research.org/iguana/ontology.owx"
+     versionIRI="https://vocab.dice-research.org/iguana/4.0.0/ontology.owx">
     <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1/"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
