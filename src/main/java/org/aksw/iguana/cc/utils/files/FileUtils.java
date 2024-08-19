@@ -105,7 +105,9 @@ public class FileUtils {
 					if (c == '\n')
 						return "\n";
 					else if (c == '\r') {
-						if ((char) br.read() == '\n')
+						if (!buffer.hasRemaining() && br.read(buffer) == -1)
+							return "\r";
+						if (buffer.hasRemaining() && buffer.get() == '\n')
 							return "\r\n";
 						return "\r";
 					}
