@@ -7,7 +7,6 @@ import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
-import org.aksw.iguana.commons.io.BigByteArrayInputStream;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.http.nio.entity.BasicAsyncEntityProducer;
@@ -59,6 +58,12 @@ public class RequestFactory {
     private final boolean caching;
     private final Map<Integer, AsyncRequestProducer> cache = new HashMap<>();
 
+
+    /**
+     * Creates a new request factory for the given worker configuration.
+     *
+     * @param workerConfig the worker configuration
+     */
     public RequestFactory(SPARQLProtocolWorker.Config workerConfig) {
         this.connectionConfig = workerConfig.connection();
         this.acceptHeader = workerConfig.acceptHeader();
@@ -78,11 +83,12 @@ public class RequestFactory {
 
     /**
      * Builds an HTTP request for a given query.
-     * If the query has been cached by the query handler, its content will be fully read by the entity producer into a
-     * byte buffer, which will then be reused on consecutive request executions.
-     * Cached requests will be sent non-chunked.
+     * The request is built according to the request type and the query type that was set in the constructor.
+     * If the query is cached, the cached data will be used to build the request.
+     * Cached requests will also be sent non-chunked.
      * If the query has not been cached by the query handler, the entity producer will use the query stream supplier to
      * send the query in chunks.
+     * All Requests will also be cached, and they will not be rebuilt if they are requested again.
      *
      * @param queryHandle the query handle to build the request for
      * @return              the request as an AsyncRequestProducer
@@ -102,17 +108,13 @@ public class RequestFactory {
 
         try {
             queryStreamSupplier = queryHandle.queryInputStreamSupplier();
-            queryStream = queryStreamSupplier.get();
+            queryStream = queryStreamSupplier.get(); // the queryStreamSupplier may throw an RuntimeException
         } catch (RuntimeException e) {
             throw new IOException(e);
         }
 
-        long queryLength = queryStream instanceof BigByteArrayInputStream ? ((BigByteArrayInputStream) queryStream).availableLong() : -1;
-        if (queryLength > Integer.MAX_VALUE- 8 && requestType != RequestType.POST_UPDATE && requestType != RequestType.POST_QUERY) {
-            LOGGER.error("Query is too large to be sent with the current request type {}.", requestType);
-            return null;
-        }
-
+        // If the query is bigger than 2^31 bytes (2GB) and the request type is set to GET_QUERY, POST_URL_ENC_QUERY or
+        // POST_URL_ENC_UPDATE, the following code will throw an exception.
         switch (requestType) {
             case GET_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.get(new URIBuilder(connectionConfig.endpoint())
                     .addParameter("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))

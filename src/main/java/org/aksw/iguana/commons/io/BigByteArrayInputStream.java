@@ -15,6 +15,13 @@ public class BigByteArrayInputStream extends InputStream {
 
     private boolean ended = true;
 
+    /**
+     * Creates a new BigByteArrayInputStream.
+     * The given byte array will be copied to the internal buffers.
+     *
+     * @param bytes the byte array to read from
+     * @throws IOException if an I/O error occurs
+     */
     public BigByteArrayInputStream(byte[] bytes) throws IOException {
         bbaos = new BigByteArrayOutputStream();
         bbaos.write(bytes);
@@ -163,21 +170,12 @@ public class BigByteArrayInputStream extends InputStream {
         return (int) Math.min(availableLong(), Integer.MAX_VALUE);
     }
 
+    /**
+     * Returns the number of bytes available in the stream as long type.
+     *
+     * @return the number of bytes available in the stream
+     */
     public long availableLong() {
         return bbaos.size() + currentBuffer.remaining();
-    }
-
-    /**
-     * Returns the current buffer.
-     * If the current buffer is empty, the next buffer will be activated.
-     * If there are no more buffers available, this method returns null.
-     *
-     * @return the current buffer
-     */
-    public ByteBuffer getCurrentBuffer() {
-        if (!currentBuffer.hasRemaining()) {
-            activateNextBuffer();
-        }
-        return currentBuffer;
     }
 }

@@ -99,6 +99,7 @@ public class ByteArrayListInputStream extends InputStream {
         return read(b, off, len, 0);
     }
 
+    @Override
     public byte[] readNBytes(int len) throws IOException {
         checkNotClosed();
         if (len < 0) {
@@ -144,6 +145,11 @@ public class ByteArrayListInputStream extends InputStream {
         return (int) Math.min(Integer.MAX_VALUE, availableLong());
     }
 
+    /**
+     * Returns the number of bytes available to read from the stream.
+     *
+     * @return the number of bytes available
+     */
     public long availableLong() {
         if (!checkBuffer())
             return 0;
@@ -175,6 +181,11 @@ public class ByteArrayListInputStream extends InputStream {
         return currentBuffer.get() & 0xFF;
     }
 
+    /**
+     * Returns the current buffer that is being read from.
+     *
+     * @return the current buffer
+     */
     public ByteBuffer getCurrentBuffer() {
         if (!checkBuffer()) {
             return null;

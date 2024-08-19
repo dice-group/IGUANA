@@ -15,7 +15,8 @@ import java.util.function.Supplier;
 /**
  * An entity producer that produces the entity data from an input stream supplier.
  * The entity data can optionally be sent in chunks.
- * If the entity data is supposed to be sent non-chunked, the whole stream will be read into a byte buffer.
+ * If the entity data is supposed to be sent non-chunked,
+ * it is assumed that the query is stored in a ByteArrayListInputStream.
  * The stream supplier should be repeatable, as this producer might be reused multiple times to create the entity data.
  */
 public class StreamEntityProducer implements AsyncEntityProducer {
