@@ -33,7 +33,7 @@ public abstract class LanguageProcessor {
 
     public interface LanguageProcessingData extends Storable {
         long hash();
-        Class<? extends LanguageProcessor> processor();
+        Exception exception();
     }
 
     public abstract LanguageProcessingData process(InputStream inputStream, long hash);

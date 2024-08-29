@@ -49,6 +49,8 @@ public class IPROP {
     public static final Property bindings = ResourceFactory.createProperty(NS, "bindings");
     public static final Property variable = ResourceFactory.createProperty(NS, "variable");
     public static final Property exception = ResourceFactory.createProperty(NS, "exception");
+    public static final Property link = ResourceFactory.createProperty(NS, "link");
+    public static final Property askBoolean = ResourceFactory.createProperty(NS, "askBoolean");
 
 
     // Query Stats

@@ -36,69 +36,19 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
 
     private final static SAXParserFactory factory = SAXParserFactory.newInstance();
 
-
-
     @Override
     public LanguageProcessingData process(InputStream inputStream, long hash) {
         try {
             final var parser = factory.newSAXParser();
             final var handler = new SaxSparqlXmlResultContentHandler();
             parser.parse(inputStream, handler);
-            return new SaxSparqlXmlResultData(hash, handler.solutions(), handler.boundValues(), handler.variables(), null);
+            if (handler.isAskResult()) {
+                return new BooleanResultData(hash, handler.askResult(), handler.links(), null);
+            }
+            return new ResultCountData(hash, handler.solutions(), handler.boundValues(), handler.variables(), handler.links(), null);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             LOGGER.error("Error while parsing SPARQL XML Results.", e);
-            return new SaxSparqlXmlResultData(hash, -1, -1, null, e);
-        }
-    }
-
-    public record SaxSparqlXmlResultData(
-            long hash,
-            long results,
-            long bindings,
-            List<String> variables,
-            Exception exception
-    ) implements LanguageProcessingData, Storable.AsCSV, Storable.AsRDF {
-        final static String[] header = new String[]{ "responseBodyHash", "results", "bindings", "variables", "exception" };
-
-        @Override
-        public Class<? extends LanguageProcessor> processor() {
-            return SaxSparqlJsonResultCountingParser.class;
-        }
-
-        @Override
-        public CSVData toCSV() {
-            String variablesString = "";
-            String exceptionString = "";
-            if (variables != null)
-                variablesString = String.join("; ", variables);
-            if (exception != null)
-                exceptionString = exception().toString();
-
-            String[] content = new String[]{ String.valueOf(hash), String.valueOf(results), String.valueOf(bindings), variablesString, exceptionString};
-            String[][] data = new String[][]{ header, content };
-
-            String folderName = "application-sparql+json";
-            List<CSVData.CSVFileData> files = List.of(new CSVData.CSVFileData("sax-sparql-result-data.csv", data));
-            return new Storable.CSVData(folderName, files);
-        }
-
-        @Override
-        public Model toRDF() {
-            Model m = ModelFactory.createDefaultModel();
-            Resource responseBodyRes = IRES.getResponsebodyResource(this.hash);
-            m.add(responseBodyRes, IPROP.results, ResourceFactory.createTypedLiteral(this.results))
-                    .add(responseBodyRes, IPROP.bindings, ResourceFactory.createTypedLiteral(this.bindings));
-
-            if (this.variables != null) {
-                for (String variable : this.variables) {
-                    m.add(responseBodyRes, IPROP.variable, ResourceFactory.createTypedLiteral(variable));
-                }
-            }
-            if (this.exception != null) {
-                m.add(responseBodyRes, IPROP.exception, ResourceFactory.createTypedLiteral(this.exception.toString()));
-            }
-
-            return m;
+            return new ResultCountData(hash, -1, -1, null, null, e); // default to result count data
         }
     }
 
@@ -191,7 +141,7 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
         private final List<String> variables = new ArrayList<>();
         private final List<String> links = new ArrayList<>();
 
-        private CharBuffer charBuffer = CharBuffer.allocate(5); // to store the string "true" or "false" for ask results
+        private final CharBuffer charBuffer = CharBuffer.allocate(5); // to store the string "true" or "false" for ask results
         private Boolean askResult = null;
 
         private State state = State.START;
@@ -264,7 +214,7 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
                 }
                 case HEADER_ASK_END -> {
                     if (qName.equals("boolean")) {
-                        state = State.END;
+                        state = State.ASK_RESULT;
                     } else {
                         throw new SAXException("Unexpected element <" + qName + "> inside <sparql> after <head> for ASK results.");
                     }
@@ -299,7 +249,7 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             switch (state) {
-                case HEADER_START -> {
+                case HEADER_START, HEADER_ASK -> {
                     if (qName.equals("head")) state = State.HEADER_ASK_END;
                 }
                 case HEADER_SELECT, HEADER_SELECT_LINK -> {
@@ -360,6 +310,18 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
 
         public List<String> variables() {
             return variables;
+        }
+
+        public List<String> links() {
+            return links;
+        }
+
+        public boolean isAskResult() {
+            return askResult != null;
+        }
+
+        public Boolean askResult() {
+            return askResult;
         }
     }
 
