@@ -45,6 +45,7 @@ public abstract class LanguageProcessor {
     // Register all available LanguageProcessors here.
     static {
         processors.put("application/sparql-results+json", org.aksw.iguana.cc.lang.impl.SaxSparqlJsonResultCountingParser.class);
+        processors.put("application/sparql-results+xml", org.aksw.iguana.cc.lang.impl.SaxSparqlXmlResultCountingParser.class);
     }
 
     public static LanguageProcessor getInstance(String contentType) {

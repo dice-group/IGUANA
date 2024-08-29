@@ -8,6 +8,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.slf4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -26,12 +27,16 @@ import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
 /**
  * SAX Parser for SPARQL XML Results.
  * For correct SPARQL XML Results it returns the number of solutions, bound values and the names of the variables.
- * For malformed results it may or may not fail.
+ * Fails for malformed SPARQL XML Results.
  */
 @LanguageProcessor.ContentType("application/sparql-results+xml")
 public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
 
+    private final static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SaxSparqlXmlResultCountingParser.class);
+
     private final static SAXParserFactory factory = SAXParserFactory.newInstance();
+
+
 
     @Override
     public LanguageProcessingData process(InputStream inputStream, long hash) {
@@ -39,9 +44,10 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
             final var parser = factory.newSAXParser();
             final var handler = new SaxSparqlXmlResultContentHandler();
             parser.parse(inputStream, handler);
-            return new SaxSparqlJsonResultCountingParser.SaxSparqlJsonResultData(hash, handler.solutions(), handler.boundValues(), handler.variables(), null);
+            return new SaxSparqlXmlResultData(hash, handler.solutions(), handler.boundValues(), handler.variables(), null);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            return new SaxSparqlJsonResultCountingParser.SaxSparqlJsonResultData(hash, -1, -1, null, e);
+            LOGGER.error("Error while parsing SPARQL XML Results.", e);
+            return new SaxSparqlXmlResultData(hash, -1, -1, null, e);
         }
     }
 
@@ -100,64 +106,65 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
         /*
          * The parser uses a state machine to parse the XML.
          * The state machine for the parser is as follows:
-         *      ┌─────┐ <sparql ...>  ┌──────────────┐ <head> ┌──────┐
-         * ────►│Start├──────────────►│SPARQL-Element├───────►│Header│
-         *      └─────┘               └──────────────┘        └─┬─┬─┬┘
-         *                                                      │ │ │
-         *                        ┌─────────────────────────────┘ │ │
-         *                        │                               │ │
-         *                        │                 ┌─────────────┘ │
-         *                        │                 │               │
-         *                        │                 │         ┌─────┘
-         *                        │ <variable ...>  │         │
-         *                        ▼                 │         │
-         *      <variable ...> ┌──────┐             │         │
-         *                 ┌───┤SELECT│             │ </head> │
-         *  <link ...>     └──►│Header│             │         │
-         *      ┌───┐          └──┬─┬─┘             │         │
-         *      │   │             │ │               │         │ <link ...>
-         *      ▼   │  <link ...> │ │               │         ▼
-         *    ┌─────┴───────┐     │ │ </head>       │      ┌──────┐<link ...>
-         *    │SELECT Header│◄────┘ │               │      │ ASK  │──┐
-         *    │    Links    ├─────┐ │               │      │Header│◄─┘
-         *    └─────────────┘     │ │               │      └──┬───┘
-         *                </head> │ │               │         │
-         *                        ▼ ▼               ▼         │ </head>
-         *                 ┌─────────────┐     ┌──────────┐   │
-         *                 │SELECT Header│     │ASK Header│◄──┘
-         *                 │     End     │     │   End    │
-         *                 └────────┬────┘     └────┬─────┘
-         *                          │               │
-         * ┌───────┐                │               │ <boolean>
-         * │Binding│ </binding>     │               ▼
-         * │  End  ├─────────────┐  │          ┌──────────┐ true | false
-         * └───────┘             │  │          │ASK Result├───┐
-         *     ▲                 │  │          └────┬─────┘◄──┘
-         *     │ </uri>|</bnode>|│  │               │
-         *     │ </literal>      │  │ <results>     │
-         *  ┌──┴──┐◄─┐           │  │               │
-         *  │Value├──┘           │  │               │
-         *  └─────┘ value        │  │               │
-         *     ▲                 │  │               │
-         *     │                 │  │               │
-         *     │ <uri>|<bnode>|  ▼  ▼               │
-         *     │ <literal ...> ┌───────┐            │
-         * ┌───┴───┐           │SELECT │            │
-         * │Binding│◄──────────┤Results│            │
-         * └───────┘ <binding> └───┬───┘            │
-         *                         │ </results>     │ </results>
-         *                         │                │
-         *                         ▼                │
-         *                     ┌───────┐            │
-         *                     │Results│            │
-         *                     │  End  │◄───────────┘
-         *                     └───┬───┘
-         *                         ▼ </sparql>
-         *                      ┌─────┐
-         *                      │┌───┐│
-         *                      ││End││
-         *                      │└───┘│
-         *                      └─────┘
+         *
+         *                         ┌─────┐ <sparql ...>  ┌──────────────┐ <head> ┌──────┐
+         *                    ────►│Start├──────────────►│SPARQL-Element├───────►│Header│
+         *                         └─────┘               └──────────────┘        └─┬─┬─┬┘
+         *                                                                         │ │ │
+         *                                           ┌─────────────────────────────┘ │ │
+         *                                           │                               │ │
+         *                                           │                 ┌─────────────┘ │
+         *                                           │                 │               │
+         *                                           │                 │         ┌─────┘
+         *                                           │ <variable ...>  │         │
+         *                                           ▼                 │         │
+         *                         <variable ...> ┌──────┐             │         │
+         *                                    ┌───┤SELECT│             │ </head> │
+         *                     <link ...>     └──►│Header│             │         │
+         *                         ┌───┐          └──┬─┬─┘             │         │
+         *                         │   │             │ │               │         │ <link ...>
+         *                         ▼   │  <link ...> │ │               │         ▼
+         *                       ┌─────┴───────┐     │ │ </head>       │      ┌──────┐<link ...>
+         *                       │SELECT Header│◄────┘ │               │      │ ASK  │──┐
+         *                       │    Links    ├─────┐ │               │      │Header│◄─┘
+         *                       └─────────────┘     │ │               │      └──┬───┘
+         *                                   </head> │ │               │         │
+         *                                           ▼ ▼               ▼         │ </head>
+         *                                    ┌─────────────┐     ┌──────────┐   │
+         *                                    │SELECT Header│     │ASK Header│◄──┘
+         *                                    │     End     │     │   End    │
+         *                                    └────────┬────┘     └────┬─────┘
+         * ┌───────┐                                   │               │
+         * │Binding│ </binding>                        │               │ <boolean>
+         * │  End  ├─────────────┐                     │               ▼
+         * └───────┘             │                     │          ┌──────────┐ true | false
+         *     ▲                 │                     │          │ASK Result├───┐
+         *     │ </uri>|</bnode>|│                     │          └────┬─────┘◄──┘
+         *     │ </literal>      │                     │               │
+         *  ┌──┴──┐◄─┐           │                     │ <results>     │
+         *  │Value├──┘           │                     │               │
+         *  └─────┘ value        │                     │               │
+         *     ▲                 │                     │               │
+         *     │                 │                     │               │
+         *     │ <uri>|<bnode>|  ▼                     │               │
+         *     │ <literal ...>                         ▼               │
+         * ┌───┴───┐           ┌──────┐  <result> ┌───────┐            │
+         * │Binding│◄──────────┤SELECT│◄──────────┤SELECT │            │
+         * └───────┘ <binding> │Result├──────────►│Results│            │
+         *                     └──────┘ </result> └───┬───┘            │
+         *                                            │ </results>     │ </results>
+         *                                            │                │
+         *                                            ▼                │
+         *                                        ┌───────┐            │
+         *                                        │Results│            │
+         *                                        │  End  │◄───────────┘
+         *                                        └───┬───┘
+         *                                            ▼ </sparql>
+         *                                         ┌─────┐
+         *                                         │┌───┐│
+         *                                         ││End││
+         *                                         │└───┘│
+         *                                         └─────┘
          */
         private enum State {
             START,
@@ -170,6 +177,7 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
             HEADER_ASK_END,
             ASK_RESULT,
             SELECT_RESULTS,
+            SELECT_SINGLE_RESULT,
             SELECT_BINDING,
             SELECT_BINDING_VALUE,
             SELECT_BINDING_END,
@@ -262,6 +270,14 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
                     }
                 }
                 case SELECT_RESULTS -> {
+                    if (qName.equals("result")) {
+                        state = State.SELECT_SINGLE_RESULT;
+                        solutions += 1;
+                    } else {
+                        throw new SAXException("Unexpected element <" + qName + "> inside <results>.");
+                    }
+                }
+                case SELECT_SINGLE_RESULT -> {
                     if (qName.equals("binding")) {
                         state = State.SELECT_BINDING;
                         boundValues += 1;
@@ -283,43 +299,30 @@ public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             switch (state) {
-                 case HEADER_START -> {
-                     if (qName.equals("head")) state = State.HEADER_ASK_END;
-                     else throw new SAXException("Unexpected element <" + qName + "> inside <head>.");
-                 }
-                 case HEADER_SELECT, HEADER_SELECT_LINK -> {
+                case HEADER_START -> {
+                    if (qName.equals("head")) state = State.HEADER_ASK_END;
+                }
+                case HEADER_SELECT, HEADER_SELECT_LINK -> {
                     if (qName.equals("head")) state = State.HEADER_SELECT_END;
-                    else throw new SAXException("Unexpected element <" + qName + "> inside <head>.");
-                 }
-                 case SELECT_BINDING_VALUE -> {
-                     if (qName.equals("uri") || qName.equals("bnode") || qName.equals("literal")) {
-                         state = State.SELECT_BINDING_END;
-                     } else {
-                         throw new SAXException("Unexpected element <" + qName + "> inside <binding>.");
-                     }
-                 }
-                 case SELECT_BINDING_END -> {
-                     if (qName.equals("binding")) {
-                         state = State.SELECT_RESULTS;
-                     } else {
-                         throw new SAXException("Unexpected element <" + qName + "> inside <binding>.");
-                     }
-                 }
-                 case ASK_RESULT -> {
-                     if (qName.equals("boolean")) {
-                         state = State.RESULTS_END;
-                     } else {
-                         throw new SAXException("Unexpected element <" + qName + "> inside <boolean>.");
-                     }
-                 }
-                 case RESULTS_END -> {
-                     if (qName.equals("sparql")) {
-                         state = State.END;
-                     } else {
-                         throw new SAXException("Unexpected element <" + qName + "> inside <results>.");
-                     }
-                 }
-                default -> throw new SAXException("Unexpected element <" + qName + ">. Found in state " + state + ".");
+                }
+                case SELECT_BINDING_VALUE -> {
+                    if (qName.equals("uri") || qName.equals("bnode") || qName.equals("literal")) state = State.SELECT_BINDING_END;
+                }
+                case SELECT_BINDING_END -> {
+                    if (qName.equals("binding")) state = State.SELECT_SINGLE_RESULT;
+                }
+                case SELECT_SINGLE_RESULT -> {
+                    if (qName.equals("result")) state = State.SELECT_RESULTS;
+                }
+                case SELECT_RESULTS -> {
+                    if (qName.equals("results")) state = State.RESULTS_END;
+                }
+                case ASK_RESULT -> {
+                    if (qName.equals("boolean")) state = State.RESULTS_END;
+                }
+                case RESULTS_END -> {
+                    if (qName.equals("sparql")) state = State.END;
+                }
             }
         }
 
