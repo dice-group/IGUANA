@@ -4,6 +4,7 @@ import com.opencsv.*;
 import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import com.opencsv.exceptions.CsvValidationException;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,9 @@ import java.util.List;
 
 @LanguageProcessor.ContentType("text/tab-separated-values")
 public class SparqlTsvResultCountingParser extends LanguageProcessor {
+
+    private final static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SparqlTsvResultCountingParser.class);
+
     @Override
     public LanguageProcessingData process(InputStream inputStream, long hash) {
 
@@ -41,9 +45,11 @@ public class SparqlTsvResultCountingParser extends LanguageProcessor {
                 }
                 return new ResultCountData(hash, solutions, boundValues, variables, null, null);
             } catch (CsvValidationException e) {
+                LOGGER.error("Error while parsing SPARQL TSV Results.", e);
                 return new ResultCountData(hash, -1, -1, null, null, e);
             }
         } catch (IOException e) {
+            LOGGER.error("Error while parsing SPARQL TSV Results.", e);
             return new ResultCountData(hash, -1, -1, null, null, e);
         }
     }

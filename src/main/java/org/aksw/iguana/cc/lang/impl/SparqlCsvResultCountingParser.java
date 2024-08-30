@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.lang.impl;
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvValidationException;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @LanguageProcessor.ContentType("text/csv")
 public class SparqlCsvResultCountingParser extends LanguageProcessor {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SparqlCsvResultCountingParser.class);
 
     @Override
     public LanguageProcessingData process(InputStream inputStream, long hash) {
@@ -36,9 +39,11 @@ public class SparqlCsvResultCountingParser extends LanguageProcessor {
                 }
                 return new ResultCountData(hash, solutions, boundValues, variables, null, null);
             } catch (CsvValidationException e) {
+                LOGGER.error("Error while parsing SPARQL CSV Results.", e);
                 return new ResultCountData(hash, -1, -1, null, null, e);
             }
         } catch (IOException e) {
+            LOGGER.error("Error while parsing SPARQL CSV Results.", e);
             return new ResultCountData(hash, -1, -1, null, null, e);
         }
     }
