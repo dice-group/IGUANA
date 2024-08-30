@@ -18,8 +18,10 @@ import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
 
 /**
  * SAX Parser for SPARQL JSON Results.
- * For correct SPARQL JSON Results it returns the number of solutions, bound values and the names of the variables.
+ * For correct SPARQL JSON results, it returns the number of solutions, bound values and the names of the variables.
  * For malformed results it may or may not fail. For malformed JSON it fails if the underlying json.simple.parser fails.
+ * <p>
+ * Specification: <a href="https://www.w3.org/TR/sparql11-results-json/">https://www.w3.org/TR/sparql11-results-json/</a>
  */
 @LanguageProcessor.ContentType("application/sparql-results+json")
 public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {

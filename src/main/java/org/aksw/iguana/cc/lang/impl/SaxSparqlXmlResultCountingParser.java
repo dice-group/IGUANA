@@ -26,8 +26,10 @@ import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
 
 /**
  * SAX Parser for SPARQL XML Results.
- * For correct SPARQL XML Results it returns the number of solutions, bound values and the names of the variables.
+ * For correct SPARQL XML Results it returns the number of solutions, bound values, the names of the variables and links.
  * Fails for malformed SPARQL XML Results.
+ * <p>
+ * Specification: <a href="https://www.w3.org/TR/rdf-sparql-XMLres/">https://www.w3.org/TR/rdf-sparql-XMLres/</a>
  */
 @LanguageProcessor.ContentType("application/sparql-results+xml")
 public class SaxSparqlXmlResultCountingParser extends LanguageProcessor {

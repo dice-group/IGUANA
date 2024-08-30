@@ -12,6 +12,12 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * CSV Parser for SPARQL CSV Results.
+ * For correct SPARQL CSV results, it returns the number of solutions, bound values and the names of the variables.
+ * <p>
+ * Specification: <a href="https://www.w3.org/TR/sparql11-results-csv-tsv/">https://www.w3.org/TR/sparql11-results-csv-tsv/</a>
+ */
 @LanguageProcessor.ContentType("text/csv")
 public class SparqlCsvResultCountingParser extends LanguageProcessor {
 
@@ -34,7 +40,7 @@ public class SparqlCsvResultCountingParser extends LanguageProcessor {
                 while ((line = csvReader.readNext()) != null) {
                     solutions++;
                     for (String value : line) {
-                        if (!value.isEmpty()) boundValues++;
+                        if (!value.isEmpty()) boundValues++; // empty string values and empty cells are not differentiated
                     }
                 }
                 return new ResultCountData(hash, solutions, boundValues, variables, null, null);

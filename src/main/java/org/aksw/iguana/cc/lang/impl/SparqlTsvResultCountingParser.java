@@ -10,6 +10,13 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+
+/**
+ * TSV Parser for SPARQL TSV Results.
+ * For correct SPARQL TSV results, it returns the number of solutions, bound values and the names of the variables.
+ * <p>
+ * Specification: <a href="https://www.w3.org/TR/sparql11-results-csv-tsv/">https://www.w3.org/TR/sparql11-results-csv-tsv/</a>
+ */
 @LanguageProcessor.ContentType("text/tab-separated-values")
 public class SparqlTsvResultCountingParser extends LanguageProcessor {
 
