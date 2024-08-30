@@ -36,7 +36,7 @@ public class SparqlTsvResultCountingParser extends LanguageProcessor {
                 while ((line = csvReader.readNext()) != null) {
                     solutions++;
                     for (String value : line) {
-                        if (!value.isEmpty()) boundValues++;
+                        if (value != null) boundValues++;
                     }
                 }
                 return new ResultCountData(hash, solutions, boundValues, variables, null, null);
