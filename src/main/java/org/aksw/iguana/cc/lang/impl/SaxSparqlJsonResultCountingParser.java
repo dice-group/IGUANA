@@ -32,7 +32,9 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         var handler = new SaxSparqlJsonResultContentHandler();
         try {
             parser.parse(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)), handler);
-            return new ResultCountData(hash, handler.solutions(), handler.boundValues(), handler.variables(), null, null);
+            if (handler.isAskResult())
+                return new BooleanResultData(hash, handler.booleanResult(), handler.links(), null);
+            return new ResultCountData(hash, handler.solutions(), handler.boundValues(), handler.variables(), handler.links(), null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ParseException e) {
@@ -42,7 +44,6 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
     }
 
     private static class SaxSparqlJsonResultContentHandler implements ContentHandler {
-        // TODO: add support for ask queries and link
         // TODO: code is unnecessary complicated
 
         private boolean headFound = false;
@@ -52,12 +53,14 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         private boolean inBindings = false;
         private boolean inBindingsArray = false;
         private boolean inVars = false;
+        private boolean inLink = false;
+        private boolean inBoolean = false;
 
         private long boundValues = 0;
-
         private long solutions = 0;
-
+        private Boolean booleanResult = null;
         private final List<String> variables = new ArrayList<>();
+        private final List<String> links = new ArrayList<>();
 
 
         @Override
@@ -111,6 +114,8 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         public boolean endArray() {
             if (inVars)
                 inVars = false;
+            if (inLink)
+                inLink = false;
             if (objectDepth == 2 && inResults && inBindings && inBindingsArray) {
                 inBindingsArray = false;
             }
@@ -128,6 +133,10 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
                             if (headFound)
                                 inResults = true;
                         }
+                        case "boolean" -> {
+                            if (headFound)
+                                inBoolean = true;
+                        }
                     }
                 }
                 case 2 -> {
@@ -136,6 +145,9 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
                     }
                     if ("vars".compareTo(key) == 0) {
                         inVars = true;
+                    }
+                    if ("link".compareTo(key) == 0) {
+                        inLink = true;
                     }
                 }
             }
@@ -150,7 +162,10 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         public boolean primitive(Object value) {
             if (inVars)
                 variables.add(value.toString());
-
+            if (inLink)
+                links.add(value.toString());
+            if (inBoolean && value instanceof Boolean val)
+                booleanResult = val;
             return true;
         }
 
@@ -164,6 +179,18 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
 
         public List<String> variables() {
             return variables;
+        }
+
+        public List<String> links() {
+            return links;
+        }
+
+        public Boolean booleanResult() {
+            return booleanResult;
+        }
+
+        public boolean isAskResult() {
+            return booleanResult != null;
         }
     }
 }
