@@ -6,9 +6,20 @@ The processing is done to extract relevant information from the responses and st
 
 Iguana supports multiple response body processors that are defined by the content type of the response body they process.
 
-Currently only the `application/sparql-results+json` content type is supported, 
-and it only uses the `SaxSparqlJsonResultCountingParser` language processor 
-to extract simple information from the responses.
+The following content types are supported:
+- `application/sparql-results+json`
+- `application/sparql-results+xml`
+- `text/csv`
+- `text/tab-separated-values`
+
+
+For the `json` and `xml` content types, 
+the response body processor counts for `SELECT` queries 
+the number of results and bindings and lists all variables and link attributes.
+If the requested query was a `ASK` query, the response body processor stores the boolean result.
+
+For the `csv` and `tsv` content types, only `SELECT` queries are supported.
+The response body processor counts the number of results and bindings and lists all variables.
 
 Workers send the response bodies to the response body processors, 
 after receiving the full response bodies from the HTTP requests.
