@@ -26,6 +26,8 @@ public abstract class QuerySource {
     final protected int hashCode;
 
     public QuerySource(Path path) {
+        if (path == null)
+            throw new IllegalArgumentException("Path for a query source must not be null.");
         this.path = path;
         this.hashCode = FileUtils.getHashcodeFromFileContent(path);
     }
