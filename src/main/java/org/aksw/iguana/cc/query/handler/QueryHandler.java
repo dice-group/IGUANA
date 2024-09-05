@@ -141,7 +141,7 @@ public class QueryHandler {
             public Pattern(URI endpoint, Long limit, Boolean caching) {
                 this.endpoint = endpoint;
                 this.limit = limit == null ? 2000 : limit;
-                this.caching = true;
+                this.caching = caching == null || caching;
             }
         }
     }
@@ -184,19 +184,20 @@ public class QueryHandler {
             if (Files.exists(instancePath)) {
                 LOGGER.info("Already existing query pattern instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath);
                 querySource = createQuerySource(instancePath);
-            }
-            final List<String> instances = instantiatePatternQueries(querySource, config.pattern);
-            if (config.pattern.caching) {
-                Files.createFile(instancePath);
-                try (var writer = Files.newBufferedWriter(instancePath)) {
-                    for (String instance : instances) {
-                        writer.write(instance);
-                        writer.newLine();
-                    }
-                }
-                querySource = createQuerySource(instancePath);
             } else {
-                querySource = new StringListQuerySource(instances);
+                final List<String> instances = instantiatePatternQueries(querySource, config.pattern);
+                if (config.pattern.caching) {
+                    Files.createFile(instancePath);
+                    try (var writer = Files.newBufferedWriter(instancePath)) {
+                        for (String instance : instances) {
+                            writer.write(instance);
+                            writer.newLine();
+                        }
+                    }
+                    querySource = createQuerySource(instancePath);
+                } else {
+                    querySource = new StringListQuerySource(instances);
+                }
             }
         }
 
