@@ -338,6 +338,26 @@
         "duration"
       ]
     },
+    "Pattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "caching": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+          "endpoint"
+      ],
+      "title": "Pattern"
+    },
     "QueryMixes": {
       "properties": {
         "number": {
@@ -379,6 +399,9 @@
         "lang": {
           "type": "string",
           "enum": [ "", "SPARQL" ]
+        },
+        "pattern": {
+          "$ref": "#/definitions/Pattern"
         }
       },
       "required": [

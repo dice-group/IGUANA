@@ -183,8 +183,8 @@
         }
       },
       "required": [
-          "type",
-          "directory"
+        "type",
+        "directory"
       ],
       "title": "CSVStorage"
     },
@@ -335,8 +335,28 @@
       "type": "object",
       "unevaluatedProperties": false,
       "required": [
-          "duration"
+        "duration"
       ]
+    },
+    "Pattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "caching": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "endpoint"
+      ],
+      "title": "Pattern"
     },
     "QueryMixes": {
       "properties": {
@@ -379,6 +399,9 @@
         "lang": {
           "type": "string",
           "enum": [ "", "SPARQL" ]
+        },
+        "pattern": {
+          "$ref": "#/definitions/Pattern"
         }
       },
       "required": [
