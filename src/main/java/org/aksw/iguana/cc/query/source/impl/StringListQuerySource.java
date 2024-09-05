@@ -46,4 +46,9 @@ public class StringListQuerySource extends QuerySource {
     public List<String> getAllQueries() throws IOException {
         return Collections.unmodifiableList(queries);
     }
+
+    @Override
+    public int hashCode() {
+        return queries.hashCode();
+    }
 }
