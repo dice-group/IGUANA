@@ -9,6 +9,7 @@ import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySourceTest;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,6 +29,7 @@ public class QueryHandlerTest {
     static Path tempDir;
     static Path tempFileSep;
     static Path tempFileLine;
+    static Path tempPatternFile;
 
     static List<FolderQuerySourceTest.Query> queries;
     static List<FolderQuerySourceTest.Query> folderQueries;
