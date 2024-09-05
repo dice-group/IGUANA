@@ -74,7 +74,11 @@ tasks:
         number: 16
         requestType: post query
         queries:
-          path: "./example/queries.txt"
+          path: "./example/query_pattern.txt"
+          pattern:
+            endpoint: "https://dbpedia.org/sparql"
+            limit: 1000
+            caching: false
         timeout: 180s
         completionTarget:
           duration: 1000s

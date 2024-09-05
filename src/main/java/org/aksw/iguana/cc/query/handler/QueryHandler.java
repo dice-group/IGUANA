@@ -295,9 +295,9 @@ public class QueryHandler {
     * and will request query solutions from the given sparql endpoint (e.g DBpedia).<br/>
     * The solutions will then be instantiated into the query pattern.
     * The result may look like the following:<br/>
-    * <code>SELECT * {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "123"}</code><br/>
-    * <code>SELECT * {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "12"}</code><br/>
-    * <code>SELECT * {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
+    * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "123"}</code><br/>
+    * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "12"}</code><br/>
+    * <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
     */
     private static List<String> instantiatePatternQueries(QuerySource querySource, Config.Pattern config) throws IOException {
         final var patternQueries = new InMemQueryList(querySource);

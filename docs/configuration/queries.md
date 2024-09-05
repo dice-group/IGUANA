@@ -16,7 +16,7 @@ The `queries` property is an object that contains the following properties:
 | order     | no       | `linear`       | The order in which the queries are executed. If set to `linear` the queries will be executed in their order inside the file. If `format` is set to `folder`, queries will be sorted by their file name first. | `random` or `linear`                      |
 | seed      | no       | `0`            | The seed for the random number generator that selects the queries. If multiple workers use the same query handler, their seed will be the sum of the given seed and their worker id.                          | `12345`                                   |
 | lang      | no       | `SPARQL`       | Not used for anything at the moment.                                                                                                                                                                          |                                           |
-
+| pattern   | no       |                | If set, queries from `path` will be treated as patten queries. See [Pattern Queries](#pattern-queries) for more information.                                                                                  |                                           |
 ## Format
 
 ### One-per-line
@@ -93,3 +93,27 @@ tasks:
         lang: "SPARQL"
       # ... additional worker properties
 ```
+
+## Pattern Queries
+The pattern attribute has the following properties:
+- `endpoint` - the endpoint to query
+- `limit` - the maximum number of instances per query pattern
+- `caching` - if set to `true`, queries instances will be stored in files
+
+Pattern queries are queries that contain placeholders.
+A query pattern is a SPARQL 1.1 Query, which can have additional variables in the regex form of
+`%%var[0-9]+%%` in the Basic Graph Pattern.
+
+An exemplary pattern:
+`SELECT * WHERE {?s %%var1%% ?o . ?o <http://exa.com> %%var2%%}`
+
+This pattern will then be converted to:
+`SELECT ?var1 ?var2 {?s ?var1 ?o . ?o <http://exa.com> ?var2}`
+
+The SELECT query will then be requested from the given sparql endpoint (e.g DBpedia).
+The solutions for this query are used to instantiate the query pattern.
+The results may look like the following:
+- `SELECT * WHERE {?s <http://prop/1> ?o . ?o <http://exa.com> "123"}`
+- `SELECT * WHERE {?s <http://prop/1> ?o . ?o <http://exa.com> "12"}`
+- `SELECT * WHERE {?s <http://prop/2> ?o . ?o <http://exa.com> "1234"}`
+
