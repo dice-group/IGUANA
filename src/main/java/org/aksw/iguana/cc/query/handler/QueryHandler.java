@@ -5,17 +5,17 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.aksw.iguana.cc.query.list.impl.StringListQueryList;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
 import org.aksw.iguana.cc.query.list.QueryList;
-import org.aksw.iguana.cc.query.list.impl.FileBasedQueryList;
-import org.aksw.iguana.cc.query.list.impl.InMemQueryList;
+import org.aksw.iguana.cc.query.list.impl.FileReadingQueryList;
+import org.aksw.iguana.cc.query.list.impl.FileCachingQueryList;
 import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
-import org.aksw.iguana.cc.query.source.impl.StringListQuerySource;
 import org.apache.jena.query.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,14 +196,16 @@ public class QueryHandler {
                     }
                     querySource = createQuerySource(instancePath);
                 } else {
-                    querySource = new StringListQuerySource(instances);
+                    queryList = new StringListQueryList(instances);
+                    this.hashCode = queryList.hashCode();
+                    return;
                 }
             }
         }
 
         queryList = (config.caching()) ?
-                new InMemQueryList(querySource) :
-                new FileBasedQueryList(querySource);
+                new FileCachingQueryList(querySource) :
+                new FileReadingQueryList(querySource);
         this.hashCode = queryList.hashCode();
     }
 
@@ -301,7 +303,7 @@ public class QueryHandler {
     * <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
     */
     private static List<String> instantiatePatternQueries(QuerySource querySource, Config.Pattern config) throws IOException {
-        final var patternQueries = new InMemQueryList(querySource);
+        final var patternQueries = new FileCachingQueryList(querySource);
         final Pattern pattern = Pattern.compile("%%var\\d+%%");
         final var instances = new ArrayList<String>();
         for (int i = 0; i < patternQueries.size(); i++) {

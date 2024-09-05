@@ -10,21 +10,38 @@ import java.io.InputStream;
  *
  * @author frensing
  */
-public interface QueryList {
+public abstract class FileBasedQueryList implements QueryList{
+
+    /**
+     * This is the QuerySource from which the queries should be retrieved.
+     */
+    final protected QuerySource querySource;
+
+    public FileBasedQueryList(QuerySource querySource) {
+        if (querySource == null) {
+            throw new IllegalArgumentException("QuerySource must not be null");
+        }
+        this.querySource = querySource;
+    }
 
     /**
      * This method returns the amount of queries in the query list.
      *
      * @return The amount of queries in the query list
      */
-    int size();
+    public int size() {
+        return querySource.size();
+    }
 
     /**
      * This method returns the hashcode of the query list which is the hashcode of the query source.
      *
      * @return The hashcode of the query list
      */
-    int hashCode();
+    @Override
+    public int hashCode() {
+        return querySource.hashCode();
+    }
 
     /**
      * This method returns a query at the given index.
@@ -32,7 +49,7 @@ public interface QueryList {
      * @param index Index of the query in the list
      * @return The query at the given index
      */
-    String getQuery(int index) throws IOException;
+    public abstract String getQuery(int index) throws IOException;
 
-    InputStream getQueryStream(int index) throws IOException;
+    public abstract InputStream getQueryStream(int index) throws IOException;
 }
