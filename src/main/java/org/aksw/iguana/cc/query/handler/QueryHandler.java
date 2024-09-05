@@ -182,7 +182,7 @@ public class QueryHandler {
                     originalPath.resolveSibling(originalPath.getFileName() + "_instances.txt") :
                     originalPath.resolveSibling(originalPath.getFileName().toString().split("\\.")[0] + "_instances.txt");
             if (Files.exists(instancePath)) {
-                LOGGER.info("Already existing query pattern instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath);
+                LOGGER.info("Already existing query pattern instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath.toAbsolutePath());
                 querySource = createQuerySource(instancePath);
             } else {
                 final List<String> instances = instantiatePatternQueries(querySource, config.pattern);
