@@ -327,7 +327,6 @@ public class QueryHandler {
             selectQueryString.append(" " + whereClause);
             selectQueryString.append(" LIMIT " + config.limit());
             selectQueryString.setNsPrefixes(patternQuery.getPrefixMapping());
-            LOGGER.info("Query pattern: {}", selectQueryString.asQuery().toString());
 
             // send request to SPARQL endpoint and instantiate the pattern based on results
             try (QueryExecution exec = QueryExecutionFactory.createServiceRequest(config.endpoint().toString(), selectQueryString.asQuery())) {
