@@ -197,9 +197,6 @@ public class QueryHandler {
                     querySource = createQuerySource(instancePath);
                 } else {
                     querySource = new StringListQuerySource(instances);
-                    queryList = new FileBasedQueryList(querySource); // inMemQueryList would just store the queries in a list again
-                    this.hashCode = queryList.hashCode();
-                    return;
                 }
             }
         }

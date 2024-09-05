@@ -23,10 +23,11 @@ public abstract class QuerySource {
      * performance reasons, so that the hashcode does not have to be calculated every time it is needed.
      * (It's needed everytime the id of a query is requested.)
      */
-    protected int hashCode;
+    final protected int hashCode;
 
     public QuerySource(Path path) {
         this.path = path;
+        this.hashCode = FileUtils.getHashcodeFromFileContent(path);
     }
 
     /**

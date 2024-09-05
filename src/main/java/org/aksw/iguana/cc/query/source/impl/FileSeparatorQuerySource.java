@@ -1,7 +1,6 @@
 package org.aksw.iguana.cc.query.source.impl;
 
 import org.aksw.iguana.cc.query.source.QuerySource;
-import org.aksw.iguana.cc.utils.files.FileUtils;
 import org.aksw.iguana.cc.utils.files.IndexedQueryReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,6 @@ public class FileSeparatorQuerySource extends QuerySource {
     public FileSeparatorQuerySource(Path path, String separator) throws IOException {
         super(path);
         iqr = getIqr(path, separator);
-        hashCode = FileUtils.getHashcodeFromFileContent(path);
     }
 
     private static IndexedQueryReader getIqr(Path path, String separator) throws IOException {
