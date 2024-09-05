@@ -100,6 +100,17 @@ The pattern attribute has the following properties:
 - `limit` - the maximum number of instances per query pattern
 - `caching` - if set to `true`, queries instances will be stored in files
 
+Example of query configuration with pattern queries:
+```yaml
+queries:
+  path: "./example/suite/queries/"
+  format: "folder"
+  pattern:
+    endpoint: "http://dbpedia.org/sparql"
+    limit: 100
+    caching: true
+```  
+
 Pattern queries are queries that contain placeholders.
 A query pattern is a SPARQL 1.1 Query, which can have additional variables in the regex form of
 `%%var[0-9]+%%` in the Basic Graph Pattern.
