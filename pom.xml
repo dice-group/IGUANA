@@ -315,6 +315,8 @@
                                 -O3
                                 -H:-UseCompressedReferences
                                 -H:+UnlockExperimentalVMOptions
+                                --enable-http
+                                --enable-https
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>

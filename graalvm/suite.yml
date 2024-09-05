@@ -60,9 +60,9 @@ tasks:
           seed: 123
           lang: "SPARQL"
           pattern:
-            endpoint: "http://localhost:9999/blazegraph/sparql"
-            limit: 1000
-            caching: true
+            endpoint: "http://dbpedia.org/sparql"
+            limit: 1
+            caching: false
         timeout: 2s
         connection: Blazegraph
         completionTarget:

@@ -1,1 +1,1 @@
-placeholder
+SELECT * WHERE {?s %%var1%% ?o . ?o %%var3%% %%var2%%}
