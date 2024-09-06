@@ -52,6 +52,7 @@ jobs:
         with:
           server: files.dice-research.org
           protocol: ftps-legacy
+          security: strict
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           dry-run: true
