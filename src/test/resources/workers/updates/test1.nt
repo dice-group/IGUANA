@@ -1,2 +1,0 @@
-INSERT DATA {<http://test.com> <http://test.com/p> <http://test.com/o> .
-<http://test.com> <http://test.com/p> <http://test.com/o2> }
