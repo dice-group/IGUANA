@@ -127,12 +127,23 @@ jobs:
       - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
       - run: cp schema/iguana.owx ontology/iguana.owx
 
-      - name: Deploy Ontology
+      - name: Deploy Ontology to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./ontology/
           destination_dir: ./ontology/
+
+      - name: Deploy Ontology to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: files.dice-research.org
+          protocol: ftps
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          dry-run: true
+          local-dir: ./ontology/
+          server-dir: vocab/iguana/
 
 
   deploy_gh_release:
