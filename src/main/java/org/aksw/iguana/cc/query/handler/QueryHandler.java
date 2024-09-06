@@ -137,11 +137,11 @@ public class QueryHandler {
             }
         }
 
-        public record Pattern(@JsonProperty(required = true) URI endpoint, Long limit, Boolean caching) {
-            public Pattern(URI endpoint, Long limit, Boolean caching) {
+        public record Pattern(@JsonProperty(required = true) URI endpoint, Long limit, Boolean save) {
+            public Pattern(URI endpoint, Long limit, Boolean save) {
                 this.endpoint = endpoint;
                 this.limit = limit == null ? 2000 : limit;
-                this.caching = caching == null || caching;
+                this.save = save == null || save;
             }
         }
     }
@@ -186,7 +186,7 @@ public class QueryHandler {
                 querySource = createQuerySource(instancePath);
             } else {
                 final List<String> instances = instantiatePatternQueries(querySource, config.pattern);
-                if (config.pattern.caching) {
+                if (config.pattern.save) {
                     Files.createFile(instancePath);
                     try (var writer = Files.newBufferedWriter(instancePath)) {
                         for (String instance : instances) {

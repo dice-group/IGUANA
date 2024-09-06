@@ -62,7 +62,7 @@ tasks:
           pattern:
             endpoint: "http://dbpedia.org/sparql"
             limit: 1
-            caching: false
+            save: false
         timeout: 2s
         connection: Blazegraph
         completionTarget:

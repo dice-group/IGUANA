@@ -98,17 +98,17 @@ tasks:
 The pattern attribute has the following properties:
 - `endpoint` - the endpoint to query
 - `limit` - the maximum number of instances per query pattern
-- `caching` - if set to `true`, queries instances will be stored in files
+- `caching` - if set to `true`, query instances will be saved in a separate file and loaded from there next time
 
 Example of query configuration with pattern queries:
 ```yaml
 queries:
   path: "./example/suite/queries/"
-  format: "folder"
+  format: "folder" 
   pattern:
     endpoint: "http://dbpedia.org/sparql"
     limit: 100
-    caching: true
+    save: true
 ```  
 
 Pattern queries are queries that contain placeholders.

@@ -78,7 +78,7 @@ tasks:
           pattern:
             endpoint: "https://dbpedia.org/sparql"
             limit: 1000
-            caching: false
+            save: false
         timeout: 180s
         completionTarget:
           duration: 1000s

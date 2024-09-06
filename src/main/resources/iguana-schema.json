@@ -349,7 +349,7 @@
           "type": "integer",
           "minimum": 1
         },
-        "caching": {
+        "save": {
           "type": "boolean"
         }
       },
