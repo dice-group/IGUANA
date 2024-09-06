@@ -9,6 +9,8 @@ import static java.lang.Math.min;
 
 public class BigByteArrayInputStream extends InputStream {
 
+    private final static int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+
     final private BigByteArrayOutputStream bbaos;
 
     private ByteBuffer currentBuffer;
@@ -115,7 +117,7 @@ public class BigByteArrayInputStream extends InputStream {
     @Override
     public byte[] readAllBytes() throws IOException {
         if (currentBuffer == null && !activateNextBuffer()) return new byte[0];
-        if (availableLong() > Integer.MAX_VALUE - 8)
+        if (availableLong() > MAX_BUFFER_SIZE)
             throw new IOException("Reading all bytes from a BigByteArrayInputStream is prohibited because it might exceed the array capacity");
         byte[] b = new byte[available()];
         readNBytes(b, 0, b.length);
@@ -167,7 +169,7 @@ public class BigByteArrayInputStream extends InputStream {
 
     @Override
     public int available() {
-        return (int) Math.min(availableLong(), Integer.MAX_VALUE);
+        return (int) Math.min(availableLong(), MAX_BUFFER_SIZE);
     }
 
     /**

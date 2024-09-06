@@ -13,6 +13,8 @@ import java.util.Objects;
  */
 public class ByteArrayListInputStream extends InputStream {
 
+    private final static int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+
     private final List<byte[]> data;
     private Iterator<byte[]> iterator;
     private ByteBuffer currentBuffer;
@@ -87,10 +89,10 @@ public class ByteArrayListInputStream extends InputStream {
     @Override
     public byte[] readAllBytes() throws IOException {
         checkNotClosed();
-        if (availableLong() > Integer.MAX_VALUE - 8) {
+        if (availableLong() > MAX_BUFFER_SIZE) {
             throw new OutOfMemoryError("Data is too large to be read into a byte array");
         }
-        return readNBytes(Integer.MAX_VALUE - 8);
+        return readNBytes(MAX_BUFFER_SIZE);
     }
 
     @Override
@@ -142,7 +144,7 @@ public class ByteArrayListInputStream extends InputStream {
 
     @Override
     public int available() {
-        return (int) Math.min(Integer.MAX_VALUE, availableLong());
+        return (int) Math.min(MAX_BUFFER_SIZE, availableLong());
     }
 
     /**
