@@ -1,3 +1,0 @@
-<https://vocab.dice-research.org/iguana/resource/1/1/1> <https://vocab.dice-research.org/iguana/resource/testMetric>  <https://vocab.dice-research.org/iguana/resource/a>  .
- <https://vocab.dice-research.org/iguana/resource/a>  <https://vocab.dice-research.org/iguana/properties/b> "c"^^<http://www.w3.org/2001/XMLSchema#string> .
-
