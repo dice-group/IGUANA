@@ -98,7 +98,7 @@ tasks:
 The pattern attribute has the following properties:
 - `endpoint` - the endpoint to query
 - `limit` - the maximum number of instances per query pattern
-- `caching` - if set to `true`, query instances will be saved in a separate file and loaded from there next time
+- `save` - if set to `true`, query instances will be saved in a separate file
 
 Example of query configuration with pattern queries:
 ```yaml
@@ -128,3 +128,6 @@ The results may look like the following:
 - `SELECT * WHERE {?s <http://prop/1> ?o . ?o <http://exa.com> "12"}`
 - `SELECT * WHERE {?s <http://prop/2> ?o . ?o <http://exa.com> "1234"}`
 
+If the `save` attribute is set to `true`, 
+the instances will be saved in a separate file in the same directory as the query patterns.
+If the query patterns are stored in a folder, the instances will be saved in the parent directory.
