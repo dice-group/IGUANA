@@ -1,105 +1,105 @@
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/workerID> "0" .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/QPS> .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/noOfQueries> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/0/sparql1>  .
-<http://iguana-benchmark.eu/resource/1/1/1/0> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/0/sparql2>  .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/Worker> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0> <https://vocab.dice-research.org/iguana/properties/workerID> "0" .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0> <https://vocab.dice-research.org/iguana/properties/metric> <https://vocab.dice-research.org/iguana/resource/QPS> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0> <https://vocab.dice-research.org/iguana/properties/noOfQueries> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0> <https://vocab.dice-research.org/iguana/properties/query> <https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1>  .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0> <https://vocab.dice-research.org/iguana/properties/query> <https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2>  .
 
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "200.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/resultSize> "120"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "5.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1123/sparql1> .
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://iguana-benchmark.eu/properties/QPS> "5.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/totalTime> "200.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/resultSize> "120"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/penalizedQPS> "5.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/queryID> <https://vocab.dice-research.org/iguana/resource/1123/sparql1> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <https://vocab.dice-research.org/iguana/properties/QPS> "5.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/ExecutedQuery> .
 
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "250.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/resultSize> "100"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "4.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1125/sparql2> .
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://iguana-benchmark.eu/properties/QPS> "4.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/0/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
-
-
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Worker> .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/workerID> "1" .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/QPS> .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/noOfQueries> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/1/sparql1>  .
-<http://iguana-benchmark.eu/resource/1/1/1/1> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/1/sparql2>  .
-
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "150.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/resultSize> "?".
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "6.666666666666667"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1123/sparql1> .
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/QPS> "6.666666666666667"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
-
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "100.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/succeeded> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/failed> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/resultSize> "?".
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/wrongCodes> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "0.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1125/sparql2> .
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/QPS> "0.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/1/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/totalTime> "250.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/resultSize> "100"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/penalizedQPS> "4.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/queryID> <https://vocab.dice-research.org/iguana/resource/1125/sparql2> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <https://vocab.dice-research.org/iguana/properties/QPS> "4.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/0/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/ExecutedQuery> .
 
 
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/Worker> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1> <https://vocab.dice-research.org/iguana/properties/workerID> "1" .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1> <https://vocab.dice-research.org/iguana/properties/metric> <https://vocab.dice-research.org/iguana/resource/QPS> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1> <https://vocab.dice-research.org/iguana/properties/noOfQueries> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1> <https://vocab.dice-research.org/iguana/properties/query> <https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1>  .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1> <https://vocab.dice-research.org/iguana/properties/query> <https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2>  .
 
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/1> .
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/metric> <http://iguana-benchmark.eu/resource/QPS> .
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/workerResult> <http://iguana-benchmark.eu/resource/1/1/1/0> .
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/sparql1>  .
-<http://iguana-benchmark.eu/resource/1/1/1> <http://iguana-benchmark.eu/properties/query> <http://iguana-benchmark.eu/resource/1/1/1/sparql2>  .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/totalTime> "150.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/resultSize> "?".
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/penalizedQPS> "6.666666666666667"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/queryID> <https://vocab.dice-research.org/iguana/resource/1123/sparql1> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/QPS> "6.666666666666667"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/ExecutedQuery> .
 
-
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/totalTime> "350.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/succeeded> "2"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/resultSize> "120"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/penalizedQPS> "5.714285714285714"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1123/sparql1> .
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://iguana-benchmark.eu/properties/QPS> "5.714285714285714"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
-
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/totalTime> "350.0"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/failed> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/resultSize> "100"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/wrongCodes> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/penalizedQPS> "0.4444444444444444"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/queryID> <http://iguana-benchmark.eu/resource/1125/sparql2> .
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://iguana-benchmark.eu/properties/QPS> "2.857142857142857"^^<http://www.w3.org/2001/XMLSchema#double>.
-<http://iguana-benchmark.eu/resource/1/1/1/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/ExecutedQuery> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/totalTime> "100.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/succeeded> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/failed> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/resultSize> "?".
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/wrongCodes> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/penalizedQPS> "0.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/queryID> <https://vocab.dice-research.org/iguana/resource/1125/sparql2> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/QPS> "0.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/1/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/ExecutedQuery> .
 
 
 
+<https://vocab.dice-research.org/iguana/resource/1/1/1> <https://vocab.dice-research.org/iguana/properties/workerResult> <https://vocab.dice-research.org/iguana/resource/1/1/1/1> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1> <https://vocab.dice-research.org/iguana/properties/metric> <https://vocab.dice-research.org/iguana/resource/QPS> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1> <https://vocab.dice-research.org/iguana/properties/workerResult> <https://vocab.dice-research.org/iguana/resource/1/1/1/0> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1> <https://vocab.dice-research.org/iguana/properties/query> <https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1>  .
+<https://vocab.dice-research.org/iguana/resource/1/1/1> <https://vocab.dice-research.org/iguana/properties/query> <https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2>  .
 
 
-<http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#label> "Queries Per Second" .
-<http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#comment> "Will calculate for each query the amount of how many times the query could be executed succesfully in one second. Further on it will save the totaltime of each query, the failure and the success" .
-<http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/Metric> .
-<http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iguana-benchmark.eu/class/metric/QPS> .
-<http://iguana-benchmark.eu/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#label> "QPS" .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/totalTime> "350.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/succeeded> "2"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/failed> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/resultSize> "120"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/wrongCodes> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/penalizedQPS> "5.714285714285714"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/queryID> <https://vocab.dice-research.org/iguana/resource/1123/sparql1> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <https://vocab.dice-research.org/iguana/properties/QPS> "5.714285714285714"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/ExecutedQuery> .
+
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/totalTime> "350.0"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/succeeded> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/failed> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/resultSize> "100"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/timeOuts> "0"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/unknownException> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/wrongCodes> "1"^^<http://www.w3.org/2001/XMLSchema#long>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/penalizedQPS> "0.4444444444444444"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/queryID> <https://vocab.dice-research.org/iguana/resource/1125/sparql2> .
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <https://vocab.dice-research.org/iguana/properties/QPS> "2.857142857142857"^^<http://www.w3.org/2001/XMLSchema#double>.
+<https://vocab.dice-research.org/iguana/resource/1/1/1/sparql2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/ExecutedQuery> .
+
+
+
+
+
+<https://vocab.dice-research.org/iguana/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#label> "Queries Per Second" .
+<https://vocab.dice-research.org/iguana/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#comment> "Will calculate for each query the amount of how many times the query could be executed succesfully in one second. Further on it will save the totaltime of each query, the failure and the success" .
+<https://vocab.dice-research.org/iguana/resource/QPS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/Metric> .
+<https://vocab.dice-research.org/iguana/resource/QPS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.dice-research.org/iguana/class/metric/QPS> .
+<https://vocab.dice-research.org/iguana/resource/QPS> <http://www.w3.org/2000/01/rdf-schema#label> "QPS" .
