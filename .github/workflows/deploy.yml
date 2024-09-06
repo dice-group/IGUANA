@@ -141,7 +141,6 @@ jobs:
           protocol: ftps
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          dry-run: true
           local-dir: ./ontology/
           server-dir: vocab/iguana/
 
