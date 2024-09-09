@@ -77,6 +77,9 @@ WHERE {
 ```
 The `separator` property should be set to `"\n###\n"`. (be aware of different line endings on different operating systems)
 
+# Huge Query Strings
+When working with large queries (Queries that are larger than 2³¹ Bytes or ~2GB),
+
 ## Example
 ```yaml
 tasks:
