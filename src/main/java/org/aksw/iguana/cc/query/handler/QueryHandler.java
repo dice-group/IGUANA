@@ -29,6 +29,8 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * The QueryHandler is used by every worker that extends the AbstractWorker.
@@ -313,6 +315,10 @@ public class QueryHandler {
     * <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
     */
     private static List<String> instantiateTemplateQueries(QuerySource querySource, Config.Template config) throws IOException {
+        // charset for generating random variable names
+        final String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        final Random random = new Random();
+
         final var templateQueries = new FileCachingQueryList(querySource);
         final Pattern template = Pattern.compile("%%var[0-9]+%%");
         final var instances = new ArrayList<String>();
@@ -321,11 +327,16 @@ public class QueryHandler {
             // and store the variable names
             var templateQueryString = templateQueries.getQuery(i);
             final Matcher matcher = template.matcher(templateQueryString);
-            final var variables = new LinkedHashSet<String>(); // a set, that preserves insertion order
+            final var variables = new LinkedHashMap<String, String>(); // a set, that preserves insertion order
             while (matcher.find()) {
                 final var match = matcher.group();
-                final var variable = "?" + match.replaceAll("%%", "");
-                variables.add(variable);
+                if (variables.containsKey(match)) continue;
+                String variableName = match.replaceAll("%%", "");
+                while (templateQueryString.contains("?" + variableName)) { // generate random variable name with 20 characters until it is unique
+                    variableName = IntStream.range(0, 20).mapToObj(m -> String.valueOf(charset.charAt(random.nextInt(charset.length())))).collect(Collectors.joining());
+                }
+                final var variable = "?" + variableName;
+                variables.put(match, variable);
                 templateQueryString = templateQueryString.replaceAll(match, variable);
             }
 
@@ -339,7 +350,7 @@ public class QueryHandler {
             final var templateQuery = QueryFactory.create(templateQueryString);
             final var whereClause = "WHERE " + templateQuery.getQueryPattern();
             final var selectQueryString = new ParameterizedSparqlString();
-            selectQueryString.setCommandText("SELECT DISTINCT " + String.join(" ", variables));
+            selectQueryString.setCommandText("SELECT DISTINCT " + String.join(" ", variables.values()));
             selectQueryString.append(" " + whereClause);
             selectQueryString.append(" LIMIT " + config.limit());
             selectQueryString.setNsPrefixes(templateQuery.getPrefixMapping());
