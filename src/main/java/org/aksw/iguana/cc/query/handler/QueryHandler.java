@@ -308,7 +308,7 @@ public class QueryHandler {
             // and store the variable names
             var templateQueryString = templateQueries.getQuery(i);
             final Matcher matcher = template.matcher(templateQueryString);
-            final var variables = new HashSet<String>();
+            final var variables = new LinkedHashSet<String>(); // a set, that preserves insertion order
             while (matcher.find()) {
                 final var match = matcher.group();
                 final var variable = "?" + match.replaceAll("%%", "");
