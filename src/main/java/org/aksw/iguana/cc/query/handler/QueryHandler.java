@@ -173,37 +173,48 @@ public class QueryHandler {
         this.config = config;
         var querySource = createQuerySource(Path.of(config.path));
 
+        // initialize queryList based on the given configuration
         if (config.template() != null) {
-            final var originalPath = querySource.getPath();
-            final Path instancePath = Files.isDirectory(originalPath) ?
-                    originalPath.resolveSibling(originalPath.getFileName() + "_instances.txt") :
-                    originalPath.resolveSibling(originalPath.getFileName().toString().split("\\.")[0] + "_instances.txt");
-            if (Files.exists(instancePath)) {
-                LOGGER.info("Already existing query template instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath.toAbsolutePath());
+            queryList = initializeTemplateQueryHandler(querySource);
+        } else {
+            queryList = (config.caching()) ?
+                    new FileCachingQueryList(querySource) :
+                    new FileReadingQueryList(querySource);
+        }
+        this.hashCode = queryList.hashCode();
+    }
+
+    private QueryList initializeTemplateQueryHandler(QuerySource templateSource) throws IOException {
+        QuerySource querySource = templateSource;
+        final var originalPath = templateSource.getPath();
+        final Path instancePath = Files.isDirectory(originalPath) ?
+                originalPath.resolveSibling(originalPath.getFileName() + "_instances.txt") : // if the source of the query templates is a folder, the instances will be saved in a file with the same name as the folder
+                originalPath.resolveSibling(originalPath.getFileName().toString().split("\\.")[0] + "_instances.txt"); // if the source of the query templates is a file, the instances will be saved in a file with the same name as the file
+        if (Files.exists(instancePath)) {
+            LOGGER.info("Already existing query template instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath.toAbsolutePath());
+            querySource = createQuerySource(instancePath); // if the instances already exist, use them
+        } else {
+            final List<String> instances = instantiateTemplateQueries(querySource, config.template);
+            if (config.template.save) {
+                // save the instances to a file
+                Files.createFile(instancePath);
+                try (var writer = Files.newBufferedWriter(instancePath)) {
+                    for (String instance : instances) {
+                        writer.write(instance);
+                        writer.newLine();
+                    }
+                }
+                // create a new query source based on the new instance file
                 querySource = createQuerySource(instancePath);
             } else {
-                final List<String> instances = instantiateTemplateQueries(querySource, config.template);
-                if (config.template.save) {
-                    Files.createFile(instancePath);
-                    try (var writer = Files.newBufferedWriter(instancePath)) {
-                        for (String instance : instances) {
-                            writer.write(instance);
-                            writer.newLine();
-                        }
-                    }
-                    querySource = createQuerySource(instancePath);
-                } else {
-                    queryList = new StringListQueryList(instances);
-                    this.hashCode = queryList.hashCode();
-                    return;
-                }
+                // query source isn't necessary, because queries aren't stored in a file,
+                // directly return a list of the instances instead
+                return new StringListQueryList(instances);
             }
         }
-
-        queryList = (config.caching()) ?
-                new FileCachingQueryList(querySource) :
-                new FileReadingQueryList(querySource);
-        this.hashCode = queryList.hashCode();
+        return (config.caching()) ?
+                new FileCachingQueryList(querySource) : // if caching is enabled, cache the instances
+                new FileReadingQueryList(querySource);  // if caching is disabled, read the instances from the file every time
     }
 
     /**
@@ -284,16 +295,18 @@ public class QueryHandler {
 
 
    /**
-    * Instantiates template queries from the given query source by querying a SPARQL endpoint.
-    * A query template is a SPARQL 1.1 Query, which can have additional variables in the regex form of
-    * <code>%%var[0-9]+%%</code> in the Basic Graph Template.
+    * Query templates are queries containing placeholders for some terms.
+    * Replacement candidates are identified by querying a given endpoint.
+    * This is done in a way that the resulting queries will yield results against endpoints with the same data.
+    * The placeholders are written in the form of <code>%%var[0-9]+%%</code>, where <code>[0-9]+</code>
+    * represents any number.
     * <p>
     * Exemplary template: </br>
     * <code>SELECT * WHERE {?s %%var1%% ?o . ?o &lt;http://exa.com&gt; %%var2%%}</code><br/>
     * This template will then be converted to: <br/>
     * <code>SELECT ?var1 ?var2 {?s ?var1 ?o . ?o &lt;http://exa.com&gt; ?var2}</code><br/>
     * and will request query solutions from the given sparql endpoint (e.g DBpedia).<br/>
-    * The solutions will then be instantiated into the query template.
+    * The solutions will then be instantiated into the template.
     * The result may look like the following:<br/>
     * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "123"}</code><br/>
     * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "12"}</code><br/>
