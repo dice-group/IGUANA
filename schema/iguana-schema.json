@@ -338,7 +338,7 @@
         "duration"
       ]
     },
-    "Pattern": {
+    "Template": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -356,7 +356,7 @@
       "required": [
         "endpoint"
       ],
-      "title": "Pattern"
+      "title": "Template"
     },
     "QueryMixes": {
       "properties": {
@@ -400,8 +400,8 @@
           "type": "string",
           "enum": [ "", "SPARQL" ]
         },
-        "pattern": {
-          "$ref": "#/definitions/Pattern"
+        "template": {
+          "$ref": "#/definitions/Template"
         }
       },
       "required": [

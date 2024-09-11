@@ -53,7 +53,7 @@ tasks:
           path: "./example/suite/queries/"
           format: "folder"
           order: "random"
-          pattern:
+          template:
             endpoint: "http://localhost:3030/sp2b"
             limit: 2000
             save: false
