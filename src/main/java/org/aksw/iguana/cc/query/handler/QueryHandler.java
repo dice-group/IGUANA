@@ -329,6 +329,12 @@ public class QueryHandler {
                 templateQueryString = templateQueryString.replaceAll(match, variable);
             }
 
+            // if no placeholders are found, the query is already a valid SPARQL query
+            if (variables.isEmpty()) {
+                instances.add(templateQueryString);
+                continue;
+            }
+
             // build SELECT query for finding bindings for the variables
             final var templateQuery = QueryFactory.create(templateQueryString);
             final var whereClause = "WHERE " + templateQuery.getQueryPattern();
