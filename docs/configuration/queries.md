@@ -16,7 +16,8 @@ The `queries` property is an object that contains the following properties:
 | order     | no       | `linear`       | The order in which the queries are executed. If set to `linear` the queries will be executed in their order inside the file. If `format` is set to `folder`, queries will be sorted by their file name first. | `random` or `linear`                      |
 | seed      | no       | `0`            | The seed for the random number generator that selects the queries. If multiple workers use the same query handler, their seed will be the sum of the given seed and their worker id.                          | `12345`                                   |
 | lang      | no       | `SPARQL`       | Not used for anything at the moment.                                                                                                                                                                          |                                           |
-| pattern   | no       |                | If set, queries from `path` will be treated as patten queries. See [Pattern Queries](#pattern-queries) for more information.                                                                                  |                                           |
+| template  | no       |                | If set, queries from `path` will be treated as query templates. See [Query Templates](#query-templates) for more information.                                                                                 |                                           |
+
 ## Format
 
 ### One-per-line
@@ -94,40 +95,48 @@ tasks:
       # ... additional worker properties
 ```
 
-## Pattern Queries
-The pattern attribute has the following properties:
-- `endpoint` - the endpoint to query
-- `limit` - the maximum number of instances per query pattern
-- `save` - if set to `true`, query instances will be saved in a separate file
+## Query Templates
+Query templates are queries containing placeholders for some terms. 
+Replacement candidates are identified by querying a given endpoint. 
+This is done in a way that the resulting queries will yield results against endpoints with the same data.
 
-Example of query configuration with pattern queries:
-```yaml
-queries:
-  path: "./example/suite/queries/"
-  format: "folder" 
-  pattern:
-    endpoint: "http://dbpedia.org/sparql"
-    limit: 100
-    save: true
-```  
+The placeholders are written in the form of `%%var[0-9]+%%`, where `[0-9]+` represents any number.
+The query templates originated from WatDiv, 
+where the placeholders are of [similar form](https://dsg.uwaterloo.ca/watdiv/basic-testing.shtml).
 
-Pattern queries are queries that contain placeholders.
-A query pattern is a SPARQL 1.1 Query, which can have additional variables in the regex form of
-`%%var[0-9]+%%` in the Basic Graph Pattern.
-
-An exemplary pattern:
+An exemplary template:
 `SELECT * WHERE {?s %%var1%% ?o . ?o <http://exa.com> %%var2%%}`
 
-This pattern will then be converted to:
-`SELECT ?var1 ?var2 {?s ?var1 ?o . ?o <http://exa.com> ?var2}`
+This template will then be converted to:
+`SELECT ?var1 ?var2 WHERE {?s ?var1 ?o . ?o <http://exa.com> ?var2}`
 
 The SELECT query will then be requested from the given sparql endpoint (e.g DBpedia).
-The solutions for this query are used to instantiate the query pattern.
+The solutions for this query are used to instantiate the template.
 The results may look like the following:
 - `SELECT * WHERE {?s <http://prop/1> ?o . ?o <http://exa.com> "123"}`
 - `SELECT * WHERE {?s <http://prop/1> ?o . ?o <http://exa.com> "12"}`
 - `SELECT * WHERE {?s <http://prop/2> ?o . ?o <http://exa.com> "1234"}`
 
-If the `save` attribute is set to `true`, 
-the instances will be saved in a separate file in the same directory as the query patterns.
-If the query patterns are stored in a folder, the instances will be saved in the parent directory.
+### Configuration
+The `template` attribute has the following properties:
+
+| property | required | default | description                                                         | example                     |
+|----------|----------|---------|---------------------------------------------------------------------|-----------------------------|
+| endpoint | yes      |         | The endpoint to query.                                              | `http://dbpedia.org/sparql` |
+| limit    | no       | `2000`  | The maximum number of instances per query template.                 | `100`                       |
+| save     | no       | `true`  | If set to `true`, query instances will be saved in a separate file. | `false`                     |
+
+If the `save` attribute is set to `true`,
+the instances will be saved in a separate file in the same directory as the query templates.
+If the query templates are stored in a folder, the instances will be saved in the parent directory.
+
+Example of query configuration with query templates:
+```yaml
+queries:
+  path: "./example/suite/queries/"
+  format: "folder" 
+  template:
+    endpoint: "http://dbpedia.org/sparql"
+    limit: 100
+    save: true
+```
