@@ -170,6 +170,6 @@ class ByteArrayListInputStreamTest {
         combined.addAll(data2);
         final var stream = new ByteArrayListInputStream(combined);
         assertEquals(Integer.MAX_VALUE - 8 + (long) BUFFER_SIZE, stream.availableLong());
-        assertEquals(Integer.MAX_VALUE, stream.available());
+        assertEquals(Integer.MAX_VALUE - 8, stream.available());
     }
 }
