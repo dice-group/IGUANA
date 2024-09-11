@@ -73,10 +73,10 @@ class QueryHandlerConfigTest {
                                 QueryHandler.Config.Order.RANDOM,
                                 42L,
                                 QueryHandler.Config.Language.SPARQL,
-                                new QueryHandler.Config.Pattern(URI.create("http://example.org/sparql"), 2000L, true)
+                                new QueryHandler.Config.Template(URI.create("http://example.org/sparql"), 2000L, true)
                         ),
                         """
-                            {"path":"some.queries","format":"separator", "separator": "\\n", "caching":true,"order":"random","seed":42,"lang":"SPARQL","pattern": {"endpoint": "http://example.org/sparql"}}
+                            {"path":"some.queries","format":"separator", "separator": "\\n", "caching":true,"order":"random","seed":42,"lang":"SPARQL","template": {"endpoint": "http://example.org/sparql"}}
                         """
                 )
         );

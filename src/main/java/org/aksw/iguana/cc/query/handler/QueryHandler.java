@@ -25,17 +25,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * The QueryHandler is used by every worker that extends the AbstractWorker.
- * It initializes the QuerySource, QuerySelector, QueryList and, if needed, PatternHandler.
+ * It initializes the QuerySource, QuerySelector, QueryList and, if needed, TemplateHandler.
  * After the initialization, it provides the next query to the worker using the generated QuerySource
  * and the order given by the QuerySelector.
  *
@@ -71,9 +68,9 @@ public class QueryHandler {
             Order order,
             Long seed,
             Language lang,
-            Pattern pattern
+            Template template
     ) {
-        public Config(@JsonProperty(required = true) String path, Format format, String separator, Boolean caching, Order order, Long seed, Language lang, Pattern pattern) {
+        public Config(@JsonProperty(required = true) String path, Format format, String separator, Boolean caching, Order order, Long seed, Language lang, Template template) {
             this.path = path;
             this.format = (format == null ? Format.ONE_PER_LINE : format);
             this.caching = (caching == null || caching);
@@ -81,7 +78,7 @@ public class QueryHandler {
             this.seed = (seed == null ? 0 : seed);
             this.lang = (lang == null ? Language.SPARQL : lang);
             this.separator = (separator == null ? "" : separator);
-            this.pattern = pattern;
+            this.template = template;
         }
 
         public Config(@JsonProperty(required = true) String path, Format format, String separator, Boolean caching, Order order, Long seed, Language lang) {
@@ -137,8 +134,8 @@ public class QueryHandler {
             }
         }
 
-        public record Pattern(@JsonProperty(required = true) URI endpoint, Long limit, Boolean save) {
-            public Pattern(URI endpoint, Long limit, Boolean save) {
+        public record Template(@JsonProperty(required = true) URI endpoint, Long limit, Boolean save) {
+            public Template(URI endpoint, Long limit, Boolean save) {
                 this.endpoint = endpoint;
                 this.limit = limit == null ? 2000 : limit;
                 this.save = save == null || save;
@@ -176,17 +173,17 @@ public class QueryHandler {
         this.config = config;
         var querySource = createQuerySource(Path.of(config.path));
 
-        if (config.pattern() != null) {
+        if (config.template() != null) {
             final var originalPath = querySource.getPath();
-            Path instancePath = Files.isDirectory(originalPath) ?
+            final Path instancePath = Files.isDirectory(originalPath) ?
                     originalPath.resolveSibling(originalPath.getFileName() + "_instances.txt") :
                     originalPath.resolveSibling(originalPath.getFileName().toString().split("\\.")[0] + "_instances.txt");
             if (Files.exists(instancePath)) {
-                LOGGER.info("Already existing query pattern instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath.toAbsolutePath());
+                LOGGER.info("Already existing query template instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath.toAbsolutePath());
                 querySource = createQuerySource(instancePath);
             } else {
-                final List<String> instances = instantiatePatternQueries(querySource, config.pattern);
-                if (config.pattern.save) {
+                final List<String> instances = instantiateTemplateQueries(querySource, config.template);
+                if (config.template.save) {
                     Files.createFile(instancePath);
                     try (var writer = Files.newBufferedWriter(instancePath)) {
                         for (String instance : instances) {
@@ -287,55 +284,56 @@ public class QueryHandler {
 
 
    /**
-    * Instantiates pattern queries from the given query source by querying a SPARQL endpoint.
-    * A query pattern is a SPARQL 1.1 Query, which can have additional variables in the regex form of
-    * <code>%%var[0-9]+%%</code> in the Basic Graph Pattern.
+    * Instantiates template queries from the given query source by querying a SPARQL endpoint.
+    * A query template is a SPARQL 1.1 Query, which can have additional variables in the regex form of
+    * <code>%%var[0-9]+%%</code> in the Basic Graph Template.
     * <p>
-    * Exemplary pattern: </br>
+    * Exemplary template: </br>
     * <code>SELECT * WHERE {?s %%var1%% ?o . ?o &lt;http://exa.com&gt; %%var2%%}</code><br/>
-    * This pattern will then be converted to: <br/>
+    * This template will then be converted to: <br/>
     * <code>SELECT ?var1 ?var2 {?s ?var1 ?o . ?o &lt;http://exa.com&gt; ?var2}</code><br/>
     * and will request query solutions from the given sparql endpoint (e.g DBpedia).<br/>
-    * The solutions will then be instantiated into the query pattern.
+    * The solutions will then be instantiated into the query template.
     * The result may look like the following:<br/>
     * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "123"}</code><br/>
     * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "12"}</code><br/>
     * <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
     */
-    private static List<String> instantiatePatternQueries(QuerySource querySource, Config.Pattern config) throws IOException {
-        final var patternQueries = new FileCachingQueryList(querySource);
-        final Pattern pattern = Pattern.compile("%%var\\d+%%");
+    private static List<String> instantiateTemplateQueries(QuerySource querySource, Config.Template config) throws IOException {
+        final var templateQueries = new FileCachingQueryList(querySource);
+        final Pattern template = Pattern.compile("%%var[0-9]+%%");
         final var instances = new ArrayList<String>();
-        for (int i = 0; i < patternQueries.size(); i++) {
-            // replace all variables in the query pattern with SPARQL variables
+        for (int i = 0; i < templateQueries.size(); i++) {
+            // replace all variables in the query template with SPARQL variables
             // and store the variable names
-            var patternQueryString = patternQueries.getQuery(i);
-            final Matcher matcher = pattern.matcher(patternQueryString);
-            final var variables = new ArrayList<String>();
+            var templateQueryString = templateQueries.getQuery(i);
+            final Matcher matcher = template.matcher(templateQueryString);
+            final var variables = new HashSet<String>();
             while (matcher.find()) {
                 final var match = matcher.group();
                 final var variable = "?" + match.replaceAll("%%", "");
                 variables.add(variable);
-                patternQueryString = patternQueryString.replaceAll(match, variable);
+                templateQueryString = templateQueryString.replaceAll(match, variable);
             }
 
             // build SELECT query for finding bindings for the variables
-            final var patternQuery = QueryFactory.create(patternQueryString);
-            final var whereClause = "WHERE " + patternQuery.getQueryPattern();
+            final var templateQuery = QueryFactory.create(templateQueryString);
+            final var whereClause = "WHERE " + templateQuery.getQueryPattern();
             final var selectQueryString = new ParameterizedSparqlString();
             selectQueryString.setCommandText("SELECT DISTINCT " + String.join(" ", variables));
             selectQueryString.append(" " + whereClause);
             selectQueryString.append(" LIMIT " + config.limit());
-            selectQueryString.setNsPrefixes(patternQuery.getPrefixMapping());
+            selectQueryString.setNsPrefixes(templateQuery.getPrefixMapping());
 
-            // send request to SPARQL endpoint and instantiate the pattern based on results
+            // send request to SPARQL endpoint and instantiate the template based on results
             try (QueryExecution exec = QueryExecutionFactory.createServiceRequest(config.endpoint().toString(), selectQueryString.asQuery())) {
                 ResultSet resultSet = exec.execSelect();
                 if (!resultSet.hasNext()) {
-                    LOGGER.warn("No results for query pattern: {}", patternQueryString);
+                    LOGGER.warn("No results for query template: {}", templateQueryString);
                 }
-                while (resultSet.hasNext()) {
-                    var instance = new ParameterizedSparqlString(patternQueryString);
+                int count = 0;
+                while (resultSet.hasNext() && count++ < config.limit()) {
+                    var instance = new ParameterizedSparqlString(templateQueryString);
                     QuerySolution solution = resultSet.next();
                     for (String var : resultSet.getResultVars()) {
                         instance.clearParam(var);

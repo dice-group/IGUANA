@@ -29,7 +29,6 @@ public class QueryHandlerTest {
     static Path tempDir;
     static Path tempFileSep;
     static Path tempFileLine;
-    static Path tempPatternFile;
 
     static List<FolderQuerySourceTest.Query> queries;
     static List<FolderQuerySourceTest.Query> folderQueries;
