@@ -104,6 +104,8 @@ The placeholders are written in the form of `%%var[0-9]+%%`, where `[0-9]+` repr
 The query templates originated from WatDiv, 
 where the placeholders are of [similar form](https://dsg.uwaterloo.ca/watdiv/basic-testing.shtml).
 
+Query templates and normal queries can be mixed in the same file or folder.
+
 An exemplary template:
 `SELECT * WHERE {?s %%var1%% ?o . ?o <http://exa.com> %%var2%%}`
 
