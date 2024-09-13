@@ -13,6 +13,8 @@ import java.util.Objects;
  */
 public class ByteArrayListInputStream extends InputStream {
 
+    private final static int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+
     private final List<byte[]> data;
     private Iterator<byte[]> iterator;
     private ByteBuffer currentBuffer;
@@ -86,13 +88,29 @@ public class ByteArrayListInputStream extends InputStream {
 
     @Override
     public byte[] readAllBytes() throws IOException {
-        throw new UnsupportedOperationException();
+        checkNotClosed();
+        if (availableLong() > MAX_BUFFER_SIZE) {
+            throw new OutOfMemoryError("Data is too large to be read into a byte array");
+        }
+        return readNBytes(MAX_BUFFER_SIZE);
     }
 
     @Override
     public int readNBytes(byte[] b, int off, int len) throws IOException {
         checkNotClosed();
         return read(b, off, len, 0);
+    }
+
+    @Override
+    public byte[] readNBytes(int len) throws IOException {
+        checkNotClosed();
+        if (len < 0) {
+            throw new IllegalArgumentException("len < 0");
+        }
+        final var actualLength = Math.min(len, this.available());
+        byte[] b = new byte[actualLength];
+        read(b, 0, actualLength, 0);
+        return b;
     }
 
     @Override
@@ -125,12 +143,16 @@ public class ByteArrayListInputStream extends InputStream {
     }
 
     @Override
-    public int available() throws IOException {
-        return (int) Math.min(Integer.MAX_VALUE, availableLong());
+    public int available() {
+        return (int) Math.min(MAX_BUFFER_SIZE, availableLong());
     }
 
-    public long availableLong() throws IOException {
-        checkNotClosed();
+    /**
+     * Returns the number of bytes available to read from the stream.
+     *
+     * @return the number of bytes available
+     */
+    public long availableLong() {
         if (!checkBuffer())
             return 0;
         long sum = 0;
@@ -159,5 +181,17 @@ public class ByteArrayListInputStream extends InputStream {
         if (!checkBuffer())
             return -1;
         return currentBuffer.get() & 0xFF;
+    }
+
+    /**
+     * Returns the current buffer that is being read from.
+     *
+     * @return the current buffer
+     */
+    public ByteBuffer getCurrentBuffer() {
+        if (!checkBuffer()) {
+            return null;
+        }
+        return currentBuffer;
     }
 }

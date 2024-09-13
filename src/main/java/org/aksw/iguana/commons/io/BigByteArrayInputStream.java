@@ -2,20 +2,28 @@ package org.aksw.iguana.commons.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 import static java.lang.Math.min;
 
 public class BigByteArrayInputStream extends InputStream {
 
+    private final static int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+
     final private BigByteArrayOutputStream bbaos;
 
-    private byte[] currentBuffer;
-    private int currentBufferSize = -1;
-    private int posInCurrentBuffer = 0;
+    private ByteBuffer currentBuffer;
 
     private boolean ended = true;
 
+    /**
+     * Creates a new BigByteArrayInputStream.
+     * The given byte array will be copied to the internal buffers.
+     *
+     * @param bytes the byte array to read from
+     * @throws IOException if an I/O error occurs
+     */
     public BigByteArrayInputStream(byte[] bytes) throws IOException {
         bbaos = new BigByteArrayOutputStream();
         bbaos.write(bytes);
@@ -38,10 +46,10 @@ public class BigByteArrayInputStream extends InputStream {
         this.bbaos.close();
 
         if (ended) return -1;
-        final var ret = currentBuffer[posInCurrentBuffer++];
-        if (availableBytes() == 0)
-            activateNextBuffer();
-        return ret & 0xFF; // convert byte (-128...127) to (0...255)
+        if (currentBuffer.remaining() == 0 && !activateNextBuffer())
+            return -1;
+
+        return currentBuffer.get() & 0xFF; // convert byte (-128...127) to (0...255)
     }
 
     @Override
@@ -51,26 +59,33 @@ public class BigByteArrayInputStream extends InputStream {
 
         if (ended) return -1;
 
-        final var copyLength1 = min(availableBytes(), len);
-        System.arraycopy(currentBuffer, posInCurrentBuffer, b, off, copyLength1);
-        posInCurrentBuffer += copyLength1;
+        final var copyLength1 = min(currentBuffer.remaining(), len);
+        currentBuffer.get(b, off, copyLength1);
         off += copyLength1;
-        if (availableBytes() == 0)
+        if (currentBuffer.remaining() == 0)
             activateNextBuffer();
 
         // check if b is already filled up or if there is nothing left to read
         if (copyLength1 == len || ended) return copyLength1;
 
-        // there might be the rare case, where reading one additional baos might not be enough to fill the buffer,
-        // because there are different array size limitations across different JVMs
-        final var copyLength2 = min(availableBytes(), len - copyLength1);
-        System.arraycopy(currentBuffer, posInCurrentBuffer, b, off, copyLength2);
-        posInCurrentBuffer += copyLength2;
+        // read again if there is still something to read
+        final var copyLength2 = min(currentBuffer.remaining(), len - copyLength1);
+        currentBuffer.get(b, off, copyLength2);
 
-        if (availableBytes() == 0)
+        if (currentBuffer.remaining() == 0)
             activateNextBuffer();
 
         return copyLength1 + copyLength2;
+    }
+
+    @Override
+    public byte[] readNBytes(int n) throws IOException {
+        if (n < 0) throw new IllegalArgumentException("n must be non-negative");
+        if (currentBuffer == null && !activateNextBuffer()) return new byte[0];
+        int read = Math.min(n, available());
+        byte[] b = new byte[read];
+        readNBytes(b, 0, read);
+        return b;
     }
 
     @Override
@@ -80,23 +95,20 @@ public class BigByteArrayInputStream extends InputStream {
 
         if (ended) return 0;
 
-        final var copyLength1 = min(availableBytes(), len);
-        System.arraycopy(currentBuffer, posInCurrentBuffer, b, off, copyLength1);
-        posInCurrentBuffer += copyLength1;
+        final var copyLength1 = min(currentBuffer.remaining(), len);
+        currentBuffer.get(b, off, copyLength1);
         off += copyLength1;
-        if (availableBytes() == 0)
+        if (currentBuffer.remaining() == 0)
             activateNextBuffer();
 
         // check if b is already filled up or if there is nothing left to read
         if (copyLength1 == len || ended) return copyLength1;
 
-        // there might be the rare case, where reading one additional baos might not be enough to fill the buffer,
-        // because there are different array size limitations across different JVMs
-        final var copyLength2 = min(availableBytes(), len - copyLength1);
-        System.arraycopy(currentBuffer, posInCurrentBuffer, b, off, copyLength2);
-        posInCurrentBuffer += copyLength2;
+        // read again if there is still something to read
+        final var copyLength2 = min(currentBuffer.remaining(), len - copyLength1);
+        currentBuffer.get(b, off, copyLength2);
 
-        if (availableBytes() == 0)
+        if (currentBuffer.remaining() == 0)
             activateNextBuffer();
 
         return copyLength1 + copyLength2;
@@ -104,18 +116,24 @@ public class BigByteArrayInputStream extends InputStream {
 
     @Override
     public byte[] readAllBytes() throws IOException {
-        throw new IOException("Reading all bytes from a BigByteArrayInputStream is prohibited because it might exceed the array capacity");
+        if (currentBuffer == null && !activateNextBuffer()) return new byte[0];
+        if (availableLong() > MAX_BUFFER_SIZE)
+            throw new IOException("Reading all bytes from a BigByteArrayInputStream is prohibited because it might exceed the array capacity");
+        byte[] b = new byte[available()];
+        readNBytes(b, 0, b.length);
+        return b;
     }
 
     @Override
     public long skip(long n) throws IOException {
         if (n <= 0) return 0;
+        if (currentBuffer == null && !activateNextBuffer()) return 0;
         long skipped = 0;
         while (skipped < n) {
-            long thisSkip = min(availableBytes(), n - skipped);
+            int thisSkip = (int) min(currentBuffer.remaining(), n - skipped); // conversion to int is lossless, because skipped is at maximum INT_MAX big
             skipped += thisSkip;
-            posInCurrentBuffer += (int) thisSkip; // conversion to int is lossless, because skipped is at maximum INT_MAX big
-            if (availableBytes() == 0)
+            currentBuffer.position(currentBuffer.position() + thisSkip);
+            if (currentBuffer.remaining() == 0)
                 if (!activateNextBuffer())
                     return skipped;
         }
@@ -131,33 +149,35 @@ public class BigByteArrayInputStream extends InputStream {
         // check if another buffer is available
         if (bbaos.getBaos().isEmpty()) {
             currentBuffer = null; // release memory
-            currentBufferSize = 0;
-            posInCurrentBuffer = 0;
             ended = true;
             return false;
         }
 
         // activate next buffer
-        currentBuffer = bbaos.getBaos().get(0).getBuffer();
-        currentBufferSize = bbaos.getBaos().get(0).size();
-        posInCurrentBuffer = 0;
+        currentBuffer = ByteBuffer.wrap(bbaos.getBaos().get(0).getBuffer());
+        currentBuffer.limit(bbaos.getBaos().get(0).size()); // set limit to the actual size of the buffer
 
         // remove the current buffer from the list to save memory
         bbaos.getBaos().remove(0);
 
         // check if the new buffer contains anything
-        if (currentBuffer.length == 0)
-            return ended = activateNextBuffer();
+        if (currentBuffer.remaining() == 0)
+            return ended = !activateNextBuffer();
         ended = false;
         return true;
     }
 
+    @Override
+    public int available() {
+        return (int) Math.min(availableLong(), MAX_BUFFER_SIZE);
+    }
+
     /**
-     * Returns the number of available bytes in the current buffer.
+     * Returns the number of bytes available in the stream as long type.
      *
-     * @return the number of available bytes in the current buffer
+     * @return the number of bytes available in the stream
      */
-    private int availableBytes() {
-        return currentBufferSize - posInCurrentBuffer;
+    public long availableLong() {
+        return bbaos.size() + currentBuffer.remaining();
     }
 }

@@ -33,7 +33,7 @@ public abstract class LanguageProcessor {
 
     public interface LanguageProcessingData extends Storable {
         long hash();
-        Class<? extends LanguageProcessor> processor();
+        Exception exception();
     }
 
     public abstract LanguageProcessingData process(InputStream inputStream, long hash);
@@ -45,6 +45,9 @@ public abstract class LanguageProcessor {
     // Register all available LanguageProcessors here.
     static {
         processors.put("application/sparql-results+json", org.aksw.iguana.cc.lang.impl.SaxSparqlJsonResultCountingParser.class);
+        processors.put("application/sparql-results+xml", org.aksw.iguana.cc.lang.impl.SaxSparqlXmlResultCountingParser.class);
+        processors.put("text/tab-separated-values", org.aksw.iguana.cc.lang.impl.SparqlTsvResultCountingParser.class);
+        processors.put("text/csv", org.aksw.iguana.cc.lang.impl.SparqlCsvResultCountingParser.class);
     }
 
     public static LanguageProcessor getInstance(String contentType) {
