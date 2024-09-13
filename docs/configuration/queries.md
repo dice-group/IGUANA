@@ -109,6 +109,8 @@ The placeholders are written in the form of `%%[a-zA-Z0-9_]+%%`, which means tha
 of letters, numbers, and underscores, enclosed by `%%` will be interpreted as a placeholder.
 The query templates originated from WatDiv, 
 where the placeholders are of [similar form](https://dsg.uwaterloo.ca/watdiv/basic-testing.shtml).
+If the placeholder name is equal to a variable name in the query, the placeholder will not be assigned
+the same variable name during candidate generation.
 
 Query templates and normal queries can be mixed in the same file or folder.
 
