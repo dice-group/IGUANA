@@ -189,8 +189,8 @@ public class QueryHandler {
     private QueryList initializeTemplateQueryHandler(QuerySource templateSource) throws IOException {
         QuerySource querySource = templateSource;
         final var originalPath = templateSource.getPath();
-        final var postfix = String.format("_instances_%s.txt",
-                Integer.toUnsignedString(this.config.template.endpoint.hashCode() + (int) this.config.template.limit.longValue()));
+        final var postfix = String.format("_instances_f%s_l%s.txt",
+                Integer.toUnsignedString(this.config.template.endpoint.hashCode()), Integer.toUnsignedString((int) this.config.template.limit.longValue()));
         final Path instancePath = Files.isDirectory(originalPath) ?
                 originalPath.resolveSibling(originalPath.getFileName() + postfix) : // if the source of the query templates is a folder, the instances will be saved in a file with the same name as the folder
                 originalPath.resolveSibling(originalPath.getFileName().toString().split("\\.")[0] + postfix); // if the source of the query templates is a file, the instances will be saved in a file with the same name as the file
