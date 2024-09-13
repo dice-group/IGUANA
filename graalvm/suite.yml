@@ -59,6 +59,10 @@ tasks:
           order: "random"
           seed: 123
           lang: "SPARQL"
+          template:
+            endpoint: "http://dbpedia.org/sparql"
+            limit: 1
+            save: false
         timeout: 2s
         connection: Blazegraph
         completionTarget:

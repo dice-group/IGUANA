@@ -1,7 +1,7 @@
 package org.aksw.iguana.cc.query.list;
 
-import org.aksw.iguana.cc.query.list.impl.FileBasedQueryList;
-import org.aksw.iguana.cc.query.list.impl.InMemQueryList;
+import org.aksw.iguana.cc.query.list.impl.FileReadingQueryList;
+import org.aksw.iguana.cc.query.list.impl.FileCachingQueryList;
 import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class QueryListTest {
+public class FileBasedQueryListTest {
     private enum QuerySourceType {
         FILE_LINE,
         FILE_SEPARATOR,
@@ -58,7 +58,7 @@ class QueryListTest {
         if (cachedArguments != null)
             return cachedArguments;
 
-        final var queryListClasses = List.of(InMemQueryList.class, FileBasedQueryList.class);
+        final var queryListClasses = List.of(FileCachingQueryList.class, FileReadingQueryList.class);
         final var querySources = List.of(QuerySourceType.FILE_SEPARATOR, QuerySourceType.FILE_LINE, QuerySourceType.FOLDER);
         final var sizes = List.of(1, 2, 10, 100, 1000);
 
@@ -104,8 +104,8 @@ class QueryListTest {
 
     @Test
     public void testIllegalArguments() {
-        assertThrows(IllegalArgumentException.class, () -> new InMemQueryList(null));
-        assertThrows(IllegalArgumentException.class, () -> new FileBasedQueryList(null));
+        assertThrows(IllegalArgumentException.class, () -> new FileCachingQueryList(null));
+        assertThrows(IllegalArgumentException.class, () -> new FileReadingQueryList(null));
     }
 
     @ParameterizedTest(name = "[{index}] queryListClass={0}, querySourceConfig={1}")

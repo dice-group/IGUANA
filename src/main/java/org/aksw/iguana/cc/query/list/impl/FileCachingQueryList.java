@@ -1,6 +1,6 @@
 package org.aksw.iguana.cc.query.list.impl;
 
-import org.aksw.iguana.cc.query.list.QueryList;
+import org.aksw.iguana.cc.query.list.FileBasedQueryList;
 import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.commons.io.ByteArrayListInputStream;
 import org.aksw.iguana.commons.io.ByteArrayListOutputStream;
@@ -19,13 +19,13 @@ import java.util.List;
  *
  * @author frensing
  */
-public class InMemQueryList extends QueryList {
+public class FileCachingQueryList extends FileBasedQueryList {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InMemQueryList.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileCachingQueryList.class);
 
     private final List<ByteArrayListOutputStream> queries = new ArrayList<>();
 
-    public InMemQueryList(QuerySource querySource) throws IOException {
+    public FileCachingQueryList(QuerySource querySource) throws IOException {
         super(querySource);
         LOGGER.info("Reading queries from the source with the hash code {} into memory.", querySource.hashCode());
         for (int i = 0; i < querySource.size(); i++) {
