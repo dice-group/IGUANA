@@ -178,7 +178,7 @@ public class QueryHandler {
         return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex));
     }
 
-    public QueryStreamWrapper getNextQueryStream(QuerySelector querySelector) throws IOException {
+    public QueryStreamWrapper getNextQueryStream(QuerySelector querySelector) {
         final var queryIndex = querySelector.getNextIndex();
         return new QueryStreamWrapper(queryIndex, config.caching(), () -> {
             try {

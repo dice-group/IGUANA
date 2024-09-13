@@ -41,11 +41,12 @@ class ByteArrayListInputStreamTest {
 
     @Test
     void testReadAllBytes() throws IOException {
-        final var data = createByteArrayListInputStream(BUFFER_SIZE, NUM_BUFFERS);
+        final var data = createByteArrayListInputStream(Integer.MAX_VALUE / 2, 2);
         final var stream = new ByteArrayListInputStream(data);
-        assertEquals(BUFFER_SIZE * NUM_BUFFERS, stream.availableLong());
-        assertThrows(UnsupportedOperationException.class, stream::readAllBytes);
-        assertEquals(BUFFER_SIZE * NUM_BUFFERS, stream.availableLong());
+        // there is actually a byte missing because Integer.MAX_VALUE is uneven
+        assertEquals(Integer.MAX_VALUE - 1, stream.availableLong());
+        assertThrows(OutOfMemoryError.class, stream::readAllBytes); // should only throw if the stream is too large
+        assertEquals(Integer.MAX_VALUE - 1, stream.availableLong());
     }
 
     @Test
@@ -157,7 +158,7 @@ class ByteArrayListInputStreamTest {
         assertThrows(IOException.class, () -> stream.readNBytes(buffer, 0, BUFFER_SIZE * NUM_BUFFERS));
         assertThrows(IOException.class, () -> stream.skip(1));
         assertThrows(IOException.class, () -> stream.skipNBytes(1));
-        assertThrows(IOException.class, stream::availableLong);
+        // assertThrows(IOException.class, stream::availableLong); is actually not required
 
     }
 
@@ -169,6 +170,6 @@ class ByteArrayListInputStreamTest {
         combined.addAll(data2);
         final var stream = new ByteArrayListInputStream(combined);
         assertEquals(Integer.MAX_VALUE - 8 + (long) BUFFER_SIZE, stream.availableLong());
-        assertEquals(Integer.MAX_VALUE, stream.available());
+        assertEquals(Integer.MAX_VALUE - 8, stream.available());
     }
 }

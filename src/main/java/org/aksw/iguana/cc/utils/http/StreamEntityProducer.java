@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.utils.http;
 
+import org.aksw.iguana.commons.io.ByteArrayListInputStream;
 import org.apache.hc.core5.http.nio.AsyncEntityProducer;
 import org.apache.hc.core5.http.nio.DataStreamChannel;
 import org.slf4j.Logger;
@@ -14,7 +15,8 @@ import java.util.function.Supplier;
 /**
  * An entity producer that produces the entity data from an input stream supplier.
  * The entity data can optionally be sent in chunks.
- * If the entity data is supposed to be sent non-chunked, the whole stream will be read into a byte buffer.
+ * If the entity data is supposed to be sent non-chunked,
+ * it is assumed that the query is stored in a ByteArrayListInputStream.
  * The stream supplier should be repeatable, as this producer might be reused multiple times to create the entity data.
  */
 public class StreamEntityProducer implements AsyncEntityProducer {
@@ -25,12 +27,11 @@ public class StreamEntityProducer implements AsyncEntityProducer {
     private final boolean chunked;
     private final String contentType;
 
-    private ByteBuffer content; // used for non-chunked request, stores the whole content in reusable buffer
-
     private final static int BUFFER_SIZE = 8192;
     private final byte[] buffer = new byte[BUFFER_SIZE];
 
-    private InputStream currentStream; // used for chunked request, stores the current stream to read from
+    private InputStream currentStream;
+    private ByteArrayListInputStream content;
 
     /**
      * Creates a new entity producer that produces the entity data from the given input stream supplier.
@@ -42,9 +43,8 @@ public class StreamEntityProducer implements AsyncEntityProducer {
         this.streamSupplier = streamSupplier;
         this.chunked = chunked;
         this.contentType = contentType;
-
         if (!chunked) {
-            content = ByteBuffer.wrap(streamSupplier.get().readAllBytes());
+            content = (streamSupplier.get() instanceof ByteArrayListInputStream) ? (ByteArrayListInputStream) streamSupplier.get() : null;
         }
     }
 
@@ -77,9 +77,9 @@ public class StreamEntityProducer implements AsyncEntityProducer {
 
     @Override
     public long getContentLength() {
-        // if the content length is known (non-chunked request), return it
+        // if the content length is known (non-chunked request), return the length
         if (content != null) {
-            return content.limit();
+            return content.availableLong();
         }
 
         // if the content length is unknown (chunked request), return -1
@@ -99,7 +99,7 @@ public class StreamEntityProducer implements AsyncEntityProducer {
     @Override
     public void releaseResources() {
         if (content != null) {
-            content.clear();
+            content = null;
         }
 
         if (currentStream != null) {
@@ -113,11 +113,8 @@ public class StreamEntityProducer implements AsyncEntityProducer {
 
     @Override
     public int available() {
-        // If content is not null, it means the whole entity data has been read into the buffer from a stream that was
-        // taken from the stream supplier and that the content will be sent non-chunked.
-        // In this case, the remaining bytes in the buffer are returned.
         if (content != null) {
-            return content.remaining();
+            return content.available();
         }
 
         // Otherwise, the data is sent in chunks. If there is currently a stream open, from which the data is being read
@@ -136,9 +133,16 @@ public class StreamEntityProducer implements AsyncEntityProducer {
     public void produce(DataStreamChannel channel) throws IOException {
         // handling of non-chunked request
         if (content != null) {
-            channel.write(content);
-            if (!content.hasRemaining()) {
-                channel.endStream();
+            ByteBuffer buffer = content.getCurrentBuffer();
+            while (channel.write(buffer) > 0) {
+                if (!buffer.hasRemaining()) {
+                    buffer = content.getCurrentBuffer();
+                }
+                if (buffer == null) {
+                    // no more data to send
+                    channel.endStream();
+                    break;
+                }
             }
             return;
         }

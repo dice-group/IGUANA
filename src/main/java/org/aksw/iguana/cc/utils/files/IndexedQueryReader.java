@@ -27,7 +27,7 @@ public class IndexedQueryReader {
     /**
      * This list stores the start position and the length of each indexed content.
      */
-    private final List<long[]> indices;
+    private final List<QueryIndex> indices;
 
     /**
      * The file whose content should be indexed.
@@ -96,12 +96,19 @@ public class IndexedQueryReader {
      * @throws IOException
      */
     public String readQuery(int index) throws IOException {
+        final int size;
+        try {
+            size = Math.toIntExact(indices.get(index).queryLength());
+        } catch (Exception e) {
+            throw new OutOfMemoryError("Can't read a Query to a string, that's bigger than 2^31 Bytes (~2GB)");
+        }
         // Indexed queries can't be larger than ~2GB
         try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-            final ByteBuffer buffer = ByteBuffer.allocate((int) indices.get(index)[1]);
-            final var read = channel.read(buffer, indices.get(index)[0]);
-            assert read == indices.get(index)[1];
-            return new String(buffer.array(), StandardCharsets.UTF_8);
+            final byte[] buffer = new byte[size]; // it's supposedly faster to manually create a byte array than a ByteBuffer
+            final ByteBuffer bufferWrapper = ByteBuffer.wrap(buffer);
+            final var read = channel.read(bufferWrapper, indices.get(index).filePosition());
+            assert read == indices.get(index).queryLength();
+            return new String(buffer, StandardCharsets.UTF_8);
         }
     }
 
@@ -111,8 +118,8 @@ public class IndexedQueryReader {
                         new BoundedInputStream(
                                 Channels.newInputStream(
                                         FileChannel.open(path, StandardOpenOption.READ)
-                                                .position(this.indices.get(index)[0] /* offset */)),
-                                this.indices.get(index)[1] /* length */)));
+                                                .position(this.indices.get(index).filePosition() /* offset */)),
+                                this.indices.get(index).queryLength() /* length */)));
     }
 
     /**
@@ -146,11 +153,11 @@ public class IndexedQueryReader {
      * @return the Indexes
      * @throws IOException
      */
-    private static List<long[]> indexFile(Path filepath, String separator) throws IOException {
+    private static List<QueryIndex> indexFile(Path filepath, String separator) throws IOException {
         try (InputStream fi = Files.newInputStream(filepath, StandardOpenOption.READ);
              BufferedInputStream bis = new BufferedInputStream(fi)) {
             return FileUtils.indexStream(separator, bis)
-                    .stream().filter((long[] e) -> e[1] > 0 /* Only elements with length > 0 */).collect(Collectors.toList());
+                    .stream().filter(e -> e.queryLength() > 0 /* Only elements with length > 0 */).collect(Collectors.toList());
         }
     }
 }
