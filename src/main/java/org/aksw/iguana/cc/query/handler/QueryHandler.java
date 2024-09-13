@@ -315,12 +315,12 @@ public class QueryHandler {
     * <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
     */
     private static List<String> instantiateTemplateQueries(QuerySource querySource, Config.Template config) throws IOException {
-        // charset for generating random variable names
+        // charset for generating random varia  ble names
         final String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         final Random random = new Random();
 
         final var templateQueries = new FileCachingQueryList(querySource);
-        final Pattern template = Pattern.compile("%%var[0-9]+%%");
+        final Pattern template = Pattern.compile("%%[a-zA-Z0-9_]+%%");
         final var instances = new ArrayList<String>();
         for (int i = 0; i < templateQueries.size(); i++) {
             // replace all variables in the query template with SPARQL variables

@@ -100,7 +100,8 @@ Query templates are queries containing placeholders for some terms.
 Replacement candidates are identified by querying a given endpoint. 
 This is done in a way that the resulting queries will yield results against endpoints with the same data.
 
-The placeholders are written in the form of `%%var[0-9]+%%`, where `[0-9]+` represents any number.
+The placeholders are written in the form of `%%[a-zA-Z0-9_]+%%`, which means that any character sequence consisting 
+of letters, numbers, and underscores, enclosed by `%%` will be interpreted as a placeholder.
 The query templates originated from WatDiv, 
 where the placeholders are of [similar form](https://dsg.uwaterloo.ca/watdiv/basic-testing.shtml).
 
