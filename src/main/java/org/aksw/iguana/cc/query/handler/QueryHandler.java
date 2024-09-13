@@ -334,7 +334,7 @@ public class QueryHandler {
                 final var match = matcher.group();
                 if (variables.containsKey(match)) continue;
                 String variableName = match.replaceAll("%%", "");
-                while (templateQueryString.contains("?" + variableName)) { // generate random variable name with 20 characters until it is unique
+                while (templateQueryString.contains("?" + variableName) || templateQueryString.contains("$" + variableName)) { // generate random variable name with 20 characters until it is unique
                     variableName = IntStream.range(0, 20).mapToObj(m -> String.valueOf(charset.charAt(random.nextInt(charset.length())))).collect(Collectors.joining());
                 }
                 final var variable = "?" + variableName;
