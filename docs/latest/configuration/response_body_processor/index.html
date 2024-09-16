@@ -20,7 +20,7 @@
     
     
       
-        <title>Response Body Processing - Iguana $VERSION Documentation</title>
+        <title>Response Body Processing - Iguana 4.1.0 Documentation</title>
       
     
     
@@ -90,7 +90,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Iguana $VERSION Documentation" class="md-header__button md-logo" aria-label="Iguana $VERSION Documentation" data-md-component="logo">
+    <a href="../.." title="Iguana 4.1.0 Documentation" class="md-header__button md-logo" aria-label="Iguana 4.1.0 Documentation" data-md-component="logo">
       
   <img src="../../logo_white.png" alt="logo">
 
@@ -103,7 +103,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Iguana $VERSION Documentation
+            Iguana 4.1.0 Documentation
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -291,12 +291,12 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Iguana $VERSION Documentation" class="md-nav__button md-logo" aria-label="Iguana $VERSION Documentation" data-md-component="logo">
+    <a href="../.." title="Iguana 4.1.0 Documentation" class="md-nav__button md-logo" aria-label="Iguana 4.1.0 Documentation" data-md-component="logo">
       
   <img src="../../logo_white.png" alt="logo">
 
     </a>
-    Iguana $VERSION Documentation
+    Iguana 4.1.0 Documentation
   </label>
   
     <div class="md-nav__source">
@@ -753,9 +753,17 @@
 to process the response bodies of the HTTP requests that are executed by the workers.
 The processing is done to extract relevant information from the responses and store them in the results.</p>
 <p>Iguana supports multiple response body processors that are defined by the content type of the response body they process.</p>
-<p>Currently only the <code>application/sparql-results+json</code> content type is supported, 
-and it only uses the <code>SaxSparqlJsonResultCountingParser</code> language processor 
-to extract simple information from the responses.</p>
+<p>The following content types are supported:
+- <code>application/sparql-results+json</code>
+- <code>application/sparql-results+xml</code>
+- <code>text/csv</code>
+- <code>text/tab-separated-values</code></p>
+<p>For the <code>json</code> and <code>xml</code> content types, 
+the response body processor counts for <code>SELECT</code> queries 
+the number of results and bindings and lists all variables and link attributes.
+If the requested query was a <code>ASK</code> query, the response body processor stores the boolean result.</p>
+<p>For the <code>csv</code> and <code>tsv</code> content types, only <code>SELECT</code> queries are supported.
+The response body processor counts the number of results and bindings and lists all variables.</p>
 <p>Workers send the response bodies to the response body processors, 
 after receiving the full response bodies from the HTTP requests.
 Response bodies are processed in parallel by the number of threads that are defined in the configuration.</p>
@@ -859,7 +867,7 @@ in the <code>responseBodyProcessors</code> list.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "toc.integrate"], "search": "../../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "4.0.0"}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "toc.integrate"], "search": "../../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "4.1.0"}</script>
     
     
       <script src="../../assets/javascripts/bundle.56dfad97.min.js"></script>

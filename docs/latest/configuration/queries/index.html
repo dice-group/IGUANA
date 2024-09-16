@@ -20,7 +20,7 @@
     
     
       
-        <title>Queries - Iguana $VERSION Documentation</title>
+        <title>Queries - Iguana 4.1.0 Documentation</title>
       
     
     
@@ -90,7 +90,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Iguana $VERSION Documentation" class="md-header__button md-logo" aria-label="Iguana $VERSION Documentation" data-md-component="logo">
+    <a href="../.." title="Iguana 4.1.0 Documentation" class="md-header__button md-logo" aria-label="Iguana 4.1.0 Documentation" data-md-component="logo">
       
   <img src="../../logo_white.png" alt="logo">
 
@@ -103,7 +103,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Iguana $VERSION Documentation
+            Iguana 4.1.0 Documentation
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -291,12 +291,12 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Iguana $VERSION Documentation" class="md-nav__button md-logo" aria-label="Iguana $VERSION Documentation" data-md-component="logo">
+    <a href="../.." title="Iguana 4.1.0 Documentation" class="md-nav__button md-logo" aria-label="Iguana 4.1.0 Documentation" data-md-component="logo">
       
   <img src="../../logo_white.png" alt="logo">
 
     </a>
-    Iguana $VERSION Documentation
+    Iguana 4.1.0 Documentation
   </label>
   
     <div class="md-nav__source">
@@ -580,11 +580,44 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#huge-query-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Huge Query Strings
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#example" class="md-nav__link">
     <span class="md-ellipsis">
       Example
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Templates
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Query Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -856,6 +889,13 @@ The <code>queries</code> property is an object that contains the following prope
 <td>Not used for anything at the moment.</td>
 <td></td>
 </tr>
+<tr>
+<td>template</td>
+<td>no</td>
+<td></td>
+<td>If set, queries from <code>path</code> will be treated as query templates. See <a href="#query-templates">Query Templates</a> for more information.</td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <h2 id="format">Format</h2>
@@ -904,6 +944,10 @@ WHERE {
 }
 </code></pre>
 <p>The <code>separator</code> property should be set to <code>"\n###\n"</code>. (be aware of different line endings on different operating systems)</p>
+<h2 id="huge-query-strings">Huge Query Strings</h2>
+<p>When working with large queries (Queries that are larger than 2³¹ Bytes or ~2GB),
+it is important to consider that only the request types <code>post query</code> and <code>update query</code>
+support large queries.</p>
 <h2 id="example">Example</h2>
 <pre><code class="language-yaml">tasks:
   - type: &quot;stresstest&quot;
@@ -918,6 +962,75 @@ WHERE {
         seed: 12345
         lang: &quot;SPARQL&quot;
       # ... additional worker properties
+</code></pre>
+<h2 id="query-templates">Query Templates</h2>
+<p>Query templates are queries containing placeholders for some terms. 
+Replacement candidates are identified by querying a given endpoint. 
+This is done in a way that the resulting queries will yield results against endpoints with the same data.</p>
+<p>The placeholders are written in the form of <code>%%[a-zA-Z0-9_]+%%</code>, which means that any character sequence consisting 
+of letters, numbers, and underscores, enclosed by <code>%%</code> will be interpreted as a placeholder.
+The query templates originated from WatDiv, 
+where the placeholders are of <a href="https://dsg.uwaterloo.ca/watdiv/basic-testing.shtml">similar form</a>.
+If the placeholder name is equal to a variable name in the query, the placeholder will not be assigned
+the same variable name during candidate generation.</p>
+<p>Query templates and normal queries can be mixed in the same file or folder.</p>
+<p>An exemplary template:
+<code>SELECT * WHERE {?s %%var1%% ?o . ?o &lt;http://exa.com&gt; %%var2%%}</code></p>
+<p>This template will then be converted to:
+<code>SELECT ?var1 ?var2 WHERE {?s ?var1 ?o . ?o &lt;http://exa.com&gt; ?var2}</code></p>
+<p>The SELECT query will then be requested from the given sparql endpoint (e.g DBpedia).
+The solutions for this query are used to instantiate the template.
+The results may look like the following:
+- <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "123"}</code>
+- <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "12"}</code>
+- <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code></p>
+<h3 id="configuration">Configuration</h3>
+<p>The <code>template</code> attribute has the following properties:</p>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>required</th>
+<th>default</th>
+<th>description</th>
+<th>example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>endpoint</td>
+<td>yes</td>
+<td></td>
+<td>The endpoint to query.</td>
+<td><code>http://dbpedia.org/sparql</code></td>
+</tr>
+<tr>
+<td>limit</td>
+<td>no</td>
+<td><code>2000</code></td>
+<td>The maximum number of instances per query template.</td>
+<td><code>100</code></td>
+</tr>
+<tr>
+<td>save</td>
+<td>no</td>
+<td><code>true</code></td>
+<td>If set to <code>true</code>, query instances will be saved in a separate file.</td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>If the <code>save</code> attribute is set to <code>true</code>,
+the instances will be saved in a separate file in the same directory as the query templates.
+If the query templates are stored in a folder, the instances will be saved in the parent directory.</p>
+<p>Example of query configuration with query templates:</p>
+<pre><code class="language-yaml">queries:
+  path: &quot;./example/suite/queries/&quot;
+  format: &quot;folder&quot; 
+  template:
+    endpoint: &quot;http://dbpedia.org/sparql&quot;
+    limit: 100
+    save: true
 </code></pre>
 
 
@@ -986,7 +1099,7 @@ WHERE {
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "toc.integrate"], "search": "../../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "4.0.0"}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "toc.integrate"], "search": "../../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "4.1.0"}</script>
     
     
       <script src="../../assets/javascripts/bundle.56dfad97.min.js"></script>
