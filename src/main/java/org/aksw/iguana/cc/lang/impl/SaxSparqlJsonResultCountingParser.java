@@ -1,16 +1,10 @@
 package org.aksw.iguana.cc.lang.impl;
 
 import org.aksw.iguana.cc.lang.LanguageProcessor;
-import org.aksw.iguana.cc.storage.Storable;
-import org.aksw.iguana.commons.rdf.IPROP;
-import org.aksw.iguana.commons.rdf.IRES;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.json.simple.parser.ContentHandler;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,11 +18,15 @@ import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
 
 /**
  * SAX Parser for SPARQL JSON Results.
- * For correct SPARQL JSON Results it returns the number of solutions, bound values and the names of the variables.
+ * For correct SPARQL JSON results, it returns the number of solutions, bound values and the names of the variables.
  * For malformed results it may or may not fail. For malformed JSON it fails if the underlying json.simple.parser fails.
+ * <p>
+ * Specification: <a href="https://www.w3.org/TR/sparql11-results-json/">https://www.w3.org/TR/sparql11-results-json/</a>
  */
 @LanguageProcessor.ContentType("application/sparql-results+json")
 public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SaxSparqlJsonResultCountingParser.class);
 
     @Override
     public LanguageProcessingData process(InputStream inputStream, long hash) {
@@ -36,67 +34,18 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         var handler = new SaxSparqlJsonResultContentHandler();
         try {
             parser.parse(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)), handler);
-            return new SaxSparqlJsonResultData(hash, handler.solutions(), handler.boundValues(), handler.variables(), null);
+            if (handler.isAskResult())
+                return new BooleanResultData(hash, handler.booleanResult(), handler.links(), null);
+            return new ResultCountData(hash, handler.solutions(), handler.boundValues(), handler.variables(), handler.links(), null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ParseException e) {
-            return new SaxSparqlJsonResultData(hash, -1, -1, null, e);
-        }
-    }
-
-    record SaxSparqlJsonResultData(
-            long hash,
-            long results,
-            long bindings,
-            List<String> variables,
-            Exception exception
-    ) implements LanguageProcessingData, Storable.AsCSV, Storable.AsRDF {
-        final static String[] header = new String[]{ "responseBodyHash", "results", "bindings", "variables", "exception" };
-
-        @Override
-        public Class<? extends LanguageProcessor> processor() {
-            return SaxSparqlJsonResultCountingParser.class;
-        }
-
-        @Override
-        public CSVData toCSV() {
-            String variablesString = "";
-            String exceptionString = "";
-            if (variables != null)
-                variablesString = String.join("; ", variables);
-            if (exception != null)
-                exceptionString = exception().toString();
-
-            String[] content = new String[]{ String.valueOf(hash), String.valueOf(results), String.valueOf(bindings), variablesString, exceptionString};
-            String[][] data = new String[][]{ header, content };
-
-            String folderName = "application-sparql+json";
-            List<CSVData.CSVFileData> files = List.of(new CSVData.CSVFileData("sax-sparql-result-data.csv", data));
-            return new Storable.CSVData(folderName, files);
-        }
-
-        @Override
-        public Model toRDF() {
-            Model m = ModelFactory.createDefaultModel();
-            Resource responseBodyRes = IRES.getResponsebodyResource(this.hash);
-            m.add(responseBodyRes, IPROP.results, ResourceFactory.createTypedLiteral(this.results))
-                    .add(responseBodyRes, IPROP.bindings, ResourceFactory.createTypedLiteral(this.bindings));
-
-            if (this.variables != null) {
-                for (String variable : this.variables) {
-                    m.add(responseBodyRes, IPROP.variable, ResourceFactory.createTypedLiteral(variable));
-                }
-            }
-            if (this.exception != null) {
-                m.add(responseBodyRes, IPROP.exception, ResourceFactory.createTypedLiteral(this.exception.toString()));
-            }
-
-            return m;
+            LOGGER.error("Error while parsing SPARQL XML Results.", e);
+            return new ResultCountData(hash, -1, -1, null, null, e);
         }
     }
 
     private static class SaxSparqlJsonResultContentHandler implements ContentHandler {
-        // TODO: add support for ask queries and link
         // TODO: code is unnecessary complicated
 
         private boolean headFound = false;
@@ -106,12 +55,14 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         private boolean inBindings = false;
         private boolean inBindingsArray = false;
         private boolean inVars = false;
+        private boolean inLink = false;
+        private boolean inBoolean = false;
 
         private long boundValues = 0;
-
         private long solutions = 0;
-
+        private Boolean booleanResult = null;
         private final List<String> variables = new ArrayList<>();
+        private final List<String> links = new ArrayList<>();
 
 
         @Override
@@ -165,6 +116,8 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         public boolean endArray() {
             if (inVars)
                 inVars = false;
+            if (inLink)
+                inLink = false;
             if (objectDepth == 2 && inResults && inBindings && inBindingsArray) {
                 inBindingsArray = false;
             }
@@ -182,6 +135,10 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
                             if (headFound)
                                 inResults = true;
                         }
+                        case "boolean" -> {
+                            if (headFound)
+                                inBoolean = true;
+                        }
                     }
                 }
                 case 2 -> {
@@ -190,6 +147,9 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
                     }
                     if ("vars".compareTo(key) == 0) {
                         inVars = true;
+                    }
+                    if ("link".compareTo(key) == 0) {
+                        inLink = true;
                     }
                 }
             }
@@ -204,7 +164,10 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         public boolean primitive(Object value) {
             if (inVars)
                 variables.add(value.toString());
-
+            if (inLink)
+                links.add(value.toString());
+            if (inBoolean && value instanceof Boolean val)
+                booleanResult = val;
             return true;
         }
 
@@ -218,6 +181,18 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
 
         public List<String> variables() {
             return variables;
+        }
+
+        public List<String> links() {
+            return links;
+        }
+
+        public Boolean booleanResult() {
+            return booleanResult;
+        }
+
+        public boolean isAskResult() {
+            return booleanResult != null;
         }
     }
 }

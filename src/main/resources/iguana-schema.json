@@ -338,6 +338,26 @@
         "duration"
       ]
     },
+    "Template": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "save": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+          "endpoint"
+      ],
+      "title": "Template"
+    },
     "QueryMixes": {
       "properties": {
         "number": {
@@ -379,6 +399,9 @@
         "lang": {
           "type": "string",
           "enum": [ "", "SPARQL" ]
+        },
+        "template": {
+          "$ref": "#/definitions/Template"
         }
       },
       "required": [
