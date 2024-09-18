@@ -33,8 +33,7 @@ public abstract class StorageTest {
 
     @AfterAll
     public static void deleteFolder() throws IOException {
-        System.out.println("Deleting folder: " + tempDir);
-        // FileUtils.deleteDirectory(tempDir.toFile());
+        FileUtils.deleteDirectory(tempDir.toFile());
     }
 
     public static class TestStorable implements Storable.AsCSV, Storable.AsRDF {
