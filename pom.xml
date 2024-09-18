@@ -41,7 +41,7 @@
         <build.version>0</build.version>
 
         <java.version>17</java.version>
-        <jena.version>4.2.0</jena.version>
+        <jena.version>5.1.0</jena.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compile.target>17</maven.compile.target>
         <maven.compile.source>17</maven.compile.source>
@@ -241,7 +241,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.6.0</version>
+                        <version>3.4.1</version>
                         <executions>
                             <execution>
                                 <id>run-script</id>

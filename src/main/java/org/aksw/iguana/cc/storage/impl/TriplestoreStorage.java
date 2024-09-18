@@ -4,25 +4,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.config.elements.StorageConfig;
 import org.aksw.iguana.cc.controller.MainController;
 import org.aksw.iguana.cc.storage.Storage;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.update.UpdateExecutionFactory;
+import org.apache.jena.sparql.exec.http.UpdateExecutionHTTP;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
-import org.mortbay.jetty.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringWriter;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+import java.net.http.HttpClient;
 
 
 /**
@@ -79,8 +74,7 @@ public class TriplestoreStorage implements Storage {
 		blockRequest.add(update);
 
 		//submit Block to Triple Store
-		UpdateProcessor processor = UpdateExecutionFactory
-				.createRemote(blockRequest, endpoint, createHttpClient());
+		UpdateProcessor processor = UpdateExecutionHTTP.service(endpoint).update(blockRequest).httpClient(createHttpClient()).build();
 
 		// If dry run is enabled, the data will not be sent to an existing triplestore,
 		// therefore we catch the exception and log it instead of letting the program crash.
@@ -99,15 +93,16 @@ public class TriplestoreStorage implements Storage {
 	}
 
 	private HttpClient createHttpClient() {
-		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+		final var httpClient = HttpClient.newBuilder();
 		if(user != null && password != null){
-			Credentials credentials = new UsernamePasswordCredentials(user, password);
-			credsProvider.setCredentials(AuthScope.ANY, credentials);
+			httpClient.authenticator(new Authenticator() {
+				@Override
+				protected PasswordAuthentication getPasswordAuthentication() {
+					return new PasswordAuthentication(user, password.toCharArray());
+				}
+			});
 		}
-		HttpClient httpclient = HttpClients.custom()
-		    .setDefaultCredentialsProvider(credsProvider)
-		    .build();
-		return httpclient;
+		return httpClient.build();
 	}
 
 	@Override
