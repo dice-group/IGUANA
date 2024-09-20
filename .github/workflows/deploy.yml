@@ -80,6 +80,10 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: 'maven'
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install lftp
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -135,14 +139,14 @@ jobs:
           destination_dir: ./ontology/
 
       - name: Deploy Ontology to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: files.dice-research.org
-          protocol: ftps
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./ontology/
-          server-dir: vocab/iguana/
+        run: |
+          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} files.dice-research.org << EOF
+              set cmd:fail-exit yes
+              set ftp:ssl-protect-data true
+              cd /vocab
+              mirror -R ontology/. iguana/
+              bye
+              EOF
 
 
   deploy_gh_release:
