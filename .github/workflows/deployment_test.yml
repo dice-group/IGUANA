@@ -50,11 +50,10 @@ jobs:
       - run: mkdir -p ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}
       - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
       - run: cp schema/iguana.owx ontology/iguana.owx
-      - run: ls -l ontology/
 
       - name: Deploy Ontology to FTP
         run: |
-          lftp -u $FTP_USER,$FTP_PASSWORD files.dice-research.org << EOF
+          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} files.dice-research.org << EOF
               set cmd:fail-exit yes
               set ftp:ssl-protect-data true
               cd /vocab
