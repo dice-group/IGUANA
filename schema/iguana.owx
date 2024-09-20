@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
-     xml:base="https://vocab.dice-research.org/iguana/ontology.owx"
+     xml:base="https://vocab.dice-research.org/iguana/"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     ontologyIRI="https://iguana-benchmark.eu/ontology/"
-     versionIRI="https://iguana-benchmark.eu/ontology/4.1.0/">
+     ontologyIRI="https://vocab.dice-research.org/iguana/"
+     versionIRI="https://vocab.dice-research.org/iguana/4.1.0/">
     <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1/"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
     <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
-    <Prefix name="iont" IRI="https://iguana-benchmark.eu/ontology/class/"/>
-    <Prefix name="ires" IRI="https://iguana-benchmark.eu/ontology/resource/"/>
+    <Prefix name="iont" IRI="https://vocab.dice-research.org/iguana/class/"/>
+    <Prefix name="ires" IRI="https://vocab.dice-research.org/iguana/resource/"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Prefix name="iprop" IRI="https://iguana-benchmark.eu/ontology/properties/"/>
+    <Prefix name="iprop" IRI="https://vocab.dice-research.org/iguana/properties/"/>
     <Prefix name="dcterms" IRI="http://purl.org/dc/terms/"/>
     <Import>http://purl.org/dc/elements/1.1/</Import>
     <Import>http://purl.org/dc/terms/</Import>
