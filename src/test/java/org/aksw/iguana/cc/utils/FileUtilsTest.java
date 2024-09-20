@@ -1,6 +1,8 @@
 package org.aksw.iguana.cc.utils;
 
+import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.utils.files.FileUtils;
+import org.aksw.iguana.cc.utils.files.QueryIndex;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -8,6 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,22 +68,39 @@ public class FileUtilsTest {
     @ParameterizedTest
     @MethodSource("data")
     public void testIndexingStrings(IndexTestData data) throws IOException {
-        List<long[]> index = FileUtils.indexStream(data.separator, new ByteArrayInputStream(data.content.getBytes()));
+        List<QueryIndex> index = FileUtils.indexStream(data.separator, new ByteArrayInputStream(data.content.getBytes()));
         assertEquals(data.indices.size(), index.size());
         for (int i = 0; i < index.size(); i++) {
-            assertArrayEquals(data.indices.get(i), index.get(i));
+            assertEquals(data.indices.get(i)[0], index.get(i).filePosition());
+            assertEquals(data.indices.get(i)[1], index.get(i).queryLength());
         }
     }
 
     @Test
     public void getHashTest() throws IOException {
+        final var hasherFactory = XXHashFactory.fastestJavaInstance();
         for (int i = 0; i < 10; i++) {
             String content = UUID.randomUUID().toString();
             final var file = createTestFileWithContent(content);
-            final int expected = Math.abs(content.hashCode());
+            final var data = content.getBytes(StandardCharsets.UTF_8);
+            final var hasher = hasherFactory.hash64();
+            final int expected = (int) hasher.hash(data, 0, data.length, 0);
+
             final int actual = FileUtils.getHashcodeFromFileContent(file);
-            assertTrue(actual >= 0);
             assertEquals(expected, actual);
+
+            final int actual2 = FileUtils.getHashcodeFromFileContent(file);
+            assertEquals(expected, actual2);
         }
+
+        final var directory = Files.createTempDirectory("getHashTest");
+        for (int i = 0; i < 10; i++) {
+            final var file = createTestFileWithContent(UUID.randomUUID().toString());
+            Files.move(file, directory.resolve(file.getFileName()));
+        }
+        final int actual = FileUtils.getHashcodeFromDirectory(directory);
+        final int actual2 = FileUtils.getHashcodeFromDirectory(directory);
+        assertEquals(actual, actual2);
+        org.apache.commons.io.FileUtils.deleteDirectory(directory.toFile());
     }
 }

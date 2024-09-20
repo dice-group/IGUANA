@@ -58,6 +58,15 @@ public abstract class QuerySource {
      */
     public abstract List<String> getAllQueries() throws IOException;
 
+    /**
+     * This method returns the path of the file or folder, that contains the queries.
+     *
+     * @return the path of the file or folder, that contains the queries
+     */
+    public Path getPath() {
+        return path;
+    }
+
     @Override
     public int hashCode() {
         return hashCode;

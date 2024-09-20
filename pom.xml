@@ -37,7 +37,7 @@
         <revision>${major.minor.version}.${build.version}</revision>
         <major.minor.version>${major.version}.${minor.version}</major.minor.version>
         <major.version>4</major.version>
-        <minor.version>0</minor.version>
+        <minor.version>1</minor.version>
         <build.version>0</build.version>
 
         <java.version>17</java.version>
@@ -315,6 +315,8 @@
                                 -O3
                                 -H:-UseCompressedReferences
                                 -H:+UnlockExperimentalVMOptions
+                                --enable-http
+                                --enable-https
                             </buildArgs>
                             <metadataRepository>
                                 <enabled>true</enabled>
