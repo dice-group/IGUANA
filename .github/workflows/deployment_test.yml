@@ -46,17 +46,13 @@ jobs:
       - run: mkdir -p ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}
       - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
       - run: cp schema/iguana.owx ontology/iguana.owx
+      - run: ls -l ontology/
 
-      - name: Deploy Ontology to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: files.dice-research.org
-          protocol: ftps-legacy
-          security: strict
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          dry-run: true
-          port: 990
-          local-dir: ./ontology/
-          server-dir: vocab/iguana/
+#      - name: Deploy Ontology to FTP
+#        run: lftp -u '$FTP_USER','$FTP_PASSWORD' files.dice-research.org << EOF
+#              set ftp:ssl-protect-data true
+#              cd vocab
+#              mirror -R ontology/. iguana/
+#              bye
+#              EOF
 
