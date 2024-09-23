@@ -145,8 +145,9 @@ public class QueryHandler {
         }
     }
 
-    public record QueryStringWrapper(int index, String query) {}
-    public record QueryStreamWrapper(int index, boolean cached, Supplier<InputStream> queryInputStreamSupplier) {}
+    public record QueryStringWrapper(int index, String query, boolean update) {}
+
+    public record QueryStreamWrapper(int index, boolean cached, Supplier<InputStream> queryInputStreamSupplier, boolean update) {}
 
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
@@ -247,7 +248,7 @@ public class QueryHandler {
 
     public QueryStringWrapper getNextQuery(QuerySelector querySelector) throws IOException {
         final var queryIndex = querySelector.getNextIndex();
-        return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex));
+        return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex), queryList.getQueryData(queryIndex).update());
     }
 
     public QueryStreamWrapper getNextQueryStream(QuerySelector querySelector) {
@@ -258,7 +259,7 @@ public class QueryHandler {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
+        }, queryList.getQueryData(queryIndex).update());
     }
 
     @Override
