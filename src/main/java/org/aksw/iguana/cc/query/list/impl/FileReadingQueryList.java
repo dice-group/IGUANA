@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.query.list.impl;
 
+import org.aksw.iguana.cc.query.QueryData;
 import org.aksw.iguana.cc.query.list.FileBasedQueryList;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
@@ -15,6 +16,11 @@ public class FileReadingQueryList extends FileBasedQueryList {
 
     public FileReadingQueryList(QuerySource querySource) {
         super(querySource);
+        try {
+            setQueryData(QueryData.generate(querySource));
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read queries from the source.", e);
+        }
     }
 
     @Override

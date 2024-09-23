@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.query.list;
 
+import org.aksw.iguana.cc.query.QueryData;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
 import java.io.IOException;
@@ -35,4 +36,6 @@ public interface QueryList {
     String getQuery(int index) throws IOException;
 
     InputStream getQueryStream(int index) throws IOException;
+
+    QueryData getQueryData(int index);
 }

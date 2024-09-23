@@ -1,9 +1,11 @@
 package org.aksw.iguana.cc.query.list;
 
+import org.aksw.iguana.cc.query.QueryData;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * The abstract class for a QueryList. A query list provides the queries to the QueryHandler.
@@ -16,12 +18,17 @@ public abstract class FileBasedQueryList implements QueryList{
      * This is the QuerySource from which the queries should be retrieved.
      */
     final protected QuerySource querySource;
+    protected List<QueryData> queryData;
 
     public FileBasedQueryList(QuerySource querySource) {
         if (querySource == null) {
             throw new IllegalArgumentException("QuerySource must not be null");
         }
         this.querySource = querySource;
+    }
+
+    protected void setQueryData(List<QueryData> queryData) {
+        this.queryData = queryData;
     }
 
     /**
@@ -52,4 +59,8 @@ public abstract class FileBasedQueryList implements QueryList{
     public abstract String getQuery(int index) throws IOException;
 
     public abstract InputStream getQueryStream(int index) throws IOException;
+
+    public QueryData getQueryData(int index) {
+        return queryData.get(index);
+    }
 }
