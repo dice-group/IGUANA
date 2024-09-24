@@ -41,7 +41,6 @@ public class FileCachingQueryList extends FileBasedQueryList {
                 queries.add(balos);
             }
         }
-        setQueryData(QueryData.generate(queries.stream().map(ByteArrayListOutputStream::toInputStream).toList()));
     }
 
     @Override

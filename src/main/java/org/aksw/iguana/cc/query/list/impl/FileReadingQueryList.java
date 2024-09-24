@@ -16,11 +16,6 @@ public class FileReadingQueryList extends FileBasedQueryList {
 
     public FileReadingQueryList(QuerySource querySource) {
         super(querySource);
-        try {
-            setQueryData(QueryData.generate(querySource));
-        } catch (IOException e) {
-            throw new RuntimeException("Could not read queries from the source.", e);
-        }
     }
 
     @Override

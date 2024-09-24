@@ -18,17 +18,12 @@ public abstract class FileBasedQueryList implements QueryList{
      * This is the QuerySource from which the queries should be retrieved.
      */
     final protected QuerySource querySource;
-    protected List<QueryData> queryData;
 
     public FileBasedQueryList(QuerySource querySource) {
         if (querySource == null) {
             throw new IllegalArgumentException("QuerySource must not be null");
         }
         this.querySource = querySource;
-    }
-
-    protected void setQueryData(List<QueryData> queryData) {
-        this.queryData = queryData;
     }
 
     /**
@@ -59,8 +54,4 @@ public abstract class FileBasedQueryList implements QueryList{
     public abstract String getQuery(int index) throws IOException;
 
     public abstract InputStream getQueryStream(int index) throws IOException;
-
-    public QueryData getQueryData(int index) {
-        return queryData.get(index);
-    }
 }

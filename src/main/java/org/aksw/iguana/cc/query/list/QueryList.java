@@ -36,6 +36,4 @@ public interface QueryList {
     String getQuery(int index) throws IOException;
 
     InputStream getQueryStream(int index) throws IOException;
-
-    QueryData getQueryData(int index);
 }
