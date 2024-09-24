@@ -148,10 +148,15 @@ public class RequestFactory {
         // set additional headers
         if (acceptHeader != null)
             asyncRequestBuilder.addHeader("Accept", acceptHeader);
-        if (connectionConfig.authentication() != null && connectionConfig.authentication().user() != null)
+        if (queryHandle.update() && connectionConfig.updateAuthentication() != null && connectionConfig.updateAuthentication().user() != null) {
             asyncRequestBuilder.addHeader("Authorization",
-                    HttpWorker.basicAuth(connectionConfig.authentication().user(),
-                            Optional.ofNullable(connectionConfig.authentication().password()).orElse("")));
+                    HttpWorker.basicAuth(connectionConfig.updateAuthentication().user(),
+                            Optional.ofNullable(connectionConfig.updateAuthentication().password()).orElse("")));
+        } else if (connectionConfig.authentication() != null && connectionConfig.authentication().user() != null) {
+                asyncRequestBuilder.addHeader("Authorization",
+                        HttpWorker.basicAuth(connectionConfig.authentication().user(),
+                                Optional.ofNullable(connectionConfig.authentication().password()).orElse("")));
+        }
 
         // cache request
         if (caching)
