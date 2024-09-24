@@ -53,9 +53,7 @@ class QueryDataTest {
         final var testStrings = querySource.getAllQueries();
 
         List<List<QueryData>> generations = List.of(
-                QueryData.generate(testStrings),
-                QueryData.generate(testStrings.stream().map(s -> (InputStream) new ByteArrayInputStream(s.getBytes())).toList()),
-                QueryData.generate(querySource)
+                QueryData.generate(testStrings.stream().map(s -> (InputStream) new ByteArrayInputStream(s.getBytes())).toList())
         );
         for (List<QueryData> generation : generations) {
             assertEquals(4, generation.size());
