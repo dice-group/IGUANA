@@ -290,7 +290,7 @@ public class SPARQLProtocolWorkerTest {
     @DisplayName("Test Malformed Response Processing")
     @ParameterizedTest(name = "[{index}] fault = {0}")
     @EnumSource(Fault.class)
-    public void testMalformedResponseProcessing(Fault fault) throws IOException, URISyntaxException {
+    public void testMalformedResponseProcessing(Fault fault) throws URISyntaxException {
         SPARQLProtocolWorker worker = (SPARQLProtocolWorker) ((Named<?>)requestFactoryData().toList().get(0).get()[0]).getPayload();
         wm.stubFor(get(urlPathEqualTo("/ds/query"))
                 .willReturn(aResponse().withFault(fault)));
@@ -300,7 +300,7 @@ public class SPARQLProtocolWorkerTest {
     }
 
     @Test
-    public void testBadHttpCodeResponse() throws IOException, URISyntaxException {
+    public void testBadHttpCodeResponse() throws URISyntaxException {
         SPARQLProtocolWorker worker = (SPARQLProtocolWorker) ((Named<?>)requestFactoryData().toList().get(0).get()[0]).getPayload();
         wm.stubFor(get(urlPathEqualTo("/ds/query"))
                 .willReturn(aResponse().withStatus(404)));
