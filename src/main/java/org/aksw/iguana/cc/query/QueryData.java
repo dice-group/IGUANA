@@ -1,10 +1,7 @@
 package org.aksw.iguana.cc.query;
 
-import org.aksw.iguana.cc.query.source.QuerySource;
 import org.apache.jena.update.UpdateFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,20 +28,5 @@ public record QueryData(int queryId, boolean update) {
             queryData.add(new QueryData(i++, update));
         }
         return queryData;
-    }
-
-    public static List<QueryData> generate(QuerySource queries) throws IOException {
-        final var streams = new ArrayList<InputStream>();
-        int bound = queries.size();
-        for (int i = 0; i < bound; i++) {
-            InputStream queryStream = queries.getQueryStream(i);
-            streams.add(queryStream);
-        }
-        return generate(streams);
-    }
-
-    public static List<QueryData> generate(List<String> queries) {
-        final var streams = queries.stream().map(s -> (InputStream) new ByteArrayInputStream(s.getBytes())).toList();
-        return generate(streams);
     }
 }
