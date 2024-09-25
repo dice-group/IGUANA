@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.query.list.impl;
 
-import org.aksw.iguana.cc.query.QueryData;
 import org.aksw.iguana.cc.query.list.QueryList;
 
 import java.io.ByteArrayInputStream;

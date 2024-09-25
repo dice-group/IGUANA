@@ -1,8 +1,5 @@
 package org.aksw.iguana.cc.query.list;
 
-import org.aksw.iguana.cc.query.QueryData;
-import org.aksw.iguana.cc.query.source.QuerySource;
-
 import java.io.IOException;
 import java.io.InputStream;
 

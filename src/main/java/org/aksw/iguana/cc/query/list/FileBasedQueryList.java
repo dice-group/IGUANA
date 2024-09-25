@@ -1,11 +1,9 @@
 package org.aksw.iguana.cc.query.list;
 
-import org.aksw.iguana.cc.query.QueryData;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 /**
  * The abstract class for a QueryList. A query list provides the queries to the QueryHandler.

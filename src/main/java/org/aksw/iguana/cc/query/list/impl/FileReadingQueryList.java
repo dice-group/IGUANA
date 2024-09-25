@@ -1,6 +1,5 @@
 package org.aksw.iguana.cc.query.list.impl;
 
-import org.aksw.iguana.cc.query.QueryData;
 import org.aksw.iguana.cc.query.list.FileBasedQueryList;
 import org.aksw.iguana.cc.query.source.QuerySource;
 
