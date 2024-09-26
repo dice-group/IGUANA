@@ -79,7 +79,7 @@ public class TemplateQueriesTest extends QueryHandlerTest {
                         .withBody(RESPONSE_JSON)));
         final var queryHandler = new QueryHandler(queryHandlerConfig);
         final var selector = queryHandler.getQuerySelectorInstance();
-        Assertions.assertEquals(2, queryHandler.getQueryCount());
+        Assertions.assertEquals(2, queryHandler.getExecutableQueryCount());
         for (int i = 0; i < 2; i++) {
             final var query = queryHandler.getNextQuery(selector);
             Assertions.assertEquals("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT * WHERE {?s rdf:type <http://www.w3.org/2002/07/owl#Class> ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Thing>. <http://www.w3.org/2002/07/owl#Thing> ?p <http://www.w3.org/2002/07/owl#Thing>}", query.query());

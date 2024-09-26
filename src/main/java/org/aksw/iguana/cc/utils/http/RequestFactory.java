@@ -173,8 +173,8 @@ public class RequestFactory {
      * @param queryHandler the query handler to preload requests for
      */
     public void preloadRequests(QueryHandler queryHandler) {
-        final var selector = new LinearQuerySelector(queryHandler.getQueryCount());
-        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+        final var selector = new LinearQuerySelector(queryHandler.getExecutableQueryCount());
+        for (int i = 0; i < queryHandler.getExecutableQueryCount(); i++) {
             try {
                 // build request and discard it
                 buildHttpRequest(queryHandler.getNextQueryStream(selector));

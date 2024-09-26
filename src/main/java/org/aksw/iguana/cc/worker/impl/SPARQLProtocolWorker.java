@@ -174,7 +174,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             List<ExecutionStats> executionStats = new ArrayList<>();
             if (config().completionTarget() instanceof QueryMixes queryMixes) {
                 for (int i = 0; i < queryMixes.number(); i++) {
-                    for (int j = 0; j < config().queries().getQueryCount(); j++) {
+                    for (int j = 0; j < config().queries().getExecutableQueryCount(); j++) {
                         ExecutionStats execution = executeQuery(config().timeout(), false);
                         if (execution == null) throw new RuntimeException("Execution returned null at a place, where it should have never been null.");
                         logExecution(execution);
@@ -186,7 +186,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 final var startNanos = System.nanoTime();
                 long queryExecutionCount = 0;
                 int queryMixExecutionCount = 0;
-                int queryMixSize = config().queries().getQueryCount();
+                int queryMixSize = config().queries().getExecutableQueryCount();
                 long now;
                 while ((now = System.nanoTime()) - startNanos < ((TimeLimit) config.completionTarget()).duration().toNanos()) {
                     final var timeLeft = ((TimeLimit) config.completionTarget()).duration().toNanos() - (now - startNanos);

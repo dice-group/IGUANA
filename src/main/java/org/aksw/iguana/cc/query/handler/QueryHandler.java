@@ -162,6 +162,9 @@ public class QueryHandler {
     final protected QueryList queryList;
     protected List<QueryData> queryData;
 
+    int executableQueryCount = 0;
+    int representativeQueryCount = 0;
+
     private int workerCount = 0; // give every worker inside the same worker config an offset seed
 
     final protected int hashCode;
@@ -196,6 +199,8 @@ public class QueryHandler {
                     throw new RuntimeException("Couldn't read query stream", e);
                 }
             }).collect(Collectors.toList()));
+            executableQueryCount = queryList.size();
+            representativeQueryCount = queryList.size();
         }
         this.hashCode = queryList.hashCode();
     }
@@ -269,6 +274,10 @@ public class QueryHandler {
                         }
                     }
             ).toList();
+            this.executableQueryCount = templateData.queries.size() - templateData.templates;
+            this.representativeQueryCount = config.template.individualResults ?
+                    templateData.queries.size() - templateData.templates :
+                    templateData.queries.size() - templateData.instanceStart;
             return new StringListQueryList(templateData.queries);
         }
         return (config.caching()) ?
@@ -335,8 +344,12 @@ public class QueryHandler {
         return hashCode;
     }
 
-    public int getQueryCount() {
-        return this.queryList.size();
+    public int getExecutableQueryCount() {
+        return executableQueryCount;
+    }
+
+    public int getRepresentativeQueryCount() {
+        return representativeQueryCount;
     }
 
     public String getQueryId(int i) {
@@ -350,8 +363,8 @@ public class QueryHandler {
      * @return String[] of query ids
      */
     public String[] getAllQueryIds() {
-        String[] out = new String[queryList.size()];
-        for (int i = 0; i < queryList.size(); i++) {
+        String[] out = new String[getRepresentativeQueryCount()];
+        for (int i = 0; i < getRepresentativeQueryCount(); i++) {
             out[i] = getQueryId(i);
         }
         return out;
