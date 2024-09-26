@@ -207,9 +207,7 @@ public class QueryHandler {
 
     private record TemplateData(List<String> queries, int templates, int[] indices, int[] instanceNumber, int instanceStart) {}
 
-    // TODO: storing and reading of instance file
     private QueryList initializeTemplateQueryHandler(QuerySource templateSource) throws IOException {
-        QuerySource querySource = templateSource;
         final var originalPath = templateSource.getPath();
         final var postfix = String.format("_instances_f%s_l%s.txt",
                 Integer.toUnsignedString(this.config.template.endpoint.hashCode()), Integer.toUnsignedString((int) this.config.template.limit.longValue()));
@@ -221,68 +219,86 @@ public class QueryHandler {
         if (Files.exists(instancePath)) {
             LOGGER.info("Already existing query template instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath.toAbsolutePath());
 
-            // TODO: change this
-            querySource = createQuerySource(instancePath); // if the instances already exist, use them
+            // read in the template data
+            // the header contains the number of templates and the index (index doesn't count headers) of the first instance
+            // afterward for each template the index of the template and the number of instances are stored
+            String header;
+            try (var reader = Files.newBufferedReader(instancePath)) {
+                header = reader.readLine();
+                Pattern digitRegex = Pattern.compile("\\d+");
+                Matcher matcher = digitRegex.matcher(header);
+                if (!matcher.find()) throw new IOException("Invalid instance file header");
+                int templates = Integer.parseInt(matcher.group());
+                if (!matcher.find()) throw new IOException("Invalid instance file header");
+                int instanceStart = Integer.parseInt(matcher.group());
+                final var indices = new int[templates];
+                final var instanceNumber = new int[templates];
+                for (int i = 0; i < templates; i++) {
+                    if (!matcher.find()) throw new IOException("Invalid instance file header");
+                    indices[i] = Integer.parseInt(matcher.group());
+                    if (!matcher.find()) throw new IOException("Invalid instance file header");
+                    instanceNumber[i] = Integer.parseInt(matcher.group());
+                }
+                templateData = new TemplateData(reader.lines().toList(), templates, indices, instanceNumber, instanceStart);
+            }
         } else {
-            templateData = instantiateTemplateQueries(querySource, config.template);
+            templateData = instantiateTemplateQueries(templateSource, config.template);
 
-            // TODO: change this
             if (config.template.save) {
                 // save the instances to a file
                 Files.createFile(instancePath);
+
                 try (var writer = Files.newBufferedWriter(instancePath)) {
-                    for (String instance : templateData.queries()) {
+                    // write header line
+                    writer.write(String.format("templates: %d instances_start: %d ", templateData.templates, templateData.instanceStart));
+                    writer.write(String.format("%s", IntStream.range(0, templateData.templates)
+                                    .mapToObj(i -> "index: " + templateData.indices[i] + " instances_count: " + templateData.instanceNumber[i])
+                                    .collect(Collectors.joining(" "))));
+                    writer.newLine();
+                    // write queries and instances
+                    for (String instance : templateData.queries) {
                         writer.write(instance);
                         writer.newLine();
                     }
                 }
-                // create a new query source based on the new instance file
-                querySource = createQuerySource(instancePath);
-            } else {
-                // query source isn't necessary, because queries aren't stored in a file,
-                // directly return a list of the instances instead
-                // return new StringListQueryList(templateData.queries());
             }
-
-            AtomicInteger templateIndex = new AtomicInteger(0); // index of the next template
-            AtomicInteger index = new AtomicInteger(0);      // index of the current query
-            AtomicInteger instanceId = new AtomicInteger(0); // id of the current instance for the current template
-            queryData = templateData.queries.stream().map(
-                    query -> {
-                        // once the template instances start, the template index is reset and reused for the instances
-                        // to track to which template the instances belong
-                        if (index.get() == templateData.instanceStart) templateIndex.set(0);
-
-                        if (index.get() >= templateData.instanceStart) {
-                            // query is an instance of a template
-
-                            // if the instance id is equal to the number of instances for the current template,
-                            // the next template is used
-                            if (instanceId.get() == templateData.instanceNumber[templateIndex.get()]) {
-                                templateIndex.getAndIncrement();
-                                instanceId.set(0);
-                            }
-                            return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE_INSTANCE, templateIndex.get());
-                        } else if (templateIndex.get() < templateData.templates && index.get() == templateData.indices[templateIndex.get()]) {
-                            // query is a template
-                            templateIndex.getAndIncrement();
-                            return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE, null);
-                        } else {
-                            // query is neither a template nor an instance
-                            final var update = QueryData.checkUpdate(new ByteArrayInputStream(query.getBytes()));
-                            return new QueryData(index.getAndIncrement(), update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null);
-                        }
-                    }
-            ).toList();
-            this.executableQueryCount = templateData.queries.size() - templateData.templates;
-            this.representativeQueryCount = config.template.individualResults ?
-                    templateData.queries.size() - templateData.templates :
-                    templateData.queries.size() - templateData.instanceStart;
-            return new StringListQueryList(templateData.queries);
         }
-        return (config.caching()) ?
-                new FileCachingQueryList(querySource) : // if caching is enabled, cache the instances
-                new FileReadingQueryList(querySource);  // if caching is disabled, read the instances from the file every time
+
+        AtomicInteger templateIndex = new AtomicInteger(0); // index of the next template
+        AtomicInteger index = new AtomicInteger(0);      // index of the current query
+        AtomicInteger instanceId = new AtomicInteger(0); // id of the current instance for the current template
+        queryData = templateData.queries.stream().map(
+                query -> {
+                    // once the template instances start, the template index is reset and reused for the instances
+                    // to track to which template the instances belong
+                    if (index.get() == templateData.instanceStart) templateIndex.set(0);
+
+                    if (index.get() >= templateData.instanceStart) {
+                        // query is an instance of a template
+
+                        // if the instance id is equal to the number of instances for the current template,
+                        // the next template is used
+                        if (instanceId.get() == templateData.instanceNumber[templateIndex.get()]) {
+                            templateIndex.getAndIncrement();
+                            instanceId.set(0);
+                        }
+                        return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE_INSTANCE, templateIndex.get());
+                    } else if (templateIndex.get() < templateData.templates && index.get() == templateData.indices[templateIndex.get()]) {
+                        // query is a template
+                        templateIndex.getAndIncrement();
+                        return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE, null);
+                    } else {
+                        // query is neither a template nor an instance
+                        final var update = QueryData.checkUpdate(new ByteArrayInputStream(query.getBytes()));
+                        return new QueryData(index.getAndIncrement(), update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null);
+                    }
+                }
+        ).toList();
+        this.executableQueryCount = templateData.queries.size() - templateData.templates;
+        this.representativeQueryCount = config.template.individualResults ?
+                templateData.queries.size() - templateData.templates :
+                templateData.instanceStart;
+        return new StringListQueryList(templateData.queries);
     }
 
     /**
