@@ -265,6 +265,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         // get the next query and request
         final var queryHandle = config().queries().getNextQueryStream(querySelector);
         final int queryIndex = queryHandle.index();
+        final int resultIndex = queryHandle.resultId() == null ? queryIndex : queryHandle.resultId();
 
         final AsyncRequestProducer request;
         try {
@@ -358,7 +359,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
                 // check for http error
                 if (response.getCode() / 100 != 2) {
-                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, null);
+                    return createFailedResultDuringResponse(resultIndex, response, timeStamp, duration, null);
                 }
 
                 // check content length
@@ -370,18 +371,18 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         if (responseSize != responseBody.size())
                             LOGGER.error("Error during copying the response data. (expected written data size = {}, actual written data size = {}, Content-Length-Header = {})", responseSize, responseBody.size(), contentLengthHeader.getValue());
                         final var exception = new HttpException(String.format("Content-Length header value doesn't match actual content length. (Content-Length-Header = %s, written data size = %s)", contentLength, config.parseResults() ? responseBody.size() : responseSize));
-                        return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, exception);
+                        return createFailedResultDuringResponse(resultIndex, response, timeStamp, duration, exception);
                     }
                 }
 
                 // check timeout
                 if (duration.compareTo(timeout) > 0) {
-                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new TimeoutException());
+                    return createFailedResultDuringResponse(resultIndex, response, timeStamp, duration, new TimeoutException());
                 }
 
                 // return successful result
                 return new HttpExecutionResult(
-                        queryIndex,
+                        resultIndex,
                         Optional.of(response),
                         timeStamp,
                         Duration.ofNanos(responseEnd - requestStart),
@@ -402,18 +403,18 @@ public class SPARQLProtocolWorker extends HttpWorker {
         } catch (InterruptedException | ExecutionException e) {
             // This will close the connection and cancel the request if it's still running.
             future.cancel(true);
-            return createFailedResultBeforeRequest(queryIndex, e);
+            return createFailedResultBeforeRequest(resultIndex, e);
         } catch (TimeoutException e) {
             if (future.isDone()) {
                 LOGGER.warn("Request finished immediately after timeout but will still be counted as timed out.");
                 try {
                     return future.get();
                 } catch (InterruptedException | ExecutionException ex) {
-                    return createFailedResultBeforeRequest(queryIndex, ex);
+                    return createFailedResultBeforeRequest(resultIndex, ex);
                 }
             } else {
                 future.cancel(true);
-                return createFailedResultBeforeRequest(queryIndex, e);
+                return createFailedResultBeforeRequest(resultIndex, e);
             }
         }
     }

@@ -69,7 +69,7 @@ public class TemplateQueriesTest extends QueryHandlerTest {
                 QueryHandler.Config.Order.LINEAR,
                 null,
                 QueryHandler.Config.Language.SPARQL,
-                new QueryHandler.Config.Template(URI.create("http://localhost:" + wm.getPort()), 2000L, false)
+                new QueryHandler.Config.Template(URI.create("http://localhost:" + wm.getPort()), 2000L, false, true)
         );
         wm.stubFor(get(anyUrl())
                 .withQueryParam("query", matching("PREFIX\\s+rdf:\\s+<http:\\/\\/www\\.w3\\.org\\/1999\\/02\\/22-rdf-syntax-ns#>\\s+SELECT\\s+DISTINCT\\s+\\?var0\\s+\\?var1\\s+\\?var2\\s+WHERE\\s+\\{\\s*\\?s\\s+rdf:type\\s+\\?var0\\s*;\\s*\\?var1\\s+\\?var2\\s*\\.\\s*\\?var2\\s+\\?p\\s+<http:\\/\\/www\\.w3\\.org\\/2002\\/07\\/owl#Thing>\\s*}\\s+LIMIT\\s+2000\\s*"))
@@ -99,7 +99,7 @@ public class TemplateQueriesTest extends QueryHandlerTest {
                 QueryHandler.Config.Order.LINEAR,
                 null,
                 QueryHandler.Config.Language.SPARQL,
-                new QueryHandler.Config.Template(URI.create("http://localhost:" + wm.getPort()), 2000L, false)
+                new QueryHandler.Config.Template(URI.create("http://localhost:" + wm.getPort()), 2000L, false, true)
         );
         Assertions.assertThrows(QueryParseException.class, () -> new QueryHandler(queryHandlerConfig));
     }
