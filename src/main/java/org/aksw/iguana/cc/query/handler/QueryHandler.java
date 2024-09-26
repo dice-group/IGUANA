@@ -145,7 +145,7 @@ public class QueryHandler {
                 this.endpoint = endpoint;
                 this.limit = limit == null ? 2000 : limit;
                 this.save = save == null || save;
-                this.individualResults = individualResults != null;
+                this.individualResults = individualResults == null;
             }
         }
     }
@@ -269,6 +269,9 @@ public class QueryHandler {
         AtomicInteger instanceId = new AtomicInteger(0); // id of the current instance for the current template
         queryData = templateData.queries.stream().map(
                 query -> {
+                    // If "individualResults" is turned on, give the query templates to last ids, so that there aren't
+                    // any gaps in the ids and results.
+
                     // once the template instances start, the template index is reset and reused for the instances
                     // to track to which template the instances belong
                     if (index.get() == templateData.instanceStart) templateIndex.set(0);
@@ -282,14 +285,26 @@ public class QueryHandler {
                             templateIndex.getAndIncrement();
                             instanceId.set(0);
                         }
+
+                        if (config.template.individualResults) {
+                            return new QueryData(index.getAndIncrement() - templateData.templates, QueryData.QueryType.TEMPLATE_INSTANCE, templateData.queries.size() - templateData.templates + templateIndex.get());
+                        }
                         return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE_INSTANCE, templateIndex.get());
                     } else if (templateIndex.get() < templateData.templates && index.get() == templateData.indices[templateIndex.get()]) {
                         // query is a template
+                        if (config.template.individualResults) {
+                            // give the templates the last ids, so that there aren't any gaps in the ids and results
+                            index.incrementAndGet();
+                            return new QueryData(templateData.queries.size() - templateData.templates + templateIndex.getAndIncrement(), QueryData.QueryType.TEMPLATE, null);
+                        }
                         templateIndex.getAndIncrement();
                         return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE, null);
                     } else {
                         // query is neither a template nor an instance
                         final var update = QueryData.checkUpdate(new ByteArrayInputStream(query.getBytes()));
+                        if (config.template.individualResults) {
+                            return new QueryData(index.getAndIncrement() - templateIndex.get(), update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null);
+                        }
                         return new QueryData(index.getAndIncrement(), update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null);
                     }
                 }
@@ -327,12 +342,12 @@ public class QueryHandler {
 
     public QueryStringWrapper getNextQuery(QuerySelector querySelector) throws IOException {
         final var queryIndex = getNextQueryIndex(querySelector);
-        return new QueryStringWrapper(queryIndex[0], queryList.getQuery(queryIndex[0]), queryData.get(queryIndex[0]).update(), queryIndex[1]);
+        return new QueryStringWrapper(queryData.get(queryIndex[0]).queryId(), queryList.getQuery(queryIndex[0]), queryData.get(queryIndex[0]).update(), queryIndex[1]);
     }
 
     public QueryStreamWrapper getNextQueryStream(QuerySelector querySelector) {
         final var queryIndex = getNextQueryIndex(querySelector);
-        return new QueryStreamWrapper(queryIndex[0], config.caching(), () -> {
+        return new QueryStreamWrapper(queryData.get(queryIndex[0]).queryId(), config.caching(), () -> {
             try {
                 return this.queryList.getQueryStream(queryIndex[0]);
             } catch (IOException e) {
