@@ -162,8 +162,8 @@ public class QueryHandler {
     final protected QueryList queryList;
     protected List<QueryData> queryData;
 
-    int executableQueryCount = 0;
-    int representativeQueryCount = 0;
+    int executableQueryCount = 0;     // stores the number of queries that can be executed
+    int representativeQueryCount = 0; // stores the number of queries that are represented in the results
 
     private int workerCount = 0; // give every worker inside the same worker config an offset seed
 
@@ -264,6 +264,7 @@ public class QueryHandler {
             }
         }
 
+        // initialize queryData based on the template data
         AtomicInteger templateIndex = new AtomicInteger(0); // index of the next template
         AtomicInteger index = new AtomicInteger(0);      // index of the current query
         AtomicInteger instanceId = new AtomicInteger(0); // id of the current instance for the current template
@@ -309,6 +310,9 @@ public class QueryHandler {
                     }
                 }
         ).toList();
+
+        // set the number of queries that can be executed and the number of queries
+        // that are represented in the results
         this.executableQueryCount = templateData.queries.size() - templateData.templates;
         this.representativeQueryCount = config.template.individualResults ?
                 templateData.queries.size() - templateData.templates :
