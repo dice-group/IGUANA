@@ -145,7 +145,7 @@ public class QueryHandler {
                 this.endpoint = endpoint;
                 this.limit = limit == null ? 2000 : limit;
                 this.save = save == null || save;
-                this.individualResults = individualResults != null;
+                this.individualResults = individualResults != null && individualResults;
             }
         }
     }
