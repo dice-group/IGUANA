@@ -270,8 +270,11 @@ public class QueryHandler {
         AtomicInteger instanceId = new AtomicInteger(0); // id of the current instance for the current template
         queryData = templateData.queries.stream().map(
                 query -> {
-                    // If "individualResults" is turned on, give the query templates to last ids, so that there aren't
-                    // any gaps in the ids and results.
+                    // If "individualResults" is turned on, move the query templates outside the range of
+                    // "representativeQueryCount" to avoid them being represented in the results.
+                    // Otherwise, if "individualResults" is turned off, the instances need to be moved outside the range
+                    // of "representativeQueryCount", but because "instantiateTemplateQueries" already appends the
+                    // instances to the end of the original queries, this will already be done.
 
                     // once the template instances start, the template index is reset and reused for the instances
                     // to track to which template the instances belong
@@ -432,6 +435,10 @@ public class QueryHandler {
     * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "123"}</code><br/>
     * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "12"}</code><br/>
     * <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
+    *
+    * The template data that this method returns will contain a list of all queries,
+    * where the first queries are the original queries including the query templates.
+    * The query instances will be appended to the original queries.
     */
     private static TemplateData instantiateTemplateQueries(QuerySource querySource, Config.Template config) throws IOException {
         // charset for generating random variable names
