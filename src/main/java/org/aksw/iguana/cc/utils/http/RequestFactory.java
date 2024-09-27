@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
-import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -173,7 +172,7 @@ public class RequestFactory {
      * @param queryHandler the query handler to preload requests for
      */
     public void preloadRequests(QueryHandler queryHandler) {
-        final var selector = new LinearQuerySelector(queryHandler.getExecutableQueryCount());
+        final var selector = queryHandler.getQuerySelectorInstance(QueryHandler.Config.Order.LINEAR);
         for (int i = 0; i < queryHandler.getExecutableQueryCount(); i++) {
             try {
                 // build request and discard it

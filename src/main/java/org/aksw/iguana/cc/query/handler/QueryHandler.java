@@ -347,6 +347,15 @@ public class QueryHandler {
         throw new IllegalStateException("Unknown query selection order: " + config.order());
     }
 
+    public QuerySelector getQuerySelectorInstance(Config.Order type) {
+        switch (type) {
+            case LINEAR -> { return new LinearQuerySelector(queryList.size()); }
+            case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + workerCount++); }
+        }
+
+        throw new IllegalStateException("Unknown query selection order: " + type);
+    }
+
     public QueryStringWrapper getNextQuery(QuerySelector querySelector) throws IOException {
         final var queryIndex = getNextQueryIndex(querySelector);
         return new QueryStringWrapper(queryData.get(queryIndex[0]).queryId(), queryList.getQuery(queryIndex[0]), queryData.get(queryIndex[0]).update(), queryIndex[1]);
