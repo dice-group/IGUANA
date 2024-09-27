@@ -73,10 +73,23 @@ class QueryHandlerConfigTest {
                                 QueryHandler.Config.Order.RANDOM,
                                 42L,
                                 QueryHandler.Config.Language.SPARQL,
-                                new QueryHandler.Config.Template(URI.create("http://example.org/sparql"), 2000L, true, null)
+                                new QueryHandler.Config.Template(URI.create("http://example.org/sparql"), 2000L, true, false)
                         ),
                         """
                             {"path":"some.queries","format":"separator", "separator": "\\n", "caching":true,"order":"random","seed":42,"lang":"SPARQL","template": {"endpoint": "http://example.org/sparql"}}
+                        """
+                ),
+                Arguments.of(new QueryHandler.Config("some.queries",
+                                QueryHandler.Config.Format.SEPARATOR,
+                                "\n",
+                                true,
+                                QueryHandler.Config.Order.RANDOM,
+                                42L,
+                                QueryHandler.Config.Language.SPARQL,
+                                new QueryHandler.Config.Template(URI.create("http://example.org/sparql"), 10L, false, true)
+                        ),
+                        """
+                            {"path":"some.queries","format":"separator", "separator": "\\n", "caching":true,"order":"random","seed":42,"lang":"SPARQL","template": {"endpoint": "http://example.org/sparql", "limit": 10, "save": false, "individualResults": true }}
                         """
                 )
         );

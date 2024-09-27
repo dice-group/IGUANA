@@ -104,4 +104,39 @@ public class TemplateQueriesTest extends QueryHandlerTest {
         Assertions.assertThrows(QueryParseException.class, () -> new QueryHandler(queryHandlerConfig));
     }
 
+    @Test
+    public void testSubsumedQueries() throws IOException {
+        String templateQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT * WHERE {?s rdf:type %%var0%% ; %%var1%% %%var2%%. %%var2%% ?p <http://www.w3.org/2002/07/owl#Thing>}";
+        tempTemplateFile = Files.createTempFile(parentFolder, "Template", ".txt");
+        Files.writeString(tempTemplateFile, templateQuery, StandardCharsets.UTF_8);
+        final var queryHandlerConfig = new QueryHandler.Config(
+                tempTemplateFile.toString(),
+                QueryHandler.Config.Format.ONE_PER_LINE,
+                null,
+                true,
+                QueryHandler.Config.Order.LINEAR,
+                null,
+                QueryHandler.Config.Language.SPARQL,
+                new QueryHandler.Config.Template(URI.create("http://localhost:" + wm.getPort()), 2000L, false, false)
+        );
+        wm.stubFor(get(anyUrl())
+                .withQueryParam("query", matching("PREFIX\\s+rdf:\\s+<http:\\/\\/www\\.w3\\.org\\/1999\\/02\\/22-rdf-syntax-ns#>\\s+SELECT\\s+DISTINCT\\s+\\?var0\\s+\\?var1\\s+\\?var2\\s+WHERE\\s+\\{\\s*\\?s\\s+rdf:type\\s+\\?var0\\s*;\\s*\\?var1\\s+\\?var2\\s*\\.\\s*\\?var2\\s+\\?p\\s+<http:\\/\\/www\\.w3\\.org\\/2002\\/07\\/owl#Thing>\\s*}\\s+LIMIT\\s+2000\\s*"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/sparql-results+json")
+                        .withBody(RESPONSE_JSON)));
+        final var queryHandler = new QueryHandler(queryHandlerConfig);
+        final var selector = queryHandler.getQuerySelectorInstance();
+        Assertions.assertEquals(2, queryHandler.getExecutableQueryCount());
+        Assertions.assertEquals(1, queryHandler.getRepresentativeQueryCount());
+        var query = queryHandler.getNextQuery(selector);
+        Assertions.assertEquals(0, query.resultId());
+        Assertions.assertEquals(1, query.index());
+        Assertions.assertFalse(query.update());
+        query = queryHandler.getNextQuery(selector);
+        Assertions.assertEquals(0, query.resultId());
+        Assertions.assertEquals(2, query.index());
+        Assertions.assertFalse(query.update());
+    }
+
 }
