@@ -220,6 +220,7 @@
                                     <directory>${project.basedir}/src/main/resources/</directory>
                                     <includes>
                                         <include>start-iguana.sh</include>
+                                        <include>iguana.owx</include>
                                     </includes>
                                     <filtering>true</filtering>
                                 </resource>
