@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.tasks.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.metrics.Metric;
+import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.storage.Storage;
 import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.HttpWorker;
@@ -82,11 +83,31 @@ public class Stresstest implements Task {
 
     public void run() {
         if (!warmupWorkers.isEmpty()) {
+            // initialize query handlers
+            // count the number of workers for each query handler
+            final var queryHandlers = warmupWorkers.stream().map(w -> w.config().queries()).distinct().toList();
+            queryHandlers.stream().map(qh1 ->
+                    List.of(qh1, warmupWorkers.stream()
+                            .map(HttpWorker::config)
+                            .map(HttpWorker.Config::queries)
+                            .filter(qh1::equals)
+                            .count()))
+                    .forEach(list -> ((QueryHandler) list.get(0)).setTotalWorkerCount((int) (long) list.get(1)));
             SPARQLProtocolWorker.initHttpClient(warmupWorkers.size());
             var warmupResults = executeWorkers(warmupWorkers); // warmup results will be dismissed
             SPARQLProtocolWorker.closeHttpClient();
         }
 
+        // initialize query handlers
+        // count the number of workers for each query handler
+        final var queryHandlers = workers.stream().map(w -> w.config().queries()).distinct().toList();
+        queryHandlers.stream().map(qh1 ->
+                        List.of(qh1, workers.stream()
+                                .map(HttpWorker::config)
+                                .map(HttpWorker.Config::queries)
+                                .filter(qh1::equals)
+                                .count()))
+                .forEach(list -> ((QueryHandler) list.get(0)).setTotalWorkerCount((int) (long) list.get(1)));
         SPARQLProtocolWorker.initHttpClient(workers.size());
         var results = executeWorkers(workers);
         SPARQLProtocolWorker.closeHttpClient();
