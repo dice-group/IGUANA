@@ -9,7 +9,6 @@ import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySourceTest;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -90,9 +89,9 @@ public class QueryHandlerTest {
         QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
         final var selector = queryHandler.getQuerySelectorInstance();
         assertInstanceOf(LinearQuerySelector.class, selector);
-        assertEquals(queries.size(), queryHandler.getQueryCount());
+        assertEquals(queries.size(), queryHandler.getExecutableQueryCount());
         assertNotEquals(0, queryHandler.hashCode());
-        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+        for (int i = 0; i < queryHandler.getExecutableQueryCount(); i++) {
             final var wrapper = queryHandler.getNextQuery(selector);
             assertEquals(i, selector.getCurrentIndex());
             if (FolderQuerySource.class.isAssignableFrom(sourceType))
@@ -110,9 +109,9 @@ public class QueryHandlerTest {
         QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
         final var selector = queryHandler.getQuerySelectorInstance();
         assertTrue(selector instanceof LinearQuerySelector);
-        assertEquals(queries.size(), queryHandler.getQueryCount());
+        assertEquals(queries.size(), queryHandler.getExecutableQueryCount());
         assertNotEquals(0, queryHandler.hashCode());
-        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+        for (int i = 0; i < queryHandler.getExecutableQueryCount(); i++) {
             final var wrapper = queryHandler.getNextQueryStream(selector);
             assertEquals(i, selector.getCurrentIndex());
             final var acutalQuery = new String(wrapper.queryInputStreamSupplier().get().readAllBytes(), StandardCharsets.UTF_8);
@@ -131,9 +130,9 @@ public class QueryHandlerTest {
         QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
         final var selector = queryHandler.getQuerySelectorInstance();
         assertInstanceOf(LinearQuerySelector.class, selector);
-        assertEquals(queries.size(), queryHandler.getQueryCount());
+        assertEquals(queries.size(), queryHandler.getExecutableQueryCount());
         assertNotEquals(0, queryHandler.hashCode());
-        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+        for (int i = 0; i < queryHandler.getExecutableQueryCount(); i++) {
             final var wrapper = queryHandler.getNextQuery(selector);
             assertEquals(i, selector.getCurrentIndex());
             if (FolderQuerySource.class.isAssignableFrom(sourceType))
@@ -151,10 +150,10 @@ public class QueryHandlerTest {
         QueryHandler queryHandler = assertDoesNotThrow(() -> mapper.readValue(json, QueryHandler.class));
         final var selector = queryHandler.getQuerySelectorInstance();
         assertInstanceOf(LinearQuerySelector.class, selector);
-        assertEquals(queries.size(), queryHandler.getQueryCount());
+        assertEquals(queries.size(), queryHandler.getExecutableQueryCount());
         assertNotEquals(0, queryHandler.hashCode());
         final var allQueryIDs = queryHandler.getAllQueryIds();
-        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+        for (int i = 0; i < queryHandler.getExecutableQueryCount(); i++) {
             assertEquals(queryHandler.hashCode() + ":" + i, allQueryIDs[i]);
             assertEquals(allQueryIDs[i], queryHandler.getQueryId(i));
         }

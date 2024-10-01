@@ -26,7 +26,7 @@ public class EachExecutionStatistic extends Metric implements ModelWritingMetric
     public Model createMetricModel(List<HttpWorker> workers, List<HttpWorker.ExecutionStats>[][] data, IRES.Factory iresFactory) {
         Model m = ModelFactory.createDefaultModel();
         for (var worker : workers) {
-            for (int i = 0; i < worker.config().queries().getQueryCount(); i++) {
+            for (int i = 0; i < worker.config().queries().getRepresentativeQueryCount(); i++) {
                 Resource workerQueryResource = iresFactory.getWorkerQueryResource(worker, i);
                 Resource queryRes = IRES.getResource(worker.config().queries().getQueryId(i));
                 BigInteger run = BigInteger.ONE;

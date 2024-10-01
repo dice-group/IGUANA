@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
-import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -17,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -113,9 +113,18 @@ public class RequestFactory {
             throw new IOException(e);
         }
 
+        // check if the query is an update query, if yes, change the request type to similar update request type
+        RequestType actualRequestType = requestType;
+        if (requestType == RequestType.GET_QUERY || requestType == RequestType.POST_QUERY)
+            actualRequestType = queryHandle.update() ? RequestType.POST_UPDATE : requestType;
+        if (requestType == RequestType.POST_URL_ENC_QUERY)
+            actualRequestType = queryHandle.update() ? RequestType.POST_URL_ENC_UPDATE : requestType;
+        // if only one endpoint is set, use it for both queries and updates
+        URI updateEndpoint = connectionConfig.updateEndpoint() != null ? connectionConfig.updateEndpoint() : connectionConfig.endpoint();
+
         // If the query is bigger than 2^31 bytes (2GB) and the request type is set to GET_QUERY, POST_URL_ENC_QUERY or
         // POST_URL_ENC_UPDATE, the following code will throw an exception.
-        switch (requestType) {
+        switch (actualRequestType) {
             case GET_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.get(new URIBuilder(connectionConfig.endpoint())
                     .addParameter("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8))
                     .build()
@@ -127,10 +136,10 @@ public class RequestFactory {
                     .setEntity(new BasicAsyncEntityProducer(urlEncode("query", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, false));
             case POST_QUERY -> asyncRequestBuilder = AsyncRequestBuilder.post(connectionConfig.endpoint())
                     .setEntity(new StreamEntityProducer(queryStreamSupplier, !caching, "application/sparql-query"));
-            case POST_URL_ENC_UPDATE -> asyncRequestBuilder = AsyncRequestBuilder.post(connectionConfig.endpoint())
+            case POST_URL_ENC_UPDATE -> asyncRequestBuilder = AsyncRequestBuilder.post(updateEndpoint)
                     .setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded")
                     .setEntity(new BasicAsyncEntityProducer(urlEncode("update", new String(queryStream.readAllBytes(), StandardCharsets.UTF_8)), null, false));
-            case POST_UPDATE -> asyncRequestBuilder = AsyncRequestBuilder.post(connectionConfig.endpoint())
+            case POST_UPDATE -> asyncRequestBuilder = AsyncRequestBuilder.post(updateEndpoint)
                     .setEntity(new StreamEntityProducer(queryStreamSupplier, !caching, "application/sparql-update"));
             default -> throw new IllegalStateException("Unexpected value: " + requestType);
         }
@@ -138,10 +147,15 @@ public class RequestFactory {
         // set additional headers
         if (acceptHeader != null)
             asyncRequestBuilder.addHeader("Accept", acceptHeader);
-        if (connectionConfig.authentication() != null && connectionConfig.authentication().user() != null)
+        if (queryHandle.update() && connectionConfig.updateAuthentication() != null && connectionConfig.updateAuthentication().user() != null) {
             asyncRequestBuilder.addHeader("Authorization",
-                    HttpWorker.basicAuth(connectionConfig.authentication().user(),
-                            Optional.ofNullable(connectionConfig.authentication().password()).orElse("")));
+                    HttpWorker.basicAuth(connectionConfig.updateAuthentication().user(),
+                            Optional.ofNullable(connectionConfig.updateAuthentication().password()).orElse("")));
+        } else if (connectionConfig.authentication() != null && connectionConfig.authentication().user() != null) {
+                asyncRequestBuilder.addHeader("Authorization",
+                        HttpWorker.basicAuth(connectionConfig.authentication().user(),
+                                Optional.ofNullable(connectionConfig.authentication().password()).orElse("")));
+        }
 
         // cache request
         if (caching)
@@ -158,8 +172,8 @@ public class RequestFactory {
      * @param queryHandler the query handler to preload requests for
      */
     public void preloadRequests(QueryHandler queryHandler) {
-        final var selector = new LinearQuerySelector(queryHandler.getQueryCount());
-        for (int i = 0; i < queryHandler.getQueryCount(); i++) {
+        final var selector = queryHandler.getQuerySelectorInstance(QueryHandler.Config.Order.LINEAR);
+        for (int i = 0; i < queryHandler.getExecutableQueryCount(); i++) {
             try {
                 // build request and discard it
                 buildHttpRequest(queryHandler.getNextQueryStream(selector));

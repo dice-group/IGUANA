@@ -29,7 +29,7 @@ public class AggregatedExecutionStatistics extends Metric implements ModelWritin
     public Model createMetricModel(List<HttpWorker> workers, List<HttpWorker.ExecutionStats>[][] data, IRES.Factory iresFactory) {
         Model m = ModelFactory.createDefaultModel();
         for (var worker : workers) {
-            for (int i = 0; i < worker.config().queries().getQueryCount(); i++) {
+            for (int i = 0; i < worker.config().queries().getRepresentativeQueryCount(); i++) {
                 Resource queryRes = iresFactory.getWorkerQueryResource(worker, i);
                 m.add(createAggregatedModel(data[(int) worker.getWorkerID()][i], queryRes));
             }
