@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
-     xml:base="https://iguana-benchmark.eu/ontology/"
+     xml:base="https://vocab.dice-research.org/iguana/"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     ontologyIRI="https://iguana-benchmark.eu/ontology/"
-     versionIRI="https://iguana-benchmark.eu/ontology/4.1.0/">
+     ontologyIRI="https://vocab.dice-research.org/iguana/"
+     versionIRI="https://vocab.dice-research.org/iguana/4.1.0/">
     <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1/"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
     <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
-    <Prefix name="iont" IRI="https://iguana-benchmark.eu/ontology/class/"/>
-    <Prefix name="ires" IRI="https://iguana-benchmark.eu/ontology/resource/"/>
+    <Prefix name="iont" IRI="https://vocab.dice-research.org/iguana/class/"/>
+    <Prefix name="ires" IRI="https://vocab.dice-research.org/iguana/resource/"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Prefix name="iprop" IRI="https://iguana-benchmark.eu/ontology/properties/"/>
+    <Prefix name="iprop" IRI="https://vocab.dice-research.org/iguana/properties/"/>
     <Prefix name="dcterms" IRI="http://purl.org/dc/terms/"/>
     <Import>http://purl.org/dc/elements/1.1/</Import>
     <Import>http://purl.org/dc/terms/</Import>
@@ -842,92 +842,92 @@
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/AES</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/AES</IRI>
         <Literal xml:lang="en">Aggregated Execution Statistics.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/AES</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/AES</IRI>
         <Literal>AES Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/AvgQPS</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/AvgQPS</IRI>
         <Literal xml:lang="en">Average Queries Per Second.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/AvgQPS</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/AvgQPS</IRI>
         <Literal>AvgQPS Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/EachQuery</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/EachQuery</IRI>
         <Literal xml:lang="en">Each query execution statistics.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/EachQuery</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/EachQuery</IRI>
         <Literal>EachQuery Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/NoQ</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/NoQ</IRI>
         <Literal xml:lang="en">Number of successfully executed Queries.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/NoQ</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/NoQ</IRI>
         <Literal>NoQ Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/NoQPH</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/NoQPH</IRI>
         <Literal xml:lang="en">Number of Queries Per Hour.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/NoQPH</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/NoQPH</IRI>
         <Literal>NoQPH Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/PAvgQPS</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/PAvgQPS</IRI>
         <Literal xml:lang="en">Penalized Average Queries Per Second.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/PAvgQPS</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/PAvgQPS</IRI>
         <Literal>PAvgQPS Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/PQPS</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/PQPS</IRI>
         <Literal xml:lang="en">Penalized Queries Per Second.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/PQPS</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/PQPS</IRI>
         <Literal>PQPS Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/QMPH</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/QMPH</IRI>
         <Literal xml:lang="en">Query Mixes Per Hour.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/QMPH</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/QMPH</IRI>
         <Literal>QMPH Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/QPS</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/QPS</IRI>
         <Literal xml:lang="en">Queries Per Second Metric.</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>http://iguana-benchmark.eu/class/metric/QPS</IRI>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/QPS</IRI>
         <Literal>QPS Metric</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>

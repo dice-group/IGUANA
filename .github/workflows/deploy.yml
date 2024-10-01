@@ -80,6 +80,10 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: 'maven'
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install lftp
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -127,12 +131,22 @@ jobs:
       - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
       - run: cp schema/iguana.owx ontology/iguana.owx
 
-      - name: Deploy Ontology
+      - name: Deploy Ontology to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./ontology/
           destination_dir: ./ontology/
+
+      - name: Deploy Ontology to FTP
+        run: |
+          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} files.dice-research.org << EOF
+              set cmd:fail-exit yes
+              set ftp:ssl-protect-data true
+              cd /vocab
+              mirror -R ontology/. iguana/
+              bye
+              EOF
 
 
   deploy_gh_release:
