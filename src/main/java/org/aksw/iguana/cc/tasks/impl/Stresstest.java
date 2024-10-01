@@ -102,7 +102,7 @@ public class Stresstest implements Task {
     public void run() {
         if (!warmupWorkers.isEmpty()) {
             SPARQLProtocolWorker.initHttpClient(warmupWorkers.size());
-            var warmupResults = executeWorkers(warmupWorkers); // warmup results will be dismissed
+            executeWorkers(warmupWorkers); // warmup results will be dismissed
             SPARQLProtocolWorker.closeHttpClient();
         }
         SPARQLProtocolWorker.initHttpClient(workers.size());
