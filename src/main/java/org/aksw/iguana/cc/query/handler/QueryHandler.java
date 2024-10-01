@@ -17,6 +17,10 @@ import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
 import org.apache.jena.query.*;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTPBuilder;
+import org.apache.jena.sparql.service.single.ServiceExecutor;
+import org.apache.jena.sparql.service.single.ServiceExecutorHttp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -358,7 +362,7 @@ public class QueryHandler {
             selectQueryString.setNsPrefixes(templateQuery.getPrefixMapping());
 
             // send request to SPARQL endpoint and instantiate the template based on results
-            try (QueryExecution exec = QueryExecutionFactory.createServiceRequest(config.endpoint().toString(), selectQueryString.asQuery())) {
+            try (QueryExecution exec = QueryExecutionHTTP.service(config.endpoint().toString(), selectQueryString.asQuery())) {
                 ResultSet resultSet = exec.execSelect();
                 if (!resultSet.hasNext()) {
                     LOGGER.warn("No results for query template: {}", templateQueryString);
