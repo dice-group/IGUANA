@@ -32,6 +32,7 @@ public class LinearQuerySelector extends QuerySelector {
 
     /**
      * Return the current index. This is the index of the last returned query.
+     * If no query was returned yet, the method will return -1.
      *
      * @return the current index
      */
