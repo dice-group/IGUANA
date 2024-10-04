@@ -270,7 +270,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         try {
             request = requestFactory.buildHttpRequest(queryHandle);
         } catch (IOException | URISyntaxException e) {
-            return createFailedResultBeforeRequest(config.queries().getQuerySelectorInstance().getCurrentIndex(), e);
+            return createFailedResultBeforeRequest(querySelector.getCurrentIndex(), e);
         }
 
         // execute the request

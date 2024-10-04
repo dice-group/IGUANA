@@ -26,4 +26,18 @@ public class LinearQuerySelectorTest {
         final var size = 0;
         assertThrows(IllegalArgumentException.class, () -> new LinearQuerySelector(size));
     }
+
+    @Test
+    public void testStartingIndex() {
+        final var size = 5;
+        final var startIndex = 3;
+        final var linearQuerySelector = new LinearQuerySelector(size, startIndex);
+        // -1, because the next index hasn't been requested yet
+        assertEquals(startIndex - 1, linearQuerySelector.getCurrentIndex());
+        for (int i = 0; i < 10; i++) {
+            int currentIndex = linearQuerySelector.getNextIndex();
+            assertEquals((i + startIndex) % size, currentIndex);
+            assertEquals(currentIndex, linearQuerySelector.getCurrentIndex());
+        }
+    }
 }
