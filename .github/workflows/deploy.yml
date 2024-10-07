@@ -69,7 +69,7 @@ jobs:
   deploy_docs:
     name: Deploy Documentation
     runs-on: ubuntu-latest
-    needs: find_version
+    needs: deploy_to_maven
     env:
       RELEASE_VERSION: ${{ needs.find_version.outputs.RELEASE_VERSION }}
     steps:
@@ -117,15 +117,20 @@ jobs:
           publish_dir: ./javadoc/${{ env.RELEASE_VERSION }}/apidocs
           destination_dir: ./javadoc/latest
 
-      - name: Find Ontology Version
-        run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' schema/iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
-        id: find_ontology_version
-
       - name: Fetch Ontologies
         run: git fetch && git checkout origin/gh-pages ontology/
+      - name: Find Ontology Version
+        run: echo "ONTOLOGY_VERSION=$(grep 'versionIRI' artifacts/iguana.owx | grep -Po '[0-9]+.[0-9]+.[0-9]+')" >> $GITHUB_OUTPUT
+        id: find_ontology_version
+      - name: Download artifacts from previous jobs
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true
+
       - run: mkdir -p ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}
-      - run: cp schema/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
-      - run: cp schema/iguana.owx ontology/iguana.owx
+      - run: cp artifacts/iguana.owx ontology/${{ steps.find_ontology_version.outputs.ONTOLOGY_VERSION }}/iguana.owx
+      - run: cp artifacts/iguana.owx ontology/iguana.owx
 
       - name: Deploy Ontology
         uses: peaceiris/actions-gh-pages@v3
