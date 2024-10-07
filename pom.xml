@@ -40,6 +40,8 @@
         <minor.version>1</minor.version>
         <build.version>0</build.version>
 
+        <ontology.version>4.1.0</ontology.version>
+
         <java.version>17</java.version>
         <jena.version>4.2.0</jena.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
