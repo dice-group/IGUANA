@@ -57,15 +57,19 @@ public class SPARQLProtocolWorkerTest {
             .build();
 
     private final static String QUERY = "SELECT * WHERE { ?s ?p ?o }";
+    private final static String UPDATE_QUERY = "INSERT DATA { <http://example.org/s> <http://example.org/p> <http://example.org/o> }";
     private final static int QUERY_MIXES = 1;
     private static Path queryFile;
+    private static Path updateFile;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLProtocolWorker.class);
 
     @BeforeAll
     public static void setup() throws IOException {
         queryFile = Files.createTempFile("iguana-test-queries", ".tmp");
+        updateFile = Files.createTempFile("iguana-test-updates", ".tmp");
         Files.writeString(queryFile, QUERY, StandardCharsets.UTF_8);
+        Files.writeString(updateFile, QUERY + "\n\n" + UPDATE_QUERY, StandardCharsets.UTF_8);
     }
 
     @BeforeEach
@@ -77,6 +81,7 @@ public class SPARQLProtocolWorkerTest {
     @AfterAll
     public static void cleanup() throws IOException {
         Files.deleteIfExists(queryFile);
+        Files.deleteIfExists(updateFile);
         SPARQLProtocolWorker.closeHttpClient();
     }
 
@@ -116,6 +121,31 @@ public class SPARQLProtocolWorkerTest {
                 );
                 workers.add(Arguments.of(Named.of(requestType.name(), new SPARQLProtocolWorker(i++, processor, config)), Named.of(String.valueOf(cached), cached)));
             }
+        }
+        return workers.stream();
+    }
+
+    public static Stream<Arguments> updateWorkerData() throws IOException {
+        final var normalEndpoint = URI.create("http://localhost:" + wm.getPort() + "/ds/query");
+        final var updateEndpoint = URI.create("http://localhost:" + wm.getPort() + "/ds/update");
+        final var processor = new ResponseBodyProcessor("application/sparql-results+json");
+        final var format = QueryHandler.Config.Format.SEPARATOR;
+        final var queryHandler = new QueryHandler(new QueryHandler.Config(updateFile.toAbsolutePath().toString(), format, null, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
+        final var datasetConfig = new DatasetConfig("TestDS", null);
+        final var connection = new ConnectionConfig("TestConn", "1", datasetConfig, normalEndpoint, new ConnectionConfig.Authentication("testUser", "password"), updateEndpoint, new ConnectionConfig.Authentication("updateUser", "password"));
+        final var workers = new ArrayDeque<Arguments>();
+        for (var requestType : List.of(RequestFactory.RequestType.GET_QUERY, RequestFactory.RequestType.POST_URL_ENC_QUERY, RequestFactory.RequestType.POST_QUERY)) {
+            final var config = new SPARQLProtocolWorker.Config(
+                    1,
+                    queryHandler,
+                    new HttpWorker.QueryMixes(QUERY_MIXES),
+                    connection,
+                    Duration.parse("PT6S"),
+                    "application/sparql-results+json",
+                    requestType,
+                    true
+            );
+            workers.add(Arguments.of(Named.of(requestType.name(), new SPARQLProtocolWorker(0, processor, config))));
         }
         return workers.stream();
     }
@@ -204,10 +234,63 @@ public class SPARQLProtocolWorkerTest {
         assertNotEquals(Duration.ZERO, result.executionStats().get(0).duration(), "Worker returned zero duration");
     }
 
+    @ParameterizedTest
+    @MethodSource("updateWorkerData")
+    public void testSeparateUpdateEndpoint(SPARQLProtocolWorker worker) {
+        final var workerConfig = worker.config();
+        switch (workerConfig.requestType()) {
+            case GET_QUERY -> {
+                wm.stubFor(get(urlPathEqualTo("/ds/query"))
+                        .withQueryParam("query", equalTo(QUERY))
+                        .withBasicAuth("testUser", "password")
+                        .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
+                wm.stubFor(post(urlPathEqualTo("/ds/update"))
+                        .withHeader("Content-Type", equalTo("application/sparql-update"))
+                        .withBasicAuth("updateUser", "password")
+                        .withRequestBody(equalTo(UPDATE_QUERY))
+                        .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
+            }
+            case POST_URL_ENC_QUERY -> {
+                wm.stubFor(post(urlPathEqualTo("/ds/query"))
+                        .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
+                        .withBasicAuth("testUser", "password")
+                        .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
+                        .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
+                wm.stubFor(post(urlPathEqualTo("/ds/update"))
+                        .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
+                        .withBasicAuth("updateUser", "password")
+                        .withRequestBody(equalTo("update=" + URLEncoder.encode(UPDATE_QUERY, StandardCharsets.UTF_8)))
+                        .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
+            }
+            case POST_QUERY -> {
+                wm.stubFor(post(urlPathEqualTo("/ds/query"))
+                        .withHeader("Content-Type", equalTo("application/sparql-query"))
+                        .withBasicAuth("testUser", "password")
+                        .withRequestBody(equalTo(QUERY))
+                        .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
+                wm.stubFor(post(urlPathEqualTo("/ds/update"))
+                        .withHeader("Content-Type", equalTo("application/sparql-update"))
+                        .withBasicAuth("updateUser", "password")
+                        .withRequestBody(equalTo(UPDATE_QUERY))
+                        .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body")));
+            }
+        }
+        final HttpWorker.Result result = worker.start().join();
+        assertEquals(result.executionStats().size(), QUERY_MIXES * 2, "Worker should have executed only 1 query");
+        for (var res : result.executionStats()) {
+            assertNull(res.error().orElse(null), "Worker threw an exception, during execution");
+            assertEquals(200, res.httpStatusCode().get(), "Worker returned wrong status code");
+            assertNotEquals(0, res.responseBodyHash().getAsLong(), "Worker didn't return a response body hash");
+            assertEquals("Non-Empty-Body".getBytes(StandardCharsets.UTF_8).length, res.contentLength().getAsLong(), "Worker returned wrong content length");
+            assertNotEquals(Duration.ZERO, res.duration(), "Worker returned zero duration");
+        }
+
+    }
+
     @DisplayName("Test Malformed Response Processing")
     @ParameterizedTest(name = "[{index}] fault = {0}")
     @EnumSource(Fault.class)
-    public void testMalformedResponseProcessing(Fault fault) throws IOException, URISyntaxException {
+    public void testMalformedResponseProcessing(Fault fault) throws URISyntaxException {
         SPARQLProtocolWorker worker = (SPARQLProtocolWorker) ((Named<?>)requestFactoryData().toList().get(0).get()[0]).getPayload();
         wm.stubFor(get(urlPathEqualTo("/ds/query"))
                 .willReturn(aResponse().withFault(fault)));
@@ -217,7 +300,7 @@ public class SPARQLProtocolWorkerTest {
     }
 
     @Test
-    public void testBadHttpCodeResponse() throws IOException, URISyntaxException {
+    public void testBadHttpCodeResponse() throws URISyntaxException {
         SPARQLProtocolWorker worker = (SPARQLProtocolWorker) ((Named<?>)requestFactoryData().toList().get(0).get()[0]).getPayload();
         wm.stubFor(get(urlPathEqualTo("/ds/query"))
                 .willReturn(aResponse().withStatus(404)));
