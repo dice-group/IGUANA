@@ -93,9 +93,9 @@ public class MainController {
         ClassLoader classloader = MainController.class.getClassLoader();
         String properties = new String(Objects.requireNonNull(classloader.getResourceAsStream("version.properties")).readAllBytes());
         String[] lines = properties.split("\\n");
-        String projectVersion = lines[0].split("=")[1];
-        String ontologyVersion = lines[1].split("=")[1];
-        System.out.println("IGUANA version: " + projectVersion + " (result ontology version: " + ontologyVersion + ")");
+        String projectVersion = lines[0].split("=")[1].trim();
+        String ontologyVersion = lines[1].split("=")[1].trim();
+        System.out.printf("IGUANA version: %s (result ontology version: %s)%n", projectVersion, ontologyVersion);
     }
 
 }
