@@ -351,6 +351,9 @@
         },
         "save": {
           "type": "boolean"
+        },
+        "individualResults": {
+          "type": "boolean"
         }
       },
       "required": [

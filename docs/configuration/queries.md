@@ -130,15 +130,20 @@ The results may look like the following:
 ### Configuration
 The `template` attribute has the following properties:
 
-| property | required | default | description                                                         | example                     |
-|----------|----------|---------|---------------------------------------------------------------------|-----------------------------|
-| endpoint | yes      |         | The endpoint to query.                                              | `http://dbpedia.org/sparql` |
-| limit    | no       | `2000`  | The maximum number of instances per query template.                 | `100`                       |
-| save     | no       | `true`  | If set to `true`, query instances will be saved in a separate file. | `false`                     |
+| property          | required | default | description                                                                                                                                                             | example                     |
+|-------------------|----------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| endpoint          | yes      |         | The endpoint to query.                                                                                                                                                  | `http://dbpedia.org/sparql` |
+| limit             | no       | `2000`  | The maximum number of instances per query template.                                                                                                                     | `100`                       |
+| save              | no       | `true`  | If set to `true`, query instances will be saved in a separate file.                                                                                                     | `false`                     |
+| individualResults | no       | `false` | If set to `true`, the results of each individual template instance will be reported, otherwise if set to `false` their results will be subsumed for the query template. | `true`                      |
 
 If the `save` attribute is set to `true`,
 the instances will be saved in a separate file in the same directory as the query templates.
 If the query templates are stored in a folder, the instances will be saved in the parent directory.
+
+If the `individualResults` attribute is set to `false`,
+the results of the instances will be subsumed for the query template.
+The query template will then be considered as an actual query in the results.
 
 Example of query configuration with query templates:
 ```yaml
@@ -149,4 +154,5 @@ queries:
     endpoint: "http://dbpedia.org/sparql"
     limit: 100
     save: true
+    individualResults: true
 ```

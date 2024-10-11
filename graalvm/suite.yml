@@ -6,7 +6,7 @@ connections:
   - name: "Blazegraph"
     version: "1.1.1"
     dataset: "DatasetName"
-    endpoint: "http://localhost:9999/blazegraph/sparql"
+    endpoint: "https://dbpedia.org/sparql"
     authentication:
       user: "user"
       password: "test"
@@ -60,13 +60,14 @@ tasks:
           seed: 123
           lang: "SPARQL"
           template:
-            endpoint: "http://dbpedia.org/sparql"
+            endpoint: "https://dbpedia.org/sparql"
             limit: 1
             save: false
+            individualResults: false
         timeout: 2s
         connection: Blazegraph
         completionTarget:
-          duration: 1s
+          duration: 0.5s
         acceptHeader: "application/sparql-results+json"
         requestType: get query
         parseResults: true
@@ -78,7 +79,7 @@ tasks:
         timeout: 3m
         connection: Blazegraph
         completionTarget:
-          duration: 1s
+          duration: 0.5s
         requestType: get query
         acceptHeader: "application/sparql-results+json"
       - number: 1

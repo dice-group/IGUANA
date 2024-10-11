@@ -57,6 +57,7 @@ tasks:
             endpoint: "http://localhost:3030/sp2b"
             limit: 2000
             save: false
+            individualResults: false
         timeout: 2S
         connection: fuseki
         completionTarget:
