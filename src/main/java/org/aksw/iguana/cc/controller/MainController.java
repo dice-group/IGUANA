@@ -95,8 +95,7 @@ public class MainController {
         String[] lines = properties.split("\\n");
         String projectVersion = lines[0].split("=")[1];
         String ontologyVersion = lines[1].split("=")[1];
-        System.out.println("IGUANA version: " + projectVersion);
-        System.out.println("Result ontology version: " + ontologyVersion);
+        System.out.println("IGUANA version: " + projectVersion + " (result ontology version: " + ontologyVersion + ")");
     }
 
 }
