@@ -44,6 +44,7 @@ fi
 
 # Run through multiple different execution paths, so that the tracing agent can generate complete configuration files.
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar --help             > /dev/null
+"$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar --version          > /dev/null
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar --dry-run -is "$SUITE" > /dev/null
 "$GRAALVM_HOME"/bin/java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image/ -jar "$TARGET_DIR"/iguana.jar --dry-run "$SUITE"     > /dev/null
 

@@ -40,6 +40,8 @@
         <minor.version>1</minor.version>
         <build.version>0</build.version>
 
+        <ontology.version>4.1.0</ontology.version>
+
         <java.version>17</java.version>
         <jena.version>5.1.0</jena.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -146,6 +148,20 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes><include>version.properties</include></includes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>version.properties</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -227,6 +243,7 @@
                                     <directory>${project.basedir}/src/main/resources/</directory>
                                     <includes>
                                         <include>start-iguana.sh</include>
+                                        <include>iguana.owx</include>
                                     </includes>
                                     <filtering>true</filtering>
                                 </resource>

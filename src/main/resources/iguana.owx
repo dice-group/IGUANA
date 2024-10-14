@@ -6,7 +6,7 @@
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      ontologyIRI="https://vocab.dice-research.org/iguana/"
-     versionIRI="https://vocab.dice-research.org/iguana/4.1.0/">
+     versionIRI="https://vocab.dice-research.org/iguana/${ontology.version}/">
     <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1/"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
@@ -48,7 +48,7 @@
     </Annotation>
     <Annotation>
         <AnnotationProperty abbreviatedIRI="owl:versionInfo"/>
-        <Literal>4.1.0</Literal>
+        <Literal>${ontology.version}</Literal>
     </Annotation>
     <Declaration>
         <Class abbreviatedIRI="iont:Connection"/>
