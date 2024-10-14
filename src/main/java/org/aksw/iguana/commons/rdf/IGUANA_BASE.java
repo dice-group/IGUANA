@@ -3,7 +3,7 @@ package org.aksw.iguana.commons.rdf;
 import java.util.Map;
 
 public class IGUANA_BASE {
-    public static final String NS = "http://iguana-benchmark.eu" + "/";
+    public static final String NS = "https://vocab.dice-research.org/iguana/";
     public static final String PREFIX = "iguana";
 
     private IGUANA_BASE() {

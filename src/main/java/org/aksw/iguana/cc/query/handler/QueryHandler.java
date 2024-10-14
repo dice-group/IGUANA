@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.aksw.iguana.cc.query.QueryData;
 import org.aksw.iguana.cc.query.list.impl.StringListQueryList;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
@@ -17,6 +18,10 @@ import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
 import org.apache.jena.query.*;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTPBuilder;
+import org.apache.jena.sparql.service.single.ServiceExecutor;
+import org.apache.jena.sparql.service.single.ServiceExecutorHttp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,8 +150,9 @@ public class QueryHandler {
         }
     }
 
-    public record QueryStringWrapper(int index, String query) {}
-    public record QueryStreamWrapper(int index, boolean cached, Supplier<InputStream> queryInputStreamSupplier) {}
+    public record QueryStringWrapper(int index, String query, boolean update) {}
+
+    public record QueryStreamWrapper(int index, boolean cached, Supplier<InputStream> queryInputStreamSupplier, boolean update) {}
 
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
@@ -155,8 +161,10 @@ public class QueryHandler {
     final protected Config config;
 
     final protected QueryList queryList;
+    final protected List<QueryData> queryData;
 
     private int workerCount = 0; // give every worker inside the same worker config an offset seed
+    private int totalWorkerCount = 0;
 
     final protected int hashCode;
 
@@ -168,6 +176,7 @@ public class QueryHandler {
         config = null;
         queryList = null;
         hashCode = 0;
+        queryData = null;
     }
 
     @JsonCreator
@@ -184,6 +193,17 @@ public class QueryHandler {
                     new FileReadingQueryList(querySource);
         }
         this.hashCode = queryList.hashCode();
+        this.queryData = QueryData.generate(IntStream.range(0, queryList.size()).mapToObj(i -> {
+            try {
+                return queryList.getQueryStream(i);
+            } catch (IOException e) {
+                throw new RuntimeException("Couldn't read query stream", e);
+            }
+        }).collect(Collectors.toList()));
+    }
+
+    public void setTotalWorkerCount(int workers) {
+        this.totalWorkerCount = workers;
     }
 
     private QueryList initializeTemplateQueryHandler(QuerySource templateSource) throws IOException {
@@ -238,7 +258,7 @@ public class QueryHandler {
 
     public QuerySelector getQuerySelectorInstance() {
         switch (config.order()) {
-            case LINEAR -> { return new LinearQuerySelector(queryList.size()); }
+            case LINEAR -> { return new LinearQuerySelector(queryList.size(), totalWorkerCount != 0 ? (queryList.size() * workerCount++) / totalWorkerCount : 0); }
             case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + workerCount++); }
         }
 
@@ -247,7 +267,7 @@ public class QueryHandler {
 
     public QueryStringWrapper getNextQuery(QuerySelector querySelector) throws IOException {
         final var queryIndex = querySelector.getNextIndex();
-        return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex));
+        return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex), queryData.get(queryIndex).update());
     }
 
     public QueryStreamWrapper getNextQueryStream(QuerySelector querySelector) {
@@ -258,7 +278,7 @@ public class QueryHandler {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
+        }, queryData.get(queryIndex).update());
     }
 
     @Override
@@ -358,7 +378,7 @@ public class QueryHandler {
             selectQueryString.setNsPrefixes(templateQuery.getPrefixMapping());
 
             // send request to SPARQL endpoint and instantiate the template based on results
-            try (QueryExecution exec = QueryExecutionFactory.createServiceRequest(config.endpoint().toString(), selectQueryString.asQuery())) {
+            try (QueryExecution exec = QueryExecutionHTTP.service(config.endpoint().toString(), selectQueryString.asQuery())) {
                 ResultSet resultSet = exec.execSelect();
                 if (!resultSet.hasNext()) {
                     LOGGER.warn("No results for query template: {}", templateQueryString);

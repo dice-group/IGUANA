@@ -28,7 +28,7 @@ public class QPS extends Metric implements QueryMetric {
         }
         BigDecimal tt = (new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 9));
         try {
-            return successes.divide(tt, 10, RoundingMode.HALF_UP);
+            return successes.divide(tt, 10, RoundingMode.HALF_UP).stripTrailingZeros();
         } catch (ArithmeticException e) {
             return BigDecimal.ZERO;
         }

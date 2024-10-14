@@ -22,7 +22,7 @@ public class QMPH extends Metric implements TaskMetric, WorkerMetric {
         final var sum = workers.stream()
                 .map(worker -> (BigDecimal) this.calculateWorkerMetric(worker.config(), data[(int) worker.getWorkerID()]))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return sum;
+        return sum.stripTrailingZeros();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class QMPH extends Metric implements TaskMetric, WorkerMetric {
         BigDecimal tt = (new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 9)).divide(BigDecimal.valueOf(3600), 20, RoundingMode.HALF_UP);
 
         try {
-            return successes.divide(tt, 10, RoundingMode.HALF_UP).divide(noq, 10, RoundingMode.HALF_UP);
+            return successes.divide(tt, 10, RoundingMode.HALF_UP).divide(noq, 10, RoundingMode.HALF_UP).stripTrailingZeros();
         } catch (ArithmeticException e) {
             return BigDecimal.ZERO;
         }

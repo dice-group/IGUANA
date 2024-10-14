@@ -7,7 +7,7 @@ The first excerpt shows the results for the task `ires:1710247002-3043500295/0` 
 `ires:1710247002-3043500295/0/0`:
 
 ```turtle
-<http://iguana-benchmark.eu/resource/1710247002-3043500295/0>
+< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0>
         a                     iont:Stresstest , iont:Task ;
         iprop:AvgQPS          84.121083502 ;
         iprop:NoQ             16 ;
@@ -18,9 +18,9 @@ The first excerpt shows the results for the task `ires:1710247002-3043500295/0` 
         iprop:noOfWorkers     "1"^^<http://www.w3.org/2001/XMLSchema#int> ;
         iprop:query           (iri of every query that has been executed inside the task) ;
         iprop:startDate       "2024-03-12T12:36:42.636Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-        iprop:workerResult    <http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0> .
+        iprop:workerResult    < https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0> .
 
-<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0>
+< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0>
         a                  iont:Worker ;
         iprop:AvgQPS       84.121083502 ;
         iprop:NoQ          16 ;
@@ -73,7 +73,7 @@ It consists of a hash value of the query handler and the query id in this format
 In this example, results for the query `ires:1181728761:0` are shown:
 
 ```turtle
-<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/1181728761:0>
+< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/1181728761:0>
         a                       iont:ExecutedQuery ;
         iprop:QPS               18.975908187 ;
         iprop:failed            0 ;
@@ -85,11 +85,11 @@ In this example, results for the query `ires:1181728761:0` are shown:
         iprop:unknownException  0 ;
         iprop:wrongCodes        0 .
 
-<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0>
+< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0/1181728761:0>
         a                       iont:ExecutedQuery ;
         iprop:QPS               18.975908187 ;
         iprop:failed            0 ;
-        iprop:queryExecution    <http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0/1> ;
+        iprop:queryExecution    < https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0/1181728761:0/1> ;
         iprop:queryID           ires:1181728761:0 ;
         iprop:resultSize        212 ;
         iprop:succeeded         1 ;
@@ -99,7 +99,7 @@ In this example, results for the query `ires:1181728761:0` are shown:
         iprop:wrongCodes        0 .
 ```
 
-The IRI `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0>` consists of the following
+The IRI `< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0/1181728761:0>` consists of the following
 segments:
 - `ires:1710247002-3043500295` is the IRI of the benchmark suite.
 - `ires:1710247002-3043500295/0` is the IRI of the first task.
@@ -109,16 +109,16 @@ segments:
 The suite id is made up of the timestamp and the hash value of the suite configuration in this pattern:
 `ires:<timestamp>-<hash>`.
 
-The subject `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0>` represents the results of the query
+The subject `< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0/1181728761:0>` represents the results of the query
 `ires:1181728761:0` from first worker of the task `1710247002-3043500295/0`.
 
-The subject `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/1181728761:0>` represents the results of the query
+The subject `< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/1181728761:0>` represents the results of the query
 `ires:1181728761:0` from every worker across the whole task `1710247002-3043500295/0`.
 
 Results of query metrics, like the `QPS` metric (also the `AES` metric),
 are therefore calculated for each query of each worker and for each query of the whole task.
 
-The `iprop:queryExecution` property of `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0>` 
+The `iprop:queryExecution` property of `< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0/1181728761:0>` 
 contains the IRIs of the executions of that query from that worker.
 These will be explained in the next section.
 
@@ -128,11 +128,11 @@ With the `EachQuery` metric Iguana stores the statistics of each execution of a 
 The following excerpt shows the execution statistics of the query `ires:1181728761:0`:
 
 ```turtle
-<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0/1>
+< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0/1181728761:0/1>
         iprop:code          "0"^^<http://www.w3.org/2001/XMLSchema#int> ;
         iprop:httpCode      "200" ;
         iprop:queryID       ires:1181728761:0 ;
-        iprop:responseBody  <http://iguana-benchmark.eu/resource/responseBody/-3025899826584824492> ;
+        iprop:responseBody  < https://vocab.dice-research.org/iguana/resource/responseBody/-3025899826584824492> ;
         iprop:resultSize    "212"^^<http://www.w3.org/2001/XMLSchema#long> ;
         iprop:run           1 ;
         iprop:startTime     "2024-03-12T12:36:42.647764Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
@@ -140,7 +140,7 @@ The following excerpt shows the execution statistics of the query `ires:11817287
         iprop:time          "PT0.0526984S"^^<http://www.w3.org/2001/XMLSchema#dayTimeDuration> .
 ```
 
-The IRI `<http://iguana-benchmark.eu/resource/1710247002-3043500295/0/0/1181728761:0/1>` consists of the worker
+The IRI `< https://vocab.dice-research.org/iguana/resource/1710247002-3043500295/0/0/1181728761:0/1>` consists of the worker
 query IRI as described above and the run number of the query execution.
 
 The properties of the `EachQuery` metric are described in the [metrics](./metrics.md) section.

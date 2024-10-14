@@ -1,13 +1,6 @@
 package org.aksw.iguana.cc.lang.impl;
 
 import org.aksw.iguana.cc.lang.LanguageProcessor;
-import org.aksw.iguana.cc.storage.Storable;
-import org.aksw.iguana.commons.rdf.IPROP;
-import org.aksw.iguana.commons.rdf.IRES;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.slf4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -21,8 +14,6 @@ import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
 
 /**
  * SAX Parser for SPARQL XML Results.

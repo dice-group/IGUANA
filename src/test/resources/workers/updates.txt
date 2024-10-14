@@ -1,3 +1,0 @@
-INSERT DATA {<http://example.com/s> <http://example.com/o> <http://example.com/q>}
-INSERT DATA {<http://example.com/s> <http://example.com/o> <http://example.com/q>}
-INSERT DATA {<http://example.com/s> <http://example.com/o> <http://example.com/q>}

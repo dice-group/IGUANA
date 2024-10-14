@@ -179,7 +179,7 @@ For the csv storage, the above configuration might result with the following `ta
 
 | taskID                                                      | connection | version | dataset |
 |-------------------------------------------------------------|------------|---------|---------|
-| http://iguana-benchmark.eu/resource/1699354119-3273189568/0 | fuseki     | v2      | sp2b    | 
+|  https://vocab.dice-research.org/iguana/resource/1699354119-3273189568/0 | fuseki     | v2      | sp2b    | 
 
 The resulting triples for the rdf file storage might look like this:
 
