@@ -164,6 +164,7 @@ public class QueryHandler {
     final protected List<QueryData> queryData;
 
     private int workerCount = 0; // give every worker inside the same worker config an offset seed
+    private int totalWorkerCount = 0;
 
     final protected int hashCode;
 
@@ -199,6 +200,10 @@ public class QueryHandler {
                 throw new RuntimeException("Couldn't read query stream", e);
             }
         }).collect(Collectors.toList()));
+    }
+
+    public void setTotalWorkerCount(int workers) {
+        this.totalWorkerCount = workers;
     }
 
     private QueryList initializeTemplateQueryHandler(QuerySource templateSource) throws IOException {
@@ -253,7 +258,7 @@ public class QueryHandler {
 
     public QuerySelector getQuerySelectorInstance() {
         switch (config.order()) {
-            case LINEAR -> { return new LinearQuerySelector(queryList.size()); }
+            case LINEAR -> { return new LinearQuerySelector(queryList.size(), totalWorkerCount != 0 ? (queryList.size() * workerCount++) / totalWorkerCount : 0); }
             case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + workerCount++); }
         }
 
