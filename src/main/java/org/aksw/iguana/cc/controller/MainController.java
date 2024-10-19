@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Objects;
 
 
 /**
@@ -36,6 +37,9 @@ public class MainController {
 
         @Parameter(description = "suite file {yml,yaml,json}", arity = 1, required = true, converter = PathConverter.class)
         private Path suitePath;
+
+        @Parameter(names = {"--version", "-v"}, description = "Outputs the version number of the program and result ontology.")
+        private boolean version;
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
@@ -45,7 +49,7 @@ public class MainController {
      *
      * @param argc The command line arguments that are passed to the program.
      */
-    public static void main(String[] argc) {
+    public static void main(String[] argc) throws IOException {
         // Configurator.reconfigure(URI.create("log4j2.yml"));
 
         var args = new Args();
@@ -55,6 +59,13 @@ public class MainController {
         try {
             jc.parse(argc);
         } catch (ParameterException e) {
+            // The exception is also thrown when no suite file is provided. In the case where only the version option
+            // is provided, this would still throw. Therefore, we need to check if the version option is provided.
+            if (args.version) {
+                outputVersion();
+                System.exit(0);
+            }
+
             System.err.println(e.getLocalizedMessage());
             jc.usage();
             System.exit(0);
@@ -62,6 +73,10 @@ public class MainController {
         if (args.help) {
             jc.usage();
             System.exit(1);
+        }
+        if (args.version) {
+            outputVersion();
+            System.exit(0);
         }
 
         try {
@@ -72,6 +87,15 @@ public class MainController {
             System.exit(0);
         }
         System.exit(0);
+    }
+
+    private static void outputVersion() throws IOException {
+        ClassLoader classloader = MainController.class.getClassLoader();
+        String properties = new String(Objects.requireNonNull(classloader.getResourceAsStream("version.properties")).readAllBytes());
+        String[] lines = properties.split("\\n");
+        String projectVersion = lines[0].split("=")[1].trim();
+        String ontologyVersion = lines[1].split("=")[1].trim();
+        System.out.printf("IGUANA version: %s (result ontology version: %s)%n", projectVersion, ontologyVersion);
     }
 
 }
