@@ -18,6 +18,10 @@ import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
 import org.apache.jena.query.*;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTPBuilder;
+import org.apache.jena.sparql.service.single.ServiceExecutor;
+import org.apache.jena.sparql.service.single.ServiceExecutorHttp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,6 +170,7 @@ public class QueryHandler {
     int representativeQueryCount = 0; // stores the number of queries that are represented in the results
 
     private int workerCount = 0; // give every worker inside the same worker config an offset seed
+    private int totalWorkerCount = 0;
 
     final protected int hashCode;
 
@@ -203,6 +208,10 @@ public class QueryHandler {
             representativeQueryCount = queryList.size();
         }
         this.hashCode = queryList.hashCode();
+    }
+
+    public void setTotalWorkerCount(int workers) {
+        this.totalWorkerCount = workers;
     }
 
     private record TemplateData(List<String> queries, int templates, int[] indices, int[] instanceNumber, int instanceStart) {}
@@ -340,7 +349,7 @@ public class QueryHandler {
 
     public QuerySelector getQuerySelectorInstance() {
         switch (config.order()) {
-            case LINEAR -> { return new LinearQuerySelector(queryList.size()); }
+            case LINEAR -> { return new LinearQuerySelector(queryList.size(), totalWorkerCount != 0 ? (queryList.size() * workerCount++) / totalWorkerCount : 0); }
             case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + workerCount++); }
         }
 
@@ -498,7 +507,7 @@ public class QueryHandler {
 
             int count = 0;
             // send request to SPARQL endpoint and instantiate the template based on results
-            try (QueryExecution exec = QueryExecutionFactory.createServiceRequest(config.endpoint().toString(), selectQueryString.asQuery())) {
+            try (QueryExecution exec = QueryExecutionHTTP.service(config.endpoint().toString(), selectQueryString.asQuery())) {
                 ResultSet resultSet = exec.execSelect();
                 if (!resultSet.hasNext()) {
                     LOGGER.warn("No results for query template: {}", templateQueryString);

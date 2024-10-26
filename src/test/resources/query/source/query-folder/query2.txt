@@ -1,3 +1,0 @@
-QUERY 2 {
-still query 2
-}

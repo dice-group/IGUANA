@@ -2,6 +2,7 @@ package org.aksw.iguana.cc.tasks.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.aksw.iguana.cc.metrics.Metric;
+import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.storage.Storage;
 import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.HttpWorker;
@@ -44,6 +45,15 @@ public class Stresstest implements Task {
 
         // initialize workers
         if (config.warmupWorkers() != null) {
+            // initialize query handlers
+            // count the number of workers for each query handler
+            final var queryHandlers = config.warmupWorkers.stream().map(HttpWorker.Config::queries).distinct().toList();
+            queryHandlers.stream().map(qh1 ->
+                            List.of(qh1, config.warmupWorkers.stream()
+                                    .map(HttpWorker.Config::queries)
+                                    .filter(qh1::equals)
+                                    .count()))
+                    .forEach(list -> ((QueryHandler) list.get(0)).setTotalWorkerCount((int) (long) list.get(1)));
             long workerId = 0;
             for (HttpWorker.Config workerConfig : config.warmupWorkers()) {
                 for (int i = 0; i < workerConfig.number(); i++) {
@@ -54,6 +64,15 @@ public class Stresstest implements Task {
         }
 
         for (HttpWorker.Config workerConfig : config.workers()) {
+            // initialize query handlers
+            // count the number of workers for each query handler
+            final var queryHandlers = config.workers.stream().map(HttpWorker.Config::queries).distinct().toList();
+            queryHandlers.stream().map(qh1 ->
+                            List.of(qh1, config.workers.stream()
+                                    .filter(w -> w.queries().equals(qh1))
+                                    .mapToInt(HttpWorker.Config::number)
+                                    .sum()))
+                    .forEach(list -> ((QueryHandler) list.get(0)).setTotalWorkerCount((int) list.get(1)));
             long workerId = 0;
             for (int i = 0; i < workerConfig.number(); i++) {
                 var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
@@ -83,10 +102,9 @@ public class Stresstest implements Task {
     public void run() {
         if (!warmupWorkers.isEmpty()) {
             SPARQLProtocolWorker.initHttpClient(warmupWorkers.size());
-            var warmupResults = executeWorkers(warmupWorkers); // warmup results will be dismissed
+            executeWorkers(warmupWorkers); // warmup results will be dismissed
             SPARQLProtocolWorker.closeHttpClient();
         }
-
         SPARQLProtocolWorker.initHttpClient(workers.size());
         var results = executeWorkers(workers);
         SPARQLProtocolWorker.closeHttpClient();

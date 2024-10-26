@@ -38,6 +38,12 @@ class QueryDataTest {
                 SELECT ?s ?p ?o WHERE {
                     ?s ?p ?o
                 }
+                
+                INSERT DATA {
+                    <http://example.org/s> <http://example.org/p> <http://example.org/o>
+                }; INSERT DATA {
+                    <http://example.org/s> <http://example.org/p> <http://example.org/o>
+                }
                 """);
     }
 
@@ -55,11 +61,12 @@ class QueryDataTest {
                 QueryData.generate(testStrings.stream().map(s -> (InputStream) new ByteArrayInputStream(s.getBytes())).toList())
         );
         for (List<QueryData> generation : generations) {
-            assertEquals(4, generation.size());
+            assertEquals(5, generation.size());
             assertFalse(generation.get(0).update());
             assertTrue(generation.get(1).update());
             assertTrue(generation.get(2).update());
             assertFalse(generation.get(3).update());
+            assertTrue(generation.get(4).update());
         }
     }
 }

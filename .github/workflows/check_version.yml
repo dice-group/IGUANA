@@ -9,3 +9,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: .github/scripts/tagcheck.sh v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+      - run: .github/scripts/check_schema_version.sh

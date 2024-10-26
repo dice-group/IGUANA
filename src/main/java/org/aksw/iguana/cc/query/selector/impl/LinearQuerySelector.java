@@ -14,25 +14,30 @@ public class LinearQuerySelector extends QuerySelector {
 
     public LinearQuerySelector(int size) {
         super(size);
-        index = -1;
+        index = 0;
+    }
+
+    public LinearQuerySelector(int size, int startIndex) {
+        super(size);
+        index = startIndex;
     }
 
     @Override
     public int getNextIndex() {
-        index++;
         if (index >= this.size) {
             index = 0;
         }
-        return index;
+        return index++;
     }
 
     /**
-     * Return the current index. This is the index of the last returned query. If no query was returned yet, it returns
-     * -1.
-     * @return
+     * Return the current index. This is the index of the last returned query.
+     * If no query was returned yet, the method will return -1.
+     *
+     * @return the current index
      */
     @Override
     public int getCurrentIndex() {
-        return index;
+        return index - 1;
     }
 }

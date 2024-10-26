@@ -40,13 +40,13 @@
         <minor.version>1</minor.version>
         <build.version>0</build.version>
 
+        <ontology.version>4.1.0</ontology.version>
+
         <java.version>17</java.version>
-        <jena.version>4.2.0</jena.version>
+        <jena.version>5.1.0</jena.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compile.target>17</maven.compile.target>
         <maven.compile.source>17</maven.compile.source>
-
-        <log4j.version>2.19.0</log4j.version>
     </properties>
 
     <distributionManagement>
@@ -76,17 +76,32 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.14</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.12.5</version>
+            <version>1.5.6</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.12.5</version>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.17.2</version>
         </dependency>
         <dependency>
             <groupId>com.networknt</groupId>
@@ -94,20 +109,15 @@
             <version>1.0.78</version>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.9.2</version>
+            <version>5.10.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.7.1</version>
+            <version>5.9</version>
         </dependency>
         <dependency>
             <groupId>org.lz4</groupId>
@@ -117,7 +127,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-common</artifactId>
-            <version>2.5.5</version>
+            <version>2.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.beust</groupId>
@@ -127,22 +137,36 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>2.35.1</version>
+            <version>2.35.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.3</version>
+            <version>5.3.1</version>
         </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes><include>version.properties</include></includes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>version.properties</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>17</source>
                     <target>17</target>
@@ -159,7 +183,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.3.1</version>
                 <configuration>
                     <argLine>-Xmx16384M</argLine>
                 </configuration>
@@ -169,7 +193,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.6.0</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <finalName>iguana</finalName>
@@ -195,17 +219,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.8.0</version>
                 <configuration>
                     <doclint>-html</doclint>
                     <reportOutputDirectory>javadoc/${revision}/</reportOutputDirectory>
                     <destDir></destDir>
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -220,6 +243,7 @@
                                     <directory>${project.basedir}/src/main/resources/</directory>
                                     <includes>
                                         <include>start-iguana.sh</include>
+                                        <include>iguana.owx</include>
                                     </includes>
                                     <filtering>true</filtering>
                                 </resource>
@@ -239,7 +263,7 @@
                     <!-- needs to be correct version fitting to junit-jupiter -->
                     <groupId>org.junit.platform</groupId>
                     <artifactId>junit-platform-launcher</artifactId>
-                    <version>1.9.2</version>
+                    <version>1.10.3</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -248,7 +272,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.6.0</version>
+                        <version>3.4.1</version>
                         <executions>
                             <execution>
                                 <id>run-script</id>
@@ -283,7 +307,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.1.2</version>
+                        <version>3.2.5</version>
                     </plugin>
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>

@@ -1,20 +1,14 @@
 package org.aksw.iguana.cc.lang.impl;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
-import org.json.simple.parser.ContentHandler;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.json.simple.parser.ParseException.ERROR_UNEXPECTED_EXCEPTION;
 
 /**
  * SAX Parser for SPARQL JSON Results.
@@ -30,22 +24,31 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
 
     @Override
     public LanguageProcessingData process(InputStream inputStream, long hash) {
-        var parser = new JSONParser();
         var handler = new SaxSparqlJsonResultContentHandler();
-        try {
-            parser.parse(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)), handler);
-            if (handler.isAskResult())
-                return new BooleanResultData(hash, handler.booleanResult(), handler.links(), null);
-            return new ResultCountData(hash, handler.solutions(), handler.boundValues(), handler.variables(), handler.links(), null);
+        JsonFactory factory = new JsonFactory();
+        try (var parser = factory.createParser(inputStream)) {
+            while (parser.nextToken() != null) {
+                switch (parser.getCurrentToken()) {
+                    case START_OBJECT -> handler.startObject();
+                    case END_OBJECT -> handler.endObject();
+                    case START_ARRAY -> handler.startArray();
+                    case END_ARRAY -> handler.endArray();
+                    case FIELD_NAME -> handler.startObjectEntry(parser.getCurrentName());
+                    case VALUE_STRING, VALUE_NUMBER_INT, VALUE_NUMBER_FLOAT, VALUE_NULL -> handler.primitive(parser.getValueAsString());
+                    case VALUE_TRUE, VALUE_FALSE -> handler.primitive(parser.getBooleanValue());
+                }
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ParseException e) {
-            LOGGER.error("Error while parsing SPARQL XML Results.", e);
+            LOGGER.error("Error while parsing SPARQL JSON Results.", e);
             return new ResultCountData(hash, -1, -1, null, null, e);
         }
+
+        if (handler.isAskResult())
+            return new BooleanResultData(hash, handler.booleanResult(), handler.links(), null);
+        return new ResultCountData(hash, handler.solutions(), handler.boundValues(), handler.variables(), handler.links(), null);
     }
 
-    private static class SaxSparqlJsonResultContentHandler implements ContentHandler {
+    private static class SaxSparqlJsonResultContentHandler {
         // TODO: code is unnecessary complicated
 
         private boolean headFound = false;
@@ -64,18 +67,6 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         private final List<String> variables = new ArrayList<>();
         private final List<String> links = new ArrayList<>();
 
-
-        @Override
-        public void startJSON() {
-        }
-
-        @Override
-        public void endJSON() throws ParseException {
-            if (inResults || inBindings || inBindingsArray || !headFound || objectDepth != 0)
-                throw new ParseException(ERROR_UNEXPECTED_EXCEPTION, "SPARQL Json Response was malformed.");
-        }
-
-        @Override
         public boolean startObject() {
             objectDepth += 1;
             if (inBindingsArray) {
@@ -87,7 +78,6 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
             return true;
         }
 
-        @Override
         public boolean endObject() {
             switch (objectDepth) {
                 case 1:
@@ -104,7 +94,6 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
             return true;
         }
 
-        @Override
         public boolean startArray() {
             if (objectDepth == 2 && inResults && inBindings && !inBindingsArray) {
                 inBindingsArray = true;
@@ -112,7 +101,6 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
             return true;
         }
 
-        @Override
         public boolean endArray() {
             if (inVars)
                 inVars = false;
@@ -125,7 +113,6 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
         }
 
 
-        @Override
         public boolean startObjectEntry(String key) {
             switch (objectDepth) {
                 case 1 -> {
@@ -153,11 +140,6 @@ public class SaxSparqlJsonResultCountingParser extends LanguageProcessor {
                     }
                 }
             }
-            return true;
-        }
-
-        @Override
-        public boolean endObjectEntry() {
             return true;
         }
 

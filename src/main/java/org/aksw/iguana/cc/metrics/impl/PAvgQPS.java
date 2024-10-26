@@ -26,7 +26,7 @@ public class PAvgQPS extends Metric implements TaskMetric, WorkerMetric {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         try {
-            return sum.divide(BigDecimal.valueOf(data.length), 10, RoundingMode.HALF_UP);
+            return sum.divide(BigDecimal.valueOf(data.length), 10, RoundingMode.HALF_UP).stripTrailingZeros();
         } catch (ArithmeticException e) {
             return BigDecimal.ZERO;
         }
@@ -44,7 +44,7 @@ public class PAvgQPS extends Metric implements TaskMetric, WorkerMetric {
         }
 
         try {
-            return sum.divide(BigDecimal.valueOf(data.length), 10, RoundingMode.HALF_UP);
+            return sum.divide(BigDecimal.valueOf(data.length), 10, RoundingMode.HALF_UP).stripTrailingZeros();
         } catch (ArithmeticException e) {
             return BigDecimal.ZERO;
         }
