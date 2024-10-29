@@ -38,7 +38,7 @@
         <major.minor.version>${major.version}.${minor.version}</major.minor.version>
         <major.version>4</major.version>
         <minor.version>1</minor.version>
-        <build.version>0</build.version>
+        <build.version>1</build.version>
 
         <java.version>17</java.version>
         <jena.version>4.2.0</jena.version>
