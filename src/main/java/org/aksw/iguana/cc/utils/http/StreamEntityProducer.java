@@ -39,13 +39,11 @@ public class StreamEntityProducer implements AsyncEntityProducer {
      * @param streamSupplier the input stream supplier, should be repeatable
      * @param chunked        whether the entity data should be sent in chunks
      */
-    public StreamEntityProducer(Supplier<InputStream> streamSupplier, boolean chunked, String contentType) throws IOException {
+    public StreamEntityProducer(Supplier<InputStream> streamSupplier, boolean chunked, String contentType) {
         this.streamSupplier = streamSupplier;
         this.chunked = chunked;
         this.contentType = contentType;
-        if (!chunked) {
-            content = (streamSupplier.get() instanceof ByteArrayListInputStream) ? (ByteArrayListInputStream) streamSupplier.get() : null;
-        }
+        if (!chunked) loadContent();
     }
 
     @Override
@@ -132,7 +130,8 @@ public class StreamEntityProducer implements AsyncEntityProducer {
     @Override
     public void produce(DataStreamChannel channel) throws IOException {
         // handling of non-chunked request
-        if (content != null) {
+        if (!chunked) {
+            if (content == null) loadContent(); // might be necessary if the producer is reused
             ByteBuffer buffer = content.getCurrentBuffer();
             while (channel.write(buffer) > 0) {
                 if (!buffer.hasRemaining()) {
@@ -148,7 +147,7 @@ public class StreamEntityProducer implements AsyncEntityProducer {
         }
 
         // handling of chunked request
-        if (chunked && currentStream == null) {
+        if (currentStream == null) {
             currentStream = streamSupplier.get();
         }
 
@@ -161,5 +160,9 @@ public class StreamEntityProducer implements AsyncEntityProducer {
         if (bytesRead == -1) {
             channel.endStream();
         }
+    }
+
+    private void loadContent() {
+        content = (ByteArrayListInputStream) streamSupplier.get();
     }
 }
