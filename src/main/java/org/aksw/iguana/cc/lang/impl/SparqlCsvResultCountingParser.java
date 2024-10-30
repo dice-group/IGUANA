@@ -18,7 +18,7 @@ import java.util.List;
  * <p>
  * Specification: <a href="https://www.w3.org/TR/sparql11-results-csv-tsv/">https://www.w3.org/TR/sparql11-results-csv-tsv/</a>
  */
-@LanguageProcessor.ContentType("text/csv")
+@LanguageProcessor.ContentType({"text/csv", "text/csv; charset=utf-8"})
 public class SparqlCsvResultCountingParser extends LanguageProcessor {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SparqlCsvResultCountingParser.class);
