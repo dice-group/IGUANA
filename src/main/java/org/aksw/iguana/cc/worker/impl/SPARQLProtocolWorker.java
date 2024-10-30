@@ -1,3 +1,6 @@
+Here is the merged file content:
+
+```
 package org.aksw.iguana.cc.worker.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -65,6 +68,10 @@ public class SPARQLProtocolWorker extends HttpWorker {
             this.acceptHeader = acceptHeader;
             this.requestType = requestType == null ? RequestFactory.RequestType.GET_QUERY : requestType;
             this.parseResults = parseResults == null || parseResults;
+
+            if (acceptHeader != null && acceptHeader.equals("text/csv")) {
+                acceptHeader = "text/csv; charset=utf-8";
+            }
         }
     }
 
@@ -239,7 +246,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
         }
 
         if (!result.successful() && discardOnFailure) {
-            LOGGER.debug("{}\t:: Discarded execution, because the time limit has been reached: [queryID={}]", this, result.queryID);
+            LOGGER.debug("{}\t:: Discarded execution, because the time limit has been reached: [queryID={}]", this, result.queryID());
             return null;
         }
 
@@ -354,129 +361,4 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     responseEnd = System.nanoTime();
 
                 // duration of the execution
-                final var duration = Duration.ofNanos(responseEnd - requestStart);
-
-                // check for http error
-                if (response.getCode() / 100 != 2) {
-                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, null);
-                }
-
-                // check content length
-                final var contentLengthHeader = response.getFirstHeader("Content-Length");
-                Long contentLength = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : null;
-                if (contentLength != null) {
-                    if ((!config.parseResults() && responseSize != contentLength) // if parseResults is false, the responseSize will be used
-                            || (config.parseResults() && responseBody.size() != contentLength)) { // if parseResults is true, the size of the bbaos will be used
-                        if (responseSize != responseBody.size())
-                            LOGGER.error("Error during copying the response data. (expected written data size = {}, actual written data size = {}, Content-Length-Header = {})", responseSize, responseBody.size(), contentLengthHeader.getValue());
-                        final var exception = new HttpException(String.format("Content-Length header value doesn't match actual content length. (Content-Length-Header = %s, written data size = %s)", contentLength, config.parseResults() ? responseBody.size() : responseSize));
-                        return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, exception);
-                    }
-                }
-
-                // check timeout
-                if (duration.compareTo(timeout) > 0) {
-                    return createFailedResultDuringResponse(queryIndex, response, timeStamp, duration, new TimeoutException());
-                }
-
-                // return successful result
-                return new HttpExecutionResult(
-                        queryIndex,
-                        Optional.of(response),
-                        timeStamp,
-                        Duration.ofNanos(responseEnd - requestStart),
-                        Optional.of(responseBody),
-                        OptionalLong.of(config.parseResults() ? responseBody.size() : responseSize),
-                        OptionalLong.of(config.parseResults() ? hasher.getValue() : 0),
-                        Optional.empty()
-                );
-            }
-        }, null); // the callback is used to handle the end state of the request, but it's not needed here
-
-        try {
-            // Wait for the request to finish, but don't wait longer than the timeout.
-            // The timeout from the configuration is used instead of the timeout from the parameter.
-            // The timeout from the parameter might be reduced if the end of the time limit is near
-            // and it might be so small that it causes issues.
-            return future.get(config.timeout().toNanos(), TimeUnit.NANOSECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            // This will close the connection and cancel the request if it's still running.
-            future.cancel(true);
-            return createFailedResultBeforeRequest(queryIndex, e);
-        } catch (TimeoutException e) {
-            if (future.isDone()) {
-                LOGGER.warn("Request finished immediately after timeout but will still be counted as timed out.");
-                try {
-                    return future.get();
-                } catch (InterruptedException | ExecutionException ex) {
-                    return createFailedResultBeforeRequest(queryIndex, ex);
-                }
-            } else {
-                future.cancel(true);
-                return createFailedResultBeforeRequest(queryIndex, e);
-            }
-        }
-    }
-
-    /**
-     * Creates a failed result for a query execution that failed before the request.
-     *
-     * @param queryIndex the index of the query
-     * @param e          the exception that caused the error
-     * @return           the failed result
-     */
-    private static HttpExecutionResult createFailedResultBeforeRequest(int queryIndex, Exception e) {
-        return new HttpExecutionResult(
-                queryIndex,
-                Optional.empty(),
-                Instant.now(),
-                Duration.ZERO,
-                Optional.empty(),
-                OptionalLong.empty(),
-                OptionalLong.empty(),
-                Optional.ofNullable(e)
-        );
-    }
-
-    /**
-     * Creates a failed result for a query execution that failed during the response.
-     *
-     * @param queryIndex the index of the query
-     * @param response   the response of the query
-     * @param timestamp  the start time of the query
-     * @param duration   the duration of the query until error
-     * @param e          the exception that caused the error, can be null
-     * @return           the failed result
-     */
-    private static HttpExecutionResult createFailedResultDuringResponse(
-            int queryIndex,
-            HttpResponse response,
-            Instant timestamp,
-            Duration duration,
-            Exception e) {
-        return new HttpExecutionResult(
-                queryIndex,
-                Optional.ofNullable(response),
-                timestamp,
-                duration,
-                Optional.empty(),
-                OptionalLong.empty(),
-                OptionalLong.empty(),
-                Optional.ofNullable(e)
-        );
-    }
-
-    private void logExecution(ExecutionStats execution) {
-        switch (execution.endState()) {
-            case SUCCESS -> LOGGER.debug("{}\t:: Successfully executed query: [queryID={}].", this, execution.queryID());
-            case TIMEOUT -> LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, execution.queryID(), execution.duration()); // TODO: look for a possibility to add the query string for better logging
-            case HTTP_ERROR -> LOGGER.warn("{}\t:: HTTP Error occurred during query execution: [queryID={}, httpError={}].", this, execution.queryID(), execution.httpStatusCode().orElse(-1));
-            case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, execution.queryID(), execution.error().orElse(null));
-        }
-    }
-
-    @Override
-    public String toString() {
-        return MessageFormatter.format("[{}-{}]", SPARQLProtocolWorker.class.getSimpleName(), this.workerID).getMessage();
-    }
-}
+                final var duration = Duration.ofNanos(responseEnd - request
