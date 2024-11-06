@@ -6,7 +6,7 @@ connections:
   - name: "Blazegraph"
     version: "1.1.1"
     dataset: "DatasetName"
-    endpoint: "https://dbpedia.org/sparql"
+    endpoint: "https://query.wikidata.org/"
     authentication:
       user: "user"
       password: "test"
