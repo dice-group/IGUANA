@@ -22,6 +22,14 @@ public record QueryData(int queryId, QueryType type, Integer templateId) {
         TEMPLATE_INSTANCE
     }
 
+    /**
+     * Generates a list of QueryData objects for a collection of queries.
+     * The method uses the Jena library to check if the query is an update query.
+     * It only checks if the query is an update query or not and sets their index in the order they were given.
+     *
+     * @param queries collection of input streams of queries
+     * @return list of QueryData objects
+     */
     public static List<QueryData> generate(Collection<InputStream> queries) {
         final var queryData = new ArrayList<QueryData>();
         int i = 0;
@@ -40,7 +48,13 @@ public record QueryData(int queryId, QueryType type, Integer templateId) {
         return queryData;
     }
 
-    public static boolean checkUpdate(InputStream query) {
+    /**
+     * Checks if the given query is an update query.
+     * The method uses the Jena library to check if the query is an update query.
+     *
+     * @param query input stream of the query
+     * @return true if the query is an update query, false otherwise
+     */
     public static boolean checkIfUpdate(InputStream query) {
         try {
             UpdateFactory.read(query); // Throws an exception if the query is not an update query
