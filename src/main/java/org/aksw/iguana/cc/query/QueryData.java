@@ -19,8 +19,7 @@ public record QueryData(int queryId, QueryType type, Integer templateId) {
         DEFAULT,
         UPDATE,
         TEMPLATE,
-        TEMPLATE_INSTANCE_DEFAULT,
-        TEMPLATE_INSTANCE_UPDATE
+        TEMPLATE_INSTANCE
     }
 
     /**
