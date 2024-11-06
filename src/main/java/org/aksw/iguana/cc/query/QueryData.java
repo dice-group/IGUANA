@@ -41,6 +41,7 @@ public record QueryData(int queryId, QueryType type, Integer templateId) {
     }
 
     public static boolean checkUpdate(InputStream query) {
+    public static boolean checkIfUpdate(InputStream query) {
         try {
             UpdateFactory.read(query); // Throws an exception if the query is not an update query
             return true;

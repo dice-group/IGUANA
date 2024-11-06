@@ -335,7 +335,7 @@ public class QueryHandler {
                         return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE, null);
                     } else {
                         // query is neither a template nor an instance
-                        final var update = QueryData.checkUpdate(new ByteArrayInputStream(query.getBytes()));
+                        final var update = QueryData.checkIfUpdate(new ByteArrayInputStream(query.getBytes()));
                         if (config.template.individualResults) {
                             return new QueryData(index.getAndIncrement() - templateIndex.get(), update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null);
                         }
