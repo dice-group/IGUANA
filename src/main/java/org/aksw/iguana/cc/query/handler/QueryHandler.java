@@ -154,7 +154,31 @@ public class QueryHandler {
         }
     }
 
+    /**
+     * Wrapper for the next query that will be executed.
+     * The wrapper contains the query as a string.
+     * The result id is only set if the query is a template instance.
+     * They are used to aggregate the results of multiple queries by using the same id.
+     *
+     * @param index the index of the query
+     * @param query the query string
+     * @param update whether the query is an update query
+     * @param resultId the query id that should be used inside the result
+     */
     public record QueryStringWrapper(int index, String query, boolean update, Integer resultId) {}
+
+    /**
+     * Wrapper for the next query that will be executed.
+     * The wrapper contains the query as an input stream supplier, that generates an input stream with the query.
+     * The result id is only set if the query is a template instance.
+     * They are used to aggregate the results of multiple queries by using the same id.
+     *
+     * @param index the index of the query
+     * @param cached whether the query is cached in memory
+     * @param queryInputStreamSupplier the supplier that generates the input stream with the query
+     * @param update whether the query is an update query
+     * @param resultId the query id that should be used inside the result
+     */
     public record QueryStreamWrapper(int index, boolean cached, Supplier<InputStream> queryInputStreamSupplier, boolean update, Integer resultId) {}
 
 
