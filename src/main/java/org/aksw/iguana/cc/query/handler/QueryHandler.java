@@ -19,9 +19,6 @@ import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
 import org.apache.jena.query.*;
 import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
-import org.apache.jena.sparql.exec.http.QueryExecutionHTTPBuilder;
-import org.apache.jena.sparql.service.single.ServiceExecutor;
-import org.apache.jena.sparql.service.single.ServiceExecutorHttp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -190,8 +187,8 @@ public class QueryHandler {
     final protected QueryList queryList;
     protected List<QueryData> queryData;
 
-    int executableQueryCount = 0;     // stores the number of queries that can be executed
-    int representativeQueryCount = 0; // stores the number of queries that are represented in the results
+    private int executableQueryCount = 0;     // stores the number of queries that can be executed
+    private int representedQueryCount = 0; // stores the number of queries that are represented in the results
 
     private int workerCount = 0; // give every worker inside the same worker config an offset seed
     private int totalWorkerCount = 0;
@@ -229,7 +226,7 @@ public class QueryHandler {
                 }
             }).collect(Collectors.toList()));
             executableQueryCount = queryList.size();
-            representativeQueryCount = queryList.size();
+            representedQueryCount = queryList.size();
         }
         this.hashCode = queryList.hashCode();
     }
@@ -304,9 +301,9 @@ public class QueryHandler {
         queryData = templateData.queries.stream().map(
                 query -> {
                     // If "individualResults" is turned on, move the query templates outside the range of
-                    // "representativeQueryCount" to avoid them being represented in the results.
+                    // "representedQueryCount" to avoid them being represented in the results.
                     // Otherwise, if "individualResults" is turned off, the instances need to be moved outside the range
-                    // of "representativeQueryCount", but because "instantiateTemplateQueries" already appends the
+                    // of "representedQueryCount", but because "instantiateTemplateQueries" already appends the
                     // instances to the end of the original queries, this will already be done.
 
                     // once the template instances start, the template index is reset and reused for the instances
@@ -350,7 +347,7 @@ public class QueryHandler {
         // set the number of queries that can be executed and the number of queries
         // that are represented in the results
         this.executableQueryCount = templateData.queries.size() - templateData.templates;
-        this.representativeQueryCount = config.template.individualResults ?
+        this.representedQueryCount = config.template.individualResults ?
                 templateData.queries.size() - templateData.templates :
                 templateData.instanceStart;
         return new StringListQueryList(templateData.queries);
@@ -428,8 +425,8 @@ public class QueryHandler {
         return executableQueryCount;
     }
 
-    public int getRepresentativeQueryCount() {
-        return representativeQueryCount;
+    public int getRepresentedQueryCount() {
+        return representedQueryCount;
     }
 
     public String getQueryId(int i) {
@@ -443,8 +440,8 @@ public class QueryHandler {
      * @return String[] of query ids
      */
     public String[] getAllQueryIds() {
-        String[] out = new String[getRepresentativeQueryCount()];
-        for (int i = 0; i < getRepresentativeQueryCount(); i++) {
+        String[] out = new String[getRepresentedQueryCount()];
+        for (int i = 0; i < getRepresentedQueryCount(); i++) {
             out[i] = getQueryId(i);
         }
         return out;

@@ -128,7 +128,7 @@ public class TemplateQueriesTest extends QueryHandlerTest {
         final var queryHandler = new QueryHandler(queryHandlerConfig);
         final var selector = queryHandler.getQuerySelectorInstance();
         Assertions.assertEquals(2, queryHandler.getExecutableQueryCount());
-        Assertions.assertEquals(1, queryHandler.getRepresentativeQueryCount());
+        Assertions.assertEquals(1, queryHandler.getRepresentedQueryCount());
         var query = queryHandler.getNextQuery(selector);
         Assertions.assertEquals(0, query.resultId());
         Assertions.assertEquals(1, query.index());

@@ -35,7 +35,7 @@ public class MockupQueryHandler extends QueryHandler {
     }
 
     @Override
-    public int getRepresentativeQueryCount() {
+    public int getRepresentedQueryCount() {
         return queryNumber;
     }
 
