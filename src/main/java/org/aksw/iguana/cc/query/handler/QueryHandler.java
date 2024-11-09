@@ -178,8 +178,16 @@ public class QueryHandler {
     final protected QueryList queryList;
     protected List<QueryData> queryData;
 
-    private int executableQueryCount = 0;     // stores the number of queries that can be executed
-    private int representedQueryCount = 0; // stores the number of queries that are represented in the results
+    // stores the number of queries that can be executed
+    private int executableQueryCount = 0;
+
+    // Stores the number of queries that are represented in the results.
+    // If individual results are disabled for query templates,
+    // the template instances will represent the template by using its id.
+    // Otherwise, each template instance will represent itself by using its own unique id, and therefore
+    // query templates won't be represented in the results because they can't be executed otherwise.
+    // 'executableQueryCount == representedQueryCount' is always true when templates are not used.
+    private int representedQueryCount = 0;
 
     private int workerCount = 0; // give every worker inside the same worker config an offset seed
     private int totalWorkerCount = 0;
