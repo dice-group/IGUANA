@@ -128,8 +128,10 @@ public class StresstestResultProcessor {
             m.add(workerRes, RDF.type, IONT.worker);
             m.add(workerRes, IPROP.workerID, toInfinitePrecisionIntegerLiteral(worker.getWorkerID()));
             m.add(workerRes, IPROP.workerType, ResourceFactory.createTypedLiteral(worker.getClass().getSimpleName()));
-            // TODO: is it executable or representative?
-            m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(config.queries().getExecutableQueryCount()));
+            m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(
+                    config.queries().getConfig().template().individualResults() ?
+                            config.queries().getExecutableQueryCount() :
+                            config.queries().getRepresentedQueryCount()));
             m.add(workerRes, IPROP.timeOut, TimeUtils.createTypedDurationLiteral(config.timeout()));
             if (config.completionTarget() instanceof HttpWorker.QueryMixes)
                 m.add(workerRes, IPROP.noOfQueryMixes, toInfinitePrecisionIntegerLiteral(((HttpWorker.QueryMixes) config.completionTarget()).number()));
