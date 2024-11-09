@@ -98,55 +98,64 @@ public class TemplateHandler {
             }
         }
 
-        // initialize queryData based on the template data
-        AtomicInteger templateIndex = new AtomicInteger(0); // index of the next template
-        AtomicInteger index = new AtomicInteger(0);      // index of the current query
-        AtomicInteger instanceId = new AtomicInteger(0); // id of the current instance for the current template
-        queryData = templateData.queries.stream().map(
-                query -> {
-                    // If "individualResults" is turned on, move the query templates outside the range of
-                    // "representedQueryCount" to avoid them being represented in the results.
-                    // Otherwise, if "individualResults" is turned off, the instances need to be moved outside the range
-                    // of "representedQueryCount", but because "instantiateTemplateQueries" already appends the
-                    // instances to the end of the original queries, this will already be done.
+        // Initialize queryData based on the template data.
+        // This means that every query is assigned a type (default, update, template, template instance) and
+        // an id (index), based on their type, position in the query file and the configuration.
+        // Because of the way the "StresstestResultProcessor" is currently implemented, the ids of the queries
+        // that are represented in the results need to be continuous and start at 0.
+        // In the case of "individualResults" turned on,
+        // every normal query and every template instance should be represented.
+        // Therefore, the ids of the templates have to be the last ones.
+        // Otherwise every normal query and every template should be represented.
+        // Template instances are located at the end of the query list.
+        // The queryData is later used to keep track of the queries, their types, ids, and relations.
+        int templateIndex = 0; // index of the next template
+        int index = 0;         // index of the current query
+        int instanceId = 0;    // id of the current instance for the current template
+        queryData = new ArrayList<>();
+        for (var query : templateData.queries) {
+            // Once the template instances are being iterated, the template index is reset
+            // and reused to track of which query template the instances are being iterated.
+            if (index == templateData.instanceStart) templateIndex = 0;
 
-                    // once the template instances start, the template index is reset and reused for the instances
-                    // to track where the template instances belong
-                    if (index.get() == templateData.instanceStart) templateIndex.set(0);
+            if (index >= templateData.instanceStart) {
+                // query is an instance of a template
 
-                    if (index.get() >= templateData.instanceStart) {
-                        // query is an instance of a template
-
-                        // if the instance id is equal to the number of instances for the current template,
-                        // the next template is used
-                        if (instanceId.get() == templateData.instanceNumber[templateIndex.get()]) {
-                            templateIndex.getAndIncrement();
-                            instanceId.set(0);
-                        }
-
-                        if (templateConfig.individualResults()) {
-                            return new QueryData(index.getAndIncrement() - templateData.templates, QueryData.QueryType.TEMPLATE_INSTANCE, templateData.queries.size() - templateData.templates + templateIndex.get());
-                        }
-                        return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE_INSTANCE, templateIndex.get());
-                    } else if (templateIndex.get() < templateData.templates && index.get() == templateData.indices[templateIndex.get()]) {
-                        // query is a template
-                        if (templateConfig.individualResults()) {
-                            // give the templates the last ids, so that there aren't any gaps in the ids and results
-                            index.incrementAndGet();
-                            return new QueryData(templateData.queries.size() - templateData.templates + templateIndex.getAndIncrement(), QueryData.QueryType.TEMPLATE, null);
-                        }
-                        templateIndex.getAndIncrement();
-                        return new QueryData(index.getAndIncrement(), QueryData.QueryType.TEMPLATE, null);
-                    } else {
-                        // query is neither a template nor an instance
-                        final var update = QueryData.checkIfUpdate(new ByteArrayInputStream(query.getBytes()));
-                        if (templateConfig.individualResults()) {
-                            return new QueryData(index.getAndIncrement() - templateIndex.get(), update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null);
-                        }
-                        return new QueryData(index.getAndIncrement(), update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null);
-                    }
+                // if the instance id is equal to the number of instances for the current template,
+                // the next instances belong to the next template
+                if (instanceId++ == templateData.instanceNumber[templateIndex]) {
+                    templateIndex++;
+                    instanceId = 0;
                 }
-        ).toList();
+
+                if (templateConfig.individualResults()) {
+                    // In this case, the ids of the instances are shifted by the number of templates,
+                    // because the templates received the last ids.
+                    // This way, there are no gaps in the ids,
+                    // and they can be correctly assigned to the results.
+                    queryData.add(new QueryData(index++ - templateData.templates, QueryData.QueryType.TEMPLATE_INSTANCE, templateData.queries.size() - templateData.templates + templateIndex));
+                }
+                queryData.add(new QueryData(index++, QueryData.QueryType.TEMPLATE_INSTANCE, templateIndex));
+            } else if (templateIndex < templateData.templates && index == templateData.indices[templateIndex]) {
+                // query is a template
+                if (templateConfig.individualResults()) {
+                    // Give the templates the last ids.
+                    index++;
+                    queryData.add(new QueryData(templateData.queries.size() - templateData.templates + templateIndex++, QueryData.QueryType.TEMPLATE, null));
+                }
+                templateIndex++;
+                queryData.add(new QueryData(index++, QueryData.QueryType.TEMPLATE, null));
+            } else {
+                // query is neither a template nor an instance
+                final var update = QueryData.checkIfUpdate(new ByteArrayInputStream(query.getBytes()));
+                if (templateConfig.individualResults()) {
+                    // Fill the gaps caused by the templates.
+                    queryData.add(new QueryData(index++ - templateIndex, update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null));
+                }
+                queryData.add(new QueryData(index++, update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null));
+            }
+
+        }
 
         // set the number of queries that can be executed and the number of queries
         // that are represented in the results
