@@ -128,7 +128,10 @@ public class StresstestResultProcessor {
             m.add(workerRes, RDF.type, IONT.worker);
             m.add(workerRes, IPROP.workerID, toInfinitePrecisionIntegerLiteral(worker.getWorkerID()));
             m.add(workerRes, IPROP.workerType, ResourceFactory.createTypedLiteral(worker.getClass().getSimpleName()));
-            m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(
+            if (config.queries().getConfig() == null || config.queries().getConfig().template() == null)
+                m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(config.queries().getExecutableQueryCount()));
+            else
+                m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(
                     config.queries().getConfig().template().individualResults() ?
                             config.queries().getExecutableQueryCount() :
                             config.queries().getRepresentedQueryCount()));

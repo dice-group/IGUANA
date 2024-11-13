@@ -134,16 +134,19 @@ public class TemplateHandler {
                     // and they can be correctly assigned to the results.
                     queryData.add(new QueryData(index++ - templateData.templates, QueryData.QueryType.TEMPLATE_INSTANCE, templateData.queries.size() - templateData.templates + templateIndex));
                 }
-                queryData.add(new QueryData(index++, QueryData.QueryType.TEMPLATE_INSTANCE, templateIndex));
+                else {
+                    queryData.add(new QueryData(index++, QueryData.QueryType.TEMPLATE_INSTANCE, templateIndex));
+                }
             } else if (templateIndex < templateData.templates && index == templateData.indices[templateIndex]) {
                 // query is a template
                 if (templateConfig.individualResults()) {
                     // Give the templates the last ids.
                     index++;
                     queryData.add(new QueryData(templateData.queries.size() - templateData.templates + templateIndex++, QueryData.QueryType.TEMPLATE, null));
+                } else {
+                    templateIndex++;
+                    queryData.add(new QueryData(index++, QueryData.QueryType.TEMPLATE, null));
                 }
-                templateIndex++;
-                queryData.add(new QueryData(index++, QueryData.QueryType.TEMPLATE, null));
             } else {
                 // query is neither a template nor an instance
                 final var update = QueryData.checkIfUpdate(new ByteArrayInputStream(query.getBytes()));
@@ -151,7 +154,9 @@ public class TemplateHandler {
                     // Fill the gaps caused by the templates.
                     queryData.add(new QueryData(index++ - templateIndex, update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null));
                 }
-                queryData.add(new QueryData(index++, update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null));
+                else {
+                    queryData.add(new QueryData(index++, update ? QueryData.QueryType.UPDATE : QueryData.QueryType.DEFAULT, null));
+                }
             }
 
         }
