@@ -1,7 +1,6 @@
 package org.dice_research.iguana.cc.tasks.impl;
 
 import org.dice_research.iguana.cc.lang.LanguageProcessor;
-import org.aksw.iguana.cc.metrics.*;
 import org.dice_research.iguana.cc.storage.Storage;
 import org.dice_research.iguana.cc.worker.HttpWorker;
 import org.dice_research.iguana.commons.rdf.IGUANA_BASE;

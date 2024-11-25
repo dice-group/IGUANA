@@ -1,7 +1,6 @@
 package org.dice_research.iguana.cc.metrics;
 
 import com.fasterxml.jackson.annotation.*;
-import org.aksw.iguana.cc.metrics.impl.*;
 import org.dice_research.iguana.cc.metrics.impl.*;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")

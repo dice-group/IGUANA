@@ -2,7 +2,6 @@ package org.dice_research.iguana.cc.storage.impl;
 
 import org.dice_research.iguana.cc.lang.LanguageProcessor;
 import org.dice_research.iguana.cc.metrics.Metric;
-import org.aksw.iguana.cc.metrics.impl.*;
 import org.dice_research.iguana.cc.mockup.MockupWorker;
 import org.dice_research.iguana.cc.storage.Storable;
 import org.dice_research.iguana.cc.storage.Storage;

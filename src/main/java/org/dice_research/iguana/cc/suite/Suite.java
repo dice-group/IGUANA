@@ -6,7 +6,6 @@ import org.dice_research.iguana.cc.config.elements.ConnectionConfig;
 import org.dice_research.iguana.cc.config.elements.DatasetConfig;
 import org.dice_research.iguana.cc.config.elements.StorageConfig;
 import org.dice_research.iguana.cc.metrics.Metric;
-import org.aksw.iguana.cc.metrics.impl.*;
 import org.dice_research.iguana.cc.storage.Storage;
 import org.dice_research.iguana.cc.storage.impl.CSVStorage;
 import org.dice_research.iguana.cc.storage.impl.RDFFileStorage;

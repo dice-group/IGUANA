@@ -5,7 +5,6 @@ import com.opencsv.CSVWriter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import org.dice_research.iguana.cc.config.elements.StorageConfig;
-import org.aksw.iguana.cc.metrics.*;
 import org.dice_research.iguana.cc.metrics.impl.AggregatedExecutionStatistics;
 import org.dice_research.iguana.cc.metrics.impl.EachExecutionStatistic;
 import org.dice_research.iguana.cc.storage.Storable;
