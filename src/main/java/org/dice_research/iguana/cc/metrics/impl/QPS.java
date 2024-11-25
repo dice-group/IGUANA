@@ -1,0 +1,36 @@
+package org.dice_research.iguana.cc.metrics.impl;
+
+import org.dice_research.iguana.cc.metrics.Metric;
+import org.dice_research.iguana.cc.metrics.QueryMetric;
+import org.dice_research.iguana.cc.worker.HttpWorker;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.util.List;
+
+public class QPS extends Metric implements QueryMetric {
+
+    public QPS() {
+        super("Queries per Second", "QPS", "This metric calculates for each query the amount of executions per second.");
+    }
+
+    @Override
+    public Number calculateQueryMetric(List<HttpWorker.ExecutionStats> data) {
+        BigDecimal successes = BigDecimal.ZERO;
+        Duration totalTime = Duration.ZERO;
+        for (HttpWorker.ExecutionStats exec : data) {
+            if (exec.successful()) {
+                successes = successes.add(BigDecimal.ONE);
+                totalTime = totalTime.plus(exec.duration());
+            }
+        }
+        BigDecimal tt = (new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 9));
+        try {
+            return successes.divide(tt, 10, RoundingMode.HALF_UP).stripTrailingZeros();
+        } catch (ArithmeticException e) {
+            return BigDecimal.ZERO;
+        }
+    }
+}
