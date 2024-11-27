@@ -1,6 +1,9 @@
 # Checks if version number has been updated 
 name: Version Check
-on: pull_request
+on:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   lint:
@@ -8,5 +11,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      # - run: .github/scripts/tagcheck.sh v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+      - run: .github/scripts/tagcheck.sh v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
       - run: .github/scripts/check_schema_version.sh
