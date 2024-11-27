@@ -3,8 +3,10 @@
 PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 ONTOLOGY_VERSION=$(mvn help:evaluate -Dexpression=ontology.version -q -DforceStdout)
 
+git fetch > /dev/null 2>&1
+
 # Check for changes and compare versions
-if git diff --quiet "main:$(git ls-tree -r --name-only main | grep 'iguana.owx')" 'src/main/resources/iguana.owx'; then
+if git diff --quiet "origin/main:$(git ls-tree -r --name-only main | grep 'iguana.owx')" 'src/main/resources/iguana.owx'; then
     DIFF_STATUS=0
 else
     DIFF_STATUS=1
