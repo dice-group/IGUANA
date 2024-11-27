@@ -1,7 +1,7 @@
 # Checks if version number has been updated 
 name: Version Check
 on: pull_request
-# on: push
+
 jobs:
   lint:
     name: Release Tag existence Check

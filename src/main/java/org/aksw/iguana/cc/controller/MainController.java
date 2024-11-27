@@ -40,6 +40,9 @@ public class MainController {
 
         @Parameter(names = {"--version", "-v"}, description = "Outputs the version number of the program and result ontology.")
         private boolean version;
+
+        @Parameter(names = {"--log-success", "-ls"}, description = "Log successful queries.")
+        public static boolean logSuccess = false;
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
