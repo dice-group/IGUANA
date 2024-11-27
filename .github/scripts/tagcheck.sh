@@ -1,6 +1,6 @@
 #!/bin/sh
 
-git fetch > /dev/null 2>&1
+git fetch --all > /dev/null 2>&1
 
 if git rev-parse "$1" >/dev/null 2>&1; then
   echo "Tag $1 exist - update version in pom!"
