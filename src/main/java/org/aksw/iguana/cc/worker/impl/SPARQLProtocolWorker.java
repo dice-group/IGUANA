@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 import org.aksw.iguana.cc.config.elements.ConnectionConfig;
+import org.aksw.iguana.cc.controller.MainController;
 import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
@@ -468,10 +469,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     private void logExecution(ExecutionStats execution) {
         switch (execution.endState()) {
-            case SUCCESS -> LOGGER.debug("{}\t:: Successfully executed query: [queryID={}].", this, execution.queryID());
+            case SUCCESS -> {
+                if (MainController.Args.logSuccess) LOGGER.info("{}\t:: Successfully executed query: [queryID={}, duration={}].", this, execution.queryID(), execution.duration());
+            }
             case TIMEOUT -> LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, execution.queryID(), execution.duration()); // TODO: look for a possibility to add the query string for better logging
             case HTTP_ERROR -> LOGGER.warn("{}\t:: HTTP Error occurred during query execution: [queryID={}, httpError={}].", this, execution.queryID(), execution.httpStatusCode().orElse(-1));
-            case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, execution.queryID(), execution.error().orElse(null));
+            case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}].", this, execution.queryID(), execution.error().orElse(null));
         }
     }
 
