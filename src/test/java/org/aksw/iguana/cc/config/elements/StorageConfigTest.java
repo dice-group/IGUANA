@@ -17,9 +17,9 @@ class StorageConfigTest {
 
     private static Stream<Arguments> testData() {
         return Stream.of(
-                Arguments.of(new RDFFileStorage.Config("some.ttl"),
+                Arguments.of(new RDFFileStorage.Config("some.ttl", 2),
                         """
-                        {"type":"rdf file","path":"some.ttl"}
+                        {"type":"rdf file","path":"some.ttl", "compressionLevel": 2}
                         """
                 ),
                 Arguments.of(new CSVStorage.Config("csv_results/"),
