@@ -198,6 +198,9 @@
         },
         "path": {
           "type": "string"
+        },
+        "compression": {
+          "type": "boolean"
         }
       },
       "required": [
