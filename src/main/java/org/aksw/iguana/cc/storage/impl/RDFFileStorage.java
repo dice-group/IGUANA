@@ -21,9 +21,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class RDFFileStorage implements Storage {
-    public record Config(String path, Boolean compression) implements StorageConfig {
+    public record Config(String path, Integer compressionLevel) implements StorageConfig {
         public Config(String path) {
-            this(path, true);
+            this(path, null);
         }
     }
 
@@ -43,10 +43,11 @@ public class RDFFileStorage implements Storage {
     private final Lang lang;
     private Path path;
     private boolean compression;
+    private int compressionLevel;
     private OutputStream outputStream;
 
     public RDFFileStorage(Config config) {
-        this(config.path(), config.compression());
+        this(config.path(), config.compressionLevel());
     }
 
     /**
@@ -56,9 +57,13 @@ public class RDFFileStorage implements Storage {
         this("");
     }
 
-    public RDFFileStorage(String filename, Boolean compression) {
+    public RDFFileStorage(String filename, Integer compressionLevel) {
         this(filename);
-        this.compression = true;
+        if (compressionLevel != null && (compressionLevel < 1 || compressionLevel > 19)) {
+            throw new IllegalArgumentException("Compression level must be between 1 and 19.");
+        }
+        this.compression = compressionLevel != null;
+        this.compressionLevel = compressionLevel != null ? compressionLevel : 0;
     }
 
     /**
@@ -127,7 +132,7 @@ public class RDFFileStorage implements Storage {
         }
 
         if (compression) {
-            final var process = new ProcessBuilder("zstd", "-o", path.toString() + ".zstd", "-T0", "-3", "-q", "-").start();
+            final var process = new ProcessBuilder("zstd", "-o", path.toString() + ".zstd", "-T0", "-" + compressionLevel, "-q", "-").start();
             outputStream = process.getOutputStream();
             return outputStream;
         } else {
