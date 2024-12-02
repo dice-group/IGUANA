@@ -31,4 +31,6 @@ public interface Storage {
 			storeResult(((Storable.AsRDF) data).toRDF());
 		}
 	}
+
+	default void close() {}
 }

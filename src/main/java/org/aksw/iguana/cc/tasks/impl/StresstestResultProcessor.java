@@ -207,6 +207,9 @@ public class StresstestResultProcessor {
                 }
             }
         }
+        for (var storage : storages) {
+            storage.close();
+        }
     }
 
     /**

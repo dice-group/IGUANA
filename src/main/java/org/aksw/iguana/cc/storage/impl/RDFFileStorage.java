@@ -21,7 +21,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class RDFFileStorage implements Storage {
-    public record Config(String path) implements StorageConfig {}
+    public record Config(String path, Boolean compression) implements StorageConfig {
+        public Config(String path) {
+            this(path, true);
+        }
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDFFileStorage.class.getName());
 
@@ -36,11 +40,13 @@ public class RDFFileStorage implements Storage {
                 now.get(Calendar.MILLISECOND));
     };
 
-    final private Lang lang;
+    private final Lang lang;
     private Path path;
+    private boolean compression;
+    private OutputStream outputStream;
 
     public RDFFileStorage(Config config) {
-        this(config.path());
+        this(config.path(), config.compression());
     }
 
     /**
@@ -48,6 +54,11 @@ public class RDFFileStorage implements Storage {
      */
     public RDFFileStorage() {
         this("");
+    }
+
+    public RDFFileStorage(String filename, Boolean compression) {
+        this(filename);
+        this.compression = true;
     }
 
     /**
@@ -62,7 +73,8 @@ public class RDFFileStorage implements Storage {
         }
         else {
             path = Paths.get(fileName);
-            if (Files.exists(path) && Files.isDirectory(path)) {
+            if ((Files.exists(path) || Files.exists(path.resolveSibling(path.getFileName() + ".zstd")))
+                    && Files.isDirectory(path)) {
                 path = path.resolve(defaultFileNameSupplier.get() + ".ttl");
             } else if (Files.exists(path)) {
                 path = Paths.get(FilenameUtils.removeExtension(fileName) + "_" + defaultFileNameSupplier.get() + ".ttl"); // we're just going to assume that that's enough to make it unique
@@ -79,12 +91,25 @@ public class RDFFileStorage implements Storage {
     }
 
     @Override
-    public void storeResult(Model data){
-        try (OutputStream os = new FileOutputStream(path.toString(), true)) {
+    public void storeResult(Model data) {
+        try {
+            OutputStream os = getFileOutputstream();
             RDFDataMgr.write(os, data, this.lang);
         } catch (IOException e) {
             LOGGER.error("Could not write to RDFFileStorage using lang: " + lang, e);
         }
+    }
+
+    @Override
+    public void close() {
+        if (outputStream != null) {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                LOGGER.error("Could not close output stream for RDFFileStorage", e);
+            }
+        }
+        outputStream = null;
     }
 
     @Override
@@ -94,5 +119,20 @@ public class RDFFileStorage implements Storage {
 
     public String getFileName() {
         return this.path.toString();
+    }
+
+    private OutputStream getFileOutputstream() throws IOException {
+        if (outputStream != null) {
+            return outputStream;
+        }
+
+        if (compression) {
+            final var process = new ProcessBuilder("zstd", "-o", path.toString() + ".zstd", "-T0", "-3", "-q", "-").start();
+            outputStream = process.getOutputStream();
+            return outputStream;
+        } else {
+            // appending stream doesn't need to be kept open in between writes
+            return new FileOutputStream(path.toString(), true);
+        }
     }
 }
