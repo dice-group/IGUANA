@@ -131,7 +131,7 @@ public class RDFFileStorage implements Storage {
             return outputStream;
         }
 
-        if (compression) {
+        if (compression) { // TODO: check if process closes properly
             final var process = new ProcessBuilder("zstd", "-o", path.toString() + ".zstd", "-T0", "-" + compressionLevel, "-q", "-").start();
             outputStream = process.getOutputStream();
             return outputStream;
