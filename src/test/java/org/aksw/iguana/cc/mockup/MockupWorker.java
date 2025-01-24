@@ -68,7 +68,7 @@ public class MockupWorker extends HttpWorker {
         final var startTime = ZonedDateTime.of(2023, 10, 11, 14, 14, 10, 0, ZoneId.of("UTC"));
         final var endTime = ZonedDateTime.of(2023, 10, 12, 15, 15, 15, 0, ZoneId.of("UTC"));
 
-        final var queryNumber = queries.getQueryCount();
+        final var queryNumber = queries.getExecutableQueryCount();
 
         Instant time = Instant.parse("2023-10-21T20:48:06.399Z");
 

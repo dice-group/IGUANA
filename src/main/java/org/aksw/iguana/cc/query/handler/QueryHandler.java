@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.aksw.iguana.cc.query.QueryData;
-import org.aksw.iguana.cc.query.list.impl.StringListQueryList;
 import org.aksw.iguana.cc.query.selector.QuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.LinearQuerySelector;
 import org.aksw.iguana.cc.query.selector.impl.RandomQuerySelector;
@@ -17,23 +16,15 @@ import org.aksw.iguana.cc.query.source.QuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileLineQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FileSeparatorQuerySource;
 import org.aksw.iguana.cc.query.source.impl.FolderQuerySource;
-import org.apache.jena.query.*;
-import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
-import org.apache.jena.sparql.exec.http.QueryExecutionHTTPBuilder;
-import org.apache.jena.sparql.service.single.ServiceExecutor;
-import org.apache.jena.sparql.service.single.ServiceExecutorHttp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -141,18 +132,42 @@ public class QueryHandler {
             }
         }
 
-        public record Template(@JsonProperty(required = true) URI endpoint, Long limit, Boolean save) {
-            public Template(URI endpoint, Long limit, Boolean save) {
+        public record Template(@JsonProperty(required = true) URI endpoint, Long limit, Boolean save, Boolean individualResults) {
+            public Template(URI endpoint, Long limit, Boolean save, Boolean individualResults) {
                 this.endpoint = endpoint;
                 this.limit = limit == null ? 2000 : limit;
                 this.save = save == null || save;
+                this.individualResults = individualResults != null && individualResults;
             }
         }
     }
 
-    public record QueryStringWrapper(int index, String query, boolean update) {}
+    /**
+     * Wrapper for the next query that will be executed.
+     * The wrapper contains the query as a string.
+     * The result id is only set if the query is a template instance.
+     * They are used to aggregate the results of multiple queries by using the same id.
+     *
+     * @param index the index of the query
+     * @param query the query string
+     * @param update whether the query is an update query
+     * @param resultId the query id that should be used inside the result
+     */
+    public record QueryStringWrapper(int index, String query, boolean update, Integer resultId) {}
 
-    public record QueryStreamWrapper(int index, boolean cached, Supplier<InputStream> queryInputStreamSupplier, boolean update) {}
+    /**
+     * Wrapper for the next query that will be executed.
+     * The wrapper contains the query as an input stream supplier, that generates an input stream with the query.
+     * The result id is only set if the query is a template instance.
+     * They are used to aggregate the results of multiple queries by using the same id.
+     *
+     * @param index the index of the query
+     * @param cached whether the query is cached in memory
+     * @param queryInputStreamSupplier the supplier that generates the input stream with the query
+     * @param update whether the query is an update query
+     * @param resultId the query id that should be used inside the result
+     */
+    public record QueryStreamWrapper(int index, boolean cached, Supplier<InputStream> queryInputStreamSupplier, boolean update, Integer resultId) {}
 
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
@@ -161,7 +176,18 @@ public class QueryHandler {
     final protected Config config;
 
     final protected QueryList queryList;
-    final protected List<QueryData> queryData;
+    protected List<QueryData> queryData;
+
+    // stores the number of queries that can be executed
+    private int executableQueryCount = 0;
+
+    // Stores the number of queries that are represented in the results.
+    // If individual results are disabled for query templates,
+    // the template instances will represent the template by using its id.
+    // Otherwise, each template instance will represent itself by using its own unique id, and therefore
+    // query templates won't be represented in the results because they can't be executed otherwise.
+    // 'executableQueryCount == representedQueryCount' is always true when templates are not used.
+    private int representedQueryCount = 0;
 
     private int workerCount = 0; // give every worker inside the same worker config an offset seed
     private int totalWorkerCount = 0;
@@ -186,59 +212,30 @@ public class QueryHandler {
 
         // initialize queryList based on the given configuration
         if (config.template() != null) {
-            queryList = initializeTemplateQueryHandler(querySource);
+            final var templateHandler = new QueryTemplateHandler(config.template);
+            queryList = templateHandler.initializeTemplateQueryHandler(querySource);
+            queryData = templateHandler.getQueryData();
+            executableQueryCount = templateHandler.getExecutableQueryCount();
+            representedQueryCount = templateHandler.getRepresentedQueryCount();
         } else {
             queryList = (config.caching()) ?
                     new FileCachingQueryList(querySource) :
                     new FileReadingQueryList(querySource);
+            queryData = QueryData.generate(IntStream.range(0, queryList.size()).mapToObj(i -> {
+                try {
+                    return queryList.getQueryStream(i);
+                } catch (IOException e) {
+                    throw new RuntimeException("Couldn't read query stream", e);
+                }
+            }).collect(Collectors.toList()));
+            executableQueryCount = queryList.size();
+            representedQueryCount = queryList.size();
         }
         this.hashCode = queryList.hashCode();
-        this.queryData = QueryData.generate(IntStream.range(0, queryList.size()).mapToObj(i -> {
-            try {
-                return queryList.getQueryStream(i);
-            } catch (IOException e) {
-                throw new RuntimeException("Couldn't read query stream", e);
-            }
-        }).collect(Collectors.toList()));
     }
 
     public void setTotalWorkerCount(int workers) {
         this.totalWorkerCount = workers;
-    }
-
-    private QueryList initializeTemplateQueryHandler(QuerySource templateSource) throws IOException {
-        QuerySource querySource = templateSource;
-        final var originalPath = templateSource.getPath();
-        final var postfix = String.format("_instances_f%s_l%s.txt",
-                Integer.toUnsignedString(this.config.template.endpoint.hashCode()), Integer.toUnsignedString((int) this.config.template.limit.longValue()));
-        final Path instancePath = Files.isDirectory(originalPath) ?
-                originalPath.resolveSibling(originalPath.getFileName() + postfix) : // if the source of the query templates is a folder, the instances will be saved in a file with the same name as the folder
-                originalPath.resolveSibling(originalPath.getFileName().toString().split("\\.")[0] + postfix); // if the source of the query templates is a file, the instances will be saved in a file with the same name as the file
-        if (Files.exists(instancePath)) {
-            LOGGER.info("Already existing query template instances have been found and will be reused. Delete the following file to regenerate them: {}", instancePath.toAbsolutePath());
-            querySource = createQuerySource(instancePath); // if the instances already exist, use them
-        } else {
-            final List<String> instances = instantiateTemplateQueries(querySource, config.template);
-            if (config.template.save) {
-                // save the instances to a file
-                Files.createFile(instancePath);
-                try (var writer = Files.newBufferedWriter(instancePath)) {
-                    for (String instance : instances) {
-                        writer.write(instance);
-                        writer.newLine();
-                    }
-                }
-                // create a new query source based on the new instance file
-                querySource = createQuerySource(instancePath);
-            } else {
-                // query source isn't necessary, because queries aren't stored in a file,
-                // directly return a list of the instances instead
-                return new StringListQueryList(instances);
-            }
-        }
-        return (config.caching()) ?
-                new FileCachingQueryList(querySource) : // if caching is enabled, cache the instances
-                new FileReadingQueryList(querySource);  // if caching is disabled, read the instances from the file every time
     }
 
     /**
@@ -265,20 +262,43 @@ public class QueryHandler {
         throw new IllegalStateException("Unknown query selection order: " + config.order());
     }
 
+    public QuerySelector getQuerySelectorInstance(Config.Order type) {
+        switch (type) {
+            case LINEAR -> { return new LinearQuerySelector(queryList.size()); }
+            case RANDOM -> { return new RandomQuerySelector(queryList.size(), config.seed() + workerCount++); }
+        }
+
+        throw new IllegalStateException("Unknown query selection order: " + type);
+    }
+
     public QueryStringWrapper getNextQuery(QuerySelector querySelector) throws IOException {
-        final var queryIndex = querySelector.getNextIndex();
-        return new QueryStringWrapper(queryIndex, queryList.getQuery(queryIndex), queryData.get(queryIndex).update());
+        final var queryIndex = getNextQueryIndex(querySelector);
+        return new QueryStringWrapper(queryData.get(queryIndex[0]).queryId(), queryList.getQuery(queryIndex[0]), queryData.get(queryIndex[0]).update(), queryIndex[1]);
     }
 
     public QueryStreamWrapper getNextQueryStream(QuerySelector querySelector) {
-        final var queryIndex = querySelector.getNextIndex();
-        return new QueryStreamWrapper(queryIndex, config.caching(), () -> {
+        final var queryIndex = getNextQueryIndex(querySelector);
+        return new QueryStreamWrapper(queryData.get(queryIndex[0]).queryId(), config.caching(), () -> {
             try {
-                return this.queryList.getQueryStream(queryIndex);
+                return this.queryList.getQueryStream(queryIndex[0]);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }, queryData.get(queryIndex).update());
+        }, queryData.get(queryIndex[0]).update(), queryIndex[1]);
+    }
+
+    private Integer[] getNextQueryIndex(QuerySelector querySelector) {
+        int queryIndex;
+        do  {
+            queryIndex = querySelector.getNextIndex();
+        } while (queryData.get(queryIndex).type() == QueryData.QueryType.TEMPLATE); // query templates can't be executed directly
+
+        // if individual results are disabled, the query instance will represent the template, by using its id
+        Integer resultId = null;
+        if (queryData.get(queryIndex).type() == QueryData.QueryType.TEMPLATE_INSTANCE && !config.template().individualResults) {
+            resultId = queryData.get(queryIndex).templateId();
+        }
+        return new Integer[]{ queryIndex, resultId };
     }
 
     @Override
@@ -286,8 +306,12 @@ public class QueryHandler {
         return hashCode;
     }
 
-    public int getQueryCount() {
-        return this.queryList.size();
+    public int getExecutableQueryCount() {
+        return executableQueryCount;
+    }
+
+    public int getRepresentedQueryCount() {
+        return representedQueryCount;
     }
 
     public String getQueryId(int i) {
@@ -301,8 +325,8 @@ public class QueryHandler {
      * @return String[] of query ids
      */
     public String[] getAllQueryIds() {
-        String[] out = new String[queryList.size()];
-        for (int i = 0; i < queryList.size(); i++) {
+        String[] out = new String[getRepresentedQueryCount()];
+        for (int i = 0; i < getRepresentedQueryCount(); i++) {
             out[i] = getQueryId(i);
         }
         return out;
@@ -318,83 +342,4 @@ public class QueryHandler {
     }
 
 
-   /**
-    * Query templates are queries containing placeholders for some terms.
-    * Replacement candidates are identified by querying a given endpoint.
-    * This is done in a way that the resulting queries will yield results against endpoints with the same data.
-    * The placeholders are written in the form of <code>%%var[0-9]+%%</code>, where <code>[0-9]+</code>
-    * represents any number.
-    * <p>
-    * Exemplary template: </br>
-    * <code>SELECT * WHERE {?s %%var1%% ?o . ?o &lt;http://exa.com&gt; %%var2%%}</code><br/>
-    * This template will then be converted to: <br/>
-    * <code>SELECT ?var1 ?var2 {?s ?var1 ?o . ?o &lt;http://exa.com&gt; ?var2}</code><br/>
-    * and will request query solutions from the given sparql endpoint (e.g DBpedia).<br/>
-    * The solutions will then be instantiated into the template.
-    * The result may look like the following:<br/>
-    * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "123"}</code><br/>
-    * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "12"}</code><br/>
-    * <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
-    */
-    private static List<String> instantiateTemplateQueries(QuerySource querySource, Config.Template config) throws IOException {
-        // charset for generating random varia  ble names
-        final String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        final Random random = new Random();
-
-        final var templateQueries = new FileCachingQueryList(querySource);
-        final Pattern template = Pattern.compile("%%[a-zA-Z0-9_]+%%");
-        final var instances = new ArrayList<String>();
-        for (int i = 0; i < templateQueries.size(); i++) {
-            // replace all variables in the query template with SPARQL variables
-            // and store the variable names
-            var templateQueryString = templateQueries.getQuery(i);
-            final Matcher matcher = template.matcher(templateQueryString);
-            final var variables = new LinkedHashMap<String, String>(); // a set, that preserves insertion order
-            while (matcher.find()) {
-                final var match = matcher.group();
-                if (variables.containsKey(match)) continue;
-                String variableName = match.replaceAll("%%", "");
-                while (templateQueryString.contains("?" + variableName) || templateQueryString.contains("$" + variableName)) { // generate random variable name with 20 characters until it is unique
-                    variableName = IntStream.range(0, 20).mapToObj(m -> String.valueOf(charset.charAt(random.nextInt(charset.length())))).collect(Collectors.joining());
-                }
-                final var variable = "?" + variableName;
-                variables.put(match, variable);
-                templateQueryString = templateQueryString.replaceAll(match, variable);
-            }
-
-            // if no placeholders are found, the query is already a valid SPARQL query
-            if (variables.isEmpty()) {
-                instances.add(templateQueryString);
-                continue;
-            }
-
-            // build SELECT query for finding bindings for the variables
-            final var templateQuery = QueryFactory.create(templateQueryString);
-            final var whereClause = "WHERE " + templateQuery.getQueryPattern();
-            final var selectQueryString = new ParameterizedSparqlString();
-            selectQueryString.setCommandText("SELECT DISTINCT " + String.join(" ", variables.values()));
-            selectQueryString.append(" " + whereClause);
-            selectQueryString.append(" LIMIT " + config.limit());
-            selectQueryString.setNsPrefixes(templateQuery.getPrefixMapping());
-
-            // send request to SPARQL endpoint and instantiate the template based on results
-            try (QueryExecution exec = QueryExecutionHTTP.service(config.endpoint().toString(), selectQueryString.asQuery())) {
-                ResultSet resultSet = exec.execSelect();
-                if (!resultSet.hasNext()) {
-                    LOGGER.warn("No results for query template: {}", templateQueryString);
-                }
-                int count = 0;
-                while (resultSet.hasNext() && count++ < config.limit()) {
-                    var instance = new ParameterizedSparqlString(templateQueryString);
-                    QuerySolution solution = resultSet.next();
-                    for (String var : resultSet.getResultVars()) {
-                        instance.clearParam(var);
-                        instance.setParam(var, solution.get(var));
-                    }
-                    instances.add(instance.toString());
-                }
-            }
-        }
-        return instances;
-    }
 }

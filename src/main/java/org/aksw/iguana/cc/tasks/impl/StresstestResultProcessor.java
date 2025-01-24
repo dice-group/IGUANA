@@ -63,8 +63,8 @@ public class StresstestResultProcessor {
 
         this.workerQueryExecutions = new ArrayList[workers.size()][];
         for (int i = 0; i < workers.size(); i++) {
-            this.workerQueryExecutions[i] = new ArrayList[workers.get(i).config().queries().getQueryCount()];
-            for (int j = 0; j < workers.get(i).config().queries().getQueryCount(); j++) {
+            this.workerQueryExecutions[i] = new ArrayList[workers.get(i).config().queries().getRepresentedQueryCount()];
+            for (int j = 0; j < workers.get(i).config().queries().getRepresentedQueryCount(); j++) {
                 this.workerQueryExecutions[i][j] = new ArrayList<>();
             }
         }
@@ -128,7 +128,13 @@ public class StresstestResultProcessor {
             m.add(workerRes, RDF.type, IONT.worker);
             m.add(workerRes, IPROP.workerID, toInfinitePrecisionIntegerLiteral(worker.getWorkerID()));
             m.add(workerRes, IPROP.workerType, ResourceFactory.createTypedLiteral(worker.getClass().getSimpleName()));
-            m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(config.queries().getQueryCount()));
+            if (config.queries().getConfig() == null || config.queries().getConfig().template() == null)
+                m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(config.queries().getExecutableQueryCount()));
+            else
+                m.add(workerRes, IPROP.noOfQueries, toInfinitePrecisionIntegerLiteral(
+                    config.queries().getConfig().template().individualResults() ?
+                            config.queries().getExecutableQueryCount() :
+                            config.queries().getRepresentedQueryCount()));
             m.add(workerRes, IPROP.timeOut, TimeUtils.createTypedDurationLiteral(config.timeout()));
             if (config.completionTarget() instanceof HttpWorker.QueryMixes)
                 m.add(workerRes, IPROP.noOfQueryMixes, toInfinitePrecisionIntegerLiteral(((HttpWorker.QueryMixes) config.completionTarget()).number()));
@@ -155,7 +161,7 @@ public class StresstestResultProcessor {
         for (var worker : workers) {
             var config = worker.config();
             var workerQueryIDs = config.queries().getAllQueryIds();
-            for (int i = 0; i < config.queries().getQueryCount(); i++) {
+            for (int i = 0; i < config.queries().getRepresentedQueryCount(); i++) {
                 Resource workerQueryRes = iresFactory.getWorkerQueryResource(worker, i);
                 Resource queryRes = IRES.getResource(workerQueryIDs[i]);
                 m.add(workerQueryRes, IPROP.queryID, queryRes);
@@ -257,7 +263,7 @@ public class StresstestResultProcessor {
         if (metric instanceof QueryMetric) {
             // queries grouped by worker
             for (var worker : workers) {
-                for (int i = 0; i < worker.config().queries().getQueryCount(); i++) {
+                for (int i = 0; i < worker.config().queries().getRepresentedQueryCount(); i++) {
                     Number metricValue = ((QueryMetric) metric).calculateQueryMetric(workerQueryExecutions[(int) worker.getWorkerID()][i]);
                     if (metricValue != null) {
                         Literal lit = ResourceFactory.createTypedLiteral(metricValue);
