@@ -24,6 +24,28 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * This class is responsible for handling query templates.
+ * Query templates are queries containing placeholders for some terms.
+ * Replacement candidates are identified by querying a given endpoint.
+ * The placeholders are written in the form of <code>%%var[0-9]+%%</code>, where <code>[0-9]+</code>
+ * represents any number.
+ * <p>
+ * Exemplary template: </br>
+ * <code>SELECT * WHERE {?s %%var1%% ?o . ?o &lt;http://exa.com&gt; %%var2%%}</code><br/>
+ * This template will then be converted to: <br/>
+ * <code>SELECT ?var1 ?var2 {?s ?var1 ?o . ?o &lt;http://exa.com&gt; ?var2}</code><br/>
+ * and will request query solutions from the given sparql endpoint (e.g DBpedia).<br/>
+ * The solutions will then be instantiated into the template.
+ * The result may look like the following:<br/>
+ * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "123"}</code><br/>
+ * <code>SELECT * WHERE {?s &lt;http://prop/1&gt; ?o . ?o &lt;http://exa.com&gt; "12"}</code><br/>
+ * <code>SELECT * WHERE {?s &lt;http://prop/2&gt; ?o . ?o &lt;http://exa.com&gt; "1234"}</code><br/>
+ * The template data that this class returns will contain a list of all queries,
+ * where the first queries are the original queries including the query templates.
+ * The query instances will be appended to the original queries.
+ * The queryData is later used to keep track of the queries, their types, ids, and relations.
+ */
 public class QueryTemplateHandler {
     private record TemplateData(List<String> queries, int templates, int[] indices, int[] instanceNumber, int instanceStart) {}
 
