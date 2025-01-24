@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class TemplateHandler {
+public class QueryTemplateHandler {
     private record TemplateData(List<String> queries, int templates, int[] indices, int[] instanceNumber, int instanceStart) {}
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TemplateHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryTemplateHandler.class);
 
     private List<QueryData> queryData;
     private int executableQueryCount = 0;     // stores the number of queries that can be executed
@@ -35,7 +35,7 @@ public class TemplateHandler {
     private final QueryHandler.Config.Template templateConfig;
 
 
-    public TemplateHandler(QueryHandler.Config.Template templateConfig) {
+    public QueryTemplateHandler(QueryHandler.Config.Template templateConfig) {
         queryData = new ArrayList<>();
         this.templateConfig = templateConfig;
     }

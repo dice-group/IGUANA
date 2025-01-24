@@ -212,7 +212,7 @@ public class QueryHandler {
 
         // initialize queryList based on the given configuration
         if (config.template() != null) {
-            final var templateHandler = new TemplateHandler(config.template);
+            final var templateHandler = new QueryTemplateHandler(config.template);
             queryList = templateHandler.initializeTemplateQueryHandler(querySource);
             queryData = templateHandler.getQueryData();
             executableQueryCount = templateHandler.getExecutableQueryCount();
