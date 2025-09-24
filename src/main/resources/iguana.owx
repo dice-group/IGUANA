@@ -108,6 +108,9 @@
         <Class abbreviatedIRI="iont:metric/QMPH"/>
     </Declaration>
     <Declaration>
+        <Class abbreviatedIRI="iont:metric/PQMPH"/>
+    </Declaration>
+    <Declaration>
         <Class abbreviatedIRI="iont:metric/QPS"/>
     </Declaration>
     <Declaration>
@@ -157,6 +160,9 @@
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="iprop:QMPH"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:PQMPH"/>
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="iprop:QPS"/>
@@ -297,6 +303,10 @@
     </SubClassOf>
     <SubClassOf>
         <Class abbreviatedIRI="iont:metric/QMPH"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="iont:metric/PQMPH"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
@@ -474,6 +484,13 @@
         </ObjectUnionOf>
     </DataPropertyDomain>
     <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:PQMPH"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
         <DataProperty abbreviatedIRI="iprop:QPS"/>
         <Class abbreviatedIRI="iont:ExecutedQuery"/>
     </DataPropertyDomain>
@@ -616,6 +633,10 @@
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty abbreviatedIRI="iprop:QMPH"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:PQMPH"/>
         <Datatype abbreviatedIRI="xsd:decimal"/>
     </DataPropertyRange>
     <DataPropertyRange>
@@ -922,6 +943,16 @@
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/PQMPH</IRI>
+        <Literal xml:lang="en">Penalized Query Mixes Per Hour.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/PQMPH</IRI>
+        <Literal>PQMPH Metric</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
         <IRI> https://vocab.dice-research.org/iguana/class/metric/QPS</IRI>
         <Literal xml:lang="en">Queries Per Second Metric.</Literal>
     </AnnotationAssertion>
@@ -979,6 +1010,16 @@
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
         <AbbreviatedIRI>iprop:QMPH</AbbreviatedIRI>
         <Literal>QMPH</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:PQMPH</AbbreviatedIRI>
+        <Literal xml:lang="en">The penalized query mixes per hour value</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:PQMPH</AbbreviatedIRI>
+        <Literal>PQMPH</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>

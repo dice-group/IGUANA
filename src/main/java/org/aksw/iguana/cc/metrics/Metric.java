@@ -12,6 +12,7 @@ import org.aksw.iguana.cc.metrics.impl.*;
         @JsonSubTypes.Type(value = NoQPH.class, name = "NoQPH"),
         @JsonSubTypes.Type(value = PAvgQPS.class, name = "PAvgQPS"),
         @JsonSubTypes.Type(value = PQPS.class, name = "PQPS"),
+        @JsonSubTypes.Type(value = PQMPH.class, name = "PQMPH"),
         @JsonSubTypes.Type(value = QMPH.class, name = "QMPH"),
         @JsonSubTypes.Type(value = QPS.class, name = "QPS")
 })
