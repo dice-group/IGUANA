@@ -68,6 +68,9 @@ that are aggregated for each execution.
 
 The `resultSize` is the size of the HTTP response in bytes and is an exception to the aggregation.
 
+Queries are considered failed if they resulted in a timeout, received a wrong HTTP status code (not 200),
+or resulted in an unknown exception during execution.
+
 ### Each Execution Statistic (EachQuery)
 This metric collects statistics for each execution of a query. 
 
