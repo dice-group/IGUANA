@@ -17,7 +17,7 @@ public class PQMPH extends Metric implements TaskMetric, WorkerMetric {
     private final int penalty;
 
     public PQMPH(@JsonProperty("penalty") Integer penalty) {
-        super("Penalized Query Mixes per Hour", "PQMPH", "This metric calculates the amount of query mixes (a given set of queries) that are executed per hour.");
+        super("Penalized Query Mixes per Hour", "PQMPH", "This metric calculates the amount of query mixes (a given set of queries) that are executed per hour. Failed executions receive a time penalty.");
         this.penalty = penalty;
     }
 
@@ -36,7 +36,7 @@ public class PQMPH extends Metric implements TaskMetric, WorkerMetric {
         Duration totalTime = Duration.ZERO;
         for (List<HttpWorker.ExecutionStats> datum : data) {
             for (HttpWorker.ExecutionStats exec : datum) {
-                if (exec.successful() || exec.timeout()) {
+                if (exec.successful()) {
                     executions = executions.add(BigDecimal.ONE);
                     totalTime = totalTime.plus(exec.duration());
                 } else {
