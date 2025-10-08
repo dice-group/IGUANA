@@ -15,6 +15,7 @@ The metrics are configured in the `metrics` section of the configuration file.
 To enable a metric, add an entry to the `metrics` list with the `type` of the metric.
 Some metrics (`PQPS`, `PAvgQPS`, `PQMPH`) require the configuration of a `penalty` value.
 The `penalty` is an integer value in milliseconds, and it replaces the execution time of a failed query.
+Queries are considered as failed if they time out or return an error code.
 This way it is ensured that queries that fail in a short time do not distort the results.
 
 ```yaml
