@@ -99,6 +99,9 @@
         <Class abbreviatedIRI="iont:metric/NoQPH"/>
     </Declaration>
     <Declaration>
+        <Class abbreviatedIRI="iont:metric/PNoQPH"/>
+    </Declaration>
+    <Declaration>
         <Class abbreviatedIRI="iont:metric/PAvgQPS"/>
     </Declaration>
     <Declaration>
@@ -157,6 +160,9 @@
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="iprop:NoQPH"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="iprop:PNoQPH"/>
     </Declaration>
     <Declaration>
         <DataProperty abbreviatedIRI="iprop:QMPH"/>
@@ -291,6 +297,10 @@
     </SubClassOf>
     <SubClassOf>
         <Class abbreviatedIRI="iont:metric/NoQPH"/>
+        <Class abbreviatedIRI="iont:Metric"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="iont:metric/PNoQPH"/>
         <Class abbreviatedIRI="iont:Metric"/>
     </SubClassOf>
     <SubClassOf>
@@ -477,6 +487,14 @@
         </ObjectUnionOf>
     </DataPropertyDomain>
     <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="iprop:PNoQPH"/>
+        <ObjectUnionOf>
+            <Class abbreviatedIRI="iont:Task"/>
+            <Class abbreviatedIRI="iont:Worker"/>
+        </ObjectUnionOf>
+    </DataPropertyDomain>
+
+    <DataPropertyDomain>
         <DataProperty abbreviatedIRI="iprop:QMPH"/>
         <ObjectUnionOf>
             <Class abbreviatedIRI="iont:Task"/>
@@ -629,6 +647,10 @@
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty abbreviatedIRI="iprop:NoQPH"/>
+        <Datatype abbreviatedIRI="xsd:decimal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="iprop:PNoQPH"/>
         <Datatype abbreviatedIRI="xsd:decimal"/>
     </DataPropertyRange>
     <DataPropertyRange>
@@ -913,6 +935,17 @@
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/PNoQPH</IRI>
+        <Literal xml:lang="en">Penalized Number of Queries Per Hour.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI> https://vocab.dice-research.org/iguana/class/metric/PNoQPH</IRI>
+        <Literal>PNoQPH Metric</Literal>
+    </AnnotationAssertion>
+
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
         <IRI> https://vocab.dice-research.org/iguana/class/metric/PAvgQPS</IRI>
         <Literal xml:lang="en">Penalized Average Queries Per Second.</Literal>
     </AnnotationAssertion>
@@ -1000,6 +1033,16 @@
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
         <AbbreviatedIRI>iprop:NoQPH</AbbreviatedIRI>
         <Literal>NoQPH</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>iprop:PNoQPH</AbbreviatedIRI>
+        <Literal xml:lang="en">The number of queries per hour value with penalized failures.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>iprop:PNoQPH</AbbreviatedIRI>
+        <Literal>PNoQPH</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
