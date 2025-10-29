@@ -31,13 +31,12 @@ public class PQMPH extends Metric implements TaskMetric, WorkerMetric {
 
     @Override
     public Number calculateWorkerMetric(HttpWorker.Config worker, List<HttpWorker.ExecutionStats>[] data) {
-        BigDecimal executions = BigDecimal.ZERO;
+        BigDecimal executions = BigDecimal.valueOf(data.length);
         BigDecimal noq = BigDecimal.valueOf(worker.queries().getExecutableQueryCount());
         Duration totalTime = Duration.ZERO;
         for (List<HttpWorker.ExecutionStats> datum : data) {
             for (HttpWorker.ExecutionStats exec : datum) {
                 if (exec.successful()) {
-                    executions = executions.add(BigDecimal.ONE);
                     totalTime = totalTime.plus(exec.duration());
                 } else {
                     totalTime = totalTime.plusMillis(penalty);
