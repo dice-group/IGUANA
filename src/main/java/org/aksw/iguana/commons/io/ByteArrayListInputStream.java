@@ -24,7 +24,7 @@ public class ByteArrayListInputStream extends InputStream {
      * Creates a new ByteArrayListInputStream that reads from the given list of byte arrays.
      * The list is not copied, so it should not be modified while the stream is in use.
      *
-     * @param data the list of byte arrays to read from
+     * @param data the list of byte arrays to read from, the list doesn't need to be mutable
      */
     public ByteArrayListInputStream(List<byte[]> data) {
         this.data = data;
@@ -193,5 +193,15 @@ public class ByteArrayListInputStream extends InputStream {
             return null;
         }
         return currentBuffer;
+    }
+
+    /**
+     * Converts a normal InputStream to a ByteArrayListInputStream.
+     *
+     * @param in InputStream object to convert
+     * @return   converted ByteArrayListInputStream
+     */
+    public static ByteArrayListInputStream toByteArrayListInputStream(InputStream in) throws IOException {
+        return new ByteArrayListInputStream(List.of(in.readAllBytes()));
     }
 }
