@@ -19,6 +19,7 @@ import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.nio.AsyncClientConnectionManager;
+import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
@@ -108,7 +110,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
     @Override
     public Config config() {
-        return (SPARQLProtocolWorker.Config) config;
+        return (Config) config;
     }
 
     public SPARQLProtocolWorker(long workerId, ResponseBodyProcessor responseBodyProcessor, Config config) {
@@ -173,6 +175,9 @@ public class SPARQLProtocolWorker extends HttpWorker {
         return CompletableFuture.supplyAsync(() -> {
             ZonedDateTime startTime = ZonedDateTime.now();
             List<ExecutionStats> executionStats = new ArrayList<>();
+            // establish connection to prevent overhead during actual execution
+            // this is done for every worker, because they might have different connection endpoints
+            sendEmptySparqlQuery(config().timeout());
             if (config().completionTarget() instanceof QueryMixes queryMixes) {
                 for (int i = 0; i < queryMixes.number(); i++) {
                     for (int j = 0; j < config().queries().getExecutableQueryCount(); j++) {
@@ -467,6 +472,49 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 Optional.ofNullable(e)
         );
     }
+
+    /**
+     * This method is only used to test and establish a connection to the endpoint.
+     * The established endpoint connection will be reused for further requests.
+     * This prevents connection overhead during the actual query executions.
+     */
+    private void sendEmptySparqlQuery(Duration timeout) {
+        final var sparqlQuery = "SELECT (1 AS ?test) WHERE {}";
+
+        // build the input stream with the query string as its content
+        // set index to -1 to not interfere with the cache of the normal queries
+        final var queryStream = new QueryHandler.QueryStreamWrapper(-1, true, () -> new ByteArrayInputStream(sparqlQuery.getBytes()), false, -1);
+        final AsyncRequestProducer request;
+        try {
+            request = requestFactory.buildHttpRequest(queryStream);
+            httpClient.execute(request, new AbstractBinResponseConsumer<HttpResponse>() {
+                    @Override protected void start(HttpResponse httpResponse, ContentType contentType) throws HttpException, IOException {}
+                    @Override protected HttpResponse buildResult() { return null; }
+                    @Override protected int capacityIncrement() { return Integer.MAX_VALUE; }
+                    @Override protected void data(ByteBuffer byteBuffer, boolean b) throws IOException { byteBuffer.clear(); }
+                    @Override public void releaseResources() {}
+
+                }, new FutureCallback<HttpResponse>() {
+                    @Override public void completed(HttpResponse result) {}
+                    @Override public void cancelled() {}
+                    @Override
+                    public void failed(Exception ex) {
+                        LOGGER.error("Error while sending first empty SPARQL query.", ex);
+                    }
+            }).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignored) {
+        } catch (ExecutionException e) {
+            LOGGER.error("Error while sending first empty SPARQL query.", e);
+            throw new RuntimeException("Error during send an empty SPARQL query.");
+        } catch (TimeoutException e) {
+            LOGGER.error("Timeout while sending intial empty SPARQL query for connection. There is either an issue with " +
+                    "the endpoint or consider increasing the timeout.", e);
+            throw new RuntimeException("Timeout while sending intial empty SPARQL query for connection. There is either an issue with " +
+                    "the endpoint or consider increasing the timeout.");
+        } catch (IOException ignored) {         // only reading query from a string literal, so this won't happen
+        } catch (URISyntaxException ignored) {} // will already be checked beforehand
+
+}
 
     private void logExecution(ExecutionStats execution) {
         switch (execution.endState()) {
