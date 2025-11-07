@@ -479,6 +479,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * This prevents connection overhead during the actual query executions.
      */
     private void sendEmptySparqlQuery(Duration timeout) {
+        if (MainController.Args.dryRun) return;
+
         final var sparqlQuery = "SELECT (1 AS ?test) WHERE {}";
 
         // build the input stream with the query string as its content
