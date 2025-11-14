@@ -26,6 +26,10 @@ public class MockupWorker extends HttpWorker {
             Duration timeout
     ) implements HttpWorker.Config {}
 
+    public MockupWorker(long workerID, Config config) {
+        super(workerID, null, config);
+    }
+
 
     /**
      * All values except the workerID and queries may be null. I recommend to use the MockupQueryHandler.
