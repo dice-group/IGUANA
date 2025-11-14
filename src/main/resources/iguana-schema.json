@@ -248,6 +248,9 @@
           "type": "string",
           "const": "stresstest"
         },
+        "timeoutRestartScript": {
+            "type": "string"
+        },
         "warmupWorkers": {
           "type": "array",
           "items": {
