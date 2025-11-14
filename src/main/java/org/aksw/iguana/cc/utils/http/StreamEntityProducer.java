@@ -39,7 +39,7 @@ public class StreamEntityProducer implements AsyncEntityProducer {
      * @param streamSupplier the input stream supplier, should be repeatable
      * @param chunked        whether the entity data should be sent in chunks
      */
-    public StreamEntityProducer(Supplier<InputStream> streamSupplier, boolean chunked, String contentType) {
+    public StreamEntityProducer(Supplier<InputStream> streamSupplier, boolean chunked, String contentType) throws IOException {
         this.streamSupplier = streamSupplier;
         this.chunked = chunked;
         this.contentType = contentType;
@@ -162,7 +162,7 @@ public class StreamEntityProducer implements AsyncEntityProducer {
         }
     }
 
-    private void loadContent() {
-        content = (ByteArrayListInputStream) streamSupplier.get();
+    private void loadContent() throws IOException {
+        content = ByteArrayListInputStream.toByteArrayListInputStream(streamSupplier.get());
     }
 }
