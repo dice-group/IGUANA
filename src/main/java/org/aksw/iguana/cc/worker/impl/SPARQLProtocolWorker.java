@@ -1,5 +1,6 @@
 package org.aksw.iguana.cc.worker.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
@@ -50,8 +51,10 @@ public class SPARQLProtocolWorker extends HttpWorker {
             Duration timeout,
             String acceptHeader /* e.g. application/sparql-results+json */,
             RequestFactory.RequestType requestType,
-            Boolean parseResults
+            Boolean parseResults,
+            @JsonIgnore Boolean skipConnectionBuildMessage // only used for testing
     ) implements HttpWorker.Config {
+        // This constructor set default values for optional parameters
         public Config(Integer number,
                       @JsonProperty(required = true) QueryHandler queries,
                       @JsonProperty(required = true) CompletionTarget completionTarget,
@@ -60,14 +63,16 @@ public class SPARQLProtocolWorker extends HttpWorker {
                       String acceptHeader,
                       RequestFactory.RequestType requestType,
                       Boolean parseResults) {
-            this.number = number == null ? 1 : number;
-            this.queries = queries;
-            this.completionTarget = completionTarget;
-            this.connection = connection;
-            this.timeout = timeout;
-            this.acceptHeader = acceptHeader;
-            this.requestType = requestType == null ? RequestFactory.RequestType.GET_QUERY : requestType;
-            this.parseResults = parseResults == null || parseResults;
+            this(
+                number == null ? 1 : number,
+                queries,
+                completionTarget,
+                connection,
+                timeout,
+                acceptHeader,
+                requestType == null ? RequestFactory.RequestType.GET_QUERY : requestType,
+                parseResults == null || parseResults,
+                false);
         }
     }
 
@@ -480,6 +485,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
      */
     private void sendEmptySparqlQuery(Duration timeout) {
         if (MainController.Args.dryRun) return;
+        if (config().skipConnectionBuildMessage()) return;
 
         final var sparqlQuery = "SELECT (1 AS ?test) WHERE {}";
 

@@ -117,6 +117,7 @@ public class SPARQLProtocolWorkerTest {
                         Duration.parse("PT6S"),
                         "application/sparql-results+json",
                         requestType,
+                        true,
                         true
                 );
                 workers.add(Arguments.of(Named.of(requestType.name(), new SPARQLProtocolWorker(i++, processor, config)), Named.of(String.valueOf(cached), cached)));
@@ -143,6 +144,7 @@ public class SPARQLProtocolWorkerTest {
                     Duration.parse("PT6S"),
                     "application/sparql-results+json",
                     requestType,
+                    true,
                     true
             );
             workers.add(Arguments.of(Named.of(requestType.name(), new SPARQLProtocolWorker(0, processor, config))));
@@ -326,7 +328,8 @@ public class SPARQLProtocolWorkerTest {
                 Duration.parse("PT5S"),
                 "application/sparql-results+json",
                 RequestFactory.RequestType.POST_URL_ENC_QUERY,
-                false
+                false,
+                true
         );
 
         SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
@@ -378,7 +381,8 @@ public class SPARQLProtocolWorkerTest {
                 Duration.parse("PT2S"),
                 "application/sparql-results+json",
                 RequestFactory.RequestType.POST_URL_ENC_QUERY,
-                false
+                false,
+                true
         );
 
         SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
