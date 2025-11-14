@@ -395,4 +395,53 @@ public class SPARQLProtocolWorkerTest {
         final HttpWorker.Result result = worker.start().join();
         assertEquals(1, result.executionStats().size()); // because of the delay, only one query should be executed
     }
+
+    @Test
+    public void testInitialConnectionBuildupMessage() throws URISyntaxException, IOException {
+        final var uri = new URI("http://localhost:" + wm.getPort() + "/ds/query");
+
+        final var processor = new ResponseBodyProcessor("application/sparql-results+json");
+        final var queryHandlder = new QueryHandler(new QueryHandler.Config(queryFile.toAbsolutePath().toString(), QueryHandler.Config.Format.SEPARATOR, null, true, QueryHandler.Config.Order.LINEAR, 0L, QueryHandler.Config.Language.SPARQL));
+        final var datasetConfig = new DatasetConfig("TestDS", null);
+        final var connection = new ConnectionConfig("TestConn", "1", datasetConfig, uri, new ConnectionConfig.Authentication("testUser", "password"), null, null);
+
+        final var config = new SPARQLProtocolWorker.Config(
+                1,
+                queryHandlder,
+                new HttpWorker.QueryMixes(1),
+                connection,
+                Duration.parse("PT2S"),
+                "application/sparql-results+json",
+                RequestFactory.RequestType.POST_URL_ENC_QUERY,
+                false,
+                false
+        );
+
+        final var emptyQuery = "SELECT (1 AS ?test) WHERE {}";
+
+        SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
+        wm.stubFor(post(urlPathEqualTo("/ds/query"))
+                .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
+                .withBasicAuth("testUser", "password")
+                .withRequestBody(equalTo("query=" + URLEncoder.encode(emptyQuery, StandardCharsets.UTF_8)))
+                .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body").withFixedDelay(1000)));
+        wm.stubFor(post(urlPathEqualTo("/ds/query"))
+                .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
+                .withBasicAuth("testUser", "password")
+                .withRequestBody(equalTo("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8)))
+                .willReturn(aResponse().withStatus(200).withBody("Non-Empty-Body").withFixedDelay(1000)));
+
+        final HttpWorker.Result result = worker.start().join();
+        assertEquals(1, result.executionStats().size()); // because of the delay, only one query should be executed
+
+        final var logs = wm.getAllServeEvents().stream()
+                .map(event -> event.getRequest().getBodyAsString())
+                .toList();
+        assertEquals(2, logs.size());
+        assertTrue(
+                logs.stream().allMatch(log ->
+                        log.contains("query=" + URLEncoder.encode(QUERY, StandardCharsets.UTF_8))
+                     || log.contains("query=" + URLEncoder.encode(emptyQuery, StandardCharsets.UTF_8)))
+        );
+    }
 }
