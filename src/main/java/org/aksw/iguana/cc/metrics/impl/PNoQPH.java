@@ -30,9 +30,10 @@ public class PNoQPH extends Metric implements TaskMetric, WorkerMetric {
 
     @Override
     public Number calculateWorkerMetric(HttpWorker.Config worker, List<HttpWorker.ExecutionStats>[] data) {
-        BigDecimal executions = BigDecimal.valueOf(data.length);
+        BigDecimal executions = BigDecimal.ZERO;
         Duration totalTime = Duration.ZERO;
         for (List<HttpWorker.ExecutionStats> datum : data) {
+            executions = executions.add(BigDecimal.valueOf(datum.size()));
             for (HttpWorker.ExecutionStats exec : datum) {
                 if (exec.successful()) {
                     totalTime = totalTime.plus(exec.duration());
