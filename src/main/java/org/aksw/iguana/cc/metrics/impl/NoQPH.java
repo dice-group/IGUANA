@@ -30,7 +30,7 @@ public class NoQPH extends Metric implements TaskMetric, WorkerMetric {
         Duration totalTime = Duration.ZERO;
         for (List<HttpWorker.ExecutionStats> datum : data) {
             for (HttpWorker.ExecutionStats exec : datum) {
-                if (exec.successful()) {
+                if (exec.successful() || exec.timeout()) {
                     successes = successes.add(BigDecimal.ONE);
                     totalTime = totalTime.plus(exec.duration());
                 }
