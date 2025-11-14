@@ -38,10 +38,12 @@ public class QMPH extends Metric implements TaskMetric, WorkerMetric {
                 }
             }
         }
-        BigDecimal tt = (new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 9)).divide(BigDecimal.valueOf(3600), 20, RoundingMode.HALF_UP);
+
+        BigDecimal queriesPerHour = executions.divide(new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 9), 10, RoundingMode.HALF_UP) // QPH = QPS * 3600
+                .multiply(BigDecimal.valueOf(3600));
 
         try {
-            return executions.divide(tt, 10, RoundingMode.HALF_UP).divide(noq, 10, RoundingMode.HALF_UP).stripTrailingZeros();
+            return queriesPerHour.divide(noq, 10, RoundingMode.HALF_UP).stripTrailingZeros();
         } catch (ArithmeticException e) {
             return BigDecimal.ZERO;
         }
