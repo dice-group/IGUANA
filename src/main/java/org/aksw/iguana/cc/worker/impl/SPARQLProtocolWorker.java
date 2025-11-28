@@ -224,8 +224,15 @@ public class SPARQLProtocolWorker extends HttpWorker {
         }, executor);
     }
 
+    /**
+     * Processes the result of a query execution.
+     * It logs the execution and adds it to the list of execution stats.
+     * If the execution timed out, the timeout handler will be called.
+     *
+     * @param executionStats the list of the already executed query stats
+     * @param execution      the execution stats of the executed query
+     */
     void processQueryResult(List<ExecutionStats> executionStats, ExecutionStats execution) {
-        // process result
         logExecution(execution);
         executionStats.add(execution);
         if (timeoutHandler != null && execution.timeout()) {
