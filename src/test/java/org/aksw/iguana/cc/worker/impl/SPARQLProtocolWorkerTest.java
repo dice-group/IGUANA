@@ -419,7 +419,7 @@ public class SPARQLProtocolWorkerTest {
 
         final var emptyQuery = "SELECT (1 AS ?test) WHERE {}";
 
-        SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
+        SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config, null);
         wm.stubFor(post(urlPathEqualTo("/ds/query"))
                 .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
                 .withBasicAuth("testUser", "password")
