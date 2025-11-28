@@ -160,6 +160,7 @@ public class Stresstest implements Task, TimeoutHandler {
             int exitCode = process.waitFor();
             if (exitCode != 0) {
                 LOGGER.error("Timeout restart script exited with code: {}", exitCode);
+                LOGGER.error(new String(process.getErrorStream().readAllBytes()));
             }
         } catch (Exception e) {
             LOGGER.error("Error while executing timeout restart script.", e);
