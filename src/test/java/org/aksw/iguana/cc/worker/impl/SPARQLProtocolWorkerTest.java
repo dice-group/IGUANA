@@ -120,7 +120,7 @@ public class SPARQLProtocolWorkerTest {
                         true,
                         true
                 );
-                workers.add(Arguments.of(Named.of(requestType.name(), new SPARQLProtocolWorker(i++, processor, config)), Named.of(String.valueOf(cached), cached)));
+                workers.add(Arguments.of(Named.of(requestType.name(), new SPARQLProtocolWorker(i++, processor, config, null)), Named.of(String.valueOf(cached), cached)));
             }
         }
         return workers.stream();
@@ -147,7 +147,7 @@ public class SPARQLProtocolWorkerTest {
                     true,
                     true
             );
-            workers.add(Arguments.of(Named.of(requestType.name(), new SPARQLProtocolWorker(0, processor, config))));
+            workers.add(Arguments.of(Named.of(requestType.name(), new SPARQLProtocolWorker(0, processor, config, null))));
         }
         return workers.stream();
     }
@@ -332,7 +332,7 @@ public class SPARQLProtocolWorkerTest {
                 true
         );
 
-        SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
+        SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config, null);
         wm.stubFor(post(urlPathEqualTo("/ds/query"))
                 .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
                 // .withBasicAuth("testUser", "password")
@@ -385,7 +385,7 @@ public class SPARQLProtocolWorkerTest {
                 true
         );
 
-        SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config);
+        SPARQLProtocolWorker worker = new SPARQLProtocolWorker(0, processor, config, null);
         wm.stubFor(post(urlPathEqualTo("/ds/query"))
                 .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
                 .withBasicAuth("testUser", "password")
