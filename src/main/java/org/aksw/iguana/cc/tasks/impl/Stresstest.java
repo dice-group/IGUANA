@@ -12,7 +12,6 @@ import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
@@ -43,8 +42,8 @@ public class Stresstest implements Task, TimeoutHandler {
     private final List<HttpWorker> workers = new ArrayList<>();
 
     private final StresstestResultProcessor srp;
-    private final File timeoutRestartScript;
 
+    private final ProcessBuilder timeoutProcessBuilder;
 
     public Stresstest(String suiteID, long stresstestID, Config config, ResponseBodyProcessorInstances responseBodyProcessorInstances, List<Storage> storages, List<Metric> metrics) {
 
@@ -112,9 +111,20 @@ public class Stresstest implements Task, TimeoutHandler {
             if (!file.canExecute()) {
                 throw new IllegalArgumentException("The provided timeoutRestartScript is not executable: " + config.timeoutRestartScript);
             }
-            this.timeoutRestartScript = file;
+
+            // determine shell executable for the operating system
+            final var os = System.getProperty("os.name").toLowerCase();
+            final List<String> shellCommands = new ArrayList<>();
+            if (os.startsWith("windows")) {
+                shellCommands.add("powershell.exe");
+            } else if (os.startsWith("linux")) {
+                shellCommands.add("bash");
+                shellCommands.add("-c");
+            }
+            shellCommands.add(file.getAbsolutePath());
+            this.timeoutProcessBuilder = new ProcessBuilder(shellCommands);
         } else {
-            this.timeoutRestartScript = null;
+            this.timeoutProcessBuilder = null;
         }
     }
 
@@ -151,12 +161,12 @@ public class Stresstest implements Task, TimeoutHandler {
 
     @Override
     public void handleTimeout(HttpWorker worker) {
-        if (timeoutRestartScript == null) return;
+        if (this.timeoutProcessBuilder == null) return;
 
         SPARQLProtocolWorker.closeHttpClient();
 
         try {
-            Process process = new ProcessBuilder(timeoutRestartScript.getAbsolutePath()).start();
+            Process process = this.timeoutProcessBuilder.start();
             int exitCode = process.waitFor();
             if (exitCode != 0) {
                 LOGGER.error("Timeout restart script exited with code: {}", exitCode);

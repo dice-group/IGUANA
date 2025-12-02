@@ -501,7 +501,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * The established endpoint connection will be reused for further requests.
      * This prevents connection overhead during the actual query executions.
      */
-    private void sendEmptySparqlQuery() {
+    public void sendEmptySparqlQuery() {
         if (MainController.Args.dryRun) return;
         if (config().skipConnectionBuildMessage()) return;
 
