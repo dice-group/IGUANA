@@ -21,13 +21,17 @@ on the measurements.
 The task is used to measure the performance of the endpoint for each query.
 The task is configured with the following properties:
 
-| property      | required | description                                                  |
-|---------------|----------|--------------------------------------------------------------|
-| workers       | yes      | An array that contains worker configurations.                | 
-| warmupworkers | no       | An array that contains worker configurations for the warmup. |
+| property             | required | description                                                        |
+|----------------------|----------|--------------------------------------------------------------------|
+| workers              | yes      | An array that contains worker configurations.                      | 
+| warmupworkers        | no       | An array that contains worker configurations for the warmup.       |
+| timeoutRestartScript | no       | A path to a script that gets executed, whenever a query times out. |
 
 The stresstest uses workers to execute the queries, which are supposed to simulate users.
 Each worker has its own set of queries and executes them parallel to the other workers.
+
+The timeout restart script is used to restart the endpoint whenever a query times out, so that they aren't stuck with
+processing the timed-out query in case the endpoint doesn't handle timeouts properly itself.
 
 Warmup workers have the same functionality as normal workers,
 but their results won't be processed and stored.

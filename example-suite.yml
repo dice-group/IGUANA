@@ -31,6 +31,9 @@ connections:
 # The tasks that will be executed by the benchmark. They will be executed in the order they are defined.
 tasks:
   - type: stresstest # Stresstests are used to test the performance of the system by sending a large number of requests.
+    # Script that will be executed when a worker times out.
+    # The behavior is undefined if multiple concurrent workers are used for the stresstest.
+    timeoutRestartScript: "./example/restart_virtuoso.sh"
     warmupWorkers:   # Warmup workers are used to warm up the system before the actual stresstest.
     - type: SPARQLProtocolWorker
       requestType: post update    # Send POST requests with application/sparql-update content type to the endpoint.

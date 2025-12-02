@@ -10,6 +10,7 @@ import org.aksw.iguana.cc.query.handler.QueryHandler;
 import org.aksw.iguana.cc.utils.http.RequestFactory;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.HttpWorker;
+import org.aksw.iguana.cc.worker.TimeoutHandler;
 import org.aksw.iguana.commons.io.BigByteArrayOutputStream;
 import org.aksw.iguana.commons.io.ByteArrayListOutputStream;
 import org.aksw.iguana.commons.io.ReversibleOutputStream;
@@ -102,6 +103,8 @@ public class SPARQLProtocolWorker extends HttpWorker {
     private static AsyncClientConnectionManager connectionManager;
     private final ThreadPoolExecutor executor;
 
+    private final TimeoutHandler timeoutHandler;
+
     private final XXHashFactory hasherFactory = XXHashFactory.fastestJavaInstance();
     private final RequestFactory requestFactory;
 
@@ -118,11 +121,12 @@ public class SPARQLProtocolWorker extends HttpWorker {
         return (Config) config;
     }
 
-    public SPARQLProtocolWorker(long workerId, ResponseBodyProcessor responseBodyProcessor, Config config) {
+    public SPARQLProtocolWorker(long workerId, ResponseBodyProcessor responseBodyProcessor, Config config, TimeoutHandler timeoutHandler) {
         super(workerId, responseBodyProcessor, config);
         this.responseBodyProcessor = responseBodyProcessor;
         this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
         this.requestFactory = new RequestFactory(this.config());
+        this.timeoutHandler = timeoutHandler;
     }
 
     /**
@@ -182,14 +186,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
             List<ExecutionStats> executionStats = new ArrayList<>();
             // establish connection to prevent overhead during actual execution
             // this is done for every worker, because they might have different connection endpoints
-            sendEmptySparqlQuery(config().timeout());
+            sendEmptySparqlQuery();
             if (config().completionTarget() instanceof QueryMixes queryMixes) {
                 for (int i = 0; i < queryMixes.number(); i++) {
                     for (int j = 0; j < config().queries().getExecutableQueryCount(); j++) {
                         ExecutionStats execution = executeQuery(config().timeout(), false);
                         if (execution == null) throw new RuntimeException("Execution returned null at a place, where it should have never been null.");
-                        logExecution(execution);
-                        executionStats.add(execution);
+                        processQueryResult(executionStats, execution);
                     }
                     LOGGER.info("{}\t:: Completed {} out of {} querymixes.", this, i + 1, queryMixes.number());
                 }
@@ -205,8 +208,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     final Duration actualQueryTimeOut = reducedTimeout ? Duration.of(timeLeft, ChronoUnit.NANOS) : config.timeout();
                     ExecutionStats execution = executeQuery(actualQueryTimeOut, reducedTimeout);
                     if (execution != null){ // If timeout is reduced, the execution result might be discarded if it failed and executeQuery returns null.
-                        logExecution(execution);
-                        executionStats.add(execution);
+                        processQueryResult(executionStats, execution);
                     }
 
                     if ((++queryExecutionCount) >= queryMixSize) {
@@ -220,6 +222,22 @@ public class SPARQLProtocolWorker extends HttpWorker {
             ZonedDateTime endTime = ZonedDateTime.now();
             return new Result(this.workerID, executionStats, startTime, endTime);
         }, executor);
+    }
+
+    /**
+     * Processes the result of a query execution.
+     * It logs the execution and adds it to the list of execution stats.
+     * If the execution timed out, the timeout handler will be called.
+     *
+     * @param executionStats the list of the already executed query stats
+     * @param execution      the execution stats of the executed query
+     */
+    void processQueryResult(List<ExecutionStats> executionStats, ExecutionStats execution) {
+        logExecution(execution);
+        executionStats.add(execution);
+        if (timeoutHandler != null && execution.timeout()) {
+            timeoutHandler.handleTimeout(this);
+        }
     }
 
     /**
@@ -483,7 +501,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * The established endpoint connection will be reused for further requests.
      * This prevents connection overhead during the actual query executions.
      */
-    private void sendEmptySparqlQuery(Duration timeout) {
+    public void sendEmptySparqlQuery() {
         if (MainController.Args.dryRun) return;
         if (config().skipConnectionBuildMessage()) return;
 
@@ -509,7 +527,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
                     public void failed(Exception ex) {
                         LOGGER.error("Error while sending first empty SPARQL query.", ex);
                     }
-            }).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+            }).get(config.timeout().toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignored) {
         } catch (ExecutionException e) {
             LOGGER.error("Error while sending first empty SPARQL query.", e);

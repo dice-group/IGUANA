@@ -7,10 +7,12 @@ import org.aksw.iguana.cc.storage.Storage;
 import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
+import org.aksw.iguana.cc.worker.TimeoutHandler;
 import org.aksw.iguana.cc.worker.impl.SPARQLProtocolWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -19,11 +21,12 @@ import java.util.concurrent.*;
  * Stresstest.
  * Will stresstest a connection using several Workers (simulated Users) each in one thread.
  */
-public class Stresstest implements Task {
+public class Stresstest implements Task, TimeoutHandler {
 
     public record Config(
             List<HttpWorker.Config> warmupWorkers,
-            @JsonProperty(required = true) List<HttpWorker.Config> workers
+            @JsonProperty(required = true) List<HttpWorker.Config> workers,
+            String timeoutRestartScript
     ) implements Task.Config {}
 
     public record Result(
@@ -40,6 +43,7 @@ public class Stresstest implements Task {
 
     private final StresstestResultProcessor srp;
 
+    private final ProcessBuilder timeoutProcessBuilder;
 
     public Stresstest(String suiteID, long stresstestID, Config config, ResponseBodyProcessorInstances responseBodyProcessorInstances, List<Storage> storages, List<Metric> metrics) {
 
@@ -58,7 +62,7 @@ public class Stresstest implements Task {
             for (HttpWorker.Config workerConfig : config.warmupWorkers()) {
                 for (int i = 0; i < workerConfig.number(); i++) {
                     var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
-                    warmupWorkers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
+                    warmupWorkers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig, this));
                 }
             }
         }
@@ -76,7 +80,7 @@ public class Stresstest implements Task {
             long workerId = 0;
             for (int i = 0; i < workerConfig.number(); i++) {
                 var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
-                workers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
+                workers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig, this));
             }
         }
 
@@ -97,6 +101,31 @@ public class Stresstest implements Task {
                 storages,
                 responseBodyProcessorInstances.getResults()
         );
+
+        // validate timeout restart script
+        if (config.timeoutRestartScript != null) {
+            final var file = Path.of(config.timeoutRestartScript).toFile();
+            if (!file.exists()) {
+                throw new IllegalArgumentException("The provided timeoutRestartScript path does not exist: " + config.timeoutRestartScript);
+            }
+            if (!file.canExecute()) {
+                throw new IllegalArgumentException("The provided timeoutRestartScript is not executable: " + config.timeoutRestartScript);
+            }
+
+            // determine shell executable for the operating system
+            final var os = System.getProperty("os.name").toLowerCase();
+            final List<String> shellCommands = new ArrayList<>();
+            if (os.startsWith("windows")) {
+                shellCommands.add("powershell.exe");
+            } else if (os.startsWith("linux")) {
+                shellCommands.add("bash");
+                shellCommands.add("-c");
+            }
+            shellCommands.add(file.getAbsolutePath());
+            this.timeoutProcessBuilder = new ProcessBuilder(shellCommands);
+        } else {
+            this.timeoutProcessBuilder = null;
+        }
     }
 
     public void run() {
@@ -128,6 +157,32 @@ public class Stresstest implements Task {
 
         }
         return new Result(results, startTime, endTime);
+    }
+
+    @Override
+    public void handleTimeout(HttpWorker worker) {
+        if (this.timeoutProcessBuilder == null) return;
+
+        SPARQLProtocolWorker.closeHttpClient();
+
+        try {
+            Process process = this.timeoutProcessBuilder.start();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                LOGGER.error("Timeout restart script exited with code: {}", exitCode);
+                LOGGER.error(new String(process.getErrorStream().readAllBytes()));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error while executing timeout restart script.", e);
+        }
+
+        // restart http client
+        SPARQLProtocolWorker.initHttpClient(workers.size());
+        for (var w : workers) {
+            if (w instanceof SPARQLProtocolWorker) {
+                ((SPARQLProtocolWorker) w).sendEmptySparqlQuery();
+            }
+        }
     }
 
     @Override
