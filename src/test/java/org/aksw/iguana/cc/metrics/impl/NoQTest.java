@@ -41,7 +41,7 @@ class NoQTest extends MetricTest {
         final var workerConfig0 = getWorker(0);
         final var workerConfig1 = getWorker(1);
         final var actual = metric.calculateTaskMetric(List.of(workerConfig0, workerConfig1), dataArray);
-        final var expected = new java.math.BigInteger("8");
+        final var expected = new java.math.BigInteger("8"); // 4 successful executions per worker
 
         assertEquals(0, expected.compareTo((BigInteger) actual));
     }

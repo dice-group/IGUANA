@@ -14,14 +14,14 @@ class PQPSTest extends MetricTest {
     @Test
     public void testPQPSQueryMetric() {
         final var testData = queryResults(0, List.of(
-                Duration.ofMillis(500),
-                Duration.ofMillis(1500),
-                Duration.ofMillis(1500),
-                Duration.ofMillis(100)
+                Duration.ofMillis(500),  // success
+                Duration.ofMillis(1500), // success
+                Duration.ofMillis(1500), // timeout
+                Duration.ofMillis(100)   // general error
         ), 2, 1, 1);
         final var metric = new PQPS(3000);
         final var actual = metric.calculateQueryMetric(testData);
-        final var expected = new java.math.BigDecimal("0.5");
+        final var expected = new java.math.BigDecimal("0.5"); // 4 executions with penalized time of 8s
 
 
         assertEquals(0, expected.compareTo((BigDecimal) actual));
