@@ -18,17 +18,17 @@ public class QPS extends Metric implements QueryMetric {
 
     @Override
     public Number calculateQueryMetric(List<HttpWorker.ExecutionStats> data) {
-        BigDecimal successes = BigDecimal.ZERO;
+        BigDecimal exeuctions = BigDecimal.ZERO;
         Duration totalTime = Duration.ZERO;
         for (HttpWorker.ExecutionStats exec : data) {
-            if (exec.successful()) {
-                successes = successes.add(BigDecimal.ONE);
+            if (exec.successful() || exec.timeout()) {
+                exeuctions = exeuctions.add(BigDecimal.ONE);
                 totalTime = totalTime.plus(exec.duration());
             }
         }
         BigDecimal tt = (new BigDecimal(BigInteger.valueOf(totalTime.toNanos()), 9));
         try {
-            return successes.divide(tt, 10, RoundingMode.HALF_UP).stripTrailingZeros();
+            return exeuctions.divide(tt, 10, RoundingMode.HALF_UP).stripTrailingZeros();
         } catch (ArithmeticException e) {
             return BigDecimal.ZERO;
         }

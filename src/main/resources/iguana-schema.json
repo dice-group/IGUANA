@@ -129,7 +129,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": [ "AES", "AvgQPS", "EachQuery", "NoQ", "NoQPH", "PAvgQPS", "PQPS", "QMPH", "QPS" ]
+          "enum": [ "AES", "AvgQPS", "EachQuery", "NoQ", "NoQPH", "PNoQPH", "PAvgQPS", "PQPS", "QMPH", "PQMPH", "QPS" ]
         },
         "penalty": {
           "type": "integer",

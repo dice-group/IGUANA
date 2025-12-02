@@ -360,7 +360,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
 
                 // check for http error
                 if (response.getCode() / 100 != 2) {
-                    return createFailedResultDuringResponse(resultIndex, response, timeStamp, duration, null);
+                    return createFailedResultAfterResponse(resultIndex, response, timeStamp, duration, null);
                 }
 
                 // check content length
@@ -372,13 +372,13 @@ public class SPARQLProtocolWorker extends HttpWorker {
                         if (responseSize != responseBody.size())
                             LOGGER.error("Error during copying the response data. (expected written data size = {}, actual written data size = {}, Content-Length-Header = {})", responseSize, responseBody.size(), contentLengthHeader.getValue());
                         final var exception = new HttpException(String.format("Content-Length header value doesn't match actual content length. (Content-Length-Header = %s, written data size = %s)", contentLength, config.parseResults() ? responseBody.size() : responseSize));
-                        return createFailedResultDuringResponse(resultIndex, response, timeStamp, duration, exception);
+                        return createFailedResultAfterResponse(resultIndex, response, timeStamp, duration, exception);
                     }
                 }
 
                 // check timeout
                 if (duration.compareTo(timeout) > 0) {
-                    return createFailedResultDuringResponse(resultIndex, response, timeStamp, duration, new TimeoutException());
+                    return createFailedResultAfterResponse(resultIndex, response, timeStamp, timeout, new TimeoutException());
                 }
 
                 // return successful result
@@ -411,11 +411,11 @@ public class SPARQLProtocolWorker extends HttpWorker {
                 try {
                     return future.get();
                 } catch (InterruptedException | ExecutionException ex) {
-                    return createFailedResultBeforeRequest(resultIndex, ex);
+                    return createFailedResultDuringResponse(resultIndex, timeStamp, timeout, ex);
                 }
             } else {
                 future.cancel(true);
-                return createFailedResultBeforeRequest(resultIndex, e);
+                return createFailedResultDuringResponse(resultIndex, timeStamp, timeout, e);
             }
         }
     }
@@ -441,7 +441,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
     }
 
     /**
-     * Creates a failed result for a query execution that failed during the response.
+     * Creates a failed result for a query execution that failed after the response, due to invalid responses etc.
      *
      * @param queryIndex the index of the query
      * @param response   the response of the query
@@ -450,7 +450,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
      * @param e          the exception that caused the error, can be null
      * @return           the failed result
      */
-    private static HttpExecutionResult createFailedResultDuringResponse(
+    private static HttpExecutionResult createFailedResultAfterResponse(
             int queryIndex,
             HttpResponse response,
             Instant timestamp,
@@ -468,6 +468,32 @@ public class SPARQLProtocolWorker extends HttpWorker {
         );
     }
 
+    /**
+     * Creates a failed result for a query execution that failed during the response.
+     *
+     * @param queryIndex the index of the query
+     * @param timestamp  the start time of the query
+     * @param duration   the duration of the query until error
+     * @param e          the exception that caused the error, can be null
+     * @return           the failed result
+     */
+    private static HttpExecutionResult createFailedResultDuringResponse(
+            int queryIndex,
+            Instant timestamp,
+            Duration duration,
+            Exception e) {
+        return new HttpExecutionResult(
+                queryIndex,
+                Optional.empty(),
+                timestamp,
+                duration,
+                Optional.empty(),
+                OptionalLong.empty(),
+                OptionalLong.empty(),
+                Optional.ofNullable(e)
+        );
+    }
+
     private void logExecution(ExecutionStats execution) {
         switch (execution.endState()) {
             case SUCCESS -> {
@@ -475,7 +501,7 @@ public class SPARQLProtocolWorker extends HttpWorker {
             }
             case TIMEOUT -> LOGGER.warn("{}\t:: Timeout during query execution: [queryID={}, duration={}].", this, execution.queryID(), execution.duration()); // TODO: look for a possibility to add the query string for better logging
             case HTTP_ERROR -> LOGGER.warn("{}\t:: HTTP Error occurred during query execution: [queryID={}, httpError={}].", this, execution.queryID(), execution.httpStatusCode().orElse(-1));
-            case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}].", this, execution.queryID(), execution.error().orElse(null));
+            case MISCELLANEOUS_EXCEPTION -> LOGGER.warn("{}\t:: Miscellaneous exception occurred during query execution: [queryID={}, exception={}].", this, execution.queryID(), execution.error().map(Throwable::toString).orElse(""));
         }
     }
 
