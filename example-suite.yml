@@ -95,6 +95,15 @@ tasks:
         timeout: 100s
         parseResults: true
         acceptHeader: "application/sparql-results+json"
+  - type: "validation"
+    groundTruth:
+      name: "fuseki"
+      resultParsingStresstest: "/path/to/stresstest_task_csv_results_dir/"
+    validate:
+      - name: "blazegraph"
+        resultParsingStresstest: "/path/to/validation_task_csv_results_dir/"
+      - name: "virtuoso"
+        resultParsingStresstest: 0
 
 # Define how the results will be stored.
 storages:
