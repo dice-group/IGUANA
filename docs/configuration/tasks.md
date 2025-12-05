@@ -1,4 +1,4 @@
-_# Tasks
+# Tasks
 The tasks are the core of the benchmark suite.
 They define the actual process of the benchmarking suite
 and are executed from top to bottom in the order they are defined in the configuration.
