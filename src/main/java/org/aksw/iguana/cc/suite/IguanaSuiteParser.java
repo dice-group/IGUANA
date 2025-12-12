@@ -1,7 +1,6 @@
 package org.aksw.iguana.cc.suite;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -243,16 +242,24 @@ public class IguanaSuiteParser {
      */
     private static Map<String, DatasetConfig> preparseDataset(ObjectMapper mapper, String input) throws JsonProcessingException {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        record PreparsingDatasets(@JsonProperty(required = true) List<DatasetConfig> datasets) {}
+        record PreparsingDatasets(List<DatasetConfig> datasets) {}
         final var preparsingDatasets = mapper.readValue(input, PreparsingDatasets.class);
+
+        if (preparsingDatasets.datasets() == null) {
+            return Collections.emptyMap();
+        }
 
         return preparsingDatasets.datasets().stream().collect(Collectors.toMap(DatasetConfig::name, Function.identity()));
     }
 
     private static Map<String, ConnectionConfig> preparseConnections(ObjectMapper mapper, String input) throws JsonProcessingException {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        record PreparsingConnections(@JsonProperty(required = true) List<ConnectionConfig> connections) {}
+        record PreparsingConnections(List<ConnectionConfig> connections) {}
         final var preparsingConnections = mapper.readValue(input, PreparsingConnections.class);
+
+        if (preparsingConnections.connections() == null) {
+            return Collections.emptyMap();
+        }
 
         return preparsingConnections.connections().stream().collect(Collectors.toMap(ConnectionConfig::name, Function.identity()));
     }
