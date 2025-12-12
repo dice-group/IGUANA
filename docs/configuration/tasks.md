@@ -77,11 +77,14 @@ tasks:
       
   - type: "validation"
     groundTruth:
-      name: "fuseki"
-      resultParsingStresstest: "/path/to/stresstest_task_csv_results_dir/" 
+      triplestoreName: "fuseki"
+      resultParsingStresstest:
+        csvResultPath: "/path/to/stresstest_task_csv_results_dir/"
     validate:
-    - name: "blazegraph"
-      resultParsingStresstest: "/path/to/validation_task_csv_results_dir/"
-    - name: "virtuoso"
-      resultParsingStresstest: 0
+      - triplestoreName: "blazegraph"
+        resultParsingStresstest:
+          csvResultPath: "/path/to/validation_task_csv_results_dir/"
+      - triplestoreName: "virtuoso"
+        resultParsingStresstest:
+          stresstestId: 0
 ```
