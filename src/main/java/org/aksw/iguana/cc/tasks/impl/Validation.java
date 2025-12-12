@@ -57,7 +57,6 @@ public class Validation implements Task {
             var diffTable = referenceTable.append(validateTable);
             diffTable = diffTable.selectColumns("triplestore", "queryID", "run", "results", "bindings", "variables", "links");
             diffTable = diffTable.sortAscendingOn("queryID", "run", "triplestore");
-            System.out.println(diffTable.print());
             diffTable = removeEqualPairs(diffTable, List.of("triplestore"));
 
             if (diffTable.rowCount() == 0) {
@@ -65,7 +64,7 @@ public class Validation implements Task {
             } else {
                 System.out.println("Validation failed for triplestore: " + validateTuple.triplestoreName);
                 System.out.println("Differences found:");
-                System.out.println(diffTable.print());
+                System.out.println(diffTable.printAll());
             }
         }
 
@@ -107,7 +106,7 @@ public class Validation implements Task {
             var executionStats = Table.read().csv(executionStatsPath.toString());
             executionStats = executionStats.selectColumns("queryID", "run", "responseBodyHash");
 
-            return resultCount.joinOn("responseBodyHash").inner(executionStats);
+            return resultCount.joinOn("responseBodyHash").fullOuter(executionStats);
         } else if (ref instanceof TaskID taskId) {
             throw new UnsupportedOperationException("StresstestResultReference of type TaskID is not yet supported.");
         } else {
