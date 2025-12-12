@@ -50,7 +50,7 @@ tasks:
 
 ## Validation Task
 The `validation`-task is used to validate the correctness of SPARQL SELECT query results.
-It compares not the direct results of the queries, but their number of bindings.
+It compares not the direct results of the queries, but their number of solutions and bindings.
 The task is configured with the following properties:
 
 | property    | required | description                                                                                   |
@@ -71,6 +71,10 @@ and `acceptHeader` set to an accept header by IGUANA to generate the necessary f
 ### Example
 ```yaml
 tasks:
+  - type: "stresstest"
+    workers:
+    - type: "SPARQLProtocolWorker"
+      
   - type: "validation"
     groundTruth:
       name: "fuseki"
