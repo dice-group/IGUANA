@@ -5,16 +5,20 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.aksw.iguana.cc.metrics.Metric;
 import org.aksw.iguana.cc.storage.Storage;
+import org.aksw.iguana.cc.storage.impl.CSVStorage;
 import org.aksw.iguana.cc.tasks.Task;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
-import tech.tablesaw.api.StringColumn;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.tablesaw.api.Table;
 
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 public class Validation implements Task {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public record Config(
             @JsonProperty(required = true) TriplestoreTuple groundTruth,
@@ -39,61 +43,72 @@ public class Validation implements Task {
 
     private final Config config;
 
+    private CSVStorage csvStorage;
+
     public Validation(String suiteID, long taskId, Validation.Config config, ResponseBodyProcessorInstances responseBodyProcessorInstances, List<Storage> storages, List<Metric> metrics) {
         this.config = config;
+        for (Storage storage : storages) {
+            if (storage instanceof CSVStorage) {
+                this.csvStorage = (CSVStorage) storage;
+                return;
+            }
+        }
     }
 
     @Override
     public void run() {
-        var referenceTable = getTriplestoreResults(config.groundTruth.resultParsingStresstest);
-        referenceTable = referenceTable.insertColumn(0, StringColumn.create("triplestore", Collections.nCopies(referenceTable.rowCount(), config.groundTruth.triplestoreName)));
-        referenceTable = referenceTable.sortAscendingOn("queryID", "run");
+        final var compareColumns = new String[]{ "results", "bindings", "variables", "links" };
+        final var keyColumns = new String[]{ "queryID", "run" };
 
+        var referenceTable = prepareTable(getTriplestoreResults(config.groundTruth.resultParsingStresstest), config.groundTruth.triplestoreName, keyColumns, compareColumns);
         for (TriplestoreTuple validateTuple : config.validate) {
-            var validateTable = getTriplestoreResults(validateTuple.resultParsingStresstest);
-            validateTable = validateTable.insertColumn(0, StringColumn.create("triplestore", Collections.nCopies(validateTable.rowCount(), validateTuple.triplestoreName)));
-            validateTable = validateTable.sortAscendingOn("queryID", "run");
+            var validateTable = prepareTable(getTriplestoreResults(validateTuple.resultParsingStresstest), validateTuple.triplestoreName, keyColumns, compareColumns);
+            var combinedTable = referenceTable.joinOn(keyColumns).fullOuter(validateTable);
 
-            var diffTable = referenceTable.append(validateTable);
-            diffTable = diffTable.selectColumns("triplestore", "queryID", "run", "results", "bindings", "variables", "links");
-            diffTable = diffTable.sortAscendingOn("queryID", "run", "triplestore");
-            diffTable = removeEqualPairs(diffTable, List.of("triplestore"));
+            // check every row for differences
+            for (var row : combinedTable) {
+                for (var columnName : compareColumns) {
+                    final var queryID = row.getObject("queryID");
+                    final var run = row.getObject("run");
 
-            if (diffTable.rowCount() == 0) {
-                System.out.println("Validation successful for triplestore: " + validateTuple.triplestoreName);
-            } else {
-                System.out.println("Validation failed for triplestore: " + validateTuple.triplestoreName);
-                System.out.println("Differences found:");
-                System.out.println(diffTable.printAll());
+                    final var referenceColumnName = config.groundTruth.triplestoreName + "_" + columnName;
+                    final var validateColumnName = validateTuple.triplestoreName + "_" + columnName;
+
+                    final var referenceValue = row.isMissing(referenceColumnName) ? null : row.getObject(referenceColumnName);
+                    final var validateValue = row.isMissing(validateColumnName) ? null : row.getObject(validateColumnName);
+
+                    if (referenceValue == null && validateValue == null) { continue; } // both are null, consider equal
+                    if (referenceValue == null) { continue; } // missing in reference, ignore
+                    if (referenceValue != null && validateValue == null) {
+                        logger.warn("Triplestore \"{}\" is missing \"{}\" value for queryID {} run {}: expectedValue={}",
+                                validateTuple.triplestoreName, columnName, queryID, run, referenceValue);
+                    } else if (!referenceValue.equals(validateValue)) {
+                        logger.warn("Triplestore \"{}\" has mismatching \"{}\" value for queryID {} run {}: actualValue={}, expectedValue={}",
+                                validateTuple.triplestoreName, columnName, queryID, run, validateValue, referenceValue);
+                    }
+                }
             }
         }
 
     }
 
-    /**
-     * Removes pairs of equal rows from the table.
-     *
-     * @param table
-     * @return
-     */
-    private Table removeEqualPairs(Table table, List<String> ignoreColumns) {
-        var newTable = table.emptyCopy();
-        for (int i = 0; i < table.rowCount() - 1; i += 2) {
-            final var row1 = table.row(i);
-            final var row2 = table.row(i + 1);
-            for (int col = 0; col < table.columnCount(); col++) {
-                if (ignoreColumns.contains(table.column(col).name())) continue; // skip ignored columns
-                var val1 = row1.getObject(col);
-                var val2 = row2.getObject(col);
+    private Table prepareTable(Table table, String triplestoreName, String[] keyColumns, String[] compareColumns) {
+        // sort by key columns
+        table = table.sortAscendingOn(keyColumns);
 
-                if ((val1 == null && val2 != null) || (val1 != null && !val1.equals(val2))) {
-                    // rows are different
-                    newTable.append(row1);
-                    newTable.append(row2);
-                }
+        // drop unused columns
+        final var selectedColumns = Arrays.copyOf(keyColumns, keyColumns.length + compareColumns.length);
+        System.arraycopy(compareColumns, 0, selectedColumns, keyColumns.length, compareColumns.length);
+        table = table.selectColumns(selectedColumns);
+
+        // add triplestore prefix to column names that are used for comparison
+        for (var column : table.columns()) {
+            if (Arrays.asList(compareColumns).contains(column.name())) {
+                var newName = triplestoreName + "_" + column.name();
+                column.setName(newName);
             }
         }
-        return newTable;
+        return table;
     }
 
     private Table getTriplestoreResults(StresstestResultReference ref) {
