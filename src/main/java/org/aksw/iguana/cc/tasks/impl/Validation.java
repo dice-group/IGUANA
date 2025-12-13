@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import tech.tablesaw.api.Table;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,6 +48,19 @@ public class Validation implements Task {
 
     public Validation(String suiteID, long taskId, Validation.Config config, ResponseBodyProcessorInstances responseBodyProcessorInstances, List<Storage> storages, List<Metric> metrics) {
         this.config = config;
+
+        // check if system names are unique
+        final var allNames = new ArrayList<String>();
+        for (TriplestoreTuple tuple : config.validate) {
+            if (allNames.contains(tuple.triplestoreName)) {
+                throw new IllegalArgumentException("Triplestore names in validation task must be unique. Duplicate name: " + tuple.triplestoreName);
+            }
+            allNames.add(tuple.triplestoreName);
+        }
+        if (allNames.contains(config.groundTruth.triplestoreName)) {
+            throw new IllegalArgumentException("Triplestore names in validation task must be unique. Duplicate name: " + config.groundTruth.triplestoreName);
+        }
+
         for (Storage storage : storages) {
             if (storage instanceof CSVStorage) {
                 this.csvStorage = (CSVStorage) storage;
@@ -62,6 +76,10 @@ public class Validation implements Task {
 
         var referenceTable = prepareTable(getTriplestoreResults(config.groundTruth.resultParsingStresstest), config.groundTruth.triplestoreName, keyColumns, compareColumns);
         for (TriplestoreTuple validateTuple : config.validate) {
+            // validation results
+            long mismatchedValues = 0L;
+            long missingValues = 0L;
+
             var validateTable = prepareTable(getTriplestoreResults(validateTuple.resultParsingStresstest), validateTuple.triplestoreName, keyColumns, compareColumns);
             var combinedTable = referenceTable.joinOn(keyColumns).fullOuter(validateTable);
 
@@ -82,11 +100,20 @@ public class Validation implements Task {
                     if (referenceValue != null && validateValue == null) {
                         logger.warn("Triplestore \"{}\" is missing \"{}\" value for queryID {} run {}: expectedValue={}",
                                 validateTuple.triplestoreName, columnName, queryID, run, referenceValue);
+                        missingValues++;
                     } else if (!referenceValue.equals(validateValue)) {
                         logger.warn("Triplestore \"{}\" has mismatching \"{}\" value for queryID {} run {}: actualValue={}, expectedValue={}",
                                 validateTuple.triplestoreName, columnName, queryID, run, validateValue, referenceValue);
+                        mismatchedValues++;
                     }
                 }
+            }
+
+            if (mismatchedValues == 0 && missingValues == 0) {
+                logger.info("Validation successful for triplestore \"{}\".", validateTuple.triplestoreName);
+            } else {
+                logger.info("Validation completed for triplestore \"{}\" with {} mismatched values and {} missing values.",
+                        validateTuple.triplestoreName, mismatchedValues, missingValues);
             }
         }
 
@@ -113,20 +140,28 @@ public class Validation implements Task {
 
     private Table getTriplestoreResults(StresstestResultReference ref) {
         if (ref instanceof CSVResultPath csvPath) {
-            final var path = Paths.get(csvPath.csvResultPath);
-            final var resultCountPath = path.resolve("result-count-data").resolve("result-count.csv");
-            var resultCount = Table.read().csv(resultCountPath.toString());
-
-            final var executionStatsPath = path.resolve("each-execution-worker-0.csv");
-            var executionStats = Table.read().csv(executionStatsPath.toString());
-            executionStats = executionStats.selectColumns("queryID", "run", "responseBodyHash");
-
-            return resultCount.joinOn("responseBodyHash").fullOuter(executionStats);
+            return getTriplestoreResultsFromCSV(csvPath.csvResultPath());
         } else if (ref instanceof TaskID taskId) {
-            throw new UnsupportedOperationException("StresstestResultReference of type TaskID is not yet supported.");
+            if (this.csvStorage == null) {
+                throw new IllegalStateException("No CSVStorage available to retrieve stresstest results. Result validation via TaskID is not possible.");
+            }
+            final var path = this.csvStorage.getTaskDirectory(String.valueOf(taskId.stresstestId));
+            return getTriplestoreResultsFromCSV(path.toString());
         } else {
             throw new IllegalArgumentException("Unknown StresstestResultReference type.");
         }
+    }
+
+    private Table getTriplestoreResultsFromCSV(String csvResultPath) {
+        final var path = Paths.get(csvResultPath);
+        final var resultCountPath = path.resolve("result-count-data").resolve("result-count.csv");
+        var resultCount = Table.read().csv(resultCountPath.toString());
+
+        final var executionStatsPath = path.resolve("each-execution-worker-0.csv");
+        var executionStats = Table.read().csv(executionStatsPath.toString());
+        executionStats = executionStats.selectColumns("queryID", "run", "responseBodyHash");
+
+        return resultCount.joinOn("responseBodyHash").fullOuter(executionStats);
     }
 
     @Override
