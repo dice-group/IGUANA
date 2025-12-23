@@ -54,26 +54,26 @@ public class Stresstest implements Task {
                                     .filter(qh1::equals)
                                     .count()))
                     .forEach(list -> ((QueryHandler) list.get(0)).setTotalWorkerCount((int) (long) list.get(1)));
-            long workerId = 0;
+            long warmupWorkerId = 0;
             for (HttpWorker.Config workerConfig : config.warmupWorkers()) {
                 for (int i = 0; i < workerConfig.number(); i++) {
                     var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
-                    warmupWorkers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
+                    warmupWorkers.add(new SPARQLProtocolWorker(warmupWorkerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
                 }
             }
         }
 
-        for (HttpWorker.Config workerConfig : config.workers()) {
-            // initialize query handlers
-            // count the number of workers for each query handler
-            final var queryHandlers = config.workers.stream().map(HttpWorker.Config::queries).distinct().toList();
-            queryHandlers.stream().map(qh1 ->
-                            List.of(qh1, config.workers.stream()
-                                    .filter(w -> w.queries().equals(qh1))
-                                    .mapToInt(HttpWorker.Config::number)
-                                    .sum()))
-                    .forEach(list -> ((QueryHandler) list.get(0)).setTotalWorkerCount((int) list.get(1)));
-            long workerId = 0;
+        long workerId = 0;
+        // initialize query handlers
+        // count the number of workers for each query handler
+        final var queryHandlers = config.workers.stream().map(HttpWorker.Config::queries).distinct().toList();
+        queryHandlers.stream().map(qh1 ->
+                        List.of(qh1, config.workers.stream()
+                                .filter(w -> w.queries().equals(qh1))
+                                .mapToInt(HttpWorker.Config::number)
+                                .sum()))
+                .forEach(list -> ((QueryHandler) list.get(0)).setTotalWorkerCount((int) list.get(1)));
+        for  (HttpWorker.Config workerConfig : config.workers()) {
             for (int i = 0; i < workerConfig.number(); i++) {
                 var responseBodyProcessor = (workerConfig.parseResults()) ? responseBodyProcessorInstances.getProcessor(workerConfig.acceptHeader()) : null;
                 workers.add(new SPARQLProtocolWorker(workerId++, responseBodyProcessor, (SPARQLProtocolWorker.Config) workerConfig));
