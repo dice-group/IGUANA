@@ -11,15 +11,13 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/Dataset"
-          },
-          "minItems": 1
+          }
         },
         "connections": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/Connection"
-          },
-          "minItems": 1
+          }
         },
         "tasks": {
           "type": "array",
@@ -32,8 +30,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/Storage"
-          },
-          "minItems": 1
+          }
         },
         "responseBodyProcessors": {
           "type": "array",
@@ -49,9 +46,6 @@
         }
       },
       "required": [
-        "connections",
-        "datasets",
-        "storages",
         "tasks"
       ]
     },
@@ -237,7 +231,7 @@
     },
     "Task": {
       "type": "object",
-      "oneOf": [ { "$ref": "#/definitions/Stresstest" } ],
+      "oneOf": [ { "$ref": "#/definitions/Stresstest" }, { "$ref": "#/definitions/Validation" } ],
       "title": "Task"
     },
     "Stresstest": {
@@ -267,6 +261,75 @@
         "workers"
       ],
       "title": "Stresstest"
+    },
+    "Validation": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "validation"
+        },
+        "groundTruth": { "$ref": "#/definitions/ValidationTuple" },
+        "validate": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ValidationTuple"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Validation"
+    },
+    "ValidationTuple": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "triplestoreName": {
+          "type": "string"
+        },
+        "resultParsingStresstest": {
+          "type": "object",
+          "oneOf": [
+            { "$ref": "#/definitions/StresstestId" },
+            { "$ref": "#/definitions/CsvResultPath" }
+          ]
+        }
+      },
+      "required": [
+        "triplestoreName",
+        "resultParsingStresstest"
+      ],
+      "title": "ValidationTuple"
+    },
+    "StresstestId": {
+      "properties": {
+        "stresstestId": {
+          "type": "integer"
+        }
+      },
+      "title": "StresstestId",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "stresstestId"
+      ]
+    },
+    "CsvResultPath": {
+      "properties": {
+        "csvResultPath": {
+          "type": "string"
+        }
+      },
+      "title": "CsvResultPath",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": [
+        "csvResultPath"
+      ]
     },
     "Worker": {
       "type": "object",
@@ -357,7 +420,7 @@
         }
       },
       "required": [
-          "endpoint"
+        "endpoint"
       ],
       "title": "Template"
     },

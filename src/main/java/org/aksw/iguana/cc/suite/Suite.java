@@ -13,6 +13,7 @@ import org.aksw.iguana.cc.storage.impl.RDFFileStorage;
 import org.aksw.iguana.cc.storage.impl.TriplestoreStorage;
 import org.aksw.iguana.cc.tasks.impl.Stresstest;
 import org.aksw.iguana.cc.tasks.Task;
+import org.aksw.iguana.cc.tasks.impl.Validation;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessor;
 import org.aksw.iguana.cc.worker.ResponseBodyProcessorInstances;
 import org.slf4j.Logger;
@@ -33,7 +34,16 @@ public class Suite {
             List<StorageConfig> storages,
             List<Metric> metrics,
             @JsonProperty List<ResponseBodyProcessor.Config> responseBodyProcessors
-    ) {}
+    ) {
+        public Config {
+            if (storages == null) {
+                storages = List.of();
+            }
+            if (metrics == null) {
+                metrics = List.of();
+            }
+        }
+    }
 
 
     private final String suiteId;
@@ -56,6 +66,8 @@ public class Suite {
         for (Task.Config task : config.tasks()) {
             if (task instanceof Stresstest.Config) {
                 tasks.add(new Stresstest(this.suiteId, taskID++, (Stresstest.Config) task, responseBodyProcessorInstances, storages, metrics));
+            } else if (task instanceof Validation.Config) {
+                tasks.add(new Validation(this.suiteId, taskID++, (Validation.Config) task, responseBodyProcessorInstances, storages, metrics));
             }
         }
     }

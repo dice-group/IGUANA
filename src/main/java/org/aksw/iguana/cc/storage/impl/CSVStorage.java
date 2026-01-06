@@ -138,7 +138,7 @@ public class CSVStorage implements Storage {
             return;
         }
 
-        this.currentFolder = this.suiteFolder.resolve("task-" + retrieveTaskID(this.taskRes));
+        this.currentFolder = getTaskDirectory(retrieveTaskID(this.taskRes));
         try {
             Files.createDirectory(this.currentFolder);
         } catch (IOException e) {
@@ -426,5 +426,13 @@ public class CSVStorage implements Storage {
      */
     private static String retrieveTaskID(Resource taskRes) {
         return taskRes.getURI().substring(taskRes.getURI().lastIndexOf("/") + 1);
+    }
+
+    public Path getSuiteFolder() {
+        return suiteFolder;
+    }
+
+    public Path getTaskDirectory(String taskID) {
+        return this.suiteFolder.resolve("task-" + taskID);
     }
 }
