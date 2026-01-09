@@ -12,6 +12,8 @@ import org.aksw.iguana.commons.time.TimeUtils;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import oshi.SystemInfo;
+import oshi.hardware.HardwareAbstractionLayer;
 
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
@@ -111,6 +113,9 @@ public class StresstestResultProcessor {
         m.add(taskRes, RDF.type, IONT.task);
         m.add(taskRes, RDF.type, IONT.stresstest);
         m.add(taskRes, IPROP.noOfWorkers, toInfinitePrecisionIntegerLiteral(workers.size()));
+
+        // add system info
+        m.add(getSystemEnvironmentModel());
 
         for (HttpWorker worker : workers) {
             HttpWorker.Config config = worker.config();
@@ -291,6 +296,33 @@ public class StresstestResultProcessor {
         m.add(metricRes, RDF.type, IONT.metric);
 
         return m;
+    }
+
+    private Model getSystemEnvironmentModel() {
+        Model model = ModelFactory.createDefaultModel();
+
+        SystemInfo si = new SystemInfo(); // or new SystemInfoFFM() on java25 version
+        HardwareAbstractionLayer hal = si.getHardware();
+        final var cpu = hal.getProcessor();
+        final var memory = hal.getMemory();
+
+        final var cpuName = cpu.getProcessorIdentifier().getName();
+        final var totalRam = memory.getTotal();
+        final var osFamily = si.getOperatingSystem().getFamily();
+        final var osVersion = si.getOperatingSystem().getVersionInfo().getVersion();
+        final var javaRuntimeName = System.getProperty("java.runtime.name");
+        final var javaRuntimeVersion = System.getProperty("java.runtime.version");
+
+        final var systemEnvironmentResource = iresFactory.getSystemEnvironmentResource();
+        model.add(systemEnvironmentResource, RDF.type, IONT.systemEnvironment);
+        model.add(systemEnvironmentResource, IPROP.cpuName, cpuName);
+        model.add(systemEnvironmentResource, IPROP.totalRam, String.valueOf(totalRam));
+        model.add(systemEnvironmentResource, IPROP.osFamily, osFamily);
+        model.add(systemEnvironmentResource, IPROP.osVersion, osVersion);
+        model.add(systemEnvironmentResource, IPROP.javaRuntimeVersion, javaRuntimeVersion);
+        model.add(systemEnvironmentResource, IPROP.javaRuntimeName, javaRuntimeName);
+
+        return model;
     }
 
     private static Literal toInfinitePrecisionIntegerLiteral(long value) {
