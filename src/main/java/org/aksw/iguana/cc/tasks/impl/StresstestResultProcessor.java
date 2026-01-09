@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.tasks.impl;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.metrics.*;
 import org.aksw.iguana.cc.storage.Storage;
+import org.aksw.iguana.cc.utils.system.SystemEnvironment;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.rdf.IGUANA_BASE;
 import org.aksw.iguana.commons.rdf.IONT;
@@ -12,8 +13,6 @@ import org.aksw.iguana.commons.time.TimeUtils;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import oshi.SystemInfo;
-import oshi.hardware.HardwareAbstractionLayer;
 
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
@@ -301,26 +300,15 @@ public class StresstestResultProcessor {
     private Model getSystemEnvironmentModel(Resource suiteRes) {
         Model model = ModelFactory.createDefaultModel();
 
-        SystemInfo si = new SystemInfo(); // or new SystemInfoFFM() on java25 version
-        HardwareAbstractionLayer hal = si.getHardware();
-        final var cpu = hal.getProcessor();
-        final var memory = hal.getMemory();
-
-        final var cpuName = cpu.getProcessorIdentifier().getName();
-        final var totalRam = memory.getTotal();
-        final var osFamily = si.getOperatingSystem().getFamily();
-        final var osVersion = si.getOperatingSystem().getVersionInfo().getVersion();
-        final var javaRuntimeName = System.getProperty("java.runtime.name");
-        final var javaRuntimeVersion = System.getProperty("java.runtime.version");
-
+        final var sysEnv = SystemEnvironment.getSystemEnvironment();
         final var systemEnvironmentResource = iresFactory.getSystemEnvironmentResource();
         model.add(systemEnvironmentResource, RDF.type, IONT.systemEnvironment);
-        model.add(systemEnvironmentResource, IPROP.cpuName, cpuName);
-        model.add(systemEnvironmentResource, IPROP.totalRam, String.valueOf(totalRam));
-        model.add(systemEnvironmentResource, IPROP.osFamily, osFamily);
-        model.add(systemEnvironmentResource, IPROP.osVersion, osVersion);
-        model.add(systemEnvironmentResource, IPROP.javaRuntimeVersion, javaRuntimeVersion);
-        model.add(systemEnvironmentResource, IPROP.javaRuntimeName, javaRuntimeName);
+        model.add(systemEnvironmentResource, IPROP.cpuName, sysEnv.cpuName());
+        model.add(systemEnvironmentResource, IPROP.totalRam, String.valueOf(sysEnv.totalRam()));
+        model.add(systemEnvironmentResource, IPROP.osFamily, sysEnv.osFamily());
+        model.add(systemEnvironmentResource, IPROP.osVersion, sysEnv.osVersion());
+        model.add(systemEnvironmentResource, IPROP.javaRuntimeVersion, sysEnv.javaRuntimeVersion());
+        model.add(systemEnvironmentResource, IPROP.javaRuntimeName, sysEnv.javaRuntimeName());
 
         model.add(suiteRes, IPROP.systemEnvironment, systemEnvironmentResource);
         model.add(IONT.systemEnvironment, RDFS.label, "System Environment");
