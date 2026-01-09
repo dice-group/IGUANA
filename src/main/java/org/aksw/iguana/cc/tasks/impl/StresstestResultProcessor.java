@@ -115,7 +115,7 @@ public class StresstestResultProcessor {
         m.add(taskRes, IPROP.noOfWorkers, toInfinitePrecisionIntegerLiteral(workers.size()));
 
         // add system info
-        m.add(getSystemEnvironmentModel());
+        m.add(getSystemEnvironmentModel(suiteRes));
 
         for (HttpWorker worker : workers) {
             HttpWorker.Config config = worker.config();
@@ -298,7 +298,7 @@ public class StresstestResultProcessor {
         return m;
     }
 
-    private Model getSystemEnvironmentModel() {
+    private Model getSystemEnvironmentModel(Resource suiteRes) {
         Model model = ModelFactory.createDefaultModel();
 
         SystemInfo si = new SystemInfo(); // or new SystemInfoFFM() on java25 version
@@ -321,6 +321,10 @@ public class StresstestResultProcessor {
         model.add(systemEnvironmentResource, IPROP.osVersion, osVersion);
         model.add(systemEnvironmentResource, IPROP.javaRuntimeVersion, javaRuntimeVersion);
         model.add(systemEnvironmentResource, IPROP.javaRuntimeName, javaRuntimeName);
+
+        model.add(suiteRes, IPROP.systemEnvironment, systemEnvironmentResource);
+        model.add(IONT.systemEnvironment, RDFS.label, "System Environment");
+        model.add(IONT.systemEnvironment, RDFS.comment, "Describes the hardware and software environment where the benchmark suite was executed");
 
         return model;
     }

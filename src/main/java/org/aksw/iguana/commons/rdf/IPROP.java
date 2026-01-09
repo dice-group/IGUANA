@@ -72,6 +72,7 @@ public class IPROP {
     public static final Property time = ResourceFactory.createProperty(NS, "time");
 
     // System environment
+    public static final Property systemEnvironment = ResourceFactory.createProperty(NS, "systemEnvironment");
     public static final Property cpuName = ResourceFactory.createProperty(NS, "cpuName");
     public static final Property totalRam = ResourceFactory.createProperty(NS, "totalRam");
     public static final Property osFamily = ResourceFactory.createProperty(NS, "osFamily");
