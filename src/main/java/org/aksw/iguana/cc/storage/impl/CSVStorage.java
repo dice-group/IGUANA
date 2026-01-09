@@ -54,7 +54,6 @@ public class CSVStorage implements Storage {
     private Path currentFolder;
     private final Path taskFile;
     private final Path taskConfigFile;
-    private final Path systemEnvironmentFile;
 
     private List<Resource> workerResources;
     private Resource taskRes;
@@ -75,14 +74,13 @@ public class CSVStorage implements Storage {
             this.suiteFolder = null;
             this.taskFile = null;
             this.taskConfigFile = null;
-            this.systemEnvironmentFile = null;
             return;
         }
 
         this.suiteFolder = parentFolder.resolve("suite-" + suiteID);
         this.taskFile = this.suiteFolder.resolve("suite-summary.csv");
         this.taskConfigFile = this.suiteFolder.resolve("task-configuration.csv");
-        this.systemEnvironmentFile = this.suiteFolder.resolve("system-environment.json");
+        final var systemEnvironmentFile = this.suiteFolder.resolve("system-environment.json");
 
         createDirectory(suiteFolder);
         createFile(taskFile);
