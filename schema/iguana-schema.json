@@ -198,6 +198,12 @@
         },
         "path": {
           "type": "string"
+        },
+        "compressionLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 19,
+          "default": 3
         }
       },
       "required": [

@@ -32,8 +32,12 @@ public class CSVStorage implements Storage {
     /** This private record is used to store information about the connections used in a task. */
     private record ConnectionInfo(String connection, String version, String dataset) {}
 
-    public record Config(String directory) implements StorageConfig {
+    public record Config(String directory, Integer compressionLevel) implements StorageConfig {
         public Config(String directory) {
+            this(directory, null);
+        }
+
+        public Config(String directory, Integer compressionLevel) {
             if (directory == null) {
                 directory = "results";
             }
@@ -42,6 +46,7 @@ public class CSVStorage implements Storage {
                 throw new IllegalArgumentException("The given path is not a directory.");
             }
             this.directory = directory;
+            this.compressionLevel = 3;
         }
     }
 
@@ -58,8 +63,14 @@ public class CSVStorage implements Storage {
     private Resource taskRes;
     List<ConnectionInfo> connections;
 
+    private Integer compressionLevel = 3;
+
     public CSVStorage(Config config, List<Metric> metrics, String suiteID) {
         this(config.directory(), metrics, suiteID);
+        if (config.compressionLevel() != null && (config.compressionLevel() < 1 || config.compressionLevel() > 19)) {
+            throw new IllegalArgumentException("Compression level must be between 1 and 19.");
+        }
+        this.compressionLevel = 3;
     }
 
     public CSVStorage(String folderPath, List<Metric> metrics, String suiteID) {
@@ -226,6 +237,29 @@ public class CSVStorage implements Storage {
             } catch (IOException e) {
                 LOGGER.error("Error while writing the data into a csv file for language processor results. The storing of language processor results will be skipped.", e);
                 return;
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        final var temp = this.suiteFolder.getParent().relativize(this.suiteFolder);
+        LOGGER.info("Compressing the suite folder.");
+        LOGGER.info(String.join(" ", "tar", "-I", String.format("\"zstd -%d\"", compressionLevel), "-cf", temp + ".tar.zst", temp.toString()));
+        LOGGER.info(this.suiteFolder.getParent().toFile().toString());
+        if (this.compressionLevel != null) {
+            try {
+                final var process = new ProcessBuilder("tar", "-I", String.format("\"zstd -%d\"", compressionLevel), "-cf", temp + ".tar.zst", temp.toString())
+                        .directory(this.suiteFolder.getParent().toFile().getAbsoluteFile())
+                        .start();
+                try {
+                    LOGGER.info("Waiting for the compression process to finish.");
+                    process.waitFor();
+                    LOGGER.info(Arrays.toString(process.getInputStream().readAllBytes()));
+                    LOGGER.info("Compression process finished. Fuck you");
+                } catch (InterruptedException ignored) {} // ignore interruption
+            } catch (IOException e) {
+                LOGGER.error("Error while compressing the suite folder.", e);
             }
         }
     }
