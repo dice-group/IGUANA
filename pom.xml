@@ -344,6 +344,7 @@
                                 -O3
                                 -H:-UseCompressedReferences
                                 -H:+UnlockExperimentalVMOptions
+                                -H:+AddAllCharsets
                                 --enable-http
                                 --enable-https
                             </buildArgs>
