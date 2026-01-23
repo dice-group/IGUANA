@@ -19,6 +19,7 @@ public class IONT {
     public static final Resource responseBody = ResourceFactory.createResource(NS + "ResponseBody");
     public static final Resource query = ResourceFactory.createResource(NS + "Query");
     public static final Resource metric = ResourceFactory.createResource(NS + "Metric");
+    public static final Resource systemEnvironment = ResourceFactory.createResource(NS + "SystemEnvironment");
 
     public static Resource getMetricClass(Metric metric) {
         return ResourceFactory.createResource(NS + "metric/" + metric.getAbbreviation());

@@ -70,4 +70,13 @@ public class IPROP {
     public static final Property run = ResourceFactory.createProperty(NS, "run");
     public static final Property success = ResourceFactory.createProperty(NS, "success");
     public static final Property time = ResourceFactory.createProperty(NS, "time");
+
+    // System environment
+    public static final Property systemEnvironment = ResourceFactory.createProperty(NS, "systemEnvironment");
+    public static final Property cpuName = ResourceFactory.createProperty(NS, "cpuName");
+    public static final Property totalRam = ResourceFactory.createProperty(NS, "totalRam");
+    public static final Property osFamily = ResourceFactory.createProperty(NS, "osFamily");
+    public static final Property osVersion = ResourceFactory.createProperty(NS, "osVersion");
+    public static final Property javaRuntimeName = ResourceFactory.createProperty(NS, "javaRuntimeName");
+    public static final Property javaRuntimeVersion = ResourceFactory.createProperty(NS, "javaRuntimeVersion");
 }

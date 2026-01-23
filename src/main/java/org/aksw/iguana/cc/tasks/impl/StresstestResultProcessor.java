@@ -3,6 +3,7 @@ package org.aksw.iguana.cc.tasks.impl;
 import org.aksw.iguana.cc.lang.LanguageProcessor;
 import org.aksw.iguana.cc.metrics.*;
 import org.aksw.iguana.cc.storage.Storage;
+import org.aksw.iguana.cc.utils.system.SystemEnvironment;
 import org.aksw.iguana.cc.worker.HttpWorker;
 import org.aksw.iguana.commons.rdf.IGUANA_BASE;
 import org.aksw.iguana.commons.rdf.IONT;
@@ -111,6 +112,9 @@ public class StresstestResultProcessor {
         m.add(taskRes, RDF.type, IONT.task);
         m.add(taskRes, RDF.type, IONT.stresstest);
         m.add(taskRes, IPROP.noOfWorkers, toInfinitePrecisionIntegerLiteral(workers.size()));
+
+        // add system info
+        m.add(getSystemEnvironmentModel(suiteRes));
 
         for (HttpWorker worker : workers) {
             HttpWorker.Config config = worker.config();
@@ -291,6 +295,26 @@ public class StresstestResultProcessor {
         m.add(metricRes, RDF.type, IONT.metric);
 
         return m;
+    }
+
+    private Model getSystemEnvironmentModel(Resource suiteRes) {
+        Model model = ModelFactory.createDefaultModel();
+
+        final var sysEnv = SystemEnvironment.getSystemEnvironment();
+        final var systemEnvironmentResource = iresFactory.getSystemEnvironmentResource();
+        model.add(systemEnvironmentResource, RDF.type, IONT.systemEnvironment);
+        model.add(systemEnvironmentResource, IPROP.cpuName, sysEnv.cpuName());
+        model.add(systemEnvironmentResource, IPROP.totalRam, String.valueOf(sysEnv.totalRam()));
+        model.add(systemEnvironmentResource, IPROP.osFamily, sysEnv.osFamily());
+        model.add(systemEnvironmentResource, IPROP.osVersion, sysEnv.osVersion());
+        model.add(systemEnvironmentResource, IPROP.javaRuntimeVersion, sysEnv.javaRuntimeVersion());
+        model.add(systemEnvironmentResource, IPROP.javaRuntimeName, sysEnv.javaRuntimeName());
+
+        model.add(suiteRes, IPROP.systemEnvironment, systemEnvironmentResource);
+        model.add(IONT.systemEnvironment, RDFS.label, "System Environment");
+        model.add(IONT.systemEnvironment, RDFS.comment, "Describes the hardware and software environment where the benchmark suite was executed");
+
+        return model;
     }
 
     private static Literal toInfinitePrecisionIntegerLiteral(long value) {

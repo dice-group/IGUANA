@@ -10,6 +10,7 @@ import org.aksw.iguana.cc.metrics.impl.AggregatedExecutionStatistics;
 import org.aksw.iguana.cc.metrics.impl.EachExecutionStatistic;
 import org.aksw.iguana.cc.storage.Storable;
 import org.aksw.iguana.cc.storage.Storage;
+import org.aksw.iguana.cc.utils.system.SystemEnvironment;
 import org.aksw.iguana.commons.rdf.IONT;
 import org.aksw.iguana.commons.rdf.IPROP;
 import org.apache.jena.arq.querybuilder.SelectBuilder;
@@ -79,29 +80,12 @@ public class CSVStorage implements Storage {
         this.suiteFolder = parentFolder.resolve("suite-" + suiteID);
         this.taskFile = this.suiteFolder.resolve("suite-summary.csv");
         this.taskConfigFile = this.suiteFolder.resolve("task-configuration.csv");
+        final var systemEnvironmentFile = this.suiteFolder.resolve("system-environment.json");
 
-        if (Files.notExists(suiteFolder)) {
-            try {
-                Files.createDirectories(suiteFolder);
-            } catch (IOException e) {
-                LOGGER.error("Can't store csv files, directory could not be created.", e);
-                return;
-            }
-        }
-
-        try {
-            Files.createFile(taskFile);
-        } catch (IOException e) {
-            LOGGER.error("Couldn't create the file: " + taskFile.toAbsolutePath(), e);
-            return;
-        }
-
-        try {
-            Files.createFile(taskConfigFile);
-        } catch (IOException e) {
-            LOGGER.error("Couldn't create the file: " + taskFile.toAbsolutePath(), e);
-            return;
-        }
+        createDirectory(suiteFolder);
+        createFile(taskFile);
+        createFile(taskConfigFile);
+        createFile(systemEnvironmentFile);
 
         // write headers for the suite-summary.csv file
         try (CSVWriter csvWriter = getCSVWriter(taskFile)) {
@@ -113,14 +97,22 @@ public class CSVStorage implements Storage {
             String[] header = headerList.toArray(String[]::new);
             csvWriter.writeNext(header, true);
         } catch (IOException e) {
-            LOGGER.error("Error while writing to file: " + taskFile.toAbsolutePath(), e);
+            LOGGER.error("Error while writing to file: {}", taskFile.toAbsolutePath(), e);
         }
 
         // write headers for the task-configuration.csv file
         try (CSVWriter csvWriter = getCSVWriter(taskConfigFile)) {
             csvWriter.writeNext(new String[]{"taskID", "connection", "version", "dataset"}, true);
         } catch (IOException e) {
-            LOGGER.error("Error while writing to file: " + taskConfigFile.toAbsolutePath(), e);
+            LOGGER.error("Error while writing to file: {}", taskConfigFile.toAbsolutePath(), e);
+        }
+
+        // write the whole systemEnvironmentFile
+        final var sysEnv = SystemEnvironment.getSystemEnvironment();
+        try {
+            Files.writeString(systemEnvironmentFile, sysEnv.toString());
+        } catch (IOException e) {
+            LOGGER.error("Error while writing to file: {}", systemEnvironmentFile.toAbsolutePath(), e);
         }
     }
 
@@ -426,5 +418,21 @@ public class CSVStorage implements Storage {
      */
     private static String retrieveTaskID(Resource taskRes) {
         return taskRes.getURI().substring(taskRes.getURI().lastIndexOf("/") + 1);
+    }
+
+    private static void createFile(Path file) {
+       try {
+           Files.createFile(file);
+       } catch (IOException e) {
+           LOGGER.error("Error while creating file: {}", file.toAbsolutePath(), e);
+       }
+    }
+
+    private static void createDirectory(Path directory) {
+        try {
+            Files.createDirectory(directory);
+        } catch (IOException e) {
+            LOGGER.error("Error while creating directory: {}", directory.toAbsolutePath(), e);
+        }
     }
 }

@@ -59,5 +59,9 @@ public class IRES {
         public Resource getWorkerQueryRunResource(HttpWorker worker, int index, BigInteger run) {
             return ResourceFactory.createResource(this.taskURI + "/" + worker.getWorkerID() + "/" + worker.config().queries().getQueryId(index) + "/" + run);
         }
+
+        public Resource getSystemEnvironmentResource() {
+            return ResourceFactory.createResource(NS + suiteID + "/system");
+        }
     }
 }
