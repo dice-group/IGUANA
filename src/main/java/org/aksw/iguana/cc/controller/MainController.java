@@ -100,8 +100,13 @@ public class MainController {
         String[] lines = properties.split("\\n");
         String projectVersion = lines[0].split("=")[1].trim();
         String ontologyVersion = lines[1].split("=")[1].trim();
-        final var sysEnv = SystemEnvironment.getSystemEnvironment().toString();
+        final var sysEnv = SystemEnvironment.getSystemEnvironment();
         System.out.printf("IGUANA version: %s (result ontology version: %s)%n", projectVersion, ontologyVersion);
+        System.out.println("System Environment:");
+        System.out.printf(" - OS: %s %s%n", sysEnv.osFamily(), sysEnv.osVersion());
+        System.out.printf(" - Java: %s %s%n", sysEnv.javaRuntimeName(), sysEnv.javaRuntimeVersion());
+        System.out.printf(" - CPU: %s%n", sysEnv.cpuName());
+        System.out.printf(" - Total RAM: %.2f GB%n", sysEnv.totalRam() / (1024.0 * 1024.0 * 1024.0));
     }
 
 }
